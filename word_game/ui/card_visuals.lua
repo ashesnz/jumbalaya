@@ -4,6 +4,7 @@
 --- Copy letter face art onto the card body so letter_base never shows through.
 
 local Scheduler = require "app.effects.scheduler"
+local DissolveFX = require "app.effects.dissolve_fx"
 
 -- Finish editions rendered as shader overlays, keyed by edition flag.
 local FINISH_SHADERS = {
@@ -212,188 +213,95 @@ function Card:explode(dissolve_colours, explode_time_fac)
     }
 end
 
---- Glass-shatter destruction effect (used for e.g. Stone/Glass Card
---- breaking), similar shape to `start_dissolve` but with glass sound effects
---- and a quicker, snappier timeline.
-
-
---- Glass-shatter destruction effect (used for e.g. Stone/Glass Card
---- breaking), similar shape to `start_dissolve` but with glass sound effects
---- and a quicker, snappier timeline.
+--- Glass-shatter destruction effect: quick, snappy dissolve with glass
+--- sound effects. Built on the generic DissolveFX timeline.
 function Card:shatter()
-    local dissolve_time = 0.7
-    self.shattered = true
-    self.dissolve = 0
-    self.dissolve_colours = {{1,1,1,0.8}}
-    self:pulse()
-    local childParts = Particles(0, 0, 0,0, {
-        timer_type = 'TOTAL',
-        timer = 0.007*dissolve_time,
-        scale = 0.3,
-        speed = 4,
-        lifespan = 0.5*dissolve_time,
-        attach = self,
-        colours = self.dissolve_colours,
-        fill = true
-    })
-    Scheduler.add{
-        mode = 'delayed',
-        blockable = false,
-        delay =  0.5*dissolve_time,
-        func = function() childParts:fade(0.15*dissolve_time) return true end
-    }
-    Scheduler.add{
-        blockable = false,
-        func = function()
-                play_sfx('glass'..math.random(1, 6), math.random()*0.2 + 0.9,0.5)
-                play_sfx('generic1', math.random()*0.2 + 0.9,0.5)
-            return true end
-    }
-    Scheduler.add{
-        mode = 'tween',
-        blockable = false,
-        ref_table = self,
-        ref_value = 'dissolve',
-        ease_to = 1,
-        delay =  0.5*dissolve_time,
-        func = (function(t) return t end)
-    }
-    Scheduler.add{
-        mode = 'delayed',
-        blockable = false,
-        delay =  0.55*dissolve_time,
-        func = (function() self:remove() return true end)
-    }
-    Scheduler.add{
-        mode = 'delayed',
-        blockable = false,
-        delay =  0.51*dissolve_time,
-    }
+	local dt = 0.7
+	self.shattered = true
+	DissolveFX.run(self, {
+		duration = dt,
+		remove = true,
+		colours = {{1, 1, 1, 0.8}},
+		pulse = true,
+		particle = {timer = 0.007, scale = 0.3, speed = 4, lifespan = 0.5},
+		fade = {delay = 0.5 * dt, duration = 0.15 * dt},
+		tween_delay = 0.5 * dt,
+		on_start = function()
+			play_sfx('glass'..math.random(1, 6), math.random()*0.2 + 0.9, 0.5)
+			play_sfx('generic1', math.random()*0.2 + 0.9, 0.5)
+		end,
+	})
 end
 
 --- Standard dissolve-away destruction effect (fade + particles), the default
 --- way most cards are removed with visual feedback (discards, companions being
---- destroyed by effects, etc.).
+--- destroyed by effects, etc.). Built on the generic DissolveFX timeline.
 --- @param dissolve_colours table|nil dissolve/particle tint colours
 --- @param silent boolean|nil skip sound effects
 --- @param dissolve_time_fac number|nil multiplier on the base dissolve duration
 --- @param no_bounce boolean|nil skip the bounce-up wobble animation
 function Card:start_dissolve(dissolve_colours, silent, dissolve_time_fac, no_bounce)
-    local dissolve_time = 0.7*(dissolve_time_fac or 1)
-    self.dissolve = 0
-    self.dissolve_colours = dissolve_colours
-        or {G.C.BLACK, G.C.ORANGE, G.C.RED, G.C.GOLD, G.C.MUTED_GREY}
-    if not no_bounce then self:pulse() end
-    local childParts = Particles(0, 0, 0,0, {
-        timer_type = 'TOTAL',
-        timer = 0.01*dissolve_time,
-        scale = 0.1,
-        speed = 2,
-        lifespan = 0.7*dissolve_time,
-        attach = self,
-        colours = self.dissolve_colours,
-        fill = true
-    })
-    Scheduler.add{
-        mode = 'delayed',
-        blockable = false,
-        delay =  0.7*dissolve_time,
-        func = function() childParts:fade(0.3*dissolve_time) return true end
-    }
-    if not silent then 
-        Scheduler.add{
-            blockable = false,
-            func = function()
-                    play_sfx('whoosh2', math.random()*0.2 + 0.9,0.5)
-                    play_sfx('crumple'..math.random(1, 5), math.random()*0.2 + 0.9,0.5)
-                return true end
-        }
-    end
-    Scheduler.add{
-        mode = 'tween',
-        blockable = false,
-        ref_table = self,
-        ref_value = 'dissolve',
-        ease_to = 1,
-        delay =  1*dissolve_time,
-        func = (function(t) return t end)
-    }
-    Scheduler.add{
-        mode = 'delayed',
-        blockable = false,
-        delay =  1.05*dissolve_time,
-        func = (function() self:remove() return true end)
-    }
-    Scheduler.add{
-        mode = 'delayed',
-        blockable = false,
-        delay =  1.051*dissolve_time,
-    }
+	local dt = 0.7*(dissolve_time_fac or 1)
+	DissolveFX.run(self, {
+		mode = 'out',
+		duration = dt,
+		remove = true,
+		colours = dissolve_colours
+			or {G.C.BLACK, G.C.ORANGE, G.C.RED, G.C.GOLD, G.C.MUTED_GREY},
+		pulse = not no_bounce,
+		fade = {delay = 0.7 * dt, duration = 0.3 * dt},
+		on_start = not silent and function()
+			play_sfx('whoosh2', math.random()*0.2 + 0.9, 0.5)
+			play_sfx('crumple'..math.random(1, 5), math.random()*0.2 + 0.9, 0.5)
+		end or nil,
+	})
 end
 
 --- Inverse of `start_dissolve`: fades a newly-created card in, with tint
 --- colour defaulting based on the card's set (rarity colour for companions,
 --- set colour for charm/orbit/phantom/etc.) if not given explicitly.
+--- Built on the generic DissolveFX timeline.
 --- @param dissolve_colours table|nil override tint colours
 --- @param silent boolean|nil skip sound effects
 --- @param timefac number|nil multiplier on the base materialize duration
 function Card:begin_materialize(dissolve_colours, silent, timefac)
-    local dissolve_time = 0.6*(timefac or 1)
-    self.states.visible = true
-    self.states.hover.can = false
-    self.dissolve = 1
-    self.dissolve_colours = dissolve_colours or
-    (self.ability.set == 'Companion' and {G.C.RARITY[self.config.center.rarity]}) or
-    (self.ability.set == 'Orbit'  and {G.C.SECONDARY_SET.Orbit}) or
-    (self.ability.set == 'Charm' and {G.C.SECONDARY_SET.Charm}) or
-    (self.ability.set == 'Phantom' and {G.C.SECONDARY_SET.Phantom}) or
-    (self.ability.set == 'Bundle' and {G.C.BOOSTER}) or
-    (self.ability.set == 'Perk' and {G.C.SECONDARY_SET.Perk, G.C.CLEAR}) or 
-    {G.C.GREEN}
-    self:pulse()
-    self.children.particles = Particles(0, 0, 0,0, {
-        timer_type = 'TOTAL',
-        timer = 0.025*dissolve_time,
-        scale = 0.25,
-        speed = 3,
-        lifespan = 0.7*dissolve_time,
-        attach = self,
-        colours = self.dissolve_colours,
-        fill = true
-    })
-    if not silent then 
-        if not G.last_materialized or G.last_materialized +0.01 < G.TIMERS.REAL or G.last_materialized > G.TIMERS.REAL then
-            G.last_materialized = G.TIMERS.REAL
-            Scheduler.add{
-                blockable = false,
-                func = function()
-                        play_sfx('whoosh1', math.random()*0.1 + 0.6,0.3)
-                        play_sfx('crumple'..math.random(1,5), math.random()*0.2 + 1.2,0.8)
-                    return true end
-            }
-        end
-    end
-    Scheduler.add{
-        mode = 'delayed',
-        blockable = false,
-        delay =  0.5*dissolve_time,
-        func = (function() if self.children.particles then self.children.particles.max = 0 end return true end)
-    }
-    Scheduler.add{
-        mode = 'tween',
-        blockable = false,
-        ref_table = self,
-        ref_value = 'dissolve',
-        ease_to = 0,
-        delay =  1*dissolve_time,
-        func = (function(t) return t end)
-    }
-    Scheduler.add{
-        mode = 'delayed',
-        blockable = false,
-        delay =  1.05*dissolve_time,
-        func = (function() self.states.hover.can = true; if self.children.particles then self.children.particles:remove(); self.children.particles = nil end return true end)
-    }
+	local dt = 0.6*(timefac or 1)
+	self.states.visible = true
+	self.states.hover.can = false
+	self.children.particles = DissolveFX.run(self, {
+		mode = 'in',
+		duration = dt,
+		colours = dissolve_colours or
+		(self.ability.set == 'Companion' and {G.C.RARITY[self.config.center.rarity]}) or
+		(self.ability.set == 'Orbit'  and {G.C.SECONDARY_SET.Orbit}) or
+		(self.ability.set == 'Charm' and {G.C.SECONDARY_SET.Charm}) or
+		(self.ability.set == 'Phantom' and {G.C.SECONDARY_SET.Phantom}) or
+		(self.ability.set == 'Bundle' and {G.C.BOOSTER}) or
+		(self.ability.set == 'Perk' and {G.C.SECONDARY_SET.Perk, G.C.CLEAR}) or
+		{G.C.GREEN},
+		pulse = true,
+		particle = {timer = 0.025, scale = 0.25, speed = 3, lifespan = 0.7},
+		fade = {delay = 0.5 * dt, cap = true},
+		on_finish = function(card)
+			card.states.hover.can = true
+			if card.children.particles then
+				card.children.particles:remove()
+				card.children.particles = nil
+			end
+		end,
+	})
+	if not silent then
+		if not G.last_materialized or G.last_materialized +0.01 < G.TIMERS.REAL or G.last_materialized > G.TIMERS.REAL then
+			G.last_materialized = G.TIMERS.REAL
+			Scheduler.add{
+				blockable = false,
+				func = function()
+						play_sfx('whoosh1', math.random()*0.1 + 0.6,0.3)
+						play_sfx('crumple'..math.random(1,5), math.random()*0.2 + 1.2,0.8)
+					return true end
+			}
+		end
+	end
 end
 
 
