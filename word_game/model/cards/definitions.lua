@@ -2,7 +2,7 @@
 	model/cards/definitions.lua - Letter card definitions and shared centers.
 
 	P_CARDS is the 52 letter faces: `red_A`–`red_Z` and `black_A`–`black_Z`.
-	Sprites live on AlphaDeck.png (13×4 grid, 71×95 px cells at 1x).
+	Sprites live on JumbalayaDeck.png (13×4 grid, 71×95 px cells at 1x).
 	Letter body (`letter_base`), tutorial companion card (`companion_pads`), Alpha Deck, and editions live in P_CENTERS.
 ]]
 

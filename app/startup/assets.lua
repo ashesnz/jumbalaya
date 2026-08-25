@@ -57,8 +57,8 @@ function Game:set_render_settings()
 	self.animation_atli = {}
 	---@type GameAtlasSpec[]
 	self.asset_atli = {
-		{ name = "cards_1", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/AlphaDeck.png", px = 71, py = 95 },
-		{ name = "cards_2", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/AlphaDeck_opt2.png", px = 71, py = 95 },
+		{ name = "cards_1", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/JumbalayaDeck.png", px = 71, py = 95 },
+		{ name = "cards_2", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/JumbalayaDeck_opt2.png", px = 71, py = 95 },
 		{ name = "playing_back", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/PlayingDeck.png", px = 71, py = 95 },
 		{ name = "Charm", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Charms.png", px = 71, py = 95 },
 		{ name = "Perk", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Perks.png", px = 71, py = 95 },
