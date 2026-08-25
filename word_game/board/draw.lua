@@ -5,6 +5,11 @@ local layout = require "word_game.board.layout"
 
 local M = {}
 
+-- Constant backdrop opacity; independent of how many cards are placed so
+-- dragging cards in/out never shifts the row's transparency.
+local BACKDROP_FILL_ALPHA = 0.18
+local BACKDROP_LINE_ALPHA = 0.28
+
 --- @param session PlacementTable
 function M.shadows(session)
 	local area = session.area
@@ -13,11 +18,10 @@ function M.shadows(session)
 	if j and j.boss_puzzle_hidden then return end
 
 	local px, py, pw, ph = layout.row_pixels(session)
-	local occupied = #area.cards > 0
 
-	love.graphics.setColor(0, 0, 0, occupied and 0.08 or 0.18)
+	love.graphics.setColor(0, 0, 0, BACKDROP_FILL_ALPHA)
 	love.graphics.rectangle('fill', px, py, pw, ph, config.CORNER_RADIUS, config.CORNER_RADIUS)
-	love.graphics.setColor(1, 1, 1, occupied and 0.15 or 0.28)
+	love.graphics.setColor(1, 1, 1, BACKDROP_LINE_ALPHA)
 	love.graphics.setLineWidth(1.5)
 	love.graphics.rectangle('line', px, py, pw, ph, config.CORNER_RADIUS, config.CORNER_RADIUS)
 
