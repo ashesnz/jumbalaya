@@ -77,7 +77,7 @@ function Game:set_render_settings()
 		{ name = 'bin', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Bin.png", px = 249, py = 251, frames = 4, cols = 2, rows = 2 },
 		{ name = 'shuffle_icon', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/shuffle_icon.png", px = 112, py = 112 },
 		{ name = 'play_icon', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/play_icon.png", px = 112, py = 112 },
-		{ name = 'tokens', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Tokens.png", px = 140, py = 101 },
+		{ name = 'tokens', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/coin_stack.png", px = 521, py = 479 },
 	}
 	---@type GameAtlasSpec[]
 	self.asset_images = {}
