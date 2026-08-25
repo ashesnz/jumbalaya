@@ -1,7 +1,6 @@
 --[[ word_game/ui/card_visuals.lua - sprites and motion/dissolve/draw ]]
 
 ---@class (partial) Card : EaseNode
---- Copy letter face art onto the card body so letter_base never shows through.
 
 local Scheduler = require "app.effects.scheduler"
 local DissolveFX = require "app.effects.dissolve_fx"
@@ -12,87 +11,134 @@ local FINISH_SHADERS = {
 	holo = "holo",
 	polychrome = "polychrome",
 }
-function Card:_copy_letter_face_to_center()
-    if not (self.children.front and self.children.center) then return end
-    local center = self.config.center
-    local pos = self.config.card and self.config.card.pos
-    if not (center and pos and (center.set == 'Default' or center.set == 'Enhanced')) then return end
-    self.children.center.atlas = self.children.front.atlas
-    self.children.center:set_sprite_pos(pos)
+
+-- Sets whose body sprite doubles as the letter-tile face. Letter cards render
+-- through a single flat sprite (the deck-atlas face is written straight onto
+-- the body) instead of a stacked front-overlay child.
+local FLAT_LETTER_SETS = { Default = true, Enhanced = true }
+
+-- Data-driven placeholder art for locked/undiscovered centers. Entries name
+-- globals holding the sprite pos; `veil_usable_only` sets additionally
+-- require the center to be flagged usable before veiling.
+local PLACEHOLDER_ART = {
+	locked = {
+		Companion = { atlas = "Companion", pos = "companion_locked" },
+		Perk = { atlas = "Perk", pos = "perk_locked" },
+	},
+	demo = { atlas = "Charm", pos = "letter_locked" },
+	undiscovered = {
+		Companion = "companion_undiscovered",
+		Finish = "companion_undiscovered",
+		Perk = "perk_undiscovered",
+		Bundle = "booster_undiscovered",
+	},
+	veil_usable_only = {
+		Charm = "charm_undiscovered",
+		Orbit = "orbit_undiscovered",
+		Phantom = "phantom_undiscovered",
+	},
+}
+
+--- Picks placeholder art for a center the player hasn't earned/discovered,
+--- or nil when real art should be shown.
+---@param self Card
+---@param center table
+---@return table|nil {atlas: table, pos: table}
+local function placeholder_art(self, center)
+	if not center or not center.set then return nil end
+	if self.params.bypass_discovery_center then return nil end
+
+	local locked = PLACEHOLDER_ART.locked[center.set]
+	if locked and not center.unlocked then
+		return { atlas = G.TEXTURE_ATLASES[locked.atlas], pos = G[locked.pos].pos }
+	end
+
+	if center.usable and center.demo then
+		local demo = PLACEHOLDER_ART.demo
+		return { atlas = G.TEXTURE_ATLASES[demo.atlas], pos = G[demo.pos].pos }
+	end
+
+	local veil_pos = PLACEHOLDER_ART.undiscovered[center.set]
+		or (center.usable and PLACEHOLDER_ART.veil_usable_only[center.set])
+	if veil_pos and not center.discovered then
+		return { atlas = G.TEXTURE_ATLASES[center.atlas or center.set], pos = G[veil_pos].pos }
+	end
+
+	return nil
 end
 
-
---- Creates/updates the card's front, center (companion/charm/etc. face art), and
---- back sprite children. Handles the "undiscovered"/"locked" placeholder art
---- swap-in for companions/perks/usables the player hasn't unlocked yet.
---- @param _center table|nil center definition to build/refresh center+back sprites for
---- @param _front table|nil base card data to build/refresh the front sprite for
+--- Creates/updates the card's body sprite (center), optional flat letter
+--- face, and back sprite. Locked/undiscovered centers get placeholder art via
+--- the PLACEHOLDER_ART table.
+--- @param _center table|nil center definition to build/refresh the center+back sprites for
+--- @param _front table|nil base card data to build/refresh the letter face for
 function Card:set_sprites(_center, _front)
-    if _front then 
-        if self.children.front then
-            self.children.front.atlas = G.TEXTURE_ATLASES[_front.atlas] or G.TEXTURE_ATLASES["cards_"..(G.SETTINGS.colourblind_option and 2 or 1)]
-            self.children.front:set_sprite_pos(self.config.card.pos)
-        else
-            self.children.front = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, _front.atlas and G.TEXTURE_ATLASES[_front.atlas] or G.TEXTURE_ATLASES["cards_"..(G.SETTINGS.colourblind_option and 2 or 1)], self.config.card.pos)
-            self.children.front.states.hover = self.states.hover
-            self.children.front.states.click = self.states.click
-            self.children.front.states.drag = self.states.drag
-            self.children.front.states.collide.can = false
-            self.children.front:set_role({major = self, role_type = 'Glued', draw_major = self})
-        end
-    end
-    if _center then 
-        if _center.set then
-            if self.children.center then
-                self.children.center.atlas = G.TEXTURE_ATLASES[(_center.atlas or (_center.set == 'Companion' or _center.usable or _center.set == 'Perk') and _center.set) or 'centers']
-                self.children.center:set_sprite_pos(_center.pos)
-            else
-                if _center.set == 'Companion' and not _center.unlocked and not self.params.bypass_discovery_center then 
-                    self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.TEXTURE_ATLASES["Companion"], G.companion_locked.pos)
-                elseif self.config.center.set == 'Perk' and not self.config.center.unlocked and not self.params.bypass_discovery_center then 
-                    self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.TEXTURE_ATLASES["Perk"], G.perk_locked.pos)
-                elseif self.config.center.usable and self.config.center.demo then 
-                    self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.TEXTURE_ATLASES["Charm"], G.letter_locked.pos)
-                elseif not self.params.bypass_discovery_center and (_center.set == 'Finish' or _center.set == 'Companion' or _center.usable or _center.set == 'Perk' or _center.set == 'Bundle') and not _center.discovered then 
-                    self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.TEXTURE_ATLASES[_center.atlas or _center.set], 
-                    (_center.set == 'Companion' and G.companion_undiscovered.pos) or 
-                    (_center.set == 'Finish' and G.companion_undiscovered.pos) or 
-                    (_center.set == 'Charm' and G.charm_undiscovered.pos) or 
-                    (_center.set == 'Orbit' and G.orbit_undiscovered.pos) or 
-                    (_center.set == 'Phantom' and G.phantom_undiscovered.pos) or 
-                    (_center.set == 'Perk' and G.perk_undiscovered.pos) or 
-                    (_center.set == 'Bundle' and G.booster_undiscovered.pos))
-                elseif _center.set == 'Companion' or _center.usable or _center.set == 'Perk' then
-                    self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.TEXTURE_ATLASES[_center.set], self.config.center.pos)
-                else
-                    self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, G.TEXTURE_ATLASES[_center.atlas or 'centers'], _center.pos)
-                end
-                self.children.center.states.hover = self.states.hover
-                self.children.center.states.click = self.states.click
-                self.children.center.states.drag = self.states.drag
-                self.children.center.states.collide.can = false
-                self.children.center:set_role({major = self, role_type = 'Glued', draw_major = self})
-            end
-        end
+	if _center and _center.set then
+		local ph = placeholder_art(self, _center)
+		local atlas, pos
+		if ph then
+			atlas, pos = ph.atlas, ph.pos
+		elseif _center.set == 'Companion' or _center.usable or _center.set == 'Perk' then
+			atlas = G.TEXTURE_ATLASES[_center.set]
+			pos = self.config.center.pos
+		else
+			atlas = G.TEXTURE_ATLASES[_center.atlas or 'centers']
+			pos = _center.pos
+		end
 
-        if not self.children.back then
-            local back_atlas = G.TEXTURE_ATLASES["playing_back"] or G.TEXTURE_ATLASES["centers"]
-         			local default_back = G.P_CENTERS and G.P_CENTERS['deck_alpha']
+		if self.children.center then
+			self.children.center.atlas = atlas
+			self.children.center:set_sprite_pos(pos)
+		else
+			self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, atlas, pos)
+			self.children.center.states.hover = self.states.hover
+			self.children.center.states.click = self.states.click
+			self.children.center.states.drag = self.states.drag
+			self.children.center.states.collide.can = false
+			self.children.center:set_role({major = self, role_type = 'Glued', draw_major = self})
+		end
+
+		if not self.children.back then
+			local back_atlas = G.TEXTURE_ATLASES["playing_back"] or G.TEXTURE_ATLASES["centers"]
+			local default_back = G.P_CENTERS and G.P_CENTERS['deck_alpha']
 			local back_pos = G.TEXTURE_ATLASES["playing_back"] and {x = 0, y = 0}
 				or (self.params.bypass_back or (self.playing_card and G.GAME and G.GAME[self.back] and G.GAME[self.back].pos)
 				or (default_back and default_back.pos) or {x = 0, y = 0})
-            self.children.back = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, back_atlas, back_pos)
-            self.children.back.states.hover = self.states.hover
-            self.children.back.states.click = self.states.click
-            self.children.back.states.drag = self.states.drag
-            self.children.back.states.collide.can = false
-            self.children.back:set_role({major = self, role_type = 'Glued', draw_major = self})
-        elseif G.TEXTURE_ATLASES["playing_back"] and self.children.back.atlas ~= G.TEXTURE_ATLASES["playing_back"] then
-            self.children.back.atlas = G.TEXTURE_ATLASES["playing_back"]
-            self.children.back:set_sprite_pos({x = 0, y = 0})
-        end
-    end
-    self:_copy_letter_face_to_center()
+			self.children.back = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, back_atlas, back_pos)
+			self.children.back.states.hover = self.states.hover
+			self.children.back.states.click = self.states.click
+			self.children.back.states.drag = self.states.drag
+			self.children.back.states.collide.can = false
+			self.children.back:set_role({major = self, role_type = 'Glued', draw_major = self})
+		elseif G.TEXTURE_ATLASES["playing_back"] and self.children.back.atlas ~= G.TEXTURE_ATLASES["playing_back"] then
+			self.children.back.atlas = G.TEXTURE_ATLASES["playing_back"]
+			self.children.back:set_sprite_pos({x = 0, y = 0})
+		end
+	end
+
+	-- Flat letter tile: paint the deck-atlas face directly onto the body
+	-- sprite. Only non-letter art still gets its own front child.
+	if _front then
+		local face_atlas = G.TEXTURE_ATLASES[_front.atlas] or G.TEXTURE_ATLASES["cards_"..(G.SETTINGS.colourblind_option and 2 or 1)]
+		local face_pos = self.config.card and self.config.card.pos
+		local is_letter = self.config.center and FLAT_LETTER_SETS[self.config.center.set]
+		if is_letter and face_pos and self.children.center then
+			self.children.center.atlas = face_atlas
+			self.children.center:set_sprite_pos(face_pos)
+		else
+			if self.children.front then
+				self.children.front.atlas = face_atlas
+				self.children.front:set_sprite_pos(face_pos)
+			else
+				self.children.front = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, face_atlas, face_pos)
+				self.children.front.states.hover = self.states.hover
+				self.children.front.states.click = self.states.click
+				self.children.front.states.drag = self.states.drag
+				self.children.front.states.collide.can = false
+				self.children.front:set_role({major = self, role_type = 'Glued', draw_major = self})
+			end
+		end
+	end
 end
 
 
