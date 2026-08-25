@@ -88,6 +88,18 @@ local function open_after_hand(opts)
 		require("word_game.model.play.opening_deal").deal()
 		return
 	end
+	if opts.boss_next then
+		-- Stage 1-3 cleared: the celebration has played; now hide the sidebar
+		-- and bring up the boss stage.
+		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.begin_boss_word then
+			WORD_GAME.Jumble.begin_boss_word(wr, function()
+				if G.GAME then
+					G.GAME.word_score_animating = false
+				end
+			end)
+		end
+		return
+	end
 	if round.is_final_hand() then
 		M.end_match(true)
 	elseif round_config.is_perk_market_after(
@@ -138,19 +150,11 @@ function M.on_hand_cleared(opts)
 
 	local wr = G.GAME and G.GAME.word_round
 	local j = wr and wr.jumble
-	if wr and wr.set == 1 and wr.hand_index == 3 and j and not j.boss_word_active and not opts.boss_cleared then
-		round.unused_play_payout()
-		if WORD_GAME.Sidebar and WORD_GAME.Sidebar.roll_to_next_hand then
-			WORD_GAME.Sidebar.roll_to_next_hand()
-		end
-		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.begin_boss_word then
-			WORD_GAME.Jumble.begin_boss_word(wr, function()
-				if G.GAME then
-					G.GAME.word_score_animating = false
-				end
-			end)
-		end
-		return
+	if wr and wr.set == 1 and wr.hand_index == 3 and j
+		and not j.boss_word_active and not opts.boss_cleared then
+		-- Stage 1-3 celebrates like every other hand, then flows into the
+		-- boss stage instead of the dealer (see open_after_hand).
+		opts.boss_next = true
 	end
 
 	round.unused_play_payout()
