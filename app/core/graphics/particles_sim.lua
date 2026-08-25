@@ -1,86 +1,98 @@
 return function(ParticleEmitter)
 local Scheduler = require("app.effects.scheduler")
---- Spawn pass: catch up on missed spawns (max 20 per frame to bound spikes).
-function ParticleEmitter:update(dt)
-	if G.SETTINGS.paused and not self.created_on_pause then
-		self.last_real_time = G.TIMERS[self.timer_type]
-		return
-	end
 
-	local added_this_frame = 0
-	while G.TIMERS[self.timer_type] > self.last_real_time + self.timer
-		and (#self.particles < self.max or self.pulsed < self.pulse_max)
-		and added_this_frame < 20 do
-		self.last_real_time = self.last_real_time + self.timer
-
-		local offset = {
-			x = self.fill and (0.5 - math.random()) * self.T.w or 0,
-			y = self.fill and (0.5 - math.random()) * self.T.h or 0,
-		}
+--- Spawns one particle. Records carry velocity components, a per-particle
+--- lifespan, and a geometry choice — deliberately unlike the old uniform
+--- {dir, facing, size, age} record.
+local function spawn(self)
+	local heading = math.random() * 2 * math.pi
+	local jitter = self.speed * (self.vel_variation * math.random() + (1 - self.vel_variation))
+	local speed = self.speed * 0.7 + 0.3 * jitter
+	local offset = {x = 0, y = 0}
+	if self.fill then
+		offset.x = (0.5 - math.random()) * self.T.w
+		offset.y = (0.5 - math.random()) * self.T.h
 		-- Rotate fill offsets with the emitter when it's only slightly tilted.
-		if self.fill and self.T.r < 0.1 and self.T.r > -0.1 then
+		if self.T.r < 0.1 and self.T.r > -0.1 then
 			offset = {
 				x = math.sin(self.T.r) * offset.y + math.cos(self.T.r) * offset.x,
 				y = math.sin(self.T.r) * offset.x + math.cos(self.T.r) * offset.y,
 			}
 		end
+	end
 
-		table.insert(self.particles, {
-			draw = false,
-			dir = math.random() * 2 * math.pi,
-			facing = math.random() * 2 * math.pi,
-			size = math.random() * 0.5 + 0.1,
-			age = 0,
-			velocity = self.speed * (self.vel_variation * math.random() + (1 - self.vel_variation)) * 0.7,
-			r_vel = 0.2 * (0.5 - math.random()),
-			e_prev = 0,
-			e_curr = 0,
-			scale = 0,
-			visible_scale = 0,
-			time = G.TIMERS[self.timer_type],
-			colour = pick_random(self.colours),
-			offset = offset,
-		})
+	self.particles[#self.particles + 1] = {
+		x = offset.x,
+		y = offset.y,
+		vx = speed * math.cos(heading),
+		vy = speed * math.sin(heading),
+		angle = math.random() * 2 * math.pi,
+		spin = 2.4 * (math.random() - 0.5),
+		swirl = self.swirl * (math.random() < 0.5 and -1 or 1),
+		size = 0.08 + 0.27 * math.random(),
+		age = 0,
+		life = self.lifespan * (0.75 + 0.5 * math.random()),
+		colour = pick_random(self.colours),
+		shape = pick_random(self.shapes),
+		env = 0,
+	}
+end
 
-		added_this_frame = added_this_frame + 1
-		if self.pulsed <= self.pulse_max then self.pulsed = self.pulsed + 1 end
+--- Emission pass: refill the spawn-credit budget from elapsed time, then
+--- spend credits. Bursts may exceed `max` while burst allowance remains.
+function ParticleEmitter:update(dt)
+	local now = G.TIMERS[self.timer_type]
+	local elapsed = now - (self.last_tick or now)
+	self.last_tick = now
+
+	if G.SETTINGS.paused and not self.created_on_pause then return end
+
+	self.emit_credit = math.min(self.emit_credit + elapsed * self.rate, self.max_debt)
+
+	local spent = 0
+	while self.emit_credit >= 1 and spent < self.spawned_this_frame_cap do
+		if #self.particles >= self.max then
+			if self.burst_allowance <= 0 then break end
+			self.burst_allowance = self.burst_allowance - 1
+		end
+		spawn(self)
+		self.emit_credit = self.emit_credit - 1
+		spent = spent + 1
 	end
 end
 
---- Integrate every live particle through its size envelope and motion;
---- particles whose scale crosses below zero have finished their life.
+--- Integration pass: sine-bell size envelope, damped drift with swirl.
+--- A particle dies of old age (past its own `life`) instead of relying on a
+--- scale sign flip.
 function ParticleEmitter:move(dt)
 	if G.SETTINGS.paused and not self.created_on_pause then return end
 
 	AnimNode.move(self, dt)
 
 	if self.timer_type ~= 'REAL' then dt = dt * G.TIME_SCALE end
+	local damp = math.max(0, 1 - 1.4 * dt)
 
 	for i = #self.particles, 1, -1 do
 		local p = self.particles[i]
-		p.draw = true
-		p.e_vel = p.e_vel or dt * self.scale
-		p.e_prev = p.e_curr
 		p.age = p.age + dt
 
-		-- Envelope: grows over the first half of life, shrinks over the second.
-		p.e_curr = math.min(
-			2 * math.min((p.age / self.lifespan) * self.scale, self.scale * ((self.lifespan - p.age) / self.lifespan)),
-			self.scale)
-
-		p.e_vel = (p.e_curr - p.e_prev) * self.scale * dt + (1 - self.scale * dt) * p.e_vel
-		p.scale = p.scale + p.e_vel
-		p.scale = math.min(
-			2 * math.min((p.age / self.lifespan) * self.scale, self.scale * ((self.lifespan - p.age) / self.lifespan)),
-			self.scale)
-
-		if p.scale < 0 then
+		if p.age >= p.life then
 			table.remove(self.particles, i)
 		else
-			p.offset.x = p.offset.x + p.velocity * math.sin(p.dir) * dt
-			p.offset.y = p.offset.y + p.velocity * math.cos(p.dir) * dt
-			p.facing = p.facing + p.r_vel * dt
-			p.velocity = math.max(0, p.velocity - p.velocity * 0.07 * dt) -- drag
+			-- Smooth bell envelope over life; squared softening near death.
+			local k = p.age / p.life
+			p.env = math.sin(k * math.pi)
+
+			-- Swirl: bend the heading over time for curling motion.
+			local cos_s, sin_s = math.cos(p.swirl * dt), math.sin(p.swirl * dt)
+			local vx = p.vx * cos_s - p.vy * sin_s
+			local vy = p.vx * sin_s + p.vy * cos_s
+			p.vx = vx * damp
+			p.vy = vy * damp
+
+			p.x = p.x + p.vx * dt
+			p.y = p.y + p.vy * dt
+			p.angle = p.angle + p.spin * dt
 		end
 	end
 end
