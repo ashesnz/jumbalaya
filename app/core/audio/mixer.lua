@@ -41,9 +41,17 @@ local function audio_available()
 	return love and love.audio and love.audio.newSource
 end
 
-local function new_source(code, kind)
-	return love.audio.newSource("resources/sounds/" .. code .. '.ogg',
+--- Creates a decoded source, or nil when the file is missing/unreadable
+--- (e.g. an asset that was culled but is still requested by game code).
+local function load_source(code, kind)
+	local ok, source = pcall(love.audio.newSource,
+		"resources/sounds/" .. code .. '.ogg',
 		(kind ~= 'sfx') and "stream" or "static")
+	return ok and source or nil
+end
+
+local function new_source(code, kind)
+	return load_source(code, kind)
 end
 
 --- Warms every .ogg under resources/sounds through its decoder so first-play
@@ -54,18 +62,22 @@ function MIXER.preload(log)
 			log('audio file - ' .. filename)
 			local code = string.sub(filename, 1, -5)
 			local kind = MIXER.classify(code)
-			local entry = {
-				sound = love.audio.newSource("resources/sounds/" .. filename,
-					(kind ~= 'sfx') and "stream" or "static"),
-				code = code,
-				base_rate = 1,
-				base_gain = 1,
-			}
-			if kind == 'music' then entry.sound:setLooping(true) end
-			pool[code] = {entry}
-			entry.sound:setVolume(0)
-			love.audio.play(entry.sound)
-			entry.sound:stop()
+			local sound = load_source(code, kind)
+			if not sound then
+				log('audio file skipped - ' .. filename)
+			else
+				local entry = {
+					sound = sound,
+					code = code,
+					base_rate = 1,
+					base_gain = 1,
+				}
+				if kind == 'music' then entry.sound:setLooping(true) end
+				pool[code] = {entry}
+				entry.sound:setVolume(0)
+				love.audio.play(entry.sound)
+				entry.sound:stop()
+			end
 		end
 	end
 end
@@ -100,6 +112,11 @@ function MIXER.play(req, recycle)
 		born_paused = not (not req.in_overlay),
 		state_tag = req.state_tag,
 	}
+	if not entry.sound then
+		-- Missing asset: return a silent dummy so callers can proceed.
+		pool[req.code] = pool[req.code] or {}
+		return entry
+	end
 	if kind == 'music' then entry.sound:setLooping(true) end
 	table.insert(pool[req.code], entry)
 	MIXER.apply(entry, req)
