@@ -47,6 +47,21 @@ require "word_game.ui.card_ui"
 
 --class methods
 
+--- Static scalar defaults shared by every new card. Mutable defaults
+--- (tilt_var, discard_pos, children) are built per-instance in construct()
+--- so instances never alias each other's tables.
+local CARD_SCHEMA = {
+    -- interaction
+    click_timeout = 0.3,
+    selected = false,
+    debuff = false,
+    -- visuals / animation
+    facing = "front",
+    sprite_facing = "front",
+    zoom = true,
+    ambient_tilt = 0.2,
+}
+
 --- @param X number initial x position (room units)
 --- @param Y number initial y position (room units)
 --- @param W number width
@@ -56,59 +71,51 @@ require "word_game.ui.card_ui"
 --- @param params table|nil extra flags: `playing_card`, `viewed_back`,
 ---   `bypass_discovery_center`, `bypass_discovery_ui`, `bypass_lock`, etc.
 function Card:construct(X, Y, W, H, card, center, params)
-    self.params = (type(params) == 'table') and params or {}
+    local p = (type(params) == "table") and params or {}
 
-    EaseNode.construct(self,X, Y, W, H)
-
+    EaseNode.construct(self, X, Y, W, H)
     self.CT = self.VT
-    self.config = {
-        card = card or {},
-        center = center
-        }
-    self.tilt_var = {mx = 0, my = 0, dx = 0, dy = 0, amt = 0}
-    self.ambient_tilt = 0.2
+
+    for field, default in pairs(CARD_SCHEMA) do
+        self[field] = default
+    end
+
+    -- Per-instance mutable state.
+    self.params = p
+    self.config = { card = card or {}, center = center }
+    self.tilt_var = { mx = 0, my = 0, dx = 0, dy = 0, amt = 0 }
+    self.discard_pos = {
+        r = 3.6 * (math.random() - 0.5),
+        x = math.random(),
+        y = math.random(),
+    }
+    self.children = {}
+    self.children.shadow = EaseNode(0, 0, 0, 0)
+
+    -- Flags forwarded from params.
+    self.playing_card = p.playing_card
+    self.back = p.viewed_back and "viewed_back" or "selected_back"
+    self.bypass_discovery_center = p.bypass_discovery_center
+    self.bypass_discovery_ui = p.bypass_discovery_ui
+    self.bypass_lock = p.bypass_lock
+    self.no_ui = self.config.card.no_ui
+
+    -- Identity / ordering.
+    G.sort_id = (G.sort_id or 0) + 1
+    self.sort_id = G.sort_id
+    self.unique_val = 1 - self.ID / 1603301
+    self.edition = nil
+    self.area = nil
 
     self.states.collide.can = true
     self.states.hover.can = true
     self.states.drag.can = true
     self.states.click.can = true
 
-    self.playing_card = self.params.playing_card
-    G.sort_id = (G.sort_id or 0) + 1
-    self.sort_id = G.sort_id
-
-    if self.params.viewed_back then self.back = 'viewed_back'
-    else self.back = 'selected_back' end
-    self.bypass_discovery_center = self.params.bypass_discovery_center
-    self.bypass_discovery_ui = self.params.bypass_discovery_ui
-    self.bypass_lock = self.params.bypass_lock
-    self.no_ui = self.config.card and self.config.card.no_ui
-    self.children = {}
-    self.added_to_deck = false
-    self.children.shadow = EaseNode(0, 0, 0, 0)
-    self.unique_val = 1-self.ID/1603301
-    self.edition = nil
-    self.zoom = true
     self:apply_center(center, true)
     self:apply_face(card, true)
 
-    self.discard_pos = {
-        r = 3.6*(math.random()-0.5),
-        x = math.random(),
-        y = math.random()
-    }
- 
-    self.facing = 'front'
-    self.sprite_facing = 'front'
-    self.flipping = nil
-    self.area = nil
-    self.selected = false
-    self.click_timeout = 0.3
     self.T.scale = 0.95
-    self.debuff = false
-
-    self.slot = nil
-    self.added_to_deck = nil
 
     if self.children.front then self.children.front.VT.w = 0 end
     self.children.back.VT.w = 0
@@ -117,6 +124,10 @@ function Card:construct(X, Y, W, H, card, center, params)
     if self.children.front then self.children.front.parent = self; self.children.front.parallax_shift = nil end
     self.children.back.parent = self; self.children.back.parallax_shift = nil
     self.children.center.parent = self; self.children.center.parallax_shift = nil
+
+    -- Intentionally left unset (checked purely for truthiness elsewhere).
+    self.slot = nil
+    self.added_to_deck = nil
 
     if getmetatable(self) == Card then
         table.insert(G.LIVE.CARD, self)
@@ -249,30 +260,57 @@ local SAVED_FIELDS = {
     "ability", "pinned", "edition", "seal",
 }
 
+--- Current save-format version. Bump whenever the layout produced by
+--- `Card:save()` changes; loaders migrate older payloads via `migrate_*`.
+Card.SAVE_VERSION = 2
+
+--- Converts a v1 payload (flat SAVED_FIELDS plus a nested `save_fields` ref
+--- table) into the current versioned format.
+local function migrate_v1_save(old)
+    local state = {}
+    for _, field in ipairs(SAVED_FIELDS) do
+        state[field] = old[field]
+    end
+    return {
+        version = 2,
+        refs = {
+            center = old.save_fields and old.save_fields.center,
+            card = old.save_fields and old.save_fields.card,
+        },
+        params = old.params,
+        state = state,
+    }
+end
+
 function Card:save()
-    local cardTable = {
-        save_fields = {
+    local state = {}
+    for _, field in ipairs(SAVED_FIELDS) do
+        state[field] = self[field]
+    end
+    return {
+        version = Card.SAVE_VERSION,
+        refs = {
             center = self.config.center_key,
             card = self.config.card_key,
         },
         params = self.params,
+        state = state,
     }
-    for _, field in ipairs(SAVED_FIELDS) do
-        cardTable[field] = self[field]
-    end
-    return cardTable
 end
 
 
-function Card:load(cardTable)
-    local saved = cardTable.save_fields
+function Card:load(saved)
+    if type(saved) ~= "table" or not saved.version then
+        saved = migrate_v1_save(saved or {})
+    end
+
     self.config = {
-        center_key = saved.center,
-        center = G.P_CENTERS[saved.center],
-        card_key = saved.card,
-        card = G.P_CARDS[saved.card],
+        center_key = saved.refs.center,
+        center = G.P_CENTERS[saved.refs.center],
+        card_key = saved.refs.card,
+        card = G.P_CARDS[saved.refs.card],
     }
-    self.params = cardTable.params
+    self.params = saved.params
 
     -- Bundle-wrapped perk offers display slightly oversized; everything else
     -- is a standard-size card.
@@ -286,12 +324,11 @@ function Card:load(cardTable)
     self.VT.w = self.T.w
 
     for _, field in ipairs(SAVED_FIELDS) do
-        self[field] = cardTable[field]
+        self[field] = saved.state[field]
     end
 
     teardown_tree(self.children)
-    self.children = {}
-    self.children.shadow = EaseNode(0, 0, 0, 0)
+    self.children = { shadow = EaseNode(0, 0, 0, 0) }
 
     self:set_sprites(self.config.center, self.config.card)
 end
