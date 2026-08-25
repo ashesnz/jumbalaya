@@ -62,35 +62,91 @@ function init_localization()
   end
 end
 
-function loc_parse_string(line)
-  local parsed_line = {}
-  local control = {}
-  local _c, _c_name, _c_val, _c_gather = nil, nil, nil, nil
-  local _s_gather, _s_ref = nil, nil
-  local str_parts, str_it = {}, 1
-  for i = 1, #line do
-      local char = line:sub(i,i)
-      if char == '{' then --Start of a control section, extract all controls
-        if str_parts[1] then parsed_line[#parsed_line+1] = {strings = str_parts, control = control or {}} end
-        str_parts, str_it = {}, 1
-        control, _c, _c_name, _c_val, _c_gather = {}, nil, nil, nil, nil
-        _s_gather, _s_ref = nil, nil
-        _c = true
-      elseif _c and not (char == ':' or char == '}') and not _c_gather then _c_name = (_c_name or '')..char
-      elseif _c and char == ':' then _c_gather = true
-      elseif _c and not (char == ',' or char == '}') and _c_gather then _c_val = (_c_val or '')..char
-      elseif _c and (char == ',' or char == '}') then _c_gather = nil; if _c_name then control[_c_name] = _c_val end; _c_name = nil; _c_val = nil; if char == '}' then _c = nil end
+--[[
+	loc_parse_string - markup parser for localization lines.
 
-      elseif not _c and char ~= '#' and not _s_gather then str_parts[str_it] = (str_parts[str_it] or '')..(control['X'] and char:gsub("%s+", "") or char)
-      elseif not _c and char == '#' and not _s_gather then _s_gather = true; if str_parts[str_it] then str_it = str_it + 1 end
-      elseif not _c and char == '#' and _s_gather then _s_gather = nil; if _s_ref then str_parts[str_it] = {_s_ref}; str_it = str_it + 1; _s_ref = nil end
-      elseif not _c and _s_gather then _s_ref = (_s_ref or '')..char
-      end
-      if i == #line then
-        if str_parts[1] then parsed_line[#parsed_line+1] = {strings = str_parts, control = control or {}} end
-        return parsed_line
-      end
-  end
+	Input grammar:
+	  line    := span*
+	  span    := styled_text | '{' section '}'
+	  section := field (',' field)*          -- e.g. {C:red}, {V:1,s:0.8}, {}
+	  field   := name (':' value)?           -- bare fields are ignored
+	  styled_text := (literal | '#' ref '#')*
+
+	Text following a section carries that section's style; an empty section
+	({}) clears it. A `#..#` pair becomes a reference run resolved later
+	against `vars` by index ({strings = {..., {'1'}, ...}}). Sections whose
+	text is empty produce no part. When a style declares `X`, whitespace is
+	stripped from its text (used for solid background chips).
+
+	Output: array of { strings = (string|{ref})[], control = table } parts,
+	consumed by `localize()`.
+]]
+
+--- Appends a literal run, dropping empties (and whitespace under `X` styles).
+local function push_literal(runs, text, strip_spaces)
+	if strip_spaces then text = text:gsub('%s+', '') end
+	if text ~= '' then
+		runs[#runs + 1] = text
+	end
+end
+
+--- Splits styled text on `#ref#` markers into literal and reference runs.
+local function split_text_runs(text, strip_spaces)
+	local runs = {}
+	local i, n = 1, #text
+	while i <= n do
+		local open = text:find('#', i, true)
+		push_literal(runs, text:sub(i, (open or n + 1) - 1), strip_spaces)
+		if not open then break end
+
+		local close = text:find('#', open + 1, true)
+		if close then
+			runs[#runs + 1] = { text:sub(open + 1, close - 1) }
+			i = close + 1
+		else
+			break -- unterminated reference: the tail is discarded
+		end
+	end
+	return runs
+end
+
+--- Parses the body of one `{...}` section into a style table. The value is
+--- everything after the first ':'; fields without a value are ignored,
+--- matching how consumers read the result.
+local function parse_control(body)
+	local control = {}
+	if body == '' then return control end
+	for field in body:gmatch('[^,]+') do
+		local name, value = field:match('^([^:]*)[:](.*)$')
+		if name and value ~= nil and name ~= '' then
+			control[name] = value
+		end
+	end
+	return control
+end
+
+function loc_parse_string(line)
+	local parts = {}
+	if type(line) ~= 'string' then return parts end
+
+	local control = {}
+	local pos = 1
+	while pos <= #line do
+		local open = line:find('{', pos, true)
+		local text = line:sub(pos, (open or #line + 1) - 1)
+		if text ~= '' then
+			parts[#parts + 1] = {
+				strings = split_text_runs(text, control.X ~= nil),
+				control = control,
+			}
+		end
+		if not open then break end
+
+		local close = line:find('}', open + 1, true)
+		control = parse_control(line:sub(open + 1, (close or #line + 1) - 1))
+		pos = (close or #line + 1) + 1
+	end
+	return parts
 end
 
 --UTF8 handler for special characters, from https://github.com/blitmap/lua-utf8-simple
