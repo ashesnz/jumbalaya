@@ -39,7 +39,7 @@ function M.settings()
         rumble = M.flags.RUMBLE, play_button_pos = 2, GAMESPEED = 1, paused = false,
         SOUND = {volume = 50, music_volume = 60, game_sounds_volume = 100},
         WINDOW = {
-            screenmode = 'Windowed', vsync = 1, selected_display = 2,
+            screenmode = 'Windowed', vsync = 0, selected_display = 2,
             display_names = {'[NONE]'},
             DISPLAYS = {{name = '[NONE]', screen_res = {w = 1000, h = 650}}},
         },
