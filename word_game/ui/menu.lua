@@ -606,23 +606,36 @@ end
 
 
 function build_main_menu_buttons()
-  local text_scale = 0.45
-  local quit_func = 'quit'
+	local text_size = 0.58
+	local button_w, button_h = 3.4, 1.15
+	local gap = 0.22
 
-  local t = {
-    n=G.UI.ROOT, config = {align = "cm", colour = G.C.CLEAR}, nodes={ 
-      {n=G.UI.COLUMN, config={align = "bm"}, nodes={      
-        {n=G.UI.ROW, config={align = "cm", padding = 0.2, r = 0.1, emboss = 0.1, colour = G.C.L_BLACK, mid = true}, nodes={
-          Components.button{id = 'main_menu_play', onClick = "begin_run", colour = G.C.BLUE, width = 3.65, height = 1.55, label = {localize('ui_play_cap')}, textSize = text_scale*2, col = true},
-          {n=G.UI.COLUMN, config={align = "cm"}, nodes={
-            Components.button{onClick = 'open_options', colour = G.C.ORANGE, width = 3.65, height = 1.55, label = {localize('ui_options_cap')}, textSize = text_scale * 1.2, col = true},
-            {n=G.UI.ROW, config={align = "cm", minh = 0.08}, nodes={}},
-            Components.button{onClick = quit_func, colour = G.C.RED, width = 3.65, height = 1.55, label = {localize('ui_quit_cap')}, textSize = text_scale * 1.2, col = true},
-          }},
-        }},
-      }},
-    }}
-  return t
+	local function menu_button(id, label, action, colour)
+		return Components.button{
+			id = id,
+			onClick = action,
+			colour = colour,
+			width = button_w,
+			height = button_h,
+			label = {label},
+			textSize = text_size,
+			col = true,
+		}
+	end
+
+	local t = {
+		n=G.UI.ROOT, config = {align = "cm", colour = G.C.CLEAR}, nodes={
+			{n=G.UI.COLUMN, config={align = "bm"}, nodes={
+				{n=G.UI.ROW, config={align = "cm", padding = 0.24, r = Components.CHROME.radius, colour = G.C.L_BLACK, mid = true}, nodes={
+					menu_button('main_menu_play', localize('ui_play_cap'), "begin_run", G.C.BLUE),
+					{n=G.UI.COLUMN, config={minw = gap}, nodes={}},
+					menu_button(nil, localize('ui_options_cap'), 'open_options', G.C.ORANGE),
+					{n=G.UI.COLUMN, config={minw = gap}, nodes={}},
+					menu_button(nil, localize('ui_quit_cap'), 'quit', G.C.RED),
+				}},
+			}},
+		}}
+	return t
 end
 
 

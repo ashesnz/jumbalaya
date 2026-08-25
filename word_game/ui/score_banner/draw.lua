@@ -107,6 +107,16 @@ function M.draw(sb)
 	sb.update(dt)
 	sb.decay_pulse(dt)
 
+	-- The points x multi readout belongs to the normal HUD; when the vault
+	-- sidebar is hidden for the boss sequence, it hides along with it. Only
+	-- an explicit boss banner ("BOSS WORD") renders during the sequence.
+	local hud_early = G.GAME and G.GAME.word_hud
+	local mode_early = hud_early and hud_early.banner_mode or "normal"
+	if mode_early ~= "boss_prep" and mode_early ~= "boss_word"
+		and felt_layout.is_boss_sequence() then
+		return
+	end
+
 	local ts = G.TILESCALE * G.TILESIZE
 	local rect = Layout.banner_rect()
 	local w = rect.w * ts
