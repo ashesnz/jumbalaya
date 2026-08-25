@@ -11,6 +11,8 @@
 ]]
 
 local RuntimeOptions = require("word_game.config.runtime_options")
+local Palette = require("word_game.config.palette")
+local Dimensions = require("word_game.config.dimensions")
 
 VERSION = '1.0.0i'
 VERSION = VERSION..'-FULL'
@@ -65,20 +67,21 @@ function Game:define_constants()
         {},
     }
 
-    self.TILESIZE = 20
-    self.TILESCALE = 3.65
-    self.TILE_W = 20
-    self.TILE_H = 11.5
-    self.CANVAS_SCALE = 1
-    self.DRAW_HASH_BUFF = 2
-    self.CARD_W = 2.4*35/41
-    self.CARD_H = 2.4*47/41
-    self.HIGHLIGHT_H = 0.2*self.CARD_H
-    self.COLLISION_BUFFER = 0.05
-    self.HAND_CARD_SPACING = 0.78   -- gap between card centres as a fraction of card width (lower = tighter fan)
-    self.SHOW_SIDE_PANEL = false    -- HUD overlay (not split-screen panel)
-    self.TABLE_HAND_SIZE = 7        -- random cards dealt on the board
-    self.TABLE_BOARD_SIDEBAR_WIDTH = 3.0  -- fixed width for the vault side panel
+    -- Render/layout constants come from the typed dimensions module.
+    self.TILESIZE = Dimensions.TILESIZE
+    self.TILESCALE = Dimensions.TILESCALE
+    self.CANVAS_SCALE = Dimensions.CANVAS_SCALE
+    self.TILE_W = Dimensions.TILE_W
+    self.TILE_H = Dimensions.TILE_H
+    self.DRAW_HASH_BUFF = Dimensions.DRAW_HASH_BUFF
+    self.COLLISION_BUFFER = Dimensions.COLLISION_BUFFER
+    self.CARD_W = Dimensions.CARD_W
+    self.CARD_H = Dimensions.CARD_H
+    self.HIGHLIGHT_H = Dimensions.HIGHLIGHT_H
+    self.HAND_CARD_SPACING = Dimensions.layout.HAND_CARD_SPACING
+    self.SHOW_SIDE_PANEL = Dimensions.layout.SHOW_SIDE_PANEL
+    self.TABLE_HAND_SIZE = Dimensions.layout.TABLE_HAND_SIZE
+    self.TABLE_BOARD_SIDEBAR_WIDTH = Dimensions.layout.TABLE_BOARD_SIDEBAR_WIDTH
 
     self.PITCH_MOD = 1
 
@@ -122,95 +125,16 @@ function Game:define_constants()
     self.ANIMATIONS = {}
     self.HIT_ORDER = {}
 
-    self.MIN_CLICK_DIST = 0.9
-    self.MIN_HOVER_TIME = 0.1
+    self.MIN_CLICK_DIST = Dimensions.layout.MIN_CLICK_DIST
+    self.MIN_HOVER_TIME = Dimensions.layout.MIN_HOVER_TIME
     self.DEBUG = false
-    self.ANIMATION_FPS = 10
+    self.ANIMATION_FPS = Dimensions.layout.ANIMATION_FPS
     self.VIBRATION = 0
     self.CHALLENGE_WINS = 5
     self.CHALLENGES = {}
 
-    self.C = {
-        MULTIPLIER = colour_from_hex('FE5F55'),
-        POINTS = colour_from_hex("009dff"),
-        MONEY = colour_from_hex('f3b958'),
-        XMULT = colour_from_hex('FE5F55'),
-        FILTER = colour_from_hex('ff9a00'),
-        BLUE = colour_from_hex("009dff"),
-        RED = colour_from_hex('FE5F55'),
-        GREEN = colour_from_hex("4BC292"),
-        PALE_GREEN = colour_from_hex("56a887"),
-        ORANGE = colour_from_hex("fda200"),
-        IMPORTANT = colour_from_hex("ff9a00"),
-        GOLD = colour_from_hex('eac058'),
-        YELLOW = {1,1,0,1},
-        CLEAR = {0, 0, 0, 0}, 
-        WHITE = {1,1,1,1},
-        PURPLE = colour_from_hex('8867a5'),
-        BLACK = colour_from_hex("374244"),--4f6367"),
-        L_BLACK = colour_from_hex("4f6367"),
-        GREY = colour_from_hex("5f7377"),
-        CHANCE = colour_from_hex("4BC292"),
-        MUTED_GREY = colour_from_hex('bfc7d5'),
-        BOOSTER = colour_from_hex("646eb7"),
-        FINISH = {1,1,1,1},
-        DARK_FINISH = {0,0,0,1},
-        
-        DYN_UI = {
-            MAIN = colour_from_hex('424e54'),
-            DARK = colour_from_hex('374244'),
-            BOSS_MAIN = colour_from_hex('374244'),
-            BOSS_DARK = colour_from_hex('374244'),
-        },
-        UI = {
-            TEXT_LIGHT = {1,1,1,1},
-            TEXT_DARK = colour_from_hex("4F6367"),
-            TEXT_INACTIVE = colour_from_hex("88888899"),
-            BACKGROUND_WHITE = {1,1,1,1},
-            BACKGROUND_DARK = colour_from_hex("7A9E9F"),
-            BACKGROUND_INACTIVE = colour_from_hex("666666FF"),
-            OUTLINE_LIGHT = colour_from_hex("D8D8D8"),
-            TRANSPARENT_LIGHT = colour_from_hex("eeeeee22"),
-            TRANSPARENT_DARK = colour_from_hex("22222222"),
-            HOVER = colour_from_hex('00000055'),
-            BUTTON = colour_from_hex('1958C8'),
-            BUTTON_HOVER = colour_from_hex('286FE0'),
-            BUTTON_OUTLINE = colour_from_hex('1958C8'),
-            BUTTON_TEXT = colour_from_hex('F4F8FF'),
-        },
-        SET = {
-            Default = colour_from_hex("cdd9dc"),
-            Enhanced = colour_from_hex("cdd9dc"),
-            Companion = colour_from_hex('424e54'),
-            Charm = colour_from_hex('424e54'),
-            Orbit = colour_from_hex("424e54"),
-            Phantom = colour_from_hex('424e54'),
-            Perk = colour_from_hex("424e54"),
-        }, 
-        SECONDARY_SET = {
-            Default = colour_from_hex("9bb6bdFF"),
-            Enhanced = colour_from_hex("8389DDFF"),
-            Companion = colour_from_hex('708b91'),
-            Charm = colour_from_hex('a782d1'),
-            Orbit = colour_from_hex('13afce'),
-            Phantom = colour_from_hex('4584fa'),
-            Perk = colour_from_hex("fd682b"),
-            Finish = colour_from_hex("4ca893"),
-        }, 
-        RARITY = {
-            colour_from_hex('009dff'),--colour_from_hex("708b91"),
-            colour_from_hex("4BC292"),
-            colour_from_hex('fe5f55'),
-            colour_from_hex("b26cbb")
-        },
-
-        BACKGROUND = {
-            L = {1,1,0,1},
-            D = {0,1,1,1},
-            C = colour_from_hex("374244"),
-            contrast = 1
-        }
-    }
+    -- The colour system lives in the palette module; this only assembles it.
+    self.C = Palette.build(colour_from_hex)
     self.C.UI_POINTS = deep_clone(self.C.BLUE)
     self.C.UI_MULTIPLIER = deep_clone(self.C.RED)
     self.UI = {
