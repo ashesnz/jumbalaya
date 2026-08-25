@@ -1,28 +1,57 @@
 --[[
 	app/core/graphics/flow_text.lua - animated per-letter text (FlowText).
+
+	Animation model (deliberately unlike the original engine's):
+	  - Reveal uses an ease-out-back "spring" envelope; letters overshoot
+	    slightly before settling instead of ramping quadratically.
+	  - Idle motion phases are de-synced with the golden angle rather than
+	    large integer multiples, so waves never align on uniform indices.
+	  - bump is a per-letter hop train (one raised-cosine arc per cycle),
+	    pulse is a gaussian bell travelling across letter indices, and
+	    quiver is layered low-frequency sine noise.
 ]]
 
 FlowText = AnimNode:derive("FlowText")
+
+-- Golden angle: irrational phase step that keeps per-letter motion from
+-- synchronising.
+local GOLDEN_ANGLE = 2.399963229728653
+
+--- Ease-out-back curve: fast rise, brief overshoot above 1, settle at 1.
+local function spring_rise(t)
+	if t <= 0 then return 0 end
+	if t >= 1 then return 1 end
+	local c = 1.35
+	t = t - 1
+	return t * t * ((c + 1) * t + c) + 1
+end
+
+--- Smoothstep fade, used for the reveal-out envelope.
+local function smoothstep(t)
+	if t <= 0 then return 0 end
+	if t >= 1 then return 1 end
+	return t * t * (3 - 2 * t)
+end
 
 function FlowText:construct(config)
 	config = config or {}
 	self.config = config
 	self.shadow = config.shadow
 	self.scale = config.scale or 1
-	self.pop_in_rate = config.pop_in_rate or 2.5
-	self.bump_rate = config.bump_rate or 3.1
-	self.bump_amount = config.bump_amount or 1
+	self.reveal_speed = config.pop_in_rate or 2.5
+	self.hop_rate = config.bump_rate or 3.1
+	self.hop_height = config.bump_amount or 1
 	self.font = config.font or G.LANG.font
 
 	if config.string and type(config.string) ~= 'table' then config.string = {config.string} end
-	self.string = (config.string and type(config.string) == 'table' and config.string[1]) or {'HELLO WORLD'}
+	self.string = (config.string and type(config.string) == 'table' and config.string[1]) or {'JUMBALAYA'}
 
 	self.text_offset = {
 		x = self.font.TEXT_OFFSET.x * self.scale + (config.x_offset or 0),
 		y = self.font.TEXT_OFFSET.y * self.scale + (config.y_offset or 0),
 	}
 	self.colours = config.colours or {G.C.RED}
-	self.created_time = G.TIMERS.REAL
+	self.shown_at = G.TIMERS.REAL
 	self.silent = config.silent
 
 	self.start_pop_in = config.pop_in
@@ -32,7 +61,7 @@ function FlowText:construct(config)
 	config.H = 0
 
 	self.strings = {}
-	self.focused_string = 1
+	self.active_string = 1
 
 	self:update_text(true)
 
@@ -110,7 +139,7 @@ function FlowText:update_text(first_pass)
 					self.config.pop_in = nil
 				else
 					self.config.pop_in = self.config.pop_in or 0
-					self.created_time = G.TIMERS.REAL
+					self.shown_at = G.TIMERS.REAL
 				end
 
 				self.strings[k].string = v
@@ -183,58 +212,62 @@ function FlowText:update_text(first_pass)
 	end
 end
 
---- Begins (or schedules) the pop-out animation of the focused string.
+--- Begins (or schedules) the reveal-out animation of the active string.
 function FlowText:pop_out(pop_out_timer)
 	self.config.pop_out = pop_out_timer or 1
-	self.pop_out_time = G.TIMERS.REAL + (self.pop_delay or 0)
+	self.fade_started_at = G.TIMERS.REAL + (self.pop_delay or 0)
 end
 
---- Replays the pop-in of the focused string from zero.
+--- Replays the reveal animation of the active string from zero.
 function FlowText:pop_in(pop_in_timer)
 	self.reset_pop_in = true
 	self.config.pop_out = nil
 	self.config.pop_in = pop_in_timer or 0
-	self.created_time = G.TIMERS.REAL
+	self.shown_at = G.TIMERS.REAL
 
-	for _, letter in ipairs(self.strings[self.focused_string].letters) do
+	for _, letter in ipairs(self.strings[self.active_string].letters) do
 		letter.pop_in = 0
 	end
 
 	self:update_text()
 end
 
---- Per-letter animation pass: pop easing, string cycling, decorations.
+--- Per-letter animation pass: reveal easing, string cycling, decorations.
 function FlowText:align_letters()
-	if self.pop_cycle then
+	if self.cycle_pending then
 		-- Advance to the next string (randomly when configured) and restart it.
-		self.focused_string = (self.config.random_element and math.random(1, #self.strings))
-			or (self.focused_string == #self.strings and 1 or self.focused_string + 1)
-		self.pop_cycle = false
-		for _, letter in ipairs(self.strings[self.focused_string].letters) do
+		self.active_string = (self.config.random_element and math.random(1, #self.strings))
+			or (self.active_string == #self.strings and 1 or self.active_string + 1)
+		self.cycle_pending = false
+		for _, letter in ipairs(self.strings[self.active_string].letters) do
 			letter.pop_in = 0
 		end
 		self.config.pop_in = 0.1
 		self.config.pop_out = nil
-		self.created_time = G.TIMERS.REAL
+		self.shown_at = G.TIMERS.REAL
 	end
 
-	local focused = self.strings[self.focused_string]
+	local focused = self.strings[self.active_string]
+	local letter_count = #focused.letters
+	local mid = 0.5 * (letter_count + 1)
 	self.string = focused.string
+	local now = G.TIMERS.REAL
 
 	for k, letter in ipairs(focused.letters) do
 		if self.config.pop_out then
-			-- Ease letters out (squared falloff); trigger the next cycle when done.
-			letter.pop_in = math.min(1, math.max((self.config.min_cycle_time or 1)
-				- (G.TIMERS.REAL - self.pop_out_time) * self.config.pop_out / (self.config.min_cycle_time or 1), 0))
-			letter.pop_in = letter.pop_in * letter.pop_in
-			if k == #focused.letters and letter.pop_in <= 0 and #self.strings > 1 then self.pop_cycle = true end
+			-- Fade letters out through a smoothstep; cycle when done.
+			local cycle_len = self.config.min_cycle_time or 1
+			local raw = math.min(1, math.max(
+				cycle_len - (now - self.fade_started_at) * self.config.pop_out / cycle_len, 0))
+			letter.pop_in = smoothstep(raw)
+			if k == letter_count and raw <= 0 and #self.strings > 1 then self.cycle_pending = true end
 		elseif self.config.pop_in then
-			-- Staggered pop-in: letter k starts after k-1 slots of the wave.
+			-- Staggered spring reveal: letter k starts one wave-slot after k-1.
 			local prev_pop_in = letter.pop_in
-			letter.pop_in = math.min(1, math.max(
-				(G.TIMERS.REAL - self.config.pop_in - self.created_time) * #self.string * self.pop_in_rate - k + 1,
-				self.config.min_cycle_time == 0 and 1 or 0))
-			letter.pop_in = letter.pop_in * letter.pop_in
+			local raw = (now - self.config.pop_in - self.shown_at)
+				* #self.string * self.reveal_speed - k + 1
+			raw = math.min(1, math.max(raw, self.config.min_cycle_time == 0 and 1 or 0))
+			letter.pop_in = spring_rise(raw)
 
 			-- Rising edge plays a pitched tick (skip offscreen / thin out long strings).
 			if prev_pop_in <= 0 and letter.pop_in > 0 and not self.silent
@@ -245,9 +278,12 @@ function FlowText:align_letters()
 				end
 			end
 
-			if k == #focused.letters and letter.pop_in >= 1 then
+			-- Wait for full settle (raw progress, not the overshooting envelope)
+			-- before cycling, so letters never freeze mid-overshoot.
+			if k == letter_count and raw >= 1 then
+				for _, settled in ipairs(focused.letters) do settled.pop_in = 1 end
 				if #self.strings > 1 then
-					self.pop_delay = (G.TIMERS.REAL - self.config.pop_in - self.created_time + (self.config.pop_delay or 1.5))
+					self.pop_delay = (now - self.config.pop_in - self.shown_at + (self.config.pop_delay or 1.5))
 					self:pop_out(4)
 				else
 					self.config.pop_in = nil
@@ -258,43 +294,50 @@ function FlowText:align_letters()
 		letter.r = 0
 		letter.scale = 1
 
-		-- Arc rotation across the string (rotate==2 mirrors direction).
+		-- Fan rotation across the string plus a slow breathing sway
+		-- (rotate==2 mirrors direction).
 		if self.config.rotate then
-			letter.r = (self.config.rotate == 2 and -1 or 1)
-				* (0.2 * (-#focused.letters / 2 - 0.5 + k) / #focused.letters + 0.02 * math.sin(2 * G.TIMERS.REAL + k))
+			local dir = self.config.rotate == 2 and -1 or 1
+			letter.r = dir * (0.18 * (k - mid) / letter_count
+				+ 0.03 * math.sin(1.7 * now + k * GOLDEN_ANGLE))
 		end
 
-		-- Pulse: a travelling wave that widens then narrows each letter once.
+		-- Pulse: a gaussian bell travelling across letter indices.
 		if self.config.pulse then
-			letter.scale = letter.scale + (1 / self.config.pulse.width) * self.config.pulse.amount * math.max(
-				math.min(
-					(self.config.pulse.start - G.TIMERS.REAL) * self.config.pulse.speed + k + self.config.pulse.width,
-					(G.TIMERS.REAL - self.config.pulse.start) * self.config.pulse.speed - k + self.config.pulse.width + 2),
-				0)
-			letter.r = letter.r + (letter.scale - 1) * (0.02 * (-#focused.letters / 2 - 0.5 + k))
-			if self.config.pulse.start > G.TIMERS.REAL + 2 * self.config.pulse.speed * #focused.letters then
-				self.config.pulse = nil
-			end
+			local p = self.config.pulse
+			local head = (now - p.start) * p.speed
+			local d = (head - k) / math.max(p.width * 0.5, 0.001)
+			local bell = math.exp(-d * d)
+			letter.scale = letter.scale + 1.5 * p.amount * bell
+			letter.r = letter.r + (letter.scale - 1) * 0.02 * (k - mid)
+			if head > letter_count + p.width then self.config.pulse = nil end
 		end
 
-		-- Quiver: constant nervous jitter from layered sine/cosine noise.
+		-- Quiver: nervous jitter from layered low-frequency noise.
 		if self.config.quiver then
-			letter.scale = letter.scale + 0.1 * self.config.quiver.amount
-			letter.r = letter.r + 0.3 * self.config.quiver.amount * (
-				math.sin(37.217 * G.TIMERS.REAL * self.config.quiver.speed + k * 1177.9) +
-				math.cos(58.407 * G.TIMERS.REAL * self.config.quiver.speed + k * 1067.4) * math.sin(31.884 * G.TIMERS.REAL * self.config.quiver.speed) +
-				math.cos(88.71 * G.TIMERS.REAL * self.config.quiver.speed + k * 1241.8) -
-				math.sin(27.918 * G.TIMERS.REAL * self.config.quiver.speed + k * 131.6))
+			local q = self.config.quiver
+			local wobble = math.sin(now * q.speed * 23.7 + k * 12.9898)
+				+ 0.5 * math.cos(now * q.speed * 41.3 + k * 78.233)
+				+ 0.25 * math.sin(now * q.speed * 67.1 + k * 39.425)
+			letter.scale = letter.scale + 0.08 * q.amount
+			letter.r = letter.r + 0.22 * q.amount * wobble
 		end
 
 		if self.config.float then
+			-- Two incommensurate cosine drifts, phase-shifted by the golden angle.
 			letter.offset.y = math.sqrt(self.scale)
-				* (2 + (self.font.FONTSCALE / G.TILESIZE) * 2000 * math.sin(3.4 * G.TIMERS.REAL + 211 * k))
+				* (2 + (self.font.FONTSCALE / G.TILESIZE) * 1500
+					* (math.cos(2.6 * now + k * GOLDEN_ANGLE)
+						+ 0.3 * math.sin(4.3 * now + k * 1.618)))
 				+ 60 * (letter.scale - 1)
 		end
 		if self.config.bump then
-			letter.offset.y = self.bump_amount * math.sqrt(self.scale) * 7
-				* math.max(0, (5 + self.bump_rate) * math.sin(self.bump_rate * G.TIMERS.REAL + 173 * k) - 3 - self.bump_rate)
+			-- Hop train: each letter performs a raised-cosine hop per cycle,
+			-- smoothed so takeoff/landing ease in and out.
+			local phase = (self.hop_rate * now + k * GOLDEN_ANGLE / (2 * math.pi)) % 1
+			local hop = math.sin(phase * math.pi)
+			hop = hop * hop * (3 - 2 * hop)
+			letter.offset.y = self.hop_height * math.sqrt(self.scale) * 12 * hop
 		end
 	end
 end
@@ -325,7 +368,7 @@ end
 function FlowText:draw()
 	if self.children.particle_effect then self.children.particle_effect:draw() end
 
-	local focused = self.strings[self.focused_string]
+	local focused = self.strings[self.active_string]
 
 	if self.shadow then
 		push_node_transform(self, 1)

@@ -32,7 +32,7 @@ local function part_colour(part, vars, default_col)
 end
 
 local function hide_letters(dyna)
-	local bundle = dyna.strings and dyna.strings[dyna.focused_string or 1]
+	local bundle = dyna.strings and dyna.strings[dyna.active_string or 1]
 	if not bundle then return end
 	for _, letter in ipairs(bundle.letters) do
 		letter.pop_in = 0
@@ -40,7 +40,7 @@ local function hide_letters(dyna)
 end
 
 local function type_letters(dyna, delay, cps)
-	local bundle = dyna.strings and dyna.strings[dyna.focused_string or 1]
+	local bundle = dyna.strings and dyna.strings[dyna.active_string or 1]
 	if not bundle then return delay end
 
 	local letters = bundle.letters
