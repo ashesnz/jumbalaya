@@ -160,13 +160,8 @@ function Card:hover()
     if self.facing ~= 'front' or self.no_ui or G.debug_tooltip_toggle then return end
     self:mark_alert_seen()
 
-    -- Letter cards zoom in the foreground on hover instead of raising a popup.
-    if is_letter then
-        if WORD_GAME and WORD_GAME.CardHover then
-            WORD_GAME.CardHover.show(self)
-        end
-        return
-    end
+    -- Letter cards are placed by dragging; no hover popup for them.
+    if is_letter then return end
 
     if not self.states.drag.is or G.INPUT.HID.touch then
         if not self.children.h_popup then
@@ -180,9 +175,6 @@ end
 
 
 function Card:stop_hover()
-    if WORD_GAME and WORD_GAME.CardHover then
-        WORD_GAME.CardHover.hide(self)
-    end
     SceneNode.stop_hover(self)
 end
 

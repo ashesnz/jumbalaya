@@ -214,9 +214,6 @@ function M.draw_card_interaction(game)
 	if WORD_GAME and WORD_GAME.CardInspect then
 		WORD_GAME.CardInspect.draw_foreground()
 	end
-	if WORD_GAME and WORD_GAME.CardHover then
-		WORD_GAME.CardHover.draw()
-	end
 end
 
 function M.draw_debug_answers()

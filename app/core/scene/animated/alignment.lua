@@ -34,10 +34,20 @@ function AnimNode:align_to_major()
 		}
 	end
 
-	-- Nothing changed since the last pass; skip recomputation.
-	if self.alignment.prev_offset.x == self.alignment.offset.x
-		and self.alignment.prev_offset.y == self.alignment.offset.y
-		and self.alignment.prev_type == self.alignment.type then
+	-- Nothing changed since the last pass; skip recomputation. Also skips
+	-- only while the major's placement and our measured size are unchanged,
+	-- so late room moves (e.g. the screen-wipe card after a button jiggle)
+	-- re-align instead of freezing at a stale offset.
+	local major, mid, off = self.role.major, self.Mid, self.alignment.offset
+	local snap = self.alignment.prev_snap
+	if self.alignment.prev_offset.x == off.x
+		and self.alignment.prev_offset.y == off.y
+		and self.alignment.prev_type == self.alignment.type
+		and snap
+		and (major == nil or (
+			snap.mx == major.T.x and snap.my == major.T.y
+			and snap.mw == major.T.w and snap.mh == major.T.h))
+		and snap.cw == mid.T.w and snap.ch == mid.T.h then
 		return
 	end
 
@@ -48,7 +58,6 @@ function AnimNode:align_to_major()
 
 	if self.alignment.type_list.a or not self.role.major then return end
 
-	local major, mid, off = self.role.major, self.Mid, self.alignment.offset
 	local tl = self.alignment.type_list
 
 	if tl.m then
@@ -78,5 +87,12 @@ function AnimNode:align_to_major()
 
 	self.alignment.prev_offset = self.alignment.prev_offset or {}
 	self.alignment.prev_offset.x, self.alignment.prev_offset.y = off.x, off.y
+	self.alignment.prev_snap = {
+		type = self.alignment.type,
+		ox = off.x, oy = off.y,
+		mx = major.T.x, my = major.T.y,
+		mw = major.T.w, mh = major.T.h,
+		cw = mid.T.w, ch = mid.T.h,
+	}
 end
 end

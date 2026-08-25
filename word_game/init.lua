@@ -32,7 +32,6 @@ local M = {
 	Confetti = require("word_game.ui.confetti"),
 	FloatUpText = require("word_game.ui.float_up_text"),
 	CardInspect = require("word_game.ui.card_inspect"),
-	CardHover = require("word_game.ui.card_hover"),
 	PlayerPortrait = require("word_game.ui.player_portrait"),
 	AllyHost = require("word_game.ui.ally_host"),
 	GuestHost = require("word_game.ui.guest_host"),

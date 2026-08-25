@@ -172,7 +172,8 @@ function M.try_snap(session, card)
 			return
 		end
 	elseif in_row then
-		if M.place_in_row(session, card) then
+		local placed = M.place_in_row(session, card)
+		if placed then
 			play_sfx("card_drop", 0.9, 0.8)
 		elseif card.area then
 			card.area:relayout()
@@ -182,6 +183,12 @@ function M.try_snap(session, card)
 		area:hard_set_cards()
 	elseif card.area then
 		card.area:relayout()
+	end
+
+	-- Gold lock-in flash: fire whenever a drop over the row leaves the card
+	-- placed in it, whatever internal path put it there.
+	if in_row and M.card_on_placement(session, card) then
+		shimmer.start_card(session, card)
 	end
 end
 
