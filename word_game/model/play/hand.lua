@@ -1,0 +1,287 @@
+--[[ word_game/model/play/hand.lua ]]
+local Scheduler = require "app.effects.scheduler"
+
+
+return function(M)
+local round = require("word_game.model.round")
+local round_config = require("word_game.config.round_config")
+local state = require("word_game.model.state")
+local word_feedback = require("word_game.ui.word_feedback")
+local CardMotion = require("app.effects.card_motion")
+
+local function discard_remaining_hand()
+	if not G.hand then return 0 end
+	local n = #(G.hand.cards or {})
+	if G.TIMELINE and G.TIMELINE.enqueue then
+		for i = 1, n do
+			Scheduler.add{
+				mode = "delayed",
+				delay = 0.07,
+				func = function()
+					local card = G.hand and G.hand.cards and G.hand.cards[1]
+					if card then
+						CardMotion.move{from = G.hand, to = G.discard, percent = 50, direction = "down", stay_flipped = false, card = card, delay = 0.08}
+					end
+					return true
+				end,
+			}
+		end
+	end
+	return n
+end
+
+local function show_perk_market()
+	if not (WORD_GAME and WORD_GAME.PerkMarketplace and WORD_GAME.PerkMarketplace.show) then
+		return
+	end
+	if G.TIMELINE and G.TIMELINE.enqueue then
+		Scheduler.add{
+			mode = "delayed",
+			delay = 0.4,
+			blockable = false,
+			blocking = false,
+			func = function()
+				WORD_GAME.PerkMarketplace.show()
+				return true
+			end,
+		}
+	else
+		WORD_GAME.PerkMarketplace.show()
+	end
+end
+
+local function open_after_hand(opts)
+	opts = opts or {}
+	if WORD_GAME and WORD_GAME.HandClearFocus and WORD_GAME.HandClearFocus.end_focus then
+		WORD_GAME.HandClearFocus.end_focus()
+	end
+	G.GAME.word_score_animating = false
+	local host = G.player_host
+	if host then
+		host:remove_speech_bubble()
+	end
+	local wr = G.GAME.word_round
+	local j = wr and wr.jumble
+	if opts.boss_cleared or (j and j.boss_word_active) then
+		if j then
+			j.boss_word_active = false
+			j.boss_word_staging = false
+			j.boss_puzzle_hidden = false
+			j.pending_boss = nil
+			j.locked_hand_layout = nil
+		end
+		if WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.destroy_boss_cards then
+			WORD_GAME.Deck.destroy_boss_cards()
+		end
+		if WORD_GAME and WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.set_banner_mode then
+			WORD_GAME.ScoreBanner.set_banner_mode("normal")
+		end
+		if WORD_GAME and WORD_GAME.PlayEffects and WORD_GAME.PlayEffects.restore_boss_layout then
+			WORD_GAME.PlayEffects.restore_boss_layout()
+		end
+		if wr.set >= round_config.SETS_TO_WIN then
+			M.end_match(true)
+			return
+		end
+		show_perk_market()
+		round.start_hand(wr.set + 1, 1)
+		require("word_game.model.play.opening_deal").deal()
+		return
+	end
+	if round.is_final_hand() then
+		M.end_match(true)
+	elseif round_config.is_perk_market_after(
+		wr.set, wr.hand_index) then
+		round.advance_hand()
+	elseif WORD_GAME.TradeUI then
+		WORD_GAME.TradeUI.open_then_dealer()
+	else
+		M.continue_after_dealer()
+	end
+end
+
+local function play_hand_clear()
+	local major = (G.placement_table and G.placement_table.area)
+		or G.PLAY_ATTACH
+		or G.ROOM_ATTACH
+	if WORD_GAME and WORD_GAME.Confetti then
+		WORD_GAME.Confetti.burst()
+	end
+	word_feedback.show("Hand Cleared", G.C.GREEN, 1.8, 0.15)
+	play_sfx("applause", 1, 0.9)
+	play_sfx("timpani", 0.92, 0.9)
+	play_sfx("card_tick", 0.6, 0.5)
+	if major and major.pulse then
+		major:pulse(0.35, 0.2)
+	end
+end
+
+local function play_boss_clear()
+	if WORD_GAME and WORD_GAME.Confetti then
+		WORD_GAME.Confetti.burst()
+	end
+	word_feedback.show("Boss Defeated!", G.C.GOLD, 1.8, 0.15)
+	play_sfx("applause", 1, 0.9)
+	play_sfx("timpani", 0.92, 0.9)
+end
+
+function M.on_hand_cleared(opts)
+	opts = opts or {}
+	if WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.is_jumble_deck
+		and WORD_GAME.Deck.is_jumble_deck()
+		and WORD_GAME.Deck.populate_jumble_deck then
+		WORD_GAME.Deck.populate_jumble_deck()
+	end
+	if G.GAME then
+		G.GAME.word_score_animating = true
+	end
+
+	local wr = G.GAME and G.GAME.word_round
+	local j = wr and wr.jumble
+	if wr and wr.set == 1 and wr.hand_index == 3 and j and not j.boss_word_active and not opts.boss_cleared then
+		round.unused_play_payout()
+		if WORD_GAME.Sidebar and WORD_GAME.Sidebar.roll_to_next_hand then
+			WORD_GAME.Sidebar.roll_to_next_hand()
+		end
+		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.begin_boss_word then
+			WORD_GAME.Jumble.begin_boss_word(wr, function()
+				if G.GAME then
+					G.GAME.word_score_animating = false
+				end
+			end)
+		end
+		return
+	end
+
+	round.unused_play_payout()
+	if WORD_GAME.Sidebar and WORD_GAME.Sidebar.roll_to_next_hand then
+		WORD_GAME.Sidebar.roll_to_next_hand()
+	end
+	if WORD_GAME and WORD_GAME.Confetti and not opts.boss_cleared then
+		WORD_GAME.Confetti.burst()
+	end
+	local leftover = discard_remaining_hand()
+
+	local function play_clear_sequence()
+		if G.TIMELINE and G.TIMELINE.enqueue then
+			Scheduler.add{
+				mode = "instant",
+				func = function()
+					if opts.boss_cleared then
+						play_boss_clear()
+					else
+						play_hand_clear()
+					end
+					Scheduler.add{
+						mode = "delayed",
+						delay = 1.7,
+						func = function()
+							open_after_hand(opts)
+							return true
+						end,
+					}
+					return true
+				end,
+			}
+		else
+			if opts.boss_cleared then
+				play_boss_clear()
+			else
+				play_hand_clear()
+			end
+			open_after_hand(opts)
+		end
+	end
+
+	if not opts.boss_cleared and WORD_GAME and WORD_GAME.TokenReward and WORD_GAME.TokenReward.try_award(play_clear_sequence) then
+		return
+	end
+	play_clear_sequence()
+end
+
+function M.on_hand_failed()
+	local function set_failed()
+		local alpha = state.get()
+		if alpha then
+			alpha.match_over = true
+			alpha.match_won = false
+		end
+		G.STATE = G.STATES.GAME_OVER
+		G.STATE_COMPLETE = false
+	end
+	if G.TIMELINE and G.TIMELINE.enqueue then
+		Scheduler.add{
+			mode = "delayed",
+			delay = 0.55,
+			func = function()
+				set_failed()
+				return true
+			end,
+		}
+	else
+		set_failed()
+	end
+end
+
+function M.continue_after_dealer()
+	if G.FUNCS and G.FUNCS.close_overlay then
+		G.FUNCS.close_overlay()
+	end
+	if G.SETTINGS then
+		G.SETTINGS.paused = false
+	end
+	local wr = G.GAME and G.GAME.word_round
+	if not wr then return end
+	local result = round.advance_hand()
+	if result == "win" then
+		M.end_match(true)
+		return
+	end
+	if WORD_GAME and WORD_GAME.Deck then
+		WORD_GAME.Deck.reset_table_deck()
+	end
+	if G.GAME then
+		G.GAME.word_score_animating = true
+	end
+	local function after_deal()
+		if WORD_GAME and WORD_GAME.Sidebar then
+			WORD_GAME.Sidebar:refresh()
+		end
+		if G.GAME then
+			G.GAME.word_score_animating = false
+		end
+	end
+	if G.TIMELINE and G.TIMELINE.enqueue then
+		Scheduler.add{
+			mode = "delayed",
+			delay = 0.18,
+			func = function()
+				if WORD_GAME and WORD_GAME.Deck then
+					WORD_GAME.Deck.reset_table_deck()
+				end
+				require("word_game.model.play.opening_deal").deal()
+				after_deal()
+				return true
+			end,
+		}
+	else
+		if WORD_GAME and WORD_GAME.Deck then
+			WORD_GAME.Deck.reset_table_deck()
+		end
+		require("word_game.model.play.opening_deal").deal()
+		after_deal()
+	end
+end
+
+function M.end_match(won)
+	local alpha = state.get()
+	if alpha then
+		alpha.match_over = true
+		alpha.match_won = won and true or false
+	end
+	if WORD_GAME.EndMatch then
+		WORD_GAME.EndMatch.open(won)
+	end
+end
+
+end

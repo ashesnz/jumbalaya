@@ -1,0 +1,12 @@
+Jumbalaya word list derived from the English Speller Database (ESDB),
+formerly SCOWL, by Kevin Atkinson et al.
+
+Source: https://github.com/en-wl/wordlist
+License: MIT-like (see SCOWL Copyright file in the ESDB repository)
+
+Filtered for conversational American English (length 2–7):
+  - SCOWL size 60, abbreviations and proper nouns excluded
+  - Two-letter words: strict conversational whitelist only
+  - Three- to seven-letter words: must appear in Norvig frequency corpus
+
+Frequency data: Peter Norvig's count_1w.txt (public domain).

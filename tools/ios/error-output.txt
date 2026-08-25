@@ -1,0 +1,10 @@
+Error: [love "boot.lua"]:328: No code to run
+Your game might be packaged incorrectly.
+Make sure main.lua is at the top level of the zip.
+stack traceback:
+	[love "boot.lua"]:352: in function <[love "boot.lua"]:348>
+	[C]: in function 'error'
+	[love "boot.lua"]:328: in function <[love "boot.lua"]:126>
+	[C]: in function 'xpcall'
+	[love "boot.lua"]:362: in function <[love "boot.lua"]:355>
+	[C]: in function 'xpcall'

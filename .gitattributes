@@ -1,0 +1,22 @@
+# Normalize line endings for text files
+* text=auto eol=lf
+
+# Lua source
+*.lua text eol=lf
+
+# Shaders
+*.fs text eol=lf
+*.vs text eol=lf
+*.glsl text eol=lf
+
+# Documentation
+*.md text eol=lf
+
+# Binary assets (do not modify line endings)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ogg binary
+*.wav binary
+*.ttf binary
+*.otf binary

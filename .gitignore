@@ -1,0 +1,108 @@
+# ------------------------------------------------------------------------------
+# OS
+# ------------------------------------------------------------------------------
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ------------------------------------------------------------------------------
+# IDE / editors
+# ------------------------------------------------------------------------------
+.idea/workspace.xml
+.idea/httpRequests/
+.idea/dataSources/
+.idea/dataSources.local.xml
+.idea/shelf/
+.idea/queries/
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries/
+.idea/**/shelf/
+*.iml
+out/
+
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json.example
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ------------------------------------------------------------------------------
+# Secrets & environment
+# ------------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+secrets.json
+credentials.json
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_rsa.*
+*.keystore
+
+# ------------------------------------------------------------------------------
+# LÖVE / game runtime artifacts
+# ------------------------------------------------------------------------------
+*.love
+
+# Native Steam / platform binaries (copy locally, never commit)
+*.so
+*.dylib
+*.dll
+luasteam.*
+libsteam_api.*
+steam_appid.txt
+
+# ------------------------------------------------------------------------------
+# Save data & player profiles (written to project dir during dev by mistake)
+# LÖVE normally stores these in ~/Library/Application Support/LOVE/CricCards/
+# ------------------------------------------------------------------------------
+*.jkr
+!version.jkr
+
+settings.jkr
+save.jkr
+profile.jkr
+meta.jkr
+metrics.jkr
+unlock_notify.jkr
+unlocked_jokers.jkr
+discovered_jokers.jkr
+alerted_jokers.jkr
+
+# Profile subdirectories (1/, 2/, 3/ save slots)
+[0-9]/
+[0-9]/**
+
+# ------------------------------------------------------------------------------
+# Build / logs / temp
+# ------------------------------------------------------------------------------
+build/
+dist/
+_tools/.cache/
+*.log
+error.log
+*.tmp
+*.bak
+*.orig
+
+# ------------------------------------------------------------------------------
+# Lua tooling caches
+# ------------------------------------------------------------------------------
+.luacheckrc.local
+.luarc.json.user
+.venv-textures/
+/AlphaCardsBackup/
