@@ -6,6 +6,8 @@
 
 local M = {}
 
+local Components = require "word_game.ui.widgets.components"
+
 M.COLS = 2
 M.BUTTON = { minw = 1.85, minh = 0.5, scale = 0.38, padding = 0.05 }
 
@@ -30,12 +32,12 @@ end
 
 function M.button(label, action)
 	-- Default row button stacks vertically inside a G.UI.COLUMN column.
-	return make_button{
+	return Components.button{
 		label = {label},
-		button = "DT_" .. action,
-		minw = M.BUTTON.minw,
-		minh = M.BUTTON.minh,
-		scale = M.BUTTON.scale,
+		onClick = "DT_" .. action,
+		width = M.BUTTON.minw,
+		height = M.BUTTON.minh,
+		textSize = M.BUTTON.scale,
 		padding = M.BUTTON.padding,
 	}
 end

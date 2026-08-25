@@ -1,3 +1,6 @@
+--[[ app/callbacks/window.lua ]]
+local Components = require "word_game.ui.widgets.components"
+
 G.FUNCS.change_vsync = function(args)
   G.SETTINGS.QUEUED_CHANGE.vsync = (G.SETTINGS.WINDOW.vsync == 0 and args.to_key == 1 and 1) or (G.SETTINGS.WINDOW.vsync == 1 and args.to_key == 2 and 0) or nil
 end
@@ -52,8 +55,7 @@ G.FUNCS.change_window_cycle_UI = function()
       swap_node.children[1]:remove()
       swap_node.children[1] = nil
       swap_node.LayoutView:add_child(
-        make_option_cycler({w = 4,scale = 0.8, options = G.SETTINGS.WINDOW.DISPLAYS[focused_display].screen_resolutions.strings, opt_callback = 'change_screen_resolution',current_option = res_option or 1}),
-        swap_node)
+        Components.cycler({width = 4,scale = 0.8, options = G.SETTINGS.WINDOW.DISPLAYS[focused_display].screen_resolutions.strings, onChange = 'change_screen_resolution',current_option = res_option or 1}),        swap_node)
     end
   end
 end

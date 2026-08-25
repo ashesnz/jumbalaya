@@ -9,6 +9,7 @@ local Layout = require "word_game.ui.layout"
 local Easing = require "app.effects.easing"
 local MenuEffects = require "app.effects.menu"
 local Scheduler = require "app.effects.scheduler"
+local Components = require "word_game.ui.widgets.components"
 
 function G.DEFINITIONS.credits()
   local text_scale = 0.75
@@ -612,11 +613,11 @@ function build_main_menu_buttons()
     n=G.UI.ROOT, config = {align = "cm", colour = G.C.CLEAR}, nodes={ 
       {n=G.UI.COLUMN, config={align = "bm"}, nodes={      
         {n=G.UI.ROW, config={align = "cm", padding = 0.2, r = 0.1, emboss = 0.1, colour = G.C.L_BLACK, mid = true}, nodes={
-          make_button{id = 'main_menu_play', button = "begin_run", colour = G.C.BLUE, minw = 3.65, minh = 1.55, label = {localize('ui_play_cap')}, scale = text_scale*2, col = true},
+          Components.button{id = 'main_menu_play', onClick = "begin_run", colour = G.C.BLUE, width = 3.65, height = 1.55, label = {localize('ui_play_cap')}, textSize = text_scale*2, col = true},
           {n=G.UI.COLUMN, config={align = "cm"}, nodes={
-            make_button{button = 'open_options', colour = G.C.ORANGE, minw = 3.65, minh = 1.55, label = {localize('ui_options_cap')}, scale = text_scale * 1.2, col = true},
+            Components.button{onClick = 'open_options', colour = G.C.ORANGE, width = 3.65, height = 1.55, label = {localize('ui_options_cap')}, textSize = text_scale * 1.2, col = true},
             {n=G.UI.ROW, config={align = "cm", minh = 0.08}, nodes={}},
-            make_button{button = quit_func, colour = G.C.RED, minw = 3.65, minh = 1.55, label = {localize('ui_quit_cap')}, scale = text_scale * 1.2, col = true},
+            Components.button{onClick = quit_func, colour = G.C.RED, width = 3.65, height = 1.55, label = {localize('ui_quit_cap')}, textSize = text_scale * 1.2, col = true},
           }},
         }},
       }},

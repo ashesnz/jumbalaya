@@ -1,6 +1,7 @@
 --[[ word_game/ui/overlays/results.lua - Win, game over, and score summary overlays ]]
 
 local Easing = require "app.effects.easing"
+local Components = require "word_game.ui.widgets.components"
 
 function build_win()
   local show_win_cta = false
@@ -24,19 +25,19 @@ function build_win()
         build_round_scores_row('times_rerolled', G.C.GREEN),
         build_round_scores_row('new_collection', G.C.WHITE),
         build_round_scores_row('seed', G.C.WHITE),
-        make_button({button = 'copy_run_seed', label = {localize('ui_copy')}, colour = G.C.BLUE, scale = 0.3, minw = 2.3, minh = 0.4,}),
+        Components.button({onClick = 'copy_run_seed', label = {localize('ui_copy')}, colour = G.C.BLUE, textSize = 0.3, width = 2.3, height = 0.4,}),
       }},
       {n=G.UI.COLUMN, config={align = "tr", padding = 0.08}, nodes={
         build_round_scores_row('furthest_set', G.C.FILTER),
         build_round_scores_row('furthest_round', G.C.FILTER),
         {n=G.UI.ROW, config={align = "cm", minh = 0.4, minw = 0.1}, nodes={}},
-        not show_win_cta and make_button({id = 'from_game_won', button = 'notify_then_start_run', label = {localize('ui_start_new_run')}, minw = 2.5, maxw = 2.5, minh = 1, focus_args = {nav = 'wide', snap_to = true}}) or nil,
+        not show_win_cta and Components.button({id = 'from_game_won', onClick = 'notify_then_start_run', label = {localize('ui_start_new_run')}, width = 2.5, maxw = 2.5, height = 1, focus_args = {nav = 'wide', snap_to = true}}) or nil,
         not show_win_cta and {n=G.UI.ROW, config={align = "cm", minh = 0.2, minw = 0.1}, nodes={}} or nil,
-        not show_win_cta and make_button({button = 'return_to_menu', label = {localize('ui_main_menu')}, minw = 2.5, maxw = 2.5, minh = 1, focus_args = {nav = 'wide'}}) or nil,
+        not show_win_cta and Components.button({onClick = 'return_to_menu', label = {localize('ui_main_menu')}, width = 2.5, maxw = 2.5, height = 1, focus_args = {nav = 'wide'}}) or nil,
       }}
     }},
     {n=G.UI.ROW, config={align = "cm", padding = 0.08}, nodes={
-      make_button({button = 'close_overlay', label = {localize('ui_endless')}, minw = 6.5, maxw = 5, minh = 1.2, scale = 0.7, shadow = true, colour = G.C.BLUE, focus_args = {nav = 'wide', button = 'x',set_button_pip = true}}),
+      Components.button({onClick = 'close_overlay', label = {localize('ui_endless')}, width = 6.5, maxw = 5, height = 1.2, textSize = 0.7, shadow = true, colour = G.C.BLUE, focus_args = {nav = 'wide', button = 'x',set_button_pip = true}}),
     }},
   }}
   }}
@@ -105,7 +106,7 @@ function build_game_over()
               build_round_scores_row('times_rerolled', G.C.GREEN),
               build_round_scores_row('new_collection', G.C.WHITE),
               build_round_scores_row('seed', G.C.WHITE),
-              make_button({button = 'copy_run_seed', label = {localize('ui_copy')}, colour = G.C.BLUE, scale = 0.3, minw = 2.3, minh = 0.4, focus_args = {nav = 'wide'}}),
+              Components.button({onClick = 'copy_run_seed', label = {localize('ui_copy')}, colour = G.C.BLUE, textSize = 0.3, width = 2.3, height = 0.4, focus_args = {nav = 'wide'}}),
             }},
             {n=G.UI.COLUMN, config={align = "tr", padding = 0.08}, nodes={
               build_round_scores_row('furthest_set', G.C.FILTER),

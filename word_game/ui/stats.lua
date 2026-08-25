@@ -5,6 +5,8 @@
 	do not change. Loaded from main.lua.
 ]]
 
+local Components = require "word_game.ui.widgets.components"
+
 function build_high_scores_filling(_resp)
   local scores = {}
   local loader = loadstring(_resp)
@@ -174,7 +176,7 @@ function build_high_scores()
     }},
     {n=G.UI.COLUMN, config={align = "cm", padding = 0.1, r = 0.1, colour = G.C.CLEAR}, nodes={
       make_progress_box(),
-      make_button({button = 'usage', label = {localize('term_card_stats')}, minw = 7.5, minh =1, focus_args = {nav = 'wide'}}),
+      Components.button({onClick = 'usage', label = {localize('term_card_stats')}, width = 7.5, height = 1, focus_args = {nav = 'wide'}}),
     }},
     not G.F_NO_ACHIEVEMENTS and {n=G.UI.COLUMN, config={align = "cm", r = 0.1, colour = G.C.CLEAR}, nodes=cheevs} or nil
   }})

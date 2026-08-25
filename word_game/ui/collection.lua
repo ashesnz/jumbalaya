@@ -1,11 +1,12 @@
 -- Jumbalaya collection browser for deck backs and visual editions.
+local Components = require "word_game.ui.widgets.components"
 
 function build_card_gallery()
   sync_discover_counts()
   local t = build_generic_options({ back_func = G.STAGE == G.STAGES.RUN and 'open_options' or 'close_overlay', contents = {
     {n=G.UI.COLUMN, config={align = "cm", padding = 0.15}, nodes={
-      make_button({button = 'card_gallery_decks', label = {localize('ui_decks')}, count = G.DISCOVER_TALLIES.backs, minw = 5}),
-      make_button({button = 'card_gallery_editions', label = {localize('ui_editions')}, count = G.DISCOVER_TALLIES.editions, minw = 5, id = 'card_gallery_editions'}),
+      Components.button({onClick = 'card_gallery_decks', label = {localize('ui_decks')}, count = G.DISCOVER_TALLIES.backs, width = 5}),
+      Components.button({onClick = 'card_gallery_editions', label = {localize('ui_editions')}, count = G.DISCOVER_TALLIES.editions, width = 5, id = 'card_gallery_editions'}),
     }},
   }})
   return t
@@ -63,7 +64,7 @@ function build_card_gallery_decks()
   end
 
   local t = build_generic_options({ back_func = 'card_gallery', contents = {
-    make_option_cycler({options = ordered_names, opt_callback = 'change_viewed_back', current_option = 1, colour = G.C.RED, w = 4.5, focus_args = {snap_to = true}, mid =
+    Components.cycler({options = ordered_names, onChange = 'change_viewed_back', current_option = 1, colour = G.C.RED, width = 4.5, focus_args = {snap_to = true}, mid =
             {n=G.UI.ROW, config={align = "cm", minw = 2.5, padding = 0.1, r = 0.1, colour = G.C.BLACK, emboss = 0.05}, nodes={
               {n=G.UI.ROW, config={align = "cm", padding = 0.2, colour = G.C.BLACK, r = 0.2}, nodes={
                 {n=G.UI.COLUMN, config={align = "cm", padding = 0}, nodes={
