@@ -19,7 +19,7 @@ function M.ensure_engine_globals()
 	_G.G = _G.G or {}
 	G.SETTINGS = G.SETTINGS or {
 		paused = false,
-		GRAPHICS = { shadows = "Off", texture_scaling = 1, crt = 0 },
+		GRAPHICS = { shadows = "Off", texture_scaling = 1 },
 	}
 	G.ID = G.ID or 1
 	G.STAGE = G.STAGE or 1

@@ -3,7 +3,6 @@
 ]]
 
 local save_queue = require "app.core.session.loop.save_queue"
-local postfx = require "app.core.session.loop.postfx"
 local debug_overlay = require "app.core.session.loop.debug_overlay"
 local Runtime = require "app.effects.runtime"
 local Updaters = require "app.core.session.updaters"
@@ -226,7 +225,6 @@ function Game:present_frame()
 	if love.graphics and love.graphics.scale then love.graphics.scale(1 / G.CANVAS_SCALE) end
 	if love.graphics and love.graphics.setColor then love.graphics.setColor(G.C.WHITE) end
 
-	postfx.apply(self)
 	if self.CANVAS then
 		love.graphics.draw(self.CANVAS, 0, 0)
 	end

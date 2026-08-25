@@ -43,8 +43,6 @@ return {
     ["ui_set_game_vol"]="Game Volume",
     ["ui_set_shadows"]="Shadows",
     ["ui_set_pixel_smoothing"]="Pixel Art Smoothing",
-    ["ui_set_CRT"]="CRT",
-    ["ui_set_CRT_bloom"]="CRT Bloom",
     ["term_trophy"]="Trophy",
     ["term_achievement"]="Achievement",
     ["term_joker"]="Joker",
@@ -126,10 +124,6 @@ return {
 [2]="Off",
 },
     ["opt_smoothing_opt"]={
-[1]="Off",
-[2]="On",
-},
-    ["opt_bloom_opt"]={
 [1]="Off",
 [2]="On",
 },

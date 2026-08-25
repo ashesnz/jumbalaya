@@ -48,7 +48,6 @@ function Game:define_constants()
         self.F_SOUND_THREAD = false
         self.F_VERBOSE = false
         self.SETTINGS.GRAPHICS.texture_scaling = 1
-        self.SETTINGS.GRAPHICS.crt = 0
         self.SETTINGS.WINDOW.screenmode = 'Borderless'
         self.SETTINGS.WINDOW.selected_display = 1
     elseif os_name == 'Windows' then

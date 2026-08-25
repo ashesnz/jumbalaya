@@ -136,8 +136,6 @@ function G.DEFINITIONS.settings_tab(tab)
     return {n=G.UI.ROOT, config={align = "cm", padding = 0.05, colour = G.C.CLEAR}, nodes={
       Components.cycler({width = 4,scale = 0.8, label = localize("ui_set_shadows"),options = localize('opt_shadow_opt'), onChange = 'change_shadows', current_option = (G.SETTINGS.GRAPHICS.shadows == 'On' and 1 or 2)}),
       Components.cycler({width = 4,scale = 0.8, label = localize("ui_set_pixel_smoothing"),options = localize('opt_smoothing_opt'), onChange = 'change_pixel_smoothing', current_option = G.SETTINGS.GRAPHICS.texture_scaling}),
-      Components.slider({label = localize('ui_set_CRT'),width = 4, height = 0.4, ref_table = G.SETTINGS.GRAPHICS, ref_value = 'crt', min = 0, max = 100}),
-      Components.cycler({width = 4,scale = 0.8, label = localize("ui_set_CRT_bloom"),options = localize('opt_bloom_opt'), onChange = 'change_crt_bloom', current_option = G.SETTINGS.GRAPHICS.bloom}),
     }}
   end
 

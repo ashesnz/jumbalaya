@@ -95,15 +95,6 @@ G.FUNCS.change_pixel_smoothing = function(args)
   G:queue_settings_write()
 end
 
---Changes the Bloom amount for the CRT effect, number of samples to take for bloom\
---
----@param args {cycle_config: table, to_key: number}
---**cycle_config** Is the config table from the original option cycle UIE\
---**to_val** The new value for shadows, 'On' or 'Off'
-G.FUNCS.change_crt_bloom = function(args)
-  G.SETTINGS.GRAPHICS.bloom = args.to_key
-  G:queue_settings_write()
-end
 G.FUNCS.can_apply_window_changes = function(e)
   local can_apply = false
   if G.SETTINGS.QUEUED_CHANGE then 

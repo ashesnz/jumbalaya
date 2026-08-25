@@ -43,7 +43,7 @@ function M.settings()
             display_names = {'[NONE]'},
             DISPLAYS = {{name = '[NONE]', screen_res = {w = 1000, h = 650}}},
         },
-        GRAPHICS = {texture_scaling = 2, shadows = 'On', crt = 70, bloom = 1},
+        GRAPHICS = {texture_scaling = 2, shadows = 'On'},
     }
 end
 
