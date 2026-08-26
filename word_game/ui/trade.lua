@@ -170,23 +170,24 @@ local function action_button(item, action, cost, colour, disabled)
 	}}
 end
 
-local function modifier_description_node(item, placeholder)
+	local function modifier_description_node(item, placeholder)
 	local text = deck.modifier_description(item and item.letter)
 	if not text then return nil end
 	local lines = wrap_description(text)
 	local line_nodes = {}
-	if not placeholder then
-		for _, line in ipairs(lines) do
-			line_nodes[#line_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.02 }, nodes = {
-				{ n = G.UI.TEXT, config = {
-					text = line,
-					scale = MODIFIER_TEXT_SCALE,
-					font = alpha_button_font(),
-					colour = G.C.BLACK or { 0, 0, 0, 1 },
-					shadow = false,
-				}},
-			}}
-		end
+	for _, line in ipairs(lines) do
+		line_nodes[#line_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.02 }, nodes = {
+			{ n = G.UI.TEXT, config = {
+				text = line,
+				scale = MODIFIER_TEXT_SCALE,
+				font = alpha_button_font(),
+				-- Placeholder keeps the same invisible ink (alpha 0) so the
+				-- text still measures identically and the modal width never
+				-- changes when a card is removed.
+				colour = placeholder and G.C.CLEAR or (G.C.BLACK or { 0, 0, 0, 1 }),
+				shadow = false,
+			}},
+		}}
 	end
 	-- Parchment chip so the black text stays readable on the artwork. The
 	-- placeholder variant is fully transparent but reserves the same footprint
@@ -420,11 +421,21 @@ refresh_overlay = function()
 		open_overlay()
 		return
 	end
+	-- Remember the body's current height so the rebuilt body can never be
+	-- shorter — the modal must not change size when a card is removed.
+	local prev_body_h = nil
+	if host.config.object and host.config.object.VT and host.config.object.VT.h then
+		prev_body_h = host.config.object.VT.h
+	end
 	if host.config.object and host.config.object.remove then
 		host.config.object:remove()
 	end
+	local body_def = marketplace_body_definition()
+	if prev_body_h and body_def.config then
+		body_def.config.minh = math.max(body_def.config.minh or 0, prev_body_h)
+	end
 	host.config.object = LayoutView{
-		definition = marketplace_body_definition(),
+		definition = body_def,
 		config = { offset = { x = 0, y = 0 }, align = "cm", parent = host },
 	}
 	G.OVERLAY_MENU:recalculate()
