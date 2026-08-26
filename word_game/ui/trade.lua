@@ -274,11 +274,25 @@ local open_overlay
 local refresh_overlay
 local finish_trade
 
+--- Vertical offset (tiles) centreing the modal on the play-area felt so its
+--- top edge lines up just above the timer and its bottom just below the hand.
+local function modal_offset_y()
+	local felt = Layout.felt_rect and Layout.felt_rect()
+	if not felt or not G.TILE_H then return 0 end
+	return (felt.y + felt.h * 0.5) - G.TILE_H * 0.5
+end
+
+--- Modal height (tiles) spans the play-area felt, top to bottom.
+local function modal_minh()
+	local felt = Layout.felt_rect and Layout.felt_rect()
+	return felt and felt.h or 1
+end
+
 open_overlay = function()
 	G.SETTINGS.paused = true
 	G.FUNCS.show_overlay({
 		definition = M.definition(),
-		config = { no_esc = true, offset = { x = 0, y = 0 }, no_jiggle = true },
+		config = { no_esc = true, offset = { x = 0, y = modal_offset_y() }, no_jiggle = true },
 	})
 end
 
@@ -410,6 +424,7 @@ function M.definition()
 
 	return build_generic_options({
 		minw = 12,
+		minh = modal_minh(),
 		padding = 0.35,
 		bg_colour = G.C.CLEAR,
 		outline_colour = G.C.CLEAR,

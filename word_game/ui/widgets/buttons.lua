@@ -112,8 +112,8 @@ function build_generic_options(args)
   end
 
   return {n=G.UI.ROOT, config = {align = "cm", minw = args.root_minw or G.ROOM.T.w*5, minh = args.root_minh or G.ROOM.T.h*5,padding = 0.1, r = 0.1, colour = args.bg_colour or {G.C.GREY[1], G.C.GREY[2], G.C.GREY[3],0.7}}, nodes={
-    {n=G.UI.ROW, config={align = "cm", minh = 1,r = 0.3, padding = 0.07, minw = 1, colour = args.outline_colour or G.C.MUTED_GREY, emboss = 0.1}, nodes={
-      {n=G.UI.COLUMN, config={align = "cm", minh = 1,r = 0.2, padding = 0.2, minw = 1, colour = args.colour or G.C.L_BLACK}, nodes={
+    {n=G.UI.ROW, config={align = "cm", minh = args.minh or 1,r = 0.3, padding = 0.07, minw = 1, colour = args.outline_colour or G.C.MUTED_GREY, emboss = 0.1}, nodes={
+      {n=G.UI.COLUMN, config={align = "cm", minh = args.minh or 1,r = 0.2, padding = 0.2, minw = 1, colour = args.colour or G.C.L_BLACK}, nodes={
         {n=G.UI.ROW, config={align = "cm",padding = args.padding or 0.2, minw = args.minw or 7}, nodes=
           contents
         },
