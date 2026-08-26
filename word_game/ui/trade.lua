@@ -749,7 +749,16 @@ local function start_remove_dissolve(item)
 			if session then
 				session.removing[item] = nil
 			end
+			-- Another copy of this letter is still in the pack: clear the
+			-- removed flag so sync rebinds the slot to it and it shows
+			-- in place of the dissolved copy.
+			if deck.find_deck_card(item.letter) then
+				item.removed = false
+			end
 			trade.sync_offer_cards(offer)
+			if item.card then
+				item.color = deck.color_from_card(item.card)
+			end
 			if G.OVERLAY_MENU then
 				refresh_overlay()
 			end
