@@ -199,12 +199,6 @@ local function action_column(item, mode, done, session_state)
 		or already_modified
 	local remove_disabled = not in_deck
 	local column_nodes = {
-		{ n = G.UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
-			action_button(item, "add", M.session_add_cost(session_state), G.C.BLUE, false),
-		}},
-		{ n = G.UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
-			action_button(item, "remove", 20, G.C.RED, remove_disabled),
-		}},
 		{ n = G.UI.ROW, config = { align = "cm", padding = 0.14 }, nodes = { face_node(item) } },
 	}
 	-- No card left to describe: drop the modifier text along with the face.
@@ -215,6 +209,12 @@ local function action_column(item, mode, done, session_state)
 	if desc then
 		column_nodes[#column_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.1 }, nodes = { desc } }
 	end
+	column_nodes[#column_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
+		action_button(item, "add", M.session_add_cost(session_state), G.C.BLUE, false),
+	}}
+	column_nodes[#column_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
+		action_button(item, "remove", 20, G.C.RED, remove_disabled),
+	}}
 	column_nodes[#column_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
 		action_button(item, "modifier", 30, G.C.GOLD, modify_disabled),
 	}}
@@ -238,6 +238,22 @@ local function card_row(items, mode, done, session_state)
 	}, nodes = cards }
 end
 
+local function close_button_node(skip_func)
+	return { n = G.UI.COLUMN, config = {
+		align = "cm", minw = 2.2, minh = 0.5, r = 0.18, padding = 0.22,
+		hover = true, colour = G.C.ORANGE, hover_colour = G.C.UI.BUTTON_HOVER,
+		button = skip_func, shadow = true, emboss = 0.1, no_jiggle = true,
+	}, nodes = {
+		{ n = G.UI.TEXT, config = {
+			text = "Close",
+			scale = 0.35,
+			font = alpha_button_font(),
+			colour = G.C.UI.BUTTON_TEXT,
+			shadow = true,
+		}},
+	}}
+end
+
 local function status_or_skip(done, done_text, skip_func)
 	if done then
 		return { n = G.UI.ROW, config = { align = "cm", padding = 0.04 }, nodes = {
@@ -250,19 +266,7 @@ local function status_or_skip(done, done_text, skip_func)
 		}}
 	end
 	return { n = G.UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
-		{ n = G.UI.COLUMN, config = {
-			align = "cm", minw = 2.2, minh = 0.5, r = 0.18, padding = 0.22,
-			hover = true, colour = G.C.ORANGE, hover_colour = G.C.UI.BUTTON_HOVER,
-			button = skip_func, shadow = true, emboss = 0.1, no_jiggle = true,
-		}, nodes = {
-			{ n = G.UI.TEXT, config = {
-				text = "Close",
-				scale = 0.35,
-				font = alpha_button_font(),
-				colour = G.C.UI.BUTTON_TEXT,
-				shadow = true,
-			}},
-		}},
+		close_button_node(skip_func)
 	}}
 end
 
@@ -281,9 +285,25 @@ local function marketplace_content_nodes()
 	trade.sync_offer_cards(offer)
 	local add = offer.add or offer
 	local nodes = {
+		-- Red cross close button, top right of the modal.
+		{ n = G.UI.ROW, config = { align = "cr", minw = 3.8 * G.CARD_W }, nodes = {
+			{ n = G.UI.COLUMN, config = {
+				align = "cm", minw = 0.72, minh = 0.72, r = 0.16, padding = 0.1,
+				hover = true, colour = G.C.RED, hover_colour = G.C.UI.BUTTON_HOVER,
+				button = "alpha_trade_skip_add", shadow = true, emboss = 0.12, no_jiggle = true,
+			}, nodes = {
+				{ n = G.UI.TEXT, config = {
+					text = "X",
+					scale = 0.62,
+					font = alpha_button_font(),
+					colour = G.C.WHITE,
+					shadow = true,
+				}},
+			}},
+		}},
+		-- Push the cards/text/buttons down from the cross button.
+		{ n = G.UI.ROW, config = { minh = 50 / (G.TILESIZE or 64) }, nodes = {} },
 		card_row(add.letters, "market", session.add_done, session),
-		{ n = G.UI.ROW, config = { minh = 0.06 }, nodes = {} },
-		status_or_skip(false, nil, "alpha_trade_skip_add"),
 	}
 
 	if offer.showdown then
@@ -327,7 +347,40 @@ local function marketplace_body_definition()
 	}
 end
 
+-- True when the token balance is lower than the cheapest action still
+-- available on the board (Add is always offered; Remove/Modify only count
+-- while an offered card is in the deck and eligible).
+local function cannot_afford_anything()
+	if not session or not offer then return false end
+	local balance = state.tokens()
+	local letters = (offer.add or offer).letters or {}
+	local any_in_deck = false
+	local modify_available = false
+	for _, item in ipairs(letters) do
+		if trade.item_in_deck(item) then
+			any_in_deck = true
+			if not session.modified[item]
+				and not (item.card and deck.is_modified(item.card)) then
+				modify_available = true
+			end
+			break
+		end
+	end
+	local min_cost = M.session_add_cost(session)
+	if any_in_deck then
+		min_cost = math.min(min_cost, trade.ACTION_COSTS.remove)
+		if modify_available then
+			min_cost = math.min(min_cost, trade.ACTION_COSTS.modifier)
+		end
+	end
+	return balance < min_cost
+end
+
 refresh_overlay = function()
+	if cannot_afford_anything() then
+		finish_trade()
+		return
+	end
 	if not G.OVERLAY_MENU then
 		open_overlay()
 		return
@@ -498,11 +551,10 @@ function M.is_flying()
 	return flyer ~= nil
 end
 
-local MODAL_BACKDROP_W = 12.6
-local MODAL_BACKDROP_H = 8.2
-
 --- Painted just before the overlay menu each frame while the marketplace is
---- open: Marketplace art stretched to fill the modal panel.
+--- open: dims the room, then stretches the Marketplace art edge-to-edge over
+--- the modal window itself (measured live from the overlay node tree, so it
+--- always matches the modal's rendered size).
 function M.backdrop_pass()
 	if not offer or not G.OVERLAY_MENU then return end
 	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.marketplace_bg
@@ -513,10 +565,21 @@ function M.backdrop_pass()
 	local iw, ih = atlas.image:getDimensions()
 	local rw = room.w * ts
 	local rh = room.h * ts
-	local frame_w = MODAL_BACKDROP_W * ts
-	local frame_h = MODAL_BACKDROP_H * ts
-	local dx = (rw - frame_w) * 0.5
-	local dy = (rh - frame_h) * 0.5
+
+	-- Modal window = outer box around the body: body OBJECT node -> contents
+	-- ROW -> panel COLUMN -> outline ROW. Fall back to the whole room.
+	local dx, dy, dw, dh = 0, 0, rw, rh
+	local host = nil
+	if G.OVERLAY_MENU.find_node_by_id then
+		host = G.OVERLAY_MENU:find_node_by_id("trade_marketplace_body")
+	end
+	local outer = host and host.parent and host.parent.parent and host.parent.parent.parent
+	local t = outer and outer.VT
+	if t and t.w and t.h and t.w > 0 and t.h > 0 then
+		dx, dy = t.x * ts, t.y * ts
+		dw, dh = t.w * ts, t.h * ts
+	end
+
 	local prev_shader = love.graphics.getShader and love.graphics.getShader()
 	local cr, cg, cb, ca = 1, 1, 1, 1
 	if love.graphics.getColor then
@@ -525,11 +588,33 @@ function M.backdrop_pass()
 	love.graphics.push()
 	if love.graphics.setShader then love.graphics.setShader() end
 	room_translate()
-	-- Dim the table behind the modal; the art sits on top in the panel frame.
+	-- Dim the table behind the modal; the art sits on top in the modal frame.
 	love.graphics.setColor(0, 0, 0, 0.45)
 	love.graphics.rectangle("fill", 0, 0, rw, rh)
 	love.graphics.setColor(1, 1, 1, 1)
-	love.graphics.draw(atlas.image, dx, dy, 0, frame_w / iw, frame_h / ih)
+	-- Aspect-preserving "cover" fit: uniform scale so the art is never
+	-- stretched, cropped to stay inside the modal window.
+	local scale = math.max(dw / iw, dh / ih)
+	local img_w, img_h = iw * scale, ih * scale
+	local ix = dx + (dw - img_w) * 0.5
+	local iy = dy + (dh - img_h) * 0.5
+	local psx, psy, psw, psh = nil, nil, nil, nil
+	if love.graphics.transformPoint and love.graphics.intersectScissor and love.graphics.getScissor then
+		local x1, y1 = love.graphics.transformPoint(dx, dy)
+		local x2, y2 = love.graphics.transformPoint(dx + dw, dy + dh)
+		psx, psy, psw, psh = love.graphics.getScissor()
+		love.graphics.intersectScissor(
+			math.min(x1, x2), math.min(y1, y2),
+			math.abs(x2 - x1), math.abs(y2 - y1))
+	end
+	love.graphics.draw(atlas.image, ix, iy, 0, scale, scale)
+	if love.graphics.setScissor then
+		if psx then
+			love.graphics.setScissor(psx, psy, psw, psh)
+		else
+			love.graphics.setScissor()
+		end
+	end
 	love.graphics.pop()
 	if prev_shader and love.graphics.setShader then
 		love.graphics.setShader(prev_shader)
@@ -683,6 +768,10 @@ end
 function M.open()
 	standalone = true
 	reset_session(trade.roll_offer())
+	if cannot_afford_anything() then
+		finish_trade()
+		return
+	end
 	open_overlay()
 end
 
@@ -694,6 +783,10 @@ function M.open_then_dealer()
 		return
 	end
 	reset_session(trade.roll_offer())
+	if cannot_afford_anything() then
+		finish_trade()
+		return
+	end
 	open_overlay()
 end
 
