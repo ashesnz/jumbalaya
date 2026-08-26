@@ -57,6 +57,10 @@ local function live_letter_count(letter)
 	return n
 end
 
+local function state_tokens()
+	return G.GAME.alpha and G.GAME.alpha.tokens or 0
+end
+
 T.describe("Marketplace duplicate removal (word_game.model.trade)", function()
 	mock_env.reset_game()
 	local trade = require("word_game.model.trade")
@@ -266,6 +270,68 @@ T.describe("Marketplace dissolve slot refill (word_game.ui.trade)", function()
 
 		T.assert_false(trade_ui.is_flying(), "Flyer should have landed")
 		T.assert_equal(#calls, 1, "Modal should close (continue run) once the animation completes")
+
+		WORD_GAME.Play = real_play
+		restore()
+	end)
+
+	T.it("closes after the fly when 36 tokens drop to 6 with nothing affordable", function()
+		local captured = {}
+		local trade_ui, restore = load_trade_ui_with_fake_dissolve(captured)
+
+		stub_areas()
+		-- Escalating add prices: 10, then 20, then 30 across three buys.
+		local letters = { "Q", "X", "J" }
+		local items = {}
+		for _, letter in ipairs(letters) do
+			items[#items + 1] = { mode = "market", letter = letter, color = "red" }
+		end
+		local offer = { add = { mode = "market", letters = items }, remove = nil, showdown = false }
+
+		local calls = {}
+		local real_play = WORD_GAME.Play
+		WORD_GAME.Play = { continue_after_dealer = function() calls[#calls + 1] = "continue" end }
+
+		G.GAME.alpha = G.GAME.alpha or {}
+		G.GAME.alpha.tokens = 66 -- buys at 10 and 20 keep the modal alive
+
+		adopt_session(trade_ui, offer)
+
+		local function land_flyer()
+			for _ = 1, 60 do
+				trade_ui.draw_pass()
+			end
+		end
+
+		local function pick(item)
+			trade_ui.on_pick({
+				config = { ref_table = { item = item, action = "add" } },
+			})
+		end
+
+		-- Buys 1 and 2 at escalating prices (10, 20).
+		pick(items[1])
+		land_flyer()
+		pick(items[2])
+		land_flyer()
+		T.assert_equal(#calls, 0, "Modal must stay open while purchases remain affordable")
+		T.assert_equal(state_tokens(), 36, "Two buys should leave 36 tokens")
+
+		-- The user's exact scenario: 36 tokens, next add costs 30, leaving
+		-- 6 -- below remove (20), modifier (30) and next add (40).
+		pick(items[3])
+
+		T.assert_true(trade_ui.is_flying(), "Third card should be flying")
+		T.assert_equal(#calls, 0, "Modal must stay open during the animation")
+
+		-- Even if a pending token reward credits the balance mid-flight,
+		-- the purchase already drained us: the modal must still close.
+		G.GAME.alpha.tokens = 100
+
+		land_flyer()
+
+		T.assert_false(trade_ui.is_flying(), "Flyer should have landed")
+		T.assert_equal(#calls, 1, "Modal should close and continue to the next round")
 
 		WORD_GAME.Play = real_play
 		restore()

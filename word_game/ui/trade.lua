@@ -513,6 +513,13 @@ local function session_complete()
 	return session and session.add_done and session.remove_done
 end
 
+-- True when the balance right after the last purchase was already below the
+-- cheapest remaining action. Locked in at pick time so a token reward that
+-- lands mid-animation cannot keep the marketplace open afterwards.
+local function broke_after_last_action()
+	return session and session.broke_after_action or false
+end
+
 local function refresh_or_finish()
 	if session_complete() then
 		finish_trade()
@@ -686,6 +693,10 @@ local function finish_transform_fx()
 	end
 	item.color = "black"
 	play_sfx("card_slide1", 1.05, 0.9)
+	if broke_after_last_action() then
+		finish_trade()
+		return
+	end
 	if G.OVERLAY_MENU then
 		refresh_overlay()
 	end
@@ -765,6 +776,10 @@ local function start_remove_dissolve(item)
 			trade.sync_offer_cards(offer)
 			if item.card then
 				item.color = deck.color_from_card(item.card)
+			end
+			if broke_after_last_action() then
+				finish_trade()
+				return
 			end
 			if G.OVERLAY_MENU then
 				refresh_overlay()
@@ -851,6 +866,10 @@ function M.on_pick(e)
 		fail(result)
 		return
 	end
+	-- Record whether this purchase drained us below every remaining action
+	-- BEFORE the animation runs; the check at landing can be skewed by token
+	-- rewards that land in the meantime.
+	session.broke_after_action = cannot_afford_anything()
 
 	if action == "add" then
 		if WORD_GAME and WORD_GAME.TokenReward and WORD_GAME.TokenReward.spend_fly then
@@ -872,7 +891,12 @@ function M.on_pick(e)
 			item.flying = false
 			session.add_cost_bonus = (session.add_cost_bonus or 0) + ADD_COST_STEP
 			play_sfx("card_slide1", 1.05, 0.75)
-			-- Now that the animation is done, close when nothing is affordable.
+			-- Now that the animation is done, close when nothing was
+			-- affordable after the purchase (or still isn't).
+			if broke_after_last_action() then
+				finish_trade()
+				return
+			end
 			refresh_overlay()
 		end, start_x, start_y)
 		return
