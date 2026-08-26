@@ -282,11 +282,12 @@ local refresh_overlay
 local finish_trade
 
 --- Vertical offset (tiles) centreing the modal on the play-area felt so its
---- top edge lines up just above the timer and its bottom just below the hand.
+--- top edge lines up just above the timer and its bottom just below the hand,
+--- then nudged up 20px.
 local function modal_offset_y()
 	local felt = Layout.felt_rect and Layout.felt_rect()
 	if not felt or not G.TILE_H then return 0 end
-	return (felt.y + felt.h * 0.5) - G.TILE_H * 0.5
+	return (felt.y + felt.h * 0.5) - G.TILE_H * 0.5 - 20 / (G.TILESIZE or 64)
 end
 
 --- Modal height (tiles) spans the play-area felt, top to bottom.
