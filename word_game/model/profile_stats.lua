@@ -134,17 +134,6 @@ function get_deck_win_stake(_deck_key)
   return 0
 end
 
-function get_deck_win_sticker(_center)
-  if G.PROFILES[G.SETTINGS.profile].deck_usage[_center.key] and
-  G.PROFILES[G.SETTINGS.profile].deck_usage[_center.key].wins then 
-    local _w = -1
-    for k, v in pairs(G.PROFILES[G.SETTINGS.profile].deck_usage[_center.key].wins) do
-      _w = math.max(k, _w)
-    end
-    if _w > 0 then return G.sticker_map[_w] end
-  end
-end
-
 function set_deck_loss()
   if G.GAME.selected_back and G.GAME.selected_back.effect and G.GAME.selected_back.effect.center and G.GAME.selected_back.effect.center.key then
     local deck_key = G.GAME.selected_back.effect.center.key

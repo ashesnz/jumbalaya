@@ -2,7 +2,7 @@
 	word_game/ui/token_reward.lua - Stage 1-1 timer-to-token reward fly animation.
 
 	When the player clears hand 1-1, remaining timeline seconds (floored)
-	become tokens. Gold stickers fly from the timeline into the token pile.
+	become tokens. 	Coins fly from the timeline into the token pile.
 ]]
 
 local Layout = require("word_game.ui.layout")
@@ -10,7 +10,7 @@ local state = require("word_game.model.state")
 
 local M = {}
 
-local STICKER_CELL = { x = 3, y = 1 }
+local STICKER_CELL = { x = 0, y = 0 }
 local FLY_DUR = 0.52
 local STAGGER = 0.042
 local ARC = 42
@@ -98,10 +98,10 @@ local function resolve_target_px()
 end
 
 local function sticker_quad()
-	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.stickers
+	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.coin
 	if not atlas or not atlas.image then return end
 	local iw, ih = atlas.image:getDimensions()
-	local px, py = atlas.px or 71, atlas.py or 95
+	local px, py = atlas.px or iw, atlas.py or ih
 	local qx = STICKER_CELL.x * px
 	local qy = STICKER_CELL.y * py
 	return atlas.image, love.graphics.newQuad(qx, qy, px, py, iw, ih), px, py

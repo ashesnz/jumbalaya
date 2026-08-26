@@ -15,6 +15,8 @@ local flyer
 local flyer_callback
 local FLY_TIME = 0.65
 local ADD_COST_STEP = 10
+local TRANSFORM_TIME = 0.85
+local transform_fx
 
 local function reset_session(rolled)
 	offer = rolled
@@ -78,27 +80,44 @@ end
 local BUTTON_LABEL_SCALE = 0.38
 local MODIFIER_TEXT_SCALE = 0.30
 local MODIFIER_LINE_CHARS = 38
-local TOKEN_COIN_SIZE = 0.26
+local TOKEN_COIN_W = 0.24
 
+-- The coin atlas is a single non-square image, so the sprite height must be
+-- derived from the image ratio or the coin renders squashed.
 local function token_coin_node()
-	if not G or not G.TEXTURE_ATLASES or not G.TEXTURE_ATLASES.stickers then
+	local atlas = G and G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.coin
+	if not atlas or not atlas.image then
 		return nil
 	end
-	local sprite = Sprite(0, 0, TOKEN_COIN_SIZE, TOKEN_COIN_SIZE, G.TEXTURE_ATLASES.stickers, { x = 3, y = 1 })
+	local pw, ph = atlas.px, atlas.py
+	if not pw or not ph then
+		if not atlas.image.getDimensions then return nil end
+		pw, ph = atlas.image:getDimensions()
+	end
+	local w = TOKEN_COIN_W
+	local h = w * (ph / pw)
+	local sprite = Sprite(0, 0, w, h, atlas, { x = 0, y = 0 })
 	sprite.states.drag.can = false
 	sprite.states.hover.can = false
 	sprite.states.collide.can = false
 	sprite.states.click.can = false
-	return { n = G.UI.OBJECT, config = { object = sprite, w = TOKEN_COIN_SIZE, h = TOKEN_COIN_SIZE } }
+	return { n = G.UI.OBJECT, config = { object = sprite, w = w, h = h } }
 end
 
 local function action_button_label_nodes(label, cost)
 	local nodes = {
 		{ n = G.UI.TEXT, config = {
-			text = label .. " " .. tostring(cost),
+			text = label,
 			scale = BUTTON_LABEL_SCALE,
 			font = alpha_button_font(),
 			colour = G.C.UI.BUTTON_TEXT,
+			shadow = true,
+		}},
+		{ n = G.UI.TEXT, config = {
+			text = tostring(cost),
+			scale = BUTTON_LABEL_SCALE,
+			font = alpha_button_font(),
+			colour = G.C.GOLD or G.C.UI.BUTTON_TEXT,
 			shadow = true,
 		}},
 	}
@@ -139,7 +158,7 @@ local function action_button(item, action, cost, colour, disabled)
 		hover = not disabled, button = disabled and nil or "alpha_trade_pick", ref_table = ref, colour = disabled and G.C.UI.BACKGROUND_INACTIVE or colour or G.C.UI.BUTTON,
 	        hover_colour = G.C.UI.BUTTON_HOVER, shadow = true, emboss = 0.1, no_jiggle = true,
 	    }, nodes = {
-		{ n = G.UI.ROW, config = { align = "cm", padding = 0.02 }, nodes = action_button_label_nodes(label, cost) },
+		{ n = G.UI.ROW, config = { align = "cm", padding = 0.05 }, nodes = action_button_label_nodes(label, cost) },
 	}}
 end
 
@@ -365,6 +384,7 @@ local function close_menu()
 	session = nil
 	flyer = nil
 	flyer_callback = nil
+	transform_fx = nil
 	if G.FUNCS.close_overlay then
 		G.FUNCS.close_overlay()
 	end
@@ -484,7 +504,121 @@ function M.is_flying()
 	return flyer ~= nil
 end
 
+local function start_transform_fx(item)
+	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
+	local card = item.market_card
+	local transform = card and card.T
+	if not transform or not (G.SHADERS and G.SHADERS.scales) then
+		item.color = "black"
+		refresh_overlay()
+		return
+	end
+	card.states.visible = false
+	local x, y = nil, nil
+	if transform.x then
+		x = (transform.x + (transform.w or G.CARD_W) * 0.5) * ts
+		y = (transform.y + (transform.h or G.CARD_H) * 0.5) * ts
+	end
+	if not x or not y then
+		local room = G.ROOM and G.ROOM.T
+		x = ((room and room.w or G.TILE_W or 20) * 0.5) * ts
+		y = ((room and room.h or G.TILE_H or 11) * 0.45) * ts
+	end
+	transform_fx = { item = item, t = 0, x = x, y = y }
+end
+
+local function finish_transform_fx()
+	local fx = transform_fx
+	transform_fx = nil
+	if not fx then return end
+	fx.item.color = "black"
+	play_sfx("card_slide1", 1.05, 0.9)
+	if G.OVERLAY_MENU then
+		refresh_overlay()
+	end
+end
+
+local function atlas_for_front(front)
+	if not front then return nil end
+	local name = front.atlas or ("cards_" .. (G.SETTINGS.colourblind_option and 2 or 1))
+	return G.TEXTURE_ATLASES and G.TEXTURE_ATLASES[name]
+end
+
+-- Feeds the scales shader the red/black face quads of this letter so it can
+-- cross-fade between the two artworks baked into the deck atlas.
+local function send_scales_uniforms(shader, red_front, black_front)
+	local red_atlas = atlas_for_front(red_front)
+	local black_atlas = atlas_for_front(black_front) or red_atlas
+	if not red_atlas or not red_atlas.image or not black_atlas.image then
+		return false
+	end
+	local rw, rh = red_atlas.image:getDimensions()
+	local bw, bh = black_atlas.image:getDimensions()
+	local rcw, rch = red_atlas.px or 71, red_atlas.py or 95
+	local bcw, bch = black_atlas.px or rcw, black_atlas.py or rch
+	local rp = red_front.pos or { x = 0, y = 0 }
+	local bp = (black_front and black_front.pos) or rp
+	pcall(function()
+		shader:send("alt_texture", black_atlas.image)
+		shader:send("origin_a", rp.x * rcw / rw, rp.y * rch / rh)
+		shader:send("origin_b", bp.x * bcw / bw, bp.y * bch / bh)
+		shader:send("quad_size", rcw / rw, rch / rh)
+	end)
+	return true
+end
+
+local function draw_transform_card(fx)
+	if not love.graphics then return end
+	local item = fx.item
+	local red_front = item and item.letter and deck.front(item.letter, "red")
+	local black_front = item and item.letter and deck.front(item.letter, "black")
+	local shader = G.SHADERS and G.SHADERS.scales
+	if not red_front or not shader then return end
+	local atlas = atlas_for_front(red_front)
+	if not atlas or not atlas.image then return end
+	if not send_scales_uniforms(shader, red_front, black_front) then return end
+
+	local u = math.min(1, fx.t / TRANSFORM_TIME)
+	local eased = u * u * (3 - 2 * u)
+	pcall(function()
+		shader:send("progress", eased)
+		shader:send("time", ((love.timer and love.timer.getTime() or 0) % 300))
+	end)
+
+	local pos = red_front.pos or { x = 0, y = 0 }
+	local pw, ph = atlas.px or 71, atlas.py or 95
+	local iw, ih = atlas.image:getDimensions()
+	local quad = love.graphics.newQuad(pos.x * pw, pos.y * ph, pw, ph, iw, ih)
+	local size = math.max(30, (G.CARD_W or 1) * (G.TILESCALE or 1) * (G.TILESIZE or 1))
+	local lift = math.sin(u * math.pi) * 0.15 * (G.TILESIZE or 1)
+
+	love.graphics.setColor(1, 1, 1, 1)
+	love.graphics.setShader(shader)
+	love.graphics.draw(atlas.image, quad, fx.x, fx.y - lift, 0, size / pw, size / ph, pw * 0.5, ph * 0.5)
+	love.graphics.setShader()
+end
+
 function M.draw_pass()
+	if transform_fx and G.ROOM and love.graphics then
+		local dt = math.min(0.05, love.timer and love.timer.getDelta() or 0.016)
+		transform_fx.t = transform_fx.t + dt
+		local prev_shader = love.graphics.getShader()
+		local cr, cg, cb, ca = love.graphics.getColor()
+		love.graphics.push()
+		room_translate()
+		draw_transform_card(transform_fx)
+		love.graphics.pop()
+		if prev_shader then
+			love.graphics.setShader(prev_shader)
+		else
+			love.graphics.setShader()
+		end
+		love.graphics.setColor(cr, cg, cb, ca)
+		if transform_fx.t >= TRANSFORM_TIME then
+			finish_transform_fx()
+		end
+	end
+
 	if not flyer or not G.ROOM or not love.graphics then return end
 	local dt = math.min(0.05, love.timer and love.timer.getDelta() or 0.016)
 	flyer.t = flyer.t + dt
@@ -536,7 +670,7 @@ function M.open_then_dealer()
 end
 
 function M.on_pick(e)
-	if flyer then return end
+	if flyer or transform_fx then return end
 	local ref = e and e.config and e.config.ref_table
 	local item = ref and ref.item or ref
 	local action = ref and ref.action or "add"
@@ -578,11 +712,14 @@ function M.on_pick(e)
 		trade.sync_offer_cards(offer)
 	elseif action == "modifier" then
 		session.modified[item] = true
+		start_transform_fx(item)
+		return
 	end
 	refresh_overlay()
 end
 
 function M.on_skip_add()
+	if flyer or transform_fx then return end
 	if not session or session.add_done then
 		if session and session_complete() then finish_trade() end
 		return
@@ -594,6 +731,7 @@ function M.on_skip_add()
 end
 
 function M.on_skip_remove()
+	if flyer or transform_fx then return end
 	if not session or session.remove_done then
 		if session and session_complete() then finish_trade() end
 		return

@@ -55,7 +55,6 @@ function build_card_gallery_decks()
     card.sprite_facing = 'back'
     card.facing = 'back'
     area:emplace(card)
-    if i == 52 then G.sticker_card = card; card.sticker = get_deck_win_sticker(G.GAME.viewed_back.effect.center) end
   end
 
   local ordered_names = {}

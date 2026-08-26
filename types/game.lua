@@ -264,9 +264,7 @@
 ---@field shared_undiscovered_joker Sprite
 ---@field shared_undiscovered_tarot Sprite
 ---@field shared_sticker_eternal Sprite
----@field shared_stickers table<string, Sprite>
 ---@field shared_seals table<string, Sprite>
----@field sticker_map string[]
 ---@field ROOM_PADDING_H number
 ---@field ROOM_PADDING_W number
 ---@field WINDOWTRANS table

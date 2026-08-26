@@ -495,7 +495,7 @@ function Card:draw_front()
 		shared_sprite:apply_shader_effect('dissolve', nil, nil, nil, self.children.center, scale_mod, rotate_mod)
 	end
 
-	local has_overlays = self.edition or self.seal or self.sticker
+	local has_overlays = self.edition or self.seal
 		or self.ability.set == 'Phantom' or self.debuff or self.greyed
 		or self.ability.set == 'Perk' or self.ability.set == 'Bundle'
 		or self.config.center.demo
@@ -527,11 +527,6 @@ function Card:draw_front()
 				G.shared_seals[self.seal]:apply_shader_effect('perk', nil, self.ARGS.send_to_shader, nil, self.children.center)
 			end
 		end
-		if self.sticker and G.shared_stickers[self.sticker] then
-			G.shared_stickers[self.sticker].role.draw_major = self
-			G.shared_stickers[self.sticker]:apply_shader_effect('dissolve', nil, nil, nil, self.children.center)
-			G.shared_stickers[self.sticker]:apply_shader_effect('perk', nil, self.ARGS.send_to_shader, nil, self.children.center)
-		end
 		if self.debuff then
 			self.children.center:apply_shader_effect('debuff', nil, self.ARGS.send_to_shader)
 			if self.children.front then
@@ -557,14 +552,6 @@ function Card:draw_back()
 		self.children.back:draw(overlay)
 	else
 		self.children.back:apply_shader_effect('dissolve')
-	end
-
-	if self.sticker and G.shared_stickers[self.sticker] then
-		G.shared_stickers[self.sticker].role.draw_major = self
-		G.shared_stickers[self.sticker]:apply_shader_effect('dissolve', nil, nil, true, self.children.center)
-		if self.sticker == 'Gold' then
-			G.shared_stickers[self.sticker]:apply_shader_effect('perk', nil, self.ARGS.send_to_shader, true, self.children.center)
-		end
 	end
 end
 

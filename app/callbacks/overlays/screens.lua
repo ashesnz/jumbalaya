@@ -31,7 +31,6 @@ end
 
 G.FUNCS.change_viewed_back = function(args)
   G.GAME.viewed_back:change_to(G.P_CENTER_POOLS.Back[args.to_key])
-  if G.sticker_card then G.sticker_card.sticker = get_deck_win_sticker(G.GAME.viewed_back.effect.center) end
   G.FUNCS.card_gallery_decks()
 end
 

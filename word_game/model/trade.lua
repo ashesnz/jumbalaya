@@ -78,11 +78,11 @@ function M.is_showdown_market()
 	return wr and round_config.is_showdown(wr.hand_index) and true or false
 end
 
-local function make_market_item(letter, color_key)
+local function make_market_item(letter)
 	local item = {
 		mode = "market",
 		letter = letter,
-		color = deck.random_letter_color(color_key or ("market_color_" .. letter)),
+		color = "red",
 	}
 	item.card = deck.find_deck_card(letter)
 	return item
@@ -107,7 +107,7 @@ local function roll_add_offer()
 		if #pool > 1 then
 			table.remove(pool, idx)
 		end
-		picks[#picks + 1] = make_market_item(letter, "market_color_" .. i)
+		picks[#picks + 1] = make_market_item(letter)
 	end
 	return {
 		mode = "add",
@@ -147,10 +147,10 @@ end
 function M.roll_offer()
 	local picks = {}
 
-	picks[#picks + 1] = make_market_item(deck.random_vowel_letter("market_vowel"), "market_vowel_color")
+	picks[#picks + 1] = make_market_item(deck.random_vowel_letter("market_vowel"))
 
 	for i = 1, 2 do
-		picks[#picks + 1] = make_market_item(deck.random_letter("market_letter_" .. i), "market_color_" .. i)
+		picks[#picks + 1] = make_market_item(deck.random_letter("market_letter_" .. i))
 	end
 
 	return {

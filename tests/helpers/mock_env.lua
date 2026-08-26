@@ -54,7 +54,7 @@ function M.ensure_engine_globals()
 	}
 	G.TEXTURE_ATLASES = G.TEXTURE_ATLASES or {}
 	G.TEXTURE_ATLASES["ui_1"] = G.TEXTURE_ATLASES["ui_1"] or stub_atlas()
-	G.TEXTURE_ATLASES["stickers"] = G.TEXTURE_ATLASES["stickers"] or stub_atlas()
+	G.TEXTURE_ATLASES["coin"] = G.TEXTURE_ATLASES["coin"] or stub_atlas()
 	G.C = G.C or {}
 	G.C.BACKGROUND = G.C.BACKGROUND or {
 		C = { 0, 0, 0, 1 },

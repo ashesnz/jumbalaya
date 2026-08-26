@@ -27,6 +27,22 @@ local function ease_inout(t)
 	return t * t * (3 - 2 * t)
 end
 
+local BOSS_SWEEP_TIME = 0.45
+
+local function hsv_to_rgb(h, s, v)
+	local i = math.floor(h * 6) % 6
+	local f = h * 6 - math.floor(h * 6)
+	local p = v * (1 - s)
+	local q = v * (1 - f * s)
+	local t = v * (1 - (1 - f) * s)
+	if i == 0 then return v, t, p end
+	if i == 1 then return q, v, p end
+	if i == 2 then return p, v, t end
+	if i == 3 then return p, q, v end
+	if i == 4 then return t, p, v end
+	return v, p, q
+end
+
 local function room_translate()
 	local room = G.ROOM
 	if not room then return end
@@ -160,15 +176,71 @@ function M.draw(sb)
 	if banner_mode == "boss_prep" or banner_mode == "boss_word" then
 		local msg = (hud and hud.banner_message)
 			or (banner_mode == "boss_prep" and "Boss Level!" or "BOSS WORD")
-		local msg_font_px = math.max(18, math.floor(h * 0.55))
-		local msg_font = fonts.title_font(msg_font_px)
+
+		-- Restart the banner sweep each time a new boss message appears.
+		local sweep_key = banner_mode .. ":" .. tostring(msg)
+		if sb.boss_sweep_key ~= sweep_key then
+			sb.boss_sweep_key = sweep_key
+			sb.boss_sweep_t = 0
+		end
+		sb.boss_sweep_t = (sb.boss_sweep_t or 0) + dt
+		local sweep_u = clamp01(sb.boss_sweep_t / BOSS_SWEEP_TIME)
+		local sweeping = sweep_u < 1
+		-- Fast ease-out: rockets in from the side, crosses the word, brakes to
+		-- a stop centred behind it.
+		local eased = 1 - (1 - sweep_u) * (1 - sweep_u) * (1 - sweep_u)
+
+		-- Bigger, bolder boss word.
+		local msg_font_px = math.max(24, math.floor(h * 0.78))
+		local msg_font = fonts.bubble_font(msg_font_px)
 		love.graphics.setFont(msg_font)
 		local msg_tw = msg_font:getWidth(msg)
 		local msg_th = msg_font:getHeight()
+
+		-- Banner image sweeping through from the side.
+		local band_l, band_r = nil, nil
+		local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.boss_banner
+		if atlas and atlas.image and love.graphics.draw then
+			local iw, ih = atlas.image:getDimensions()
+			local img_h = h * 1.15
+			local img_w = img_h * (iw / ih)
+			if img_w < w * 1.3 then
+				img_w = w * 1.3
+				img_h = img_w * (ih / iw)
+			end
+			local start_x = -(w * 0.5 + img_w * 0.5 + 60)
+			local bx = start_x + (0 - start_x) * eased
+			band_l = bx - img_w * 0.5
+			band_r = bx + img_w * 0.5
+			love.graphics.setColor(1, 1, 1, 1)
+			love.graphics.draw(atlas.image, band_l, -img_h * 0.5, 0, img_w / iw, img_h / ih)
+		end
+
 		love.graphics.setColor(0.04, 0.08, 0.16, 0.75)
-		love.graphics.print(msg, -msg_tw * 0.5 + 1.5, -msg_th * 0.5 + 1.5)
+		love.graphics.print(msg, -msg_tw * 0.5 + 2, -msg_th * 0.5 + 2)
 		love.graphics.setColor(0.98, 0.92, 0.45, 1)
 		love.graphics.print(msg, -msg_tw * 0.5, -msg_th * 0.5)
+
+		-- While the banner is crossing the word, repaint the letters inside
+		-- the banner band with a fast-cycling colour.
+		if sweeping and band_l and love.graphics.transformPoint
+			and love.graphics.intersectScissor and love.graphics.getScissor then
+			local x1, y1 = love.graphics.transformPoint(band_l, -msg_th)
+			local x2, y2 = love.graphics.transformPoint(band_r, msg_th)
+			local psx, psy, psw, psh = love.graphics.getScissor()
+			love.graphics.intersectScissor(
+				math.min(x1, x2), math.min(y1, y2),
+				math.abs(x2 - x1), math.abs(y2 - y1))
+			local hr, hg, hb = hsv_to_rgb(((G.TIMERS.REAL or 0) * 1.8) % 1, 0.85, 1)
+			love.graphics.setColor(hr, hg, hb, 1)
+			love.graphics.print(msg, -msg_tw * 0.5, -msg_th * 0.5)
+			if psx then
+				love.graphics.setScissor(psx, psy, psw, psh)
+			else
+				love.graphics.setScissor()
+			end
+		end
+
 		love.graphics.pop() -- inner transform (scale at line 137)
 		love.graphics.pop() -- outer transform (room at line 124)
 		if prev_shader and love.graphics.setShader then

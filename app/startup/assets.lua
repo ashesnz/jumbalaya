@@ -20,16 +20,6 @@ function M.init_shared_sprites(game)
 		game.shared_undiscovered_charm = Sprite(0, 0, game.CARD_W, game.CARD_H, atlas, { x = 0, y = 0 })
 	end
 
-	game.shared_stickers = {
-		White = Sprite(0, 0, game.CARD_W, game.CARD_H, game.TEXTURE_ATLASES["stickers"], { x = 1, y = 0 }),
-		Red = Sprite(0, 0, game.CARD_W, game.CARD_H, game.TEXTURE_ATLASES["stickers"], { x = 2, y = 0 }),
-		Green = Sprite(0, 0, game.CARD_W, game.CARD_H, game.TEXTURE_ATLASES["stickers"], { x = 3, y = 0 }),
-		Black = Sprite(0, 0, game.CARD_W, game.CARD_H, game.TEXTURE_ATLASES["stickers"], { x = 0, y = 1 }),
-		Blue = Sprite(0, 0, game.CARD_W, game.CARD_H, game.TEXTURE_ATLASES["stickers"], { x = 4, y = 0 }),
-		Purple = Sprite(0, 0, game.CARD_W, game.CARD_H, game.TEXTURE_ATLASES["stickers"], { x = 1, y = 1 }),
-		Orange = Sprite(0, 0, game.CARD_W, game.CARD_H, game.TEXTURE_ATLASES["stickers"], { x = 2, y = 1 }),
-		Gold = Sprite(0, 0, game.CARD_W, game.CARD_H, game.TEXTURE_ATLASES["stickers"], { x = 3, y = 1 }),
-	}
 	local seal_atlas = game.TEXTURE_ATLASES.cards_1 or game.TEXTURE_ATLASES.centers
 	game.shared_seals = seal_atlas and {
 		Gold = Sprite(0, 0, game.CARD_W, game.CARD_H, seal_atlas, { x = 0, y = 0 }),
@@ -37,7 +27,6 @@ function M.init_shared_sprites(game)
 		Red = Sprite(0, 0, game.CARD_W, game.CARD_H, seal_atlas, { x = 0, y = 0 }),
 		Blue = Sprite(0, 0, game.CARD_W, game.CARD_H, seal_atlas, { x = 0, y = 0 }),
 	} or {}
-	game.sticker_map = { 'White', 'Red', 'Green', 'Black', 'Blue', 'Purple', 'Orange', 'Gold' }
 end
 
 function Game:set_render_settings()
@@ -72,12 +61,13 @@ function Game:set_render_settings()
 		{ name = "title_garden", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/title_garden.png", px = 1536, py = 1024 },
 		{ name = 'gamepad_ui', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/gamepad_ui.png", px = 32, py = 32 },
 		{ name = 'icons', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/icons.png", px = 66, py = 66 },
-		{ name = 'stickers', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/stickers.png", px = 71, py = 95 },
 		{ name = 'characters', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Characters.png", px = 88, py = 188, frames = 19, cols = 5, rows = 4 },
 		{ name = 'bin', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Bin.png", px = 249, py = 251, frames = 4, cols = 2, rows = 2 },
 		{ name = 'shuffle_icon', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/shuffle_icon.png", px = 112, py = 112 },
 		{ name = 'play_icon', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/play_icon.png", px = 112, py = 112 },
 		{ name = 'tokens', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/coin_stack.png", px = 521, py = 479 },
+		{ name = 'coin', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/coin.png", px = 521, py = 478 },
+		{ name = 'boss_banner', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/banner.png", px = 1180, py = 211 },
 	}
 	---@type GameAtlasSpec[]
 	self.asset_images = {}
@@ -103,6 +93,9 @@ function Game:set_render_settings()
 				path = "resources/textures/1x/PlayingDeck.png"
 			end
 		end
+		if not love.filesystem.getInfo(path) and spec.name == "boss_banner" then
+			path = "resources/textures/2x/banner.png"
+		end
 		if not love.filesystem.getInfo(path) and (
 			spec.name == "Jumbalaya" or spec.name == "title_garden"
 			or spec.name == "jumbalaya_base" or spec.name == "jumbalaya_start_a"
@@ -127,7 +120,7 @@ function Game:set_render_settings()
 			local dpiscale = (
 				spec.name == "playing_back" or spec.name == "Jumbalaya" or spec.name == "title_garden"
 				or spec.name == "jumbalaya_base" or spec.name == "jumbalaya_start_a"
-				or spec.name == "jumbalaya_end_a"
+				or spec.name == "jumbalaya_end_a" or spec.name == "boss_banner"
 			) and 1 or self.SETTINGS.GRAPHICS.texture_scaling
 			self.TEXTURE_ATLASES[spec.name] = {}
 			self.TEXTURE_ATLASES[spec.name].name = spec.name
@@ -143,6 +136,7 @@ function Game:set_render_settings()
 			end
 			self.TEXTURE_ATLASES[spec.name].type = spec.type
 			if spec.name == "playing_back" or spec.name == "shuffle_icon" or spec.name == "play_icon" or spec.name == "tokens"
+				or spec.name == "coin" or spec.name == "boss_banner"
 				or spec.name == "Jumbalaya" or spec.name == "title_garden"
 				or spec.name == "jumbalaya_base" or spec.name == "jumbalaya_start_a"
 				or spec.name == "jumbalaya_end_a" then

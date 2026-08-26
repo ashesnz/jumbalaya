@@ -67,8 +67,6 @@ function Card:build_card_tooltip()
     if self.seal then badges[#badges + 1] = string.lower(self.seal)..'_seal' end
     if self.pinned then badges[#badges + 1] = 'pinned_left' end
 
-    if self.sticker then loc_vars = loc_vars or {}; loc_vars.sticker=self.sticker end
-
     return generate_card_ui(self.config.center, nil, loc_vars, card_type, badges, hide_desc, main_start, main_end)
 end
 
