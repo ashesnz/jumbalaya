@@ -67,8 +67,8 @@ local function face_node(item)
 	if item.flying then
 		return { n = G.UI.ROW, config = { align = "cm", minw = G.CARD_W * MARKET_CARD_SCALE, minh = G.CARD_H * MARKET_CARD_SCALE }, nodes = {} }
 	end
-	-- A removed card whose last deck copy is gone stays gone: empty slot.
-	if item.mode == "remove" and not trade.item_in_deck(item) then
+	-- A card whose deck copy was removed this session stays gone: empty slot.
+	if item.removed or (item.mode == "remove" and not trade.item_in_deck(item)) then
 		return { n = G.UI.ROW, config = { align = "cm", minw = G.CARD_W * MARKET_CARD_SCALE, minh = G.CARD_H * MARKET_CARD_SCALE }, nodes = {} }
 	end
 	local w, h = G.CARD_W * MARKET_CARD_SCALE, G.CARD_H * MARKET_CARD_SCALE
@@ -170,31 +170,35 @@ local function action_button(item, action, cost, colour, disabled)
 	}}
 end
 
-local function modifier_description_node(item)
+local function modifier_description_node(item, placeholder)
 	local text = deck.modifier_description(item and item.letter)
 	if not text then return nil end
 	local lines = wrap_description(text)
 	local line_nodes = {}
-	for _, line in ipairs(lines) do
-		line_nodes[#line_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.02 }, nodes = {
-			{ n = G.UI.TEXT, config = {
-				text = line,
-				scale = MODIFIER_TEXT_SCALE,
-				font = alpha_button_font(),
-				colour = G.C.BLACK or { 0, 0, 0, 1 },
-				shadow = false,
-			}},
-		}}
+	if not placeholder then
+		for _, line in ipairs(lines) do
+			line_nodes[#line_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.02 }, nodes = {
+				{ n = G.UI.TEXT, config = {
+					text = line,
+					scale = MODIFIER_TEXT_SCALE,
+					font = alpha_button_font(),
+					colour = G.C.BLACK or { 0, 0, 0, 1 },
+					shadow = false,
+				}},
+			}}
+		end
 	end
-	-- Parchment chip so the black text stays readable on the artwork.
+	-- Parchment chip so the black text stays readable on the artwork. The
+	-- placeholder variant is fully transparent but reserves the same footprint
+	-- so the modal keeps its size when a card is removed.
 	return { n = G.UI.COLUMN, config = {
 		align = "cm",
 		padding = 0.08,
 		minw = G.CARD_W * MARKET_CARD_SCALE + 0.35,
 		minh = math.max(0.5, #lines * 0.28) + 0.12,
 		r = 0.14,
-		colour = { 0.97, 0.93, 0.84, 1 },
-		shadow = true,
+		colour = placeholder and G.C.CLEAR or { 0.97, 0.93, 0.84, 1 },
+		shadow = not placeholder and true or nil,
 	}, nodes = line_nodes }
 end
 
@@ -208,10 +212,13 @@ local function action_column(item, mode, done, session_state)
 	local column_nodes = {
 		{ n = G.UI.ROW, config = { align = "cm", padding = 0.03 }, nodes = { face_node(item) } },
 	}
-	-- No card left to describe: drop the modifier text along with the face.
+	-- No card left to describe: keep an invisible placeholder so the modal
+	-- window keeps its size.
 	local desc = nil
-	if item.mode ~= "remove" or trade.item_in_deck(item) then
+	if not item.removed and (item.mode ~= "remove" or trade.item_in_deck(item)) then
 		desc = modifier_description_node(item)
+	elseif item.letter then
+		desc = modifier_description_node(item, true)
 	end
 	if desc then
 		column_nodes[#column_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.0 }, nodes = { desc } }
@@ -718,6 +725,7 @@ local function start_remove_dissolve(item)
 		return
 	end
 	session.removing[item] = true
+	item.removed = true
 	play_sfx("whoosh2", math.random() * 0.2 + 0.9, 0.5)
 	play_sfx("crumple" .. math.random(1, 5), math.random() * 0.2 + 0.9, 0.5)
 	DissolveFX.run(card, {
