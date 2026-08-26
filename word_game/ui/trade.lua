@@ -207,7 +207,7 @@ local function action_column(item, mode, done, session_state)
 	local in_deck = trade.item_in_deck(item)
 	local already_modified = item.card and deck.is_modified(item.card)
 	local modify_disabled = not in_deck
-		or session_state.modified[item]
+		or (session_state and session_state.modified[item])
 		or already_modified
 	local remove_disabled = not in_deck
 	local column_nodes = {
@@ -287,6 +287,7 @@ end
 
 local open_overlay
 local refresh_overlay
+local rebuild_overlay
 local finish_trade
 
 --- Vertical offset (tiles) centreing the modal on the play-area felt so its
@@ -349,7 +350,7 @@ local function marketplace_content_nodes()
 			}},
 		}}
 		if remove and remove.letters and #remove.letters > 0 then
-			nodes[#nodes + 1] = card_row(remove.letters, "remove", session.remove_done)
+			nodes[#nodes + 1] = card_row(remove.letters, "remove", session.remove_done, session)
 			nodes[#nodes + 1] = status_or_skip(
 				session.remove_done,
 				session.removed == "skipped" and "Remove skipped" or "Card removed",
@@ -407,11 +408,9 @@ local function cannot_afford_anything()
 	return balance < min_cost
 end
 
-refresh_overlay = function()
-	if cannot_afford_anything() then
-		finish_trade()
-		return
-	end
+-- Rebuilds the modal body without any affordability gating, so in-flight
+-- animations can play out before the session is torn down.
+rebuild_overlay = function()
 	if not G.OVERLAY_MENU then
 		open_overlay()
 		return
@@ -439,6 +438,14 @@ refresh_overlay = function()
 		config = { offset = { x = 0, y = 0 }, align = "cm", parent = host },
 	}
 	G.OVERLAY_MENU:recalculate()
+end
+
+refresh_overlay = function()
+	if cannot_afford_anything() then
+		finish_trade()
+		return
+	end
+	rebuild_overlay()
 end
 
 function M.definition()
@@ -857,13 +864,15 @@ function M.on_pick(e)
 		local start_x = transform and (transform.x + (transform.w or G.CARD_W) * 0.5) * ts
 		local start_y = transform and (transform.y + (transform.h or G.CARD_H) * 0.5) * ts
 		item.flying = true
-		refresh_overlay()
-		if not session then return end
+		-- Rebuild without the affordability check: if this purchase broke
+		-- us, the modal must stay open until the card finishes flying.
+		rebuild_overlay()
 		start_card_fly(item, function()
 			if not session then return end
 			item.flying = false
 			session.add_cost_bonus = (session.add_cost_bonus or 0) + ADD_COST_STEP
 			play_sfx("card_slide1", 1.05, 0.75)
+			-- Now that the animation is done, close when nothing is affordable.
 			refresh_overlay()
 		end, start_x, start_y)
 		return

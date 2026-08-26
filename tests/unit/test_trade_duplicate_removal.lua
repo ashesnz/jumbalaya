@@ -99,6 +99,19 @@ T.describe("Marketplace dissolve slot refill (word_game.ui.trade)", function()
 	local trade = require("word_game.model.trade")
 	local deck = require("word_game.model.cards.deck")
 
+	-- Populate letter card fronts so make_face_card can build market cards.
+	for i = 1, 26 do
+		local letter = string.char(string.byte("A") + i - 1)
+		for _, color in ipairs({ "red", "black" }) do
+			G.P_CARDS[color .. "_" .. letter] = {
+				key = color .. "_" .. letter,
+				letter = letter,
+				color = color,
+				pos = { x = 0, y = 0 },
+			}
+		end
+	end
+
 	-- Reload word_game.ui.trade with DissolveFX stubbed out so we can run
 	-- the dissolve completion callback synchronously.
 	local function load_trade_ui_with_fake_dissolve(captured)
@@ -106,7 +119,10 @@ T.describe("Marketplace dissolve slot refill (word_game.ui.trade)", function()
 		local real_fx = package.loaded["app.effects.dissolve_fx"]
 		package.loaded["word_game.ui.trade"] = nil
 		package.loaded["app.effects.dissolve_fx"] = {
-			run = function(_, target, opts) captured.opts = opts end,
+			run = function(target, opts)
+				captured.target = target
+				captured.opts = opts
+			end,
 		}
 		local ui = require("word_game.ui.trade")
 		return ui, function()
@@ -139,9 +155,10 @@ T.describe("Marketplace dissolve slot refill (word_game.ui.trade)", function()
 		end
 		local real_roll = trade.roll_offer
 		trade.roll_offer = function() return rolled end
-		trade_ui.definition()
+		local ok, err = pcall(trade_ui.definition)
 		trade.roll_offer = real_roll
 		alpha_button_font = real_font
+		if not ok then error(err) end
 	end
 
 	local function make_remove_item(card)
@@ -214,6 +231,43 @@ T.describe("Marketplace dissolve slot refill (word_game.ui.trade)", function()
 		T.assert_true(item.removed, "Last copy: slot stays empty after dissolve")
 		T.assert_nil(item.card, "No copy remains to bind")
 		T.assert_equal(live_letter_count("E"), 0, "Deck has no E's left")
+		restore()
+	end)
+
+	T.it("keeps the modal open while a bought card flies when tokens run out", function()
+		local captured = {}
+		local trade_ui, restore = load_trade_ui_with_fake_dissolve(captured)
+
+		stub_areas()
+		local item = { mode = "market", letter = "Z", color = "red" }
+		local offer = { add = { mode = "market", letters = { item } }, remove = nil, showdown = false }
+
+		G.GAME.alpha = G.GAME.alpha or {}
+		-- Exactly enough for one purchase: after buying, nothing is affordable.
+		G.GAME.alpha.tokens = trade.ACTION_COSTS.add
+
+		-- Spy on the run continuation so we can detect the modal closing.
+		local calls = {}
+		local real_play = WORD_GAME.Play
+		WORD_GAME.Play = { continue_after_dealer = function() calls[#calls + 1] = "continue" end }
+
+		adopt_session(trade_ui, offer)
+		trade_ui.on_pick({
+			config = { ref_table = { item = item, action = "add" } },
+		})
+
+		T.assert_true(trade_ui.is_flying(), "Card should be flying after purchase")
+		T.assert_equal(#calls, 0, "Modal must stay open until the fly animation lands")
+
+		-- Advance the flyer to landing (FLY_TIME / min dt per draw_pass).
+		for _ = 1, 60 do
+			trade_ui.draw_pass()
+		end
+
+		T.assert_false(trade_ui.is_flying(), "Flyer should have landed")
+		T.assert_equal(#calls, 1, "Modal should close (continue run) once the animation completes")
+
+		WORD_GAME.Play = real_play
 		restore()
 	end)
 end)
