@@ -849,7 +849,9 @@ function M.on_pick(e)
 		local start_y = transform and (transform.y + (transform.h or G.CARD_H) * 0.5) * ts
 		item.flying = true
 		refresh_overlay()
+		if not session then return end
 		start_card_fly(item, function()
+			if not session then return end
 			item.flying = false
 			session.add_cost_bonus = (session.add_cost_bonus or 0) + ADD_COST_STEP
 			play_sfx("card_slide1", 1.05, 0.75)
