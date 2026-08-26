@@ -76,11 +76,11 @@ end
 function M.spend_tokens_display(amount)
 	amount = math.floor(amount or 0)
 	if amount <= 0 then return end
-	local actual = state.tokens()
 	-- The table deck update loop does not run while an overlay marketplace is
 	-- open. Publish the purchased balance immediately so the sidebar cannot
-	-- remain stale until the overlay closes.
-	M.token_display = math.max(0, actual - amount)
+	-- remain stale until the overlay closes. Tokens are already spent in state
+	-- before this is called from the marketplace.
+	M.token_display = state.tokens()
 	M.token_roll = nil
 	M.token_highlight = TOKEN_HIGHLIGHT_TIME
 end

@@ -263,9 +263,9 @@ T.describe("Marketplace dissolve slot refill (word_game.ui.trade)", function()
 		T.assert_true(trade_ui.is_flying(), "Card should be flying after purchase")
 		T.assert_equal(#calls, 0, "Modal must stay open until the fly animation lands")
 
-		-- Advance the flyer to landing (FLY_TIME / min dt per draw_pass).
+		-- Advance the flyer to landing.
 		for _ = 1, 60 do
-			trade_ui.draw_pass()
+			trade_ui.step_card_fly(0.02)
 		end
 
 		T.assert_false(trade_ui.is_flying(), "Flyer should have landed")
@@ -299,7 +299,7 @@ T.describe("Marketplace dissolve slot refill (word_game.ui.trade)", function()
 
 		local function land_flyer()
 			for _ = 1, 60 do
-				trade_ui.draw_pass()
+				trade_ui.step_card_fly(0.02)
 			end
 		end
 
@@ -332,6 +332,59 @@ T.describe("Marketplace dissolve slot refill (word_game.ui.trade)", function()
 
 		T.assert_false(trade_ui.is_flying(), "Flyer should have landed")
 		T.assert_equal(#calls, 1, "Modal should close and continue to the next round")
+
+		WORD_GAME.Play = real_play
+		restore()
+	end)
+
+	T.it("closes after the second add when 32 tokens become 2 with escalating prices", function()
+		local captured = {}
+		local trade_ui, restore = load_trade_ui_with_fake_dissolve(captured)
+
+		stub_areas()
+		local letters = { "A", "B" }
+		local items = {}
+		for _, letter in ipairs(letters) do
+			items[#items + 1] = { mode = "market", letter = letter, color = "red" }
+		end
+		local offer = { add = { mode = "market", letters = items }, remove = nil, showdown = false }
+
+		local calls = {}
+		local real_play = WORD_GAME.Play
+		WORD_GAME.Play = { continue_after_dealer = function() calls[#calls + 1] = "continue" end }
+		WORD_GAME.TableDeck = require("word_game.ui.table_deck")
+		WORD_GAME.TableDeck.reset()
+
+		G.GAME.alpha = G.GAME.alpha or {}
+		G.GAME.alpha.tokens = 32
+
+		adopt_session(trade_ui, offer)
+
+		local function land_flyer()
+			for _ = 1, 60 do
+				trade_ui.step_card_fly(0.02)
+			end
+		end
+
+		trade_ui.on_pick({
+			config = { ref_table = { item = items[1], action = "add" } },
+		})
+		T.assert_equal(state_tokens(), 22, "First add should spend 10 tokens")
+		T.assert_equal(WORD_GAME.TableDeck.token_count(), 22, "Sidebar tokens should update after the first add")
+		land_flyer()
+
+		trade_ui.on_pick({
+			config = { ref_table = { item = items[2], action = "add" } },
+		})
+		T.assert_equal(state_tokens(), 2, "Second add should spend 20 tokens")
+		T.assert_equal(WORD_GAME.TableDeck.token_count(), 2, "Sidebar tokens should update after the second add")
+		T.assert_true(trade_ui.is_flying(), "Second card should be flying")
+		T.assert_equal(#calls, 0, "Modal must stay open during the fly animation")
+
+		land_flyer()
+
+		T.assert_false(trade_ui.is_flying(), "Flyer should have landed")
+		T.assert_equal(#calls, 1, "Modal should close once nothing is affordable")
 
 		WORD_GAME.Play = real_play
 		restore()

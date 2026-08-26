@@ -150,11 +150,13 @@ T.describe("Jumble play flow integration", function()
 
 	T.it("updates the token counter while the marketplace hides the table deck area", function()
 		local table_deck = require("word_game.ui.table_deck")
+		local state = require("word_game.model.state")
 		G.GAME.alpha = { tokens = 20, perks = {} }
 		table_deck.reset()
+		state.spend_tokens(10)
 		table_deck.spend_tokens_display(10)
 
-		T.assert_equal(table_deck.token_count(), 10, "Token counter should finish counting down without a deck area")
+		T.assert_equal(table_deck.token_count(), 10, "Token counter should reflect the spent balance without a deck area")
 		T.assert_true(table_deck.is_token_highlighted(), "Spending tokens should set_selected the sidebar token display")
 		table_deck.update_tokens(0.8)
 		T.assert_false(table_deck.is_token_highlighted(), "Sidebar token set_selected should fade after its display window")

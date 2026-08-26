@@ -382,7 +382,9 @@ end
 -- True when the token balance is lower than the cheapest action still
 -- available on the board (Add is always offered; Remove/Modify only count
 -- while an offered card is in the deck and eligible).
-local function cannot_afford_anything()
+-- after_add_purchase: the add-cost bonus rises once the in-flight card lands,
+-- so project the next add price when deciding whether to auto-close.
+function M.cannot_afford_anything(opts)
 	if not session or not offer then return false end
 	local balance = state.tokens()
 	local letters = (offer.add or offer).letters or {}
@@ -395,10 +397,12 @@ local function cannot_afford_anything()
 				and not (item.card and deck.is_modified(item.card)) then
 				modify_available = true
 			end
-			break
 		end
 	end
 	local min_cost = M.session_add_cost(session)
+	if opts and opts.after_add_purchase then
+		min_cost = min_cost + ADD_COST_STEP
+	end
 	if any_in_deck then
 		min_cost = math.min(min_cost, trade.ACTION_COSTS.remove)
 		if modify_available then
@@ -407,6 +411,8 @@ local function cannot_afford_anything()
 	end
 	return balance < min_cost
 end
+
+local cannot_afford_anything = M.cannot_afford_anything
 
 -- Rebuilds the modal body without any affordability gating, so in-flight
 -- animations can play out before the session is torn down.
@@ -607,6 +613,32 @@ function M.is_flying()
 	return flyer ~= nil
 end
 
+local function fly_delta(dt)
+	dt = dt or (G and G.real_dt) or 0.016
+	if (not dt or dt <= 0) and love and love.timer and love.timer.getDelta then
+		dt = love.timer.getDelta()
+	end
+	if not dt or dt <= 0 then dt = 0.016 end
+	return math.min(0.05, dt)
+end
+
+--- Advance the marketplace card fly animation. Called from the post_input
+--- updater so progress continues while G.SETTINGS.paused freezes game dt.
+function M.step_card_fly(dt)
+	if not flyer then return false end
+	flyer.t = flyer.t + fly_delta(dt)
+	local u = math.min(1, flyer.t / FLY_TIME)
+	if u >= 1 and not flyer.landed then
+		local done = flyer_callback
+		flyer.landed = true
+		flyer_callback = nil
+		flyer = nil
+		if done then done() end
+		return true
+	end
+	return false
+end
+
 --- Painted just before the overlay menu each frame while the marketplace is
 --- open: dims the room, then stretches the Marketplace art edge-to-edge over
 --- the modal window itself (measured live from the overlay node tree, so it
@@ -794,8 +826,6 @@ end
 
 function M.draw_pass()
 	if not flyer or not G.ROOM or not love.graphics then return end
-	local dt = math.min(0.05, love.timer and love.timer.getDelta() or 0.016)
-	flyer.t = flyer.t + dt
 	local u = math.min(1, flyer.t / FLY_TIME)
 	local eased = 1 - (1 - u) * (1 - u)
 	local arc = math.sin(u * math.pi) * 0.8 * (G.TILESIZE or 1) * (G.TILESCALE or 1)
@@ -816,14 +846,6 @@ function M.draw_pass()
 		love.graphics.setShader()
 	end
 	love.graphics.setColor(cr, cg, cb, ca)
-
-	if u >= 1 and not flyer.landed then
-		local done = flyer_callback
-		flyer.landed = true
-		flyer_callback = nil
-		flyer = nil
-		if done then done() end
-	end
 end
 
 function M.open()
@@ -868,8 +890,11 @@ function M.on_pick(e)
 	end
 	-- Record whether this purchase drained us below every remaining action
 	-- BEFORE the animation runs; the check at landing can be skewed by token
-	-- rewards that land in the meantime.
-	session.broke_after_action = cannot_afford_anything()
+	-- rewards that land in the meantime. For adds, project the post-landing
+	-- add-cost escalation so we do not keep the modal open when the next add
+	-- would already be unaffordable.
+	local broke_opts = action == "add" and { after_add_purchase = true } or nil
+	session.broke_after_action = cannot_afford_anything(broke_opts)
 
 	if action == "add" then
 		if WORD_GAME and WORD_GAME.TokenReward and WORD_GAME.TokenReward.spend_fly then

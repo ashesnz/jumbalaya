@@ -59,3 +59,8 @@ Updaters.register('post_input', 'card_inspect', function(game, dt)
 		WORD_GAME.CardInspect.update(dt)
 	end
 end)
+Updaters.register('post_input', 'trade_card_fly', function(_, dt)
+	if WORD_GAME and WORD_GAME.TradeUI and WORD_GAME.TradeUI.step_card_fly then
+		WORD_GAME.TradeUI.step_card_fly(dt)
+	end
+end)
