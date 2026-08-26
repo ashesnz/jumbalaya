@@ -67,6 +67,7 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 				sh:send('hovering', ((_shadow_height and not tilt_shadow) or _no_tilt) and 0
 					or (draw_major.hover_tilt or 0) * (tilt_shadow or 1))
 				sh:send('dissolve', math.abs(draw_major.dissolve or 0))
+				sh:send('dissolve_wipe', draw_major.dissolve_wipe or 0)
 				-- Stable per-object phase derived from the unique ID.
 				sh:send('time', 123.33412 * ((tonumber(draw_major.ID) or 0) / 1.14212) % 3000)
 				sh:send('texture_details', self:texture_descriptor())

@@ -16,8 +16,7 @@ local flyer
 local flyer_callback
 local FLY_TIME = 0.65
 local ADD_COST_STEP = 10
-local TRANSFORM_TIME = 0.85
-local transform_fx
+local transform_item
 
 local function reset_session(rolled)
 	offer = rolled
@@ -222,19 +221,6 @@ local function action_column(item, mode, done, session_state)
 	return { n = G.UI.COLUMN, config = { align = "cm", padding = 0.28, minw = G.CARD_W + 0.7 }, nodes = column_nodes }
 end
 
-local function token_balance_node()
-	local balance = state.tokens()
-	return { n = G.UI.ROW, config = { align = "cm", padding = 0.08, r = 0.16,
-		colour = G.C.BLACK or { 0.05, 0.04, 0.03, 1 }, shadow = true }, nodes = {
-		{ n = G.UI.TEXT, config = {
-			text = "TOKENS: " .. tostring(balance),
-			scale = 0.42,
-			colour = G.C.GOLD,
-			shadow = true,
-		}},
-	}}
-end
-
 local function card_row(items, mode, done, session_state)
 	local cards = {}
 	for _, item in ipairs(items or {}) do
@@ -247,7 +233,7 @@ local function card_row(items, mode, done, session_state)
 	return { n = G.UI.ROW, config = {
 		align = "cm",
 		padding = 0.12,
-		minh = 2.9 * G.CARD_H,
+		minh = 3.4 * G.CARD_H,
 		minw = 3.8 * G.CARD_W,
 	}, nodes = cards }
 end
@@ -295,13 +281,8 @@ local function marketplace_content_nodes()
 	trade.sync_offer_cards(offer)
 	local add = offer.add or offer
 	local nodes = {
-		{ n = G.UI.ROW, config = { align = "cm", padding = 0.12 }, nodes = {
-			{ n = G.UI.TEXT, config = { text = "CARD MARKETPLACE", scale = 0.5, colour = G.C.GOLD, shadow = true } },
-		}},
-		token_balance_node(),
-		{ n = G.UI.ROW, config = { minh = 0.08 }, nodes = {} },
 		card_row(add.letters, "market", session.add_done, session),
-		{ n = G.UI.ROW, config = { minh = 0.1 }, nodes = {} },
+		{ n = G.UI.ROW, config = { minh = 0.06 }, nodes = {} },
 		status_or_skip(false, nil, "alpha_trade_skip_add"),
 	}
 
@@ -376,6 +357,9 @@ function M.definition()
 	return build_generic_options({
 		minw = 12,
 		padding = 0.35,
+		bg_colour = G.C.CLEAR,
+		outline_colour = G.C.CLEAR,
+		colour = G.C.CLEAR,
 		contents = {
 			{ n = G.UI.OBJECT, config = {
 				id = "trade_marketplace_body",
@@ -394,7 +378,7 @@ local function close_menu()
 	session = nil
 	flyer = nil
 	flyer_callback = nil
-	transform_fx = nil
+	transform_item = nil
 	if G.FUNCS.close_overlay then
 		G.FUNCS.close_overlay()
 	end
@@ -514,43 +498,122 @@ function M.is_flying()
 	return flyer ~= nil
 end
 
-local function start_transform_fx(item)
+local MODAL_BACKDROP_W = 12.6
+local MODAL_BACKDROP_H = 8.2
+
+--- Painted just before the overlay menu each frame while the marketplace is
+--- open: Marketplace art stretched to fill the modal panel.
+function M.backdrop_pass()
+	if not offer or not G.OVERLAY_MENU then return end
+	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.marketplace_bg
+	if not atlas or not atlas.image or not love.graphics or not love.graphics.draw then return end
+	local room = G.ROOM and G.ROOM.T
+	if not room then return end
 	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
-	local card = item.market_card
-	local transform = card and card.T
-	if not transform or not (G.SHADERS and G.SHADERS.scales) then
-		item.color = "black"
-		refresh_overlay()
-		return
+	local iw, ih = atlas.image:getDimensions()
+	local rw = room.w * ts
+	local rh = room.h * ts
+	local frame_w = MODAL_BACKDROP_W * ts
+	local frame_h = MODAL_BACKDROP_H * ts
+	local dx = (rw - frame_w) * 0.5
+	local dy = (rh - frame_h) * 0.5
+	local prev_shader = love.graphics.getShader and love.graphics.getShader()
+	local cr, cg, cb, ca = 1, 1, 1, 1
+	if love.graphics.getColor then
+		cr, cg, cb, ca = love.graphics.getColor()
 	end
-	card.states.visible = false
-	local x, y = nil, nil
-	if transform.x then
-		x = (transform.x + (transform.w or G.CARD_W) * 0.5) * ts
-		y = (transform.y + (transform.h or G.CARD_H) * 0.5) * ts
+	love.graphics.push()
+	if love.graphics.setShader then love.graphics.setShader() end
+	room_translate()
+	-- Dim the table behind the modal; the art sits on top in the panel frame.
+	love.graphics.setColor(0, 0, 0, 0.45)
+	love.graphics.rectangle("fill", 0, 0, rw, rh)
+	love.graphics.setColor(1, 1, 1, 1)
+	love.graphics.draw(atlas.image, dx, dy, 0, frame_w / iw, frame_h / ih)
+	love.graphics.pop()
+	if prev_shader and love.graphics.setShader then
+		love.graphics.setShader(prev_shader)
+	elseif love.graphics.setShader then
+		love.graphics.setShader()
 	end
-	if not x or not y then
-		local room = G.ROOM and G.ROOM.T
-		x = ((room and room.w or G.TILE_W or 20) * 0.5) * ts
-		y = ((room and room.h or G.TILE_H or 11) * 0.45) * ts
+	if love.graphics.setColor then love.graphics.setColor(cr, cg, cb, ca) end
+end
+
+local TRANSFORM_DISSOLVE_TIME = 0.7
+local TRANSFORM_MATERIALIZE_TIME = 0.6
+
+local BURN_DISSOLVE_COLOURS = { G.C.BLACK, G.C.ORANGE, G.C.RED, G.C.GOLD, G.C.MUTED_GREY }
+local BURN_MATERIALIZE_COLOURS = { G.C.BLACK, G.C.ORANGE, G.C.GOLD, G.C.WHITE }
+
+local function apply_black_market_face(card, item)
+	local front = deck.front(item.letter, "black")
+	if front and card.apply_face then
+		deck.tag_card(card, item.letter, "black")
+		card:apply_face(front, false)
 	end
-	transform_fx = { item = item, t = 0, x = x, y = y }
+	item.color = "black"
 end
 
 local function finish_transform_fx()
-	local fx = transform_fx
-	transform_fx = nil
-	if not fx then return end
-	fx.item.color = "black"
+	local item = transform_item
+	transform_item = nil
+	if not item then return end
+	local card = item.market_card
+	if card then
+		card.dissolve = 0
+		card.dissolve_wipe = 0
+	end
+	item.color = "black"
 	play_sfx("card_slide1", 1.05, 0.9)
 	if G.OVERLAY_MENU then
 		refresh_overlay()
 	end
 end
 
--- Same treatment as AlphaCardsBackup Card:start_dissolve: crumple particles
--- riding the card while the dissolve shader uniform tweens 0 -> 1, then the
--- card node is removed and the overlay refreshes without it.
+local function start_transform_fx(item)
+	local card = item.market_card
+	if not card then
+		item.color = "black"
+		refresh_overlay()
+		return
+	end
+
+	transform_item = item
+	card.states.visible = true
+	card.dissolve = 0
+	card.dissolve_wipe = 0
+	card.dissolve_colours = BURN_DISSOLVE_COLOURS
+
+	play_sfx("whoosh2", math.random() * 0.2 + 0.9, 0.5)
+	play_sfx("crumple" .. math.random(1, 5), math.random() * 0.2 + 0.9, 0.5)
+
+	-- Phase 1: red card burns away like crumpling paper (fibrous noise dissolve).
+	DissolveFX.run(card, {
+		mode = "out",
+		duration = TRANSFORM_DISSOLVE_TIME,
+		wipe = 0,
+		pulse = true,
+		colours = BURN_DISSOLVE_COLOURS,
+		fade = { delay = 0.7 * TRANSFORM_DISSOLVE_TIME, duration = 0.3 * TRANSFORM_DISSOLVE_TIME },
+		on_finish = function()
+			apply_black_market_face(card, item)
+			card.dissolve = 1
+			card.dissolve_wipe = 0
+			card.dissolve_colours = BURN_MATERIALIZE_COLOURS
+			-- Phase 2: black card re-forms from the same burnt-paper dissolve, reversed.
+			DissolveFX.run(card, {
+				mode = "in",
+				duration = TRANSFORM_MATERIALIZE_TIME,
+				wipe = 0,
+				pulse = true,
+				colours = BURN_MATERIALIZE_COLOURS,
+				particle = { timer = 0.025, scale = 0.25, speed = 3, lifespan = 0.7 },
+				on_finish = finish_transform_fx,
+			})
+		end,
+	})
+end
+
 local function start_remove_dissolve(item)
 	local card = item.market_card
 	if not card then
@@ -579,87 +642,11 @@ local function start_remove_dissolve(item)
 	})
 end
 
-local function atlas_for_front(front)
-	if not front then return nil end
-	local name = front.atlas or ("cards_" .. (G.SETTINGS.colourblind_option and 2 or 1))
-	return G.TEXTURE_ATLASES and G.TEXTURE_ATLASES[name]
-end
-
--- Feeds the scales shader the red/black face quads of this letter so it can
--- cross-fade between the two artworks baked into the deck atlas.
-local function send_scales_uniforms(shader, red_front, black_front)
-	local red_atlas = atlas_for_front(red_front)
-	local black_atlas = atlas_for_front(black_front) or red_atlas
-	if not red_atlas or not red_atlas.image or not black_atlas.image then
-		return false
-	end
-	local rw, rh = red_atlas.image:getDimensions()
-	local bw, bh = black_atlas.image:getDimensions()
-	local rcw, rch = red_atlas.px or 71, red_atlas.py or 95
-	local bcw, bch = black_atlas.px or rcw, black_atlas.py or rch
-	local rp = red_front.pos or { x = 0, y = 0 }
-	local bp = (black_front and black_front.pos) or rp
-	pcall(function()
-		shader:send("alt_texture", black_atlas.image)
-		shader:send("origin_a", rp.x * rcw / rw, rp.y * rch / rh)
-		shader:send("origin_b", bp.x * bcw / bw, bp.y * bch / bh)
-		shader:send("quad_size", rcw / rw, rch / rh)
-	end)
-	return true
-end
-
-local function draw_transform_card(fx)
-	if not love.graphics then return end
-	local item = fx.item
-	local red_front = item and item.letter and deck.front(item.letter, "red")
-	local black_front = item and item.letter and deck.front(item.letter, "black")
-	local shader = G.SHADERS and G.SHADERS.scales
-	if not red_front or not shader then return end
-	local atlas = atlas_for_front(red_front)
-	if not atlas or not atlas.image then return end
-	if not send_scales_uniforms(shader, red_front, black_front) then return end
-
-	local u = math.min(1, fx.t / TRANSFORM_TIME)
-	local eased = u * u * (3 - 2 * u)
-	pcall(function()
-		shader:send("progress", eased)
-		shader:send("time", ((love.timer and love.timer.getTime() or 0) % 300))
-	end)
-
-	local pos = red_front.pos or { x = 0, y = 0 }
-	local pw, ph = atlas.px or 71, atlas.py or 95
-	local iw, ih = atlas.image:getDimensions()
-	local quad = love.graphics.newQuad(pos.x * pw, pos.y * ph, pw, ph, iw, ih)
-	local size = math.max(30, (G.CARD_W or 1) * (G.TILESCALE or 1) * (G.TILESIZE or 1))
-	local lift = math.sin(u * math.pi) * 0.15 * (G.TILESIZE or 1)
-
-	love.graphics.setColor(1, 1, 1, 1)
-	love.graphics.setShader(shader)
-	love.graphics.draw(atlas.image, quad, fx.x, fx.y - lift, 0, size / pw, size / ph, pw * 0.5, ph * 0.5)
-	love.graphics.setShader()
+function M.is_transforming()
+	return transform_item ~= nil
 end
 
 function M.draw_pass()
-	if transform_fx and G.ROOM and love.graphics then
-		local dt = math.min(0.05, love.timer and love.timer.getDelta() or 0.016)
-		transform_fx.t = transform_fx.t + dt
-		local prev_shader = love.graphics.getShader()
-		local cr, cg, cb, ca = love.graphics.getColor()
-		love.graphics.push()
-		room_translate()
-		draw_transform_card(transform_fx)
-		love.graphics.pop()
-		if prev_shader then
-			love.graphics.setShader(prev_shader)
-		else
-			love.graphics.setShader()
-		end
-		love.graphics.setColor(cr, cg, cb, ca)
-		if transform_fx.t >= TRANSFORM_TIME then
-			finish_transform_fx()
-		end
-	end
-
 	if not flyer or not G.ROOM or not love.graphics then return end
 	local dt = math.min(0.05, love.timer and love.timer.getDelta() or 0.016)
 	flyer.t = flyer.t + dt
@@ -711,7 +698,7 @@ function M.open_then_dealer()
 end
 
 function M.on_pick(e)
-	if flyer or transform_fx then return end
+	if flyer or transform_item then return end
 	local ref = e and e.config and e.config.ref_table
 	local item = ref and ref.item or ref
 	local action = ref and ref.action or "add"
@@ -761,7 +748,7 @@ function M.on_pick(e)
 end
 
 function M.on_skip_add()
-	if flyer or transform_fx then return end
+	if flyer or transform_item then return end
 	if not session or session.add_done then
 		if session and session_complete() then finish_trade() end
 		return
@@ -773,7 +760,7 @@ function M.on_skip_add()
 end
 
 function M.on_skip_remove()
-	if flyer or transform_fx then return end
+	if flyer or transform_item then return end
 	if not session or session.remove_done then
 		if session and session_complete() then finish_trade() end
 		return

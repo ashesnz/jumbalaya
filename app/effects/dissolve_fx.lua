@@ -23,6 +23,7 @@ local DissolveFX = {}
 ---                emission instantly instead of fading
 ---   tween_delay  delay before the dissolve uniform starts tweening
 ---   remove       remove the node when the animation completes
+---   wipe         0 = noise crumble (default); 1 = bottom-up out; 2 = top-down in
 ---   on_start     fn(target) fired immediately
 ---   on_finish    fn(target) fired just before removal
 function DissolveFX.run(target, opts)
@@ -33,6 +34,7 @@ function DissolveFX.run(target, opts)
 
 	target.dissolve = (mode == 'in') and 1 or 0
 	target.dissolve_colours = opts.colours or {G.C.WHITE}
+	target.dissolve_wipe = opts.wipe or 0
 
 	if opts.on_start then opts.on_start(target) end
 	if opts.pulse and target.pulse then target:pulse() end
@@ -76,6 +78,7 @@ function DissolveFX.run(target, opts)
 		delay = tween_delay + 0.05 * duration,
 		func = function()
 			if opts.on_finish then opts.on_finish(target) end
+			if not opts.keep_wipe then target.dissolve_wipe = 0 end
 			if opts.remove then target:remove() end
 			return true
 		end,

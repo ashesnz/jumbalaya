@@ -14,6 +14,8 @@ uniform vec2 image_details;
 uniform vec4 burn_colour_1;
 uniform vec4 burn_colour_2;
 uniform bool shadow;
+// 0 = fibrous noise crumble; 1 = bottom-up wipe out; 2 = top-down wipe in.
+uniform float dissolve_wipe;
 
 float hash21(vec2 p)
 {
@@ -45,16 +47,34 @@ vec4 effect(vec4 colour, Image tex, vec2 texture_coords, vec2 screen_coords)
 	grain += 0.04 * sin(uv.y * 21.0 + time * 0.7);
 
 	float t = clamp(dissolve, 0.0, 1.0);
+	float wipe = dissolve_wipe;
+	float rag = (hash21(vec2(floor(uv.x * 24.0), 7.0)) - 0.5) * 0.08
+		+ (hash21(vec2(floor(uv.x * 24.0), floor(time * 7.0))) - 0.5) * 0.03;
 
-	if (shadow) {
-		// Shadow pass: flat dark silhouette that crumbles on the same pattern.
-		float coverage = smoothstep(t - 0.10, t + 0.02, grain);
-		return vec4(0.0, 0.0, 0.0, pix.a * coverage * 0.22) * colour;
+	float keep;
+	float rim;
+
+	if (wipe < 0.5) {
+		// Classic fibrous crumble.
+		keep = smoothstep(t - 0.035, t + 0.045, grain);
+		rim = smoothstep(t - 0.17, t - 0.03, grain) * (1.0 - smoothstep(t - 0.03, t + 0.02, grain));
+	} else if (wipe < 1.5) {
+		// Marketplace modify phase 1: red card sheds bottom -> top.
+		float edge = t + rag;
+		float gone = step(edge, uv.y);
+		keep = 1.0 - gone;
+		rim = smoothstep(edge - 0.08, edge, uv.y) * (1.0 - gone);
+	} else {
+		// Marketplace modify phase 2: black card grows top -> bottom.
+		float edge = (1.0 - t) + rag;
+		keep = step(uv.y, edge);
+		rim = (1.0 - smoothstep(edge - 0.08, edge, uv.y)) * keep;
 	}
 
-	// Surviving surface and the burning rim just inside the tear line.
-	float keep = smoothstep(t - 0.035, t + 0.045, grain);
-	float rim = smoothstep(t - 0.17, t - 0.03, grain) * (1.0 - smoothstep(t - 0.03, t + 0.02, grain));
+	if (shadow) {
+		float coverage = keep;
+		return vec4(0.0, 0.0, 0.0, pix.a * coverage * 0.22) * colour;
+	}
 
 	// Soft cursor sheen while the card is alive.
 	vec2 md = (screen_coords - mouse_screen_pos) / max(screen_scale, 1.0);

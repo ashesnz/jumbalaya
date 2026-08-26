@@ -68,6 +68,7 @@ function Game:set_render_settings()
 		{ name = 'tokens', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/coin_stack.png", px = 521, py = 479 },
 		{ name = 'coin', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/coin.png", px = 521, py = 478 },
 		{ name = 'boss_banner', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/banner.png", px = 1180, py = 211 },
+		{ name = 'marketplace_bg', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Marketplace.png", px = 1408, py = 768 },
 	}
 	---@type GameAtlasSpec[]
 	self.asset_images = {}
@@ -96,6 +97,17 @@ function Game:set_render_settings()
 		if not love.filesystem.getInfo(path) and spec.name == "boss_banner" then
 			path = "resources/textures/2x/banner.png"
 		end
+		if not love.filesystem.getInfo(path) and spec.name == "marketplace_bg" then
+			local jpeg = "resources/textures/2x/Marketplace.jpeg"
+			local png2x = "resources/textures/2x/Marketplace.png"
+			if love.filesystem.getInfo(png2x) then
+				path = png2x
+			elseif love.filesystem.getInfo(jpeg) then
+				path = jpeg
+			else
+				path = "resources/textures/1x/Marketplace.png"
+			end
+		end
 		if not love.filesystem.getInfo(path) and (
 			spec.name == "Jumbalaya" or spec.name == "title_garden"
 			or spec.name == "jumbalaya_base" or spec.name == "jumbalaya_start_a"
@@ -121,6 +133,7 @@ function Game:set_render_settings()
 				spec.name == "playing_back" or spec.name == "Jumbalaya" or spec.name == "title_garden"
 				or spec.name == "jumbalaya_base" or spec.name == "jumbalaya_start_a"
 				or spec.name == "jumbalaya_end_a" or spec.name == "boss_banner"
+				or spec.name == "marketplace_bg"
 			) and 1 or self.SETTINGS.GRAPHICS.texture_scaling
 			self.TEXTURE_ATLASES[spec.name] = {}
 			self.TEXTURE_ATLASES[spec.name].name = spec.name
@@ -136,7 +149,7 @@ function Game:set_render_settings()
 			end
 			self.TEXTURE_ATLASES[spec.name].type = spec.type
 			if spec.name == "playing_back" or spec.name == "shuffle_icon" or spec.name == "play_icon" or spec.name == "tokens"
-				or spec.name == "coin" or spec.name == "boss_banner"
+				or spec.name == "coin" or spec.name == "boss_banner" or spec.name == "marketplace_bg"
 				or spec.name == "Jumbalaya" or spec.name == "title_garden"
 				or spec.name == "jumbalaya_base" or spec.name == "jumbalaya_start_a"
 				or spec.name == "jumbalaya_end_a" then

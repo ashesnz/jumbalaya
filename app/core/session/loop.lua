@@ -173,6 +173,9 @@ function Game:render_menu_pass()
 	local show_background = (not self.OVERLAY_MENU) or (not self.F_HIDE_BG)
 
 	if self.OVERLAY_MENU and self.OVERLAY_MENU ~= self.INPUT.dragging.target then
+		if WORD_GAME and WORD_GAME.TradeUI and WORD_GAME.TradeUI.backdrop_pass then
+			WORD_GAME.TradeUI.backdrop_pass()
+		end
 		draw_with_container(self.OVERLAY_MENU)
 	end
 	if (show_background or self.OVERLAY_MENU)
