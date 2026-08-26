@@ -17,6 +17,9 @@ local flyer_callback
 local FLY_TIME = 0.65
 local ADD_COST_STEP = 10
 local transform_item
+-- Marketplace cards render slightly smaller than table cards so the modal
+-- contents fit comfortably inside the play-area-sized window.
+local MARKET_CARD_SCALE = 0.82
 
 local function reset_session(rolled)
 	offer = rolled
@@ -62,13 +65,13 @@ end
 
 local function face_node(item)
 	if item.flying then
-		return { n = G.UI.ROW, config = { align = "cm", minw = G.CARD_W, minh = G.CARD_H }, nodes = {} }
+		return { n = G.UI.ROW, config = { align = "cm", minw = G.CARD_W * MARKET_CARD_SCALE, minh = G.CARD_H * MARKET_CARD_SCALE }, nodes = {} }
 	end
 	-- A removed card whose last deck copy is gone stays gone: empty slot.
 	if item.mode == "remove" and not trade.item_in_deck(item) then
-		return { n = G.UI.ROW, config = { align = "cm", minw = G.CARD_W, minh = G.CARD_H }, nodes = {} }
+		return { n = G.UI.ROW, config = { align = "cm", minw = G.CARD_W * MARKET_CARD_SCALE, minh = G.CARD_H * MARKET_CARD_SCALE }, nodes = {} }
 	end
-	local w, h = G.CARD_W, G.CARD_H
+	local w, h = G.CARD_W * MARKET_CARD_SCALE, G.CARD_H * MARKET_CARD_SCALE
 	local card = make_face_card(item, w, h)
 	item.market_card = card
 	if card then
@@ -159,7 +162,7 @@ local function action_button(item, action, cost, colour, disabled)
 	local ref = { item = item, action = action }
 	local label = action == "modifier" and "Modify" or (action:gsub("^%l", string.upper))
 	return { n = G.UI.ROW, config = {
-		align = "cm", padding = 0.12, r = 0.18, minw = G.CARD_W + 0.45, minh = 0.62,
+		align = "cm", padding = 0.12, r = 0.18, minw = G.CARD_W * MARKET_CARD_SCALE + 0.45, minh = 0.62,
 		hover = not disabled, button = disabled and nil or "alpha_trade_pick", ref_table = ref, colour = disabled and G.C.UI.BACKGROUND_INACTIVE or colour or G.C.UI.BUTTON,
 	        hover_colour = G.C.UI.BUTTON_HOVER, shadow = true, emboss = 0.1, no_jiggle = true,
 	    }, nodes = {
@@ -178,16 +181,20 @@ local function modifier_description_node(item)
 				text = line,
 				scale = MODIFIER_TEXT_SCALE,
 				font = alpha_button_font(),
-				colour = G.C.UI.TEXT_LIGHT or G.C.UI.BUTTON_TEXT,
-				shadow = true,
+				colour = G.C.BLACK or { 0, 0, 0, 1 },
+				shadow = false,
 			}},
 		}}
 	end
+	-- Parchment chip so the black text stays readable on the artwork.
 	return { n = G.UI.COLUMN, config = {
 		align = "cm",
-		padding = 0.04,
-		minw = G.CARD_W + 0.35,
-		minh = math.max(0.5, #lines * 0.28),
+		padding = 0.08,
+		minw = G.CARD_W * MARKET_CARD_SCALE + 0.35,
+		minh = math.max(0.5, #lines * 0.28) + 0.12,
+		r = 0.14,
+		colour = { 0.97, 0.93, 0.84, 1 },
+		shadow = true,
 	}, nodes = line_nodes }
 end
 
@@ -199,7 +206,7 @@ local function action_column(item, mode, done, session_state)
 		or already_modified
 	local remove_disabled = not in_deck
 	local column_nodes = {
-		{ n = G.UI.ROW, config = { align = "cm", padding = 0.14 }, nodes = { face_node(item) } },
+		{ n = G.UI.ROW, config = { align = "cm", padding = 0.03 }, nodes = { face_node(item) } },
 	}
 	-- No card left to describe: drop the modifier text along with the face.
 	local desc = nil
@@ -207,7 +214,7 @@ local function action_column(item, mode, done, session_state)
 		desc = modifier_description_node(item)
 	end
 	if desc then
-		column_nodes[#column_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.1 }, nodes = { desc } }
+		column_nodes[#column_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.0 }, nodes = { desc } }
 	end
 	column_nodes[#column_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
 		action_button(item, "add", M.session_add_cost(session_state), G.C.BLUE, false),
@@ -218,7 +225,7 @@ local function action_column(item, mode, done, session_state)
 	column_nodes[#column_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
 		action_button(item, "modifier", 30, G.C.GOLD, modify_disabled),
 	}}
-	return { n = G.UI.COLUMN, config = { align = "cm", padding = 0.28, minw = G.CARD_W + 0.7 }, nodes = column_nodes }
+	return { n = G.UI.COLUMN, config = { align = "cm", padding = 0.28, minw = G.CARD_W * MARKET_CARD_SCALE + 0.7 }, nodes = column_nodes }
 end
 
 local function card_row(items, mode, done, session_state)
@@ -233,8 +240,8 @@ local function card_row(items, mode, done, session_state)
 	return { n = G.UI.ROW, config = {
 		align = "cm",
 		padding = 0.12,
-		minh = 3.4 * G.CARD_H,
-		minw = 3.8 * G.CARD_W,
+		minh = 3.4 * G.CARD_H * MARKET_CARD_SCALE,
+		minw = 3.8 * G.CARD_W * MARKET_CARD_SCALE,
 	}, nodes = cards }
 end
 
@@ -301,7 +308,7 @@ local function marketplace_content_nodes()
 	local add = offer.add or offer
 	local nodes = {
 		-- Red cross close button, top right of the modal.
-		{ n = G.UI.ROW, config = { align = "cr", minw = 3.8 * G.CARD_W }, nodes = {
+		{ n = G.UI.ROW, config = { align = "cr", minw = 3.8 * G.CARD_W * MARKET_CARD_SCALE }, nodes = {
 			{ n = G.UI.COLUMN, config = {
 				align = "cm", minw = 0.72, minh = 0.72, r = 0.16, padding = 0.1,
 				hover = true, colour = G.C.RED, hover_colour = G.C.UI.BUTTON_HOVER,
@@ -317,7 +324,7 @@ local function marketplace_content_nodes()
 			}},
 		}},
 		-- Push the cards/text/buttons down from the cross button.
-		{ n = G.UI.ROW, config = { minh = 50 / (G.TILESIZE or 64) }, nodes = {} },
+		{ n = G.UI.ROW, config = { minh = 40 / (G.TILESIZE or 64) }, nodes = {} },
 		card_row(add.letters, "market", session.add_done, session),
 	}
 
