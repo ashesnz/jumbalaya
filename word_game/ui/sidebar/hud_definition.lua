@@ -49,7 +49,7 @@ local function deck_count_node(box_w)
 		align = "cm",
 		id = "row_deck_count",
 		minw = box_w,
-		padding = 0.02,
+		padding = 0,
 	}, nodes = {
 		{ n = G.UI.TEXT, config = {
 			text = "Cards left: ",

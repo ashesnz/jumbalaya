@@ -14,8 +14,10 @@ local state = require("word_game.model.state")
 local M = {
 	SIZE = 0.68,
 	MAX_STACK = 0.40,
-	LABEL_H = 0.40,
+	LABEL_H = 0.16,
 	TOKEN_STACK_H = 0.62,
+	TOKEN_DECK_GAP_PX = 14,
+	DECK_SLOT_Y_ALIGN = 0.72,
 	token_display = nil,
 	token_roll = nil,
 	token_pending = 0,
@@ -248,6 +250,12 @@ local function ensure_mesh(n)
 end
 
 
+local function deck_origin_y(area, pack_h, miny)
+	local slot_h = area.T.h or 0
+	return area.T.y + M.TOKEN_STACK_H
+		+ math.max(0, (slot_h - pack_h - M.LABEL_H - M.TOKEN_STACK_H) * M.DECK_SLOT_Y_ALIGN) - miny
+end
+
 local function tokens_atlas()
 	return G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.tokens
 end
@@ -268,7 +276,7 @@ local function token_layout(area, ox, oy, miny, pack_w, card_w, ts)
 	local label_h = label_font:getHeight()
 	local label_w = label_font:getWidth(label)
 	local stack_h = sprite_h + label_h + 4
-	local top_y = (oy + miny) * ts - stack_h - 6
+	local top_y = (oy + miny) * ts - stack_h - M.TOKEN_DECK_GAP_PX
 	local sprite_x = area.T.x * ts + (slot_w - sprite_w) * 0.5
 	local label_x = area.T.x * ts + (slot_w - label_w) * 0.5
 	local label_y = top_y + sprite_h + 2
@@ -316,8 +324,7 @@ function M.token_center_px(area)
 	local pack_w = maxx - minx
 	local pack_h = maxy - miny
 	local ox = (transform.x or 0) + math.max(0, (slot_w - pack_w) * 0.5) - minx
-	local oy = (transform.y or 0) + M.TOKEN_STACK_H
-		+ math.max(0, (slot_h - pack_h - M.LABEL_H - M.TOKEN_STACK_H) * 0.08) - miny
+	local oy = deck_origin_y(area, pack_h, miny)
 
 	local lay = token_layout(area, ox, oy, miny, pack_w, W, ts)
 	if not lay then return end
@@ -388,8 +395,7 @@ function M.draw(area)
 	local pack_w = maxx - minx
 	local pack_h = maxy - miny
 	local ox = area.T.x + math.max(0, (slot_w - pack_w) * 0.5) - minx
-	local oy = area.T.y + M.TOKEN_STACK_H
-		+ math.max(0, (slot_h - pack_h - M.LABEL_H - M.TOKEN_STACK_H) * 0.08) - miny
+	local oy = deck_origin_y(area, pack_h, miny)
 
 	draw_tokens(area, ox, oy, miny, pack_w, W, ts)
 
