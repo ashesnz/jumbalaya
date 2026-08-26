@@ -4,6 +4,7 @@ local widgets = require("word_game.ui.widgets")
 local trade = require("word_game.model.trade")
 local state = require("word_game.model.state")
 local deck = require("word_game.model.cards.deck")
+local DissolveFX = require("app.effects.dissolve_fx")
 local Layout = require("word_game.ui.layout")
 
 local M = {}
@@ -27,6 +28,7 @@ local function reset_session(rolled)
 		removed = nil,
 		add_cost_bonus = 0,
 		modified = {},
+		removing = {},
 	}
 	if rolled and rolled.showdown and not rolled.remove then
 		session.remove_done = true
@@ -61,6 +63,10 @@ end
 
 local function face_node(item)
 	if item.flying then
+		return { n = G.UI.ROW, config = { align = "cm", minw = G.CARD_W, minh = G.CARD_H }, nodes = {} }
+	end
+	-- A removed card whose last deck copy is gone stays gone: empty slot.
+	if item.mode == "remove" and not trade.item_in_deck(item) then
 		return { n = G.UI.ROW, config = { align = "cm", minw = G.CARD_W, minh = G.CARD_H }, nodes = {} }
 	end
 	local w, h = G.CARD_W, G.CARD_H
@@ -202,7 +208,11 @@ local function action_column(item, mode, done, session_state)
 		}},
 		{ n = G.UI.ROW, config = { align = "cm", padding = 0.14 }, nodes = { face_node(item) } },
 	}
-	local desc = modifier_description_node(item)
+	-- No card left to describe: drop the modifier text along with the face.
+	local desc = nil
+	if item.mode ~= "remove" or trade.item_in_deck(item) then
+		desc = modifier_description_node(item)
+	end
 	if desc then
 		column_nodes[#column_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.1 }, nodes = { desc } }
 	end
@@ -538,6 +548,37 @@ local function finish_transform_fx()
 	end
 end
 
+-- Same treatment as AlphaCardsBackup Card:start_dissolve: crumple particles
+-- riding the card while the dissolve shader uniform tweens 0 -> 1, then the
+-- card node is removed and the overlay refreshes without it.
+local function start_remove_dissolve(item)
+	local card = item.market_card
+	if not card then
+		trade.sync_offer_cards(offer)
+		refresh_overlay()
+		return
+	end
+	session.removing[item] = true
+	play_sfx("whoosh2", math.random() * 0.2 + 0.9, 0.5)
+	play_sfx("crumple" .. math.random(1, 5), math.random() * 0.2 + 0.9, 0.5)
+	DissolveFX.run(card, {
+		duration = 0.7,
+		colours = { G.C.BLACK, G.C.ORANGE, G.C.RED, G.C.GOLD },
+		pulse = true,
+		remove = true,
+		on_finish = function()
+			item.market_card = nil
+			if session then
+				session.removing[item] = nil
+			end
+			trade.sync_offer_cards(offer)
+			if G.OVERLAY_MENU then
+				refresh_overlay()
+			end
+		end,
+	})
+end
+
 local function atlas_for_front(front)
 	if not front then return nil end
 	local name = front.atlas or ("cards_" .. (G.SETTINGS.colourblind_option and 2 or 1))
@@ -675,7 +716,7 @@ function M.on_pick(e)
 	local item = ref and ref.item or ref
 	local action = ref and ref.action or "add"
 	if not item or not session then return end
-	if action == "remove" and session.removed then return end
+	if action == "remove" and (session.removed or session.removing[item]) then return end
 	if action == "modifier" and session.modified[item] then return end
 
 	local cost = action == "add" and M.session_add_cost(session) or nil
@@ -709,7 +750,8 @@ function M.on_pick(e)
 
 	play_sfx("card_slide1", 0.9, 0.8)
 	if action == "remove" then
-		trade.sync_offer_cards(offer)
+		start_remove_dissolve(item)
+		return
 	elseif action == "modifier" then
 		session.modified[item] = true
 		start_transform_fx(item)

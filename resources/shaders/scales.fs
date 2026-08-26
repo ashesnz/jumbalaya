@@ -1,14 +1,15 @@
-// Jumbalaya - "reptilian scales" transformation.
-// A wave of diamond-shaped scales rises up the card from the bottom edge.
-// Each scale grows out of its cell centre and, as it expands, flips the
-// artwork underneath from the red variant to the black variant. A warm gold
-// rim glints along each scale's leading edge while it is still growing.
+// Jumbalaya - "scale shed" transformation.
+// Two-phase directional wipe used when a marketplace card is modified:
+//   phase 1 (progress 0 -> 0.5): the red card burns away from the bottom
+//   edge upward, leaving a ragged gold ember rim along the retreat line.
+//   phase 2 (progress 0.5 -> 1): the black version of the card materialises
+//   from the top edge downward behind the same travelling rim.
 
 uniform Image alt_texture;
 uniform vec2 origin_a;   // normalised top-left of the source (red) quad
 uniform vec2 origin_b;   // normalised top-left of the target (black) quad
 uniform vec2 quad_size;  // normalised size of one card face in the atlas
-uniform float progress;  // 0..1 sweep of the rising wave
+uniform float progress;  // 0..1 across both phases
 uniform float time;
 
 float hash21(vec2 p)
@@ -23,37 +24,32 @@ vec4 effect(vec4 colour, Image tex, vec2 texture_coords, vec2 screen_coords)
 	vec4 red_pix = Texel(tex, texture_coords);
 	vec4 black_pix = Texel(alt_texture, origin_b + (texture_coords - origin_a));
 
+	// Card-face space: x/y in 0..1, y = 0 at the top edge, 1 at the bottom.
 	vec2 uv = clamp((texture_coords - origin_a) / quad_size, 0.0, 1.0);
 
-	// Diamond grid laid over the card face.
-	float cols = 6.0;
-	float rows = 8.0;
-	vec2 gp = vec2(uv.x * cols, uv.y * rows);
-	vec2 cell = floor(gp);
-	vec2 f = fract(gp);
-	// Diamond metric: 0 at the scale centre, 1 at the cell corners.
-	float d = (abs(f.x - 0.5) + abs(f.y - 0.5)) * 2.0;
+	float u = clamp(progress, 0.0, 1.0);
+	// Ragged, slowly flickering frontier so the wipe reads organic.
+	float rag = (hash21(vec2(floor(uv.x * 24.0), 7.0)) - 0.5) * 0.07
+		+ (hash21(vec2(floor(uv.x * 24.0), floor(time * 7.0))) - 0.5) * 0.03;
 
-	// The wave starts at the bottom edge and climbs; per-cell hash jitters so
-	// neighbouring scales do not flip in lockstep.
-	float h = hash21(cell);
-	float rise = 1.0 - cell.y / rows;
-	float t = progress * 1.35 - 0.175;
-	float threshold = rise * 0.8 + h * 0.2;
+	vec3 rgb;
+	float alpha;
 
-	// Each scale grows from its centre once the wave passes its threshold.
-	float grow = clamp((t - threshold) / 0.22, 0.0, 1.0);
-	float radius = sqrt(grow); // ease-out growth of the inscribed diamond
+	if (u < 0.5) {
+		// Phase 1: red card sheds away bottom -> top.
+		float edge = (1.0 - u * 2.0) + rag;
+		float gone = step(edge, uv.y);
+		float rim = smoothstep(edge - 0.07, edge, uv.y) * (1.0 - gone);
+		rgb = mix(red_pix.rgb, vec3(1.0, 0.78, 0.30), rim * 0.85);
+		alpha = (1.0 - gone) * (1.0 - 0.25 * rim);
+	} else {
+		// Phase 2: black card grows back top -> bottom.
+		float edge = ((u - 0.5) * 2.0) + rag;
+		float shown = step(uv.y, edge);
+		float rim = (1.0 - smoothstep(edge - 0.07, edge, uv.y)) * shown;
+		rgb = mix(black_pix.rgb, vec3(1.0, 0.82, 0.35), rim * 0.7);
+		alpha = shown;
+	}
 
-	float inside = 1.0 - smoothstep(radius - 0.10, radius + 0.03, d);
-
-	// Glinting rim on scales that are mid-growth.
-	float rim = smoothstep(radius - 0.32, radius - 0.02, d)
-		* (1.0 - smoothstep(radius - 0.02, radius + 0.06, d))
-		* step(0.001, grow) * (1.0 - step(0.999, grow));
-
-	vec3 rgb = mix(red_pix.rgb, black_pix.rgb, inside);
-	rgb += rim * vec3(1.0, 0.82, 0.35) * 0.30 * (0.75 + 0.25 * sin(time * 9.0 + h * 12.0));
-
-	return vec4(rgb, red_pix.a) * colour;
+	return vec4(rgb, alpha * red_pix.a) * colour;
 }
