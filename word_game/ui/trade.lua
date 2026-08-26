@@ -272,6 +272,7 @@ end
 
 local open_overlay
 local refresh_overlay
+local finish_trade
 
 open_overlay = function()
 	G.SETTINGS.paused = true
@@ -450,7 +451,7 @@ local function continue_run()
 	close_menu()
 end
 
-local function finish_trade()
+finish_trade = function()
 	trade.mark_used()
 	if standalone then
 		standalone = false
@@ -592,29 +593,16 @@ function M.backdrop_pass()
 	love.graphics.setColor(0, 0, 0, 0.45)
 	love.graphics.rectangle("fill", 0, 0, rw, rh)
 	love.graphics.setColor(1, 1, 1, 1)
-	-- Aspect-preserving "cover" fit: uniform scale so the art is never
-	-- stretched, cropped to stay inside the modal window.
+	-- Aspect-preserving "cover" fill, cropped with a Quad (no scissor needed):
+	-- uniform scale fills the whole modal boundary and the source rectangle is
+	-- cropped symmetrically so nothing spills outside the modal.
 	local scale = math.max(dw / iw, dh / ih)
-	local img_w, img_h = iw * scale, ih * scale
-	local ix = dx + (dw - img_w) * 0.5
-	local iy = dy + (dh - img_h) * 0.5
-	local psx, psy, psw, psh = nil, nil, nil, nil
-	if love.graphics.transformPoint and love.graphics.intersectScissor and love.graphics.getScissor then
-		local x1, y1 = love.graphics.transformPoint(dx, dy)
-		local x2, y2 = love.graphics.transformPoint(dx + dw, dy + dh)
-		psx, psy, psw, psh = love.graphics.getScissor()
-		love.graphics.intersectScissor(
-			math.min(x1, x2), math.min(y1, y2),
-			math.abs(x2 - x1), math.abs(y2 - y1))
-	end
-	love.graphics.draw(atlas.image, ix, iy, 0, scale, scale)
-	if love.graphics.setScissor then
-		if psx then
-			love.graphics.setScissor(psx, psy, psw, psh)
-		else
-			love.graphics.setScissor()
-		end
-	end
+	local crop_w = math.min(iw, dw / scale)
+	local crop_h = math.min(ih, dh / scale)
+	local qx = (iw - crop_w) * 0.5
+	local qy = (ih - crop_h) * 0.5
+	local quad = love.graphics.newQuad(qx, qy, crop_w, crop_h, iw, ih)
+	love.graphics.draw(atlas.image, quad, dx, dy, 0, scale, scale)
 	love.graphics.pop()
 	if prev_shader and love.graphics.setShader then
 		love.graphics.setShader(prev_shader)
