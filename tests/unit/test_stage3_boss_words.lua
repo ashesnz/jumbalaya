@@ -189,4 +189,32 @@ T.describe("Stage 1-3 boss words", function()
 		T.assert_almost_equal(hand_col.w, normal_col.w, 0.01)
 		T.assert_true(boss_col.w > hand_col.w, "Hand column should stay narrow while boss widens placement")
 	end)
+
+	T.it("stacks boss word cards below the timer with half-card overlap", function()
+		local felt = require("word_game.ui.layout.felt")
+		local layout = require("word_game.ui.layout.placement")
+		local boss_word_stack = require("word_game.ui.boss_word_stack")
+		G.GAME = {
+			word_round = {
+				jumble = { boss_word_active = true },
+			},
+		}
+		G.TILE_W = 20
+		G.TILE_H = 11.5
+		G.CARD_W = 2
+		G.CARD_H = 2.8
+		G.ROOM = { T = { x = 0, y = 0, w = 20, h = 11.5 } }
+		local stack = boss_word_stack.stack_layout()
+		local timer = layout.timeline_rect()
+		local col = felt.play_column()
+		T.assert_true(stack.y >= timer.y + timer.h - 0.01, "Stack should start below the timer")
+		T.assert_true(stack.x >= col.x - 0.01, "Stack should align to the left play column")
+		T.assert_almost_equal(stack.step_y, stack.card_h * 0.5, 0.001)
+		local x1, y1 = boss_word_stack.target_position(1)
+		local x2, y2 = boss_word_stack.target_position(2)
+		T.assert_almost_equal(x1, stack.x, 0.001)
+		T.assert_almost_equal(y1, stack.y, 0.001)
+		T.assert_almost_equal(x2, stack.x, 0.001)
+		T.assert_almost_equal(y2, stack.y + stack.step_y, 0.001)
+	end)
 end)

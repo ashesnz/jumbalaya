@@ -124,6 +124,24 @@ function M.show_hand_centered(text, colour, hold, offset_y)
 	})
 end
 
+function M.show_screen_centered(text, colour, hold, offset_y)
+	if not spawn_attention then return end
+	local scale = math.min(0.82, math.max(0.48, (G.TILE_H or 11) * 0.055))
+	spawn_attention({
+		text = text,
+		scale = scale,
+		maxw = (G.TILE_W or 20) * 0.72,
+		hold = hold or 1.2,
+		align = "cm",
+		major = G.ROOM_ATTACH,
+		offset = {
+			x = 0,
+			y = offset_y or 0,
+		},
+		colour = colour or G.C.GOLD,
+	})
+end
+
 function M.show_above_hand_centered(text, colour, hold, offset_y)
 	local row = hand_dealt_metrics()
 	if not row then

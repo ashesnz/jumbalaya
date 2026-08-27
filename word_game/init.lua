@@ -42,6 +42,7 @@ local M = {
 	HandShuffle = require("word_game.ui.hand_shuffle"),
 	PlayHoldRedraw = require("word_game.ui.play_hold_redraw"),
 	PlayEffects = require("word_game.ui.play_effects"),
+	BossWordStack = require("word_game.ui.boss_word_stack"),
 	Sidebar = sidebar,
 }
 

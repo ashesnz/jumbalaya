@@ -4,6 +4,7 @@ local M = {}
 
 local deck = require("word_game.model.cards.deck")
 local word_feedback = require("word_game.ui.word_feedback")
+local boss_word_stack = require("word_game.ui.boss_word_stack")
 local Easing = require "app.effects.easing"
 local Scheduler = require "app.effects.scheduler"
 
@@ -144,6 +145,7 @@ function M.sync_sidebar_actions()
 end
 
 function M.restore_boss_layout()
+	boss_word_stack.clear()
 	local wr = G.GAME and G.GAME.word_round
 	if wr and wr.jumble then
 		wr.jumble.locked_hand_layout = nil
@@ -372,21 +374,137 @@ function M.present_boss_word(wr, on_complete)
 	end, { instant = true })
 end
 
+local function detach_card_for_stack(card)
+	if not card then return end
+	if card.area then
+		if G.placement_table and card.area == G.placement_table.area then
+			G.placement_table:on_remove_card(card)
+		end
+		card.area:remove_card(card)
+	end
+	if card.states and card.states.drag then
+		card.states.drag.is = false
+	end
+	if card.set_selected then
+		card:set_selected(false)
+	end
+	card.T.r = 0
+	if card.hard_set_T then
+		card:hard_set_T(card.T.x, card.T.y, card.T.w, card.T.h)
+	end
+end
+
+function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_complete)
+	local WELL_DONE_HOLD = 1.0
+	local CARD_DELAY = 0.45
+	local CARD_STAGGER = 0.07
+	local STACK_HOLD = 0.3
+
+	M.set_word_score_animating(true)
+	if WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.pause then
+		WORD_GAME.TimelineTimer.pause()
+	end
+
+	jumble.clear_blank_cards(j.slots)
+	jumble.sync_placement_cards(j.slots)
+	M.align_placement_table()
+
+	local cards = {}
+	for _, card in ipairs(used_cards or {}) do
+		detach_card_for_stack(card)
+		cards[#cards + 1] = card
+	end
+	boss_word_stack.set_cards(cards)
+
+	local function finish_success()
+		for i, card in ipairs(cards) do
+			local tx, ty = boss_word_stack.target_position(i)
+			if card.hard_set_T then
+				card:hard_set_T(tx, ty, card.T.w, card.T.h)
+			end
+		end
+		if on_hand_cleared then
+			on_hand_cleared({ boss_cleared = true })
+		end
+		if on_complete then
+			on_complete({ word = j.puzzle and j.puzzle.boss_word, boss = true })
+		end
+	end
+
+	M.queue_event(Tween({
+		mode = "delayed",
+		delay = 0.05,
+		blocking = true,
+		func = function()
+			word_feedback.show_screen_centered("Well done!", G.C.GOLD, WELL_DONE_HOLD)
+			if play_sfx then
+				play_sfx("coin2", 1, 0.9)
+			end
+			return true
+		end,
+	}))
+
+	M.queue_event(Tween({
+		mode = "delayed",
+		delay = WELL_DONE_HOLD,
+		blocking = true,
+		func = function()
+			for i, card in ipairs(cards) do
+				M.queue_event(Tween({
+					mode = "delayed",
+					delay = (i - 1) * CARD_STAGGER,
+					blockable = false,
+					blocking = false,
+					func = function()
+						local tx, ty = boss_word_stack.target_position(i)
+						Easing.value{
+							ref_table = card.T,
+							ref_value = "x",
+							mod = tx - card.T.x,
+							timer = "REAL",
+							delay = CARD_DELAY,
+							ease = "quad",
+							not_blockable = true,
+						}
+						Easing.value{
+							ref_table = card.T,
+							ref_value = "y",
+							mod = ty - card.T.y,
+							timer = "REAL",
+							delay = CARD_DELAY,
+							ease = "quad",
+							not_blockable = true,
+						}
+						if play_sfx then
+							play_sfx("card_slide1", 0.88 + i * 0.015, 0.55)
+						end
+						return true
+					end,
+				}))
+			end
+
+			local total_wait = (#cards > 0 and ((#cards - 1) * CARD_STAGGER + CARD_DELAY) or 0) + STACK_HOLD
+			M.queue_event(Tween({
+				mode = "delayed",
+				delay = total_wait,
+				blocking = true,
+				func = function()
+					finish_success()
+					return true
+				end,
+			}))
+			return true
+		end,
+	}))
+end
+
 function M.present_word_play_after_cards(jumble, j, result, on_hand_cleared, on_complete)
+	local is_boss_success = j.boss_word_active
+		and result.word == (j.puzzle and j.puzzle.boss_word)
+
 	local function after_cards_cleared()
 		jumble.clear_blank_cards(j.slots)
 		jumble.sync_placement_cards(j.slots)
-		if j.boss_word_active and result.word == (j.puzzle and j.puzzle.boss_word) then
-			M.set_word_score_animating(true)
-			M.align_placement_table()
-			if on_hand_cleared then
-				on_hand_cleared({ boss_cleared = true })
-			end
-			if on_complete then
-				on_complete({ word = result.word, boss = true })
-			end
-			return
-		end
 		if result.cleared then
 			j.total_score = result.new_score
 			M.add_points(result.word_pts)
@@ -414,6 +532,11 @@ function M.present_word_play_after_cards(jumble, j, result, on_hand_cleared, on_
 	if M.triggers_boss_word(result) and result.cleared then
 		finish_used_cards(result.used_cards, true)
 		after_cards_cleared()
+		return
+	end
+
+	if is_boss_success then
+		M.present_boss_word_success(jumble, j, result.used_cards, on_hand_cleared, on_complete)
 		return
 	end
 
