@@ -6,6 +6,7 @@ local state = require("word_game.model.state")
 local deck = require("word_game.model.cards.deck")
 local DissolveFX = require("app.effects.dissolve_fx")
 local Layout = require("word_game.ui.layout")
+local LetterPalette = require("word_game.config.letter_card_palette")
 
 local M = {}
 local unpack_nodes = table.unpack or unpack
@@ -736,13 +737,14 @@ local TRANSFORM_MATERIALIZE_TIME = 0.6
 local BURN_DISSOLVE_COLOURS = { G.C.BLACK, G.C.ORANGE, G.C.RED, G.C.GOLD, G.C.MUTED_GREY }
 local BURN_MATERIALIZE_COLOURS = { G.C.BLACK, G.C.ORANGE, G.C.GOLD, G.C.WHITE }
 
-local function apply_black_market_face(card, item)
-	local front = deck.front(item.letter, "black")
+local function apply_modified_market_face(card, item)
+	local color = LetterPalette.MODIFIED_FACE_COLOR
+	local front = deck.front(item.letter, color)
 	if front and card.apply_face then
-		deck.tag_card(card, item.letter, "black")
+		deck.tag_card(card, item.letter, color)
 		card:apply_face(front, false)
 	end
-	item.color = "black"
+	item.color = color
 end
 
 local function finish_transform_fx()
@@ -754,7 +756,7 @@ local function finish_transform_fx()
 		card.dissolve = 0
 		card.dissolve_wipe = 0
 	end
-	item.color = "black"
+	item.color = LetterPalette.MODIFIED_FACE_COLOR
 	play_sfx("card_slide1", 1.05, 0.9)
 	if broke_after_last_action() then
 		finish_trade()
@@ -768,7 +770,7 @@ end
 local function start_transform_fx(item)
 	local card = item.market_card
 	if not card then
-		item.color = "black"
+		item.color = LetterPalette.MODIFIED_FACE_COLOR
 		refresh_overlay()
 		return
 	end
@@ -791,11 +793,11 @@ local function start_transform_fx(item)
 		colours = BURN_DISSOLVE_COLOURS,
 		fade = { delay = 0.7 * TRANSFORM_DISSOLVE_TIME, duration = 0.3 * TRANSFORM_DISSOLVE_TIME },
 		on_finish = function()
-			apply_black_market_face(card, item)
+			apply_modified_market_face(card, item)
 			card.dissolve = 1
 			card.dissolve_wipe = 0
 			card.dissolve_colours = BURN_MATERIALIZE_COLOURS
-			-- Phase 2: black card re-forms from the same burnt-paper dissolve, reversed.
+			-- Phase 2: modified card re-forms from the same burnt-paper dissolve, reversed.
 			DissolveFX.run(card, {
 				mode = "in",
 				duration = TRANSFORM_MATERIALIZE_TIME,

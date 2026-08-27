@@ -39,6 +39,14 @@ function Game:load_card_definitions()
             atlas = "letters",
             pos = pos,
         }
+        self.P_CARDS["modified_"..letter] = {
+            name = "Modified "..letter,
+            letter = letter,
+            color = "modified",
+            value = letter,
+            atlas = "letters",
+            pos = pos,
+        }
     end
     self.P_CARDS.empty = {name = "Empty", pos = {x = 0, y = 0}}
 

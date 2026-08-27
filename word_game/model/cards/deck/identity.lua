@@ -10,8 +10,10 @@ return function(context)
 
 	function M.front_key(letter, color)
 		if type(letter) ~= "string" or #letter < 1 then return nil end
-		local col = (color == "red") and "red" or "black"
-		return col .. "_" .. letter:sub(1, 1):upper()
+		if color ~= "red" and color ~= "black" and color ~= "modified" then
+			color = "black"
+		end
+		return color .. "_" .. letter:sub(1, 1):upper()
 	end
 
 	function M.front(letter, color)
@@ -169,6 +171,8 @@ return function(context)
 	end
 
 	function M.create_letter_card(letter, color)
+		local LetterPalette = require "word_game.config.letter_card_palette"
+		color = color or LetterPalette.DEFAULT_FACE_COLOR
 		local front = M.front(letter, color)
 		G.playing_card = (G.playing_card or 0) + 1
 		local deck_x = (G.deck and G.deck.T and G.deck.T.x) or 0

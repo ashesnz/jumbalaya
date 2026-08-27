@@ -5,6 +5,7 @@ local CardMotion = require "app.effects.card_motion"
 
 return function(context)
 	local M = context.module
+	local LetterPalette = require "word_game.config.letter_card_palette"
 
 	function M.is_jumble_deck()
 		local wr = G.GAME and G.GAME.word_round
@@ -162,7 +163,7 @@ return function(context)
 		local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
 		j.boss_cards = {}
 		for i, letter in ipairs(letters) do
-			local card = M.create_letter_card(letter, "red")
+			local card = M.create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR)
 			card.boss_temp = true
 			for pi = #(G.playing_cards or {}), 1, -1 do
 				if G.playing_cards[pi] == card then

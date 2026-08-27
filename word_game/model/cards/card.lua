@@ -181,9 +181,9 @@ function Card:apply_face(card, initial)
     end
 
     local Palette = require "word_game.config.letter_card_palette"
-    local card_color = self.config.card.color
+    local card_color = self.config.card.color or Palette.DEFAULT_FACE_COLOR
     local colourblind = G.SETTINGS and G.SETTINGS.colourblind_option
-    local card_colour = Palette.ui_color(card_color, colourblind) or G.C.BLACK
+    local card_colour = Palette.ui_color(card_color, colourblind) or Palette.default_fill(colourblind)
     local letter = self.config.card.letter
     local idx = 0
     if type(letter) == "string" and #letter == 1 then
@@ -196,7 +196,10 @@ function Card:apply_face(card, initial)
         value = letter or self.config.card.value,
         letter_index = idx,
         id = idx,
-        color_tiebreak = card_color == "red" and 0.01 or (card_color == "black" and 0.02 or 0),
+        color_tiebreak = (card_color == "red" and 0.01)
+            or (card_color == "black" and 0.02)
+            or (card_color == "modified" and 0.03)
+            or 0,
         face_tiebreak = 0,
         colour = card_colour,
         times_played = 0

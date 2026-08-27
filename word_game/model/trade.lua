@@ -4,6 +4,7 @@ local economy = require("word_game.config.economy")
 local round_config = require("word_game.config.round_config")
 local state = require("word_game.model.state")
 local deck = require("word_game.model.cards.deck")
+local LetterPalette = require("word_game.config.letter_card_palette")
 
 local M = {}
 
@@ -82,7 +83,7 @@ local function make_market_item(letter)
 	local item = {
 		mode = "market",
 		letter = letter,
-		color = "red",
+		color = LetterPalette.DEFAULT_FACE_COLOR,
 	}
 	item.card = deck.find_deck_card(letter)
 	return item
