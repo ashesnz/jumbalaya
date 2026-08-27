@@ -48,6 +48,8 @@ local function hand_dealt_metrics()
 	return {
 		cx = left + row_w * 0.5,
 		cy = top + row_h * 0.5,
+		top = top,
+		bottom = bottom,
 		gap_w = math.min(math.max(row_w, G.hand.T.w), felt.w * 0.82),
 		inner_h = math.max(row_h, G.hand.T.h),
 	}
@@ -129,10 +131,9 @@ function M.show_above_hand_centered(text, colour, hold, offset_y)
 		return
 	end
 	if not spawn_attention then return end
-	local card_h = G.CARD_H or G.hand.T.h or 1
-	local zone_h = math.max(0.18, card_h * 0.34)
-	local margin = math.max(0.06, card_h * 0.08)
-	local cy = G.hand.T.y - margin - zone_h * 0.5
+	local zone_h = math.max(0.18, row.inner_h * 0.34)
+	local margin = math.max(0.06, row.inner_h * 0.08)
+	local cy = row.top - margin - zone_h * 0.5
 	local scale = math.min(0.78, math.max(0.42, zone_h * 1.55))
 	spawn_attention({
 		text = text,
