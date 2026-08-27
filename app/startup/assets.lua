@@ -64,6 +64,7 @@ function Game:set_render_settings()
 		{ name = 'characters', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Characters.png", px = 88, py = 188, frames = 19, cols = 5, rows = 4 },
 		{ name = 'bin', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Bin.png", px = 249, py = 251, frames = 4, cols = 2, rows = 2 },
 		{ name = 'shuffle_icon', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/shuffle_icon.png", px = 112, py = 112 },
+		{ name = 'remove_placement_icon', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/remove_placement_icon.png", px = 112, py = 112 },
 		{ name = 'play_icon', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/play_icon.png", px = 112, py = 112 },
 		{ name = 'tokens', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/coin_stack.png", px = 521, py = 479 },
 		{ name = 'coin', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/coin.png", px = 521, py = 478 },
@@ -96,6 +97,12 @@ function Game:set_render_settings()
 		end
 		if not love.filesystem.getInfo(path) and spec.name == "boss_banner" then
 			path = "resources/textures/2x/banner.png"
+		end
+		if not love.filesystem.getInfo(path) and spec.name == "shuffle_icon" then
+			path = "resources/textures/2x/shuffle_icon.png"
+		end
+		if not love.filesystem.getInfo(path) and spec.name == "remove_placement_icon" then
+			path = "resources/textures/2x/remove_placement_icon.png"
 		end
 		if not love.filesystem.getInfo(path) and spec.name == "marketplace_bg" then
 			local jpeg = "resources/textures/2x/Marketplace.jpeg"
@@ -148,7 +155,8 @@ function Game:set_render_settings()
 				self.TEXTURE_ATLASES[spec.name].image:setFilter('nearest', 'nearest')
 			end
 			self.TEXTURE_ATLASES[spec.name].type = spec.type
-			if spec.name == "playing_back" or spec.name == "shuffle_icon" or spec.name == "play_icon" or spec.name == "tokens"
+			if spec.name == "playing_back" or spec.name == "shuffle_icon" or spec.name == "remove_placement_icon"
+				or spec.name == "play_icon" or spec.name == "tokens"
 				or spec.name == "coin" or spec.name == "boss_banner" or spec.name == "marketplace_bg"
 				or spec.name == "Jumbalaya" or spec.name == "title_garden"
 				or spec.name == "jumbalaya_base" or spec.name == "jumbalaya_start_a"

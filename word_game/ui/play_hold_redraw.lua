@@ -129,34 +129,8 @@ function M.reset()
 end
 
 local function recall_placement_cards()
-	if G.placement_table and G.placement_table.area and G.placement_table.area.cards then
-		local p_area = G.placement_table.area
-		for i = #p_area.cards, 1, -1 do
-			local card = p_area.cards[i]
-			G.placement_table:on_remove_card(card)
-			p_area:remove_card(card)
-			if G.hand then
-				G.hand:emplace(card)
-			end
-		end
-		if p_area.hard_set_cards then
-			p_area:hard_set_cards()
-		end
-	end
-	if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active() then
-		local wr = G.GAME and G.GAME.word_round
-		if wr and wr.jumble and wr.jumble.slots then
-			WORD_GAME.Jumble.clear_blank_cards(wr.jumble.slots)
-			WORD_GAME.Jumble.sync_placement_cards(wr.jumble.slots)
-		end
-	end
-	local placement_word = require("word_game.model.placement_word")
-	placement_word.clear()
-	if G.hand then
-		if G.hand.clear_selection then G.hand:clear_selection() end
-		if G.hand.set_ranks then G.hand:set_ranks() end
-		if G.hand.relayout then G.hand:relayout() end
-		if G.hand.hard_set_cards then G.hand:hard_set_cards() end
+	if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.recall_placement_cards then
+		WORD_GAME.HandShuffle.recall_placement_cards()
 	end
 end
 

@@ -297,6 +297,9 @@ function M.word_fits_pattern(word, puzzle)
 	end
 	if #word ~= #puzzle.pattern then return false end
 	if not pattern_matches(puzzle.pattern, word) then return false end
+	if puzzle.boss_word then
+		return true
+	end
 	return Dictionary and Dictionary.is_valid(word)
 end
 

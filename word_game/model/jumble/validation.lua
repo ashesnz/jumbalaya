@@ -206,11 +206,12 @@ function M.validate_current()
 	if not M.word_fits_pattern(word, j.puzzle) then
 		return nil, "Does not match"
 	end
-	if not Dictionary or not Dictionary.is_valid(word) then
+	if j.puzzle and j.puzzle.boss_word then
+		if word ~= j.puzzle.boss_word then
+			return nil, "Wrong word!"
+		end
+	elseif not Dictionary or not Dictionary.is_valid(word) then
 		return nil, "Not a valid word"
-	end
-	if j.puzzle and j.puzzle.boss_word and word ~= j.puzzle.boss_word then
-		return nil, "Wrong word!"
 	end
 	local round = require("word_game.model.round")
 	if round.is_word_played(word) then

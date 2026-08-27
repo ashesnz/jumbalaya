@@ -217,4 +217,45 @@ T.describe("Stage 1-3 boss words", function()
 		T.assert_almost_equal(x2, stack.x, 0.001)
 		T.assert_almost_equal(y2, stack.y + stack.step_y, 0.001)
 	end)
+
+	T.it("accepts a filled nine-letter boss word even when it is absent from the dictionary", function()
+		local jumble = require("word_game.model.jumble")
+		Dictionary.load()
+		T.assert_false(Dictionary.is_valid("VEGETABLE"), "Nine-letter boss words are outside the normal dictionary length cap")
+
+		local puzzle = {
+			kind = "rigid",
+			pattern = "___E__B__",
+			boss_word = "VEGETABLE",
+			display = "___E__B__",
+		}
+		local slots = jumble.parse_slots(puzzle)
+		local function card(letter)
+			return { ability = { letter = letter } }
+		end
+		slots[1].card = card("V")
+		slots[2].card = card("E")
+		slots[3].card = card("G")
+		slots[5].card = card("T")
+		slots[6].card = card("A")
+		slots[8].card = card("L")
+		slots[9].card = card("E")
+
+		G.GAME = G.GAME or {}
+		G.GAME.word_round = {
+			mode = "jumble",
+			played_words = {},
+			jumble = {
+				boss_word_active = true,
+				puzzle = puzzle,
+				slots = slots,
+			},
+		}
+
+		T.assert_equal(jumble.build_word(slots), "VEGETABLE")
+		T.assert_true(jumble.word_fits_pattern("VEGETABLE", puzzle))
+		local word, err = jumble.validate_current()
+		T.assert_equal(word, "VEGETABLE", "validation error: " .. tostring(err))
+		T.assert_nil(err)
+	end)
 end)
