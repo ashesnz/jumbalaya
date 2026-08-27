@@ -10,12 +10,12 @@ local Easing = require "app.effects.easing"
 function build_notify_alert(_achievement, _type)
   local _c = G.P_CENTERS and G.P_CENTERS[_achievement]
   local _atlas = 
-    _type == 'Companion' and (G.TEXTURE_ATLASES["Companion"] or G.TEXTURE_ATLASES["centers"] or G.TEXTURE_ATLASES["cards_1"]) or
-    _type == 'Perk' and (G.TEXTURE_ATLASES["Perk"] or G.TEXTURE_ATLASES["centers"] or G.TEXTURE_ATLASES["cards_1"]) or
-    _type == 'Back' and (G.TEXTURE_ATLASES["centers"] or G.TEXTURE_ATLASES["cards_1"]) or
-    (G.TEXTURE_ATLASES["icons"] or G.TEXTURE_ATLASES["centers"] or G.TEXTURE_ATLASES["cards_1"])
+    _type == 'Companion' and (G.TEXTURE_ATLASES["Companion"] or G.TEXTURE_ATLASES["centers"] or G.TEXTURE_ATLASES["letter_frame"]) or
+    _type == 'Perk' and (G.TEXTURE_ATLASES["Perk"] or G.TEXTURE_ATLASES["centers"] or G.TEXTURE_ATLASES["letter_frame"]) or
+    _type == 'Back' and (G.TEXTURE_ATLASES["centers"] or G.TEXTURE_ATLASES["letter_frame"]) or
+    (G.TEXTURE_ATLASES["icons"] or G.TEXTURE_ATLASES["centers"] or G.TEXTURE_ATLASES["letter_frame"])
 
-  _atlas = _atlas or {px = 71, py = 95, name = "cards_1"}
+  _atlas = _atlas or {px = 71, py = 95, name = "letter_frame"}
   local px = _atlas.px or 71
   local py = _atlas.py or 95
 

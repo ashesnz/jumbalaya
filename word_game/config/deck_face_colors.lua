@@ -2,7 +2,7 @@
 	deck_face_colors.lua - Letter-card face fill colours.
 
 	Default red is #7e1011; modified (marketplace transform) is #16151a.
-	Black is sampled from JumbalayaDeck.png by _tools/build_letter_atlas.py.
+	Black matches the legacy JumbalayaDeck black row.
 ]]
 
 return {

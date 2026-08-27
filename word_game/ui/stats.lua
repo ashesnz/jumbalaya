@@ -275,7 +275,7 @@ function build_high_scores_row(score)
       {n=G.UI.TEXT, config={text = " ("..G.PROFILES[G.SETTINGS.profile].high_scores["current_streak"].amt..")", scale = 0.45, colour = G.C.MUTED_GREY}}
     }
   elseif score == 'hand' then 
-    local chip_sprite = Sprite(0,0,0.4,0.4,G.TEXTURE_ATLASES["ui_"..(G.SETTINGS.colourblind_option and 2 or 1)], {x=0, y=0})
+    local chip_sprite = Sprite(0,0,0.4,0.4,G.TEXTURE_ATLASES.ui_1, {x=0, y=0})
     chip_sprite.states.drag.can = false
     score_tab = {
       {n=G.UI.COLUMN, config={align = "cm"}, nodes={

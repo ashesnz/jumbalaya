@@ -34,7 +34,7 @@ function M.settings()
     return {
         COMP = {name = '', submission_name = nil, score = 0},
         DEMO = {total_uptime = 0, timed_CTA_shown = false, win_CTA_shown = false, quit_CTA_shown = false},
-        ACHIEVEMENTS_EARNED = {}, crashreports = false, colourblind_option = false,
+        ACHIEVEMENTS_EARNED = {}, crashreports = false,
         skip_title_screen = false, title_screen = true, language = 'en-us', screenshake = true,
         rumble = M.flags.RUMBLE, play_button_pos = 2, GAMESPEED = 1, paused = false,
         SOUND = {volume = 50, music_volume = 60, game_sounds_volume = 100},

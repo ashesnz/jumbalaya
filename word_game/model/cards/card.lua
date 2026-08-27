@@ -182,8 +182,7 @@ function Card:apply_face(card, initial)
 
     local Palette = require "word_game.config.letter_card_palette"
     local card_color = self.config.card.color or Palette.DEFAULT_FACE_COLOR
-    local colourblind = G.SETTINGS and G.SETTINGS.colourblind_option
-    local card_colour = Palette.ui_color(card_color, colourblind) or Palette.default_fill(colourblind)
+    local card_colour = Palette.ui_color(card_color) or Palette.default_fill()
     local letter = self.config.card.letter
     local idx = 0
     if type(letter) == "string" and #letter == 1 then

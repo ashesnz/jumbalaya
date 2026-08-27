@@ -1,0 +1,77 @@
+# ==============================================================================
+# Jumbalaya — Cursor ignore list
+# Reduces indexing noise and keeps AI context focused on game source code.
+# Syntax matches .gitignore; entries here also apply beyond what Cursor ignores
+# by default. Files in .gitignore are already excluded unless re-included with !.
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# IDE / editor / OS (no reasoning value for the AI)
+# ------------------------------------------------------------------------------
+.idea/
+.run/
+.junie/
+*.iml
+.DS_Store
+
+# ------------------------------------------------------------------------------
+# Python tooling & asset build pipelines (large, not runtime game code)
+# ------------------------------------------------------------------------------
+_tools/
+.venv-textures/
+**/.venv/
+**/__pycache__/
+**/.cache/
+
+# ------------------------------------------------------------------------------
+# Binary & generated assets (textures, audio, fonts — already default-ignored
+# for indexing, but explicit here blocks @-mentions and broader AI access)
+# ------------------------------------------------------------------------------
+resources/textures/
+resources/sounds/
+resources/fonts/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.mp3
+*.wav
+*.ogg
+*.flac
+*.aac
+*.ttf
+*.otf
+*.woff
+*.woff2
+
+# ------------------------------------------------------------------------------
+# Reference / backup codebases (Balatro fork — 80MB+, not this project)
+# ------------------------------------------------------------------------------
+AlphaCardsBackup/
+
+# ------------------------------------------------------------------------------
+# Large static data (word lists, controller DB — rarely needed for code edits)
+# ------------------------------------------------------------------------------
+dictionary/words_set.lua
+resources/gamecontrollerdb.txt
+resources/dictionary/
+
+# ------------------------------------------------------------------------------
+# Git internals, logs, runtime artifacts
+# ------------------------------------------------------------------------------
+.git/
+*.log
+error-output.txt
+*.love
+*.jkr
+!version.jkr
+
+# ------------------------------------------------------------------------------
+# Native / platform binaries (copy locally, never commit)
+# ------------------------------------------------------------------------------
+*.so
+*.dylib
+*.dll
+luasteam.*
+libsteam_api.*

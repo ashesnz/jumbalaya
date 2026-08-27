@@ -13,14 +13,14 @@ function M.load_shaders(game)
 end
 
 function M.init_shared_sprites(game)
-	local atlas = game.TEXTURE_ATLASES.cards_1 or game.TEXTURE_ATLASES.centers
+	local atlas = game.TEXTURE_ATLASES.letter_frame or game.TEXTURE_ATLASES.playing_back
 	if atlas then
 		game.shared_debuff = Sprite(0, 0, game.CARD_W, game.CARD_H, atlas, { x = 0, y = 0 })
 		game.shared_undiscovered_companion = Sprite(0, 0, game.CARD_W, game.CARD_H, atlas, { x = 0, y = 0 })
 		game.shared_undiscovered_charm = Sprite(0, 0, game.CARD_W, game.CARD_H, atlas, { x = 0, y = 0 })
 	end
 
-	local seal_atlas = game.TEXTURE_ATLASES.cards_1 or game.TEXTURE_ATLASES.centers
+	local seal_atlas = game.TEXTURE_ATLASES.letter_frame or game.TEXTURE_ATLASES.playing_back
 	game.shared_seals = seal_atlas and {
 		Gold = Sprite(0, 0, game.CARD_W, game.CARD_H, seal_atlas, { x = 0, y = 0 }),
 		Purple = Sprite(0, 0, game.CARD_W, game.CARD_H, seal_atlas, { x = 0, y = 0 }),
@@ -46,8 +46,6 @@ function Game:set_render_settings()
 	self.animation_atli = {}
 	---@type GameAtlasSpec[]
 	self.asset_atli = {
-		{ name = "cards_1", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/JumbalayaDeck.png", px = 71, py = 95 },
-		{ name = "cards_2", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/JumbalayaDeck_opt2.png", px = 71, py = 95 },
 		{ name = "letters", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/JumbalayaLetters.png", px = 71, py = 95 },
 		{ name = "letter_frame", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/JumbalayaCardFrame.png", px = 71, py = 95 },
 		{ name = "playing_back", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/PlayingDeck.png", px = 71, py = 95 },
@@ -55,7 +53,6 @@ function Game:set_render_settings()
 		{ name = "Perk", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Perks.png", px = 71, py = 95 },
 		{ name = "Bundle", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/bundles.png", px = 71, py = 95 },
 		{ name = "ui_1", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/ui_assets.png", px = 18, py = 18 },
-		{ name = "ui_2", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/ui_assets_opt2.png", px = 18, py = 18 },
 		{ name = "Jumbalaya", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Jumbalaya.png", px = 466.5, py = 133.5 },
 		{ name = "jumbalaya_base", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Jumbalaya_base.png", px = 933, py = 267 },
 		{ name = "jumbalaya_start_a", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Jumbalaya_start_A.png", px = 103, py = 143 },
@@ -173,7 +170,7 @@ function Game:set_render_settings()
 		end
 	end
 	if not self.TEXTURE_ATLASES.centers then
-		self.TEXTURE_ATLASES.centers = self.TEXTURE_ATLASES.cards_1 or self.TEXTURE_ATLASES.playing_back
+		self.TEXTURE_ATLASES.centers = self.TEXTURE_ATLASES.letter_frame or self.TEXTURE_ATLASES.playing_back
 	end
 	if not self.TEXTURE_ATLASES.Companion then
 		self.TEXTURE_ATLASES.Companion = self.TEXTURE_ATLASES.characters or self.TEXTURE_ATLASES.centers

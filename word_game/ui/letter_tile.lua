@@ -39,8 +39,7 @@ end
 
 -- Renders a single letter/card image
 function LetterTile.ui_node(snap, scale)
-    local colourblind = G.SETTINGS and G.SETTINGS.colourblind_option
-    local palette = Palette.scheme(colourblind)
+    local palette = Palette.scheme()
     local fill = palette[snap.letter_color] or palette.black
     local tile_w = 0.52 * scale
     local tile_h = 0.68 * scale

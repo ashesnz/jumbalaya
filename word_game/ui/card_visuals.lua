@@ -144,7 +144,7 @@ function Card:set_sprites(_center, _front)
 				end
 			end
 		else
-			local face_atlas = G.TEXTURE_ATLASES[_front.atlas] or G.TEXTURE_ATLASES["cards_"..(G.SETTINGS.colourblind_option and 2 or 1)]
+			local face_atlas = G.TEXTURE_ATLASES[_front.atlas] or G.TEXTURE_ATLASES.letters
 			local face_pos = self.config.card and self.config.card.pos
 			if self.children.front then
 				self.children.front.atlas = face_atlas

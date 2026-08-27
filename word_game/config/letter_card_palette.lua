@@ -22,31 +22,26 @@ M.schemes = {
 		black = DeckColors.black,
 		modified = DeckColors.modified,
 	},
-	colourblind = {
-		red = { 0.95, 0.55, 0.10, 1 },
-		black = { 0.20, 0.45, 0.85, 1 },
-		modified = DeckColors.modified,
-	},
 }
 
 --- UI/history tiles reuse the same fills.
 M.tile = M.schemes
 
-function M.scheme(colourblind)
-	return colourblind and M.schemes.colourblind or M.schemes.default
+function M.scheme()
+	return M.schemes.default
 end
 
-function M.fill(color_key, colourblind)
-	local scheme = M.scheme(colourblind)
+function M.fill(color_key)
+	local scheme = M.scheme()
 	return scheme[color_key] or scheme[M.DEFAULT_FACE_COLOR]
 end
 
-function M.ui_color(color_key, colourblind)
-	return M.fill(color_key, colourblind)
+function M.ui_color(color_key)
+	return M.fill(color_key)
 end
 
-function M.default_fill(colourblind)
-	return M.fill(M.DEFAULT_FACE_COLOR, colourblind)
+function M.default_fill()
+	return M.fill(M.DEFAULT_FACE_COLOR)
 end
 
 return M

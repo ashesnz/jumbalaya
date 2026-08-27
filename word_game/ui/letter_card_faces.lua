@@ -4,10 +4,6 @@ local Palette = require "word_game.config.letter_card_palette"
 
 local M = {}
 
-function M.colourblind()
-	return G.SETTINGS and G.SETTINGS.colourblind_option
-end
-
 function M.glyph_pos(letter)
 	if type(letter) ~= "string" or #letter < 1 then
 		return { x = 0, y = 0 }
@@ -20,7 +16,7 @@ function M.glyph_pos(letter)
 end
 
 function M.fill_color(color_key)
-	return Palette.fill(color_key, M.colourblind())
+	return Palette.fill(color_key)
 end
 
 function M.is_letter_face(front)
