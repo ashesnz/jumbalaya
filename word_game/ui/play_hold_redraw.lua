@@ -99,6 +99,8 @@ function M.can_hold()
 	if animating then return false end
 	if G.GAME and G.GAME.word_score_animating then return false end
 	if G.GAME and G.GAME.hand_redraw_animating then return false end
+	if G.GAME and G.GAME.hand_shuffle_animating then return false end
+	if G.GAME and G.GAME.placement_recall_animating then return false end
 	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
 	if gameplay_overlays_active() then return false end
 	local btn = play_button_uie()

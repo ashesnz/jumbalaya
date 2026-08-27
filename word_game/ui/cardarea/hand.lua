@@ -27,7 +27,7 @@ function M.relayout(self)
 		local start_x = self.T.x + (self.T.w - group_w) / 2
 		local fan_n = G.TABLE_HAND_SIZE or self.config.card_limit or 7
 		for k, card in ipairs(self.cards) do
-			if not card.states.drag.is then
+			if not card.states.drag.is and not card.shuffle_hop then
 				local slot = k + (fan_n - n) * 0.5
 				card.T.r = 0.2 * (-fan_n / 2 - 0.5 + slot) / fan_n + 0.02 * math.sin(2 * G.TIMERS.REAL + card.T.x)
 				card.T.x = start_x + (k - 1) * card_w * spacing + 0.5 * (card_w - card.T.w)
@@ -41,10 +41,30 @@ end
 
 function M.draw_layer(self, v, draw_card_layer)
 	if self.config.type ~= 'hand' then return end
+	local resting, hopping = {}, {}
 	for i = 1, #self.cards do
-		if self.cards[i] ~= G.INPUT.focused.target or self == G.hand then
-			draw_card_layer(self.cards[i], v)
+		local card = self.cards[i]
+		if card.shuffle_hop then
+			hopping[#hopping + 1] = card
+		else
+			resting[#resting + 1] = card
 		end
+	end
+	local function by_x(a, b)
+		return a.T.x + a.T.w / 2 < b.T.x + b.T.w / 2
+	end
+	table.sort(resting, by_x)
+	table.sort(hopping, by_x)
+	local function draw_card(card)
+		if card ~= G.INPUT.focused.target or self == G.hand then
+			draw_card_layer(card, v)
+		end
+	end
+	for _, card in ipairs(resting) do
+		draw_card(card)
+	end
+	for _, card in ipairs(hopping) do
+		draw_card(card)
 	end
 end
 

@@ -2,6 +2,8 @@
 
 local state = require("word_game.model.state")
 local felt_layout = require("word_game.ui.layout.felt")
+local hand_shuffle_anim = require("word_game.ui.hand_shuffle_anim")
+local hand_placement_recall_anim = require("word_game.ui.hand_placement_recall_anim")
 local characters = { intro_step_keys = function() return nil end, intro_uses_play_button = function() return true end }
 
 local M = {}
@@ -70,42 +72,38 @@ local function shuffle_icon_sprite(size)
 	return action_icon_sprite(size, "shuffle_icon")
 end
 
-local function remove_icon_sprite(size)
-	return action_icon_sprite(size, "remove_placement_icon")
+local function set_shuffle_icon_sprite(sprite, atlas_name, size)
+	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES[atlas_name]
+	if not sprite or not atlas or not atlas.image then return end
+	local icon_size = size * 0.92
+	sprite.atlas = atlas
+	sprite.scale = { x = atlas.px, y = atlas.py }
+	sprite.T.w = icon_size
+	sprite.T.h = icon_size
+	sprite:set_sprite_pos({ x = 0, y = 0 })
+	if sprite.refresh_scale then
+		sprite:refresh_scale()
+	end
+	sprite.states.visible = true
 end
 
 local function set_shuffle_display(shuffle_btn, mode)
 	if not shuffle_btn then return end
-	local shuffle_uie = find_node(shuffle_btn, "hand_shuffle_icon")
-	local remove_uie = find_node(shuffle_btn, "hand_remove_icon")
-	if shuffle_uie then
-		shuffle_uie.states.visible = mode == "shuffle"
-		if shuffle_uie.config.object then
-			shuffle_uie.config.object.states.visible = mode == "shuffle"
-		end
-	end
-	if remove_uie then
-		remove_uie.states.visible = mode == "remove"
-		if remove_uie.config.object then
-			remove_uie.config.object.states.visible = mode == "remove"
-		end
-	end
+	local icon_uie = find_node(shuffle_btn, "hand_shuffle_icon")
+	local sprite = icon_uie and icon_uie.config.object
+	if not sprite then return end
+	local size = button_size()
+	local atlas_name = mode == "remove" and "remove_placement_icon" or "shuffle_icon"
+	set_shuffle_icon_sprite(sprite, atlas_name, size)
 end
 
 local function shuffle_button_def(size)
-	local nodes = {}
 	local shuffle_sprite = shuffle_icon_sprite(size)
-	local remove_sprite = remove_icon_sprite(size)
+	local nodes = {}
 	if shuffle_sprite then
 		nodes[#nodes + 1] = {
 			n = G.UI.OBJECT,
 			config = { id = "hand_shuffle_icon", object = shuffle_sprite },
-		}
-	end
-	if remove_sprite then
-		nodes[#nodes + 1] = {
-			n = G.UI.OBJECT,
-			config = { id = "hand_remove_icon", object = remove_sprite },
 		}
 	end
 	return {
@@ -207,6 +205,7 @@ local function snap_bar(bar)
 end
 
 local pos_sig = nil
+local locked_anchors = nil
 local SNAP_EPS = 0.004
 
 local function layout_pos_sig()
@@ -223,21 +222,26 @@ local function layout_pos_sig()
 end
 
 local function button_anchors()
+	if locked_anchors and locked_anchors.sig == pos_sig then
+		return locked_anchors
+	end
 	local size = button_size()
 	local gap = play_gap()
-	local hand_size = G.TABLE_HAND_SIZE or (G.hand and G.hand.config.card_limit) or 7
+	local hand_size = G.TABLE_HAND_SIZE or 7
 	local hand_w = get_hand_area_width(hand_size)
 	local hand_h = (G.CARD_H or 1.4) * 0.95
 	local felt = felt_layout.hand_felt_rect()
 	local hand_x = felt.x + math.max(0, (felt.w - hand_w) * 0.5)
 	local hand_y = G.TILE_H - hand_h - HAND_BOTTOM_MARGIN
 	local center_y = hand_y + hand_h * 0.5
-	return {
+	locked_anchors = {
+		sig = pos_sig,
 		size = size,
 		shuffle_x = hand_x - gap - size,
 		play_x = hand_x + hand_w + gap,
 		y = center_y - size * 0.5,
 	}
+	return locked_anchors
 end
 
 local function room_center_offset(x, y, size)
@@ -287,7 +291,7 @@ local function snap_hand_cards()
 		if card.states and card.states.drag and card.states.drag.is then
 			goto continue
 		end
-		if card.bounce then
+		if card.bounce or card.shuffle_hop then
 			goto continue
 		end
 		if card.hard_set_T then
@@ -328,6 +332,23 @@ local function place_bar(bar, x, y, size)
 	snap_bar(bar)
 end
 
+local function place_action_bars()
+	if not G.ROOM_ATTACH then return end
+	local sig = layout_pos_sig()
+	if locked_anchors and locked_anchors.sig ~= sig then
+		locked_anchors = nil
+	end
+	pos_sig = sig
+	local anchors = button_anchors()
+	local size = anchors.size
+	if G.hand_shuffle_bar and not G.hand_shuffle_bar.REMOVED then
+		place_bar(G.hand_shuffle_bar, anchors.shuffle_x, anchors.y, size)
+	end
+	if G.hand_action_bar and not G.hand_action_bar.REMOVED then
+		place_bar(G.hand_action_bar, anchors.play_x, anchors.y, size)
+	end
+end
+
 function M.play_button_uie()
 	if not G.hand_action_bar or G.hand_action_bar.REMOVED then return nil end
 	return G.hand_action_bar:find_node_by_id("hand_play_button")
@@ -362,7 +383,8 @@ function M.placement_has_cards()
 	return false
 end
 
-function M.recall_placement_cards()
+function M.recall_placement_cards(opts)
+	opts = opts or {}
 	if placement_area() and placement_area().cards then
 		local p_area = placement_area()
 		for i = #p_area.cards, 1, -1 do
@@ -395,8 +417,10 @@ function M.recall_placement_cards()
 		if G.hand.clear_selection then G.hand:clear_selection() end
 		if G.hand.set_ranks then G.hand:set_ranks() end
 		if G.hand.relayout then G.hand:relayout() end
-		if G.hand.hard_set_cards then G.hand:hard_set_cards() end
-		if G.hand.snap_VT then G.hand:snap_VT() end
+		if not opts.skip_hand_snap then
+			if G.hand.hard_set_cards then G.hand:hard_set_cards() end
+			if G.hand.snap_VT then G.hand:snap_VT() end
+		end
 	end
 end
 
@@ -404,7 +428,14 @@ function M.return_placement_cards_to_hand()
 	if not M.placement_has_cards() then return end
 	if G.GAME and G.GAME.hand_redraw_animating then return end
 	if G.GAME and G.GAME.word_score_animating then return end
+	if G.GAME and G.GAME.hand_shuffle_animating then return end
+	if G.GAME and G.GAME.placement_recall_animating then return end
 	if G.INPUT and G.INPUT.dragging and G.INPUT.dragging.target then return end
+	if hand_placement_recall_anim.animate(function()
+		M.sync_visibility()
+	end) then
+		return
+	end
 	M.recall_placement_cards()
 	M.sync_visibility()
 	if play_sfx then
@@ -415,16 +446,9 @@ end
 function M.sync_position()
 	if not G.hand or not G.ROOM_ATTACH then return end
 	local sig = layout_pos_sig()
-	if sig == pos_sig then return end
-	pos_sig = sig
-	local anchors = button_anchors()
-	local size = anchors.size
-	if G.hand_shuffle_bar and not G.hand_shuffle_bar.REMOVED then
-		place_bar(G.hand_shuffle_bar, anchors.shuffle_x, anchors.y, size)
-	end
-	if G.hand_action_bar and not G.hand_action_bar.REMOVED then
-		place_bar(G.hand_action_bar, anchors.play_x, anchors.y, size)
-	end
+	if sig == pos_sig and locked_anchors then return end
+	locked_anchors = nil
+	place_action_bars()
 end
 
 function M.visible()
@@ -520,15 +544,7 @@ end
 
 function M.stabilize()
 	if not G.hand or (not G.hand_action_bar and not G.hand_shuffle_bar) then return end
-	M.sync_position()
-	if G.hand_action_bar and not G.hand_action_bar.REMOVED then
-		refresh_bar_tree(G.hand_action_bar)
-		snap_bar(G.hand_action_bar)
-	end
-	if G.hand_shuffle_bar and not G.hand_shuffle_bar.REMOVED then
-		refresh_bar_tree(G.hand_shuffle_bar)
-		snap_bar(G.hand_shuffle_bar)
-	end
+	place_action_bars()
 end
 
 function M.stabilize_table_board()
@@ -562,6 +578,11 @@ M.sync_action_buttons = M.sync_visibility
 
 function M.invalidate_layout()
 	pos_sig = nil
+	locked_anchors = nil
+end
+
+function M.is_animating()
+	return hand_shuffle_anim.is_animating() or hand_placement_recall_anim.is_animating()
 end
 
 function M.shuffle_hand()
@@ -569,15 +590,11 @@ function M.shuffle_hand()
 	if not G.hand or #G.hand.cards < 2 then return end
 	if G.GAME and G.GAME.hand_redraw_animating then return end
 	if G.GAME and G.GAME.word_score_animating then return end
+	if G.GAME and G.GAME.hand_shuffle_animating then return end
+	if G.GAME and G.GAME.placement_recall_animating then return end
 	if G.INPUT and G.INPUT.dragging and G.INPUT.dragging.target then return end
 	G.hand:clear_selection()
-	G.hand:shuffle("hand_shuffle")
-	G.hand:relayout()
-	G.hand:snap_VT()
-	G.hand:hard_set_cards()
-	if play_sfx then
-		play_sfx("hover_card")
-	end
+	hand_shuffle_anim.animate(G.hand)
 end
 
 function M.ensure()
@@ -591,8 +608,7 @@ function M.ensure()
 			or G.hand_action_bar:find_node_by_id("play_hand_icon_text"))
 	local has_shuffle = G.hand_shuffle_bar
 		and not G.hand_shuffle_bar.REMOVED
-		and (G.hand_shuffle_bar:find_node_by_id("hand_shuffle_icon")
-			or G.hand_shuffle_bar:find_node_by_id("hand_remove_icon"))
+		and G.hand_shuffle_bar:find_node_by_id("hand_shuffle_icon")
 	if has_play and has_shuffle then
 		M.sync_visibility()
 		return
@@ -603,6 +619,7 @@ function M.ensure()
 
 	local size = button_size()
 	pos_sig = nil
+	locked_anchors = nil
 	G.hand_shuffle_bar = LayoutView{
 		definition = {
 			n = G.UI.ROOT,
@@ -638,6 +655,7 @@ end
 
 function M.destroy()
 	pos_sig = nil
+	locked_anchors = nil
 	if G.hand_shuffle_bar then
 		G.hand_shuffle_bar:remove()
 		G.hand_shuffle_bar = nil

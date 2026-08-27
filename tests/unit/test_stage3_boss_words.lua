@@ -191,7 +191,6 @@ T.describe("Stage 1-3 boss words", function()
 	end)
 
 	T.it("stacks boss word cards below the timer with half-card overlap", function()
-		local felt = require("word_game.ui.layout.felt")
 		local layout = require("word_game.ui.layout.placement")
 		local boss_word_stack = require("word_game.ui.boss_word_stack")
 		G.GAME = {
@@ -204,11 +203,20 @@ T.describe("Stage 1-3 boss words", function()
 		G.CARD_W = 2
 		G.CARD_H = 2.8
 		G.ROOM = { T = { x = 0, y = 0, w = 20, h = 11.5 } }
+		G.hand = { T = { x = 3.2, y = 8.0, w = 10.5, h = 2.8 } }
+		G.placement_table = { area = { T = { x = 0.6, y = 2.0, w = 18.0, h = 2.8 } } }
 		local stack = boss_word_stack.stack_layout()
 		local timer = layout.timeline_rect()
-		local col = felt.play_column()
 		T.assert_true(stack.y >= timer.y + timer.h - 0.01, "Stack should start below the timer")
-		T.assert_true(stack.x >= col.x - 0.01, "Stack should align to the left play column")
+		T.assert_true(boss_word_stack.clears_gameplay_bounds(), "Stack should sit left of hand and placement areas")
+		T.assert_true(
+			stack.x + stack.card_w < G.placement_table.area.T.x,
+			"Stack should not overlap the placement row"
+		)
+		T.assert_true(
+			stack.x + stack.card_w < G.hand.T.x,
+			"Stack should not overlap the dealt hand"
+		)
 		T.assert_almost_equal(stack.step_y, stack.card_h * 0.5, 0.001)
 		local x1, y1 = boss_word_stack.target_position(1)
 		local x2, y2 = boss_word_stack.target_position(2)
