@@ -127,7 +127,8 @@ end
 
 function M.on_hand_cleared(opts)
 	opts = opts or {}
-	if WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.is_jumble_deck
+	if not opts.boss_cleared
+		and WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.is_jumble_deck
 		and WORD_GAME.Deck.is_jumble_deck()
 		and WORD_GAME.Deck.populate_jumble_deck then
 		WORD_GAME.Deck.populate_jumble_deck()

@@ -17,6 +17,38 @@ function M.is_bonus_card(card)
 	return card and card.bonus_card
 end
 
+function M.detach(card)
+	if not card then return end
+	if G.placement_table and G.placement_table.on_remove_card then
+		G.placement_table:on_remove_card(card)
+	end
+	if card.area and card.area.remove_card then
+		card.area:remove_card(card)
+	end
+	if card.remove_from_area then
+		card:remove_from_area()
+	else
+		card.area = nil
+		card.parent = nil
+	end
+	if card.states and card.states.drag then
+		card.states.drag.can = true
+		card.states.drag.is = false
+	end
+	if card.states and card.states.collide then
+		card.states.collide.can = true
+	end
+	if card.states then
+		card.states.visible = true
+	end
+	if card.set_selected then
+		card:set_selected(false)
+	end
+	if card.T then
+		card.T.r = 0
+	end
+end
+
 function M.is_active()
 	return stack_cards ~= nil and #stack_cards > 0
 end
@@ -38,6 +70,7 @@ function M.stage_cards(cards)
 	stack_cards = {}
 	for _, card in ipairs(cards or {}) do
 		if card and not card.REMOVED then
+			M.detach(card)
 			stack_cards[#stack_cards + 1] = card
 		end
 	end
@@ -122,19 +155,29 @@ end
 
 function M.sync_positions()
 	if not stack_cards or stack_animating then return end
+	local placement = G.placement_table and G.placement_table.area
 	for i, card in ipairs(stack_cards) do
-		if card and not card.REMOVED and not card.area then
-			local tx, ty = M.target_position(i)
-			if card.hard_set_T then
-				card:hard_set_T(tx, ty, card.T.w, card.T.h)
-			else
-				card.T.x, card.T.y = tx, ty
-			end
-			if card.states and card.states.drag then
-				card.states.drag.can = true
-			end
-			if card.states and card.states.collide then
-				card.states.collide.can = true
+		if card and not card.REMOVED then
+			local in_play = card.area and (card.area == placement or card.area == G.hand)
+			if not in_play then
+				if card.area then
+					M.detach(card)
+				end
+				local tx, ty = M.target_position(i)
+				if card.hard_set_T then
+					card:hard_set_T(tx, ty, card.T.w, card.T.h)
+				else
+					card.T.x, card.T.y = tx, ty
+				end
+				if card.states and card.states.drag then
+					card.states.drag.can = true
+				end
+				if card.states and card.states.collide then
+					card.states.collide.can = true
+				end
+				if card.states then
+					card.states.visible = true
+				end
 			end
 		end
 	end
@@ -145,17 +188,11 @@ function M.promote_to_bonus(cards)
 	stack_cards = {}
 	for _, card in ipairs(cards or {}) do
 		if card and not card.REMOVED then
+			M.detach(card)
 			card.bonus_card = true
 			card.boss_temp = nil
 			card.placement_locked = nil
 			card.pinned = nil
-			if card.states and card.states.drag then
-				card.states.drag.can = true
-				card.states.drag.is = false
-			end
-			if card.states and card.states.collide then
-				card.states.collide.can = true
-			end
 			if card.ability then
 				card.ability.bonus = M.BONUS_POINTS
 			end
@@ -175,13 +212,26 @@ local function sync_card_transform(card)
 	end
 end
 
-function M.animate_cards_to_stack(queue_event, easing_mod, opts)
+local function snap_card_to(card, tx, ty)
+	if card.hard_set_T then
+		card:hard_set_T(tx, ty, card.T.w, card.T.h)
+	else
+		card.T.x, card.T.y = tx, ty
+		sync_card_transform(card)
+	end
+end
+
+local function smoothstep(u)
+	return u * u * (3 - 2 * u)
+end
+
+function M.animate_cards_to_stack(queue_event, _easing_mod, opts)
 	opts = opts or {}
 	local cards = stack_cards or {}
 	local card_delay = opts.card_delay or 0.45
 	local stagger = opts.stagger or 0.07
 	local hold = opts.hold or 0.3
-	local Easing = easing_mod or require("app.effects.easing")
+	local initial_delay = opts.initial_delay or 0
 
 	if #cards == 0 then
 		if opts.on_complete then opts.on_complete() end
@@ -190,72 +240,84 @@ function M.animate_cards_to_stack(queue_event, easing_mod, opts)
 
 	stack_animating = true
 
-	local function ease_card_axis(card, axis, target, delay)
-		local start = card.T[axis]
-		Easing.value{
-			ref_table = card.T,
-			ref_value = axis,
-			mod = target - start,
-			timer = "REAL",
-			delay = delay,
-			ease = "quad",
-			not_blockable = false,
-		}
-		if card.VT then
-			Easing.value{
-				ref_table = card.VT,
-				ref_value = axis,
-				mod = target - start,
-				timer = "REAL",
-				delay = delay,
-				ease = "quad",
-				not_blockable = false,
-			}
-		end
+	local function finish()
+		stack_animating = false
+		if opts.on_complete then opts.on_complete() end
 	end
 
-	local function queue_completion(delay)
-		queue_event(Tween({
-			mode = "delayed",
-			delay = delay,
-			blocking = false,
-			func = function()
-				stack_animating = false
-				if opts.on_complete then opts.on_complete() end
-				return true
-			end,
-		}))
+	local can_queue = queue_event and G.TIMELINE and G.TIMELINE.enqueue
+	if not can_queue then
+		for index, card in ipairs(cards) do
+			local tx, ty = M.target_position(index)
+			snap_card_to(card, tx, ty)
+		end
+		finish()
+		return
 	end
 
 	queue_event(Tween({
 		mode = "delayed",
-		delay = opts.initial_delay or 0,
+		timer = "REAL",
+		delay = initial_delay,
 		blocking = true,
 		func = function()
 			for index, card in ipairs(cards) do
 				local fly_card = card
+				local fly_index = index
 				queue_event(Tween({
 					mode = "delayed",
+					timer = "REAL",
 					delay = (index - 1) * stagger,
 					blockable = false,
 					blocking = false,
 					func = function()
+						M.detach(fly_card)
 						if fly_card.hard_set_T then
 							fly_card:hard_set_T(fly_card.T.x, fly_card.T.y, fly_card.T.w, fly_card.T.h)
 						else
 							sync_card_transform(fly_card)
 						end
-						local tx, ty = M.target_position(index)
-						ease_card_axis(fly_card, "x", tx, card_delay)
-						ease_card_axis(fly_card, "y", ty, card_delay)
+						local sx, sy = fly_card.T.x, fly_card.T.y
+						local tx, ty = M.target_position(fly_index)
+						local started = (G.TIMERS and G.TIMERS.REAL) or 0
 						if play_sfx then
-							play_sfx("card_slide1", 0.88 + index * 0.015, 0.55)
+							play_sfx("card_slide1", 0.88 + fly_index * 0.015, 0.55)
 						end
+						queue_event(Tween({
+							mode = "window",
+							timer = "REAL",
+							delay = card_delay,
+							blockable = false,
+							blocking = false,
+							func = function()
+								local now = (G.TIMERS and G.TIMERS.REAL) or (started + card_delay)
+								local u = card_delay > 0 and math.min(1, (now - started) / card_delay) or 1
+								local e = smoothstep(u)
+								fly_card.T.x = sx + (tx - sx) * e
+								fly_card.T.y = sy + (ty - sy) * e
+								sync_card_transform(fly_card)
+								return u >= 1
+							end,
+						}))
 						return true
 					end,
 				}))
 			end
-			queue_completion(((#cards - 1) * stagger) + card_delay + hold)
+			return true
+		end,
+	}))
+
+	queue_event(Tween({
+		mode = "delayed",
+		timer = "REAL",
+		delay = initial_delay + ((#cards - 1) * stagger) + card_delay + hold,
+		blocking = true,
+		func = function()
+			for index, card in ipairs(cards) do
+				local tx, ty = M.target_position(index)
+				snap_card_to(card, tx, ty)
+			end
+			finish()
 			return true
 		end,
 	}))
@@ -263,7 +325,13 @@ end
 
 function M.finalize_for_bonus_hand(wr)
 	local j = wr and wr.jumble
-	if j then
+	if j and j.boss_cards then
+		local deck = require("word_game.model.cards.deck")
+		for _, card in ipairs(j.boss_cards) do
+			if card and not card.REMOVED and not card.bonus_card then
+				deck.destroy_card(card)
+			end
+		end
 		j.boss_cards = nil
 	end
 	if not stack_animating then
@@ -365,8 +433,11 @@ function M.draw_pass()
 	if M.is_active() and not stack_animating then
 		draw_label(layout)
 	end
+	local dragging = G.INPUT and G.INPUT.dragging and G.INPUT.dragging.target
+	local focused = G.INPUT and G.INPUT.focused and G.INPUT.focused.target
 	for _, card in ipairs(stack_cards) do
-		if card and not card.REMOVED and not card.area then
+		if card and not card.REMOVED and not card.area
+			and card ~= dragging and card ~= focused then
 			love.graphics.push()
 			card:translate_container()
 			card:draw()

@@ -49,7 +49,9 @@ function M.apply_puzzle(wr, puzzle)
 				G.placement_table:on_remove_card(card)
 			end
 			area:remove_card(card)
-			if card.area ~= G.hand and G.hand then
+			if card.bonus_card then
+				bonus_stack.return_card(card)
+			elseif card.area ~= G.hand and G.hand then
 				G.hand:emplace(card)
 			end
 		end

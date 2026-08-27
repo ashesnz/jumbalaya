@@ -45,13 +45,23 @@ function M.is_boss_sequence()
 	return j.boss_word_active or j.boss_word_staging or j.boss_puzzle_hidden
 end
 
+function M.bonus_stack_gutter()
+	local stack = WORD_GAME and WORD_GAME.BossWordStack
+	if not stack then return 0 end
+	if not (stack.is_active() or stack.is_animating()) then return 0 end
+	local card_w = G.CARD_W or 1
+	local clearance = math.max(0.45, card_w * 0.30)
+	return card_w + clearance
+end
+
 function M.hand_play_column()
 	local pad_x = G.TILE_W * M.PLAY_LEFT_FRAC
+	local gutter = M.bonus_stack_gutter()
 	local gap = M.sidebar_gap()
 	local vault_x = M.vault_right_x() - M.sidebar_width()
 	return {
-		x = pad_x,
-		w = math.max(4, vault_x - pad_x - gap),
+		x = pad_x + gutter,
+		w = math.max(4, vault_x - pad_x - gap - gutter),
 	}
 end
 
@@ -97,20 +107,21 @@ end
 
 function M.play_column()
 	local pad_x = G.TILE_W * M.PLAY_LEFT_FRAC
+	local gutter = M.bonus_stack_gutter()
 	if M.is_boss_sequence() then
 		local room_x = (G.ROOM and G.ROOM.T and G.ROOM.T.x) or 0
 		local win_w = M.window_width_tiles() - room_x
 		local margin = math.max(pad_x, G.TILE_W * 0.03)
 		return {
-			x = margin,
-			w = math.max(4, win_w - 2 * margin),
+			x = margin + gutter,
+			w = math.max(4, win_w - 2 * margin - gutter),
 		}
 	end
 	local gap = M.sidebar_gap()
 	local vault_x = M.vault_right_x() - M.sidebar_width()
 	return {
-		x = pad_x,
-		w = math.max(4, vault_x - pad_x - gap),
+		x = pad_x + gutter,
+		w = math.max(4, vault_x - pad_x - gap - gutter),
 	}
 end
 

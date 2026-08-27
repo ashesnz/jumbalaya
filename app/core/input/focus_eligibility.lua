@@ -15,7 +15,9 @@ function InputRouter:is_node_focusable(node)
 				and (node.facing == 'front'
 					or node.area == G.hand
 					or node.area == (G.placement_table and G.placement_table.area)
-					or node == G.deck)
+					or node == G.deck
+					or node.bonus_card
+					or (WORD_GAME and WORD_GAME.BossWordStack and WORD_GAME.BossWordStack.contains(node)))
 				and node.states.hover.can
 				and not node.is_mascot then
 				focusable = true

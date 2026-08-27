@@ -39,6 +39,10 @@ T.describe("Bonus cards", function()
 				self.T.h = nh or self.T.h
 				self.VT.x, self.VT.y = self.T.x, self.T.y
 			end,
+			remove_from_area = function(self)
+				self.area = nil
+				self.parent = nil
+			end,
 			translate_container = function() end,
 			draw = function() end,
 		}
@@ -132,6 +136,80 @@ T.describe("Bonus cards", function()
 
 		bonus_stack.stage_cards = orig_stage
 		bonus_stack.animate_cards_to_stack = orig_animate
+	end)
+
+	T.it("detaches won cards from placement before flying them left", function()
+		bonus_stack.clear()
+		layout_globals()
+		local area = {
+			cards = {},
+			remove_card = function(self, card)
+				for i, c in ipairs(self.cards) do
+					if c == card then
+						table.remove(self.cards, i)
+						card.area = nil
+						card.parent = nil
+						return
+					end
+				end
+			end,
+		}
+		G.placement_table.area = area
+		G.placement_table.on_remove_card = function() end
+		local cards = { mock_card("V", 9.5, 4), mock_card("E", 10.5, 4) }
+		for _, card in ipairs(cards) do
+			card.area = area
+			card.parent = area
+		end
+		bonus_stack.stage_cards(cards)
+		for _, card in ipairs(cards) do
+			T.assert_nil(card.area, "Bonus cards must leave the placement area to draw on the left")
+			T.assert_nil(card.parent)
+		end
+		local tx = select(1, bonus_stack.target_position(1))
+		bonus_stack.animate_cards_to_stack(nil, nil, {})
+		T.assert_almost_equal(cards[1].T.x, tx, 0.05)
+		T.assert_true(cards[1].T.x < 9.5)
+	end)
+
+	T.it("insets the play column so bonus cards stay on-screen", function()
+		bonus_stack.clear()
+		layout_globals()
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.BossWordStack = bonus_stack
+		local felt = require("word_game.ui.layout.felt")
+		local before = felt.play_column()
+		bonus_stack.promote_to_bonus({ mock_card("A", 1, 1) })
+		local after = felt.play_column()
+		T.assert_true(after.x > before.x, "Play column should shift right to leave a bonus-card gutter")
+		T.assert_true(after.w < before.w)
+		local stack_x = select(1, bonus_stack.target_position(1))
+		T.assert_true(stack_x + 2 <= after.x + 0.05, "Bonus stack should sit in the left gutter")
+		bonus_stack.clear()
+	end)
+
+	T.it("destroys leftover boss cards instead of adding them to the deck", function()
+		bonus_stack.clear()
+		local kept = mock_card("V", 1, 1)
+		local leftover = mock_card("X", 2, 2)
+		leftover.boss_temp = true
+		bonus_stack.promote_to_bonus({ kept })
+		local destroyed = {}
+		local orig_deck = package.loaded["word_game.model.cards.deck"]
+		package.loaded["word_game.model.cards.deck"] = {
+			destroy_card = function(card)
+				destroyed[#destroyed + 1] = card
+				card.REMOVED = true
+			end,
+		}
+		bonus_stack.finalize_for_bonus_hand({
+			jumble = { boss_cards = { kept, leftover } },
+		})
+		T.assert_equal(#destroyed, 1)
+		T.assert_true(destroyed[1] == leftover)
+		T.assert_true(bonus_stack.is_active())
+		T.assert_true(kept.bonus_card)
+		package.loaded["word_game.model.cards.deck"] = orig_deck
 	end)
 
 	T.it("keeps bonus cards on the left when stage 1-4 begins", function()

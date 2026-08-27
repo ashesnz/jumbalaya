@@ -394,23 +394,7 @@ function M.present_boss_word(wr, on_complete)
 end
 
 local function detach_card_for_stack(card)
-	if not card then return end
-	if card.area then
-		if G.placement_table and card.area == G.placement_table.area then
-			G.placement_table:on_remove_card(card)
-		end
-		card.area:remove_card(card)
-	end
-	if card.states and card.states.drag then
-		card.states.drag.is = false
-	end
-	if card.set_selected then
-		card:set_selected(false)
-	end
-	card.T.r = 0
-	if card.hard_set_T then
-		card:hard_set_T(card.T.x, card.T.y, card.T.w, card.T.h)
-	end
+	boss_word_stack.detach(card)
 end
 
 function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_complete)
@@ -424,16 +408,31 @@ function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_
 		WORD_GAME.TimelineTimer.pause()
 	end
 
-	jumble.clear_blank_cards(j.slots)
-	jumble.sync_placement_cards(j.slots)
-	M.align_placement_table()
-
 	local cards = {}
 	for _, card in ipairs(used_cards or {}) do
 		detach_card_for_stack(card)
 		cards[#cards + 1] = card
 	end
+	jumble.clear_blank_cards(j.slots)
+	jumble.sync_placement_cards(j.slots)
 	boss_word_stack.stage_cards(cards)
+
+	M.request_layout_refresh()
+	if WORD_GAME and WORD_GAME.Layout then
+		if WORD_GAME.Layout.update_all then
+			WORD_GAME.Layout.update_all()
+		end
+		if WORD_GAME.Layout.set_screen_positions then
+			WORD_GAME.Layout.set_screen_positions()
+		end
+	end
+	if G.hand and G.hand.relayout then
+		G.hand:relayout()
+		if G.hand.hard_set_cards then
+			G.hand:hard_set_cards()
+		end
+	end
+	M.align_placement_table()
 
 	local function finish_success()
 		boss_word_stack.promote_to_bonus(cards)
