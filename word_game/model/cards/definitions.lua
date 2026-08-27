@@ -2,7 +2,8 @@
 	model/cards/definitions.lua - Letter card definitions and shared centers.
 
 	P_CARDS is the 52 letter faces: `red_A`–`red_Z` and `black_A`–`black_Z`.
-	Sprites live on JumbalayaDeck.png (13×4 grid, 71×95 px cells at 1x).
+	Glyphs live on JumbalayaLetters.png (13×2 grid); card bodies are tinted at
+	runtime from JumbalayaCardFrame.png via letter_card_palette.lua.
 	Letter body (`letter_base`), tutorial companion card (`companion_pads`), Alpha Deck, and editions live in P_CENTERS.
 ]]
 
@@ -15,26 +16,28 @@ local function matches_any_prefix(key, prefixes)
 end
 
 function Game:load_card_definitions()
-    -- Sprite sheet is 13 columns × 4 rows. Columns are just atlas x;
-    -- rows are red A–M, black N–Z, red N–Z, black A–M. Keys are letter+color.
+    -- Letter glyphs: 13 columns × 2 rows (A–M, N–Z). Colour is runtime-only.
     self.P_CARDS = {}
     for i = 1, 26 do
         local letter = string.char(64 + i)
         local col = (i - 1) % 13
-        local first = i <= 13
+        local row = i <= 13 and 0 or 1
+        local pos = { x = col, y = row }
         self.P_CARDS["red_"..letter] = {
             name = "Red "..letter,
             letter = letter,
             color = "red",
             value = letter,
-            pos = {x = col, y = first and 0 or 2},
+            atlas = "letters",
+            pos = pos,
         }
         self.P_CARDS["black_"..letter] = {
             name = "Black "..letter,
             letter = letter,
             color = "black",
             value = letter,
-            pos = {x = col, y = first and 3 or 1},
+            atlas = "letters",
+            pos = pos,
         }
     end
     self.P_CARDS.empty = {name = "Empty", pos = {x = 0, y = 0}}
@@ -50,7 +53,7 @@ function Game:load_card_definitions()
     self.booster_undiscovered = {unlocked = false, max = 1, name = "Locked", pos = {x=0,y=5}, set = "Bundle", cost_mult = 1.0,config = {}}
 
     self.P_CENTERS = {
-        letter_base={max = 500, freq = 1, line = 'base', name = "Letter", pos = {x=0,y=0}, atlas = "cards_1", set = "Default", label = 'Letter', effect = "Base", cost_mult = 1.0, config = {}},
+        letter_base={max = 500, freq = 1, line = 'base', name = "Letter", pos = {x=0,y=0}, atlas = "letter_frame", set = "Default", label = 'Letter', effect = "Base", cost_mult = 1.0, config = {}},
 
         -- Tutorial companion card (not in shop/collection pools)
         companion_pads={order = 0, unlocked = true, discovered = true, skip_pool = true, rarity = 1, cost = 0, name = "Pads", pos = {x=0,y=9}, set = "Companion", effect = "", config = {talk_pos = {x=1,y=9}}},

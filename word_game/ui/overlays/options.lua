@@ -100,15 +100,7 @@ function G.DEFINITIONS.settings_tab(tab)
       Components.cycler({width = 5, label = localize('ui_set_play_discard_pos'),scale = 0.8, options = localize('opt_play_discard_pos_opt'), onChange = 'change_play_discard_position', current_option = (G.SETTINGS.play_button_pos)}),
       G.F_RUMBLE and Components.toggle({label = localize('ui_set_rumble'), ref_table = G.SETTINGS, ref_value = 'rumble'}) or nil,
       Components.slider({label = localize('ui_set_screenshake'),width = 4, height = 0.4, ref_table = G.SETTINGS, ref_value = 'screenshake', min = 0, max = 100}),
-      Components.toggle({label = localize('ui_high_contrast_cards'), ref_table = G.SETTINGS, ref_value = 'colourblind_option', callback = (
-        function(_set_toggle)
-          for k, v in pairs(G.LIVE.SPRITE) do
-            if v.atlas and string.find(v.atlas.name, 'cards_') then
-              v.atlas = G.TEXTURE_ATLASES["cards_"..(G.SETTINGS.colourblind_option and 2 or 1)]
-            end
-          end
-        end
-      )}),
+      Components.toggle({label = localize('ui_high_contrast_cards'), ref_table = G.SETTINGS, ref_value = 'colourblind_option'}),
       G.F_CRASH_REPORTS and Components.toggle({label = localize('ui_set_crash_reports'), ref_table = G.SETTINGS, ref_value = 'crashreports', info = localize('opt_crash_report_info')}) or nil,
     }}
   elseif tab == 'Video' then

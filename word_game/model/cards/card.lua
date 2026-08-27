@@ -180,10 +180,10 @@ function Card:apply_face(card, initial)
         self:set_sprites(nil, card)
     end
 
+    local Palette = require "word_game.config.letter_card_palette"
     local card_color = self.config.card.color
-    local card_colour = (card_color == "red" and G.C.RED)
-        or (card_color == "black" and G.C.BLACK)
-        or G.C.BLACK
+    local colourblind = G.SETTINGS and G.SETTINGS.colourblind_option
+    local card_colour = Palette.ui_color(card_color, colourblind) or G.C.BLACK
     local letter = self.config.card.letter
     local idx = 0
     if type(letter) == "string" and #letter == 1 then

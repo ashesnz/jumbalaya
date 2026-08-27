@@ -48,6 +48,8 @@ function Game:set_render_settings()
 	self.asset_atli = {
 		{ name = "cards_1", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/JumbalayaDeck.png", px = 71, py = 95 },
 		{ name = "cards_2", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/JumbalayaDeck_opt2.png", px = 71, py = 95 },
+		{ name = "letters", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/JumbalayaLetters.png", px = 71, py = 95 },
+		{ name = "letter_frame", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/JumbalayaCardFrame.png", px = 71, py = 95 },
 		{ name = "playing_back", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/PlayingDeck.png", px = 71, py = 95 },
 		{ name = "Charm", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Charms.png", px = 71, py = 95 },
 		{ name = "Perk", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Perks.png", px = 71, py = 95 },

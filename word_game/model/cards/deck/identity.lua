@@ -162,7 +162,7 @@ return function(context)
 	function M.letter_center()
 		local center = G.P_CENTERS and G.P_CENTERS.letter_base
 		if center then
-			center.atlas = "cards_" .. ((G.SETTINGS and G.SETTINGS.colourblind_option) and 2 or 1)
+			center.atlas = "letter_frame"
 			center.pos = { x = 0, y = 0 }
 		end
 		return center

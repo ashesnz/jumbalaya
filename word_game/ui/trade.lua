@@ -601,17 +601,11 @@ local function room_translate()
 end
 
 local function draw_flyer_card(item, x, y, rot, alpha)
-	local front = item and deck.front(item.letter, item.color)
-	if not front then return end
-	local atlas = G.TEXTURE_ATLASES and (G.TEXTURE_ATLASES[front.atlas] or G.TEXTURE_ATLASES["cards_" .. (G.SETTINGS.colourblind_option and 2 or 1)])
-	if not atlas or not atlas.image then return end
-	local pos = front.pos or { x = 0, y = 0 }
-	local pw, ph = atlas.px or 71, atlas.py or 95
-	local iw, ih = atlas.image:getDimensions()
-	local quad = love.graphics.newQuad(pos.x * pw, pos.y * ph, pw, ph, iw, ih)
+	if not item then return end
 	local size = math.max(30, (G.CARD_W or 1) * (G.TILESCALE or 1) * (G.TILESIZE or 1))
-	love.graphics.setColor(1, 1, 1, alpha or 1)
-	love.graphics.draw(atlas.image, quad, x, y, rot or 0, size / pw, size / ph, pw * 0.5, ph * 0.5)
+	local LetterFaces = require "word_game.ui.letter_card_faces"
+	LetterFaces.draw_composite(x, y, rot, size, size * ((G.CARD_H or 1) / (G.CARD_W or 1)),
+		item.letter, item.color, alpha)
 end
 
 local function start_card_fly(item, callback, start_x, start_y)

@@ -4,6 +4,7 @@
 
 local Scheduler = require "app.effects.scheduler"
 local DissolveFX = require "app.effects.dissolve_fx"
+local LetterFaces = require "word_game.ui.letter_card_faces"
 
 -- Finish editions rendered as shader overlays, keyed by edition flag.
 local FINISH_SHADERS = {
@@ -13,8 +14,7 @@ local FINISH_SHADERS = {
 }
 
 -- Sets whose body sprite doubles as the letter-tile face. Letter cards render
--- through a single flat sprite (the deck-atlas face is written straight onto
--- the body) instead of a stacked front-overlay child.
+-- as a tinted frame (center) plus a shared glyph layer (front).
 local FLAT_LETTER_SETS = { Default = true, Enhanced = true }
 
 -- Data-driven placeholder art for locked/undiscovered centers. Entries name
@@ -116,16 +116,36 @@ function Card:set_sprites(_center, _front)
 		end
 	end
 
-	-- Flat letter tile: paint the deck-atlas face directly onto the body
-	-- sprite. Only non-letter art still gets its own front child.
+	-- Letter cards: tinted frame on center, shared glyph atlas on front.
 	if _front then
-		local face_atlas = G.TEXTURE_ATLASES[_front.atlas] or G.TEXTURE_ATLASES["cards_"..(G.SETTINGS.colourblind_option and 2 or 1)]
-		local face_pos = self.config.card and self.config.card.pos
 		local is_letter = self.config.center and FLAT_LETTER_SETS[self.config.center.set]
-		if is_letter and face_pos and self.children.center then
-			self.children.center.atlas = face_atlas
-			self.children.center:set_sprite_pos(face_pos)
+			and LetterFaces.is_letter_face(_front)
+		if is_letter then
+			local frame_atlas = LetterFaces.frame_atlas()
+			local letters_atlas = LetterFaces.letters_atlas()
+			local glyph_pos = _front.pos or LetterFaces.glyph_pos(_front.letter)
+
+			if frame_atlas and self.children.center then
+				self.children.center.atlas = frame_atlas
+				self.children.center:set_sprite_pos({ x = 0, y = 0 })
+			end
+
+			if letters_atlas then
+				if self.children.front then
+					self.children.front.atlas = letters_atlas
+					self.children.front:set_sprite_pos(glyph_pos)
+				else
+					self.children.front = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, letters_atlas, glyph_pos)
+					self.children.front.states.hover = self.states.hover
+					self.children.front.states.click = self.states.click
+					self.children.front.states.drag = self.states.drag
+					self.children.front.states.collide.can = false
+					self.children.front:set_role({major = self, role_type = 'Glued', draw_major = self})
+				end
+			end
 		else
+			local face_atlas = G.TEXTURE_ATLASES[_front.atlas] or G.TEXTURE_ATLASES["cards_"..(G.SETTINGS.colourblind_option and 2 or 1)]
+			local face_pos = self.config.card and self.config.card.pos
 			if self.children.front then
 				self.children.front.atlas = face_atlas
 				self.children.front:set_sprite_pos(face_pos)
@@ -477,9 +497,18 @@ function Card:draw_front()
 			self.children.front:apply_shader_effect('negative', nil, self.ARGS.send_to_shader)
 		end
 	elseif not self.greyed then
-		self.children.center:apply_shader_effect('dissolve')
-		if self.children.front then
-			self.children.front:apply_shader_effect('dissolve')
+		if LetterFaces.is_letter_card(self) then
+			G.OVERLAY_TINT = LetterFaces.fill_color(self.base and self.base.color)
+			self.children.center:apply_shader_effect('dissolve')
+			G.OVERLAY_TINT = nil
+			if self.children.front then
+				self.children.front:apply_shader_effect('dissolve')
+			end
+		else
+			self.children.center:apply_shader_effect('dissolve')
+			if self.children.front then
+				self.children.front:apply_shader_effect('dissolve')
+			end
 		end
 	end
 
