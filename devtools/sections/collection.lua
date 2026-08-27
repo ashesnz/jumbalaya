@@ -12,17 +12,11 @@ return {
 				WORD_GAME.TradeUI.open()
 			end
 		end)
-		panel:action("show_perk_market", function(_ctx)
-			if WORD_GAME and WORD_GAME.PerkMarketplace then
-				WORD_GAME.PerkMarketplace.show()
-			end
-		end)
 	end,
 
 	build = function(_panel)
 		return layout.section("Marketplace", layout.button_columns({
 			{ label = "Card Marketplace", action = "show_trade" },
-			{ label = "Perk Marketplace", action = "show_perk_market" },
 		}))
 	end,
 }

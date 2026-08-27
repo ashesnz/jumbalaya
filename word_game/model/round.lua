@@ -110,9 +110,6 @@ function M.start_hand(set, hand_index)
 	if jumble.is_active_hand(set, hand_index)
 		and WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.reset then
 		WORD_GAME.TimelineTimer.reset(60.0)
-	elseif not round_config.is_perk_hand(set, hand_index)
-		and WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.reset then
-		WORD_GAME.TimelineTimer.reset(60.0)
 	end
 
 	if WORD_GAME and WORD_GAME.Sidebar then
@@ -219,20 +216,12 @@ function M.advance_hand()
 		if wr.set >= round_config.SETS_TO_WIN then
 			return "win"
 		end
-		if round_config.is_perk_market_after(wr.set, wr.hand_index)
-			and WORD_GAME and WORD_GAME.PerkMarketplace then
-			Scheduler.add{
-				mode = "delayed",
-				delay = 0.4,
-				blockable = false,
-				blocking = false,
-				func = function()
-					WORD_GAME.PerkMarketplace.show()
-					return true
-				end,
-			}
-		end
 		M.start_hand(wr.set + 1, 1)
+		return "next_set"
+	end
+
+	if wr.set == 1 and wr.hand_index == 4 then
+		M.start_hand(2, 1)
 		return "next_set"
 	end
 

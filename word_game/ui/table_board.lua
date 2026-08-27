@@ -178,9 +178,6 @@ function M.draw_reward_passes()
 	if WORD_GAME and WORD_GAME.TokenReward then
 		WORD_GAME.TokenReward.draw_pass()
 	end
-	if WORD_GAME and WORD_GAME.PerkMarketplace then
-		WORD_GAME.PerkMarketplace.draw_pass()
-	end
 end
 
 function M.draw_attention_passes(game)

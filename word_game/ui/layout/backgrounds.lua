@@ -13,9 +13,9 @@ local M = {}
 
 local GARDEN_STAGE_MOSS = {0.38, 0.52, 0.36, 1}
 
--- The first three hands of set 1 play on the garden board.
+-- Garden (falling leaves) board for all stages.
 function M.is_garden_stage(set, hand_index)
-	return set == 1 and hand_index >= 1 and hand_index <= 3
+	return true
 end
 
 local function remove_current()
@@ -114,14 +114,7 @@ function M.swirl()
 end
 
 function M.stage(set, hand_index)
-	if M.is_garden_stage(set, hand_index) then
-		M.garden()
-	else
-		M.swirl()
-		if ease_background_colour and G.C and G.C.GREEN then
-			ease_background_colour{new_colour = G.C.GREEN, contrast = 1}
-		end
-	end
+	M.garden()
 end
 
 function M.run()

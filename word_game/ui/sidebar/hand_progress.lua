@@ -78,7 +78,8 @@ function M.odometer_node(box_w)
 				subtitle_fn = function(hand)
 					local set = set_number()
 					if round_config.is_showdown(hand)
-						and not round_config.is_early_showdown(set, hand) then
+						and not round_config.is_stage3_cinematic_hand(set, hand)
+						and not round_config.is_marco_cinematic_hand(set, hand) then
 						return "Boss Battle"
 					end
 				end,

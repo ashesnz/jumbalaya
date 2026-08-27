@@ -8,7 +8,7 @@ local modifier_effects = require("word_game.model.play.letter_modifier_effects")
 function M.is_active_hand(set, hand_index)
 	set = set or (G.GAME and G.GAME.word_round and G.GAME.word_round.set) or 1
 	hand_index = hand_index or (G.GAME and G.GAME.word_round and G.GAME.word_round.hand_index) or 1
-	return set >= 1 and set <= 8 and hand_index >= 1 and hand_index <= 3
+	return set >= 1 and set <= 8 and hand_index >= 1
 end
 
 function M.is_active()

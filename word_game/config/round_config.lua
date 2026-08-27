@@ -23,7 +23,7 @@ local M = {
 	HAND_CYCLE = { "Standard", "Standard", "Showdown" },
 
 	HAND_TARGETS = {
-		[1] = { 2, 2, 2 },
+		[1] = { 2, 2, 2, 2 },
 		[2] = { 100, 140, 175 },
 		[3] = { 200, 280, 350 },
 		[4] = { 400, 560, 700 },
@@ -68,18 +68,17 @@ function M.is_showdown(hand_index)
 	return M.hand_name(hand_index) == "Showdown"
 end
 
--- Sets 1–3 showdown hands: perk pick, except stage 1-3's boss word.
+-- Sets 1–3 showdown hands used to gate the early perk marketplace (removed).
 function M.is_early_showdown(set, hand_index)
-	return (set or 1) <= 3 and M.is_showdown(hand_index)
+	return false
 end
 
 function M.is_perk_hand(set, hand_index)
-	return M.is_early_showdown(set, hand_index)
+	return false
 end
 
--- The perk marketplace opens after the showdown hand is cleared.
 function M.is_perk_market_after(set, hand_index)
-	return M.is_early_showdown(set, hand_index) and not (set == 1 and hand_index == 3)
+	return false
 end
 
 function M.is_stage3_cinematic_hand(set, hand_index)

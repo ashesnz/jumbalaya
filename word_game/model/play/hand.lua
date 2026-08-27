@@ -30,26 +30,6 @@ local function discard_remaining_hand()
 	return n
 end
 
-local function show_perk_market()
-	if not (WORD_GAME and WORD_GAME.PerkMarketplace and WORD_GAME.PerkMarketplace.show) then
-		return
-	end
-	if G.TIMELINE and G.TIMELINE.enqueue then
-		Scheduler.add{
-			mode = "delayed",
-			delay = 0.4,
-			blockable = false,
-			blocking = false,
-			func = function()
-				WORD_GAME.PerkMarketplace.show()
-				return true
-			end,
-		}
-	else
-		WORD_GAME.PerkMarketplace.show()
-	end
-end
-
 local function open_after_hand(opts)
 	opts = opts or {}
 	if WORD_GAME and WORD_GAME.HandClearFocus and WORD_GAME.HandClearFocus.end_focus then
@@ -83,8 +63,7 @@ local function open_after_hand(opts)
 			M.end_match(true)
 			return
 		end
-		show_perk_market()
-		round.start_hand(wr.set + 1, 1)
+		round.start_hand(wr.set, wr.hand_index + 1)
 		require("word_game.model.play.opening_deal").deal()
 		return
 	end
@@ -102,9 +81,6 @@ local function open_after_hand(opts)
 	end
 	if round.is_final_hand() then
 		M.end_match(true)
-	elseif round_config.is_perk_market_after(
-		wr.set, wr.hand_index) then
-		round.advance_hand()
 	elseif WORD_GAME.TradeUI then
 		WORD_GAME.TradeUI.open_then_dealer()
 	else
