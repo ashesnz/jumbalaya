@@ -7,6 +7,11 @@ local M = {}
 M.BONUS_POINTS = 10
 
 local stack_cards
+local stack_animating = false
+
+function M.is_animating()
+	return stack_animating
+end
 
 function M.is_bonus_card(card)
 	return card and card.bonus_card
@@ -21,16 +26,29 @@ function M.cards()
 end
 
 function M.set_cards(cards)
-	stack_cards = cards
+	M.stage_cards(cards)
 end
 
 function M.clear()
 	stack_cards = nil
+	stack_animating = false
+end
+
+function M.stage_cards(cards)
+	stack_cards = {}
+	for _, card in ipairs(cards or {}) do
+		if card and not card.REMOVED then
+			stack_cards[#stack_cards + 1] = card
+		end
+	end
+	stack_animating = #stack_cards > 0
 end
 
 function M.on_hand_start(set, hand_index)
 	if set == 1 and hand_index == 4 then
-		M.sync_positions()
+		if not stack_animating then
+			M.sync_positions()
+		end
 		return
 	end
 	M.clear()
@@ -103,7 +121,7 @@ function M.contains(card)
 end
 
 function M.sync_positions()
-	if not stack_cards then return end
+	if not stack_cards or stack_animating then return end
 	for i, card in ipairs(stack_cards) do
 		if card and not card.REMOVED and not card.area then
 			local tx, ty = M.target_position(i)
@@ -123,6 +141,7 @@ function M.sync_positions()
 end
 
 function M.promote_to_bonus(cards)
+	stack_animating = false
 	stack_cards = {}
 	for _, card in ipairs(cards or {}) do
 		if card and not card.REMOVED then
@@ -146,12 +165,110 @@ function M.promote_to_bonus(cards)
 	M.sync_positions()
 end
 
+local function sync_card_transform(card)
+	if card.VT and card.T then
+		card.VT.x = card.T.x
+		card.VT.y = card.T.y
+		card.VT.w = card.T.w
+		card.VT.h = card.T.h
+		card.VT.r = card.T.r or 0
+	end
+end
+
+function M.animate_cards_to_stack(queue_event, easing_mod, opts)
+	opts = opts or {}
+	local cards = stack_cards or {}
+	local card_delay = opts.card_delay or 0.45
+	local stagger = opts.stagger or 0.07
+	local hold = opts.hold or 0.3
+	local Easing = easing_mod or require("app.effects.easing")
+
+	if #cards == 0 then
+		if opts.on_complete then opts.on_complete() end
+		return
+	end
+
+	stack_animating = true
+
+	local function ease_card_axis(card, axis, target, delay)
+		local start = card.T[axis]
+		Easing.value{
+			ref_table = card.T,
+			ref_value = axis,
+			mod = target - start,
+			timer = "REAL",
+			delay = delay,
+			ease = "quad",
+			not_blockable = false,
+		}
+		if card.VT then
+			Easing.value{
+				ref_table = card.VT,
+				ref_value = axis,
+				mod = target - start,
+				timer = "REAL",
+				delay = delay,
+				ease = "quad",
+				not_blockable = false,
+			}
+		end
+	end
+
+	local function queue_completion(delay)
+		queue_event(Tween({
+			mode = "delayed",
+			delay = delay,
+			blocking = false,
+			func = function()
+				stack_animating = false
+				if opts.on_complete then opts.on_complete() end
+				return true
+			end,
+		}))
+	end
+
+	queue_event(Tween({
+		mode = "delayed",
+		delay = opts.initial_delay or 0,
+		blocking = true,
+		func = function()
+			for index, card in ipairs(cards) do
+				local fly_card = card
+				queue_event(Tween({
+					mode = "delayed",
+					delay = (index - 1) * stagger,
+					blockable = false,
+					blocking = false,
+					func = function()
+						if fly_card.hard_set_T then
+							fly_card:hard_set_T(fly_card.T.x, fly_card.T.y, fly_card.T.w, fly_card.T.h)
+						else
+							sync_card_transform(fly_card)
+						end
+						local tx, ty = M.target_position(index)
+						ease_card_axis(fly_card, "x", tx, card_delay)
+						ease_card_axis(fly_card, "y", ty, card_delay)
+						if play_sfx then
+							play_sfx("card_slide1", 0.88 + index * 0.015, 0.55)
+						end
+						return true
+					end,
+				}))
+			end
+			queue_completion(((#cards - 1) * stagger) + card_delay + hold)
+			return true
+		end,
+	}))
+end
+
 function M.finalize_for_bonus_hand(wr)
 	local j = wr and wr.jumble
 	if j then
 		j.boss_cards = nil
 	end
-	M.sync_positions()
+	if not stack_animating then
+		M.sync_positions()
+	end
 end
 
 function M.remove_card(card)
@@ -245,7 +362,9 @@ end
 function M.draw_pass()
 	if not stack_cards then return end
 	local layout = M.stack_layout()
-	draw_label(layout)
+	if M.is_active() and not stack_animating then
+		draw_label(layout)
+	end
 	for _, card in ipairs(stack_cards) do
 		if card and not card.REMOVED and not card.area then
 			love.graphics.push()

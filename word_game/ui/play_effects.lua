@@ -170,7 +170,8 @@ function M.restore_boss_layout(opts)
 	if WORD_GAME and WORD_GAME.HandShuffle then
 		WORD_GAME.HandShuffle.sync_position()
 	end
-	if opts.keep_bonus_stack and boss_word_stack.sync_positions then
+	if opts.keep_bonus_stack and boss_word_stack.sync_positions
+		and not boss_word_stack.is_animating() then
 		boss_word_stack.sync_positions()
 	end
 end
@@ -432,7 +433,7 @@ function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_
 		detach_card_for_stack(card)
 		cards[#cards + 1] = card
 	end
-	boss_word_stack.set_cards(cards)
+	boss_word_stack.stage_cards(cards)
 
 	local function finish_success()
 		boss_word_stack.promote_to_bonus(cards)
@@ -457,58 +458,13 @@ function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_
 		end,
 	}))
 
-	M.queue_event(Tween({
-		mode = "delayed",
-		delay = WELL_DONE_HOLD,
-		blocking = true,
-		func = function()
-			for i, card in ipairs(cards) do
-				M.queue_event(Tween({
-					mode = "delayed",
-					delay = (i - 1) * CARD_STAGGER,
-					blockable = false,
-					blocking = false,
-					func = function()
-						local tx, ty = boss_word_stack.target_position(i)
-						Easing.value{
-							ref_table = card.T,
-							ref_value = "x",
-							mod = tx - card.T.x,
-							timer = "REAL",
-							delay = CARD_DELAY,
-							ease = "quad",
-							not_blockable = true,
-						}
-						Easing.value{
-							ref_table = card.T,
-							ref_value = "y",
-							mod = ty - card.T.y,
-							timer = "REAL",
-							delay = CARD_DELAY,
-							ease = "quad",
-							not_blockable = true,
-						}
-						if play_sfx then
-							play_sfx("card_slide1", 0.88 + i * 0.015, 0.55)
-						end
-						return true
-					end,
-				}))
-			end
-
-			local total_wait = (#cards > 0 and ((#cards - 1) * CARD_STAGGER + CARD_DELAY) or 0) + STACK_HOLD
-			M.queue_event(Tween({
-				mode = "delayed",
-				delay = total_wait,
-				blocking = true,
-				func = function()
-					finish_success()
-					return true
-				end,
-			}))
-			return true
-		end,
-	}))
+	boss_word_stack.animate_cards_to_stack(M.queue_event, nil, {
+		initial_delay = WELL_DONE_HOLD,
+		card_delay = CARD_DELAY,
+		stagger = CARD_STAGGER,
+		hold = STACK_HOLD,
+		on_complete = finish_success,
+	})
 end
 
 function M.present_word_play_after_cards(jumble, j, result, on_hand_cleared, on_complete)
