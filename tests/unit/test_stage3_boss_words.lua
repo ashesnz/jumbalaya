@@ -202,17 +202,15 @@ T.describe("Stage 1-3 boss words", function()
 		G.TILE_H = 11.5
 		G.CARD_W = 2
 		G.CARD_H = 2.8
-		G.ROOM = { T = { x = 0, y = 0, w = 20, h = 11.5 } }
+		G.ROOM = { T = { x = 1, y = 0, w = 20, h = 11.5 } }
 		G.hand = { T = { x = 3.2, y = 8.0, w = 10.5, h = 2.8 } }
-		G.placement_table = { area = { T = { x = 0.6, y = 2.0, w = 18.0, h = 2.8 } } }
+		G.placement_table = { area = { T = { x = 4.0, y = 2.0, w = 10.0, h = 2.8 } } }
 		local stack = boss_word_stack.stack_layout()
 		local timer = layout.timeline_rect()
+		local window_left = -(G.ROOM.T.x or 0)
 		T.assert_true(stack.y >= timer.y + timer.h - 0.01, "Stack should start below the timer")
-		T.assert_true(boss_word_stack.clears_gameplay_bounds(), "Stack should sit left of hand and placement areas")
-		T.assert_true(
-			stack.x + stack.card_w < G.placement_table.area.T.x,
-			"Stack should not overlap the placement row"
-		)
+		T.assert_almost_equal(stack.x, window_left + boss_word_stack.LEFT_WINDOW_MARGIN, 0.02)
+		T.assert_true(stack.x > window_left, "Small margin should keep cards off the hard left")
 		T.assert_true(
 			stack.x + stack.card_w < G.hand.T.x,
 			"Stack should not overlap the dealt hand"

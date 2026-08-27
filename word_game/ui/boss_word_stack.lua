@@ -5,6 +5,7 @@ local placement_layout = require("word_game.ui.layout.placement")
 local M = {}
 
 M.BONUS_POINTS = 10
+M.LEFT_WINDOW_MARGIN = 0.14
 
 local stack_cards
 local stack_animating = false
@@ -107,25 +108,24 @@ local function gameplay_left_edge()
 	return edge
 end
 
+local function window_left_x()
+	return -((G.ROOM and G.ROOM.T and G.ROOM.T.x) or 0)
+end
+
 function M.stack_layout()
 	local timer = placement_layout.timeline_rect()
 	local card_w = G.CARD_W or 1
 	local card_h = G.CARD_H or 1.4
-	local clearance = math.max(0.45, card_w * 0.30)
+	local margin_x = M.LEFT_WINDOW_MARGIN
 	local margin_y = math.max(0.10, card_h * 0.08)
-	local room_x = (G.ROOM and G.ROOM.T and G.ROOM.T.x) or 0
-	local x = gameplay_left_edge() - clearance - card_w
-	local screen_min = room_x - card_w * 2.5
-	if x < screen_min then
-		x = screen_min
-	end
+	local x = window_left_x() + margin_x
 	return {
 		x = x,
 		y = timer.y + timer.h + margin_y,
 		card_w = card_w,
 		card_h = card_h,
 		step_y = card_h * 0.5,
-		clearance = clearance,
+		clearance = math.max(0.45, card_w * 0.30),
 		label_y = timer.y + timer.h + margin_y * 0.35,
 	}
 end

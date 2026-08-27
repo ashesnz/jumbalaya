@@ -417,23 +417,6 @@ function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_
 	jumble.sync_placement_cards(j.slots)
 	boss_word_stack.stage_cards(cards)
 
-	M.request_layout_refresh()
-	if WORD_GAME and WORD_GAME.Layout then
-		if WORD_GAME.Layout.update_all then
-			WORD_GAME.Layout.update_all()
-		end
-		if WORD_GAME.Layout.set_screen_positions then
-			WORD_GAME.Layout.set_screen_positions()
-		end
-	end
-	if G.hand and G.hand.relayout then
-		G.hand:relayout()
-		if G.hand.hard_set_cards then
-			G.hand:hard_set_cards()
-		end
-	end
-	M.align_placement_table()
-
 	local function finish_success()
 		boss_word_stack.promote_to_bonus(cards)
 		if on_hand_cleared then
