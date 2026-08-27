@@ -286,7 +286,7 @@ function M.present_boss_word(wr, on_complete)
 				delay = step.delay,
 				blocking = true,
 				func = function()
-					word_feedback.show_above_hand_centered(step.text, G.C.GOLD, step.hold)
+					word_feedback.show_hand_centered(step.text, G.C.GOLD, step.hold)
 					if play_sfx then
 						if index == 1 then
 							play_sfx("timpani", 0.9, 0.7)

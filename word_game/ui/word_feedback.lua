@@ -10,19 +10,41 @@ end
 
 local function hand_dealt_metrics()
 	if not G.hand then return nil end
-	local left = G.hand.T.x
-	local right = G.hand.T.x + G.hand.T.w
-	local top = G.hand.T.y
-	local bottom = G.hand.T.y + G.hand.T.h
-	if G.hand_action_bar and not G.hand_action_bar.REMOVED then
-		local bar = G.hand_action_bar
-		right = math.max(right, bar.T.x + bar.T.w)
-		top = math.min(top, bar.T.y)
-		bottom = math.max(bottom, bar.T.y + bar.T.h)
+
+	local wr = G.GAME and G.GAME.word_round
+	local locked = wr and wr.jumble and wr.jumble.locked_hand_layout
+	local left, right, top, bottom
+
+	if locked then
+		left = locked.x
+		right = locked.x + locked.w
+		top = locked.y
+		bottom = locked.y + locked.h
+	elseif G.hand.cards and #G.hand.cards > 0 then
+		for _, card in ipairs(G.hand.cards) do
+			if card and card.T then
+				local cl = card.T.x
+				local cr = card.T.x + (card.T.w or G.CARD_W or 1)
+				local ct = card.T.y
+				local cb = card.T.y + (card.T.h or G.CARD_H or 1.4)
+				left = left and math.min(left, cl) or cl
+				right = right and math.max(right, cr) or cr
+				top = top and math.min(top, ct) or ct
+				bottom = bottom and math.max(bottom, cb) or cb
+			end
+		end
 	end
-	local felt = get_table_felt_rect()
+
+	if not left then
+		left = G.hand.T.x
+		right = G.hand.T.x + G.hand.T.w
+		top = G.hand.T.y
+		bottom = G.hand.T.y + G.hand.T.h
+	end
+
 	local row_w = right - left
 	local row_h = bottom - top
+	local felt = get_table_felt_rect()
 	return {
 		cx = left + row_w * 0.5,
 		cy = top + row_h * 0.5,
