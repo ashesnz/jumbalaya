@@ -176,7 +176,20 @@ function M.restore_boss_layout(opts)
 	end
 end
 
+function M.show_bonus_flyovers(used_cards)
+	local FloatUp = WORD_GAME and WORD_GAME.FloatUpText
+	if not FloatUp or not FloatUp.from_card then return end
+	for _, card in ipairs(used_cards or {}) do
+		if boss_word_stack.is_bonus_card(card) then
+			FloatUp.from_card(card, "+" .. tostring(boss_word_stack.BONUS_POINTS), {
+				colour = G.C and G.C.GOLD or { 1, 0.85, 0.2, 1 },
+			})
+		end
+	end
+end
+
 function M.run_card_return_sequence(used_cards, on_after, return_to_deck)
+	M.show_bonus_flyovers(used_cards)
 	local count = #used_cards
 	if count > 0 then
 		for i, card in ipairs(used_cards) do
@@ -234,6 +247,7 @@ local function finish_used_card(card, return_to_deck)
 end
 
 local function finish_used_cards(used_cards, return_to_deck)
+	M.show_bonus_flyovers(used_cards)
 	local returned = false
 	for _, card in ipairs(used_cards or {}) do
 		if not boss_word_stack.is_bonus_card(card) and return_to_deck then

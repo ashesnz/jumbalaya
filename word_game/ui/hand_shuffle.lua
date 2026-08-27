@@ -4,6 +4,7 @@ local state = require("word_game.model.state")
 local felt_layout = require("word_game.ui.layout.felt")
 local hand_shuffle_anim = require("word_game.ui.hand_shuffle_anim")
 local hand_placement_recall_anim = require("word_game.ui.hand_placement_recall_anim")
+local bonus_stack = require("word_game.ui.boss_word_stack")
 local characters = { intro_step_keys = function() return nil end, intro_uses_play_button = function() return true end }
 
 local M = {}
@@ -396,7 +397,9 @@ function M.recall_placement_cards(opts)
 				G.placement_table:on_remove_card(card)
 			end
 			p_area:remove_card(card)
-			if G.hand then
+			if bonus_stack.is_bonus_card(card) then
+				bonus_stack.return_card(card)
+			elseif G.hand then
 				G.hand:emplace(card)
 			end
 		end

@@ -208,7 +208,8 @@ T.describe("Stage 1-3 boss words", function()
 		local stack = boss_word_stack.stack_layout()
 		local timer = layout.timeline_rect()
 		local window_left = -(G.ROOM.T.x or 0)
-		T.assert_true(stack.y >= timer.y + timer.h - 0.01, "Stack should start below the timer")
+		T.assert_true(stack.y >= timer.y + timer.h - boss_word_stack.stack_y_lift() - 0.02,
+			"Stack should sit just below the timer, lifted slightly")
 		T.assert_almost_equal(stack.x, window_left + boss_word_stack.LEFT_WINDOW_MARGIN, 0.02)
 		T.assert_true(stack.x > window_left, "Small margin should keep cards off the hard left")
 		T.assert_true(

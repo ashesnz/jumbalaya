@@ -185,17 +185,40 @@ function M.try_snap(session, card)
 	local j = WORD_GAME.Jumble.state()
 	local from_blank = card_in_jumble_slots(j, card)
 
-	if (from_blank or M.card_on_placement(session, card) or bonus_stack.contains(card))
-		and M.point_in_return_zone(session, cx, cy) then
-		if bonus_stack.is_bonus_card(card) then
-			if M.return_to_hand(session, card) then
-				play_sfx("card_slide1", nil, 0.8)
-				if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync_visibility then
-					WORD_GAME.HandShuffle.sync_visibility()
-				end
+	if bonus_stack.is_bonus_card(card) then
+		if in_row then
+			local placed = M.place_in_row(session, card)
+			if placed then
+				play_sfx("card_drop", 0.9, 0.8)
+			elseif bonus_stack.contains(card) then
+				bonus_stack.return_card(card)
+			elseif card.area then
+				card.area:relayout()
+			end
+			if in_row and M.card_on_placement(session, card) then
+				shimmer.start_card(session, card)
 			end
 			return
-		elseif M.return_to_hand(session, card) then
+		end
+		if from_blank or M.card_on_placement(session, card) then
+			WORD_GAME.Jumble.remove_card_from_blanks(card)
+			bonus_stack.return_card(card)
+			jumble_geometry.relayout(session)
+			area:hard_set_cards()
+			placement_word.clear()
+			play_sfx("card_slide1", nil, 0.8)
+			if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync_visibility then
+				WORD_GAME.HandShuffle.sync_visibility()
+			end
+			return
+		end
+		bonus_stack.return_card(card)
+		return
+	end
+
+	if (from_blank or M.card_on_placement(session, card) or bonus_stack.contains(card))
+		and M.point_in_return_zone(session, cx, cy) then
+		if M.return_to_hand(session, card) then
 			play_sfx("card_slide1", nil, 0.8)
 			if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync_visibility then
 				WORD_GAME.HandShuffle.sync_visibility()

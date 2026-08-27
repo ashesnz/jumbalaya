@@ -6,6 +6,7 @@ local M = {}
 
 M.BONUS_POINTS = 10
 M.LEFT_WINDOW_MARGIN = 0.14
+M.STACK_Y_LIFT_PX = 20
 
 local stack_cards
 local stack_animating = false
@@ -112,21 +113,34 @@ local function window_left_x()
 	return -((G.ROOM and G.ROOM.T and G.ROOM.T.x) or 0)
 end
 
+function M.stack_y_lift()
+	local dim_ok, dim = pcall(require, "word_game.config.dimensions")
+	local tile = G.TILESIZE or (dim_ok and dim.TILESIZE) or 20
+	local scale = G.TILESCALE or (dim_ok and dim.TILESCALE) or 1
+	local px_per_tile = tile * scale
+	if px_per_tile <= 0 then
+		px_per_tile = (dim_ok and dim.CANVAS_TILE_PX) or 73
+	end
+	return (M.STACK_Y_LIFT_PX or 20) / px_per_tile
+end
+
 function M.stack_layout()
 	local timer = placement_layout.timeline_rect()
 	local card_w = G.CARD_W or 1
 	local card_h = G.CARD_H or 1.4
 	local margin_x = M.LEFT_WINDOW_MARGIN
 	local margin_y = math.max(0.10, card_h * 0.08)
+	local lift = M.stack_y_lift()
 	local x = window_left_x() + margin_x
+	local y = timer.y + timer.h + margin_y - lift
 	return {
 		x = x,
-		y = timer.y + timer.h + margin_y,
+		y = y,
 		card_w = card_w,
 		card_h = card_h,
 		step_y = card_h * 0.5,
 		clearance = math.max(0.45, card_w * 0.30),
-		label_y = timer.y + timer.h + margin_y * 0.35,
+		label_y = timer.y + timer.h + margin_y * 0.35 - lift,
 	}
 end
 
@@ -365,10 +379,13 @@ function M.return_card(card)
 		end
 	end
 	if card.area then
-		if G.placement_table and card.area == G.placement_table.area then
+		if G.placement_table and card.area == G.placement_table.area
+			and G.placement_table.on_remove_card then
 			G.placement_table:on_remove_card(card)
 		end
-		card.area:remove_card(card)
+		if card.area.remove_card then
+			card.area:remove_card(card)
+		end
 	end
 	if card.states and card.states.drag then
 		card.states.drag.is = false
@@ -388,10 +405,11 @@ end
 function M.point_in_stack(x, y)
 	if not M.is_active() then return false end
 	local layout = M.stack_layout()
-	local pad_x = layout.card_w * 0.15
-	local pad_y = layout.card_h * 0.2
-	local top = layout.label_y - layout.card_h * 0.35
-	local bottom = layout.y + (#stack_cards - 1) * layout.step_y + layout.card_h + pad_y
+	local count = math.max(1, #(stack_cards or {}))
+	local pad_x = math.max(0.35, layout.card_w * 0.35)
+	local pad_y = math.max(0.35, layout.card_h * 0.25)
+	local top = layout.label_y - layout.card_h * 0.45
+	local bottom = layout.y + (count - 1) * layout.step_y + layout.card_h + pad_y
 	return x >= layout.x - pad_x
 		and x <= layout.x + layout.card_w + pad_x
 		and y >= top
@@ -410,6 +428,15 @@ end
 
 function M.consume_card(card)
 	M.remove_card(card)
+	if card.area and card.area.remove_card then
+		card.area:remove_card(card)
+	elseif card.remove_from_area then
+		card:remove_from_area()
+	end
+	if card.start_dissolve then
+		card:start_dissolve()
+		return
+	end
 	local deck = require("word_game.model.cards.deck")
 	deck.destroy_card(card)
 end

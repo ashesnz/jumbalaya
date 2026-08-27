@@ -385,4 +385,133 @@ T.describe("Bonus cards", function()
 		T.assert_true(bonus_stack.is_active(), "Bonus cards should persist into stage 1-4")
 		T.assert_equal(#bonus_stack.cards(), 3)
 	end)
+
+	T.it("lifts the left gutter stack by about 20 pixels", function()
+		bonus_stack.clear()
+		layout_globals()
+		G.TILESIZE = 20
+		G.TILESCALE = 73 / 20
+		local placement = require("word_game.ui.layout.placement")
+		local timer = placement.timeline_rect()
+		local layout = bonus_stack.stack_layout()
+		local margin_y = math.max(0.10, G.CARD_H * 0.08)
+		local lift = bonus_stack.stack_y_lift()
+		T.assert_almost_equal(lift * G.TILESIZE * G.TILESCALE, bonus_stack.STACK_Y_LIFT_PX, 0.6)
+		T.assert_almost_equal(layout.y, timer.y + timer.h + margin_y - lift, 0.02)
+		T.assert_true(layout.y < timer.y + timer.h + margin_y - 0.01)
+	end)
+
+	T.it("returns a gutter card from the placement row back to the gutter", function()
+		bonus_stack.clear()
+		layout_globals()
+		local snap = require("word_game.board.snap")
+		local card = mock_card("B", 5, 2.4)
+		bonus_stack.promote_to_bonus({ card })
+		card.area = G.placement_table.area
+		G.placement_table.area.cards = { card }
+		G.placement_table.area.remove_card = function(self, c)
+			for i, held in ipairs(self.cards) do
+				if held == c then
+					table.remove(self.cards, i)
+					c.area = nil
+					return
+				end
+			end
+		end
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.Jumble = {
+			is_active = function() return true end,
+			state = function()
+				return { slots = { { kind = "blank", card = card } } }
+			end,
+			remove_card_from_blanks = function() card.from_blank = true end,
+		}
+		card.T.x, card.T.y = 5, 7
+		snap.try_snap({
+			area = G.placement_table.area,
+			ctx = {
+				card_w = function() return G.CARD_W end,
+				card_h = function() return G.CARD_H end,
+			},
+		}, card)
+		T.assert_nil(card.area, "Bonus card should leave the placement row")
+		T.assert_true(bonus_stack.contains(card), "Bonus card should return to the gutter")
+		T.assert_true(card.from_blank)
+		bonus_stack.clear()
+	end)
+
+	T.it("sends gutter cards back to the gutter when recalling the placement row", function()
+		bonus_stack.clear()
+		layout_globals()
+		local hand_shuffle = require("word_game.ui.hand_shuffle")
+		local bonus = mock_card("G", 4, 2)
+		local dealt = mock_card("H", 6, 2)
+		bonus_stack.promote_to_bonus({ bonus })
+		bonus.area = G.placement_table.area
+		dealt.area = G.placement_table.area
+		G.placement_table.area.cards = { bonus, dealt }
+		G.placement_table.area.remove_card = function(self, card)
+			for i, held in ipairs(self.cards) do
+				if held == card then
+					table.remove(self.cards, i)
+					card.area = nil
+					return
+				end
+			end
+		end
+		G.placement_table.on_remove_card = function() end
+		G.hand = {
+			cards = {},
+			emplace = function(self, card)
+				self.cards[#self.cards + 1] = card
+				card.area = self
+			end,
+			clear_selection = function() end,
+			set_ranks = function() end,
+			relayout = function() end,
+			hard_set_cards = function() end,
+			snap_VT = function() end,
+		}
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.Jumble = { is_active = function() return false end }
+		hand_shuffle.recall_placement_cards()
+		T.assert_true(bonus_stack.contains(bonus), "Gutter card should return to the gutter")
+		T.assert_nil(bonus.area)
+		T.assert_equal(#G.hand.cards, 1)
+		T.assert_equal(G.hand.cards[1], dealt)
+		bonus_stack.clear()
+	end)
+
+	T.it("dissolves a bonus card when it is consumed after a play", function()
+		bonus_stack.clear()
+		local card = mock_card("Z", 3, 3)
+		local dissolved = false
+		card.start_dissolve = function()
+			dissolved = true
+		end
+		bonus_stack.promote_to_bonus({ card })
+		bonus_stack.consume_card(card)
+		T.assert_true(dissolved, "Played bonus cards should dissolve")
+		T.assert_false(bonus_stack.is_active())
+	end)
+
+	T.it("spawns steam +10 flyover text above played bonus cards", function()
+		bonus_stack.clear()
+		layout_globals()
+		local card = mock_card("Q", 4, 3)
+		card.bonus_card = true
+		local spawned = {}
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.FloatUpText = {
+			from_card = function(target, text, opts)
+				spawned[#spawned + 1] = { card = target, text = text, opts = opts }
+			end,
+		}
+		local play_effects = require("word_game.ui.play_effects")
+		play_effects.show_bonus_flyovers({ card, mock_card("A", 0, 0) })
+		T.assert_equal(#spawned, 1)
+		T.assert_equal(spawned[1].card, card)
+		T.assert_equal(spawned[1].text, "+" .. tostring(bonus_stack.BONUS_POINTS))
+		WORD_GAME.FloatUpText = nil
+	end)
 end)
