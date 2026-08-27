@@ -33,6 +33,13 @@ local function safe_random(seed_key)
 	return math.random()
 end
 
+local function gameplay_overlays_active()
+	if WORD_GAME and WORD_GAME.TradeUI and WORD_GAME.TradeUI.is_open and WORD_GAME.TradeUI.is_open() then
+		return true
+	end
+	return false
+end
+
 local function play_button_uie()
 	return WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.play_button_uie()
 end
@@ -93,6 +100,7 @@ function M.can_hold()
 	if G.GAME and G.GAME.word_score_animating then return false end
 	if G.GAME and G.GAME.hand_redraw_animating then return false end
 	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
+	if gameplay_overlays_active() then return false end
 	local btn = play_button_uie()
 	return btn and btn.states.visible and btn.config.button ~= nil
 end
@@ -288,6 +296,11 @@ end
 function M.update(dt)
 	dt = dt or 0
 
+	if gameplay_overlays_active() then
+		reset_hold()
+		return
+	end
+
 	if animating then
 		reset_hold()
 		return
@@ -353,6 +366,7 @@ local function find_sprite_object(uie)
 end
 
 function M.draw()
+	if gameplay_overlays_active() then return end
 	if not holding or hold_t <= 0 then return end
 
 	local btn = play_button_uie()

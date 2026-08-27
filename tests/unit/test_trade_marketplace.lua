@@ -18,6 +18,18 @@ T.describe("Card marketplace offers (word_game.model.trade)", function()
 		return count
 	end
 
+	T.it("offers three distinct letters with no duplicates", function()
+		for i = 1, 30 do
+			local offer = trade.roll_offer()
+			T.assert_equal(#offer.add.letters, 3, "Marketplace should offer three cards")
+			local seen = {}
+			for _, item in ipairs(offer.add.letters) do
+				T.assert_nil(seen[item.letter], "Offered letters must be unique")
+				seen[item.letter] = true
+			end
+		end
+	end)
+
 	T.it("offers three cards: two random A–Z letters and one vowel", function()
 		local saw_vowel = false
 		for i = 1, 20 do
@@ -74,5 +86,29 @@ T.describe("Card marketplace offers (word_game.model.trade)", function()
 		T.assert_true(trade.item_in_deck(item), "Added letters should bind to the deck card")
 		trade.sync_offer_cards(offer)
 		T.assert_true(trade.item_in_deck(item), "Sync should keep deck bindings current")
+	end)
+
+	T.it("counts every live copy of a letter in the deck", function()
+		G.playing_cards = {}
+		local cards = {}
+		G.deck = {
+			cards = cards,
+			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
+			config = {},
+		}
+		local create_letter_card = deck.create_letter_card
+		deck.create_letter_card = function(letter, color)
+			local card = { ability = { letter = letter, letter_color = color }, REMOVED = false }
+			G.playing_cards[#G.playing_cards + 1] = card
+			return card
+		end
+		G.deck:emplace(deck.create_letter_card("E", "red"))
+		G.deck:emplace(deck.create_letter_card("E", "black"))
+		G.deck:emplace(deck.create_letter_card("A", "red"))
+		deck.create_letter_card = create_letter_card
+
+		T.assert_equal(deck.count_letters_in_deck("E"), 2)
+		T.assert_equal(deck.count_letters_in_deck("A"), 1)
+		T.assert_equal(deck.count_letters_in_deck("Z"), 0)
 	end)
 end)

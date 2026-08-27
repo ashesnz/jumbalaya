@@ -203,6 +203,31 @@ end
 	}, nodes = line_nodes }
 end
 
+local function deck_count_node(item, placeholder)
+	if not item or not item.letter then return nil end
+	local count = deck.count_letters_in_deck(item.letter)
+	local text = tostring(count) .. " in deck"
+	return { n = G.UI.COLUMN, config = {
+		align = "cm",
+		padding = 0.08,
+		minw = G.CARD_W * MARKET_CARD_SCALE + 0.35,
+		minh = math.max(0.5, 0.28) + 0.12,
+		r = 0.14,
+		colour = placeholder and G.C.CLEAR or { 0.97, 0.93, 0.84, 1 },
+		shadow = not placeholder and true or nil,
+	}, nodes = {
+		{ n = G.UI.ROW, config = { align = "cm", padding = 0.02 }, nodes = {
+			{ n = G.UI.TEXT, config = {
+				text = text,
+				scale = MODIFIER_TEXT_SCALE,
+				font = alpha_button_font(),
+				colour = placeholder and G.C.CLEAR or (G.C.BLACK or { 0, 0, 0, 1 }),
+				shadow = false,
+			}},
+		}},
+	}}
+end
+
 local function action_column(item, mode, done, session_state)
 	local in_deck = trade.item_in_deck(item)
 	local already_modified = item.card and deck.is_modified(item.card)
@@ -210,9 +235,14 @@ local function action_column(item, mode, done, session_state)
 		or (session_state and session_state.modified[item])
 		or already_modified
 	local remove_disabled = not in_deck
-	local column_nodes = {
-		{ n = G.UI.ROW, config = { align = "cm", padding = 0.03 }, nodes = { face_node(item) } },
-	}
+	local column_nodes = {}
+	local deck_count = deck_count_node(item)
+	if deck_count then
+		column_nodes[#column_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.02 }, nodes = { deck_count } }
+	elseif item.letter then
+		column_nodes[#column_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.02 }, nodes = { deck_count_node(item, true) } }
+	end
+	column_nodes[#column_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.03 }, nodes = { face_node(item) } }
 	-- No card left to describe: keep an invisible placeholder so the modal
 	-- window keeps its size.
 	local desc = nil
@@ -307,6 +337,9 @@ end
 
 open_overlay = function()
 	G.SETTINGS.paused = true
+	if WORD_GAME and WORD_GAME.PlayHoldRedraw and WORD_GAME.PlayHoldRedraw.reset then
+		WORD_GAME.PlayHoldRedraw.reset()
+	end
 	G.FUNCS.show_overlay({
 		definition = M.definition(),
 		config = { no_esc = true, offset = { x = 0, y = modal_offset_y() }, no_jiggle = true },
@@ -611,6 +644,10 @@ end
 
 function M.is_flying()
 	return flyer ~= nil
+end
+
+function M.is_open()
+	return offer ~= nil
 end
 
 local function fly_delta(dt)

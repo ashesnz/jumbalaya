@@ -143,14 +143,31 @@ local function roll_remove_offer()
 	}
 end
 
---- Three cards: one vowel plus two random A–Z letters.
+--- Three distinct cards: one vowel plus two random A–Z letters (no duplicates).
 function M.roll_offer()
 	local picks = {}
+	local used = {}
 
-	picks[#picks + 1] = make_market_item(deck.random_vowel_letter("market_vowel"))
+	local function take_unique(key, roll_fn)
+		for attempt = 1, 52 do
+			local letter = roll_fn(key .. "_" .. attempt)
+			if letter and not used[letter] then
+				used[letter] = true
+				return letter
+			end
+		end
+		for i = 1, 26 do
+			local letter = string.char(string.byte("A") + i - 1)
+			if not used[letter] then
+				used[letter] = true
+				return letter
+			end
+		end
+	end
 
+	picks[#picks + 1] = make_market_item(take_unique("market_vowel", deck.random_vowel_letter))
 	for i = 1, 2 do
-		picks[#picks + 1] = make_market_item(deck.random_letter("market_letter_" .. i))
+		picks[#picks + 1] = make_market_item(take_unique("market_letter_" .. i, deck.random_letter))
 	end
 
 	return {

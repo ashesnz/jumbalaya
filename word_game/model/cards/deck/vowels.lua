@@ -171,6 +171,17 @@ return function(context)
 		return nil
 	end
 
+	function M.count_letters_in_deck(letter)
+		if not letter then return 0 end
+		local count = 0
+		for _, card in ipairs(M.list_deck_cards()) do
+			if card and not card.REMOVED and card_letter(card) == letter then
+				count = count + 1
+			end
+		end
+		return count
+	end
+
 	local function random_index(key, min, max)
 		if type(seeded_random) == "function" then
 			return seeded_random(key, min, max)

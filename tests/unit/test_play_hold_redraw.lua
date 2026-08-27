@@ -37,8 +37,13 @@ T.describe("Play Button Hold Redraw (word_game.ui.play_hold_redraw)", function()
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.HandShuffle = WORD_GAME.HandShuffle or {}
 		WORD_GAME.HandShuffle.play_button_uie = function() return mock_btn end
+		WORD_GAME.TradeUI = { is_open = function() return false end }
 
 		T.assert_true(PlayHoldRedraw.can_hold(), "Should allow hold when table board is active")
+
+		WORD_GAME.TradeUI = { is_open = function() return true end }
+		T.assert_false(PlayHoldRedraw.can_hold(), "Should not allow hold while the card marketplace is open")
+		WORD_GAME.TradeUI = { is_open = function() return false end }
 
 		G.GAME.hand_redraw_animating = true
 		T.assert_equal(PlayHoldRedraw.can_hold(), false, "Should not allow hold during redraw animation")
