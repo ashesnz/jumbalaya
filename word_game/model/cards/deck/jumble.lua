@@ -38,7 +38,7 @@ return function(context)
 		end
 		G.deck.cards = {}
 		for _, card in ipairs(G.playing_cards) do
-			if card and not card.REMOVED and not card.boss_temp then
+			if card and not card.REMOVED and not card.boss_temp and not card.bonus_card then
 				G.deck:emplace(card)
 			end
 		end
@@ -49,6 +49,7 @@ return function(context)
 	end
 
 	function M.clear_hand_and_placement()
+		local bonus_stack = require("word_game.ui.boss_word_stack")
 		local area = G.placement_table and G.placement_table.area
 		if area and area.cards then
 			for i = #area.cards, 1, -1 do
@@ -57,7 +58,9 @@ return function(context)
 					G.placement_table:on_remove_card(card)
 				end
 				area:remove_card(card)
-				if card.boss_temp then
+				if card.bonus_card then
+					bonus_stack.return_card(card)
+				elseif card.boss_temp then
 					M.destroy_card(card)
 				end
 			end
@@ -67,7 +70,9 @@ return function(context)
 			for i = #G.hand.cards, 1, -1 do
 				local card = G.hand.cards[i]
 				G.hand:remove_card(card)
-				if card.boss_temp then
+				if card.bonus_card then
+					bonus_stack.return_card(card)
+				elseif card.boss_temp then
 					M.destroy_card(card)
 				end
 			end
@@ -93,7 +98,7 @@ return function(context)
 		local cards = {}
 		if G.hand and G.hand.cards then
 			for _, card in ipairs(G.hand.cards) do
-				if not card.boss_temp then
+				if not card.boss_temp and not card.bonus_card then
 					cards[#cards + 1] = card
 				end
 			end

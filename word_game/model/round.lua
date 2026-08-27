@@ -89,6 +89,10 @@ function M.start_hand(set, hand_index)
 	-- Dynamic values
 	wr.dynamic_letter_values = nil
 
+	if WORD_GAME and WORD_GAME.BossWordStack and WORD_GAME.BossWordStack.on_hand_start then
+		WORD_GAME.BossWordStack.on_hand_start(set, hand_index)
+	end
+
 	local jumble = require("word_game.model.jumble")
 	if jumble.is_active_hand(set, hand_index) then
 		jumble.start_hand(wr)

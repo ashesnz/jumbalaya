@@ -4,6 +4,7 @@ return function(M)
 local TIMER_ENABLED = false
 local TIMER_SECONDS = 30
 local modifier_effects = require("word_game.model.play.letter_modifier_effects")
+local bonus_stack = require("word_game.ui.boss_word_stack")
 
 function M.is_active_hand(set, hand_index)
 	set = set or (G.GAME and G.GAME.word_round and G.GAME.word_round.set) or 1
@@ -208,6 +209,7 @@ function M.record_puzzle_word(word, opts)
 
 	local effects = modifier_effects.apply_word_effects(word, used_cards, j, wr)
 	local word_pts = #word + (effects.bonus_points or 0)
+	word_pts = word_pts + bonus_stack.bonus_points_for(used_cards)
 	local new_pts = old_pts + word_pts
 	j.puzzle_words = j.puzzle_words or {}
 	table.insert(j.puzzle_words, word)

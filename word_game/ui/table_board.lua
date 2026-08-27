@@ -150,16 +150,21 @@ function M.draw_hand_pass(game)
 		love.graphics.pop()
 	end
 
-	if not G.hand or #G.hand.cards == 0 then return end
+	if not G.hand or #G.hand.cards == 0 then
+		-- still draw bonus stack card overlays below
+	else
+		love.graphics.push()
+		G.hand:translate_container()
+		G.hand:draw()
+		love.graphics.pop()
+	end
 
-	love.graphics.push()
-	G.hand:translate_container()
-	G.hand:draw()
-	love.graphics.pop()
-
+	local bonus_stack = WORD_GAME and WORD_GAME.BossWordStack
 	local controller = game.INPUT
 	for _, v in pairs(game.LIVE.CARD) do
-		if v.area == G.hand
+		local from_hand = v.area == G.hand
+		local from_bonus = bonus_stack and bonus_stack.contains(v) and not v.area
+		if (from_hand or from_bonus)
 			and (not v.parent and v ~= controller.dragging.target and v ~= controller.focused.target)
 			and not (WORD_GAME and WORD_GAME.CardInspect and WORD_GAME.CardInspect.is(v)) then
 			love.graphics.push()
@@ -197,6 +202,7 @@ end
 
 function M.draw_card_interaction(game)
 	if not game.placement_table then return end
+	local bonus_stack = WORD_GAME and WORD_GAME.BossWordStack
 	if game.INPUT.dragging.target and game.INPUT.dragging.target ~= game.INPUT.focused.target then
 		love.graphics.push()
 		game.INPUT.dragging.target:translate_container()
@@ -205,7 +211,8 @@ function M.draw_card_interaction(game)
 	end
 
 	if game.INPUT.focused.target and getmetatable(game.INPUT.focused.target) == Card
-		and game.INPUT.focused.target.area == G.hand
+		and (game.INPUT.focused.target.area == G.hand
+			or (bonus_stack and bonus_stack.contains(game.INPUT.focused.target)))
 		and game.INPUT.focused.target ~= game.INPUT.dragging.target then
 		love.graphics.push()
 		game.INPUT.focused.target:translate_container()

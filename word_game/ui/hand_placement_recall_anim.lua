@@ -1,6 +1,7 @@
 --[[ word_game/ui/hand_placement_recall_anim.lua - Slide placement-row cards back to hand ]]
 
 local Scheduler = require "app.effects.scheduler"
+local bonus_stack = require "word_game.ui.boss_word_stack"
 
 local M = {}
 
@@ -84,6 +85,58 @@ local function sync_card_transform(card)
 		card.VT.y = card.T.y
 		card.VT.r = card.T.r
 	end
+end
+
+local function slide_card_to_bonus_stack(card, p_area, delay)
+	Scheduler.add{
+		mode = "delayed",
+		timer = "REAL",
+		delay = delay,
+		blockable = false,
+		func = function()
+			if not card or not p_area then return true end
+			local sx, sy = card.T.x, card.T.y
+			local sr = card.T.r or 0
+			if G.placement_table then
+				G.placement_table:on_remove_card(card)
+			end
+			if card.area == p_area then
+				p_area:remove_card(card)
+			end
+			bonus_stack.return_card(card)
+			local tx, ty = card.T.x, card.T.y
+			local tr = card.T.r or 0
+			local arc = (G.CARD_H or 1.4) * ARC_FRAC
+			park_card(card, sx, sy, sr)
+			local started = G.TIMERS.REAL
+			Scheduler.add{
+				mode = "window",
+				timer = "REAL",
+				delay = SLIDE_DURATION,
+				blockable = false,
+				blocking = false,
+				func = function()
+					local u = math.min(1, (G.TIMERS.REAL - started) / SLIDE_DURATION)
+					local e = smoothstep(u)
+					card.T.x = sx + (tx - sx) * e
+					card.T.y = sy + (ty - sy) * e - arc * math.sin(math.pi * u)
+					card.T.r = sr + (tr - sr) * e
+					sync_card_transform(card)
+					if u >= 1 then
+						card.T.x = tx
+						card.T.y = ty
+						card.T.r = tr
+						sync_card_transform(card)
+						return true
+					end
+				end,
+			}
+			if play_sfx then
+				play_sfx("card_slide1", 0.88 + delay * 0.15, 0.55)
+			end
+			return true
+		end,
+	}
 end
 
 local function slide_card_to_hand(card, p_area, delay)
@@ -201,7 +254,11 @@ function M.animate(on_complete)
 
 	local p_area = placement_area()
 	for i, card in ipairs(cards) do
-		slide_card_to_hand(card, p_area, (i - 1) * STAGGER)
+		if bonus_stack.is_bonus_card(card) then
+			slide_card_to_bonus_stack(card, p_area, (i - 1) * STAGGER)
+		else
+			slide_card_to_hand(card, p_area, (i - 1) * STAGGER)
+		end
 	end
 
 	local tail = (#cards > 0 and ((#cards - 1) * STAGGER + SLIDE_DURATION) or 0) + FINISH_PAD

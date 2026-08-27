@@ -1,10 +1,16 @@
---[[ word_game/ui/boss_word_stack.lua - Boss word success card stack display ]]
+--[[ word_game/ui/boss_word_stack.lua - Bonus card stack (boss word rewards on stage 1-4) ]]
 
 local placement_layout = require("word_game.ui.layout.placement")
 
 local M = {}
 
+M.BONUS_POINTS = 10
+
 local stack_cards
+
+function M.is_bonus_card(card)
+	return card and card.bonus_card
+end
 
 function M.is_active()
 	return stack_cards ~= nil and #stack_cards > 0
@@ -20,6 +26,14 @@ end
 
 function M.clear()
 	stack_cards = nil
+end
+
+function M.on_hand_start(set, hand_index)
+	if set == 1 and hand_index == 4 then
+		M.sync_positions()
+		return
+	end
+	M.clear()
 end
 
 local function gameplay_left_edge()
@@ -61,6 +75,7 @@ function M.stack_layout()
 		card_h = card_h,
 		step_y = card_h * 0.5,
 		clearance = clearance,
+		label_y = timer.y + timer.h + margin_y * 0.35,
 	}
 end
 
@@ -75,10 +90,164 @@ function M.target_position(index)
 	return layout.x, layout.y + (index - 1) * layout.step_y
 end
 
+function M.stack_index(card)
+	if not stack_cards or not card then return nil end
+	for i, c in ipairs(stack_cards) do
+		if c == card then return i end
+	end
+	return nil
+end
+
+function M.contains(card)
+	return M.stack_index(card) ~= nil
+end
+
+function M.sync_positions()
+	if not stack_cards then return end
+	for i, card in ipairs(stack_cards) do
+		if card and not card.REMOVED and not card.area then
+			local tx, ty = M.target_position(i)
+			if card.hard_set_T then
+				card:hard_set_T(tx, ty, card.T.w, card.T.h)
+			else
+				card.T.x, card.T.y = tx, ty
+			end
+			if card.states and card.states.drag then
+				card.states.drag.can = true
+			end
+			if card.states and card.states.collide then
+				card.states.collide.can = true
+			end
+		end
+	end
+end
+
+function M.promote_to_bonus(cards)
+	stack_cards = {}
+	for _, card in ipairs(cards or {}) do
+		if card and not card.REMOVED then
+			card.bonus_card = true
+			card.boss_temp = nil
+			card.placement_locked = nil
+			card.pinned = nil
+			if card.states and card.states.drag then
+				card.states.drag.can = true
+				card.states.drag.is = false
+			end
+			if card.states and card.states.collide then
+				card.states.collide.can = true
+			end
+			if card.ability then
+				card.ability.bonus = M.BONUS_POINTS
+			end
+			stack_cards[#stack_cards + 1] = card
+		end
+	end
+	M.sync_positions()
+end
+
+function M.finalize_for_bonus_hand(wr)
+	local j = wr and wr.jumble
+	if j then
+		j.boss_cards = nil
+	end
+	M.sync_positions()
+end
+
+function M.remove_card(card)
+	if not stack_cards or not card then return end
+	for i = #stack_cards, 1, -1 do
+		if stack_cards[i] == card then
+			table.remove(stack_cards, i)
+			break
+		end
+	end
+	if stack_cards and #stack_cards == 0 then
+		stack_cards = nil
+	else
+		M.sync_positions()
+	end
+end
+
+function M.return_card(card)
+	if not card then return false end
+	if not M.contains(card) then
+		if card.bonus_card then
+			stack_cards = stack_cards or {}
+			stack_cards[#stack_cards + 1] = card
+		else
+			return false
+		end
+	end
+	if card.area then
+		if G.placement_table and card.area == G.placement_table.area then
+			G.placement_table:on_remove_card(card)
+		end
+		card.area:remove_card(card)
+	end
+	if card.states and card.states.drag then
+		card.states.drag.is = false
+	end
+	if card.set_selected then
+		card:set_selected(false)
+	end
+	local index = M.stack_index(card) or 1
+	local tx, ty = M.target_position(index)
+	if card.hard_set_T then
+		card:hard_set_T(tx, ty, card.T.w, card.T.h)
+	end
+	card.T.r = 0
+	return true
+end
+
+function M.point_in_stack(x, y)
+	if not M.is_active() then return false end
+	local layout = M.stack_layout()
+	local pad_x = layout.card_w * 0.15
+	local pad_y = layout.card_h * 0.2
+	local top = layout.label_y - layout.card_h * 0.35
+	local bottom = layout.y + (#stack_cards - 1) * layout.step_y + layout.card_h + pad_y
+	return x >= layout.x - pad_x
+		and x <= layout.x + layout.card_w + pad_x
+		and y >= top
+		and y <= bottom
+end
+
+function M.bonus_points_for(used_cards)
+	local total = 0
+	for _, card in ipairs(used_cards or {}) do
+		if M.is_bonus_card(card) then
+			total = total + M.BONUS_POINTS
+		end
+	end
+	return total
+end
+
+function M.consume_card(card)
+	M.remove_card(card)
+	local deck = require("word_game.model.cards.deck")
+	deck.destroy_card(card)
+end
+
+local function draw_label(layout)
+	if not M.is_active() then return end
+	local font = G.FONTS and (G.FONTS.sm or G.FONTS.medium or G.FONTS.main)
+	if not font then return end
+	love.graphics.setFont(font)
+	love.graphics.setColor(1, 0.92, 0.55, 0.95)
+	local scale = 0.34
+	local text = "Bonus Cards"
+	local tw = font:getWidth(text) * scale
+	love.graphics.print(text, layout.x + (layout.card_w - tw) * 0.5, layout.label_y, 0, scale, scale)
+	love.graphics.setColor(1, 1, 1, 1)
+end
+
 function M.draw_pass()
 	if not stack_cards then return end
+	local layout = M.stack_layout()
+	draw_label(layout)
 	for _, card in ipairs(stack_cards) do
-		if card and not card.REMOVED then
+		if card and not card.REMOVED and not card.area then
 			love.graphics.push()
 			card:translate_container()
 			card:draw()

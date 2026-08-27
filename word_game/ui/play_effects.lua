@@ -144,8 +144,11 @@ function M.sync_sidebar_actions()
 	end
 end
 
-function M.restore_boss_layout()
-	boss_word_stack.clear()
+function M.restore_boss_layout(opts)
+	opts = opts or {}
+	if not opts.keep_bonus_stack then
+		boss_word_stack.clear()
+	end
 	local wr = G.GAME and G.GAME.word_round
 	if wr and wr.jumble then
 		wr.jumble.locked_hand_layout = nil
@@ -167,6 +170,9 @@ function M.restore_boss_layout()
 	if WORD_GAME and WORD_GAME.HandShuffle then
 		WORD_GAME.HandShuffle.sync_position()
 	end
+	if opts.keep_bonus_stack and boss_word_stack.sync_positions then
+		boss_word_stack.sync_positions()
+	end
 end
 
 function M.run_card_return_sequence(used_cards, on_after, return_to_deck)
@@ -181,7 +187,9 @@ function M.run_card_return_sequence(used_cards, on_after, return_to_deck)
 					if card.area then
 						card.area:remove_card(card)
 					end
-					if return_to_deck then
+					if boss_word_stack.is_bonus_card(card) then
+						boss_word_stack.consume_card(card)
+					elseif return_to_deck then
 						card.REMOVED = nil
 						if G.deck and G.deck.emplace then
 							G.deck:emplace(card)
@@ -208,21 +216,31 @@ function M.run_card_return_sequence(used_cards, on_after, return_to_deck)
 	}))
 end
 
-local function finish_used_cards(used_cards, return_to_deck)
-	for _, card in ipairs(used_cards or {}) do
-		if card.area then
-			card.area:remove_card(card)
-		end
-		if return_to_deck then
-			card.REMOVED = nil
-			if G.deck and G.deck.emplace then
-				G.deck:emplace(card)
-			end
-		else
-			deck.destroy_card(card)
-		end
+local function finish_used_card(card, return_to_deck)
+	if card.area then
+		card.area:remove_card(card)
 	end
-	if return_to_deck then
+	if boss_word_stack.is_bonus_card(card) then
+		boss_word_stack.consume_card(card)
+	elseif return_to_deck then
+		card.REMOVED = nil
+		if G.deck and G.deck.emplace then
+			G.deck:emplace(card)
+		end
+	else
+		deck.destroy_card(card)
+	end
+end
+
+local function finish_used_cards(used_cards, return_to_deck)
+	local returned = false
+	for _, card in ipairs(used_cards or {}) do
+		if not boss_word_stack.is_bonus_card(card) and return_to_deck then
+			returned = true
+		end
+		finish_used_card(card, return_to_deck)
+	end
+	if returned then
 		deck.sync_deck_count_display()
 	end
 end
@@ -417,12 +435,7 @@ function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_
 	boss_word_stack.set_cards(cards)
 
 	local function finish_success()
-		for i, card in ipairs(cards) do
-			local tx, ty = boss_word_stack.target_position(i)
-			if card.hard_set_T then
-				card:hard_set_T(tx, ty, card.T.w, card.T.h)
-			end
-		end
+		boss_word_stack.promote_to_bonus(cards)
 		if on_hand_cleared then
 			on_hand_cleared({ boss_cleared = true })
 		end

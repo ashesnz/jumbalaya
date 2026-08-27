@@ -43,6 +43,9 @@ local function open_after_hand(opts)
 	local wr = G.GAME.word_round
 	local j = wr and wr.jumble
 	if opts.boss_cleared or (j and j.boss_word_active) then
+		local bonus_stack = WORD_GAME and WORD_GAME.BossWordStack
+		local keep_bonus_cards = opts.boss_cleared
+			and wr.set == 1 and wr.hand_index == 3
 		if j then
 			j.boss_word_active = false
 			j.boss_word_staging = false
@@ -50,14 +53,23 @@ local function open_after_hand(opts)
 			j.pending_boss = nil
 			j.locked_hand_layout = nil
 		end
-		if WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.destroy_boss_cards then
-			WORD_GAME.Deck.destroy_boss_cards()
+		if keep_bonus_cards then
+			if bonus_stack and bonus_stack.finalize_for_bonus_hand then
+				bonus_stack.finalize_for_bonus_hand(wr)
+			end
+			if WORD_GAME and WORD_GAME.PlayEffects and WORD_GAME.PlayEffects.restore_boss_layout then
+				WORD_GAME.PlayEffects.restore_boss_layout({ keep_bonus_stack = true })
+			end
+		else
+			if WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.destroy_boss_cards then
+				WORD_GAME.Deck.destroy_boss_cards()
+			end
+			if WORD_GAME and WORD_GAME.PlayEffects and WORD_GAME.PlayEffects.restore_boss_layout then
+				WORD_GAME.PlayEffects.restore_boss_layout()
+			end
 		end
 		if WORD_GAME and WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.set_banner_mode then
 			WORD_GAME.ScoreBanner.set_banner_mode("normal")
-		end
-		if WORD_GAME and WORD_GAME.PlayEffects and WORD_GAME.PlayEffects.restore_boss_layout then
-			WORD_GAME.PlayEffects.restore_boss_layout()
 		end
 		if wr.set >= round_config.SETS_TO_WIN then
 			M.end_match(true)
