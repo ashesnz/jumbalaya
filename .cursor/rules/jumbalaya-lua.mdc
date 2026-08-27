@@ -1,0 +1,49 @@
+---
+description: Lua module and class conventions for Jumbalaya
+globs: "**/*.lua"
+alwaysApply: false
+---
+
+# Lua conventions
+
+## Modules
+
+- Dot paths from repo root: `require "word_game.ui.letter_card_faces"`
+- Package folders use `init.lua`
+- Most modules: `local M = {}` … `return M`
+- Pure data configs may `return { ... }` directly (`deck_face_colors.lua`)
+
+## Naming
+
+- Files/dirs: `snake_case`
+- Locals: `snake_case`
+- Classes/globals: `PascalCase` (`Card`, `Game`, `LayoutView`)
+- Package globals: `UPPER_SNAKE` (`WORD_GAME`, `G`, `DEVTOOLS`)
+- Feature flags on `G`: `F_*` from `runtime_options.flags`
+
+## Classes (`app/core/object.lua`)
+
+```lua
+Card = EaseNode:derive("Card")
+
+function Card:construct(X, Y, W, H, ...)
+    EaseNode.construct(self, X, Y, W, H)
+end
+```
+
+Chain: `Object → Node → EaseNode/Moveable → Sprite, LayoutView, Card, CardArea`
+
+`card.lua` mixes in behavior via requires (`card_visuals.lua`, `card_ui.lua`) — preserve this pattern.
+
+## Callbacks & layout
+
+- UI binds `G.FUNCS.*` by string — move implementations, not registration names
+- Model requests layout via `WORD_GAME.Layout.request_refresh()` / deferred `G.ARGS.pending_layout` — not direct geometry from model code
+
+## Annotations
+
+Add `---@class` / `---@field` on new public APIs. Analyzer stubs live in `types/`; `.emmyrc.json` ignores `_tools/`.
+
+## Do not hand-edit
+
+`dictionary/words_set.lua`, regenerated `deck_face_colors.lua`, binary textures — use `_tools/` scripts.

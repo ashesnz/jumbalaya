@@ -1,0 +1,38 @@
+---
+description: Jumbalaya architecture, packages, and dependency boundaries
+alwaysApply: true
+---
+
+# Jumbalaya — project context
+
+Roguelike **jumble** word game on Love2D/Lua. Active loop: fill **pattern puzzles** from a 7-card hand, bank score × multiplier, clear 24 stages (8 sets × 3 hands). Timeline fuse → tokens; between hands → The Trade marketplace.
+
+**Authoritative docs:** `docs/code-organization.md`, `docs/gameplay.md`, `docs/testing.md`
+
+## Layout
+
+| Path | Role |
+|------|------|
+| `app/` | Bootstrap, lifecycle, input, persistence, engine (`app/core/`) |
+| `word_game/` | Domain: `config/`, `model/`, `board/`, `ui/` |
+| `tests/` | Headless suite — `love tests` |
+| `dictionary/` | Offline word validation |
+| `_tools/` | Python asset pipelines (not runtime) |
+| `resources/` | Textures, shaders, sounds, fonts |
+| `AlphaCardsBackup/` | Legacy Balatro reference — do not edit |
+
+## Dependency rules
+
+- `word_game/ui/` → `app/core/` — never reverse
+- `word_game/board/` — snap/geometry only; no UI imports
+- Cross-package: use `WORD_GAME` facade (`word_game/init.lua`), not deep `require` from `app/` or `tests/`
+- Config = data; model = rules/state; ui = presentation — keep separated
+- Bootstrap load order lives in `app/bootstrap.lua` only; globals (`G`, `Card`, `LayoutView`) exist after boot
+
+## Active vs legacy
+
+Jumble mode is the player experience (`word_game/model/jumble/`, `play/jumble.lua`). Legacy AP/plays/discards code may remain but is not active — do not extend it unless asked.
+
+## Verification
+
+After logic changes: `love tests`. For structural refactors: `emmylua_check . --severity warn`. Minimize diff scope; match existing naming and patterns.

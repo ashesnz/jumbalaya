@@ -246,6 +246,36 @@ def write_face_colors_lua(colors: dict[str, tuple[float, float, float, float]]) 
     print("wrote", path)
 
 
+def validate_frame(frame: Image.Image) -> None:
+    """Reject a solid rectangle; the frame must keep rounded-corner transparency."""
+    px = frame.load()
+    w, h = frame.size
+    corners = ((0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1))
+    if any(px[x, y][3] > 32 for x, y in corners):
+        raise SystemExit(
+            "JumbalayaCardFrame has opaque corners (solid rectangle). "
+            "Restore deck source art or keep the committed frame PNG."
+        )
+    transparent = sum(1 for y in range(h) for x in range(w) if px[x, y][3] < 32)
+    if transparent < 32:
+        raise SystemExit("JumbalayaCardFrame has too few transparent pixels; check source art.")
+
+
+def validate_letters(letters: Image.Image, cell_w: int, cell_h: int) -> None:
+    """Glyphs must be transparent outside the card body; no baked card background rows."""
+    cols, rows = letters.width // cell_w, letters.height // cell_h
+    for row in range(rows):
+        for col in range(cols):
+            cell = letters.crop((col * cell_w, row * cell_h, (col + 1) * cell_w, (row + 1) * cell_h))
+            px = cell.load()
+            for y in range(min(3, cell_h)):
+                if sum(1 for x in range(cell_w) if px[x, y][3] > 32) >= cell_w - 2:
+                    raise SystemExit(
+                        "JumbalayaLetters includes a full-width background row near the top. "
+                        "Glyphs must be letter art only; card colour comes from JumbalayaCardFrame."
+                    )
+
+
 def write_atlases(scale: str) -> None:
     cell_w, cell_h = cell_size(scale)
     deck = load_deck(scale)
@@ -254,6 +284,8 @@ def write_atlases(scale: str) -> None:
 
     letters = build_letters(deck, cell_w, cell_h)
     frame = build_frame(deck, cell_w, cell_h)
+    validate_frame(frame)
+    validate_letters(letters, cell_w, cell_h)
 
     letters_path = out_dir / "JumbalayaLetters.png"
     frame_path = out_dir / "JumbalayaCardFrame.png"

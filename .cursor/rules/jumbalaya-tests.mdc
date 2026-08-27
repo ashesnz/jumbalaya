@@ -1,0 +1,43 @@
+---
+description: Unit test harness and how to add tests
+globs: "tests/**"
+alwaysApply: false
+---
+
+# Testing
+
+Run headless suite:
+
+```sh
+love tests
+```
+
+Exit `0` = pass, `1` = fail. Config in `tests/conf.lua` disables window/audio.
+
+## Structure
+
+- `tests/framework.lua` — `describe`, `it`, `assert_equal`, etc.
+- `tests/runner.lua` — auto-discovers `tests/unit/test_*.lua`
+- `tests/helpers/mock_env.lua` — stubs `G`, loads real engine classes when needed
+
+## New test template
+
+```lua
+local T = require("tests.framework")
+local mock_env = require("tests.helpers.mock_env")
+
+T.describe("feature", function()
+    mock_env.reset_game()
+    T.it("does thing", function()
+        T.assert_equal(actual, expected)
+    end)
+end)
+```
+
+No manual registration in `runner.lua` — naming `test_*.lua` under `tests/unit/` is enough.
+
+## Jumble-related tests
+
+`test_jumble_patterns.lua`, `test_jumble_scoring.lua`, `test_jumble_play_flow.lua`, `test_letter_card_faces.lua`
+
+Use `mock_env.ensure_engine_globals()` when tests need real `Sprite`/`Node`/`Card` classes.
