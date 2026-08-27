@@ -266,6 +266,9 @@ local function hand_position_drift()
 			goto continue
 		end
 		local vt, t = card.VT, card.T
+		if card.placement_recall_slide then
+			goto continue
+		end
 		if vt and t and (math.abs(vt.x - t.x) > SNAP_EPS or math.abs(vt.y - t.y) > SNAP_EPS) then
 			return true
 		end
@@ -291,7 +294,7 @@ local function snap_hand_cards()
 		if card.states and card.states.drag and card.states.drag.is then
 			goto continue
 		end
-		if card.bounce or card.shuffle_hop then
+		if card.bounce or card.shuffle_hop or card.placement_recall_slide then
 			goto continue
 		end
 		if card.hard_set_T then
@@ -550,6 +553,7 @@ end
 function M.stabilize_table_board()
 	M.stabilize()
 	snap_hand_container()
+	if G.GAME and G.GAME.placement_recall_animating then return end
 	local settle = G.GAME and G.GAME.hand_layout_settle or 0
 	if settle > 0 or hand_position_drift() then
 		snap_hand_cards()

@@ -27,7 +27,7 @@ function M.relayout(self)
 		local start_x = self.T.x + (self.T.w - group_w) / 2
 		local fan_n = G.TABLE_HAND_SIZE or self.config.card_limit or 7
 		for k, card in ipairs(self.cards) do
-			if not card.states.drag.is and not card.shuffle_hop then
+			if not card.states.drag.is and not card.shuffle_hop and not card.placement_recall_slide then
 				local slot = k + (fan_n - n) * 0.5
 				card.T.r = 0.2 * (-fan_n / 2 - 0.5 + slot) / fan_n + 0.02 * math.sin(2 * G.TIMERS.REAL + card.T.x)
 				card.T.x = start_x + (k - 1) * card_w * spacing + 0.5 * (card_w - card.T.w)
@@ -44,7 +44,7 @@ function M.draw_layer(self, v, draw_card_layer)
 	local resting, hopping = {}, {}
 	for i = 1, #self.cards do
 		local card = self.cards[i]
-		if card.shuffle_hop then
+		if card.shuffle_hop or card.placement_recall_slide then
 			hopping[#hopping + 1] = card
 		else
 			resting[#resting + 1] = card
