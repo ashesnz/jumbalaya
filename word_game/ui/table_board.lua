@@ -232,11 +232,8 @@ function M.draw_debug_answers()
 	local text = "AVAILABLE ANSWERS\n"
 	local jumble = WORD_GAME and WORD_GAME.Jumble
 	if jumble and jumble.is_active() and jumble.find_playable_words then
-		local counts = jumble.jumble_hand_counts and jumble.jumble_hand_counts() or {}
-		if G.hand and G.hand.cards and #G.hand.cards > 0
-			and Dictionary and Dictionary.counts_from_cards then
-			counts = Dictionary.counts_from_cards(G.hand.cards)
-		end
+		local counts = jumble.debug_answer_counts and jumble.debug_answer_counts()
+			or (jumble.jumble_hand_counts and jumble.jumble_hand_counts() or {})
 		local words = jumble.find_playable_words(counts, jumble.state().puzzle, 12)
 		text = text .. (#words > 0 and table.concat(words, ", ") or "none") .. "\n"
 	else

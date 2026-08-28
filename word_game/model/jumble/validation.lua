@@ -150,6 +150,39 @@ function M.jumble_hand_counts()
 	return starting_letter_counts()
 end
 
+function M.debug_answer_cards()
+	local cards = {}
+	if G.hand and G.hand.cards then
+		for _, card in ipairs(G.hand.cards) do
+			cards[#cards + 1] = card
+		end
+	end
+	local area = G.placement_table and G.placement_table.area
+	if area and area.cards then
+		for _, card in ipairs(area.cards) do
+			cards[#cards + 1] = card
+		end
+	end
+	local bonus_stack = WORD_GAME and WORD_GAME.BossWordStack
+	if bonus_stack and bonus_stack.is_active and bonus_stack.is_active() then
+		for _, card in ipairs(bonus_stack.cards() or {}) do
+			if card and not card.REMOVED then
+				local in_hand = G.hand and card.area == G.hand
+				local in_placement = area and card.area == area
+				if not in_hand and not in_placement then
+					cards[#cards + 1] = card
+				end
+			end
+		end
+	end
+	return cards
+end
+
+function M.debug_answer_counts()
+	if not Dictionary then return {} end
+	return Dictionary.counts_from_cards(M.debug_answer_cards())
+end
+
 function M.ensure_playable_puzzle(wr)
 	wr = wr or (G.GAME and G.GAME.word_round)
 	local j = wr and wr.jumble

@@ -77,6 +77,14 @@ local function min_hand_letters(puzzle)
 	return blanks
 end
 
+local function debug_answer_counts()
+	local jumble = WORD_GAME and WORD_GAME.Jumble
+	if jumble and jumble.debug_answer_counts then
+		return jumble.debug_answer_counts()
+	end
+	return Dictionary and Dictionary.counts_from_cards(held_cards()) or {}
+end
+
 local function find_playable_words(counts, puzzle)
 	if puzzle and WORD_GAME and WORD_GAME.Jumble then
 		return WORD_GAME.Jumble.find_playable_words(counts, puzzle)
@@ -151,7 +159,7 @@ function M.refresh_hint()
 	end
 
 	local puzzle = active_jumble_puzzle()
-	local counts = Dictionary and Dictionary.counts_from_cards(held_cards()) or {}
+	local counts = debug_answer_counts()
 	local key = counts_key(counts, puzzle)
 	if key == M._last_counts_key then return end
 	M._last_counts_key = key

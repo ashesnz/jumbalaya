@@ -9,6 +9,7 @@ T.describe("Debug stage jump (devtools.sections.stage)", function()
 	local stage_section = require("devtools.sections.stage")
 	local DebugContext = require("devtools.context")
 	local opening_deal = require("word_game.model.play.opening_deal")
+	local round_config = require("word_game.config.round_config")
 
 	T.it("deals the opening hand after jumping to a jumble stage", function()
 		local saved_word_game = WORD_GAME
@@ -108,5 +109,39 @@ T.describe("Debug stage jump (devtools.sections.stage)", function()
 		T.assert_equal(start_calls[1].hand, 1)
 		T.assert_true(opening_deal_called, "Stage jump must deal a fresh opening hand")
 		T.assert_equal(#G.hand.cards, 7, "Jumble stage jump should leave seven cards in hand")
+	end)
+
+	T.it("seeds seven bonus cards in the left gutter when jumping to stage 1-4", function()
+		local created_letters = {}
+		local promoted = nil
+		local destroyed = 0
+		local bonus_cards = {}
+
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.Deck = {
+			create_letter_card = function(letter)
+				created_letters[#created_letters + 1] = letter
+				return { ability = { letter = letter }, REMOVED = false }
+			end,
+			destroy_card = function()
+				destroyed = destroyed + 1
+			end,
+		}
+		WORD_GAME.BossWordStack = {
+			cards = function() return bonus_cards end,
+			clear = function() bonus_cards = {} end,
+			promote_to_bonus = function(cards)
+				promoted = cards
+				bonus_cards = cards
+			end,
+		}
+
+		stage_section.seed_bonus_gutter()
+
+		T.assert_equal(#created_letters, round_config.HAND_SIZE,
+			"Stage 1-4 debug should create seven bonus cards")
+		T.assert_equal(#promoted, round_config.HAND_SIZE,
+			"Stage 1-4 debug should promote seven bonus cards")
+		T.assert_equal(destroyed, 0, "No prior bonus cards should exist on first seed")
 	end)
 end)

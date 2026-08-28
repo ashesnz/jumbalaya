@@ -9,7 +9,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import sys
+
 from PIL import Image, ImageChops, ImageFilter
+
+_TOOLS = Path(__file__).resolve().parent
+if str(_TOOLS) not in sys.path:
+    sys.path.insert(0, str(_TOOLS))
+from letter_border_remap import remap_image
 
 ROOT = Path(__file__).resolve().parents[1]
 LOGICAL_W = 71
@@ -185,7 +192,10 @@ def build_letters(deck: Image.Image, cell_w: int, cell_h: int) -> Image.Image:
             glyph = extract_glyph(cell, bg)
             sheet.paste(glyph, (col * cell_w, sheet_row * cell_h))
 
-    return sheet
+    remapped, stats = remap_image(sheet)
+    if stats["remapped"]:
+        print(f"  remapped {stats['remapped']} red border pixels to black")
+    return remapped
 
 
 def build_frame(deck: Image.Image, cell_w: int, cell_h: int) -> Image.Image:
