@@ -13,9 +13,21 @@ local VAULT_ROOT_PAD = 0
 local VAULT_OUTER_PAD = 0
 local VAULT_FILL_PAD = 0.06
 local VAULT_BOTTOM_PAD = 0.22
-local VAULT_FILL_CHILDREN = 7
+local VAULT_FILL_CHILDREN = 6
+local STAMP_SLOT_H_PX = 50
+
+-- Word list hidden from vault; list_nodes()/list_definition() kept for reuse elsewhere.
+local SHOW_VAULT_WORD_LIST = false
+
+local function stamp_slot_height()
+	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
+	return STAMP_SLOT_H_PX / ts + 0.04
+end
 
 local function list_height()
+	if not SHOW_VAULT_WORD_LIST then
+		return 0
+	end
 	local history = G.GAME and G.GAME.table_word_history or {}
 	return math.max(0.40, #history * LIST_ROW_H)
 end
@@ -23,6 +35,8 @@ end
 local function vault_fixed_content_height()
 	local _, deck_h = Layout.deck_slot_size()
 	local rows = 0.82
+		+ stamp_slot_height()
+		+ 0.45
 		+ list_height()
 		+ 0.08
 		+ deck_h
@@ -38,25 +52,6 @@ end
 
 local function box_width()
 	return Layout.sidebar_width()
-end
-
-local function voucher_nodes()
-	if not (G.GAME and G.GAME.selected_perk) then
-		return {}
-	end
-	local perk = G.GAME.selected_perk
-	local nodes = {}
-	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.Perk
-	if atlas and perk.pos then
-		local w, h = 0.48, 0.64
-		local sprite = Sprite(0, 0, w, h, atlas, perk.pos)
-		sprite.states.drag.can = false
-		sprite.states.hover.can = false
-		sprite.states.collide.can = false
-		sprite.states.click.can = false
-		nodes[#nodes + 1] = { n = G.UI.OBJECT, config = { object = sprite, w = w, h = h } }
-	end
-	return nodes
 end
 
 local function deck_count_node(box_w)
@@ -144,9 +139,77 @@ end
 function M.hud_definition()
 	local box_w = box_width()
 	local vault_h = Layout.vault_height()
+	local stamp_h = stamp_slot_height()
 
 	local inner_h = math.max(4, vault_h - VAULT_ROOT_PAD * 2)
 	local fill_h = math.max(3.5, inner_h - VAULT_OUTER_PAD * 2)
+
+	local fill_nodes = {
+		{ n = G.UI.ROW, config = {
+			align = "cm",
+			padding = 0,
+			minw = box_w,
+			id = "row_hand_progress",
+		}, nodes = {
+			hand_progress.odometer_node(box_w),
+		}},
+		{ n = G.UI.ROW, config = {
+			id = "row_stamp_slot",
+			minh = stamp_h,
+			minw = box_w,
+			align = "cm",
+			padding = 0,
+		}, nodes = {} },
+		{ n = G.UI.ROW, config = {
+			id = "row_vault_spacer",
+			minh = vault_spacer_height(),
+		}, nodes = {} },
+		{ n = G.UI.ROW, config = {
+			id = "row_perk_stamp",
+			minh = 0.45,
+			align = "cm",
+			padding = 0.04,
+			minw = box_w * 0.88,
+			r = 0.08,
+			hover = true,
+			colour = G.C.UI.BACKGROUND_INACTIVE,
+			button = "perk_stamp_demo",
+			shadow = true,
+		}, nodes = {
+			{ n = G.UI.TEXT, config = {
+				text = "Stamp Frame",
+				scale = 0.24,
+				colour = G.C.UI.TEXT_LIGHT,
+				shadow = true,
+			}},
+		}},
+		(function()
+			local dw, dh = Layout.deck_slot_size()
+			return { n = G.UI.ROW, config = {
+				align = "cm",
+				id = "row_deck",
+				minw = box_w,
+				minh = dh,
+				maxh = dh,
+			}, nodes = {
+				{ n = G.UI.BOX, config = { w = dw, h = dh } },
+			}}
+		end)(),
+		deck_count_node(box_w),
+		{ n = G.UI.ROW, config = {
+			id = "row_vault_bottom_pad",
+			minh = VAULT_BOTTOM_PAD,
+		}, nodes = {} },
+	}
+
+	if SHOW_VAULT_WORD_LIST then
+		table.insert(fill_nodes, 3, { n = G.UI.ROW, config = {
+			align = "tm",
+			id = "row_embedded_list",
+			minw = box_w,
+			padding = 0.02,
+		}, nodes = M.list_nodes() })
+	end
 
 	return { n = G.UI.ROOT, config = {
 		align = "tm",
@@ -172,68 +235,7 @@ function M.hud_definition()
 				minh = fill_h,
 				minw = box_w,
 				padding = VAULT_FILL_PAD,
-			}, nodes = {
-				{ n = G.UI.ROW, config = {
-					align = "cm",
-					padding = 0,
-					minw = box_w,
-					id = "row_hand_progress",
-				}, nodes = {
-					hand_progress.odometer_node(box_w),
-				}},
-				{ n = G.UI.ROW, config = {
-					align = "tm",
-					id = "row_embedded_list",
-					minw = box_w,
-					padding = 0.02,
-				}, nodes = M.list_nodes() },
-				{ n = G.UI.ROW, config = {
-					id = "row_vault_spacer",
-					minh = vault_spacer_height(),
-				}, nodes = {} },
-				{ n = G.UI.ROW, config = {
-					id = "row_perk_stamp",
-					minh = 0.45,
-					align = "cm",
-					padding = 0.04,
-					minw = box_w * 0.88,
-					r = 0.08,
-					hover = true,
-					colour = G.C.UI.BACKGROUND_INACTIVE,
-					button = "perk_stamp_demo",
-					shadow = true,
-				}, nodes = {
-					{ n = G.UI.TEXT, config = {
-						text = "Stamp Frame",
-						scale = 0.24,
-						colour = G.C.UI.TEXT_LIGHT,
-						shadow = true,
-					}},
-				}},
-				{ n = G.UI.ROW, config = {
-					id = "row_voucher",
-					minh = 0.6,
-					align = "cm",
-					padding = 0.05,
-				}, nodes = voucher_nodes() },
-				(function()
-					local dw, dh = Layout.deck_slot_size()
-					return { n = G.UI.ROW, config = {
-						align = "cm",
-						id = "row_deck",
-						minw = box_w,
-						minh = dh,
-						maxh = dh,
-					}, nodes = {
-						{ n = G.UI.BOX, config = { w = dw, h = dh } },
-					}}
-				end)(),
-				deck_count_node(box_w),
-				{ n = G.UI.ROW, config = {
-					id = "row_vault_bottom_pad",
-					minh = VAULT_BOTTOM_PAD,
-				}, nodes = {} },
-			}},
+			}, nodes = fill_nodes },
 		}},
 	}}
 end
@@ -247,6 +249,7 @@ function M.relayout_vault()
 	local outer = G.VAULT_HUD:find_node_by_id("row_vault_outer")
 	local fill = G.VAULT_HUD:find_node_by_id("row_vault_fill")
 	local spacer = G.VAULT_HUD:find_node_by_id("row_vault_spacer")
+	local stamp_slot = G.VAULT_HUD:find_node_by_id("row_stamp_slot")
 	if root and root.config then
 		root.config.minh = vault_h
 	end
@@ -258,6 +261,9 @@ function M.relayout_vault()
 	end
 	if spacer then
 		spacer.config.minh = vault_spacer_height()
+	end
+	if stamp_slot then
+		stamp_slot.config.minh = stamp_slot_height()
 	end
 	G.VAULT_HUD:recalculate()
 	if G.VAULT_ATTACH then

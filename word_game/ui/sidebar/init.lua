@@ -48,7 +48,7 @@ function WordSidebar:ensure()
 	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_vault_spacer") then
 		self:destroy()
 	end
-	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_embedded_list") then
+	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_stamp_slot") then
 		self:destroy()
 	end
 	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_hand_progress") then
