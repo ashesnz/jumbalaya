@@ -262,9 +262,16 @@ local function quad_fill(a, b, c, d, rgb, alpha)
 end
 
 local function edge_line(a, b, alpha, width)
-	love.graphics.setColor(WOOD_EDGE[1], WOOD_EDGE[2], WOOD_EDGE[3], alpha * 0.85)
+	love.graphics.setColor(0, 0, 0, alpha * 0.92)
 	love.graphics.setLineWidth(width or 1.6)
 	love.graphics.line(a[1], a[2], b[1], b[2])
+end
+
+local function face_outline(a, b, c, d, alpha, width)
+	edge_line(a, b, alpha, width)
+	edge_line(b, c, alpha, width)
+	edge_line(c, d, alpha, width)
+	edge_line(d, a, alpha, width)
 end
 
 local function shade(rgb, mul)
@@ -340,12 +347,14 @@ local function draw_stamp_3d(ox, oy, scale, yaw, pitch, squash_y, alpha, roll)
 	quad_fill(c.ftr, c.btr, c.bbr, c.fbr, shade(WOOD_SIDE, 0.9), alpha)
 	quad_fill(c.ftl, c.ftr, c.fbr, c.fbl, WOOD_FRONT, alpha)
 
-	-- Exterior outlines only — top rim plus the two vertical front edges.
-	edge_line(c.ftl, c.ftr, alpha)
-	edge_line(c.ftl, c.btl, alpha)
-	edge_line(c.ftr, c.btr, alpha)
-	edge_line(c.ftl, c.fbl, alpha)
-	edge_line(c.ftr, c.fbr, alpha)
+	-- Full black perimeter on every visible face.
+	face_outline(c.ftl, c.ftr, c.btr, c.btl, alpha)
+	face_outline(c.ftl, c.ftr, c.fbr, c.fbl, alpha)
+	face_outline(c.btl, c.ftl, c.fbl, c.bbl, alpha)
+	face_outline(c.ftr, c.btr, c.bbr, c.fbr, alpha)
+	face_outline(c.btl, c.btr, c.bbr, c.bbl, alpha)
+	face_outline(c.fbl, c.fbr, c.rfr, c.rfl, alpha)
+	face_outline(c.fbr, c.bbr, c.rbr, c.rfr, alpha)
 
 	quad_fill(c.hbl, c.hbr, c.hfr, c.hfl, HANDLE, alpha)
 	quad_fill(c.hbr, c.hbf, c.htf, c.hfr, shade(HANDLE, 0.8), alpha)
@@ -464,6 +473,17 @@ function M.play(entry, callback)
 		play_sfx("whoosh2", 0.85, 0.5)
 	end
 	return true
+end
+
+function M.demo_play()
+	if G.STATE ~= G.STATES.TABLE_BOARD then return end
+	if anim and not anim.debug and anim.t < TOTAL_DUR then return end
+
+	anim = nil
+	local pool = perk_cfg.POOL
+	if #pool == 0 then return end
+	demo_index = (demo_index - 1) % #pool + 1
+	M.play(copy_perk(pool[demo_index]))
 end
 
 function M.debug_step()

@@ -13,7 +13,7 @@ local VAULT_ROOT_PAD = 0
 local VAULT_OUTER_PAD = 0
 local VAULT_FILL_PAD = 0.06
 local VAULT_BOTTOM_PAD = 0.22
-local VAULT_FILL_CHILDREN = 6
+local VAULT_FILL_CHILDREN = 7
 local STAMP_SLOT_H_PX = 50
 
 -- Word list hidden from vault; list_nodes()/list_definition() kept for reuse elsewhere.
@@ -36,6 +36,7 @@ local function vault_fixed_content_height()
 	local _, deck_h = Layout.deck_slot_size()
 	local rows = 0.82
 		+ stamp_slot_height()
+		+ 0.45
 		+ 0.45
 		+ list_height()
 		+ 0.08
@@ -164,6 +165,25 @@ function M.hud_definition()
 			id = "row_vault_spacer",
 			minh = vault_spacer_height(),
 		}, nodes = {} },
+		{ n = G.UI.ROW, config = {
+			id = "row_perk_stamp_play",
+			minh = 0.45,
+			align = "cm",
+			padding = 0.04,
+			minw = box_w * 0.88,
+			r = 0.08,
+			hover = true,
+			colour = G.C.UI.BACKGROUND_INACTIVE,
+			button = "perk_stamp_play",
+			shadow = true,
+		}, nodes = {
+			{ n = G.UI.TEXT, config = {
+				text = "Stamp Play",
+				scale = 0.24,
+				colour = G.C.UI.TEXT_LIGHT,
+				shadow = true,
+			}},
+		}},
 		{ n = G.UI.ROW, config = {
 			id = "row_perk_stamp",
 			minh = 0.45,
