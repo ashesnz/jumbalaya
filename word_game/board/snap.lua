@@ -55,6 +55,43 @@ function M.point_in_hand(x, y)
 		and y <= G.hand.T.y + G.hand.T.h + pad_y
 end
 
+local function bonus_origin_slot(card)
+	local jumble = WORD_GAME and WORD_GAME.Jumble
+	if jumble and jumble.slot_for_card then
+		return jumble.slot_for_card(card)
+	end
+	return nil, nil
+end
+
+function M.restore_bonus_card(session, card, origin_slot, origin_insert)
+	if not bonus_stack.is_bonus_card(card) then return false end
+	if G.hand then
+		M.drop_from_area_list(G.hand, card)
+	end
+	if G.deck then
+		M.drop_from_area_list(G.deck, card)
+	end
+
+	local jumble = WORD_GAME and WORD_GAME.Jumble
+	if origin_slot and jumble and jumble.assign_card_to_blank then
+		if jumble.assign_card_to_blank(origin_slot, card, origin_insert) then
+			if session and session.area then
+				jumble_geometry.relayout(session)
+				session.area:hard_set_cards()
+			end
+			placement_word.refresh_from_jumble_slots(jumble.state().slots)
+			return true
+		end
+	end
+
+	bonus_stack.return_card(card)
+	if session and session.area then
+		jumble_geometry.relayout(session)
+		session.area:hard_set_cards()
+	end
+	return true
+end
+
 function M.point_in_return_zone(session, x, y)
 	if bonus_stack.is_active() and bonus_stack.point_in_stack(x, y) then
 		return true
@@ -94,6 +131,7 @@ function M.place_in_row(session, card)
 	local area = session.area
 	if not area or not card or card.REMOVED then return false end
 
+	local origin_slot, origin_insert = bonus_origin_slot(card)
 	local from_area = card.area
 	local from_bonus = bonus_stack.contains(card)
 	if from_area and from_area ~= area then
@@ -115,7 +153,9 @@ function M.place_in_row(session, card)
 		insert_pos = nil
 	end
 	if not slot_i then
-		if from_area == area or (from_area and from_area == G.hand) then
+		if bonus_stack.is_bonus_card(card) then
+			M.restore_bonus_card(session, card, origin_slot, origin_insert)
+		elseif from_area == area or (from_area and from_area == G.hand) then
 			if G.hand then
 				G.hand:emplace(card)
 				G.hand:relayout()
@@ -152,8 +192,8 @@ function M.return_to_hand(session, card)
 	if not jumble or not jumble.is_active() then return false end
 	if bonus_stack.is_bonus_card(card) then
 		if not M.card_on_placement(session, card) then return false end
-		jumble.remove_card_from_blanks(card)
 		bonus_stack.return_card(card)
+		jumble.remove_card_from_blanks(card)
 		jumble_geometry.relayout(session)
 		session.area:hard_set_cards()
 		placement_word.clear()
@@ -186,32 +226,57 @@ function M.try_snap(session, card)
 	local from_blank = card_in_jumble_slots(j, card)
 
 	if bonus_stack.is_bonus_card(card) then
+		local origin_slot, origin_insert = bonus_origin_slot(card)
 		if in_row then
 			local placed = M.place_in_row(session, card)
 			if placed then
 				play_sfx("card_drop", 0.9, 0.8)
-			elseif bonus_stack.contains(card) then
-				bonus_stack.return_card(card)
-			elseif card.area then
-				card.area:relayout()
 			end
 			if in_row and M.card_on_placement(session, card) then
 				shimmer.start_card(session, card)
 			end
 			return
 		end
-		if from_blank or M.card_on_placement(session, card) then
-			WORD_GAME.Jumble.remove_card_from_blanks(card)
-			bonus_stack.return_card(card)
-			jumble_geometry.relayout(session)
-			area:hard_set_cards()
+
+		local function finish_bonus_return()
 			placement_word.clear()
 			play_sfx("card_slide1", nil, 0.8)
 			if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync_visibility then
 				WORD_GAME.HandShuffle.sync_visibility()
 			end
+		end
+
+		local function leave_placement_slot()
+			if from_blank or M.card_on_placement(session, card) then
+				WORD_GAME.Jumble.remove_card_from_blanks(card)
+			end
+		end
+
+		if M.point_in_hand(cx, cy) then
+			leave_placement_slot()
+			M.restore_bonus_card(session, card, origin_slot, origin_insert)
+			finish_bonus_return()
 			return
 		end
+
+		if from_blank or M.card_on_placement(session, card) then
+			if bonus_stack.is_active() and cx < area.T.x then
+				bonus_stack.return_card(card)
+				if from_blank or M.card_on_placement(session, card) then
+					WORD_GAME.Jumble.remove_card_from_blanks(card)
+				end
+				if session and session.area then
+					jumble_geometry.relayout(session)
+					session.area:hard_set_cards()
+				end
+			else
+				leave_placement_slot()
+				M.restore_bonus_card(session, card, origin_slot, origin_insert)
+			end
+			finish_bonus_return()
+			return
+		end
+
 		bonus_stack.return_card(card)
 		return
 	end

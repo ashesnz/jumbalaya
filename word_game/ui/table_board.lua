@@ -134,6 +134,10 @@ end
 function M.draw_board(game)
 	if game.placement_table then
 		game.placement_table:draw_run_pass(game)
+		local boss_word_stack = WORD_GAME and WORD_GAME.BossWordStack
+		if boss_word_stack and boss_word_stack.draw_shadow then
+			boss_word_stack.draw_shadow()
+		end
 		M.draw_hand_pass(game)
 	end
 	local boss_word_stack = WORD_GAME and WORD_GAME.BossWordStack

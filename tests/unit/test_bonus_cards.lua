@@ -43,8 +43,55 @@ T.describe("Bonus cards", function()
 				self.area = nil
 				self.parent = nil
 			end,
+			set_card_area = function(self, area)
+				self.area = area
+			end,
 			translate_container = function() end,
 			draw = function() end,
+		}
+	end
+
+	local function mock_hand()
+		return {
+			T = { x = 3.2, y = 8.0, w = 10.5, h = 2.8 },
+			cards = {},
+			emplace = function(self, card)
+				self.cards[#self.cards + 1] = card
+				card.area = self
+			end,
+			remove_card = function(self, card)
+				for i, held in ipairs(self.cards) do
+					if held == card then
+						table.remove(self.cards, i)
+						if card.remove_from_area then
+							card:remove_from_area()
+						end
+						return card
+					end
+				end
+			end,
+			relayout = function() end,
+			snap_VT = function() end,
+			hard_set_cards = function() end,
+		}
+	end
+
+	local function mock_jumble(slots)
+		G.GAME = G.GAME or {}
+		G.GAME.word_round = G.GAME.word_round or {}
+		G.GAME.word_round.jumble = {
+			slots = slots,
+			puzzle = { min = 3, max = 7 },
+		}
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.Jumble = {
+			is_active = function() return true end,
+			state = function() return G.GAME.word_round.jumble end,
+			slot_for_card = jumble.slot_for_card,
+			remove_card_from_blanks = jumble.remove_card_from_blanks,
+			assign_card_to_blank = jumble.assign_card_to_blank,
+			sync_placement_cards = jumble.sync_placement_cards,
+			build_word = jumble.build_word,
 		}
 	end
 
@@ -318,17 +365,19 @@ T.describe("Bonus cards", function()
 		package.loaded["word_game.model.cards.deck"] = orig_deck
 	end)
 
-	T.it("keeps bonus cards on the left when stage 1-4 begins", function()
+	T.it("keeps bonus cards on the left through stages 1-4, 1-5, and 1-6", function()
 		bonus_stack.clear()
 		layout_globals()
 		local cards = { mock_card("Z", 1, 1) }
 		bonus_stack.promote_to_bonus(cards)
-		bonus_stack.on_hand_start(1, 4)
-		T.assert_true(bonus_stack.is_active())
-		T.assert_equal(#bonus_stack.cards(), 1)
-		T.assert_true(bonus_stack.cards()[1].bonus_card)
-		bonus_stack.on_hand_start(1, 5)
-		T.assert_false(bonus_stack.is_active())
+		for hand = 4, 6 do
+			bonus_stack.on_hand_start(1, hand)
+			T.assert_true(bonus_stack.is_active(), "Bonus stack should persist on 1-" .. hand)
+			T.assert_equal(#bonus_stack.cards(), 1)
+			T.assert_true(bonus_stack.cards()[1].bonus_card)
+		end
+		bonus_stack.on_hand_start(1, 7)
+		T.assert_false(bonus_stack.is_active(), "Bonus stack clears when stage 1-7 begins")
 	end)
 
 	T.it("adds +10 per bonus card used in puzzle scoring", function()
@@ -401,12 +450,24 @@ T.describe("Bonus cards", function()
 		T.assert_true(layout.y < timer.y + timer.h + margin_y - 0.01)
 	end)
 
-	T.it("returns a gutter card from the placement row back to the gutter", function()
+	T.it("remove_card_from_blanks clears a bonus slot", function()
+		layout_globals()
+		local card = mock_card("B", 1, 1)
+		local slots = { { kind = "blank", card = card } }
+		mock_jumble(slots)
+		jumble.remove_card_from_blanks(card)
+		T.assert_nil(slots[1].card)
+	end)
+
+	T.it("returns a placement bonus card to the left gutter when dropped there", function()
 		bonus_stack.clear()
 		layout_globals()
+		G.hand = mock_hand()
 		local snap = require("word_game.board.snap")
 		local card = mock_card("B", 5, 2.4)
 		bonus_stack.promote_to_bonus({ card })
+		local slots = { { kind = "blank", card = card } }
+		mock_jumble(slots)
 		card.area = G.placement_table.area
 		G.placement_table.area.cards = { card }
 		G.placement_table.area.remove_card = function(self, c)
@@ -418,14 +479,44 @@ T.describe("Bonus cards", function()
 				end
 			end
 		end
-		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.Jumble = {
-			is_active = function() return true end,
-			state = function()
-				return { slots = { { kind = "blank", card = card } } }
-			end,
-			remove_card_from_blanks = function() card.from_blank = true end,
-		}
+		local gutter_x, gutter_y = bonus_stack.target_position(1)
+		card.T.x, card.T.y = gutter_x, gutter_y
+		local cx = card.T.x + card.T.w / 2
+		T.assert_true(cx < G.placement_table.area.T.x, "test drop should be left of the placement row")
+		snap.try_snap({
+			area = G.placement_table.area,
+			ctx = {
+				card_w = function() return G.CARD_W end,
+				card_h = function() return G.CARD_H end,
+			},
+		}, card)
+		T.assert_nil(slots[1].card, "Bonus card should leave the placement row")
+		T.assert_true(bonus_stack.contains(card), "Bonus card should return to the gutter")
+		T.assert_nil(card.area)
+		T.assert_equal(#G.hand.cards, 0)
+		bonus_stack.clear()
+	end)
+
+	T.it("returns a placement bonus card to its slot when dropped below the row", function()
+		bonus_stack.clear()
+		layout_globals()
+		G.hand = mock_hand()
+		local snap = require("word_game.board.snap")
+		local card = mock_card("B", 5, 2.4)
+		bonus_stack.promote_to_bonus({ card })
+		local slots = { { kind = "blank", card = card } }
+		mock_jumble(slots)
+		card.area = G.placement_table.area
+		G.placement_table.area.cards = { card }
+		G.placement_table.area.remove_card = function(self, c)
+			for i, held in ipairs(self.cards) do
+				if held == c then
+					table.remove(self.cards, i)
+					c.area = nil
+					return
+				end
+			end
+		end
 		card.T.x, card.T.y = 5, 7
 		snap.try_snap({
 			area = G.placement_table.area,
@@ -434,9 +525,79 @@ T.describe("Bonus cards", function()
 				card_h = function() return G.CARD_H end,
 			},
 		}, card)
-		T.assert_nil(card.area, "Bonus card should leave the placement row")
-		T.assert_true(bonus_stack.contains(card), "Bonus card should return to the gutter")
-		T.assert_true(card.from_blank)
+		T.assert_equal(slots[1].card, card, "Bonus card should return to its placement slot")
+		T.assert_equal(card.area, G.placement_table.area)
+		T.assert_equal(#G.hand.cards, 0)
+		bonus_stack.clear()
+	end)
+
+	T.it("rejects a gutter bonus card dropped on the dealt hand", function()
+		bonus_stack.clear()
+		layout_globals()
+		G.hand = mock_hand()
+		local snap = require("word_game.board.snap")
+		local card = mock_card("B", 5, 8.5)
+		bonus_stack.promote_to_bonus({ card })
+		mock_jumble({})
+		snap.try_snap({
+			area = G.placement_table.area,
+			ctx = {
+				card_w = function() return G.CARD_W end,
+				card_h = function() return G.CARD_H end,
+			},
+		}, card)
+		T.assert_true(bonus_stack.contains(card), "Gutter bonus should return to the gutter")
+		T.assert_nil(card.area)
+		T.assert_equal(#G.hand.cards, 0, "Bonus cards must not enter the dealt hand")
+		bonus_stack.clear()
+	end)
+
+	T.it("restores a placement bonus card dropped on the dealt hand", function()
+		bonus_stack.clear()
+		layout_globals()
+		G.hand = mock_hand()
+		local snap = require("word_game.board.snap")
+		local card = mock_card("B", 5, 2.4)
+		bonus_stack.promote_to_bonus({ card })
+		local slots = { { kind = "blank", card = card } }
+		mock_jumble(slots)
+		card.area = G.placement_table.area
+		G.placement_table.area.cards = { card }
+		G.placement_table.area.remove_card = function(self, c)
+			for i, held in ipairs(self.cards) do
+				if held == c then
+					table.remove(self.cards, i)
+					c.area = nil
+					return
+				end
+			end
+		end
+		card.T.x, card.T.y = 5, 8.5
+		snap.try_snap({
+			area = G.placement_table.area,
+			ctx = {
+				card_w = function() return G.CARD_W end,
+				card_h = function() return G.CARD_H end,
+			},
+		}, card)
+		T.assert_equal(slots[1].card, card, "Bonus card should return to its placement slot")
+		T.assert_equal(card.area, G.placement_table.area)
+		T.assert_equal(#G.hand.cards, 0)
+		bonus_stack.clear()
+	end)
+
+	T.it("sync_positions ejects bonus cards that end up in the dealt hand", function()
+		bonus_stack.clear()
+		layout_globals()
+		G.hand = mock_hand()
+		local card = mock_card("B", 5, 8.5)
+		bonus_stack.promote_to_bonus({ card })
+		G.hand:emplace(card)
+		T.assert_equal(#G.hand.cards, 1)
+		bonus_stack.sync_positions()
+		T.assert_equal(#G.hand.cards, 0)
+		T.assert_true(bonus_stack.contains(card))
+		T.assert_nil(card.area)
 		bonus_stack.clear()
 	end)
 

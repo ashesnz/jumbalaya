@@ -310,6 +310,23 @@ local function detach_card_from_slots(slots, card)
 	end
 end
 
+function M.slot_for_card(card)
+	local j = M.state()
+	if not j or not j.slots or not card then return nil end
+	for i, slot in ipairs(j.slots) do
+		if slot.kind == "blank" and slot.card == card then
+			return i, nil
+		elseif slot.kind == "span" then
+			for pi, span_card in ipairs(slot.cards or {}) do
+				if span_card == card then
+					return i, pi
+				end
+			end
+		end
+	end
+	return nil
+end
+
 function M.assign_card_to_blank(slot_index, card, insert_pos)
 	local j = M.state()
 	if not j or not j.slots then return false end
@@ -354,8 +371,12 @@ function M.assign_card_to_blank(slot_index, card, insert_pos)
 		end
 	elseif slot.kind == "blank" then
 		if slot.card and slot.card ~= card then
-			if G.hand and slot.card.area ~= G.hand then
-				G.hand:emplace(slot.card)
+			local displaced = slot.card
+			if displaced.bonus_card then
+				local bonus_stack = require("word_game.ui.boss_word_stack")
+				bonus_stack.return_card(displaced)
+			elseif G.hand and displaced.area ~= G.hand then
+				G.hand:emplace(displaced)
 			end
 		end
 		detach_card_from_slots(j.slots, card)

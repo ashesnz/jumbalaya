@@ -40,6 +40,9 @@ local M = {
 
 	-- Stage odometer hand that plays the Milo / Aleisha boss intro (1-3).
 	STAGE3_CINEMATIC = { set = 1, hand = 3 },
+	-- Set 1 hands where boss-word gold cards sit in the left gutter (1-4 … 1-6).
+	BONUS_STACK_HAND_FIRST = 4,
+	BONUS_STACK_HAND_LAST = 6,
 	-- Set 1 hand 7: Milo + Aleisha stay left, boss drops, Marco joins.
 	MARCO_CINEMATIC = { set = 1, hand = 7 },
 }
@@ -90,7 +93,11 @@ function M.is_boss_word_hand(set, hand_index)
 end
 
 function M.is_bonus_stack_hand(set, hand_index)
-	return set == 1 and hand_index == 4
+	set = set or 1
+	hand_index = hand_index or 1
+	return set == 1
+		and hand_index >= M.BONUS_STACK_HAND_FIRST
+		and hand_index <= M.BONUS_STACK_HAND_LAST
 end
 
 function M.is_token_reward_hand(set, hand_index)

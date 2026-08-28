@@ -1,6 +1,7 @@
---[[ word_game/ui/boss_word_stack.lua - Bonus card stack (boss word rewards on stage 1-4) ]]
+--[[ word_game/ui/boss_word_stack.lua - Bonus card stack (boss word rewards on stages 1-4 … 1-6) ]]
 
 local placement_layout = require("word_game.ui.layout.placement")
+local board_config = require("word_game.board.config")
 local DissolveFX = require("app.effects.dissolve_fx")
 local deck = require("word_game.model.cards.deck")
 local LetterPalette = require("word_game.config.letter_card_palette")
@@ -17,6 +18,8 @@ local TRANSFORM_MATERIALIZE_TIME = 0.6
 local TRANSFORM_TOTAL = TRANSFORM_DISSOLVE_TIME + TRANSFORM_MATERIALIZE_TIME + 0.1
 local BURN_DISSOLVE_COLOURS = { G.C.BLACK, G.C.ORANGE, G.C.RED, G.C.GOLD, G.C.MUTED_GREY }
 local BURN_MATERIALIZE_COLOURS = { G.C.BLACK, G.C.ORANGE, G.C.GOLD, G.C.WHITE }
+local BACKDROP_FILL_ALPHA = 0.18
+local BACKDROP_LINE_ALPHA = 0.28
 
 local stack_cards
 local stack_animating = false
@@ -182,8 +185,11 @@ function M.sync_positions()
 	local placement = G.placement_table and G.placement_table.area
 	for i, card in ipairs(stack_cards) do
 		if card and not card.REMOVED then
-			local in_play = card.area and (card.area == placement or card.area == G.hand)
-			if not in_play then
+			if card.area == G.hand and M.is_bonus_card(card) then
+				M.return_card(card)
+			elseif card.area == placement then
+				-- Bonus cards placed in the puzzle row keep their slot layout.
+			else
 				if card.area then
 					M.detach(card)
 				end
@@ -501,6 +507,22 @@ function M.point_in_stack(x, y)
 		and y <= bottom
 end
 
+function M.drop_in_gutter(session, x, y)
+	if M.point_in_stack(x, y) then return true end
+	if not M.is_active() then return false end
+	local area = session and session.area
+	if not area or not area.T then return false end
+	if x >= area.T.x then return false end
+	local layout = M.stack_layout()
+	local count = math.max(1, #(stack_cards or {}))
+	local pad_y = math.max(0.35, layout.card_h * 0.25)
+	local top = layout.label_y - layout.card_h * 0.55
+	local bottom = layout.y + (count - 1) * layout.step_y + layout.card_h + pad_y
+	local left = window_left_x()
+	local right = layout.x + layout.card_w + math.max(0.35, layout.card_w * 0.35)
+	return x >= left and x <= right and y >= top and y <= bottom
+end
+
 function M.bonus_points_for(used_cards)
 	local total = 0
 	for _, card in ipairs(used_cards or {}) do
@@ -537,6 +559,35 @@ local function draw_label(layout)
 	local tw = font:getWidth(text) * scale
 	love.graphics.print(text, layout.x + (layout.card_w - tw) * 0.5, layout.label_y, 0, scale, scale)
 	love.graphics.setColor(1, 1, 1, 1)
+end
+
+function M.gutter_pixels(layout)
+	layout = layout or M.stack_layout()
+	local count = math.max(1, #(stack_cards or {}))
+	local pad_x = math.max(0.35, layout.card_w * 0.35)
+	local pad_y = math.max(0.35, layout.card_h * 0.25)
+	local top = layout.label_y - layout.card_h * 0.45
+	local bottom = layout.y + (count - 1) * layout.step_y + layout.card_h + pad_y
+	local ts = G.TILESCALE * G.TILESIZE
+	return layout.x * ts - pad_x * ts,
+		top * ts,
+		(layout.card_w + pad_x * 2) * ts,
+		(bottom - top) * ts
+end
+
+function M.draw_shadow()
+	if not stack_cards or #stack_cards == 0 then return end
+	local layout = M.stack_layout()
+	local px, py, pw, ph = M.gutter_pixels(layout)
+	local radius = board_config.CORNER_RADIUS or 8
+
+	love.graphics.setColor(0, 0, 0, BACKDROP_FILL_ALPHA)
+	love.graphics.rectangle("fill", px, py, pw, ph, radius, radius)
+	love.graphics.setColor(1, 1, 1, BACKDROP_LINE_ALPHA)
+	love.graphics.setLineWidth(1.5)
+	love.graphics.rectangle("line", px, py, pw, ph, radius, radius)
+	love.graphics.setColor(1, 1, 1, 1)
+	love.graphics.setLineWidth(1)
 end
 
 function M.draw_pass()

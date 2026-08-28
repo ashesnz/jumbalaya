@@ -109,6 +109,15 @@ end
 --- @param location string|nil 'front' to insert at index 1
 --- @param stay_flipped boolean|nil if true, don't auto-flip a face-down card
 function CardArea:emplace(card, location, stay_flipped)
+	if table_board() and card and card.bonus_card and (self == G.hand or self == G.deck) then
+		local snap = require("word_game.board.snap")
+		local origin_slot, origin_insert
+		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.slot_for_card then
+			origin_slot, origin_insert = WORD_GAME.Jumble.slot_for_card(card)
+		end
+		snap.restore_bonus_card(G.placement_table, card, origin_slot, origin_insert)
+		return
+	end
 	if location == 'front' or self.config.type == 'deck' then
 		table.insert(self.cards, 1, card)
 	else
