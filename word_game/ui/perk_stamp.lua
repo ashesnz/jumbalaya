@@ -11,23 +11,24 @@ local perk_model = require("word_game.model.perk")
 
 local M = {}
 
-local STRIKE_DUR = 0.42
-local HOLD_DUR = 0.16
-local RETRACT_DUR = 0.48
+local STRIKE_DUR = 1.05
+local HOLD_DUR = 0.18
+local RETRACT_DUR = 0.62
 local IMPRINT_DUR = 0.55
 local TOTAL_DUR = STRIKE_DUR + HOLD_DUR + RETRACT_DUR
-local FRAME_DT = 1 / 24
+local FRAME_DT = 1 / 36
 local TOTAL_FRAMES = math.ceil(TOTAL_DUR / FRAME_DT)
 local IMPRINT_H_PX = 50
-local SLOT_WIDTH_FILL = 0.78
+local SLOT_WIDTH_FILL = 1.0
+local START_SCALE_MUL = 2.4
 -- 3/4 view: long axis stays horizontal so the block matches the vault row.
 -- Roll is the slight diagonal tilt of a hand coming down from above-right.
-local LANDING_YAW = 0.38
-local LANDING_PITCH = 0.30
-local LANDING_ROLL = -0.16
-local START_YAW = 0.46
-local START_PITCH = 0.40
-local START_ROLL = -0.26
+local LANDING_YAW = 0.32
+local LANDING_PITCH = 0.26
+local LANDING_ROLL = -0.06
+local START_YAW = 0.50
+local START_PITCH = 0.48
+local START_ROLL = -0.22
 
 -- Local-space millimetres of the wooden block (x right, y up, z toward camera).
 local BODY_W = 96
@@ -229,10 +230,10 @@ local function screen_top_px()
 	return ((room and room.y) or 0) * tile_scale() + 10
 end
 
-local function scale_for_slot(slot_w, slot_h, slot_y, yaw, pitch, roll)
+local function scale_for_slot(slot_w, yaw, pitch, roll)
 	local target_rubber_w = slot_w * SLOT_WIDTH_FILL
-	local lo, hi = 0.05, 2.2
-	for _ = 1, 14 do
+	local lo, hi = 0.04, 4.0
+	for _ = 1, 16 do
 		local mid = (lo + hi) * 0.5
 		if rubber_width_at_scale(mid, yaw, pitch, 1, roll) < target_rubber_w then
 			lo = mid
@@ -240,13 +241,7 @@ local function scale_for_slot(slot_w, slot_h, slot_y, yaw, pitch, roll)
 			hi = mid
 		end
 	end
-	local scale = lo * 0.94
-	local height = stamp_height_at_scale(scale, yaw, pitch, 1, roll)
-	local budget = math.max(64, slot_y + slot_h - screen_top_px())
-	if height > budget * 0.88 then
-		scale = scale * ((budget * 0.88) / height)
-	end
-	return scale
+	return (lo + hi) * 0.5
 end
 
 local function perk_quad(entry)
@@ -283,7 +278,7 @@ local function stamp_pose(t, anim_state)
 
 	if t < STRIKE_DUR then
 		phase = "strike"
-		approach = ease_in_quad(t / STRIKE_DUR)
+		approach = ease_in_cubic(t / STRIKE_DUR)
 	elseif t < STRIKE_DUR + HOLD_DUR then
 		phase = "hold"
 		approach = 1
@@ -295,21 +290,22 @@ local function stamp_pose(t, anim_state)
 		approach = 1 - u
 	end
 
-	-- Contact point travels diagonally onto the row; origin is solved so the
-	-- rubber pad stays glued to that point at every frame.
+	-- Contact point travels from above the screen onto the row; origin is
+	-- solved so the rubber pad stays glued to that point at every frame.
 	local cx = lerp(anim_state.start_cx, anim_state.land_cx, approach)
 	local cy = lerp(anim_state.start_cy, anim_state.land_cy, approach)
 	local yaw = lerp(START_YAW, LANDING_YAW, approach)
 	local pitch = lerp(START_PITCH, LANDING_PITCH, approach)
 	local roll = lerp(START_ROLL, LANDING_ROLL, approach)
-	local scale = anim_state.target_scale
+	-- Shrink as it recedes toward the panel (near-camera → far-table).
+	local scale = lerp(anim_state.start_scale, anim_state.land_scale, ease_out_quad(approach))
 	local ox, oy = anchor_to_contact(cx, cy, scale, yaw, pitch, squash_y, roll)
 	return ox, oy, scale, yaw, pitch, roll, squash_y, phase, approach
 end
 
 local function draw_shadow(cx, cy, slot_w, slot_h, approach, alpha)
-	local w = slot_w * lerp(0.55, 0.92, approach)
-	local h = slot_h * lerp(0.35, 0.72, approach)
+	local w = slot_w * lerp(0.70, 1.0, approach)
+	local h = slot_h * lerp(0.35, 0.85, approach)
 	love.graphics.setColor(0, 0, 0, alpha * lerp(0.06, 0.28, approach))
 	love.graphics.ellipse("fill", cx, cy + 2, w * 0.5, h * 0.5)
 end
@@ -413,25 +409,18 @@ local function make_anim_state(entry, debug)
 	local _, _, slot_x, slot_y, slot_w, slot_h = stamp_target_px()
 	local land_cx = slot_x + slot_w * 0.5
 	local land_cy = slot_y + slot_h * 0.5
-	local target_scale = scale_for_slot(
-		slot_w, slot_h, slot_y, LANDING_YAW, LANDING_PITCH, LANDING_ROLL)
+	local land_scale = scale_for_slot(slot_w, LANDING_YAW, LANDING_PITCH, LANDING_ROLL)
+	local start_scale = land_scale * START_SCALE_MUL
 
-	local lift = math.min(
-		stamp_height_at_scale(target_scale, START_YAW, START_PITCH, 1, START_ROLL) * 0.95,
-		math.max(56, land_cy - screen_top_px() - 16))
-	local start_cx = land_cx + slot_w * 0.10
-	local start_cy = land_cy - lift
-
-	local start_ox, start_oy = anchor_to_contact(
-		start_cx, start_cy, target_scale, START_YAW, START_PITCH, 1, START_ROLL)
-	local min_x, min_y = stamp_bounds_px(
-		start_ox, start_oy, target_scale, START_YAW, START_PITCH, 1, START_ROLL)
+	local start_cx = land_cx + slot_w * 0.16
+	local start_cy = land_cy
 	local top = screen_top_px()
-	if min_y < top then
-		start_cy = start_cy + (top - min_y)
-	end
-	if min_x < slot_x - 8 then
-		start_cx = start_cx + (slot_x - 8 - min_x)
+	for _ = 1, 8 do
+		local ox, oy = anchor_to_contact(
+			start_cx, start_cy, start_scale, START_YAW, START_PITCH, 1, START_ROLL)
+		local _, _, _, max_y = stamp_bounds_px(
+			ox, oy, start_scale, START_YAW, START_PITCH, 1, START_ROLL)
+		start_cy = start_cy + ((top - 28) - max_y)
 	end
 
 	return {
@@ -446,7 +435,9 @@ local function make_anim_state(entry, debug)
 		land_cy = land_cy,
 		start_cx = start_cx,
 		start_cy = start_cy,
-		target_scale = target_scale,
+		start_scale = start_scale,
+		land_scale = land_scale,
+		target_scale = land_scale,
 		impacted = false,
 		finished = false,
 		debug = debug,
