@@ -42,12 +42,8 @@ local anim
 local imprint
 local demo_index = 1
 
-local WOOD_TOP = { 0.72, 0.48, 0.26 }
-local WOOD_FRONT = { 0.52, 0.32, 0.16 }
-local WOOD_SIDE = { 0.36, 0.20, 0.10 }
+local WOOD = { 0.58, 0.38, 0.20 }
 local WOOD_EDGE = { 0.10, 0.05, 0.02 }
-local RUBBER = { 0.22, 0.10, 0.08 }
-local HANDLE = { 0.42, 0.24, 0.12 }
 local HAND = { 1.00, 0.86, 0.18 }
 
 local function clamp01(t)
@@ -274,10 +270,6 @@ local function face_outline(a, b, c, d, alpha, width)
 	edge_line(d, a, alpha, width)
 end
 
-local function shade(rgb, mul)
-	return { rgb[1] * mul, rgb[2] * mul, rgb[3] * mul }
-end
-
 local function stamp_pose(t, anim_state)
 	local squash_y = 1
 	local phase = "strike"
@@ -339,26 +331,27 @@ local function draw_stamp_3d(ox, oy, scale, yaw, pitch, squash_y, alpha, roll)
 	local c = body_corners(ox, oy, scale, yaw, pitch, squash_y, roll)
 
 	-- Back-to-front fills.  Front and right side are drawn last so they stay visible.
-	quad_fill(c.btl, c.btr, c.bbr, c.bbl, WOOD_TOP, alpha)
-	quad_fill(c.btl, c.ftl, c.fbl, c.bbl, WOOD_SIDE, alpha)
-	quad_fill(c.fbr, c.bbr, c.rbr, c.rfr, shade(RUBBER, 0.75), alpha)
-	quad_fill(c.fbl, c.fbr, c.rfr, c.rfl, RUBBER, alpha)
-	quad_fill(c.ftl, c.ftr, c.btr, c.btl, WOOD_TOP, alpha)
-	quad_fill(c.ftr, c.btr, c.bbr, c.fbr, shade(WOOD_SIDE, 0.9), alpha)
-	quad_fill(c.ftl, c.ftr, c.fbr, c.fbl, WOOD_FRONT, alpha)
+	quad_fill(c.btl, c.btr, c.bbr, c.bbl, WOOD, alpha)
+	quad_fill(c.btl, c.ftl, c.fbl, c.bbl, WOOD, alpha)
+	quad_fill(c.fbr, c.bbr, c.rbr, c.rfr, WOOD, alpha)
+	quad_fill(c.fbl, c.fbr, c.rfr, c.rfl, WOOD, alpha)
+	quad_fill(c.ftl, c.ftr, c.btr, c.btl, WOOD, alpha)
+	quad_fill(c.ftr, c.btr, c.bbr, c.fbr, WOOD, alpha)
+	quad_fill(c.ftl, c.ftr, c.fbr, c.fbl, WOOD, alpha)
 
-	-- Full black perimeter on every visible face.
-	face_outline(c.ftl, c.ftr, c.btr, c.btl, alpha)
+	-- Full black perimeter on visible faces (skip recessed back edges).
+	edge_line(c.ftl, c.ftr, alpha)
+	edge_line(c.ftr, c.btr, alpha)
+	edge_line(c.btl, c.ftl, alpha)
 	face_outline(c.ftl, c.ftr, c.fbr, c.fbl, alpha)
 	face_outline(c.btl, c.ftl, c.fbl, c.bbl, alpha)
 	face_outline(c.ftr, c.btr, c.bbr, c.fbr, alpha)
-	face_outline(c.btl, c.btr, c.bbr, c.bbl, alpha)
 	face_outline(c.fbl, c.fbr, c.rfr, c.rfl, alpha)
 	face_outline(c.fbr, c.bbr, c.rbr, c.rfr, alpha)
 
-	quad_fill(c.hbl, c.hbr, c.hfr, c.hfl, HANDLE, alpha)
-	quad_fill(c.hbr, c.hbf, c.htf, c.hfr, shade(HANDLE, 0.8), alpha)
-	quad_fill(c.hfl, c.hfr, c.htf, c.htb, shade(HANDLE, 1.15), alpha)
+	quad_fill(c.hbl, c.hbr, c.hfr, c.hfl, WOOD, alpha)
+	quad_fill(c.hbr, c.hbf, c.htf, c.hfr, WOOD, alpha)
+	quad_fill(c.hfl, c.hfr, c.htf, c.htb, WOOD, alpha)
 	edge_line(c.hbl, c.hbr, alpha, 1.2)
 	edge_line(c.hbr, c.hfr, alpha, 1.2)
 	edge_line(c.hfr, c.hfl, alpha, 1.2)
