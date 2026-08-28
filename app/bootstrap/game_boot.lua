@@ -64,3 +64,8 @@ Updaters.register('post_input', 'trade_card_fly', function(_, dt)
 		WORD_GAME.TradeUI.step_card_fly(dt)
 	end
 end)
+Updaters.register('post_input', 'perk_stamp', function(_, dt)
+	if WORD_GAME and WORD_GAME.PerkStamp and WORD_GAME.PerkStamp.update then
+		WORD_GAME.PerkStamp.update(dt)
+	end
+end)

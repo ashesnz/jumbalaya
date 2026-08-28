@@ -37,6 +37,7 @@ local M = {
 	GuestHost = require("word_game.ui.guest_host"),
 	PlayerHost = require("word_game.ui.player_host"),
 	TradeUI = require("word_game.ui.trade"),
+	PerkStamp = require("word_game.ui.perk_stamp"),
 	EndMatch = require("word_game.ui.end_match"),
 	HandShuffle = require("word_game.ui.hand_shuffle"),
 	PlayHoldRedraw = require("word_game.ui.play_hold_redraw"),

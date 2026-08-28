@@ -40,6 +40,31 @@ local function box_width()
 	return Layout.sidebar_width()
 end
 
+local function voucher_nodes()
+	if not (G.GAME and G.GAME.selected_perk) then
+		return {}
+	end
+	local perk = G.GAME.selected_perk
+	local nodes = {}
+	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.Perk
+	if atlas and perk.pos then
+		local w, h = 0.48, 0.64
+		local sprite = Sprite(0, 0, w, h, atlas, perk.pos)
+		sprite.states.drag.can = false
+		sprite.states.hover.can = false
+		sprite.states.collide.can = false
+		sprite.states.click.can = false
+		nodes[#nodes + 1] = { n = G.UI.OBJECT, config = { object = sprite, w = w, h = h } }
+	end
+	nodes[#nodes + 1] = { n = G.UI.TEXT, config = {
+		text = perk.name or "Perk",
+		scale = 0.22,
+		colour = G.C.GOLD,
+		shadow = true,
+	}}
+	return nodes
+end
+
 local function deck_count_node(box_w)
 	G.GAME = G.GAME or {}
 	if G.GAME.deck_left_count == nil then
@@ -173,16 +198,30 @@ function M.hud_definition()
 					minh = vault_spacer_height(),
 				}, nodes = {} },
 				{ n = G.UI.ROW, config = {
+					id = "row_perk_stamp",
+					minh = 0.45,
+					align = "cm",
+					padding = 0.04,
+					minw = box_w * 0.88,
+					r = 0.08,
+					hover = true,
+					colour = G.C.UI.BACKGROUND_INACTIVE,
+					button = "perk_stamp_demo",
+					shadow = true,
+				}, nodes = {
+					{ n = G.UI.TEXT, config = {
+						text = "Stamp Perk",
+						scale = 0.24,
+						colour = G.C.UI.TEXT_LIGHT,
+						shadow = true,
+					}},
+				}},
+				{ n = G.UI.ROW, config = {
 					id = "row_voucher",
 					minh = 0.6,
 					align = "cm",
 					padding = 0.05,
-				}, nodes = (function()
-					if G.GAME and G.GAME.selected_perk then
-						return { { n = G.UI.TEXT, config = { text = "Bonus: " .. G.GAME.selected_perk.name, scale = 0.25, colour = G.C.GOLD, shadow = true } } }
-					end
-					return {}
-				end)() },
+				}, nodes = voucher_nodes() },
 				(function()
 					local dw, dh = Layout.deck_slot_size()
 					return { n = G.UI.ROW, config = {
