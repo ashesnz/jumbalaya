@@ -264,10 +264,11 @@ local function edge_line(a, b, alpha, width)
 end
 
 local function face_outline(a, b, c, d, alpha, width)
-	edge_line(a, b, alpha, width)
-	edge_line(b, c, alpha, width)
-	edge_line(c, d, alpha, width)
-	edge_line(d, a, alpha, width)
+	love.graphics.setColor(0, 0, 0, alpha * 0.92)
+	love.graphics.setLineWidth(width or 1.6)
+	love.graphics.setLineJoin("miter")
+	love.graphics.line(
+		a[1], a[2], b[1], b[2], c[1], c[2], d[1], d[2], a[1], a[2])
 end
 
 local function stamp_pose(t, anim_state)
@@ -330,24 +331,21 @@ end
 local function draw_stamp_3d(ox, oy, scale, yaw, pitch, squash_y, alpha, roll)
 	local c = body_corners(ox, oy, scale, yaw, pitch, squash_y, roll)
 
-	-- Back-to-front fills.  Front and right side are drawn last so they stay visible.
-	quad_fill(c.btl, c.btr, c.bbr, c.bbl, WOOD, alpha)
-	quad_fill(c.btl, c.ftl, c.fbl, c.bbl, WOOD, alpha)
-	quad_fill(c.fbr, c.bbr, c.rbr, c.rfr, WOOD, alpha)
-	quad_fill(c.fbl, c.fbr, c.rfr, c.rfl, WOOD, alpha)
+	-- One wooden prism: body and pad share a colour, so they are filled as
+	-- full-height faces.  Internal wood/pad seams are not drawn.
+	quad_fill(c.btl, c.btr, c.rbr, c.rbl, WOOD, alpha)
+	quad_fill(c.btl, c.ftl, c.rfl, c.rbl, WOOD, alpha)
 	quad_fill(c.ftl, c.ftr, c.btr, c.btl, WOOD, alpha)
-	quad_fill(c.ftr, c.btr, c.bbr, c.fbr, WOOD, alpha)
-	quad_fill(c.ftl, c.ftr, c.fbr, c.fbl, WOOD, alpha)
+	quad_fill(c.ftr, c.btr, c.rbr, c.rfr, WOOD, alpha)
+	quad_fill(c.ftl, c.ftr, c.rfr, c.rfl, WOOD, alpha)
 
-	-- Full black perimeter on visible faces (skip recessed back edges).
+	-- Visible silhouettes.  Skip every edge that sits on the far/back plane.
 	edge_line(c.ftl, c.ftr, alpha)
 	edge_line(c.ftr, c.btr, alpha)
-	edge_line(c.btl, c.ftl, alpha)
-	face_outline(c.ftl, c.ftr, c.fbr, c.fbl, alpha)
-	face_outline(c.btl, c.ftl, c.fbl, c.bbl, alpha)
-	face_outline(c.ftr, c.btr, c.bbr, c.fbr, alpha)
-	face_outline(c.fbl, c.fbr, c.rfr, c.rfl, alpha)
-	face_outline(c.fbr, c.bbr, c.rbr, c.rfr, alpha)
+	edge_line(c.ftl, c.btl, alpha)
+	face_outline(c.ftl, c.ftr, c.rfr, c.rfl, alpha)
+	edge_line(c.ftr, c.rfr, alpha)
+	edge_line(c.rfr, c.rbr, alpha)
 
 	quad_fill(c.hbl, c.hbr, c.hfr, c.hfl, WOOD, alpha)
 	quad_fill(c.hbr, c.hbf, c.htf, c.hfr, WOOD, alpha)
