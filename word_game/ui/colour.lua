@@ -11,7 +11,7 @@ function loc_colour(_c, _default)
     green = G.C.GREEN, money = G.C.MONEY, gold = G.C.GOLD, attention = G.C.FILTER,
     purple = G.C.PURPLE, white = G.C.WHITE, inactive = G.C.UI.TEXT_INACTIVE,
     spades = G.C.BLACK, hearts = G.C.RED, clubs = G.C.BLACK, diamonds = G.C.RED,
-    charm = G.C.SECONDARY_SET.Charm, orbit = G.C.SECONDARY_SET.Orbit,
+    orbit = G.C.SECONDARY_SET.Orbit,
     phantom = G.C.SECONDARY_SET.Phantom, finish = G.C.FINISH,
     dark_finish = G.C.DARK_FINISH, legendary = G.C.RARITY[4],
     enhanced = G.C.SECONDARY_SET.Enhanced

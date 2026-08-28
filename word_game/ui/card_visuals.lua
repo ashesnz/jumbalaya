@@ -25,17 +25,10 @@ local PLACEHOLDER_ART = {
 		Companion = { atlas = "Companion", pos = "companion_locked" },
 		Perk = { atlas = "Perk", pos = "perk_locked" },
 	},
-	demo = { atlas = "Charm", pos = "letter_locked" },
 	undiscovered = {
 		Companion = "companion_undiscovered",
 		Finish = "companion_undiscovered",
 		Perk = "perk_undiscovered",
-		Bundle = "booster_undiscovered",
-	},
-	veil_usable_only = {
-		Charm = "charm_undiscovered",
-		Orbit = "orbit_undiscovered",
-		Phantom = "phantom_undiscovered",
 	},
 }
 
@@ -54,12 +47,10 @@ local function placeholder_art(self, center)
 	end
 
 	if center.usable and center.demo then
-		local demo = PLACEHOLDER_ART.demo
-		return { atlas = G.TEXTURE_ATLASES[demo.atlas], pos = G[demo.pos].pos }
+		return nil
 	end
 
 	local veil_pos = PLACEHOLDER_ART.undiscovered[center.set]
-		or (center.usable and PLACEHOLDER_ART.veil_usable_only[center.set])
 	if veil_pos and not center.discovered then
 		return { atlas = G.TEXTURE_ATLASES[center.atlas or center.set], pos = G[veil_pos].pos }
 	end
@@ -325,7 +316,7 @@ end
 
 --- Inverse of `start_dissolve`: fades a newly-created card in, with tint
 --- colour defaulting based on the card's set (rarity colour for companions,
---- set colour for charm/orbit/phantom/etc.) if not given explicitly.
+--- set colour for companions/perks/etc.) if not given explicitly.
 --- Built on the generic DissolveFX timeline.
 --- @param dissolve_colours table|nil override tint colours
 --- @param silent boolean|nil skip sound effects
@@ -339,10 +330,6 @@ function Card:begin_materialize(dissolve_colours, silent, timefac)
 		duration = dt,
 		colours = dissolve_colours or
 		(self.ability.set == 'Companion' and {G.C.RARITY[self.config.center.rarity]}) or
-		(self.ability.set == 'Orbit'  and {G.C.SECONDARY_SET.Orbit}) or
-		(self.ability.set == 'Charm' and {G.C.SECONDARY_SET.Charm}) or
-		(self.ability.set == 'Phantom' and {G.C.SECONDARY_SET.Phantom}) or
-		(self.ability.set == 'Bundle' and {G.C.BOOSTER}) or
 		(self.ability.set == 'Perk' and {G.C.SECONDARY_SET.Perk, G.C.CLEAR}) or
 		{G.C.GREEN},
 		pulse = true,
@@ -515,8 +502,7 @@ function Card:draw_front()
 	-- Undiscovered companions/perks wear a silhouetted veil instead of their art.
 	if not self.config.center.discovered and (self.ability.usable or self.config.center.unlocked)
 		and not self.config.center.demo and not self.bypass_discovery_center then
-		local shared_sprite = (self.ability.set == 'Finish' or self.ability.set == 'Companion')
-			and G.shared_undiscovered_companion or G.shared_undiscovered_charm
+		local shared_sprite = G.shared_undiscovered_companion
 		local scale_mod = -0.05 + 0.05*math.sin(1.8*G.TIMERS.REAL)
 		local rotate_mod = 0.03*math.sin(1.219*G.TIMERS.REAL)
 
@@ -525,15 +511,12 @@ function Card:draw_front()
 	end
 
 	local has_overlays = self.edition or self.seal
-		or self.ability.set == 'Phantom' or self.debuff or self.greyed
-		or self.ability.set == 'Perk' or self.ability.set == 'Bundle'
+		or self.debuff or self.greyed
+		or self.ability.set == 'Perk'
 		or self.config.center.demo
 	if has_overlays then
 		if self.ability.set == 'Perk' or self.config.center.demo then
 			self.children.center:apply_shader_effect('perk', nil, self.ARGS.send_to_shader)
-		end
-		if self.ability.set == 'Bundle' or self.ability.set == 'Phantom' then
-			self.children.center:apply_shader_effect('booster', nil, self.ARGS.send_to_shader)
 		end
 
 		-- Each finished edition layers its signature shine on centre and front.

@@ -17,7 +17,6 @@ function M.init_shared_sprites(game)
 	if atlas then
 		game.shared_debuff = Sprite(0, 0, game.CARD_W, game.CARD_H, atlas, { x = 0, y = 0 })
 		game.shared_undiscovered_companion = Sprite(0, 0, game.CARD_W, game.CARD_H, atlas, { x = 0, y = 0 })
-		game.shared_undiscovered_charm = Sprite(0, 0, game.CARD_W, game.CARD_H, atlas, { x = 0, y = 0 })
 	end
 
 	local seal_atlas = game.TEXTURE_ATLASES.letter_frame or game.TEXTURE_ATLASES.playing_back
@@ -49,9 +48,7 @@ function Game:set_render_settings()
 		{ name = "letters", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/JumbalayaLetters.png", px = 71, py = 95 },
 		{ name = "letter_frame", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/JumbalayaCardFrame.png", px = 71, py = 95 },
 		{ name = "playing_back", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/PlayingDeck.png", px = 71, py = 95 },
-		{ name = "Charm", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Charms.png", px = 71, py = 95 },
 		{ name = "Perk", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Perks.png", px = 71, py = 95 },
-		{ name = "Bundle", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/bundles.png", px = 71, py = 95 },
 		{ name = "ui_1", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/ui_assets.png", px = 18, py = 18 },
 		{ name = "Jumbalaya", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Jumbalaya.png", px = 466.5, py = 133.5 },
 		{ name = "jumbalaya_base", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Jumbalaya_base.png", px = 933, py = 267 },
@@ -60,7 +57,6 @@ function Game:set_render_settings()
 		{ name = "title_garden", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/title_garden.png", px = 1536, py = 1024 },
 		{ name = 'gamepad_ui', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/gamepad_ui.png", px = 32, py = 32 },
 		{ name = 'icons', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/icons.png", px = 66, py = 66 },
-		{ name = 'characters', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Characters.png", px = 88, py = 188, frames = 19, cols = 5, rows = 4 },
 		{ name = 'bin', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Bin.png", px = 249, py = 251, frames = 4, cols = 2, rows = 2 },
 		{ name = 'shuffle_icon', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/shuffle_icon.png", px = 112, py = 112 },
 		{ name = 'remove_placement_icon', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/remove_placement_icon.png", px = 112, py = 112 },
@@ -144,7 +140,7 @@ function Game:set_render_settings()
 			self.TEXTURE_ATLASES[spec.name] = {}
 			self.TEXTURE_ATLASES[spec.name].name = spec.name
 			self.TEXTURE_ATLASES[spec.name].image = love.graphics.newImage(path, { mipmaps = true, dpiscale = dpiscale })
-			if spec.name == 'bin' or spec.name == 'characters' then
+			if spec.name == 'bin' then
 				self.TEXTURE_ATLASES[spec.name].image:setFilter('nearest', 'nearest')
 				self.TEXTURE_ATLASES[spec.name].frames = spec.frames or 160
 				if spec.cols then self.TEXTURE_ATLASES[spec.name].cols = spec.cols end
@@ -173,7 +169,7 @@ function Game:set_render_settings()
 		self.TEXTURE_ATLASES.centers = self.TEXTURE_ATLASES.letter_frame or self.TEXTURE_ATLASES.playing_back
 	end
 	if not self.TEXTURE_ATLASES.Companion then
-		self.TEXTURE_ATLASES.Companion = self.TEXTURE_ATLASES.characters or self.TEXTURE_ATLASES.centers
+		self.TEXTURE_ATLASES.Companion = self.TEXTURE_ATLASES.letter_frame or self.TEXTURE_ATLASES.centers
 	end
 	for i = 1, #self.asset_images do
 		self.TEXTURE_ATLASES[self.asset_images[i].name] = {}
@@ -187,9 +183,6 @@ function Game:set_render_settings()
 	for _, v in pairs(G.LIVE.SPRITE) do
 		v:reset()
 	end
-
-	self.TEXTURE_ATLASES.Orbit = self.TEXTURE_ATLASES.Charm
-	self.TEXTURE_ATLASES.Phantom = self.TEXTURE_ATLASES.Charm
 end
 
 return M

@@ -30,7 +30,7 @@ function Card:build_card_tooltip()
     local main_start, main_end = nil,nil
     
     if not self.bypass_lock and self.config.center.unlocked ~= false and
-    (self.ability.set == 'Companion' or self.ability.set == 'Finish' or self.ability.usable or self.ability.set == 'Perk' or self.ability.set == 'Bundle') and
+    (self.ability.set == 'Companion' or self.ability.set == 'Finish' or self.ability.usable or self.ability.set == 'Perk') and
     not self.config.center.discovered then
         card_type = 'Undiscovered'
     end

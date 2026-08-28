@@ -36,11 +36,9 @@ function Game:load_profile(_profile)
 			c_round_interest_cap_streak = 0,
 			c_dollars_earned = 0,
 			c_shop_dollars_spent = 0,
-			charms_bought = 0,
 			orbits_bought = 0,
 			c_playing_cards_bought = 0,
 			c_vouchers_bought = 0,
-			charm_reading_used = 0,
 			orbit_wheel_used = 0,
 			c_shop_rerolls = 0,
 			c_cards_played = 0,
@@ -84,9 +82,7 @@ function Game:load_profile(_profile)
 	-- Migrate legacy stat keys from older profile saves.
 	local stats = G.PROFILES[G.SETTINGS.profile].career_stats
 	local legacy_stats = {
-		c_tarots_bought = "charms_bought",
 		c_planets_bought = "orbits_bought",
-		c_tarot_reading_used = "charm_reading_used",
 		c_planetarium_used = "orbit_wheel_used",
 		c_jokers_sold = "power_cards_sold",
 	}

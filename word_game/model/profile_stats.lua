@@ -157,36 +157,17 @@ function set_usable_usage(card)
       else
         G.GAME.usable_usage[card.config.center_key] = {count = 1, order = card.config.center.order, set = card.ability.set}
       end
-      G.GAME.usable_usage_total = G.GAME.usable_usage_total or {charm = 0, orbit = 0, phantom = 0, charm_orbit = 0, all = 0}
-      if card.config.center.set == 'Charm' then
-        G.GAME.usable_usage_total.charm = G.GAME.usable_usage_total.charm + 1  
-        G.GAME.usable_usage_total.charm_orbit = G.GAME.usable_usage_total.charm_orbit + 1
-      elseif card.config.center.set == 'Orbit' then
+      G.GAME.usable_usage_total = G.GAME.usable_usage_total or {orbit = 0, phantom = 0, all = 0}
+      if card.config.center.set == 'Orbit' then
         G.GAME.usable_usage_total.orbit = G.GAME.usable_usage_total.orbit + 1
-        G.GAME.usable_usage_total.charm_orbit = G.GAME.usable_usage_total.charm_orbit + 1
-      elseif card.config.center.set == 'Phantom' then  G.GAME.usable_usage_total.phantom = G.GAME.usable_usage_total.phantom + 1
+      elseif card.config.center.set == 'Phantom' then
+        G.GAME.usable_usage_total.phantom = G.GAME.usable_usage_total.phantom + 1
       end
 
       G.GAME.usable_usage_total.all = G.GAME.usable_usage_total.all + 1
 
       if not card.config.center.discovered then
         discover_card(card)
-      end
-
-      if card.config.center.set == 'Charm' or card.config.center.set == 'Orbit' then
-        Scheduler.add{
-          mode = 'instant',
-          func = function()
-            Scheduler.add{
-              mode = 'instant',
-              func = function()
-                G.GAME.last_charm_orbit = card.config.center_key
-                return true
-              end
-            }
-            return true
-          end
-        }
       end
 
     end
@@ -270,11 +251,9 @@ function sync_discover_counts()
   G.DISCOVER_TALLIES = G.DISCOVER_TALLIES or {
       companions = {tally = 0, of = 0},
       usables = {tally = 0, of = 0},
-      charms = {tally = 0, of = 0},
       orbits = {tally = 0, of = 0},
       phantoms = {tally = 0, of = 0},
       perks = {tally = 0, of = 0},
-      boosters = {tally = 0, of = 0},
       editions = {tally = 0, of = 0},
       backs = {tally = 0, of = 0},
       total = {tally = 0, of = 0},
@@ -286,7 +265,7 @@ function sync_discover_counts()
   
   for _, v in pairs(G.P_CENTERS) do
     if not v.omit then 
-      if v.set and ((v.set == 'Companion') or v.usable or (v.set == 'Finish') or (v.set == 'Perk') or (v.set == 'Back') or (v.set == 'Bundle')) then
+      if v.set and ((v.set == 'Companion') or v.usable or (v.set == 'Finish') or (v.set == 'Perk') or (v.set == 'Back')) then
         G.DISCOVER_TALLIES.total.of = G.DISCOVER_TALLIES.total.of+1
         if v.discovered then 
           G.DISCOVER_TALLIES.total.tally = G.DISCOVER_TALLIES.total.tally+1
@@ -319,23 +298,12 @@ function sync_discover_counts()
           if v.discovered then 
               G.DISCOVER_TALLIES.phantoms.tally = G.DISCOVER_TALLIES.phantoms.tally+1
           end
-        elseif v.set == 'Charm' then
-          G.DISCOVER_TALLIES.charms.of = G.DISCOVER_TALLIES.charms.of+1
-          if v.discovered then 
-              G.DISCOVER_TALLIES.charms.tally = G.DISCOVER_TALLIES.charms.tally+1
-          end
         end
       end
       if v.set and v.set == 'Perk' then
         G.DISCOVER_TALLIES.perks.of = G.DISCOVER_TALLIES.perks.of+1
         if v.discovered then 
             G.DISCOVER_TALLIES.perks.tally = G.DISCOVER_TALLIES.perks.tally+1
-        end
-      end
-      if v.set and v.set == 'Bundle' then
-        G.DISCOVER_TALLIES.boosters.of = G.DISCOVER_TALLIES.boosters.of+1
-        if v.discovered then 
-            G.DISCOVER_TALLIES.boosters.tally = G.DISCOVER_TALLIES.boosters.tally+1
         end
       end
       if v.set and v.set == 'Finish' then

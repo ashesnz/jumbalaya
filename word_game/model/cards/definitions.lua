@@ -60,13 +60,8 @@ function Game:load_card_definitions()
 
     self.companion_locked = {unlocked = false, max = 1, name = "Locked", pos = {x=8,y=9}, set = "Companion", cost_mult = 1.0,config = {}}
     self.perk_locked = {unlocked = false, max = 1, name = "Locked", pos = {x=8,y=3}, set = "Perk", cost_mult = 1.0,config = {}}
-    self.letter_locked = {unlocked = false, max = 1, name = "Locked", pos = {x=4,y=2}, set = "Charm", cost_mult = 1.0,config = {}}
     self.companion_undiscovered = {unlocked = false, max = 1, name = "Locked", pos = {x=9,y=9}, set = "Companion", cost_mult = 1.0,config = {}}
-    self.charm_undiscovered = {unlocked = false, max = 1, name = "Locked", pos = {x=6,y=2}, set = "Charm", cost_mult = 1.0,config = {}}
-    self.orbit_undiscovered = {unlocked = false, max = 1, name = "Locked", pos = {x=7,y=2}, set = "Orbit", cost_mult = 1.0,config = {}}
-    self.phantom_undiscovered = {unlocked = false, max = 1, name = "Locked", pos = {x=5,y=2}, set = "Phantom", cost_mult = 1.0,config = {}}
     self.perk_undiscovered = {unlocked = false, max = 1, name = "Locked", pos = {x=8,y=2}, set = "Perk", cost_mult = 1.0,config = {}}
-    self.booster_undiscovered = {unlocked = false, max = 1, name = "Locked", pos = {x=0,y=5}, set = "Bundle", cost_mult = 1.0,config = {}}
 
     self.P_CENTERS = {
         letter_base={max = 500, freq = 1, line = 'base', name = "Letter", pos = {x=0,y=0}, atlas = "letter_frame", set = "Default", label = 'Letter', effect = "Base", cost_mult = 1.0, config = {}},
@@ -78,11 +73,11 @@ function Game:load_card_definitions()
         deck_alpha=              {name = "Alpha Deck",         stake = 1, unlocked = true,order = 1, pos =   {x=0,y=0}, set = "Back", config = {discards = 1}, discovered = true},
 
         --editions
-        finish_base =       {order = 1,  unlocked = true, discovered = false, name = "Base", pos = {x=0,y=0}, atlas = 'Companion', set = "Finish", config = {}},
-        finish_foil =       {order = 2,  unlocked = true, discovered = false, name = "Foil", pos = {x=0,y=0}, atlas = 'Companion', set = "Finish", config = {extra = 50}},
-        finish_holo =       {order = 3,  unlocked = true, discovered = false, name = "Holographic", pos = {x=0,y=0}, atlas = 'Companion', set = "Finish", config = {extra = 10}},
-        finish_polychrome = {order = 4,  unlocked = true, discovered = false, name = "Polychrome", pos = {x=0,y=0}, atlas = 'Companion', set = "Finish", config = {extra = 1.5}},
-        finish_negative =   {order = 5,  unlocked = true, discovered = false, name = "Negative", pos = {x=0,y=0}, atlas = 'Companion', set = "Finish", config = {extra = 1}},
+        finish_base =       {order = 1,  unlocked = true, discovered = false, name = "Base", pos = {x=0,y=0}, atlas = 'letter_frame', set = "Finish", config = {}},
+        finish_foil =       {order = 2,  unlocked = true, discovered = false, name = "Foil", pos = {x=0,y=0}, atlas = 'letter_frame', set = "Finish", config = {extra = 50}},
+        finish_holo =       {order = 3,  unlocked = true, discovered = false, name = "Holographic", pos = {x=0,y=0}, atlas = 'letter_frame', set = "Finish", config = {extra = 10}},
+        finish_polychrome = {order = 4,  unlocked = true, discovered = false, name = "Polychrome", pos = {x=0,y=0}, atlas = 'letter_frame', set = "Finish", config = {extra = 1.5}},
+        finish_negative =   {order = 5,  unlocked = true, discovered = false, name = "Negative", pos = {x=0,y=0}, atlas = 'letter_frame', set = "Finish", config = {extra = 1}},
 
         --Extras       
         soul={pos = {x=0,y=1}},

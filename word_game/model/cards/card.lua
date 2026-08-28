@@ -67,7 +67,7 @@ local CARD_SCHEMA = {
 --- @param W number width
 --- @param H number height
 --- @param card table|nil base playing-card data, see `apply_face`
---- @param center table|nil center definition (companion/charm/etc.), see `apply_center`
+--- @param center table|nil center definition (companion/perk/etc.), see `apply_center`
 --- @param params table|nil extra flags: `playing_card`, `viewed_back`,
 ---   `bypass_discovery_center`, `bypass_discovery_ui`, `bypass_lock`, etc.
 function Card:construct(X, Y, W, H, card, center, params)
@@ -135,9 +135,9 @@ function Card:construct(X, Y, W, H, card, center, params)
 end
 
 --- Shows/hides the "new item discovered" alert badge on collection screens
---- (companions/perks/usables/editions/boosters only).
+--- (companions/perks/usables/editions only).
 function Card:update_alert()
-    if (self.ability.set == 'Companion' or self.ability.set == 'Perk' or self.ability.usable or self.ability.set == 'Finish' or self.ability.set == 'Bundle') then 
+    if (self.ability.set == 'Companion' or self.ability.set == 'Perk' or self.ability.usable or self.ability.set == 'Finish') then 
         if self.area and self.area.config.collection and self.config.center then
             if self.config.center.alerted and self.children.alert  then
                 self.children.alert:remove()
@@ -315,14 +315,9 @@ function Card:load(saved)
     }
     self.params = saved.params
 
-    -- Bundle-wrapped perk offers display slightly oversized; everything else
-    -- is a standard-size card.
+    -- Standard-size card restore.
     local H, W = G.CARD_H, G.CARD_W
-    if self.config.center.set == 'Bundle' then
-        self.T.h, self.T.w = H * 1.27, W * 1.27
-    else
-        self.T.h, self.T.w = H, W
-    end
+    self.T.h, self.T.w = H, W
     self.VT.h = self.T.h
     self.VT.w = self.T.w
 
