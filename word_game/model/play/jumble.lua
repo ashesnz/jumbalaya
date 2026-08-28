@@ -64,7 +64,7 @@ function M.end_jumble_hand()
 		hud.to_go_label = "TO CLEAR"
 	end
 
-	round.start_hand(wr.set, wr.hand_index + 1)
+	round.advance_hand()
 	require("word_game.model.play.opening_deal").deal()
 	effects.present_end_jumble_sidebar()
 end

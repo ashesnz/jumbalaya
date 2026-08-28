@@ -1,4 +1,4 @@
---[[ word_game/model/round.lua - Set / Hand / Showdown controller ]]
+--[[ word_game/model/round.lua - Set / Hand controller ]]
 local Scheduler = require "app.effects.scheduler"
 
 
@@ -46,7 +46,7 @@ function M.restore_from_save()
 	wr.words_left = wr.words_left or wr.plays_left
 	wr.redraws_left = wr.redraws_left or round_config.REDRAWS_PER_HAND
 	wr.target = wr.target or round_config.hand_target(wr.set, wr.hand_index)
-	wr.hand_name = wr.hand_name or round_config.hand_name(wr.hand_index)
+	wr.hand_name = wr.hand_name or round_config.hand_name(wr.hand_index, wr.set)
 	G.GAME.round_resets = G.GAME.round_resets or {}
 	G.GAME.round_resets.ante = wr.set
 	G.GAME.points = G.GAME.points or 0
@@ -82,7 +82,7 @@ function M.start_hand(set, hand_index)
 	wr.words_left = wr.plays_left
 	wr.redraws_left = round_config.REDRAWS_PER_HAND
 	wr.target = round_config.hand_target(set, hand_index)
-	wr.hand_name = round_config.hand_name(hand_index)
+	wr.hand_name = round_config.hand_name(hand_index, set)
 	wr.played_words = {}
 	wr.boss_character = nil
 
@@ -109,14 +109,13 @@ function M.start_hand(set, hand_index)
 		WORD_GAME.ScoreBanner.reset(wr.target)
 	end
 
-	-- 60s timeline for all jumble puzzle phases (including 1-3 pre-boss).
 	local jumble = require("word_game.model.jumble")
 	if jumble.is_active_hand(set, hand_index)
 		and WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.reset then
 		WORD_GAME.TimelineTimer.reset(60.0)
 	end
 
-	if WORD_GAME and WORD_GAME.Sidebar then
+	if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.clear_hand then
 		WORD_GAME.Sidebar:clear_hand()
 	end
 
@@ -209,23 +208,20 @@ M.out_of_words = M.out_of_plays
 
 function M.is_final_hand()
 	local wr = G.GAME.word_round
-	return wr and wr.set >= round_config.SETS_TO_WIN and round_config.is_showdown(wr.hand_index)
+	return wr and round_config.is_final_hand(wr.set, wr.hand_index)
 end
 
 function M.advance_hand()
 	local wr = G.GAME.word_round
 	if not wr then return "next" end
 
-	if round_config.is_showdown(wr.hand_index) then
-		if wr.set >= round_config.SETS_TO_WIN then
-			return "win"
-		end
-		M.start_hand(wr.set + 1, 1)
-		return "next_set"
+	if round_config.is_final_hand(wr.set, wr.hand_index) then
+		return "win"
 	end
 
-	if wr.set == 1 and wr.hand_index == 4 then
-		M.start_hand(2, 1)
+	local hands = round_config.hands_in_set(wr.set)
+	if wr.hand_index >= hands then
+		M.start_hand(wr.set + 1, 1)
 		return "next_set"
 	end
 

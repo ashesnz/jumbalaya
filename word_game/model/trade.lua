@@ -76,7 +76,7 @@ end
 
 function M.is_showdown_market()
 	local wr = G.GAME and G.GAME.word_round
-	return wr and round_config.is_showdown(wr.hand_index) and true or false
+	return wr and round_config.is_showdown(wr.hand_index, wr.set) and true or false
 end
 
 local function make_market_item(letter)

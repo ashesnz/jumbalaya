@@ -19,7 +19,8 @@ local function hand_number()
 end
 
 local function next_set_and_hand(set, hand)
-	if round_config.is_showdown(hand) then
+	local hands = round_config.hands_in_set(set)
+	if hand >= hands then
 		if set >= round_config.SETS_TO_WIN then
 			return nil
 		end
@@ -77,7 +78,7 @@ function M.odometer_node(box_w)
 				colour = G.C.GOLD,
 				subtitle_fn = function(hand)
 					local set = set_number()
-					if round_config.is_showdown(hand)
+					if round_config.is_showdown(hand, set)
 						and not round_config.is_stage3_cinematic_hand(set, hand)
 						and not round_config.is_marco_cinematic_hand(set, hand) then
 						return "Boss Battle"

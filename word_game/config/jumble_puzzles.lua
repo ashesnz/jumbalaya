@@ -1,7 +1,7 @@
 --[[ word_game/config/jumble_puzzles.lua
      Router and loader for stage-specific jumble puzzle patterns.
-     Stage pattern definitions are broken up into:
-       jumble_puzzles/1_1.lua through jumble_puzzles/8_3.lua
+     Stage pattern definitions live in jumble_puzzles/{set}_{hand}.lua
+     (e.g. 1_1.lua … 1_9.lua, 2_1.lua … 8_3.lua).
 ]]
 
 local M = {}

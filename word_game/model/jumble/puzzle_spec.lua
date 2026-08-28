@@ -2,6 +2,7 @@
 
 return function(M)
 local puzzles_cfg = require("word_game.config.jumble_puzzles")
+local round_config = require("word_game.config.round_config")
 
 local stage_validated_puzzles = {}
 
@@ -349,7 +350,9 @@ function M.puzzles(set, hand_index)
 end
 
 function M.boss_puzzle(set, hand_index)
-	if set ~= 1 or hand_index ~= 3 then return nil end
+	set = set or (G.GAME and G.GAME.word_round and G.GAME.word_round.set) or 1
+	hand_index = hand_index or (G.GAME and G.GAME.word_round and G.GAME.word_round.hand_index) or 1
+	if not round_config.is_boss_word_hand(set, hand_index) then return nil end
 	local stage_cfg = puzzles_cfg.get_stage(set, hand_index)
 	return random_boss_puzzle(stage_cfg and stage_cfg.BOSS_WORDS)
 end

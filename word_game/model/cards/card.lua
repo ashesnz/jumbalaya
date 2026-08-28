@@ -198,6 +198,7 @@ function Card:apply_face(card, initial)
         color_tiebreak = (card_color == "red" and 0.01)
             or (card_color == "black" and 0.02)
             or (card_color == "modified" and 0.03)
+            or (card_color == "gold" and 0.04)
             or 0,
         face_tiebreak = 0,
         colour = card_colour,

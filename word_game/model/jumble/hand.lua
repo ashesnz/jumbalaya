@@ -5,11 +5,13 @@ local TIMER_ENABLED = false
 local TIMER_SECONDS = 30
 local modifier_effects = require("word_game.model.play.letter_modifier_effects")
 local bonus_stack = require("word_game.ui.boss_word_stack")
+local round_config = require("word_game.config.round_config")
 
 function M.is_active_hand(set, hand_index)
 	set = set or (G.GAME and G.GAME.word_round and G.GAME.word_round.set) or 1
 	hand_index = hand_index or (G.GAME and G.GAME.word_round and G.GAME.word_round.hand_index) or 1
-	return set >= 1 and set <= 8 and hand_index >= 1
+	return set >= 1 and set <= round_config.SETS_TO_WIN and hand_index >= 1
+		and hand_index <= round_config.hands_in_set(set)
 end
 
 function M.is_active()
@@ -124,7 +126,7 @@ function M.start_boss_word(wr)
 end
 
 function M.prepare_boss_word(wr)
-	if not wr or wr.set ~= 1 or wr.hand_index ~= 3 or not wr.jumble then return false end
+	if not wr or not round_config.is_boss_word_hand(wr.set, wr.hand_index) or not wr.jumble then return false end
 	local boss = M.boss_puzzle(wr.set, wr.hand_index)
 	if not boss then return false end
 	wr.jumble.pending_boss = boss
@@ -140,7 +142,7 @@ function M.prepare_boss_word(wr)
 end
 
 function M.reveal_boss_puzzle(wr)
-	if not wr or wr.set ~= 1 or wr.hand_index ~= 3 or not wr.jumble then return false end
+	if not wr or not round_config.is_boss_word_hand(wr.set, wr.hand_index) or not wr.jumble then return false end
 	local boss = wr.jumble.pending_boss
 	if not boss then return false end
 	wr.jumble.pending_boss = nil

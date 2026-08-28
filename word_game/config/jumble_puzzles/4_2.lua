@@ -1,22 +1,22 @@
---[[ word_game/config/jumble_puzzle_4_2.lua
+--[[ word_game/config/jumble_puzzles/4_2.lua
      Jumble puzzle patterns for stage 4-2.
 ]]
 
 local M = {}
 
 M.PATTERNS = {
-	"M_N__",
-	"P_R__",
-	{ span = { "S", "D" }, min = 3, max = 7 },
-	{ center = "AP", min = 5, max = 7 },
-	{ center = "AV", min = 5, max = 7 },
-	"_E_L_",
-	{ center = "IR", min = 5, max = 7 },
-	"_OL_S",
-	"_O__H",
-	{ center = "AL", min = 5, max = 7 },
-	{ center = "AM", min = 5, max = 7 },
-	{ center = "BE", min = 5, max = 7 },
+	"_I_KE_",
+	"_RI_E_",
+	"_U_GE_",
+	"__AR_S",
+	{ center = "AVE", min = 6, max = 7 },
+	"__EA_S",
+	{ center = "ER", min = 6, max = 7 },
+	"__I__E",
+	"__M__R",
+	{ center = "PE", min = 6, max = 7 },
+	"__S_L_",
+	"__TT_R",
 }
 
 return M

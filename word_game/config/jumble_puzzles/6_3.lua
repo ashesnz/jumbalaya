@@ -1,22 +1,22 @@
---[[ word_game/config/jumble_puzzle_6_3.lua
+--[[ word_game/config/jumble_puzzles/6_3.lua
      Jumble puzzle patterns for stage 6-3.
 ]]
 
 local M = {}
 
 M.PATTERNS = {
-	"__U__D",
-	{ suffix = "ATE", min = 3, max = 7 },
-	{ suffix = "DLE", min = 3, max = 7 },
-	{ suffix = "HER", min = 3, max = 7 },
-	"___L_Y",
-	"___S_R",
-	{ suffix = "TES", min = 3, max = 7 },
-	"A_T___",
-	"A___A_",
-	"BO__E_",
-	"CA___S",
-	"C__A__",
+	{ center = "UST", min = 7, max = 7 },
+	"__CK_N_",
+	"__C__ED",
+	{ center = "MI", min = 7, max = 7 },
+	"__M_A__",
+	"__M___D",
+	"__N_H__",
+	"__N___Y",
+	"__O_O__",
+	"__O_PE_",
+	{ center = "PI", min = 7, max = 7 },
+	{ center = "RC", min = 7, max = 7 },
 }
 
 return M

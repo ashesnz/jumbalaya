@@ -103,7 +103,7 @@ T.describe("Bonus cards", function()
 		bonus_stack.animate_cards_to_stack = function(queue_event, easing_mod, opts)
 			queued = queued + 1
 			T.assert_not_nil(opts.on_complete)
-			T.assert_equal(opts.initial_delay, 1.0)
+			T.assert_equal(opts.initial_delay, 0)
 			if opts.on_complete then
 				opts.on_complete()
 			end
@@ -327,7 +327,7 @@ T.describe("Bonus cards", function()
 		T.assert_true(bonus_stack.is_active())
 		T.assert_equal(#bonus_stack.cards(), 1)
 		T.assert_true(bonus_stack.cards()[1].bonus_card)
-		bonus_stack.on_hand_start(2, 1)
+		bonus_stack.on_hand_start(1, 5)
 		T.assert_false(bonus_stack.is_active())
 	end)
 

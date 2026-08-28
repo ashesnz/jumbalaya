@@ -5,6 +5,7 @@ local M = {}
 local deck = require("word_game.model.cards.deck")
 local word_feedback = require("word_game.ui.word_feedback")
 local boss_word_stack = require("word_game.ui.boss_word_stack")
+local round_config = require("word_game.config.round_config")
 local Easing = require "app.effects.easing"
 local Scheduler = require "app.effects.scheduler"
 
@@ -41,7 +42,7 @@ function M.triggers_boss_word(result)
 	if not result or not result.cleared then return false end
 	local wr = G.GAME and G.GAME.word_round
 	local j = wr and wr.jumble
-	return wr and wr.set == 1 and wr.hand_index == 3
+	return wr and round_config.is_boss_word_hand(wr.set, wr.hand_index)
 		and j and not j.boss_word_active and not j.boss_word_staging
 end
 
@@ -455,7 +456,7 @@ function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_
 	}))
 
 	boss_word_stack.animate_cards_to_stack(M.queue_event, nil, {
-		initial_delay = WELL_DONE_HOLD,
+		initial_delay = 0,
 		card_delay = CARD_DELAY,
 		stagger = CARD_STAGGER,
 		hold = STACK_HOLD,

@@ -1,4 +1,4 @@
---[[ word_game/config/jumble_puzzle_7_1.lua
+--[[ word_game/config/jumble_puzzles/7_1.lua
      Jumble puzzle patterns for stage 7-1.
 ]]
 

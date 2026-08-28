@@ -1,12 +1,22 @@
 --[[ word_game/ui/boss_word_stack.lua - Bonus card stack (boss word rewards on stage 1-4) ]]
 
 local placement_layout = require("word_game.ui.layout.placement")
+local DissolveFX = require("app.effects.dissolve_fx")
+local deck = require("word_game.model.cards.deck")
+local LetterPalette = require("word_game.config.letter_card_palette")
+local round_config = require("word_game.config.round_config")
 
 local M = {}
 
 M.BONUS_POINTS = 10
 M.LEFT_WINDOW_MARGIN = 0.14
 M.STACK_Y_LIFT_PX = 20
+
+local TRANSFORM_DISSOLVE_TIME = 0.7
+local TRANSFORM_MATERIALIZE_TIME = 0.6
+local TRANSFORM_TOTAL = TRANSFORM_DISSOLVE_TIME + TRANSFORM_MATERIALIZE_TIME + 0.1
+local BURN_DISSOLVE_COLOURS = { G.C.BLACK, G.C.ORANGE, G.C.RED, G.C.GOLD, G.C.MUTED_GREY }
+local BURN_MATERIALIZE_COLOURS = { G.C.BLACK, G.C.ORANGE, G.C.GOLD, G.C.WHITE }
 
 local stack_cards
 local stack_animating = false
@@ -80,7 +90,7 @@ function M.stage_cards(cards)
 end
 
 function M.on_hand_start(set, hand_index)
-	if set == 1 and hand_index == 4 then
+	if round_config.is_bonus_stack_hand(set, hand_index) then
 		if not stack_animating then
 			M.sync_positions()
 		end
@@ -207,6 +217,7 @@ function M.promote_to_bonus(cards)
 			card.boss_temp = nil
 			card.placement_locked = nil
 			card.pinned = nil
+			M.apply_gold_bonus_face(card)
 			if card.ability then
 				card.ability.bonus = M.BONUS_POINTS
 			end
@@ -239,6 +250,98 @@ local function smoothstep(u)
 	return u * u * (3 - 2 * u)
 end
 
+local function card_letter(card)
+	return (card.ability and card.ability.letter)
+		or (card.config and card.config.card and card.config.card.letter)
+end
+
+function M.apply_gold_bonus_face(card)
+	local letter = card_letter(card)
+	if not letter then return end
+	local color = LetterPalette.BONUS_FACE_COLOR
+	local front = deck.front(letter, color)
+	if front and card.apply_face then
+		deck.tag_card(card, letter, color)
+		card:apply_face(front, false)
+	end
+end
+
+local function run_gold_transform(card, on_complete)
+	if not card or not card.apply_face or not DissolveFX or not DissolveFX.run then
+		M.apply_gold_bonus_face(card)
+		if on_complete then on_complete() end
+		return
+	end
+
+	if card.states then
+		card.states.visible = true
+	end
+	card.dissolve = 0
+	card.dissolve_wipe = 0
+	card.dissolve_colours = BURN_DISSOLVE_COLOURS
+
+	if play_sfx then
+		play_sfx("whoosh2", math.random() * 0.2 + 0.9, 0.5)
+		play_sfx("crumple" .. math.random(1, 5), math.random() * 0.2 + 0.9, 0.5)
+	end
+
+	DissolveFX.run(card, {
+		mode = "out",
+		duration = TRANSFORM_DISSOLVE_TIME,
+		wipe = 0,
+		pulse = true,
+		colours = BURN_DISSOLVE_COLOURS,
+		fade = {
+			delay = 0.7 * TRANSFORM_DISSOLVE_TIME,
+			duration = 0.3 * TRANSFORM_DISSOLVE_TIME,
+		},
+		on_finish = function()
+			M.apply_gold_bonus_face(card)
+			card.dissolve = 1
+			card.dissolve_wipe = 0
+			card.dissolve_colours = BURN_MATERIALIZE_COLOURS
+			DissolveFX.run(card, {
+				mode = "in",
+				duration = TRANSFORM_MATERIALIZE_TIME,
+				wipe = 0,
+				pulse = true,
+				colours = BURN_MATERIALIZE_COLOURS,
+				particle = { timer = 0.025, scale = 0.25, speed = 3, lifespan = 0.7 },
+				on_finish = function()
+					card.dissolve = 0
+					card.dissolve_wipe = 0
+					if on_complete then on_complete() end
+				end,
+			})
+		end,
+	})
+end
+
+local function fly_card_to_stack(queue_event, card, fly_index, card_delay)
+	local sx, sy = card.T.x, card.T.y
+	local tx, ty = M.target_position(fly_index)
+	local started = (G.TIMERS and G.TIMERS.REAL) or 0
+	if play_sfx then
+		play_sfx("card_slide1", 0.88 + fly_index * 0.015, 0.55)
+	end
+	queue_event(Tween({
+		mode = "window",
+		timer = "REAL",
+		delay = card_delay,
+		blockable = false,
+		blocking = false,
+		func = function()
+			local now = (G.TIMERS and G.TIMERS.REAL) or (started + card_delay)
+			local u = card_delay > 0 and math.min(1, (now - started) / card_delay) or 1
+			local e = smoothstep(u)
+			card.T.x = sx + (tx - sx) * e
+			card.T.y = sy + (ty - sy) * e
+			sync_card_transform(card)
+			return u >= 1
+		end,
+	}))
+end
+
 function M.animate_cards_to_stack(queue_event, _easing_mod, opts)
 	opts = opts or {}
 	local cards = stack_cards or {}
@@ -262,6 +365,7 @@ function M.animate_cards_to_stack(queue_event, _easing_mod, opts)
 	local can_queue = queue_event and G.TIMELINE and G.TIMELINE.enqueue
 	if not can_queue then
 		for index, card in ipairs(cards) do
+			M.apply_gold_bonus_face(card)
 			local tx, ty = M.target_position(index)
 			snap_card_to(card, tx, ty)
 		end
@@ -291,28 +395,9 @@ function M.animate_cards_to_stack(queue_event, _easing_mod, opts)
 						else
 							sync_card_transform(fly_card)
 						end
-						local sx, sy = fly_card.T.x, fly_card.T.y
-						local tx, ty = M.target_position(fly_index)
-						local started = (G.TIMERS and G.TIMERS.REAL) or 0
-						if play_sfx then
-							play_sfx("card_slide1", 0.88 + fly_index * 0.015, 0.55)
-						end
-						queue_event(Tween({
-							mode = "window",
-							timer = "REAL",
-							delay = card_delay,
-							blockable = false,
-							blocking = false,
-							func = function()
-								local now = (G.TIMERS and G.TIMERS.REAL) or (started + card_delay)
-								local u = card_delay > 0 and math.min(1, (now - started) / card_delay) or 1
-								local e = smoothstep(u)
-								fly_card.T.x = sx + (tx - sx) * e
-								fly_card.T.y = sy + (ty - sy) * e
-								sync_card_transform(fly_card)
-								return u >= 1
-							end,
-						}))
+						run_gold_transform(fly_card, function()
+							fly_card_to_stack(queue_event, fly_card, fly_index, card_delay)
+						end)
 						return true
 					end,
 				}))
@@ -324,7 +409,7 @@ function M.animate_cards_to_stack(queue_event, _easing_mod, opts)
 	queue_event(Tween({
 		mode = "delayed",
 		timer = "REAL",
-		delay = initial_delay + ((#cards - 1) * stagger) + card_delay + hold,
+		delay = initial_delay + ((#cards - 1) * stagger) + TRANSFORM_TOTAL + card_delay + hold,
 		blocking = true,
 		func = function()
 			for index, card in ipairs(cards) do

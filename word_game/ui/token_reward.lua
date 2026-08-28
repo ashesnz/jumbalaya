@@ -7,6 +7,7 @@
 
 local Layout = require("word_game.ui.layout")
 local state = require("word_game.model.state")
+local round_config = require("word_game.config.round_config")
 
 local M = {}
 
@@ -52,7 +53,7 @@ end
 
 function M.is_eligible()
 	local wr = G.GAME and G.GAME.word_round
-	return wr and wr.set == 1 and wr.hand_index == 1
+	return wr and round_config.is_token_reward_hand(wr.set, wr.hand_index)
 end
 
 function M.earned_amount()

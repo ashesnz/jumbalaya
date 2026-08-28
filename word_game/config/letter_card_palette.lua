@@ -16,11 +16,15 @@ M.DEFAULT_FACE_COLOR = "red"
 --- Face colour applied after the marketplace Modify transform animation.
 M.MODIFIED_FACE_COLOR = "modified"
 
+--- Face colour applied to boss-word bonus cards after the gold transform.
+M.BONUS_FACE_COLOR = "gold"
+
 M.schemes = {
 	default = {
 		red = DeckColors.red,
 		black = DeckColors.black,
 		modified = DeckColors.modified,
+		gold = DeckColors.gold,
 	},
 }
 

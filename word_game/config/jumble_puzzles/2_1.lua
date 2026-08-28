@@ -1,22 +1,22 @@
---[[ word_game/config/jumble_puzzle_2_1.lua
+--[[ word_game/config/jumble_puzzles/2_1.lua
      Jumble puzzle patterns for stage 2-1.
 ]]
 
 local M = {}
 
 M.PATTERNS = {
-	{ prefix = "U", min = 3, max = 7 },
-	{ suffix = "AD", min = 3, max = 7 },
-	{ suffix = "AG", min = 3, max = 7 },
-	{ suffix = "AP", min = 3, max = 7 },
-	{ center = "F", min = 3, max = 7 },
-	{ center = "N", min = 3, max = 7 },
-	{ suffix = "OB", min = 3, max = 7 },
-	{ suffix = "OW", min = 3, max = 7 },
-	{ prefix = "MA", min = 3, max = 7 },
-	{ suffix = "AT", min = 3, max = 7 },
-	{ center = "B", min = 3, max = 7 },
-	{ suffix = "IT", min = 3, max = 7 },
+	{ span = { "L", "S" }, min = 3, max = 7 },
+	{ span = { "M", "E" }, min = 3, max = 7 },
+	{ span = { "R", "S" }, min = 3, max = 7 },
+	{ center = "ER", min = 4, max = 7 },
+	{ center = "O", pin_index = 2, suffix = "N", min = 4, max = 7 },
+	{ suffix = "NT", min = 3, max = 7 },
+	{ span = { "C", "S" }, min = 3, max = 7 },
+	{ prefix = "DA", min = 3, max = 7 },
+	{ span = { "M", "S" }, min = 3, max = 7 },
+	"C_E__",
+	{ prefix = "FR", min = 3, max = 7 },
+	{ prefix = "GO", min = 3, max = 7 },
 }
 
 return M

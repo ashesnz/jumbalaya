@@ -8,6 +8,11 @@ local M = {
 	MIN_WORD_LEN = 3,
 	MAX_WORD_LEN = 7,
 
+	-- Set 1 runs nine hands (1-1 … 1-9); later sets use three hands each.
+	HANDS_IN_SET = {
+		[1] = 9,
+	},
+
 	-- GDD length table: flat AP bonus and base Boost
 	LENGTH = {
 		[3] = { ap = 10, boost = 1 },
@@ -23,24 +28,29 @@ local M = {
 	HAND_CYCLE = { "Standard", "Standard", "Showdown" },
 
 	HAND_TARGETS = {
-		[1] = { 2, 2, 2, 2 },
-		[2] = { 100, 140, 175 },
-		[3] = { 200, 280, 350 },
-		[4] = { 400, 560, 700 },
-		[5] = { 800, 1120, 1400 },
-		[6] = { 1600, 2240, 2800 },
-		[7] = { 3200, 4480, 5600 },
-		[8] = { 6400, 8960, 11200 },
+		[1] = { 2, 2, 2, 2, 100, 140, 175, 200, 350 },
+		[2] = { 400, 560, 700 },
+		[3] = { 800, 1120, 1400 },
+		[4] = { 1600, 2240, 2800 },
+		[5] = { 3200, 4480, 5600 },
+		[6] = { 6400, 8960, 11200 },
+		[7] = { 12800, 17920, 22400 },
+		[8] = { 25600, 35840, 44800 },
 	},
 
-	-- Stage odometer hand that plays the Milo / Aleisha boss intro (e.g. 1-3).
+	-- Stage odometer hand that plays the Milo / Aleisha boss intro (1-3).
 	STAGE3_CINEMATIC = { set = 1, hand = 3 },
-	-- Set 2 Showdown: Milo + Aleisha stay left, boss drops, Marco joins.
-	MARCO_CINEMATIC = { set = 2, hand = 3 },
+	-- Set 1 hand 7: Milo + Aleisha stay left, boss drops, Marco joins.
+	MARCO_CINEMATIC = { set = 1, hand = 7 },
 }
 
 function M.length_bonus(len)
 	return M.LENGTH[len] or M.LENGTH[M.MAX_WORD_LEN]
+end
+
+function M.hands_in_set(set)
+	set = set or 1
+	return M.HANDS_IN_SET[set] or 3
 end
 
 function M.hand_target(set, hand_index)
@@ -60,12 +70,37 @@ function M.hand_target(set, hand_index)
 	return row[hand_index] or row[1]
 end
 
-function M.hand_name(hand_index)
+function M.hand_name(hand_index, set)
+	set = set or 1
+	if set == 1 then
+		if hand_index == 3 then return "Showdown" end
+		if hand_index == 7 then return "Showdown" end
+		if hand_index == 9 then return "Showdown" end
+		return "Standard"
+	end
 	return M.HAND_CYCLE[hand_index] or "Standard"
 end
 
-function M.is_showdown(hand_index)
-	return M.hand_name(hand_index) == "Showdown"
+function M.is_showdown(hand_index, set)
+	return M.hand_name(hand_index, set) == "Showdown"
+end
+
+function M.is_boss_word_hand(set, hand_index)
+	return set == 1 and hand_index == 3
+end
+
+function M.is_bonus_stack_hand(set, hand_index)
+	return set == 1 and hand_index == 4
+end
+
+function M.is_token_reward_hand(set, hand_index)
+	return set == 1 and hand_index == 1
+end
+
+function M.is_final_hand(set, hand_index)
+	set = set or 1
+	hand_index = hand_index or 1
+	return set >= M.SETS_TO_WIN and hand_index >= M.hands_in_set(set)
 end
 
 -- Sets 1–3 showdown hands used to gate the early perk marketplace (removed).
@@ -97,24 +132,28 @@ end
 
 function M.cinematic_id(set, hand_index)
 	if M.is_stage3_cinematic_hand(set, hand_index) then return "1-3" end
-	if M.is_marco_cinematic_hand(set, hand_index) then return "2-3" end
+	if M.is_marco_cinematic_hand(set, hand_index) then return "1-7" end
 	return nil
 end
 
--- Aleisha is in the party from 1-3 onward (all later sets included).
+function M.stage_label(set, hand_index)
+	return string.format("%d-%d", set or 1, hand_index or 1)
+end
+
+-- Aleisha is in the party from 1-3 onward.
 function M.aleisha_has_joined(set, hand_index)
 	set = set or 1
 	hand_index = hand_index or 1
 	if set > 1 then return true end
-	return set == 1 and hand_index >= 3
+	return hand_index >= 3
 end
 
--- Marco is in the party from 2-3 onward.
+-- Marco is in the party from 1-7 onward.
 function M.marco_has_joined(set, hand_index)
 	set = set or 1
 	hand_index = hand_index or 1
-	if set > 2 then return true end
-	return set == 2 and hand_index >= 3
+	if set > 1 then return true end
+	return hand_index >= 7
 end
 
 return M

@@ -9,8 +9,8 @@ local function jump_to_hand(ctx, set, hand_index)
 	if G.STATE ~= G.STATES.TABLE_BOARD then return end
 	if not (WORD_GAME and WORD_GAME.Round) then return end
 
-	set = math.max(1, math.min(round_config.SETS_TO_WIN or 3, set))
-	hand_index = math.max(1, math.min(3, hand_index or 1))
+	set = math.max(1, math.min(round_config.SETS_TO_WIN or 8, set))
+	hand_index = math.max(1, math.min(round_config.hands_in_set(set), hand_index or 1))
 	if G.GAME then
 		G.GAME.word_score_animating = false
 		G.GAME.hand_redraw_animating = false
@@ -83,10 +83,11 @@ end
 local HANDS = {
 	{ set = 1, hand = 1, label = "1-1" },
 	{ set = 1, hand = 3, label = "1-3 (boss)" },
-	{ set = 2, hand = 1, label = "2-1 (boss)" },
+	{ set = 1, hand = 4, label = "1-4" },
+	{ set = 1, hand = 7, label = "1-7 (boss)" },
+	{ set = 1, hand = 9, label = "1-9 (boss)" },
+	{ set = 2, hand = 1, label = "2-1" },
 	{ set = 2, hand = 3, label = "2-3 (boss)" },
-	{ set = 3, hand = 1, label = "3-1" },
-	{ set = 3, hand = 3, label = "3-3 (boss)" },
 }
 
 return {

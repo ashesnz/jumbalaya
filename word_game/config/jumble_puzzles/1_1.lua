@@ -1,4 +1,4 @@
---[[ word_game/config/jumble_puzzle_1_1.lua
+--[[ word_game/config/jumble_puzzles/1_1.lua
      Jumble puzzle patterns for stage 1-1.
 ]]
 

@@ -10,7 +10,7 @@ return function(context)
 
 	function M.front_key(letter, color)
 		if type(letter) ~= "string" or #letter < 1 then return nil end
-		if color ~= "red" and color ~= "black" and color ~= "modified" then
+		if color ~= "red" and color ~= "black" and color ~= "modified" and color ~= "gold" then
 			color = "black"
 		end
 		return color .. "_" .. letter:sub(1, 1):upper()

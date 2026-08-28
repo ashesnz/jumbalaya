@@ -17,7 +17,7 @@ return function(ctx)
 		local alpha = state.get()
 		if not alpha then return end
 		alpha.cinematic_seen = alpha.cinematic_seen or {}
-		alpha.cinematic_seen["2-3"] = true
+		alpha.cinematic_seen["1-7"] = true
 		alpha.marco_cinematic_seen = true
 		alpha.stage3_cinematic = nil
 		alpha.stage3_portrait_rect = nil
@@ -192,7 +192,7 @@ return function(ctx)
 		local alpha = state.get()
 		if not alpha then return end
 		local seen = alpha.cinematic_seen or {}
-		if seen["2-3"] or alpha.marco_cinematic_seen then return end
+		if seen["1-7"] or alpha.marco_cinematic_seen then return end
 		if alpha.stage3_cinematic then return end
 
 		PlayerHost.reset_marco_cinematic_state()

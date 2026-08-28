@@ -45,7 +45,7 @@ local function open_after_hand(opts)
 	if opts.boss_cleared or (j and j.boss_word_active) then
 		local bonus_stack = WORD_GAME and WORD_GAME.BossWordStack
 		local keep_bonus_cards = opts.boss_cleared
-			and wr.set == 1 and wr.hand_index == 3
+			and round_config.is_boss_word_hand(wr.set, wr.hand_index)
 		if j then
 			j.boss_word_active = false
 			j.boss_word_staging = false
@@ -139,7 +139,7 @@ function M.on_hand_cleared(opts)
 
 	local wr = G.GAME and G.GAME.word_round
 	local j = wr and wr.jumble
-	if wr and wr.set == 1 and wr.hand_index == 3 and j
+	if wr and round_config.is_boss_word_hand(wr.set, wr.hand_index) and j
 		and not j.boss_word_active and not opts.boss_cleared then
 		-- Stage 1-3 celebrates like every other hand, then flows into the
 		-- boss stage instead of the dealer (see open_after_hand).

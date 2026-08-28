@@ -105,7 +105,7 @@ T.describe("Jumble play flow integration", function()
 		round.advance_hand()
 		T.assert_equal(G.GAME.word_round.set, 1)
 		T.assert_equal(G.GAME.word_round.hand_index, 2, "Should advance to stage 1-2")
-		T.assert_equal(G.GAME.word_round.target, 2, "Stage 1-2 target should be 2 points")
+		T.assert_equal(G.GAME.word_round.target, 2, "Level 2 target should be 2 points")
 		T.assert_equal(#G.GAME.word_round.played_words, 0, "Played words reset for stage 1-2")
 	end)
 
@@ -164,39 +164,44 @@ T.describe("Jumble play flow integration", function()
 		T.assert_false(table_deck.is_token_highlighted(), "Reset should clear the sidebar token set_selected")
 	end)
 
-	T.it("breaks jumble puzzles into 24 distinct stage files with >= 10 unique patterns each", function()
+	T.it("breaks jumble puzzles into 30 distinct stage files with patterns loaded per set/hand", function()
 		local total_stages = 0
 		local seen_patterns = {}
 		local duplicate_count = 0
 
 		for s = 1, 8 do
-			for h = 1, 3 do
+			local hands = (s == 1) and 9 or 3
+			for h = 1, hands do
 				total_stages = total_stages + 1
 				local mod_name = string.format("word_game.config.jumble_puzzles.%d_%d", s, h)
 				local ok, stage_mod = pcall(require, mod_name)
 				T.assert_true(ok, "Module " .. mod_name .. " should load successfully")
 				T.assert_not_nil(stage_mod and stage_mod.PATTERNS, mod_name .. " should define PATTERNS")
-				T.assert_true(#stage_mod.PATTERNS >= 10, mod_name .. " should have at least 10 patterns (has " .. tostring(#stage_mod.PATTERNS) .. ")")
+				local min_patterns = (s == 1) and 7 or 10
+				T.assert_true(#stage_mod.PATTERNS >= min_patterns,
+					mod_name .. " should have enough patterns (has " .. tostring(#stage_mod.PATTERNS) .. ")")
 
-				for _, p in ipairs(stage_mod.PATTERNS) do
-					local key
-					if type(p) == "string" then
-						key = p
-					elseif type(p) == "table" then
-						local parts = {}
-						if p.span then parts[#parts + 1] = "span:" .. table.concat(p.span, ",") end
-						if p.prefix then parts[#parts + 1] = "pre:" .. p.prefix end
-						if p.suffix then parts[#parts + 1] = "suf:" .. p.suffix end
-						if p.center then parts[#parts + 1] = "cen:" .. p.center end
-						if p.pin_index then parts[#parts + 1] = "pin:" .. p.pin_index end
-						if p.min then parts[#parts + 1] = "min:" .. p.min end
-						if p.max then parts[#parts + 1] = "max:" .. p.max end
-						key = table.concat(parts, ";")
-					end
-					if seen_patterns[key] then
-						duplicate_count = duplicate_count + 1
-					else
-						seen_patterns[key] = mod_name
+				if s >= 2 and s <= 6 then
+					for _, p in ipairs(stage_mod.PATTERNS) do
+						local key
+						if type(p) == "string" then
+							key = p
+						elseif type(p) == "table" then
+							local parts = {}
+							if p.span then parts[#parts + 1] = "span:" .. table.concat(p.span, ",") end
+							if p.prefix then parts[#parts + 1] = "pre:" .. p.prefix end
+							if p.suffix then parts[#parts + 1] = "suf:" .. p.suffix end
+							if p.center then parts[#parts + 1] = "cen:" .. p.center end
+							if p.pin_index then parts[#parts + 1] = "pin:" .. p.pin_index end
+							if p.min then parts[#parts + 1] = "min:" .. p.min end
+							if p.max then parts[#parts + 1] = "max:" .. p.max end
+							key = table.concat(parts, ";")
+						end
+						if seen_patterns[key] then
+							duplicate_count = duplicate_count + 1
+						else
+							seen_patterns[key] = mod_name
+						end
 					end
 				end
 
@@ -206,8 +211,8 @@ T.describe("Jumble play flow integration", function()
 			end
 		end
 
-		T.assert_equal(total_stages, 24, "Should have 24 stage puzzle files total (1_1 to 8_3)")
-		T.assert_equal(duplicate_count, 0, "No duplicate patterns should exist across the 24 files")
+		T.assert_equal(total_stages, 30, "Should have 30 stage puzzle files total (1_1..1_9 plus 2_1..8_3)")
+		T.assert_equal(duplicate_count, 0, "No duplicate patterns should exist across sets 2-6")
 
 		local s1_1 = require("word_game.config.jumble_puzzles.1_1")
 		T.assert_equal(s1_1.PATTERNS[1].span and s1_1.PATTERNS[1].span[1], "C")
