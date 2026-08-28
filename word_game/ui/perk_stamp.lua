@@ -38,7 +38,6 @@ local WOOD_EDGE = { 0.10, 0.05, 0.02 }
 local RUBBER = { 0.22, 0.10, 0.08 }
 local HANDLE = { 0.42, 0.24, 0.12 }
 local HAND = { 1.00, 0.86, 0.18 }
-local SLEEVE = { 0.95, 0.62, 0.72 }
 
 local function clamp01(t)
 	if t < 0 then return 0 end
@@ -133,19 +132,18 @@ local function project(lx, ly, lz, ox, oy, scale, yaw, pitch)
 	return ox + x1 * scale * persp, oy - y1 * scale * persp
 end
 
-local function quad(a, b, c, d)
-	return { a[1], a[2], b[1], b[2], c[1], c[2], d[1], d[2] }
-end
-
-local function fill_poly(pts, rgb, alpha)
+local function quad_fill(a, b, c, d, rgb, alpha)
 	love.graphics.setColor(rgb[1], rgb[2], rgb[3], alpha)
-	love.graphics.polygon("fill", pts[1], pts[2], pts[3], pts[4], pts[5], pts[6], pts[7], pts[8])
+	love.graphics.polygon("fill",
+		a[1], a[2], b[1], b[2], c[1], c[2])
+	love.graphics.polygon("fill",
+		a[1], a[2], c[1], c[2], d[1], d[2])
 end
 
-local function stroke_poly(pts, alpha)
+local function edge_line(a, b, alpha, width)
 	love.graphics.setColor(WOOD_EDGE[1], WOOD_EDGE[2], WOOD_EDGE[3], alpha * 0.85)
-	love.graphics.setLineWidth(1.6)
-	love.graphics.polygon("line", pts[1], pts[2], pts[3], pts[4], pts[5], pts[6], pts[7], pts[8])
+	love.graphics.setLineWidth(width or 1.6)
+	love.graphics.line(a[1], a[2], b[1], b[2])
 end
 
 local function shade(rgb, mul)
@@ -227,18 +225,9 @@ local function draw_shadow(ox, oy, scale, approach, alpha)
 end
 
 local function draw_hand(c, scale, alpha)
-	-- Yellow cartoon fist around the handle, pink sleeve trailing up-right.
 	local grip_x = (c.hfl[1] + c.hfr[1] + c.htb[1] + c.htf[1]) * 0.25
 	local grip_y = (c.hfl[2] + c.hfr[2]) * 0.5
 	local s = scale * 0.9
-
-	love.graphics.setColor(SLEEVE[1], SLEEVE[2], SLEEVE[3], alpha)
-	love.graphics.polygon("fill",
-		grip_x + 10 * s, grip_y - 18 * s,
-		grip_x + 42 * s, grip_y - 48 * s,
-		grip_x + 58 * s, grip_y - 36 * s,
-		grip_x + 22 * s, grip_y - 4 * s
-	)
 
 	love.graphics.setColor(HAND[1], HAND[2], HAND[3], alpha)
 	love.graphics.ellipse("fill", grip_x + 2 * s, grip_y - 2 * s, 16 * s, 13 * s)
@@ -256,31 +245,29 @@ end
 local function draw_stamp_3d(ox, oy, scale, yaw, pitch, squash_y, alpha)
 	local c = body_corners(ox, oy, scale, yaw, pitch, squash_y)
 
-	-- Painter order: far side, back, rubber, front, top, handle, hand.
-	local side = quad(c.ftr, c.btr, c.bbr, c.fbr)
-	local back = quad(c.btl, c.btr, c.bbr, c.bbl)
-	local front = quad(c.ftl, c.ftr, c.fbr, c.fbl)
-	local top = quad(c.ftl, c.ftr, c.btr, c.btl)
-	local rubber_f = quad(c.fbl, c.fbr, c.rfr, c.rfl)
-	local rubber_s = quad(c.fbr, c.bbr, c.rbr, c.rfr)
-	local handle_f = quad(c.hbl, c.hbr, c.hfr, c.hfl)
-	local handle_s = quad(c.hbr, c.hbf, c.htf, c.hfr)
-	local handle_t = quad(c.hfl, c.hfr, c.htf, c.htb)
+	-- Back-to-front fills.  Front and right side are drawn last so they stay visible.
+	quad_fill(c.btl, c.btr, c.bbr, c.bbl, WOOD_TOP, alpha)
+	quad_fill(c.btl, c.ftl, c.fbl, c.bbl, WOOD_SIDE, alpha)
+	quad_fill(c.fbr, c.bbr, c.rbr, c.rfr, shade(RUBBER, 0.75), alpha)
+	quad_fill(c.fbl, c.fbr, c.rfr, c.rfl, RUBBER, alpha)
+	quad_fill(c.ftl, c.ftr, c.btr, c.btl, WOOD_TOP, alpha)
+	quad_fill(c.ftr, c.btr, c.bbr, c.fbr, shade(WOOD_SIDE, 0.9), alpha)
+	quad_fill(c.ftl, c.ftr, c.fbr, c.fbl, WOOD_FRONT, alpha)
 
-	fill_poly(back, shade(WOOD_FRONT, 0.72), alpha)
-	fill_poly(side, WOOD_SIDE, alpha)
-	fill_poly(rubber_s, shade(RUBBER, 0.75), alpha)
-	fill_poly(rubber_f, RUBBER, alpha)
-	fill_poly(front, WOOD_FRONT, alpha)
-	fill_poly(top, WOOD_TOP, alpha)
-	stroke_poly(front, alpha)
-	stroke_poly(top, alpha)
-	stroke_poly(side, alpha)
+	-- Exterior outlines only — top rim plus the two vertical front edges.
+	edge_line(c.ftl, c.ftr, alpha)
+	edge_line(c.ftl, c.btl, alpha)
+	edge_line(c.ftr, c.btr, alpha)
+	edge_line(c.ftl, c.fbl, alpha)
+	edge_line(c.ftr, c.fbr, alpha)
 
-	fill_poly(handle_s, shade(HANDLE, 0.8), alpha)
-	fill_poly(handle_f, HANDLE, alpha)
-	fill_poly(handle_t, shade(HANDLE, 1.15), alpha)
-	stroke_poly(handle_f, alpha)
+	quad_fill(c.hbl, c.hbr, c.hfr, c.hfl, HANDLE, alpha)
+	quad_fill(c.hbr, c.hbf, c.htf, c.hfr, shade(HANDLE, 0.8), alpha)
+	quad_fill(c.hfl, c.hfr, c.htf, c.htb, shade(HANDLE, 1.15), alpha)
+	edge_line(c.hbl, c.hbr, alpha, 1.2)
+	edge_line(c.hbr, c.hfr, alpha, 1.2)
+	edge_line(c.hfr, c.hfl, alpha, 1.2)
+	edge_line(c.hfl, c.hbl, alpha, 1.2)
 
 	draw_hand(c, scale, alpha)
 end
@@ -451,12 +438,6 @@ function M.draw_pass()
 
 	if stamp_alpha > 0.02 then
 		draw_stamp_3d(x, y, scale, yaw, pitch, squash_y, stamp_alpha)
-	end
-
-	if frame.debug then
-		local label = string.format("stamp frame %d / %d", (frame.frame or 0) + 1, TOTAL_FRAMES + 1)
-		love.graphics.setColor(1, 1, 1, 0.95)
-		love.graphics.print(label, frame.tx - 70, frame.ty - 120, 0, 0.9, 0.9)
 	end
 
 	love.graphics.pop()

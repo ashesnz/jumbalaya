@@ -56,12 +56,6 @@ local function voucher_nodes()
 		sprite.states.click.can = false
 		nodes[#nodes + 1] = { n = G.UI.OBJECT, config = { object = sprite, w = w, h = h } }
 	end
-	nodes[#nodes + 1] = { n = G.UI.TEXT, config = {
-		text = perk.name or "Perk",
-		scale = 0.22,
-		colour = G.C.GOLD,
-		shadow = true,
-	}}
 	return nodes
 end
 
