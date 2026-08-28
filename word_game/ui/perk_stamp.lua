@@ -17,6 +17,8 @@ local HOLD_DUR = 0.16
 local RETRACT_DUR = 0.48
 local IMPRINT_DUR = 0.55
 local TOTAL_DUR = STRIKE_DUR + HOLD_DUR + RETRACT_DUR
+local FRAME_DT = 1 / 24
+local TOTAL_FRAMES = math.ceil(TOTAL_DUR / FRAME_DT)
 
 -- Local-space millimetres of the wooden block (x right, y up, z toward camera).
 local BODY_W = 86
@@ -295,12 +297,42 @@ local function draw_perk_icon(entry, x, y, scale, rot, alpha)
 	love.graphics.draw(img, quad, x, y, rot or 0, sx, sy, pw * 0.5, ph * 0.5)
 end
 
-local function on_finished(entry, callback)
-	perk_model.apply_choice(entry)
-	if WORD_GAME and WORD_GAME.Sidebar then
-		WORD_GAME.Sidebar:refresh()
+local function copy_perk(entry)
+	return {
+		id = entry.id,
+		name = entry.name,
+		desc = entry.desc,
+		pos = { x = entry.pos.x, y = entry.pos.y },
+		token_cost = entry.token_cost,
+	}
+end
+
+local function trigger_impact(frame)
+	if frame.impacted then return end
+	frame.impacted = true
+	if G.VIBRATION then
+		G.VIBRATION = G.VIBRATION + 0.55
 	end
-	if callback then callback() end
+	if play_sfx then
+		play_sfx("multhit2", 1.0, 0.8)
+	end
+end
+
+local function begin_debug_anim(entry)
+	local tx, ty = voucher_target_px()
+	local sx, sy = start_above_px(tx, ty)
+	anim = {
+		entry = entry,
+		t = 0,
+		frame = 0,
+		tx = tx,
+		ty = ty,
+		sx = sx,
+		sy = sy,
+		impacted = false,
+		finished = false,
+		debug = true,
+	}
 end
 
 function M.is_active()
@@ -316,11 +348,14 @@ function M.play(entry, callback)
 	anim = {
 		entry = entry,
 		t = 0,
+		frame = 0,
 		tx = tx,
 		ty = ty,
 		sx = sx,
 		sy = sy,
 		impacted = false,
+		finished = false,
+		debug = false,
 		callback = callback,
 	}
 	if play_sfx then
@@ -329,52 +364,59 @@ function M.play(entry, callback)
 	return true
 end
 
+function M.debug_step()
+	if G.STATE ~= G.STATES.TABLE_BOARD then return end
+
+	if anim and anim.finished then
+		anim = nil
+	end
+
+	if not anim then
+		local pool = perk_cfg.POOL
+		if #pool == 0 then return end
+		demo_index = (demo_index - 1) % #pool + 1
+		begin_debug_anim(copy_perk(pool[demo_index]))
+		if play_sfx then
+			play_sfx("whoosh2", 0.85, 0.5)
+		end
+		return
+	end
+
+	anim.frame = anim.frame + 1
+	anim.t = math.min(TOTAL_DUR, anim.frame * FRAME_DT)
+
+	if not anim.impacted and anim.t >= STRIKE_DUR then
+		trigger_impact(anim)
+	end
+
+	if anim.frame >= TOTAL_FRAMES then
+		anim.t = TOTAL_DUR
+		anim.finished = true
+	end
+end
+
 function M.demo()
-	if M.is_active() then return end
-	local pool = perk_cfg.POOL
-	if #pool == 0 then return end
-	demo_index = (demo_index - 1) % #pool + 1
-	local entry = pool[demo_index]
-	M.play({
-		id = entry.id,
-		name = entry.name,
-		desc = entry.desc,
-		pos = { x = entry.pos.x, y = entry.pos.y },
-		token_cost = entry.token_cost,
-	})
+	M.debug_step()
 end
 
 function M.update(dt)
-	if not anim then return end
+	if not anim or anim.debug then return end
 	dt = dt or (G and G.real_dt) or 0.016
 	dt = math.min(0.05, dt)
 	anim.t = anim.t + dt
 
 	if not anim.impacted and anim.t >= STRIKE_DUR then
-		anim.impacted = true
-		if G.VIBRATION then
-			G.VIBRATION = G.VIBRATION + 0.55
-		end
-		if play_sfx then
-			play_sfx("multhit2", 1.0, 0.8)
-		end
-		if spawn_attention and anim.entry and anim.entry.name then
-			spawn_attention({
-				scale = 0.55,
-				text = anim.entry.name,
-				hold = 1.0,
-				align = "cm",
-				major = G.VAULT_ATTACH or G.ROOM_ATTACH,
-				colour = G.C.GOLD,
-				comic_burst = true,
-			})
-		end
+		trigger_impact(anim)
 	end
 
 	if anim.t >= TOTAL_DUR then
 		local done = anim
 		anim = nil
-		on_finished(done.entry, done.callback)
+		if done.callback then done.callback() end
+		perk_model.apply_choice(done.entry)
+		if WORD_GAME and WORD_GAME.Sidebar then
+			WORD_GAME.Sidebar:refresh()
+		end
 	end
 end
 
@@ -409,6 +451,12 @@ function M.draw_pass()
 
 	if stamp_alpha > 0.02 then
 		draw_stamp_3d(x, y, scale, yaw, pitch, squash_y, stamp_alpha)
+	end
+
+	if frame.debug then
+		local label = string.format("stamp frame %d / %d", (frame.frame or 0) + 1, TOTAL_FRAMES + 1)
+		love.graphics.setColor(1, 1, 1, 0.95)
+		love.graphics.print(label, frame.tx - 70, frame.ty - 120, 0, 0.9, 0.9)
 	end
 
 	love.graphics.pop()

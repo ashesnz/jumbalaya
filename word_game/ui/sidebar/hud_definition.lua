@@ -210,7 +210,7 @@ function M.hud_definition()
 					shadow = true,
 				}, nodes = {
 					{ n = G.UI.TEXT, config = {
-						text = "Stamp Perk",
+						text = "Stamp Frame",
 						scale = 0.24,
 						colour = G.C.UI.TEXT_LIGHT,
 						shadow = true,

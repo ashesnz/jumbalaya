@@ -23,7 +23,7 @@ return function(sidebar, hud_definition)
 	end
 	G.FUNCS.perk_stamp_demo = function()
 		if WORD_GAME and WORD_GAME.PerkStamp then
-			WORD_GAME.PerkStamp.demo()
+			WORD_GAME.PerkStamp.debug_step()
 		end
 	end
 end
