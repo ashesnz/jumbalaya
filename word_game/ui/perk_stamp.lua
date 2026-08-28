@@ -19,20 +19,23 @@ local TOTAL_DUR = STRIKE_DUR + HOLD_DUR + RETRACT_DUR
 local FRAME_DT = 1 / 24
 local TOTAL_FRAMES = math.ceil(TOTAL_DUR / FRAME_DT)
 local IMPRINT_H_PX = 50
-local SLOT_WIDTH_FILL = 0.88
-local MAX_STAMP_HEIGHT_PX = 118
-local LANDING_YAW = 1.28
-local LANDING_PITCH = 0.12
-local START_YAW = 1.28
-local START_PITCH = 0.36
+local SLOT_WIDTH_FILL = 0.78
+-- 3/4 view: long axis stays horizontal so the block matches the vault row.
+-- Roll is the slight diagonal tilt of a hand coming down from above-right.
+local LANDING_YAW = 0.38
+local LANDING_PITCH = 0.30
+local LANDING_ROLL = -0.16
+local START_YAW = 0.46
+local START_PITCH = 0.40
+local START_ROLL = -0.26
 
 -- Local-space millimetres of the wooden block (x right, y up, z toward camera).
-local BODY_W = 86
-local BODY_H = 38
-local BODY_D = 58
-local RUBBER_H = 8
-local HANDLE_R = 8
-local HANDLE_H = 28
+local BODY_W = 96
+local BODY_H = 22
+local BODY_D = 42
+local RUBBER_H = 7
+local HANDLE_R = 7
+local HANDLE_H = 22
 
 local anim
 local imprint
@@ -131,7 +134,8 @@ local function stamp_target_px()
 end
 
 -- Project a local 3D point.  y is up; screen y grows downward.
-local function project(lx, ly, lz, ox, oy, scale, yaw, pitch)
+-- roll is a screen-space tilt around the stamp origin (the rubber pad).
+local function project(lx, ly, lz, ox, oy, scale, yaw, pitch, roll)
 	local cy, sy = math.cos(yaw), math.sin(yaw)
 	local cp, sp = math.cos(pitch), math.sin(pitch)
 	local x1 = lx * cy + lz * sy
@@ -139,14 +143,21 @@ local function project(lx, ly, lz, ox, oy, scale, yaw, pitch)
 	local y1 = ly * cp - z1 * sp
 	local z2 = ly * sp + z1 * cp
 	local persp = 1 / math.max(0.35, 1 + z2 * 0.0045)
-	return ox + x1 * scale * persp, oy - y1 * scale * persp
+	local sx = x1 * scale * persp
+	local sy = -y1 * scale * persp
+	roll = roll or 0
+	if roll ~= 0 then
+		local cr, sr = math.cos(roll), math.sin(roll)
+		sx, sy = sx * cr - sy * sr, sx * sr + sy * cr
+	end
+	return ox + sx, oy + sy
 end
 
-local function body_corners(ox, oy, scale, yaw, pitch, squash_y)
+local function body_corners(ox, oy, scale, yaw, pitch, squash_y, roll)
 	local hw, hh, hd = BODY_W * 0.5, BODY_H * squash_y, BODY_D * 0.5
 	local rubber = RUBBER_H * squash_y
 	local function P(lx, ly, lz)
-		return { project(lx, ly, lz, ox, oy, scale, yaw, pitch) }
+		return { project(lx, ly, lz, ox, oy, scale, yaw, pitch, roll) }
 	end
 	return {
 		ftl = P(-hw, rubber + hh, hd),
@@ -172,8 +183,8 @@ local function body_corners(ox, oy, scale, yaw, pitch, squash_y)
 	}
 end
 
-local function stamp_height_at_scale(scale, yaw, pitch, squash_y)
-	local c = body_corners(0, 0, scale, yaw, pitch, squash_y or 1)
+local function stamp_height_at_scale(scale, yaw, pitch, squash_y, roll)
+	local c = body_corners(0, 0, scale, yaw, pitch, squash_y or 1, roll)
 	local min_y, max_y = math.huge, -math.huge
 	for _, pt in pairs(c) do
 		min_y = math.min(min_y, pt[2])
@@ -182,16 +193,13 @@ local function stamp_height_at_scale(scale, yaw, pitch, squash_y)
 	return max_y - min_y
 end
 
-local function rubber_width_at_scale(scale, yaw, pitch, squash_y)
-	local hw = BODY_W * 0.5
-	local z = BODY_D * 0.5
-	local x1 = project(-hw, 0, z, 0, 0, scale, yaw, pitch)
-	local x2 = project(hw, 0, z, 0, 0, scale, yaw, pitch)
-	return math.abs(x2 - x1)
+local function rubber_width_at_scale(scale, yaw, pitch, squash_y, roll)
+	local c = body_corners(0, 0, scale, yaw, pitch, squash_y or 1, roll)
+	return math.abs(c.rfr[1] - c.rfl[1])
 end
 
-local function stamp_bounds_px(ox, oy, scale, yaw, pitch, squash_y)
-	local c = body_corners(ox, oy, scale, yaw, pitch, squash_y or 1)
+local function stamp_bounds_px(ox, oy, scale, yaw, pitch, squash_y, roll)
+	local c = body_corners(ox, oy, scale, yaw, pitch, squash_y or 1, roll)
 	local min_x, min_y, max_x, max_y = math.huge, math.huge, -math.huge, -math.huge
 	for _, pt in pairs(c) do
 		min_x = math.min(min_x, pt[1])
@@ -202,51 +210,43 @@ local function stamp_bounds_px(ox, oy, scale, yaw, pitch, squash_y)
 	return min_x, min_y, max_x, max_y
 end
 
-local function anchor_for_slot(slot_x, slot_y, slot_w, slot_h, scale, yaw, pitch)
-	local tcx = slot_x + slot_w * 0.5
-	local tcy = slot_y + slot_h * 0.5
-	local ox, oy = tcx, tcy
-	for _ = 1, 10 do
-		local c = body_corners(ox, oy, scale, yaw, pitch, 1)
-		local rbx = (c.rfl[1] + c.rfr[1]) * 0.5
-		local rby = (c.rfl[2] + c.rfr[2]) * 0.5
-		ox = ox + (tcx - rbx)
-		oy = oy + (tcy - rby)
+-- Place the stamp origin so the rubber pad centre sits on (cx, cy).
+local function anchor_to_contact(cx, cy, scale, yaw, pitch, squash_y, roll)
+	local ox, oy = cx, cy
+	squash_y = squash_y or 1
+	for _ = 1, 8 do
+		local c = body_corners(ox, oy, scale, yaw, pitch, squash_y, roll)
+		local rbx = (c.rfl[1] + c.rfr[1] + c.rbl[1] + c.rbr[1]) * 0.25
+		local rby = (c.rfl[2] + c.rfr[2] + c.rbl[2] + c.rbr[2]) * 0.25
+		ox = ox + (cx - rbx)
+		oy = oy + (cy - rby)
 	end
 	return ox, oy
 end
 
-local function scale_for_slot(slot_w, slot_h, yaw, pitch)
+local function screen_top_px()
+	local room = G.ROOM and G.ROOM.T
+	return ((room and room.y) or 0) * tile_scale() + 10
+end
+
+local function scale_for_slot(slot_w, slot_h, slot_y, yaw, pitch, roll)
 	local target_rubber_w = slot_w * SLOT_WIDTH_FILL
-	local lo, hi = 0.05, 2.5
+	local lo, hi = 0.05, 2.2
 	for _ = 1, 14 do
 		local mid = (lo + hi) * 0.5
-		if rubber_width_at_scale(mid, yaw, pitch, 1) < target_rubber_w then
+		if rubber_width_at_scale(mid, yaw, pitch, 1, roll) < target_rubber_w then
 			lo = mid
 		else
 			hi = mid
 		end
 	end
-	local scale = lo * 0.96
-	local max_h = math.min(MAX_STAMP_HEIGHT_PX, math.max(slot_h * 2.8, 90))
-	local height = stamp_height_at_scale(scale, yaw, pitch, 1)
-	if height > max_h then
-		scale = scale * (max_h / height)
+	local scale = lo * 0.94
+	local height = stamp_height_at_scale(scale, yaw, pitch, 1, roll)
+	local budget = math.max(64, slot_y + slot_h - screen_top_px())
+	if height > budget * 0.88 then
+		scale = scale * ((budget * 0.88) / height)
 	end
 	return scale
-end
-
-local function fit_start_anchor(landing_ox, landing_oy, start_scale, slot_y)
-	local lift = math.max(88, stamp_height_at_scale(start_scale, START_YAW, START_PITCH, 1) * 1.08)
-	local start_ox, start_oy = landing_ox, landing_oy - lift
-	local _, min_y = stamp_bounds_px(start_ox, start_oy, start_scale, START_YAW, START_PITCH, 1)
-	local room = G.ROOM and G.ROOM.T
-	local ts = tile_scale()
-	local top_margin = ((room and room.y) or 0) * ts + 12
-	if min_y < top_margin then
-		start_oy = start_oy + (top_margin - min_y)
-	end
-	return start_ox, start_oy
 end
 
 local function perk_quad(entry)
@@ -276,44 +276,42 @@ local function shade(rgb, mul)
 	return { rgb[1] * mul, rgb[2] * mul, rgb[3] * mul }
 end
 
-local function stamp_pose(t, landing_ox, landing_oy, start_ox, start_oy, target_scale)
-	local squash_y, squash_x = 1, 1
+local function stamp_pose(t, anim_state)
+	local squash_y = 1
 	local phase = "strike"
-	local u, x, y
-	target_scale = target_scale or 0.5
+	local approach
 
 	if t < STRIKE_DUR then
 		phase = "strike"
-		u = ease_in_quad(t / STRIKE_DUR)
-		x = lerp(start_ox, landing_ox, u)
-		y = lerp(start_oy, landing_oy, u)
+		approach = ease_in_quad(t / STRIKE_DUR)
 	elseif t < STRIKE_DUR + HOLD_DUR then
 		phase = "hold"
-		x, y = landing_ox, landing_oy
-		u = 1
+		approach = 1
 		local hold = 1 - (t - STRIKE_DUR) / HOLD_DUR
-		squash_y = 1 - 0.18 * hold
-		squash_x = 1 + 0.10 * hold
+		squash_y = 1 - 0.12 * hold
 	else
 		phase = "retract"
-		u = ease_out_quad((t - STRIKE_DUR - HOLD_DUR) / RETRACT_DUR)
-		x = lerp(landing_ox, start_ox, u)
-		y = lerp(landing_oy, start_oy, u)
-		u = 1 - u
+		local u = ease_out_quad((t - STRIKE_DUR - HOLD_DUR) / RETRACT_DUR)
+		approach = 1 - u
 	end
 
-	local approach = (phase == "retract") and u or (phase == "hold" and 1 or u)
-	local scale = lerp(target_scale * 0.72, target_scale, approach) * squash_x
+	-- Contact point travels diagonally onto the row; origin is solved so the
+	-- rubber pad stays glued to that point at every frame.
+	local cx = lerp(anim_state.start_cx, anim_state.land_cx, approach)
+	local cy = lerp(anim_state.start_cy, anim_state.land_cy, approach)
 	local yaw = lerp(START_YAW, LANDING_YAW, approach)
 	local pitch = lerp(START_PITCH, LANDING_PITCH, approach)
-	return x, y, scale, yaw, pitch, squash_y, phase, approach
+	local roll = lerp(START_ROLL, LANDING_ROLL, approach)
+	local scale = anim_state.target_scale
+	local ox, oy = anchor_to_contact(cx, cy, scale, yaw, pitch, squash_y, roll)
+	return ox, oy, scale, yaw, pitch, roll, squash_y, phase, approach
 end
 
-local function draw_shadow(ox, oy, scale, approach, alpha)
-	local w = BODY_W * scale * lerp(1.6, 0.95, approach)
-	local h = BODY_D * scale * 0.38 * lerp(1.8, 0.85, approach)
-	love.graphics.setColor(0, 0, 0, alpha * lerp(0.08, 0.28, approach))
-	love.graphics.ellipse("fill", ox + 6, oy + 10, w * 0.55, h)
+local function draw_shadow(cx, cy, slot_w, slot_h, approach, alpha)
+	local w = slot_w * lerp(0.55, 0.92, approach)
+	local h = slot_h * lerp(0.35, 0.72, approach)
+	love.graphics.setColor(0, 0, 0, alpha * lerp(0.06, 0.28, approach))
+	love.graphics.ellipse("fill", cx, cy + 2, w * 0.5, h * 0.5)
 end
 
 local function draw_hand(c, scale, alpha)
@@ -334,8 +332,8 @@ local function draw_hand(c, scale, alpha)
 	love.graphics.ellipse("line", grip_x + 2 * s, grip_y - 2 * s, 16 * s, 13 * s)
 end
 
-local function draw_stamp_3d(ox, oy, scale, yaw, pitch, squash_y, alpha)
-	local c = body_corners(ox, oy, scale, yaw, pitch, squash_y)
+local function draw_stamp_3d(ox, oy, scale, yaw, pitch, squash_y, alpha, roll)
+	local c = body_corners(ox, oy, scale, yaw, pitch, squash_y, roll)
 
 	-- Back-to-front fills.  Front and right side are drawn last so they stay visible.
 	quad_fill(c.btl, c.btr, c.bbr, c.bbl, WOOD_TOP, alpha)
@@ -413,11 +411,29 @@ end
 
 local function make_anim_state(entry, debug)
 	local _, _, slot_x, slot_y, slot_w, slot_h = stamp_target_px()
-	local target_scale = scale_for_slot(slot_w, slot_h, LANDING_YAW, LANDING_PITCH)
-	local landing_ox, landing_oy = anchor_for_slot(
-		slot_x, slot_y, slot_w, slot_h, target_scale, LANDING_YAW, LANDING_PITCH)
-	local start_scale = target_scale * 0.72
-	local start_ox, start_oy = fit_start_anchor(landing_ox, landing_oy, start_scale, slot_y)
+	local land_cx = slot_x + slot_w * 0.5
+	local land_cy = slot_y + slot_h * 0.5
+	local target_scale = scale_for_slot(
+		slot_w, slot_h, slot_y, LANDING_YAW, LANDING_PITCH, LANDING_ROLL)
+
+	local lift = math.min(
+		stamp_height_at_scale(target_scale, START_YAW, START_PITCH, 1, START_ROLL) * 0.95,
+		math.max(56, land_cy - screen_top_px() - 16))
+	local start_cx = land_cx + slot_w * 0.10
+	local start_cy = land_cy - lift
+
+	local start_ox, start_oy = anchor_to_contact(
+		start_cx, start_cy, target_scale, START_YAW, START_PITCH, 1, START_ROLL)
+	local min_x, min_y = stamp_bounds_px(
+		start_ox, start_oy, target_scale, START_YAW, START_PITCH, 1, START_ROLL)
+	local top = screen_top_px()
+	if min_y < top then
+		start_cy = start_cy + (top - min_y)
+	end
+	if min_x < slot_x - 8 then
+		start_cx = start_cx + (slot_x - 8 - min_x)
+	end
+
 	return {
 		entry = entry,
 		t = 0,
@@ -426,10 +442,10 @@ local function make_anim_state(entry, debug)
 		slot_y = slot_y,
 		slot_w = slot_w,
 		slot_h = slot_h,
-		landing_ox = landing_ox,
-		landing_oy = landing_oy,
-		start_ox = start_ox,
-		start_oy = start_oy,
+		land_cx = land_cx,
+		land_cy = land_cy,
+		start_cx = start_cx,
+		start_cy = start_cy,
 		target_scale = target_scale,
 		impacted = false,
 		finished = false,
@@ -536,21 +552,15 @@ function M.draw_pass()
 
 	if anim then
 		local frame = anim
-		local x, y, scale, yaw, pitch, squash_y, phase, approach = stamp_pose(
-			frame.t,
-			frame.landing_ox,
-			frame.landing_oy,
-			frame.start_ox,
-			frame.start_oy,
-			frame.target_scale)
+		local x, y, scale, yaw, pitch, roll, squash_y, phase, approach = stamp_pose(frame.t, frame)
 		local stamp_alpha = 1
 		if phase == "retract" then
 			stamp_alpha = clamp01(1 - (frame.t - STRIKE_DUR - HOLD_DUR) / RETRACT_DUR)
 		end
 
 		if stamp_alpha > 0.02 then
-			draw_shadow(frame.landing_ox, frame.landing_oy, scale, approach, stamp_alpha)
-			draw_stamp_3d(x, y, scale, yaw, pitch, squash_y, stamp_alpha)
+			draw_shadow(frame.land_cx, frame.land_cy, frame.slot_w, frame.slot_h, approach, stamp_alpha)
+			draw_stamp_3d(x, y, scale, yaw, pitch, squash_y, stamp_alpha, roll)
 		end
 	end
 
