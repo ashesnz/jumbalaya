@@ -514,9 +514,16 @@ function Card:draw_front()
 		or self.debuff or self.greyed
 		or self.ability.set == 'Perk'
 		or self.config.center.demo
+		or self.bonus_card
 	if has_overlays then
 		if self.ability.set == 'Perk' or self.config.center.demo then
 			self.children.center:apply_shader_effect('perk', nil, self.ARGS.send_to_shader)
+		end
+		if self.bonus_card then
+			self.children.center:apply_shader_effect('gold_seal', nil, self.ARGS.send_to_shader)
+			if self.children.front then
+				self.children.front:apply_shader_effect('gold_seal', nil, self.ARGS.send_to_shader)
+			end
 		end
 
 		-- Each finished edition layers its signature shine on centre and front.
