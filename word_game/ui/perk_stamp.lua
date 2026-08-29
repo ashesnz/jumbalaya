@@ -8,6 +8,7 @@
 local Layout = require("word_game.ui.layout")
 local perk_cfg = require("word_game.config.perks")
 local perk_model = require("word_game.model.perk")
+local perk_voucher = require("word_game.ui.perk_voucher")
 local stamp_grid = require("word_game.ui.stamp_grid")
 
 local M = {}
@@ -165,8 +166,26 @@ local function copy_perk(entry)
 	}
 end
 
-local function resolve_stamp_perk(entry)
-	if entry then return copy_perk(entry) end
+local function copy_stamp(entry)
+	return {
+		id = entry.id,
+		pos = { x = entry.pos.x, y = entry.pos.y },
+	}
+end
+
+local function roll_stamp_sprite()
+	local sprites = perk_cfg.STAMP_SPRITES
+	if not sprites or #sprites == 0 then return nil end
+	return copy_stamp(sprites[math.random(1, #sprites)])
+end
+
+local function resolve_stamp_sprite(sprite_entry)
+	if sprite_entry then return copy_stamp(sprite_entry) end
+	return roll_stamp_sprite()
+end
+
+local function resolve_stamp_perk(perk_entry)
+	if perk_entry then return copy_perk(perk_entry) end
 	if G.GAME and G.GAME.pending_stamp_perk then
 		local pending = copy_perk(G.GAME.pending_stamp_perk)
 		G.GAME.pending_stamp_perk = nil
@@ -283,16 +302,6 @@ local function scale_for_slot(slot_w, yaw, pitch, roll)
 		end
 	end
 	return (lo + hi) * 0.5
-end
-
-local function perk_quad(entry)
-	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.Perk
-	if not atlas or not atlas.image or not entry or not entry.pos then return end
-	local pw = perk_cfg.ATLAS_CELL_W_PX or atlas.px or 71
-	local ph = perk_cfg.ATLAS_CELL_H_PX or atlas.py or 95
-	local iw, ih = atlas.image:getDimensions()
-	return atlas.image, love.graphics.newQuad(
-		entry.pos.x * pw, entry.pos.y * ph, pw, ph, iw, ih), pw, ph
 end
 
 local function quad_fill(a, b, c, d, rgb, alpha)
@@ -434,34 +443,17 @@ local function draw_stamp_3d(ox, oy, scale, yaw, pitch, squash_y, alpha, roll)
 	draw_hand(c, scale, alpha)
 end
 
-local function draw_type_imprint(entry, x, y, w, h, alpha)
+local function draw_type_imprint(sprite_entry, x, y, w, h, alpha)
 	alpha = alpha or 1
-	love.graphics.setColor(0.14, 0.08, 0.05, alpha * 0.42)
-	love.graphics.rectangle("fill", x, y, w, h, 2, 2)
-
-	local img, quad, pw, ph = perk_quad(entry)
-	if img and quad then
-		local pad = math.max(2, math.min(5, math.floor(math.min(w, h) * 0.08)))
-		local draw_w = math.max(1, w - pad * 2)
-		local draw_h = math.max(1, h - pad * 2)
-		-- Keep perk art at atlas aspect inside the cell.
-		local scale = math.min(draw_w / pw, draw_h / ph)
-		draw_w = pw * scale
-		draw_h = ph * scale
-		local draw_x = x + (w - draw_w) * 0.5
-		local draw_y = y + (h - draw_h) * 0.5
-		love.graphics.setColor(1, 1, 1, alpha * 0.92)
-		love.graphics.draw(img, quad, draw_x, draw_y, 0, draw_w / pw, draw_h / ph)
-	end
-
-	love.graphics.setColor(WOOD_EDGE[1], WOOD_EDGE[2], WOOD_EDGE[3], alpha * 0.75)
-	love.graphics.setLineWidth(1.5)
-	love.graphics.rectangle("line", x, y, w, h, 2, 2)
+	perk_voucher.draw_stamp(sprite_entry, x, y, w, h, alpha * 0.96)
 end
 
-local function apply_imprint(entry)
-	imprint = { entry = copy_perk(entry) }
-	local perk = perk_cfg.by_id(entry.id)
+local function apply_imprint(sprite_entry, perk_entry)
+	imprint = {
+		sprite = copy_stamp(sprite_entry),
+		perk = copy_perk(perk_entry),
+	}
+	local perk = perk_cfg.by_id(perk_entry.id)
 	if perk then
 		perk_model.apply_choice(perk)
 	end
@@ -471,7 +463,7 @@ end
 local function trigger_impact(frame)
 	if frame.impacted then return end
 	frame.impacted = true
-	apply_imprint(frame.entry)
+	apply_imprint(frame.sprite_entry, frame.perk_entry)
 	if G.VIBRATION then
 		G.VIBRATION = G.VIBRATION + 0.55
 	end
@@ -480,7 +472,7 @@ local function trigger_impact(frame)
 	end
 end
 
-local function make_anim_state(entry, debug)
+local function make_anim_state(sprite_entry, perk_entry, debug)
 	local _, _, slot_x, slot_y, slot_w, slot_h = stamp_target_px()
 	local land_cx = slot_x + slot_w * 0.5
 	local land_cy = slot_y + slot_h * 0.5
@@ -499,7 +491,8 @@ local function make_anim_state(entry, debug)
 	end
 
 	return {
-		entry = entry,
+		sprite_entry = sprite_entry,
+		perk_entry = perk_entry,
 		t = 0,
 		frame = 0,
 		slot_x = slot_x,
@@ -519,16 +512,24 @@ local function make_anim_state(entry, debug)
 	}
 end
 
-local function begin_debug_anim(entry)
-	anim = make_anim_state(entry, true)
+local function begin_debug_anim(sprite_entry, perk_entry)
+	anim = make_anim_state(sprite_entry, perk_entry, true)
 end
 
 function M.is_active()
 	return anim ~= nil
 end
 
+function M.roll_stamp_sprite()
+	return roll_stamp_sprite()
+end
+
 function M.roll_random_stamp()
-	return resolve_stamp_perk()
+	return roll_stamp_sprite()
+end
+
+function M.resolve_perk(perk_entry)
+	return resolve_stamp_perk(perk_entry)
 end
 
 function M.queue(entry)
@@ -539,13 +540,15 @@ function M.queue(entry)
 	return true
 end
 
-function M.play(entry, callback)
+function M.play(perk_entry, callback)
 	if anim then return false end
 	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
-	entry = resolve_stamp_perk(entry)
-	if not entry then return false end
+	perk_entry = resolve_stamp_perk(perk_entry)
+	if not perk_entry then return false end
+	local sprite_entry = resolve_stamp_sprite()
+	if not sprite_entry then return false end
 
-	anim = make_anim_state(entry, false)
+	anim = make_anim_state(sprite_entry, perk_entry, false)
 	if not anim then return false end
 	anim.callback = callback
 	if play_sfx then
@@ -559,7 +562,7 @@ function M.demo_play()
 	if anim and not anim.debug and anim.t < TOTAL_DUR then return end
 
 	anim = nil
-	M.play(resolve_stamp_perk())
+	M.play()
 end
 
 function M.debug_step()
@@ -570,9 +573,10 @@ function M.debug_step()
 	end
 
 	if not anim then
-		local stamp = resolve_stamp_perk()
-		if not stamp then return end
-		begin_debug_anim(stamp)
+		local perk_entry = resolve_stamp_perk()
+		local sprite_entry = resolve_stamp_sprite()
+		if not perk_entry or not sprite_entry then return end
+		begin_debug_anim(sprite_entry, perk_entry)
 		if play_sfx then
 			play_sfx("whoosh2", 0.85, 0.5)
 		end
@@ -626,14 +630,14 @@ function M.draw_pass()
 	love.graphics.setShader()
 	room_translate()
 
-	if imprint and imprint.entry then
+	if imprint and imprint.sprite then
 		local x, y, w, h = stamp_cell_rect_px()
 		local alpha = 1
 		if anim and anim.impacted then
 			local imprint_t = math.min(1, (anim.t - STRIKE_DUR) / IMPRINT_DUR)
 			alpha = math.min(1, imprint_t * 2.2)
 		end
-		draw_type_imprint(imprint.entry, x, y, w, h, alpha)
+		draw_type_imprint(imprint.sprite, x, y, w, h, alpha)
 	end
 
 	if anim then
@@ -723,8 +727,8 @@ end
 
 -- Runs the real imprint draw path for tests/tools, without needing an
 -- active strike animation.
-function M.debug_draw_imprint(entry, x, y, w, h, alpha)
-	draw_type_imprint(entry, x, y, w, h, alpha)
+function M.debug_draw_imprint(sprite_entry, x, y, w, h, alpha)
+	draw_type_imprint(sprite_entry, x, y, w, h, alpha)
 end
 
 function M.reset()
@@ -737,7 +741,11 @@ function M.has_imprint()
 end
 
 function M.current_imprint()
-	return imprint and imprint.entry
+	return imprint and imprint.sprite
+end
+
+function M.current_imprint_perk()
+	return imprint and imprint.perk
 end
 
 -- Panel + per-slot cell rects for layout tests and tooling.

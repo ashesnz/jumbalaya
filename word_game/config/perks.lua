@@ -8,14 +8,67 @@ M.DEFAULT_OFFER_COUNT = 3
 M.DEFAULT_TOKEN_COST = 10
 M.RANDOM_SEED_PREFIX = "perk_pick_"
 
--- Vault stamp imprint window: proportions of the sidebar panel width.
--- Design reference is 190×90 px at the canonical 3.0-tile vault (73 px/tile).
+-- Vault stamp imprint window: width as a fraction of the sidebar panel.
+-- Design reference width is 190 px at the canonical 3.0-tile vault (73 px/tile).
 local ref_vault_w_px = dimensions.layout.TABLE_BOARD_SIDEBAR_WIDTH * dimensions.CANVAS_TILE_PX
 M.STAMP_SLOT_WIDTH_FRAC = 190 / ref_vault_w_px
 M.STAMP_SLOT_ASPECT = 90 / 190
--- Perk atlas cell size on Perks.png.
-M.ATLAS_CELL_W_PX = 71
-M.ATLAS_CELL_H_PX = 95
+
+-- Perks.png: 3×2 grid of horizontal voucher tickets (measured pixel bounds).
+M.STAMP_COLS = 3
+M.STAMP_ROWS = 2
+M.STAMP_REGIONS = {
+	{
+		{ x = 8, y = 12, w = 287, h = 125 },
+		{ x = 308, y = 12, w = 295, h = 124 },
+		{ x = 617, y = 12, w = 286, h = 125 },
+	},
+	{
+		{ x = 8, y = 147, w = 287, h = 125 },
+		{ x = 308, y = 147, w = 294, h = 125 },
+		{ x = 616, y = 147, w = 287, h = 125 },
+	},
+}
+
+M.STAMP_SPRITES = {
+	{ id = "stamp_1", pos = { x = 0, y = 0 } },
+	{ id = "stamp_2", pos = { x = 1, y = 0 } },
+	{ id = "stamp_3", pos = { x = 2, y = 0 } },
+	{ id = "stamp_4", pos = { x = 0, y = 1 } },
+	{ id = "stamp_5", pos = { x = 1, y = 1 } },
+	{ id = "stamp_6", pos = { x = 2, y = 1 } },
+}
+
+local stamp_aspect = 0
+for row = 1, M.STAMP_ROWS do
+	for col = 1, M.STAMP_COLS do
+		local region = M.STAMP_REGIONS[row][col]
+		stamp_aspect = stamp_aspect + region.w / region.h
+	end
+end
+M.STAMP_ASPECT = stamp_aspect / (M.STAMP_COLS * M.STAMP_ROWS)
+
+-- Marketplace vouchers use the same sheet regions.
+M.VOUCHER_COLS = M.STAMP_COLS
+M.VOUCHER_ROWS = M.STAMP_ROWS
+M.VOUCHER_REGIONS = M.STAMP_REGIONS
+
+local voucher_aspect = 0
+local voucher_count = 0
+for row = 1, M.VOUCHER_ROWS do
+	for col = 1, M.VOUCHER_COLS do
+		local region = M.VOUCHER_REGIONS[row][col]
+		voucher_aspect = voucher_aspect + region.w / region.h
+		voucher_count = voucher_count + 1
+	end
+end
+M.VOUCHER_ASPECT = voucher_aspect / voucher_count
+
+function M.stamp_sprite_at(col, row)
+	col = col + 1
+	row = row + 1
+	return M.STAMP_SPRITES[(row - 1) * M.STAMP_COLS + col]
+end
 
 M.SHOWDOWN_BONUSES = {
 	extra_play = "plays",
@@ -39,7 +92,7 @@ M.DESCRIPTION_VARIABLES = {
 	["Illusion"] = { "c_playing_cards_bought" },
 }
 
--- Sprites from resources/assets/Perks.png (71×95 cells, 9×4 grid).
+-- Sprites from resources/assets/Perks.png (3×2 horizontal voucher grid).
 M.POOL = {
     {
         id = "wide_hand",

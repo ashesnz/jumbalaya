@@ -320,12 +320,46 @@ T.describe("perk stamp panel layout", function()
 		local expected_h = expected_w * perk_cfg.STAMP_SLOT_ASPECT
 		T.assert_almost_equal(layout.cell.w, expected_w, 0.5, "stamp slot width")
 		T.assert_almost_equal(layout.cell.h, expected_h, 0.5, "stamp slot height")
+		T.assert_almost_equal(layout.cell.h / layout.cell.w, perk_cfg.STAMP_SLOT_ASPECT, 0.01,
+			"stamp slot should match stamp aspect")
 		T.assert_almost_equal(
 			layout.cell.x - layout.panel.x,
 			(panel_w - layout.cell.w) * 0.5,
 			0.5,
 			"stamp slot should be centered horizontally"
 		)
+	end)
+
+	T.it("uses tight atlas bounds for each of the six stamps", function()
+		local perk_voucher = require("word_game.ui.perk_voucher")
+		T.assert_equal(#perk_cfg.STAMP_SPRITES, 6)
+		local expected = {
+			{ x = 8, y = 12, w = 287, h = 125 },
+			{ x = 308, y = 12, w = 295, h = 124 },
+			{ x = 617, y = 12, w = 286, h = 125 },
+			{ x = 8, y = 147, w = 287, h = 125 },
+			{ x = 308, y = 147, w = 294, h = 125 },
+			{ x = 616, y = 147, w = 287, h = 125 },
+		}
+		for i, stamp in ipairs(perk_cfg.STAMP_SPRITES) do
+			local region = perk_voucher.stamp_region(stamp.pos)
+			T.assert_equal(region.x, expected[i].x, "stamp " .. i .. " x")
+			T.assert_equal(region.y, expected[i].y, "stamp " .. i .. " y")
+			T.assert_equal(region.w, expected[i].w, "stamp " .. i .. " w")
+			T.assert_equal(region.h, expected[i].h, "stamp " .. i .. " h")
+			T.assert_equal(perk_cfg.stamp_sprite_at(stamp.pos.x, stamp.pos.y).id, stamp.id)
+		end
+	end)
+
+	T.it("fits a stamp inside the slot without changing aspect", function()
+		local perk_voucher = require("word_game.ui.perk_voucher")
+		local entry = perk_cfg.STAMP_SPRITES[1]
+		local slot_w, slot_h = layout.cell.w, layout.cell.h
+		local region = perk_voucher.stamp_region(entry.pos)
+		local _, _, draw_w, draw_h = perk_voucher.fit_rect(region.w, region.h, slot_w, slot_h)
+		T.assert_true(draw_w <= slot_w + 0.01)
+		T.assert_true(draw_h <= slot_h + 0.01)
+		T.assert_almost_equal(draw_w / draw_h, region.w / region.h, 0.01)
 	end)
 
 	T.it("scales stamp slot when panel width changes", function()
@@ -336,26 +370,26 @@ T.describe("perk stamp panel layout", function()
 			"aspect ratio should stay constant")
 	end)
 
-	T.it("rolls a random perk from the pool", function()
+	T.it("rolls a random stamp sprite from the 3×2 sheet", function()
 		math.randomseed(42)
 		local seen = {}
-		for _ = 1, 30 do
-			local stamp = Stamp.roll_random_stamp()
+		for _ = 1, 40 do
+			local stamp = Stamp.roll_stamp_sprite()
 			T.assert_not_nil(stamp)
-			T.assert_not_nil(stamp.id)
-			T.assert_not_nil(perk_cfg.by_id(stamp.id), "stamp perk should exist in POOL")
-			seen[stamp.id] = true
+			T.assert_not_nil(stamp.pos)
+			seen[stamp.pos.x .. "," .. stamp.pos.y] = true
 		end
-		T.assert_true(#perk_cfg.POOL >= 1)
+		T.assert_equal(#perk_cfg.STAMP_SPRITES, 6)
 	end)
 
-	T.it("plays a queued perk when the stamp is triggered", function()
+	T.it("applies a queued perk but picks a stamp sprite for the imprint", function()
 		Stamp.reset()
 		G.GAME = G.GAME or {}
 		local target = perk_cfg.by_id("wide_hand")
 		T.assert_true(Stamp.queue(target))
-		local queued = Stamp.roll_random_stamp()
-		T.assert_equal(queued.id, "wide_hand")
+		T.assert_equal(Stamp.resolve_perk().id, "wide_hand")
+		local sprite = Stamp.roll_stamp_sprite()
+		T.assert_not_nil(sprite.id:match("^stamp_"))
 	end)
 
 	T.it("places one imprint on the panel and replaces it on restamp", function()
@@ -367,11 +401,15 @@ T.describe("perk stamp panel layout", function()
 		for _ = 1, 70 do Stamp.debug_step() end
 		T.assert_true(Stamp.has_imprint())
 		local first = Stamp.current_imprint()
+		local first_perk = Stamp.current_imprint_perk()
 
 		for _ = 1, 70 do Stamp.debug_step() end
 		T.assert_true(Stamp.has_imprint())
 		local second = Stamp.current_imprint()
+		local second_perk = Stamp.current_imprint_perk()
 		T.assert_not_nil(first)
 		T.assert_not_nil(second)
+		T.assert_not_nil(first_perk)
+		T.assert_not_nil(second_perk)
 	end)
 end)

@@ -4,6 +4,7 @@ local widgets = require("word_game.ui.widgets")
 local perk = require("word_game.model.perk")
 local state = require("word_game.model.state")
 local Layout = require("word_game.ui.layout")
+require("word_game.ui.perk_voucher_sprite")
 
 local M = {}
 
@@ -27,18 +28,13 @@ local function notice(msg, colour)
 	end
 end
 
-local function perk_sprite(perk, w, h)
+local function perk_sprite(entry, w, h)
 	w = w or G.CARD_W * 0.9
-	h = h or G.CARD_H * 0.9
-	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES["Perk"]
-	if not atlas or not perk or not perk.pos then
+	h = h or G.CARD_W * 0.9 / (require("word_game.config.perks").VOUCHER_ASPECT or 2.3)
+	if not entry or not entry.pos then
 		return nil
 	end
-	local sprite = Sprite(0, 0, w, h, atlas, perk.pos)
-	sprite.states.drag.can = false
-	sprite.states.hover.can = false
-	sprite.states.collide.can = false
-	sprite.states.click.can = false
+	local sprite = PerkVoucherSprite(0, 0, w, h, entry)
 	return sprite
 end
 
@@ -210,13 +206,12 @@ function M.draw_pass()
 	local x = flyer.landed and flyer.ex or flyer.sx + (flyer.ex - flyer.sx) * eased
 	local y = flyer.landed and flyer.ey or flyer.sy + (flyer.ey - flyer.sy) * eased - math.sin(u * math.pi) * 0.8 * (G.TILESIZE or 1) * (G.TILESCALE or 1)
 	flyer.rot = flyer.landed and flyer.rot or -math.pi * 14 * u
-	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.Perk
-	local image = atlas and atlas.image
-	if image then
-		local pw, ph = atlas.px or 71, atlas.py or 95
-		local quad = love.graphics.newQuad(flyer.entry.pos.x * pw, flyer.entry.pos.y * ph, pw, ph,
-			image:getDimensions())
+	local perk_voucher = require("word_game.ui.perk_voucher")
+	local img, quad, pw, ph = perk_voucher.voucher_quad(flyer.entry)
+	if img and quad then
 		local size = math.max(30, (G.CARD_W or 1) * (G.TILESCALE or 1) * (G.TILESIZE or 1) * 0.9)
+		local draw_w = size
+		local draw_h = size / (pw / ph)
 		love.graphics.push()
 		local room = G.ROOM.T
 		local ts_room = (G.TILESCALE or 1) * (G.TILESIZE or 1)
@@ -225,7 +220,7 @@ function M.draw_pass()
 		love.graphics.translate(-room.w * ts_room * 0.5 + (room.x or 0) * ts_room,
 			-room.h * ts_room * 0.5 + (room.y or 0) * ts_room)
 		love.graphics.setColor(1, 1, 1, 1)
-		love.graphics.draw(image, quad, x, y, flyer.rot, size / pw, size / ph, pw * 0.5, ph * 0.5)
+		love.graphics.draw(img, quad, x, y, flyer.rot, draw_w / pw, draw_h / ph, pw * 0.5, ph * 0.5)
 		love.graphics.pop()
 	end
 	if u >= 1 and not flyer.landed then

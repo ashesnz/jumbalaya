@@ -67,7 +67,7 @@ function Game:set_render_settings()
 		{ name = "letters", path = asset_path("JumbalayaLetters.png"), px = 71, py = 95 },
 		{ name = "letter_frame", path = asset_path("JumbalayaCardFrame.png"), px = 71, py = 95 },
 		{ name = "playing_back", path = asset_path("PlayingDeck.png"), px = 71, py = 95 },
-		{ name = "Perk", path = asset_path("Perks.png"), px = 71, py = 95 },
+		{ name = "Perk", path = asset_path("Perks.png"), px = 303, py = 138 },
 		{ name = "ui_1", path = asset_path("ui_assets.png"), px = 18, py = 18 },
 		{ name = "Jumbalaya", path = asset_path("Jumbalaya.png"), px = 466.5, py = 133.5 },
 		{ name = "jumbalaya_base", path = asset_path("Jumbalaya_base.png"), px = 933, py = 267 },
@@ -108,7 +108,7 @@ function Game:set_render_settings()
 				spec.name == "playing_back" or spec.name == "Jumbalaya" or spec.name == "title_garden"
 				or spec.name == "jumbalaya_base" or spec.name == "jumbalaya_start_a"
 				or spec.name == "jumbalaya_end_a" or spec.name == "boss_banner"
-				or spec.name == "marketplace_bg"
+				or spec.name == "marketplace_bg" or spec.name == "Perk"
 			) and 1 or self.SETTINGS.GRAPHICS.texture_scaling
 			self.TEXTURE_ATLASES[spec.name] = {}
 			self.TEXTURE_ATLASES[spec.name].name = spec.name
