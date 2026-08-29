@@ -148,8 +148,8 @@ T.describe("perk stamp visible mesh", function()
 		T.assert_not_nil(handle_back, "handle_back outline loop is required")
 		T.assert_true(front.closed, "front face must stroke as a closed loop")
 		T.assert_true(rubber_front.closed, "rubber_front face must stroke as a closed loop")
-		T.assert_true(right.closed, "right face must stroke as a closed loop")
-		T.assert_true(rubber_right.closed, "rubber_right face must stroke as a closed loop")
+		T.assert_false(right.closed, "right face must stay open so the back edge is hidden")
+		T.assert_false(rubber_right.closed, "rubber_right face must stay open so the back edge is hidden")
 		T.assert_true(left.closed, "left face must stroke as a closed loop")
 		T.assert_true(rubber_left.closed, "rubber_left face must stroke as a closed loop")
 		T.assert_true(handle_left.closed, "handle_left face must stroke as a closed loop")
@@ -250,6 +250,10 @@ T.describe("perk stamp visible mesh", function()
 				end
 				T.assert_false(same_edge(a, b, c.btl, c.btr, 0.12),
 					"draw pass must not stroke the back-top edge")
+				T.assert_false(same_edge(a, b, c.btr, c.bbr, 0.12),
+					"draw pass must not stroke the wood right back edge")
+				T.assert_false(same_edge(a, b, c.bbr, c.rbr, 0.12),
+					"draw pass must not stroke the rubber right back edge")
 			end
 		end
 		if saw_front_top then black_front_sides = black_front_sides + 1 end

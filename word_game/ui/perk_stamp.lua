@@ -364,8 +364,8 @@ local function draw_stamp_body(c, alpha)
 	stroke_loop({ c.btl, c.ftl, c.ftr, c.btr }, false, alpha)
 	stroke_loop({ c.ftl, c.ftr, c.fbr, c.fbl }, true, alpha)
 	stroke_loop({ c.fbl, c.fbr, c.rfr, c.rfl }, true, alpha)
-	stroke_loop({ c.ftr, c.btr, c.bbr, c.fbr }, true, alpha)
-	stroke_loop({ c.fbr, c.bbr, c.rbr, c.rfr }, true, alpha)
+	stroke_loop({ c.bbr, c.fbr, c.ftr, c.btr }, false, alpha)
+	stroke_loop({ c.rbr, c.rfr, c.fbr, c.bbr }, false, alpha)
 	stroke_loop({ c.btl, c.ftl, c.fbl, c.bbl }, true, alpha)
 	stroke_loop({ c.bbl, c.fbl, c.rfl, c.rbl }, true, alpha)
 end
@@ -621,8 +621,8 @@ function M.debug_mesh(ox, oy, scale, yaw, pitch, squash_y, roll)
 		{ name = "top", closed = false, pts = { c.btl, c.ftl, c.ftr, c.btr } },
 		{ name = "front", closed = true, pts = { c.ftl, c.ftr, c.fbr, c.fbl } },
 		{ name = "rubber_front", closed = true, pts = { c.fbl, c.fbr, c.rfr, c.rfl } },
-		{ name = "right", closed = true, pts = { c.ftr, c.btr, c.bbr, c.fbr } },
-		{ name = "rubber_right", closed = true, pts = { c.fbr, c.bbr, c.rbr, c.rfr } },
+		{ name = "right", closed = false, pts = { c.bbr, c.fbr, c.ftr, c.btr } },
+		{ name = "rubber_right", closed = false, pts = { c.rbr, c.rfr, c.fbr, c.bbr } },
 		{ name = "left", closed = true, pts = { c.btl, c.ftl, c.fbl, c.bbl } },
 		{ name = "rubber_left", closed = true, pts = { c.bbl, c.fbl, c.rfl, c.rbl } },
 		{ name = "handle_front", closed = true, pts = { c.hbl, c.hbr, c.hfr, c.hfl } },
@@ -636,6 +636,8 @@ function M.debug_mesh(ox, oy, scale, yaw, pitch, squash_y, roll)
 		{ c.btl, c.btr },
 		{ c.bbl, c.bbr },
 		{ c.rbl, c.rbr },
+		{ c.btr, c.bbr },
+		{ c.bbr, c.rbr },
 	}
 
 	local min_x, min_y, max_x, max_y = math.huge, math.huge, -math.huge, -math.huge
