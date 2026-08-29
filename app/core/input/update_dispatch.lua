@@ -25,6 +25,8 @@ function InputRouter:update_dispatch(dt)
 		local clicked = self.clicked.target
 		if WORD_GAME and WORD_GAME.PlayerHost and WORD_GAME.PlayerHost.consume_stage3_ally_click() then
 			self.clicked.handled = true
+		elseif WORD_GAME and WORD_GAME.PerkStamp and WORD_GAME.PerkStamp.consume_click() then
+			self.clicked.handled = true
 		elseif clicked then
 			clicked:click()
 			self.clicked.handled = true

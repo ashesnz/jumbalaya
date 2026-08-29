@@ -11,6 +11,8 @@ local perk_model = require("word_game.model.perk")
 local perk_voucher = require("word_game.ui.perk_voucher")
 local stamp_grid = require("word_game.ui.stamp_grid")
 local stamp_puff = require("word_game.ui.stamp_puff")
+local state = require("word_game.model.state")
+local widgets = require("word_game.ui.widgets")
 
 local M = {}
 
@@ -183,6 +185,66 @@ local function stamp_cell_rect_px(index)
 	local count = math.max(index, layout_stamp_count())
 	local panel_x, panel_y, panel_w, panel_h = stamp_panel_rect_px(count)
 	return stamp_grid.cell_rect_px(panel_x, panel_y, panel_w, panel_h, index, count)
+end
+
+local function mouse_to_stamp_space(mx, my)
+	local room = G and G.ROOM and G.ROOM.T
+	if not room then return mx, my end
+	local ts = tile_scale()
+	local cx = room.w * ts * 0.5
+	local cy = room.h * ts * 0.5
+	local ox = -cx + (room.x or 0) * ts
+	local oy = -cy + (room.y or 0) * ts
+	local r = room.r or 0
+	local x = mx - cx
+	local y = my - cy
+	if r ~= 0 then
+		local cr, sr = math.cos(-r), math.sin(-r)
+		x, y = x * cr - y * sr, x * sr + y * cr
+	end
+	return x - ox, y - oy
+end
+
+local function imprint_index_at(mx, my)
+	if #imprints == 0 then return nil end
+	local sx, sy = mouse_to_stamp_space(mx, my)
+	for i = 1, #imprints do
+		local x, y, w, h = stamp_cell_rect_px(i)
+		if sx >= x and sx <= x + w and sy >= y and sy <= y + h then
+			return i
+		end
+	end
+	return nil
+end
+
+local function perk_popup_definition(entry)
+	require("word_game.ui.perk_voucher_sprite")
+	local w = (G.CARD_W or 1) * 0.9
+	local h = w / (perk_cfg.VOUCHER_ASPECT or 2.3)
+	local sprite = PerkVoucherSprite(0, 0, w, h, entry)
+	return build_generic_options({
+		contents = {
+			{ n = G.UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
+				{ n = G.UI.OBJECT, config = { object = sprite, w = w, h = h } },
+			}},
+			{ n = G.UI.ROW, config = { align = "cm", padding = 0.04 }, nodes = {
+				{ n = G.UI.TEXT, config = {
+					text = entry.name or "Perk",
+					scale = 0.42,
+					colour = G.C.GOLD,
+					shadow = true,
+				}},
+			}},
+			{ n = G.UI.ROW, config = { align = "cm", padding = 0.06, maxw = 4.8 }, nodes = {
+				{ n = G.UI.TEXT, config = {
+					text = entry.desc or "",
+					scale = 0.28,
+					colour = G.C.UI.TEXT_LIGHT,
+					shadow = true,
+				}},
+			}},
+		},
+	})
 end
 
 local function stamp_target_px(target_index)
@@ -491,6 +553,7 @@ local function apply_imprint(sprite_entry, perk_entry)
 	local perk = perk_cfg.by_id(perk_entry.id)
 	if perk then
 		perk_model.apply_choice(perk)
+		state.add_perk(perk.id)
 	end
 	refresh_sidebar()
 	return true
@@ -645,6 +708,12 @@ function M.update(dt)
 	dt = dt or (G and G.real_dt) or 0.016
 	dt = math.min(0.05, dt)
 	stamp_puff.update(dt)
+
+	if not anim or anim.debug then
+		if not anim and G.GAME and G.GAME.pending_stamp_perk then
+			M.play()
+		end
+	end
 
 	if not anim or anim.debug then return end
 	anim.t = anim.t + dt
@@ -813,6 +882,39 @@ end
 
 function M.current_imprints()
 	return imprints
+end
+
+function M.show_perk_popup(perk_entry)
+	if not perk_entry or not perk_entry.id then return false end
+	local entry = perk_cfg.by_id(perk_entry.id) or perk_entry
+	widgets.open(perk_popup_definition(copy_perk(entry)))
+	return true
+end
+
+function M.consume_click(mx, my)
+	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
+	if G.OVERLAY_MENU then return false end
+	if anim and not anim.finished then return false end
+	if #imprints == 0 then return false end
+
+	local c = G.INPUT
+	if not c or c.clicked.handled or not c.clicked.target then return false end
+	if Card and getmetatable(c.clicked.target) == Card then return false end
+
+	if not mx or not my then
+		if not love or not love.mouse or not love.mouse.getPosition then return false end
+		mx, my = love.mouse.getPosition()
+	end
+	local idx = imprint_index_at(mx, my)
+	if not idx then return false end
+
+	M.show_perk_popup(imprints[idx].perk)
+	if play_sfx then play_sfx("card_slide1", 0.95, 0.5) end
+	return true
+end
+
+function M.imprint_index_at_screen(mx, my)
+	return imprint_index_at(mx, my)
 end
 
 -- Panel + per-slot cell rects for layout tests and tooling.

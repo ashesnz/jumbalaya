@@ -98,4 +98,15 @@ function M.rightmost_perk()
 	return alpha.perks[slots] or alpha.perks[#alpha.perks]
 end
 
+function M.add_perk(id)
+	if not id then return false end
+	local alpha = M.get()
+	if not alpha then return false end
+	alpha.perks = alpha.perks or {}
+	local slots = alpha.perk_slots or perks_cfg.SLOT_COUNT
+	if #alpha.perks >= slots then return false end
+	alpha.perks[#alpha.perks + 1] = id
+	return true
+end
+
 return M

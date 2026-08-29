@@ -533,6 +533,27 @@ function M.bonus_points_for(used_cards)
 	return total
 end
 
+local function try_award_gutter_perk()
+	if M.is_active() then return end
+	local perk_stamp = WORD_GAME and WORD_GAME.PerkStamp
+	if not perk_stamp then return end
+	local perk_model = require("word_game.model.perk")
+	local rolled = perk_model.roll_stamp_perk()
+	if not rolled then return end
+	if not perk_stamp.play(rolled) then
+		perk_stamp.queue(rolled)
+	end
+	if spawn_attention then
+		spawn_attention({
+			text = "Perk earned!",
+			scale = 0.55,
+			hold = 1.1,
+			align = "cm",
+			colour = G.C and G.C.GOLD or { 1, 0.85, 0.2, 1 },
+		})
+	end
+end
+
 function M.consume_card(card)
 	M.remove_card(card)
 	if card.area and card.area.remove_card then
@@ -542,10 +563,12 @@ function M.consume_card(card)
 	end
 	if card.start_dissolve then
 		card:start_dissolve()
+		try_award_gutter_perk()
 		return
 	end
 	local deck = require("word_game.model.cards.deck")
 	deck.destroy_card(card)
+	try_award_gutter_perk()
 end
 
 local function draw_label(layout)

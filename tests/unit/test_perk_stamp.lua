@@ -440,3 +440,96 @@ T.describe("perk stamp panel layout", function()
 		T.assert_not_nil(second)
 	end)
 end)
+
+T.describe("perk stamp click popup", function()
+	pcall(mock_env.setup)
+	G.TILESCALE = 1
+	G.TILESIZE = 71
+	G.TABLE_BOARD_SIDEBAR_WIDTH = 3.0
+	G.STATES = G.STATES or { TABLE_BOARD = 1 }
+	G.STATE = G.STATES.TABLE_BOARD
+	G.CARD_W = 2
+	G.C = G.C or {
+		GOLD = { 1, 0.85, 0.2, 1 },
+		UI = { TEXT_LIGHT = { 1, 1, 1, 1 }, BUTTON = { 0.2, 0.2, 0.2, 1 }, BUTTON_HOVER = { 0.3, 0.3, 0.3, 1 }, BUTTON_TEXT = { 1, 1, 1, 1 } },
+		GREY = { 0.5, 0.5, 0.5, 1 },
+		MUTED_GREY = { 0.4, 0.4, 0.4, 1 },
+		L_BLACK = { 0.1, 0.1, 0.1, 1 },
+		BLACK = { 0, 0, 0, 1 },
+		CLEAR = { 0, 0, 0, 0 },
+	}
+	G.ROOM = { T = { x = 0, y = 0, w = 20, h = 11.5, r = 0 } }
+	G.ROOM_ATTACH = G.ROOM
+
+	local Stamp = require("word_game.ui.perk_stamp")
+	local perk_cfg = require("word_game.config.perks")
+
+	T.it("opens a popup with the perk description when an imprint is clicked", function()
+		Stamp.reset()
+		local opened
+		local widgets = require("word_game.ui.widgets")
+		local original_open = widgets.open
+		widgets.open = function(definition)
+			opened = definition
+		end
+
+		for _ = 1, 70 do Stamp.debug_step() end
+		T.assert_equal(Stamp.imprint_count(), 1)
+		local perk = Stamp.current_imprint_perk()
+		T.assert_not_nil(perk)
+
+		local layout = Stamp.debug_grid_layout(1)
+		local cell = layout.cells[1]
+		local cx = cell.x + cell.w * 0.5
+		local cy = cell.y + cell.h * 0.5
+		T.assert_equal(Stamp.imprint_index_at_screen(cx, cy), 1)
+		T.assert_true(Stamp.show_perk_popup(perk))
+		T.assert_not_nil(opened)
+
+		widgets.open = original_open
+		Stamp.reset()
+	end)
+
+	T.it("consumes table clicks that land on perk imprints", function()
+		Stamp.reset()
+		G.OVERLAY_MENU = nil
+		G.INPUT = {
+			clicked = { handled = false, target = G.ROOM },
+		}
+		local opened = false
+		local widgets = require("word_game.ui.widgets")
+		local original_open = widgets.open
+		widgets.open = function()
+			opened = true
+		end
+
+		for _ = 1, 68 do Stamp.debug_step() end
+		T.assert_equal(Stamp.imprint_count(), 1)
+		local layout = Stamp.debug_grid_layout(1)
+		local cell = layout.cells[1]
+		local mx = cell.x + cell.w * 0.5
+		local my = cell.y + cell.h * 0.5
+
+		T.assert_equal(Stamp.imprint_index_at_screen(mx, my), 1)
+		G.OVERLAY_MENU = nil
+		T.assert_true(Stamp.consume_click(mx, my))
+		T.assert_true(opened)
+
+		widgets.open = original_open
+		Stamp.reset()
+	end)
+
+	T.it("persists earned perks on match state", function()
+		Stamp.reset()
+		G.GAME = G.GAME or {}
+		local state = require("word_game.model.state")
+		state.get().perks = {}
+
+		for _ = 1, 70 do Stamp.debug_step() end
+		local perk = Stamp.current_imprint_perk()
+		T.assert_not_nil(perk)
+		T.assert_true(state.has_perk(perk.id))
+
+		Stamp.reset()
+	end)
+end)

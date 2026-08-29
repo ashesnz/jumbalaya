@@ -675,4 +675,47 @@ T.describe("Bonus cards", function()
 		T.assert_equal(spawned[1].text, "+" .. tostring(bonus_stack.BONUS_POINTS))
 		WORD_GAME.FloatUpText = nil
 	end)
+
+	T.it("awards a random perk when the last bonus gutter card is consumed", function()
+		bonus_stack.clear()
+		G.GAME = G.GAME or {}
+		G.STATE = (G.STATES and G.STATES.TABLE_BOARD) or 1
+		G.STATES = G.STATES or { TABLE_BOARD = 1 }
+		local played
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.PerkStamp = {
+			play = function(entry)
+				played = entry
+				return true
+			end,
+			queue = function() end,
+		}
+		_G.spawn_attention = function() end
+		local card = mock_card("M", 3, 3)
+		card.start_dissolve = function() end
+		bonus_stack.promote_to_bonus({ card })
+		bonus_stack.consume_card(card)
+		T.assert_false(bonus_stack.is_active())
+		T.assert_not_nil(played)
+		T.assert_not_nil(played.id)
+		T.assert_not_nil(played.name)
+		T.assert_not_nil(played.desc)
+		WORD_GAME.PerkStamp = nil
+	end)
+
+	T.it("does not award a perk when the bonus gutter is cleared without consumption", function()
+		bonus_stack.clear()
+		local played = false
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.PerkStamp = {
+			play = function()
+				played = true
+				return true
+			end,
+		}
+		bonus_stack.promote_to_bonus({ mock_card("N", 3, 3) })
+		bonus_stack.clear()
+		T.assert_false(played)
+		WORD_GAME.PerkStamp = nil
+	end)
 end)
