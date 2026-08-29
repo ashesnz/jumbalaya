@@ -40,7 +40,37 @@ local HANDLE_R = 7
 local HANDLE_H = 22
 
 local anim
-local imprint
+local imprints = {}
+local pending_target_index
+local make_anim_state
+
+local function refresh_sidebar()
+	if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.refresh then
+		WORD_GAME.Sidebar:refresh()
+	end
+end
+
+local function layout_stamp_count()
+	local count = #imprints
+	if pending_target_index then
+		count = math.max(count, pending_target_index)
+	elseif anim and not anim.impacted then
+		count = count + 1
+	end
+	return math.max(1, count)
+end
+
+local function next_slot_index()
+	return #imprints + 1
+end
+
+local function begin_stamp_anim(sprite_entry, perk_entry, debug)
+	local target_index = next_slot_index()
+	pending_target_index = target_index
+	refresh_sidebar()
+	anim = make_anim_state(sprite_entry, perk_entry, debug, target_index)
+	pending_target_index = nil
+end
 
 local WOOD_TOP = { 0.65, 0.44, 0.23 }
 local WOOD_FRONT = { 0.58, 0.38, 0.20 }
@@ -125,10 +155,11 @@ local function vault_width_px()
 end
 
 local function stamp_panel_height_px()
-	return stamp_grid.panel_height_px()
+	return stamp_grid.panel_height_px(nil, layout_stamp_count())
 end
 
-local function stamp_panel_rect_px()
+local function stamp_panel_rect_px(layout_count)
+	layout_count = layout_count or layout_stamp_count()
 	local row = G.VAULT_HUD and G.VAULT_HUD:find_node_by_id("row_stamp_slot")
 	local rx, ry, rw, rh = node_rect_px(row)
 	if not rx then
@@ -137,22 +168,25 @@ local function stamp_panel_rect_px()
 		rx = vault.x * ts
 		ry = (vault.y + 0.82) * ts
 		rw = vault.w * ts
-		rh = stamp_panel_height_px()
+		rh = stamp_grid.panel_height_px(nil, layout_count)
 	end
 	local w = vault_width_px()
-	local h = stamp_panel_height_px()
+	local h = stamp_grid.panel_height_px(nil, layout_count)
 	local x = rx + (rw - w) * 0.5
 	local y = ry + (rh - h) * 0.5
-	return x, y, w, h
+	return x, y, w, h, layout_count
 end
 
-local function stamp_cell_rect_px()
-	local panel_x, panel_y, panel_w, panel_h = stamp_panel_rect_px()
-	return stamp_grid.cell_rect_px(panel_x, panel_y, panel_w, panel_h)
+local function stamp_cell_rect_px(index)
+	index = index or next_slot_index()
+	local count = math.max(index, layout_stamp_count())
+	local panel_x, panel_y, panel_w, panel_h = stamp_panel_rect_px(count)
+	return stamp_grid.cell_rect_px(panel_x, panel_y, panel_w, panel_h, index, count)
 end
 
-local function stamp_target_px()
-	local x, y, w, h = stamp_cell_rect_px()
+local function stamp_target_px(target_index)
+	target_index = target_index or next_slot_index()
+	local x, y, w, h = stamp_cell_rect_px(target_index)
 	return x + w * 0.5, y + h * 0.5, x, y, w, h
 end
 
@@ -449,7 +483,7 @@ local function draw_type_imprint(sprite_entry, x, y, w, h, alpha)
 end
 
 local function apply_imprint(sprite_entry, perk_entry)
-	imprint = {
+	imprints[#imprints + 1] = {
 		sprite = copy_stamp(sprite_entry),
 		perk = copy_perk(perk_entry),
 	}
@@ -457,6 +491,7 @@ local function apply_imprint(sprite_entry, perk_entry)
 	if perk then
 		perk_model.apply_choice(perk)
 	end
+	refresh_sidebar()
 	return true
 end
 
@@ -472,8 +507,9 @@ local function trigger_impact(frame)
 	end
 end
 
-local function make_anim_state(sprite_entry, perk_entry, debug)
-	local _, _, slot_x, slot_y, slot_w, slot_h = stamp_target_px()
+make_anim_state = function(sprite_entry, perk_entry, debug, target_index)
+	target_index = target_index or next_slot_index()
+	local _, _, slot_x, slot_y, slot_w, slot_h = stamp_target_px(target_index)
 	local land_cx = slot_x + slot_w * 0.5
 	local land_cy = slot_y + slot_h * 0.5
 	local land_scale = scale_for_slot(slot_w, LANDING_YAW, LANDING_PITCH, LANDING_ROLL)
@@ -493,6 +529,7 @@ local function make_anim_state(sprite_entry, perk_entry, debug)
 	return {
 		sprite_entry = sprite_entry,
 		perk_entry = perk_entry,
+		target_index = target_index,
 		t = 0,
 		frame = 0,
 		slot_x = slot_x,
@@ -513,7 +550,7 @@ local function make_anim_state(sprite_entry, perk_entry, debug)
 end
 
 local function begin_debug_anim(sprite_entry, perk_entry)
-	anim = make_anim_state(sprite_entry, perk_entry, true)
+	begin_stamp_anim(sprite_entry, perk_entry, true)
 end
 
 function M.is_active()
@@ -548,7 +585,7 @@ function M.play(perk_entry, callback)
 	local sprite_entry = resolve_stamp_sprite()
 	if not sprite_entry then return false end
 
-	anim = make_anim_state(sprite_entry, perk_entry, false)
+	begin_stamp_anim(sprite_entry, perk_entry, false)
 	if not anim then return false end
 	anim.callback = callback
 	if play_sfx then
@@ -614,9 +651,7 @@ function M.update(dt)
 		local done = anim
 		anim = nil
 		if done.callback then done.callback() end
-		if WORD_GAME and WORD_GAME.Sidebar then
-			WORD_GAME.Sidebar:refresh()
-		end
+		refresh_sidebar()
 	end
 end
 
@@ -630,14 +665,15 @@ function M.draw_pass()
 	love.graphics.setShader()
 	room_translate()
 
-	if imprint and imprint.sprite then
-		local x, y, w, h = stamp_cell_rect_px()
+	local count = layout_stamp_count()
+	for i, entry in ipairs(imprints) do
+		local x, y, w, h = stamp_cell_rect_px(i)
 		local alpha = 1
-		if anim and anim.impacted then
+		if anim and i == #imprints and anim.impacted then
 			local imprint_t = math.min(1, (anim.t - STRIKE_DUR) / IMPRINT_DUR)
 			alpha = math.min(1, imprint_t * 2.2)
 		end
-		draw_type_imprint(imprint.sprite, x, y, w, h, alpha)
+		draw_type_imprint(entry.sprite, x, y, w, h, alpha)
 	end
 
 	if anim then
@@ -731,27 +767,50 @@ function M.debug_draw_imprint(sprite_entry, x, y, w, h, alpha)
 	draw_type_imprint(sprite_entry, x, y, w, h, alpha)
 end
 
+function M.debug_next_land_px()
+	local target_index = next_slot_index()
+	pending_target_index = target_index
+	local _, land_cy, _, slot_y = stamp_target_px(target_index)
+	pending_target_index = nil
+	return target_index, land_cy, slot_y
+end
+
 function M.reset()
 	anim = nil
-	imprint = nil
+	imprints = {}
 end
 
 function M.has_imprint()
-	return imprint ~= nil
+	return #imprints > 0
+end
+
+function M.imprint_count()
+	return #imprints
+end
+
+function M.stack_count()
+	return layout_stamp_count()
 end
 
 function M.current_imprint()
-	return imprint and imprint.sprite
+	local last = imprints[#imprints]
+	return last and last.sprite
 end
 
 function M.current_imprint_perk()
-	return imprint and imprint.perk
+	local last = imprints[#imprints]
+	return last and last.perk
+end
+
+function M.current_imprints()
+	return imprints
 end
 
 -- Panel + per-slot cell rects for layout tests and tooling.
-function M.debug_grid_layout()
+function M.debug_grid_layout(count)
 	local panel_x, panel_y, panel_w = stamp_panel_rect_px()
-	return stamp_grid.layout(panel_x, panel_y, panel_w)
+	count = count or layout_stamp_count()
+	return stamp_grid.layout(panel_x, panel_y, panel_w, count)
 end
 
 return M

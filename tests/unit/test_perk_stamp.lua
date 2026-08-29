@@ -392,24 +392,42 @@ T.describe("perk stamp panel layout", function()
 		T.assert_not_nil(sprite.id:match("^stamp_"))
 	end)
 
-	T.it("places one imprint on the panel and replaces it on restamp", function()
+	T.it("stacks imprints vertically with a gap", function()
+		local layout2 = Stamp.debug_grid_layout(2)
+		T.assert_equal(#layout2.cells, 2)
+		local gap = layout2.cells[2].y - (layout2.cells[1].y + layout2.cells[1].h)
+		T.assert_true(gap >= 2, "stamps should have a vertical gap between them")
+		T.assert_almost_equal(layout2.cells[1].x, layout2.cells[2].x, 0.5,
+			"stamps should share the same horizontal alignment")
+		T.assert_almost_equal(layout2.cells[1].w, layout2.cells[2].w, 0.5)
+	end)
+
+	T.it("targets a lower landing point for each stacked stamp", function()
+		Stamp.reset()
+		G.STATE = G.STATES.TABLE_BOARD
+		local _, cy1 = Stamp.debug_next_land_px()
+
+		for _ = 1, 70 do Stamp.debug_step() end
+		T.assert_equal(Stamp.imprint_count(), 1)
+
+		local _, cy2 = Stamp.debug_next_land_px()
+		T.assert_true(cy2 > cy1, "second stamp animation should land below the first")
+	end)
+
+	T.it("adds imprints below existing stamps on restamp", function()
 		Stamp.reset()
 		G.STATE = G.STATES.TABLE_BOARD
 		math.randomseed(7)
 		T.assert_false(Stamp.has_imprint())
 
 		for _ = 1, 70 do Stamp.debug_step() end
-		T.assert_true(Stamp.has_imprint())
+		T.assert_equal(Stamp.imprint_count(), 1)
 		local first = Stamp.current_imprint()
-		local first_perk = Stamp.current_imprint_perk()
 
 		for _ = 1, 70 do Stamp.debug_step() end
-		T.assert_true(Stamp.has_imprint())
+		T.assert_equal(Stamp.imprint_count(), 2)
 		local second = Stamp.current_imprint()
-		local second_perk = Stamp.current_imprint_perk()
 		T.assert_not_nil(first)
 		T.assert_not_nil(second)
-		T.assert_not_nil(first_perk)
-		T.assert_not_nil(second_perk)
 	end)
 end)

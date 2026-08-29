@@ -20,7 +20,11 @@ local VAULT_FILL_CHILDREN = 7
 local SHOW_VAULT_WORD_LIST = false
 
 local function stamp_slot_height()
-	return stamp_grid.panel_height_tiles()
+	local count = 1
+	if WORD_GAME and WORD_GAME.PerkStamp and WORD_GAME.PerkStamp.stack_count then
+		count = WORD_GAME.PerkStamp.stack_count()
+	end
+	return stamp_grid.panel_height_tiles(count)
 end
 
 local function list_height()
