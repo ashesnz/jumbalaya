@@ -42,7 +42,23 @@ local anim
 local imprint
 local demo_index = 1
 
-local WOOD = { 0.58, 0.38, 0.20 }
+local WOOD_TOP = { 0.65, 0.44, 0.23 }
+local WOOD_FRONT = { 0.58, 0.38, 0.20 }
+local WOOD_LEFT = { 0.51, 0.33, 0.17 }
+local WOOD_RIGHT = { 0.44, 0.28, 0.13 }
+local WOOD_BACK = { 0.36, 0.22, 0.10 }
+
+local RUBBER_FRONT = { 0.34, 0.25, 0.19 }
+local RUBBER_LEFT = { 0.31, 0.22, 0.16 }
+local RUBBER_RIGHT = { 0.28, 0.20, 0.14 }
+local RUBBER_BACK = { 0.24, 0.17, 0.12 }
+
+local HANDLE_TOP = { 0.62, 0.41, 0.21 }
+local HANDLE_FRONT = { 0.56, 0.36, 0.19 }
+local HANDLE_LEFT = { 0.49, 0.31, 0.16 }
+local HANDLE_RIGHT = { 0.42, 0.27, 0.12 }
+local HANDLE_BACK = { 0.35, 0.21, 0.09 }
+
 local WOOD_EDGE = { 0.10, 0.05, 0.02 }
 local HAND = { 1.00, 0.86, 0.18 }
 
@@ -346,16 +362,15 @@ end
 -- set of corners `c` (as returned by body_corners / debug_mesh).  Split out
 -- so both the real draw pass and the debug tooling share one code path.
 local function draw_stamp_body(c, alpha)
-	-- One wooden prism: body and pad share a colour, so they are filled as
-	-- full-height faces (no visible seam in the fill itself).
-	quad_fill(c.btl, c.btr, c.rbr, c.rbl, WOOD, alpha)
-	quad_fill(c.btl, c.ftl, c.fbl, c.bbl, WOOD, alpha)
-	quad_fill(c.bbl, c.fbl, c.rfl, c.rbl, WOOD, alpha)
-	quad_fill(c.ftl, c.ftr, c.btr, c.btl, WOOD, alpha)
-	quad_fill(c.ftr, c.btr, c.bbr, c.fbr, WOOD, alpha)
-	quad_fill(c.fbr, c.bbr, c.rbr, c.rfr, WOOD, alpha)
-	quad_fill(c.ftl, c.ftr, c.rfr, c.rfl, WOOD, alpha)
-	quad_fill(c.fbl, c.fbr, c.rfr, c.rfl, WOOD, alpha)
+	-- Multi-shaded 3D faces for wood body and rubber pad to enhance 3D perception.
+	quad_fill(c.btl, c.btr, c.rbr, c.rbl, WOOD_BACK, alpha)
+	quad_fill(c.btl, c.ftl, c.fbl, c.bbl, WOOD_LEFT, alpha)
+	quad_fill(c.bbl, c.fbl, c.rfl, c.rbl, RUBBER_LEFT, alpha)
+	quad_fill(c.ftl, c.ftr, c.btr, c.btl, WOOD_TOP, alpha)
+	quad_fill(c.ftr, c.btr, c.bbr, c.fbr, WOOD_RIGHT, alpha)
+	quad_fill(c.fbr, c.bbr, c.rbr, c.rfr, RUBBER_RIGHT, alpha)
+	quad_fill(c.ftl, c.ftr, c.fbr, c.fbl, WOOD_FRONT, alpha)
+	quad_fill(c.fbl, c.fbr, c.rfr, c.rfl, RUBBER_FRONT, alpha)
 
 	-- Visible silhouettes and face borders. Each face is stroked as its own
 	-- closed loop so every border shows up individually, including wood and
@@ -375,11 +390,11 @@ local function draw_stamp_3d(ox, oy, scale, yaw, pitch, squash_y, alpha, roll)
 
 	draw_stamp_body(c, alpha)
 
-	quad_fill(c.hbl, c.hbr, c.hfr, c.hfl, WOOD, alpha)
-	quad_fill(c.hbr, c.hbf, c.htf, c.hfr, WOOD, alpha)
-	quad_fill(c.hfl, c.hfr, c.htf, c.htb, WOOD, alpha)
-	quad_fill(c.hbl, c.hfl, c.htb, c.hbb, WOOD, alpha)
-	quad_fill(c.hbb, c.hbf, c.htf, c.htb, WOOD, alpha)
+	quad_fill(c.hbl, c.hbr, c.hfr, c.hfl, HANDLE_FRONT, alpha)
+	quad_fill(c.hbr, c.hbf, c.htf, c.hfr, HANDLE_RIGHT, alpha)
+	quad_fill(c.hfl, c.hfr, c.htf, c.htb, HANDLE_TOP, alpha)
+	quad_fill(c.hbl, c.hfl, c.htb, c.hbb, HANDLE_LEFT, alpha)
+	quad_fill(c.hbb, c.hbf, c.htf, c.htb, HANDLE_BACK, alpha)
 	stroke_loop({ c.hbl, c.hbr, c.hfr, c.hfl }, true, alpha * 0.9, 1.2)
 	stroke_loop({ c.hbr, c.hbf, c.htf, c.hfr }, true, alpha * 0.9, 1.2)
 	stroke_loop({ c.hfl, c.hfr, c.htf, c.htb }, true, alpha * 0.9, 1.2)

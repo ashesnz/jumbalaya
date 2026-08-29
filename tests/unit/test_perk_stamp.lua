@@ -232,6 +232,16 @@ T.describe("perk stamp visible mesh", function()
 		T.assert_true(#log.fills >= 5, "wooden faces should fill on screen")
 		T.assert_true(#log.lines >= 3, "each visible face should stroke a border loop")
 
+		local unique_colors = {}
+		for _, fill in ipairs(log.fills) do
+			local col = fill.color
+			local key = string.format("%.2f,%.2f,%.2f", col[1], col[2], col[3])
+			unique_colors[key] = true
+		end
+		local shade_count = 0
+		for _ in pairs(unique_colors) do shade_count = shade_count + 1 end
+		T.assert_true(shade_count >= 4, "stamp faces should have multiple distinct brown/rubber shades for 3d depth")
+
 		local black_front_sides = 0
 		local saw_front_bottom = false
 		local saw_front_left = false
