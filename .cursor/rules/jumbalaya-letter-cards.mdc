@@ -13,7 +13,7 @@ Recent architecture: **two atlases + runtime tint** (not monolithic `JumbalayaDe
 | `JumbalayaLetters.png` | `letters` | 13×2 glyph grid (A–M row 0, N–Z row 1), white letters |
 | `JumbalayaCardFrame.png` | `letter_frame` | White silhouette; tinted at draw time |
 
-Cell size: **71×95** logical px (142×190 at 2x). Paths: `resources/textures/{1x,2x}/`.
+Cell size: **71×95** logical px. Paths: `resources/assets/`.
 
 ## Key modules
 

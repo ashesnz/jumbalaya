@@ -27,7 +27,7 @@ _tools/
 # Binary & generated assets (textures, audio, fonts — already default-ignored
 # for indexing, but explicit here blocks @-mentions and broader AI access)
 # ------------------------------------------------------------------------------
-resources/textures/
+resources/assets/
 resources/sounds/
 resources/fonts/
 *.png

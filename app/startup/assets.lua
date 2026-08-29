@@ -2,6 +2,25 @@
 
 local M = {}
 
+local ASSETS_DIR = "resources/assets"
+
+local function asset_path(filename)
+	return ASSETS_DIR .. "/" .. filename
+end
+
+local function resolve_asset_path(filename, alternates)
+	if love.filesystem.getInfo(asset_path(filename)) then
+		return asset_path(filename)
+	end
+	for _, alt in ipairs(alternates or {}) do
+		local path = asset_path(alt)
+		if love.filesystem.getInfo(path) then
+			return path
+		end
+	end
+	return asset_path(filename)
+end
+
 function M.load_shaders(game)
 	game.SHADERS = {}
 	for _, filename in ipairs(love.filesystem.getDirectoryItems("resources/shaders")) do
@@ -45,26 +64,26 @@ function Game:set_render_settings()
 	self.animation_atli = {}
 	---@type GameAtlasSpec[]
 	self.asset_atli = {
-		{ name = "letters", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/JumbalayaLetters.png", px = 71, py = 95 },
-		{ name = "letter_frame", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/JumbalayaCardFrame.png", px = 71, py = 95 },
-		{ name = "playing_back", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/PlayingDeck.png", px = 71, py = 95 },
-		{ name = "Perk", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Perks.png", px = 71, py = 95 },
-		{ name = "ui_1", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/ui_assets.png", px = 18, py = 18 },
-		{ name = "Jumbalaya", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Jumbalaya.png", px = 466.5, py = 133.5 },
-		{ name = "jumbalaya_base", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Jumbalaya_base.png", px = 933, py = 267 },
-		{ name = "jumbalaya_start_a", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Jumbalaya_start_A.png", px = 103, py = 143 },
-		{ name = "jumbalaya_end_a", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Jumbalaya_end_A.png", px = 123, py = 152 },
-		{ name = "title_garden", path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/title_garden.png", px = 1536, py = 1024 },
-		{ name = 'gamepad_ui', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/gamepad_ui.png", px = 32, py = 32 },
-		{ name = 'icons', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/icons.png", px = 66, py = 66 },
-		{ name = 'bin', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Bin.png", px = 249, py = 251, frames = 4, cols = 2, rows = 2 },
-		{ name = 'shuffle_icon', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/shuffle_icon.png", px = 112, py = 112 },
-		{ name = 'remove_placement_icon', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/remove_placement_icon.png", px = 112, py = 112 },
-		{ name = 'play_icon', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/play_icon.png", px = 112, py = 112 },
-		{ name = 'tokens', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/coin_stack.png", px = 521, py = 479 },
-		{ name = 'coin', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/coin.png", px = 521, py = 478 },
-		{ name = 'boss_banner', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/banner.png", px = 1180, py = 211 },
-		{ name = 'marketplace_bg', path = "resources/textures/" .. self.SETTINGS.GRAPHICS.texture_scaling .. "x/Marketplace.png", px = 1408, py = 768 },
+		{ name = "letters", path = asset_path("JumbalayaLetters.png"), px = 71, py = 95 },
+		{ name = "letter_frame", path = asset_path("JumbalayaCardFrame.png"), px = 71, py = 95 },
+		{ name = "playing_back", path = asset_path("PlayingDeck.png"), px = 71, py = 95 },
+		{ name = "Perk", path = asset_path("Perks.png"), px = 71, py = 95 },
+		{ name = "ui_1", path = asset_path("ui_assets.png"), px = 18, py = 18 },
+		{ name = "Jumbalaya", path = asset_path("Jumbalaya.png"), px = 466.5, py = 133.5 },
+		{ name = "jumbalaya_base", path = asset_path("Jumbalaya_base.png"), px = 933, py = 267 },
+		{ name = "jumbalaya_start_a", path = asset_path("Jumbalaya_start_A.png"), px = 103, py = 143 },
+		{ name = "jumbalaya_end_a", path = asset_path("Jumbalaya_end_A.png"), px = 123, py = 152 },
+		{ name = "title_garden", path = asset_path("title_garden.png"), px = 1536, py = 1024 },
+		{ name = 'gamepad_ui', path = asset_path("gamepad_ui.png"), px = 32, py = 32 },
+		{ name = 'icons', path = asset_path("icons.png"), px = 66, py = 66 },
+		{ name = 'bin', path = asset_path("Bin.png"), px = 249, py = 251, frames = 4, cols = 2, rows = 2 },
+		{ name = 'shuffle_icon', path = asset_path("shuffle_icon.png"), px = 112, py = 112 },
+		{ name = 'remove_placement_icon', path = asset_path("remove_placement_icon.png"), px = 112, py = 112 },
+		{ name = 'play_icon', path = asset_path("play_icon.png"), px = 112, py = 112 },
+		{ name = 'tokens', path = asset_path("coin_stack.png"), px = 521, py = 479 },
+		{ name = 'coin', path = asset_path("coin.png"), px = 521, py = 478 },
+		{ name = 'boss_banner', path = asset_path("banner.png"), px = 1180, py = 211 },
+		{ name = 'marketplace_bg', path = resolve_asset_path("Marketplace.png", { "Marketplace.jpeg" }), px = 1408, py = 768 },
 	}
 	---@type GameAtlasSpec[]
 	self.asset_images = {}
@@ -84,52 +103,6 @@ function Game:set_render_settings()
 	for i = 1, #self.asset_atli do
 		local spec = self.asset_atli[i]
 		local path = spec.path
-		if not love.filesystem.getInfo(path) and spec.name == "playing_back" then
-			path = "resources/textures/2x/PlayingDeck.png"
-			if not love.filesystem.getInfo(path) then
-				path = "resources/textures/1x/PlayingDeck.png"
-			end
-		end
-		if not love.filesystem.getInfo(path) and spec.name == "boss_banner" then
-			path = "resources/textures/2x/banner.png"
-		end
-		if not love.filesystem.getInfo(path) and spec.name == "shuffle_icon" then
-			path = "resources/textures/2x/shuffle_icon.png"
-		end
-		if not love.filesystem.getInfo(path) and spec.name == "remove_placement_icon" then
-			path = "resources/textures/2x/remove_placement_icon.png"
-		end
-		if not love.filesystem.getInfo(path) and spec.name == "marketplace_bg" then
-			local jpeg = "resources/textures/2x/Marketplace.jpeg"
-			local png2x = "resources/textures/2x/Marketplace.png"
-			if love.filesystem.getInfo(png2x) then
-				path = png2x
-			elseif love.filesystem.getInfo(jpeg) then
-				path = jpeg
-			else
-				path = "resources/textures/1x/Marketplace.png"
-			end
-		end
-		if not love.filesystem.getInfo(path) and (
-			spec.name == "Jumbalaya" or spec.name == "title_garden"
-			or spec.name == "jumbalaya_base" or spec.name == "jumbalaya_start_a"
-			or spec.name == "jumbalaya_end_a") then
-			local file = "title_garden.png"
-			if spec.name == "Jumbalaya" then
-				file = "Jumbalaya.png"
-			elseif spec.name == "jumbalaya_base" then
-				file = "Jumbalaya_base.png"
-			elseif spec.name == "jumbalaya_start_a" then
-				file = "Jumbalaya_start_A.png"
-			elseif spec.name == "jumbalaya_end_a" then
-				file = "Jumbalaya_end_A.png"
-			end
-			local fallback = "resources/textures/2x/" .. file
-			if not love.filesystem.getInfo(fallback) then
-				fallback = "resources/textures/1x/" .. file
-			end
-			path = fallback
-		end
 		if love.filesystem.getInfo(path) then
 			local dpiscale = (
 				spec.name == "playing_back" or spec.name == "Jumbalaya" or spec.name == "title_garden"

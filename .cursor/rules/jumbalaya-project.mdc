@@ -18,7 +18,7 @@ Roguelike **jumble** word game on Love2D/Lua. Active loop: fill **pattern puzzle
 | `tests/` | Headless suite — `love tests` |
 | `dictionary/` | Offline word validation |
 | `_tools/` | Python asset pipelines (not runtime) |
-| `resources/` | Textures, shaders, sounds, fonts |
+| `resources/` | Assets, shaders, sounds, fonts |
 | `AlphaCardsBackup/` | Legacy Balatro reference — do not edit |
 
 ## Dependency rules

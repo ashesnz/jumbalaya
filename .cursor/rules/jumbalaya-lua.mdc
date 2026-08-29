@@ -46,4 +46,4 @@ Add `---@class` / `---@field` on new public APIs. Analyzer stubs live in `types/
 
 ## Do not hand-edit
 
-`dictionary/words_set.lua`, regenerated `deck_face_colors.lua`, binary textures — use `_tools/` scripts.
+`dictionary/words_set.lua`, regenerated `deck_face_colors.lua`, binary assets — use `_tools/` scripts.

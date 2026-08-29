@@ -40,7 +40,7 @@ M.DESCRIPTION_VARIABLES = {
 	["Illusion"] = { "c_playing_cards_bought" },
 }
 
--- Sprites from resources/textures/{scale}x/Perks.png (71×95 cells, 9×4 grid).
+-- Sprites from resources/assets/Perks.png (71×95 cells, 9×4 grid).
 M.POOL = {
     {
         id = "wide_hand",

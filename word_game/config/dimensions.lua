@@ -6,7 +6,7 @@
 	  - One tile occupies `CANVAS_TILE_PX` on-screen pixels at zoom 1, giving
 	    TILESCALE = 73/20.
 	  - Card dimensions derive from the letter-atlas cell (71x95 px per face in
-	    resources/textures/{1,2}x/JumbalayaLetters.png) times a single
+	    resources/assets/JumbalayaLetters.png) times a single
 	    art-pixel-to-world-unit factor tuned so a full vault row fits its
 	    sidebar with gutters.
 ]]
