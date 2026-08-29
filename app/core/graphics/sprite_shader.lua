@@ -70,23 +70,30 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 				if _shader == 'dissolve' then
 					sh:send('dissolve_wipe', draw_major.dissolve_wipe or 0)
 				end
-				-- Real time so foil/holo/gold_seal sweeps actually animate each frame.
-				local id_phase = 123.33412 * ((tonumber(draw_major.ID) or 0) / 1.14212) % 3000
-				sh:send('time', id_phase + (G.TIMERS and G.TIMERS.REAL or 0))
+				-- Real time so foil/holo sweeps actually animate each frame.
+				-- gold_seal uses REAL alone (sent after this pcall) so a failed
+				-- earlier uniform cannot leave the shimmer clock stuck at 0.
+				if _shader ~= 'gold_seal' then
+					local id_phase = 123.33412 * ((tonumber(draw_major.ID) or 0) / 1.14212) % 3000
+					sh:send('time', id_phase + (G.TIMERS and G.TIMERS.REAL or 0))
+				end
 				sh:send('texture_details', self:texture_descriptor())
 				sh:send('image_details', self:image_dimensions())
 				sh:send('burn_colour_1', draw_major.dissolve_colours and draw_major.dissolve_colours[1] or G.C.CLEAR)
 				sh:send('burn_colour_2', draw_major.dissolve_colours and draw_major.dissolve_colours[2] or G.C.CLEAR)
 				sh:send('shadow', (not not _shadow_height))
-				-- Balatro gold_seal.fs clocks the sparkle from gold_seal.r.
-				-- Send a real vec4; a 2-value send_to_shader table is not a vec4.
-				if _shader == 'gold_seal' then
-					local clock = (G.TIMERS and G.TIMERS.REAL) or 0
-					sh:send('gold_seal', { clock, clock, 0, 1 })
-				elseif _send then
+				if _shader ~= 'gold_seal' and _send then
 					sh:send(_shader, _send)
 				end
 			end)
+			-- Own pcall: still animates if texture_details / burn_colour send failed.
+			if _shader == 'gold_seal' then
+				pcall(function()
+					local clock = (G.TIMERS and G.TIMERS.REAL) or 0
+					sh:send('time', clock)
+					sh:send('gold_seal', clock, clock, 0, 1)
+				end)
+			end
 		end
 	end
 

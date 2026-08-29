@@ -25,25 +25,12 @@ local function letter_card_tint(card)
 	return LetterFaces.fill_color(card.base and card.base.color)
 end
 
--- Balatro gold-seal is an overlay on already-drawn art. Additive blend keeps
--- the yellow dissolve face (and later the white glyphs) even if the overlay
--- shader emits black.
+-- Overlay a travelling gold sheen. Uses the default alpha blend so a bright
+-- stripe is visible on the yellow face (additive gold-on-gold is not).
 local function draw_bonus_gold_shimmer(card)
 	local center = card.children and card.children.center
-	if not center or not love or not love.graphics or not love.graphics.setBlendMode then
-		return
-	end
-	local mode, alphamode = "alpha", "alphamultiply"
-	if love.graphics.getBlendMode then
-		mode, alphamode = love.graphics.getBlendMode()
-	end
-	love.graphics.setBlendMode("add")
+	if not center then return end
 	center:apply_shader_effect("gold_seal", nil, card.ARGS and card.ARGS.send_to_shader)
-	if alphamode then
-		love.graphics.setBlendMode(mode, alphamode)
-	else
-		love.graphics.setBlendMode(mode)
-	end
 end
 
 -- Data-driven placeholder art for locked/undiscovered centers. Entries name
@@ -517,10 +504,10 @@ function Card:draw_front()
 			-- Same tinted-frame path as every other letter card: yellow gold here.
 			G.OVERLAY_TINT = letter_card_tint(self)
 			self.children.center:apply_shader_effect('dissolve')
+			G.OVERLAY_TINT = nil
 			if self.bonus_card then
 				draw_bonus_gold_shimmer(self)
 			end
-			G.OVERLAY_TINT = nil
 			if self.children.front then
 				self.children.front:apply_shader_effect('dissolve')
 			end

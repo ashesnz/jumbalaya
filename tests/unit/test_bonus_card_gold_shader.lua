@@ -21,7 +21,6 @@ T.describe("bonus card gold shader (gold_seal.fs)", function()
 		T.assert_not_nil(src:match("uniform vec4 gold_seal"), "must declare gold_seal like Balatro")
 		T.assert_not_nil(src:match("uniform float time"), "must declare time so sprite_shader pcall can finish")
 		T.assert_not_nil(src:match("uniform vec2 mouse_screen_pos"), "must declare mouse_screen_pos")
-		T.assert_not_nil(src:match("gold_seal%.r"), "sweep must use gold_seal.r as the animation clock")
 	end)
 
 	T.it("sweeps in card-local UV like Balatro voucher/foil, not atlas texture_coords", function()
@@ -32,17 +31,11 @@ T.describe("bonus card gold shader (gold_seal.fs)", function()
 		T.assert_nil(src:match("fract%(texture_coords"), "sweep must not use raw atlas texture_coords")
 	end)
 
-	T.it("defines a travelling diagonal beam clocked by gold_seal.r", function()
+	T.it("animates from the time uniform so a stuck gold_seal clock cannot freeze the sweep", function()
 		local src = read_shader_source()
-		T.assert_not_nil(src:match("SWEEP_SPEED 0%.70"), "beam speed must be visible (~1.4s per pass)")
+		T.assert_not_nil(src:match("float clock = time"), "sweep clock must be the time uniform")
 		T.assert_not_nil(src:match("clock %* SWEEP_SPEED"), "band must subtract clock so it travels")
-		T.assert_not_nil(src:match("uv%.x %* SWEEP_X"), "band must vary across the card horizontally")
-	end)
-
-	T.it("emits highlight only so additive blend cannot black out the face", function()
-		local src = read_shader_source()
-		T.assert_not_nil(src:match("gold %* %(beam"), "overlay should be a travelling highlight")
-		T.assert_nil(src:match("colour%.rgb %* mask"), "must not rebuild the face from overlay colour")
+		T.assert_not_nil(src:match("pixel%.a %* shine"), "stripe must use alpha so it is visible on the yellow face")
 	end)
 end)
 
@@ -58,7 +51,7 @@ T.describe("gold shimmer sweep motion", function()
 		local phase = fract(uvx * SWEEP_X + uvy * SWEEP_Y - clock * SWEEP_SPEED)
 		local ridge = 1 - math.abs(phase - 0.5) * 2
 		if ridge < 0 then ridge = 0 end
-		return ridge ^ 6
+		return ridge ^ 3
 	end
 
 	T.it("moves the highlight peak across the card as time advances", function()
@@ -100,11 +93,14 @@ T.describe("sprite shader uniform contract", function()
 		T.assert_not_nil(src:match("if _shader == 'dissolve'"), "dissolve_wipe must be dissolve-only")
 	end)
 
-	T.it("sends gold_seal as a vec4 clock from G.TIMERS.REAL", function()
+	T.it("sends gold_seal time in a separate pcall from G.TIMERS.REAL", function()
 		local src = io.open("app/core/graphics/sprite_shader.lua", "r"):read("*a")
-		T.assert_not_nil(src:match("sh:send%('gold_seal'"), "gold_seal uniform must be sent explicitly")
-		T.assert_not_nil(src:match("G%.TIMERS and G%.TIMERS%.REAL"),
-			"clock should include real time so the shimmer animates")
+		T.assert_not_nil(src:match("if _shader == 'gold_seal' then"),
+			"gold_seal clock must be sent even if earlier uniforms fail")
+		T.assert_not_nil(src:match("sh:send%('time', clock%)"),
+			"gold_seal must send time as REAL so the stripe moves on a still card")
+		T.assert_not_nil(src:match("sh:send%('gold_seal', clock, clock, 0, 1%)"),
+			"gold_seal vec4 must be four numbers, not a 2-value table")
 	end)
 end)
 
@@ -177,21 +173,13 @@ T.describe("bonus card gold visuals", function()
 		T.assert_nil(card.dissolve_colours)
 	end)
 
-	T.it("draw_front tints the frame yellow, adds additive gold shimmer, then draws white glyphs", function()
+	T.it("draw_front tints the frame yellow, overlays gold shimmer, then draws white glyphs", function()
 		mock_env.ensure_engine_globals()
 		require("word_game.model.cards.card")
 
 		local shader_calls = {}
 		local center_dissolve_tint
 		local front_dissolve_tint = "unset"
-		local blend_modes = {}
-
-		love.graphics.getBlendMode = function()
-			return "alpha", "alphamultiply"
-		end
-		love.graphics.setBlendMode = function(mode)
-			blend_modes[#blend_modes + 1] = mode
-		end
 
 		local card = {
 			bonus_card = true,
@@ -233,7 +221,7 @@ T.describe("bonus card gold visuals", function()
 		T.assert_equal(shader_calls[1], "center:dissolve",
 			"yellow face must use the same dissolve tint path as other letter cards")
 		T.assert_equal(shader_calls[2], "center:gold_seal",
-			"Balatro-style gold shimmer overlays the yellow face")
+			"gold shimmer overlays the yellow face")
 		T.assert_equal(shader_calls[3], "front:dissolve",
 			"letter glyphs must draw on top so they stay visible")
 		T.assert_nil(shader_calls[4])
@@ -243,8 +231,6 @@ T.describe("bonus card gold visuals", function()
 		T.assert_equal(center_dissolve_tint[1], gold[1],
 			"bonus frame dissolve must use BONUS_FACE_COLOR, not a stale red/black base")
 		T.assert_nil(front_dissolve_tint, "glyphs must stay white, not gold-tinted")
-		T.assert_equal(blend_modes[1], "add", "gold shimmer must be additive so it cannot replace the yellow face")
-		T.assert_equal(blend_modes[2], "alpha", "blend mode must be restored before glyphs draw")
 	end)
 
 	T.it("shader gold_seal and time uniforms advance between frames", function()
@@ -269,11 +255,11 @@ T.describe("bonus card gold visuals", function()
 		sprite:set_role({ draw_major = { ID = 7, dissolve = 0 } })
 
 		G.SHADERS.gold_seal = {
-			send = function(_, name, value)
+			send = function(_, name, ...)
 				if name == "time" then
-					sent_times[#sent_times + 1] = value
+					sent_times[#sent_times + 1] = select(1, ...)
 				elseif name == "gold_seal" then
-					sent_gold[#sent_gold + 1] = value[1]
+					sent_gold[#sent_gold + 1] = select(1, ...)
 				end
 			end,
 		}
@@ -284,9 +270,11 @@ T.describe("bonus card gold visuals", function()
 		G.TIMERS.REAL = 2.5
 		sprite:apply_shader_effect("gold_seal", nil, nil, nil, nil)
 
-		T.assert_equal(#sent_gold, 2, "gold_seal.r must be sent each frame")
-		T.assert_true(sent_gold[2] > sent_gold[1], "gold_seal.r must advance so Balatro sparkle animates")
+		T.assert_equal(#sent_gold, 2, "gold_seal clock must be sent each frame")
+		T.assert_true(sent_gold[2] > sent_gold[1], "gold_seal clock must advance on a still card")
 		T.assert_equal(#sent_times, 2)
-		T.assert_true(sent_times[2] > sent_times[1], "time uniform must also advance")
+		T.assert_true(sent_times[2] > sent_times[1], "time uniform must advance with G.TIMERS.REAL")
+		T.assert_almost_equal(sent_times[1], 1.0, 0.001)
+		T.assert_almost_equal(sent_times[2], 2.5, 0.001)
 	end)
 end)

@@ -1,9 +1,9 @@
-// Jumbalaya - gold shimmer overlay (Balatro voucher/foil travelling shine).
-// Drawn additively over the yellow dissolve face. Highlight only — no fill.
+// Jumbalaya - gold shimmer overlay (Balatro voucher-style travelling shine).
+// Drawn over the yellow dissolve face with normal alpha. The stripe's alpha
+// is the animation — gold-on-gold additive was effectively invisible.
 //
-// Balatro gold seals use the voucher shader: card-local UV plus a clock
-// (send_to_shader.r) so bands actually travel across the sprite. Atlas
-// texture_coords barely change on one cell, so they cannot drive a sweep.
+// Clock is `time` (G.TIMERS.REAL). Cards do not need to move; Lua is not a
+// limiter — the game loop advances REAL every frame.
 
 uniform vec2 mouse_screen_pos;
 uniform float screen_scale;
@@ -37,22 +37,20 @@ vec4 effect(vec4 colour, Image texture, vec2 texture_coords, vec2 screen_coords)
 	}
 
 	vec2 uv = card_uv(texture_coords);
-	float clock = gold_seal.r;
+	float clock = time;
 
-	// Sharp diagonal ridge that crosses the card about once per 1.4s.
+	// Diagonal ridge that crosses the card about once per 1.4s.
 	float phase = fract(uv.x * SWEEP_X + uv.y * SWEEP_Y - clock * SWEEP_SPEED);
-	float beam = pow(1.0 - abs(phase - 0.5) * 2.0, 6.0);
+	float beam = pow(1.0 - abs(phase - 0.5) * 2.0, 3.0);
 
-	// Balatro voucher-style gold crawl, keyed to the same card UV.
+	// Slower Balatro-voucher crawl so the face isn't a single hard stripe.
 	float v = clock / 28.0;
 	float fac = 0.8 + 0.9 * sin(13. * uv.x + 5.32 * uv.y + v * 12.
 		+ cos(v * 5.3 + uv.y * 4.2 - uv.x * 4.));
-	float fac2 = 0.5 + 0.5 * sin(10. * uv.x + 2.32 * uv.y + v * 5.
-		- cos(v * 2.3 + uv.x * 8.2));
-	float crawl = max(0.0, max(fac, fac2) - 1.15);
+	float crawl = max(0.0, fac - 1.2);
 
-	vec3 gold = vec3(1.00, 0.90, 0.35);
-	vec3 rgb = gold * (beam * 1.25 + crawl * 0.35) * pixel.a;
+	float shine = clamp(beam * 0.85 + crawl * 0.25, 0.0, 1.0);
+	vec3 highlight = vec3(1.00, 0.96, 0.72);
 
-	return vec4(rgb, pixel.a);
+	return vec4(highlight, pixel.a * shine);
 }
