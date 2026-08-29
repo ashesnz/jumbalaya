@@ -123,6 +123,20 @@ function M.apply_gold_bonus_face(card)
 	end
 end
 
+--- Gold face + shimmer flag. Used when the dissolve rematerializes, before
+--- the fly to the left gutter, so the card already looks like a bonus card.
+function M.become_bonus_card(card)
+	if not card or card.REMOVED then return end
+	card.bonus_card = true
+	card.boss_temp = nil
+	card.placement_locked = nil
+	card.pinned = nil
+	if card.ability then
+		card.ability.bonus = M.BONUS_POINTS
+	end
+	M.apply_gold_bonus_face(card)
+end
+
 local function reconcile_bonus_faces()
 	for _, card in ipairs(stack_cards or {}) do
 		if card and card.bonus_card and not card.REMOVED then
@@ -249,14 +263,7 @@ function M.promote_to_bonus(cards)
 	for _, card in ipairs(cards or {}) do
 		if card and not card.REMOVED then
 			M.detach(card)
-			card.bonus_card = true
-			card.boss_temp = nil
-			card.placement_locked = nil
-			card.pinned = nil
-			M.apply_gold_bonus_face(card)
-			if card.ability then
-				card.ability.bonus = M.BONUS_POINTS
-			end
+			M.become_bonus_card(card)
 			stack_cards[#stack_cards + 1] = card
 		end
 	end
@@ -287,8 +294,8 @@ local function smoothstep(u)
 end
 
 local function run_gold_transform(card, on_complete)
-	if not card or not card.apply_face or not DissolveFX or not DissolveFX.run then
-		M.apply_gold_bonus_face(card)
+	if not card or not DissolveFX or not DissolveFX.run then
+		M.become_bonus_card(card)
 		if on_complete then on_complete() end
 		return
 	end
@@ -316,7 +323,8 @@ local function run_gold_transform(card, on_complete)
 			duration = 0.3 * TRANSFORM_DISSOLVE_TIME,
 		},
 		on_finish = function()
-			M.apply_gold_bonus_face(card)
+			-- Rematerialize as a gold shimmer bonus card, then fly to the gutter.
+			M.become_bonus_card(card)
 			card.dissolve = 1
 			card.dissolve_wipe = 0
 			card.dissolve_colours = BURN_MATERIALIZE_COLOURS
@@ -387,7 +395,7 @@ function M.animate_cards_to_stack(queue_event, _easing_mod, opts)
 	local can_queue = queue_event and G.TIMELINE and G.TIMELINE.enqueue
 	if not can_queue then
 		for index, card in ipairs(cards) do
-			M.apply_gold_bonus_face(card)
+			M.become_bonus_card(card)
 			local tx, ty = M.target_position(index)
 			snap_card_to(card, tx, ty)
 		end

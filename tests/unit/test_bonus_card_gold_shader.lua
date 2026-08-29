@@ -173,6 +173,94 @@ T.describe("bonus card gold visuals", function()
 		T.assert_nil(card.dissolve_colours)
 	end)
 
+	T.it("become_bonus_card flags the card and switches it to gold before any fly", function()
+		local applied_color
+		local card = {
+			ability = { letter = "V", bonus = 0 },
+			config = { card = { letter = "V", color = "red" } },
+			apply_face = function(self, front)
+				self.config.card = front
+				applied_color = front and front.color
+			end,
+		}
+		G.P_CARDS = G.P_CARDS or {}
+		G.P_CARDS.gold_V = { letter = "V", color = "gold", pos = LetterFaces.glyph_pos("V") }
+
+		bonus_stack.become_bonus_card(card)
+
+		T.assert_true(card.bonus_card)
+		T.assert_equal(applied_color, "gold")
+		T.assert_equal(card.ability.bonus, bonus_stack.BONUS_POINTS)
+	end)
+
+	T.it("gold transform rematerializes as a shimmer bonus card before flying to the gutter", function()
+		local DissolveFX = require("app.effects.dissolve_fx")
+		local orig_run = DissolveFX.run
+		local gold_before_fly = false
+		local shimmer_before_fly = false
+		local flew = false
+
+		DissolveFX.run = function(target, opts)
+			if opts.on_finish then
+				if opts.mode == "in" then
+					gold_before_fly = target.config and target.config.card and target.config.card.color == "gold"
+					shimmer_before_fly = target.bonus_card == true
+				end
+				opts.on_finish(target)
+			end
+		end
+
+		local card = {
+			ability = { letter = "E", bonus = 0, set = "Default" },
+			config = { card = { letter = "E", color = "red" } },
+			T = { x = 8, y = 4, w = 2, h = 2.8, r = 0 },
+			VT = { x = 8, y = 4, w = 2, h = 2.8, r = 0 },
+			states = { visible = true, drag = { can = true, is = false }, collide = { can = true } },
+			apply_face = function(self, front)
+				self.config.card = front
+			end,
+			hard_set_T = function(self, nx, ny, nw, nh)
+				self.T.x, self.T.y, self.T.w, self.T.h = nx, ny, nw, nh
+			end,
+		}
+		G.P_CARDS = G.P_CARDS or {}
+		G.P_CARDS.gold_E = { letter = "E", color = "gold", pos = LetterFaces.glyph_pos("E") }
+
+		G.TIMELINE = { enqueue = function() end }
+		G.TIMERS = G.TIMERS or { REAL = 0 }
+
+		bonus_stack.clear()
+		G.CARD_W, G.CARD_H = 2, 2.8
+		G.ROOM = G.ROOM or { T = { x = 1, y = 0, w = 20, h = 11.5 } }
+		G.hand = G.hand or { T = { x = 3.2, y = 8.0, w = 10.5, h = 2.8 } }
+		G.placement_table = G.placement_table or {
+			area = { T = { x = 0.6, y = 2.0, w = 18.0, h = 2.8 } },
+		}
+
+		bonus_stack.stage_cards({ card })
+		bonus_stack.animate_cards_to_stack(function(tween)
+			if type(tween) == "table" and tween.func then
+				tween.func()
+			end
+		end, nil, {
+			initial_delay = 0,
+			card_delay = 0,
+			stagger = 0,
+			hold = 0,
+			on_complete = function()
+				flew = true
+			end,
+		})
+
+		DissolveFX.run = orig_run
+
+		T.assert_true(shimmer_before_fly, "bonus_card (gold shimmer) must be set before the gutter fly")
+		T.assert_true(gold_before_fly, "gold face must be applied before the gutter fly")
+		T.assert_true(card.bonus_card)
+		T.assert_equal(card.config.card.color, "gold")
+		T.assert_true(flew)
+	end)
+
 	T.it("draw_front tints the frame yellow, overlays gold shimmer, then draws white glyphs", function()
 		mock_env.ensure_engine_globals()
 		require("word_game.model.cards.card")
