@@ -21,20 +21,76 @@ T.describe("bonus card gold shader (gold_seal.fs)", function()
 		T.assert_not_nil(src:match("uniform vec4 gold_seal"), "must declare gold_seal like Balatro")
 		T.assert_not_nil(src:match("uniform float time"), "must declare time so sprite_shader pcall can finish")
 		T.assert_not_nil(src:match("uniform vec2 mouse_screen_pos"), "must declare mouse_screen_pos")
-		T.assert_not_nil(src:match("gold_seal%.r"), "sparkle must use Balatro gold_seal.r clock")
+		T.assert_not_nil(src:match("gold_seal%.r"), "sweep must use gold_seal.r as the animation clock")
 	end)
 
-	T.it("uses Balatro sparkle math and a travelling beam", function()
+	T.it("sweeps in card-local UV like Balatro voucher/foil, not atlas texture_coords", function()
 		local src = read_shader_source()
-		T.assert_not_nil(src:match("sin%(%(texture_coords%.x %* 450"), "Balatro gold-seal sparkle")
-		T.assert_not_nil(src:match("beam"), "visible travelling beam")
-		T.assert_not_nil(src:match("clock %* 0%.55"), "beam must move with the clock")
+		T.assert_not_nil(src:match("card_uv"), "must convert atlas coords into 0-1 card UV")
+		T.assert_not_nil(src:match("texture_details%.xy"), "UV must subtract the sprite cell origin")
+		T.assert_not_nil(src:match("texture_details%.ba"), "UV must divide by the sprite cell size")
+		T.assert_nil(src:match("fract%(texture_coords"), "sweep must not use raw atlas texture_coords")
+	end)
+
+	T.it("defines a travelling diagonal beam clocked by gold_seal.r", function()
+		local src = read_shader_source()
+		T.assert_not_nil(src:match("SWEEP_SPEED 0%.70"), "beam speed must be visible (~1.4s per pass)")
+		T.assert_not_nil(src:match("clock %* SWEEP_SPEED"), "band must subtract clock so it travels")
+		T.assert_not_nil(src:match("uv%.x %* SWEEP_X"), "band must vary across the card horizontally")
 	end)
 
 	T.it("emits highlight only so additive blend cannot black out the face", function()
 		local src = read_shader_source()
-		T.assert_not_nil(src:match("gold %* sparkle"), "overlay should be sparkle highlight, not a replacement fill")
+		T.assert_not_nil(src:match("gold %* %(beam"), "overlay should be a travelling highlight")
 		T.assert_nil(src:match("colour%.rgb %* mask"), "must not rebuild the face from overlay colour")
+	end)
+end)
+
+T.describe("gold shimmer sweep motion", function()
+	-- Keep in lockstep with SWEEP_* in resources/shaders/gold_seal.fs
+	local SWEEP_X, SWEEP_Y, SWEEP_SPEED = 0.85, 0.45, 0.70
+
+	local function fract(x)
+		return x - math.floor(x)
+	end
+
+	local function beam(uvx, uvy, clock)
+		local phase = fract(uvx * SWEEP_X + uvy * SWEEP_Y - clock * SWEEP_SPEED)
+		local ridge = 1 - math.abs(phase - 0.5) * 2
+		if ridge < 0 then ridge = 0 end
+		return ridge ^ 6
+	end
+
+	T.it("moves the highlight peak across the card as time advances", function()
+		local function peak_x(clock)
+			local best_x, best = 0, -1
+			for i = 0, 20 do
+				local x = i / 20
+				local b = beam(x, 0.5, clock)
+				if b > best then
+					best, best_x = b, x
+				end
+			end
+			return best_x, best
+		end
+
+		local x0, b0 = peak_x(0)
+		local x1, b1 = peak_x(0.8)
+		T.assert_true(b0 > 0.3, "there must be a bright band at t=0")
+		T.assert_true(b1 > 0.3, "there must be a bright band after the clock advances")
+		T.assert_true(math.abs(x1 - x0) > 0.2,
+			"the bright band must travel across the card, not pulse in place")
+	end)
+
+	T.it("is bright on one side of the card and dark on the other at a frozen clock", function()
+		local brightest, darkest = -1, 2
+		for i = 0, 20 do
+			local b = beam(i / 20, 0.5, 0)
+			if b > brightest then brightest = b end
+			if b < darkest then darkest = b end
+		end
+		T.assert_true(brightest - darkest > 0.5,
+			"a travelling shimmer must not light the whole face evenly")
 	end)
 end)
 

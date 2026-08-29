@@ -1,10 +1,9 @@
-// Jumbalaya - Balatro-style gold seal shimmer, as an additive overlay.
-// The yellow card face is drawn first with dissolve + gold OVERLAY_TINT.
-// This pass only emits highlight; black = no change to the face underneath.
+// Jumbalaya - gold shimmer overlay (Balatro voucher/foil travelling shine).
+// Drawn additively over the yellow dissolve face. Highlight only — no fill.
 //
-// Standard sprite uniforms must be declared so sprite_shader.lua can send them
-// without aborting before `gold_seal` / `time` are set.
-// Balatro gold_seal.fs uses gold_seal.r as the animation clock.
+// Balatro gold seals use the voucher shader: card-local UV plus a clock
+// (send_to_shader.r) so bands actually travel across the sprite. Atlas
+// texture_coords barely change on one cell, so they cannot drive a sweep.
 
 uniform vec2 mouse_screen_pos;
 uniform float screen_scale;
@@ -18,6 +17,18 @@ uniform vec4 burn_colour_2;
 uniform bool shadow;
 uniform vec4 gold_seal;
 
+// Must stay in sync with tests/unit/test_bonus_card_gold_shader.lua
+#define SWEEP_X 0.85
+#define SWEEP_Y 0.45
+#define SWEEP_SPEED 0.70
+
+vec2 card_uv(vec2 texture_coords)
+{
+	vec2 img = max(image_details, vec2(1.0));
+	vec2 cell = max(texture_details.ba, vec2(1.0));
+	return (texture_coords * img - texture_details.xy * cell) / cell;
+}
+
 vec4 effect(vec4 colour, Image texture, vec2 texture_coords, vec2 screen_coords)
 {
 	vec4 pixel = Texel(texture, texture_coords);
@@ -25,25 +36,23 @@ vec4 effect(vec4 colour, Image texture, vec2 texture_coords, vec2 screen_coords)
 		return vec4(0.0);
 	}
 
-	// Prefer the dedicated gold_seal clock (Balatro); fall back to `time`.
-	float clock = gold_seal.r + time;
+	vec2 uv = card_uv(texture_coords);
+	float clock = gold_seal.r;
 
-	float low = min(pixel.r, min(pixel.g, pixel.b));
-	float high = max(pixel.r, max(pixel.g, pixel.b));
-	float delta = high * 0.5;
+	// Sharp diagonal ridge that crosses the card about once per 1.4s.
+	float phase = fract(uv.x * SWEEP_X + uv.y * SWEEP_Y - clock * SWEEP_SPEED);
+	float beam = pow(1.0 - abs(phase - 0.5) * 2.0, 6.0);
 
-	// Balatro gold-seal sparkle (gold_seal.r is the original clock).
-	float fac = 0.3
-		+ sin((texture_coords.x * 450. + sin(clock * 6.) * 180.) - 700. * clock)
-		- sin((texture_coords.x * 190. + texture_coords.y * 30.) + 1080.3 * clock);
+	// Balatro voucher-style gold crawl, keyed to the same card UV.
+	float v = clock / 28.0;
+	float fac = 0.8 + 0.9 * sin(13. * uv.x + 5.32 * uv.y + v * 12.
+		+ cos(v * 5.3 + uv.y * 4.2 - uv.x * 4.));
+	float fac2 = 0.5 + 0.5 * sin(10. * uv.x + 2.32 * uv.y + v * 5.
+		- cos(v * 2.3 + uv.x * 8.2));
+	float crawl = max(0.0, max(fac, fac2) - 1.15);
 
-	// Extra travelling band so the sweep is obvious on a flat letter frame.
-	float cycle = fract(texture_coords.x * 0.90 + texture_coords.y * 0.50 - clock * 0.55);
-	float beam = smoothstep(0.18, 0.34, cycle) * smoothstep(0.78, 0.62, cycle);
-
-	float sparkle = max(0.0, fac) * delta * 0.85 + beam * 0.90;
-	vec3 gold = vec3(1.00, 0.88, 0.28);
-	vec3 rgb = gold * sparkle * pixel.a;
+	vec3 gold = vec3(1.00, 0.90, 0.35);
+	vec3 rgb = gold * (beam * 1.25 + crawl * 0.35) * pixel.a;
 
 	return vec4(rgb, pixel.a);
 }
