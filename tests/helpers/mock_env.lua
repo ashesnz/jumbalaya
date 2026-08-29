@@ -167,6 +167,10 @@ function M.setup()
 	love.graphics.getColor = love.graphics.getColor or function() return 1, 1, 1, 1 end
 	love.graphics.setShader = love.graphics.setShader or function() end
 	love.graphics.getShader = love.graphics.getShader or function() return nil end
+	love.graphics.setBlendMode = love.graphics.setBlendMode or function() end
+	love.graphics.getBlendMode = love.graphics.getBlendMode or function()
+		return "alpha", "alphamultiply"
+	end
 	love.graphics.setCanvas = love.graphics.setCanvas or function() end
 	love.graphics.getCanvas = love.graphics.getCanvas or function() return nil end
 	love.graphics.newCanvas = love.graphics.newCanvas or function(w, h)

@@ -67,15 +67,25 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 				sh:send('hovering', ((_shadow_height and not tilt_shadow) or _no_tilt) and 0
 					or (draw_major.hover_tilt or 0) * (tilt_shadow or 1))
 				sh:send('dissolve', math.abs(draw_major.dissolve or 0))
-				sh:send('dissolve_wipe', draw_major.dissolve_wipe or 0)
-				-- Stable per-object phase derived from the unique ID.
-				sh:send('time', 123.33412 * ((tonumber(draw_major.ID) or 0) / 1.14212) % 3000)
+				if _shader == 'dissolve' then
+					sh:send('dissolve_wipe', draw_major.dissolve_wipe or 0)
+				end
+				-- Real time so foil/holo/gold_seal sweeps actually animate each frame.
+				local id_phase = 123.33412 * ((tonumber(draw_major.ID) or 0) / 1.14212) % 3000
+				sh:send('time', id_phase + (G.TIMERS and G.TIMERS.REAL or 0))
 				sh:send('texture_details', self:texture_descriptor())
 				sh:send('image_details', self:image_dimensions())
 				sh:send('burn_colour_1', draw_major.dissolve_colours and draw_major.dissolve_colours[1] or G.C.CLEAR)
 				sh:send('burn_colour_2', draw_major.dissolve_colours and draw_major.dissolve_colours[2] or G.C.CLEAR)
 				sh:send('shadow', (not not _shadow_height))
-				if _send then sh:send(_shader, _send) end
+				-- Balatro gold_seal.fs clocks the sparkle from gold_seal.r.
+				-- Send a real vec4; a 2-value send_to_shader table is not a vec4.
+				if _shader == 'gold_seal' then
+					local clock = (G.TIMERS and G.TIMERS.REAL) or 0
+					sh:send('gold_seal', { clock, clock, 0, 1 })
+				elseif _send then
+					sh:send(_shader, _send)
+				end
 			end)
 		end
 	end

@@ -5,6 +5,7 @@
 local Scheduler = require "app.effects.scheduler"
 local DissolveFX = require "app.effects.dissolve_fx"
 local LetterFaces = require "word_game.ui.letter_card_faces"
+local LetterPalette = require "word_game.config.letter_card_palette"
 
 -- Finish editions rendered as shader overlays, keyed by edition flag.
 local FINISH_SHADERS = {
@@ -16,6 +17,34 @@ local FINISH_SHADERS = {
 -- Sets whose body sprite doubles as the letter-tile face. Letter cards render
 -- as a tinted frame (center) plus a shared glyph layer (front).
 local FLAT_LETTER_SETS = { Default = true, Enhanced = true }
+
+local function letter_card_tint(card)
+	if card.bonus_card then
+		return LetterPalette.fill(LetterPalette.BONUS_FACE_COLOR)
+	end
+	return LetterFaces.fill_color(card.base and card.base.color)
+end
+
+-- Balatro gold-seal is an overlay on already-drawn art. Additive blend keeps
+-- the yellow dissolve face (and later the white glyphs) even if the overlay
+-- shader emits black.
+local function draw_bonus_gold_shimmer(card)
+	local center = card.children and card.children.center
+	if not center or not love or not love.graphics or not love.graphics.setBlendMode then
+		return
+	end
+	local mode, alphamode = "alpha", "alphamultiply"
+	if love.graphics.getBlendMode then
+		mode, alphamode = love.graphics.getBlendMode()
+	end
+	love.graphics.setBlendMode("add")
+	center:apply_shader_effect("gold_seal", nil, card.ARGS and card.ARGS.send_to_shader)
+	if alphamode then
+		love.graphics.setBlendMode(mode, alphamode)
+	else
+		love.graphics.setBlendMode(mode)
+	end
+end
 
 -- Data-driven placeholder art for locked/undiscovered centers. Entries name
 -- globals holding the sprite pos; `veil_usable_only` sets additionally
@@ -485,8 +514,12 @@ function Card:draw_front()
 		end
 	elseif not self.greyed then
 		if LetterFaces.is_letter_card(self) then
-			G.OVERLAY_TINT = LetterFaces.fill_color(self.base and self.base.color)
+			-- Same tinted-frame path as every other letter card: yellow gold here.
+			G.OVERLAY_TINT = letter_card_tint(self)
 			self.children.center:apply_shader_effect('dissolve')
+			if self.bonus_card then
+				draw_bonus_gold_shimmer(self)
+			end
 			G.OVERLAY_TINT = nil
 			if self.children.front then
 				self.children.front:apply_shader_effect('dissolve')
@@ -514,16 +547,9 @@ function Card:draw_front()
 		or self.debuff or self.greyed
 		or self.ability.set == 'Perk'
 		or self.config.center.demo
-		or self.bonus_card
 	if has_overlays then
 		if self.ability.set == 'Perk' or self.config.center.demo then
 			self.children.center:apply_shader_effect('perk', nil, self.ARGS.send_to_shader)
-		end
-		if self.bonus_card then
-			self.children.center:apply_shader_effect('gold_seal', nil, self.ARGS.send_to_shader)
-			if self.children.front then
-				self.children.front:apply_shader_effect('gold_seal', nil, self.ARGS.send_to_shader)
-			end
 		end
 
 		-- Each finished edition layers its signature shine on centre and front.

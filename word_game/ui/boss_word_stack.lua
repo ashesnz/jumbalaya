@@ -102,6 +102,35 @@ function M.on_hand_start(set, hand_index)
 	M.clear()
 end
 
+local function card_letter(card)
+	return (card.ability and card.ability.letter)
+		or (card.config and card.config.card and card.config.card.letter)
+end
+
+function M.apply_gold_bonus_face(card)
+	local letter = card_letter(card)
+	if not letter then return end
+	local color = LetterPalette.BONUS_FACE_COLOR
+	local front = deck.front(letter, color)
+	if front and card.apply_face then
+		deck.tag_card(card, letter, color)
+		card:apply_face(front, false)
+	end
+	if card.bonus_card then
+		card.dissolve = 0
+		card.dissolve_wipe = 0
+		card.dissolve_colours = nil
+	end
+end
+
+local function reconcile_bonus_faces()
+	for _, card in ipairs(stack_cards or {}) do
+		if card and card.bonus_card and not card.REMOVED then
+			M.apply_gold_bonus_face(card)
+		end
+	end
+end
+
 local function gameplay_left_edge()
 	local edge
 	if G.hand and G.hand.T then
@@ -211,6 +240,7 @@ function M.sync_positions()
 			end
 		end
 	end
+	reconcile_bonus_faces()
 end
 
 function M.promote_to_bonus(cards)
@@ -254,22 +284,6 @@ end
 
 local function smoothstep(u)
 	return u * u * (3 - 2 * u)
-end
-
-local function card_letter(card)
-	return (card.ability and card.ability.letter)
-		or (card.config and card.config.card and card.config.card.letter)
-end
-
-function M.apply_gold_bonus_face(card)
-	local letter = card_letter(card)
-	if not letter then return end
-	local color = LetterPalette.BONUS_FACE_COLOR
-	local front = deck.front(letter, color)
-	if front and card.apply_face then
-		deck.tag_card(card, letter, color)
-		card:apply_face(front, false)
-	end
 end
 
 local function run_gold_transform(card, on_complete)
@@ -316,6 +330,7 @@ local function run_gold_transform(card, on_complete)
 				on_finish = function()
 					card.dissolve = 0
 					card.dissolve_wipe = 0
+					card.dissolve_colours = nil
 					if on_complete then on_complete() end
 				end,
 			})
@@ -365,6 +380,7 @@ function M.animate_cards_to_stack(queue_event, _easing_mod, opts)
 
 	local function finish()
 		stack_animating = false
+		reconcile_bonus_faces()
 		if opts.on_complete then opts.on_complete() end
 	end
 
