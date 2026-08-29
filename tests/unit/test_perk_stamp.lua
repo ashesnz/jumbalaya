@@ -414,6 +414,15 @@ T.describe("perk stamp panel layout", function()
 		T.assert_true(cy2 > cy1, "second stamp animation should land below the first")
 	end)
 
+	T.it("spawns a landing puff when the stamp impacts", function()
+		local puff_mod = require("word_game.ui.stamp_puff")
+		puff_mod.reset()
+		Stamp.reset()
+		G.STATE = G.STATES.TABLE_BOARD
+		for _ = 1, 40 do Stamp.debug_step() end
+		T.assert_true(puff_mod.active_count() >= 1, "landing puff should spawn on impact")
+	end)
+
 	T.it("adds imprints below existing stamps on restamp", function()
 		Stamp.reset()
 		G.STATE = G.STATES.TABLE_BOARD

@@ -14,6 +14,18 @@ T.describe("AnimNode align_to_major re-alignment", function()
 		return AnimNode { T = { x = x, y = y, w = w, h = h } }
 	end
 
+	T.it("builds type_list when alignment type is empty on first pass", function()
+		local major = make_node(0, 0, 20, 11)
+		local node = make_node(0, 0, 2, 1)
+		node.Mid = node
+		node:set_alignment{ major = major, type = "", offset = { x = 0, y = 0 } }
+
+		node:align_to_major()
+
+		T.assert_true(node.alignment.type_list ~= nil,
+			"empty align type must still initialize type_list")
+	end)
+
 	T.it("centers a node on its major at 'cm' alignment", function()
 		local major = make_node(0, 0, 20, 11)
 		local node = make_node(0, 0, 2, 1)

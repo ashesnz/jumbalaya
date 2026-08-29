@@ -10,6 +10,7 @@ local perk_cfg = require("word_game.config.perks")
 local perk_model = require("word_game.model.perk")
 local perk_voucher = require("word_game.ui.perk_voucher")
 local stamp_grid = require("word_game.ui.stamp_grid")
+local stamp_puff = require("word_game.ui.stamp_puff")
 
 local M = {}
 
@@ -499,11 +500,12 @@ local function trigger_impact(frame)
 	if frame.impacted then return end
 	frame.impacted = true
 	apply_imprint(frame.sprite_entry, frame.perk_entry)
+	stamp_puff.spawn(frame.land_cx, frame.land_cy, frame.slot_w, frame.slot_h)
 	if G.VIBRATION then
 		G.VIBRATION = G.VIBRATION + 0.55
 	end
 	if play_sfx then
-		play_sfx("multhit2", 1.0, 0.8)
+		play_sfx("stamp", 1.0, 0.9)
 	end
 end
 
@@ -631,6 +633,8 @@ function M.debug_step()
 		anim.t = TOTAL_DUR
 		anim.finished = true
 	end
+
+	stamp_puff.update(FRAME_DT)
 end
 
 function M.demo()
@@ -638,9 +642,11 @@ function M.demo()
 end
 
 function M.update(dt)
-	if not anim or anim.debug then return end
 	dt = dt or (G and G.real_dt) or 0.016
 	dt = math.min(0.05, dt)
+	stamp_puff.update(dt)
+
+	if not anim or anim.debug then return end
 	anim.t = anim.t + dt
 
 	if not anim.impacted and anim.t >= STRIKE_DUR then
@@ -675,6 +681,8 @@ function M.draw_pass()
 		end
 		draw_type_imprint(entry.sprite, x, y, w, h, alpha)
 	end
+
+	stamp_puff.draw()
 
 	if anim then
 		local frame = anim
@@ -778,6 +786,7 @@ end
 function M.reset()
 	anim = nil
 	imprints = {}
+	stamp_puff.reset()
 end
 
 function M.has_imprint()

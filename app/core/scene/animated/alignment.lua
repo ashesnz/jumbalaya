@@ -21,7 +21,7 @@ end
 --- Recomputes the role offset so this AnimNode sits at its alignment anchor
 --- relative to `role.major`, then snaps `T` onto the major's origin.
 function AnimNode:align_to_major()
-	if self.alignment.type ~= self.alignment.prev_type then
+	if not self.alignment.type_list or self.alignment.type ~= self.alignment.prev_type then
 		self.alignment.type_list = {
 			a = self.alignment.type == 'a',
 			m = string.find(self.alignment.type, "m"),
