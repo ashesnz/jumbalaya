@@ -18,5 +18,8 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
     pixel.g = max(pixel.g, (1. - pixel.g)*delta*fac + pixel.g);
     pixel.b = max(pixel.b, (1. - pixel.b)*delta*fac + pixel.b);
 
-    return pixel;
+    vec3 gold = vec3(1.00, 0.83, 0.42);
+    pixel.rgb = mix(pixel.rgb, pixel.rgb * gold * 1.25, 0.40);
+
+    return pixel * color;
 }
