@@ -41,7 +41,7 @@ end)
 
 T.describe("gold shimmer sweep motion", function()
 	-- Keep in lockstep with SWEEP_* in resources/shaders/gold_seal.fs
-	local SWEEP_X, SWEEP_Y, SWEEP_SPEED = 0.85, 0.45, 0.70
+	local SWEEP_X, SWEEP_Y, SWEEP_SPEED = 0.85, 0.45, 0.233
 
 	local function fract(x)
 		return x - math.floor(x)
@@ -68,7 +68,7 @@ T.describe("gold shimmer sweep motion", function()
 		end
 
 		local x0, b0 = peak_x(0)
-		local x1, b1 = peak_x(0.8)
+		local x1, b1 = peak_x(2.4)
 		T.assert_true(b0 > 0.3, "there must be a bright band at t=0")
 		T.assert_true(b1 > 0.3, "there must be a bright band after the clock advances")
 		T.assert_true(math.abs(x1 - x0) > 0.2,

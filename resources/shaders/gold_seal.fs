@@ -20,7 +20,7 @@ uniform vec4 gold_seal;
 // Must stay in sync with tests/unit/test_bonus_card_gold_shader.lua
 #define SWEEP_X 0.85
 #define SWEEP_Y 0.45
-#define SWEEP_SPEED 0.70
+#define SWEEP_SPEED 0.233
 
 vec2 card_uv(vec2 texture_coords)
 {
@@ -39,12 +39,12 @@ vec4 effect(vec4 colour, Image texture, vec2 texture_coords, vec2 screen_coords)
 	vec2 uv = card_uv(texture_coords);
 	float clock = time;
 
-	// Diagonal ridge that crosses the card about once per 1.4s.
+	// Diagonal ridge that crosses the card about once per 4.3s.
 	float phase = fract(uv.x * SWEEP_X + uv.y * SWEEP_Y - clock * SWEEP_SPEED);
 	float beam = pow(1.0 - abs(phase - 0.5) * 2.0, 3.0);
 
 	// Slower Balatro-voucher crawl so the face isn't a single hard stripe.
-	float v = clock / 28.0;
+	float v = clock / 84.0;
 	float fac = 0.8 + 0.9 * sin(13. * uv.x + 5.32 * uv.y + v * 12.
 		+ cos(v * 5.3 + uv.y * 4.2 - uv.x * 4.));
 	float crawl = max(0.0, fac - 1.2);
