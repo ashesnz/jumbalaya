@@ -163,6 +163,9 @@ end
 
 local function stamp_panel_rect_px(layout_count)
 	layout_count = layout_count or layout_stamp_count()
+	if G.VAULT_HUD then
+		require("word_game.ui.sidebar.hud_definition").relayout_vault()
+	end
 	local row = G.VAULT_HUD and G.VAULT_HUD:find_node_by_id("row_stamp_slot")
 	local rx, ry, rw, rh = node_rect_px(row)
 	if not rx then
@@ -175,8 +178,9 @@ local function stamp_panel_rect_px(layout_count)
 	end
 	local w = vault_width_px()
 	local h = stamp_grid.panel_height_px(nil, layout_count)
+	local box_h = math.max(rh or h, h)
 	local x = rx + (rw - w) * 0.5
-	local y = ry + (rh - h) * 0.5
+	local y = ry + (box_h - h) * 0.5
 	return x, y, w, h, layout_count
 end
 
@@ -847,6 +851,7 @@ end
 function M.debug_next_land_px()
 	local target_index = next_slot_index()
 	pending_target_index = target_index
+	refresh_sidebar()
 	local _, land_cy, _, slot_y = stamp_target_px(target_index)
 	pending_target_index = nil
 	return target_index, land_cy, slot_y
@@ -855,7 +860,12 @@ end
 function M.reset()
 	anim = nil
 	imprints = {}
+	pending_target_index = nil
 	stamp_puff.reset()
+	if G.VAULT_HUD and G.VAULT_HUD.remove then
+		pcall(function() G.VAULT_HUD:remove() end)
+	end
+	G.VAULT_HUD = nil
 end
 
 function M.has_imprint()

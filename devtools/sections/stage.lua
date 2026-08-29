@@ -6,7 +6,7 @@ local opening_deal = require "word_game.model.play.opening_deal"
 
 -- Stage 1-3 boss word with two revealed letters → seven gutter bonus cards on 1-4.
 local DEBUG_BOSS_WORD = "VEGETABLE"
-local DEBUG_BOSS_PATTERN = "VE______E"
+local DEBUG_BOSS_PATTERN = "V_______E"
 
 local function debug_bonus_letters()
 	local letters = {}

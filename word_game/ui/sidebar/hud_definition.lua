@@ -16,8 +16,7 @@ local VAULT_FILL_PAD = 0.06
 local VAULT_BOTTOM_PAD = 0.22
 local VAULT_FILL_CHILDREN = 7
 
--- Word list hidden from vault; list_nodes()/list_definition() kept for reuse elsewhere.
-local SHOW_VAULT_WORD_LIST = false
+local SHOW_VAULT_WORD_LIST = true
 
 local function stamp_slot_height()
 	local count = 1

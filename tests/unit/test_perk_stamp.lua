@@ -495,6 +495,7 @@ T.describe("perk stamp click popup", function()
 		G.OVERLAY_MENU = nil
 		G.INPUT = {
 			clicked = { handled = false, target = G.ROOM },
+			snap_to = function() end,
 		}
 		local opened = false
 		local widgets = require("word_game.ui.widgets")
