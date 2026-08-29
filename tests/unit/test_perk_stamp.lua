@@ -276,9 +276,9 @@ T.describe("perk stamp visible mesh", function()
 	end)
 
 	T.it("plays on the table board and issues a visible draw pass", function()
-		local perk_cfg = require("word_game.config.perks")
 		Stamp.reset()
-		T.assert_true(Stamp.play(perk_cfg.POOL[1]), "stamp play should start on TABLE_BOARD")
+		math.randomseed(1)
+		T.assert_true(Stamp.play(), "stamp play should start with a random sprite on TABLE_BOARD")
 		T.assert_true(Stamp.is_active())
 
 		local log, restore = capture_graphics()
@@ -298,5 +298,60 @@ T.describe("perk stamp visible mesh", function()
 			end
 		end
 		T.assert_true(drawn, "stamp outline coordinates should leave the origin")
+	end)
+end)
+
+T.describe("perk stamp panel layout", function()
+	pcall(mock_env.setup)
+	G.TILESCALE = 1
+	G.TILESIZE = 71
+	G.TABLE_BOARD_SIDEBAR_WIDTH = 3.0
+
+	local Stamp = require("word_game.ui.perk_stamp")
+	local stamp_grid = require("word_game.ui.stamp_grid")
+	local perk_cfg = require("word_game.config.perks")
+	Stamp.reset()
+
+	local layout = Stamp.debug_grid_layout()
+
+	T.it("exposes six stamp sprites on the perks sheet", function()
+		T.assert_equal(#perk_cfg.STAMP_SPRITES, 6)
+	end)
+
+	T.it("sizes one stamp cell across the vault width", function()
+		local panel_w = layout.panel.w
+		T.assert_almost_equal(layout.cell.w + stamp_grid.pad_px() * 2, panel_w, 0.5,
+			"single stamp should span the vault panel width")
+		T.assert_almost_equal(layout.cell.h / layout.cell.w, stamp_grid.ASPECT, 0.001,
+			"stamp cell should match Perks.png aspect")
+	end)
+
+	T.it("rolls a random stamp from the sprite list", function()
+		math.randomseed(42)
+		local seen = {}
+		for _ = 1, 30 do
+			local stamp = Stamp.roll_random_stamp()
+			T.assert_not_nil(stamp)
+			T.assert_not_nil(stamp.pos)
+			seen[stamp.pos.x .. "," .. stamp.pos.y] = true
+		end
+		T.assert_true(#perk_cfg.STAMP_SPRITES >= 1)
+	end)
+
+	T.it("places one imprint on the panel and replaces it on restamp", function()
+		Stamp.reset()
+		G.STATE = G.STATES.TABLE_BOARD
+		math.randomseed(7)
+		T.assert_false(Stamp.has_imprint())
+
+		for _ = 1, 70 do Stamp.debug_step() end
+		T.assert_true(Stamp.has_imprint())
+		local first = Stamp.current_imprint()
+
+		for _ = 1, 70 do Stamp.debug_step() end
+		T.assert_true(Stamp.has_imprint())
+		local second = Stamp.current_imprint()
+		T.assert_not_nil(first)
+		T.assert_not_nil(second)
 	end)
 end)

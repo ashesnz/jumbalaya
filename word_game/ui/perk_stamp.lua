@@ -8,6 +8,7 @@
 local Layout = require("word_game.ui.layout")
 local perk_cfg = require("word_game.config.perks")
 local perk_model = require("word_game.model.perk")
+local stamp_grid = require("word_game.ui.stamp_grid")
 
 local M = {}
 
@@ -18,8 +19,7 @@ local IMPRINT_DUR = 0.55
 local TOTAL_DUR = STRIKE_DUR + HOLD_DUR + RETRACT_DUR
 local FRAME_DT = 1 / 36
 local TOTAL_FRAMES = math.ceil(TOTAL_DUR / FRAME_DT)
-local IMPRINT_H_PX = 50
-local SLOT_WIDTH_FILL = 1.0
+local SLOT_WIDTH_FILL = 0.92
 local START_SCALE_MUL = 2.4
 -- 3/4 view: long axis stays horizontal so the block matches the vault row.
 -- Roll is the slight diagonal tilt of a hand coming down from above-right.
@@ -40,7 +40,6 @@ local HANDLE_H = 22
 
 local anim
 local imprint
-local demo_index = 1
 
 local WOOD_TOP = { 0.65, 0.44, 0.23 }
 local WOOD_FRONT = { 0.58, 0.38, 0.20 }
@@ -124,7 +123,11 @@ local function vault_width_px()
 	return Layout.sidebar_width() * tile_scale()
 end
 
-local function stamp_slot_rect_px()
+local function stamp_panel_height_px()
+	return stamp_grid.panel_height_px()
+end
+
+local function stamp_panel_rect_px()
 	local row = G.VAULT_HUD and G.VAULT_HUD:find_node_by_id("row_stamp_slot")
 	local rx, ry, rw, rh = node_rect_px(row)
 	if not rx then
@@ -133,17 +136,39 @@ local function stamp_slot_rect_px()
 		rx = vault.x * ts
 		ry = (vault.y + 0.82) * ts
 		rw = vault.w * ts
-		rh = IMPRINT_H_PX
+		rh = stamp_panel_height_px()
 	end
 	local w = vault_width_px()
+	local h = stamp_panel_height_px()
 	local x = rx + (rw - w) * 0.5
-	local y = ry + (rh - IMPRINT_H_PX) * 0.5
-	return x, y, w, IMPRINT_H_PX
+	local y = ry + (rh - h) * 0.5
+	return x, y, w, h
+end
+
+local function stamp_cell_rect_px()
+	local panel_x, panel_y, panel_w, panel_h = stamp_panel_rect_px()
+	return stamp_grid.cell_rect_px(panel_x, panel_y, panel_w, panel_h)
 end
 
 local function stamp_target_px()
-	local x, y, w, h = stamp_slot_rect_px()
+	local x, y, w, h = stamp_cell_rect_px()
 	return x + w * 0.5, y + h * 0.5, x, y, w, h
+end
+
+local function copy_perk(entry)
+	return {
+		id = entry.id,
+		name = entry.name,
+		desc = entry.desc,
+		pos = { x = entry.pos.x, y = entry.pos.y },
+		token_cost = entry.token_cost,
+	}
+end
+
+local function roll_random_stamp()
+	local sprites = perk_cfg.STAMP_SPRITES
+	if not sprites or #sprites == 0 then return nil end
+	return copy_perk(sprites[math.random(1, #sprites)])
 end
 
 -- Project a local 3D point.  y is up; screen y grows downward.
@@ -404,38 +429,38 @@ local function draw_stamp_3d(ox, oy, scale, yaw, pitch, squash_y, alpha, roll)
 	draw_hand(c, scale, alpha)
 end
 
-local function copy_perk(entry)
-	return {
-		id = entry.id,
-		name = entry.name,
-		desc = entry.desc,
-		pos = { x = entry.pos.x, y = entry.pos.y },
-		token_cost = entry.token_cost,
-	}
-end
-
 local function draw_type_imprint(entry, x, y, w, h, alpha)
 	alpha = alpha or 1
 	love.graphics.setColor(0.14, 0.08, 0.05, alpha * 0.42)
-	love.graphics.rectangle("fill", x, y, w, h, 3, 3)
+	love.graphics.rectangle("fill", x, y, w, h, 2, 2)
 
 	local img, quad, pw, ph = perk_quad(entry)
 	if img and quad then
-		local pad = 5
+		local pad = math.max(2, math.min(5, math.floor(math.min(w, h) * 0.08)))
 		local draw_w = math.max(1, w - pad * 2)
 		local draw_h = math.max(1, h - pad * 2)
+		-- Keep perk art at atlas aspect inside the cell.
+		local scale = math.min(draw_w / pw, draw_h / ph)
+		draw_w = pw * scale
+		draw_h = ph * scale
+		local draw_x = x + (w - draw_w) * 0.5
+		local draw_y = y + (h - draw_h) * 0.5
 		love.graphics.setColor(1, 1, 1, alpha * 0.92)
-		love.graphics.draw(img, quad, x + pad, y + pad, 0, draw_w / pw, draw_h / ph)
+		love.graphics.draw(img, quad, draw_x, draw_y, 0, draw_w / pw, draw_h / ph)
 	end
 
 	love.graphics.setColor(WOOD_EDGE[1], WOOD_EDGE[2], WOOD_EDGE[3], alpha * 0.75)
-	love.graphics.setLineWidth(2)
-	love.graphics.rectangle("line", x, y, w, h, 3, 3)
+	love.graphics.setLineWidth(1.5)
+	love.graphics.rectangle("line", x, y, w, h, 2, 2)
 end
 
 local function apply_imprint(entry)
 	imprint = { entry = copy_perk(entry) }
-	perk_model.apply_choice(entry)
+	local perk = perk_cfg.by_id(entry.id)
+	if perk then
+		perk_model.apply_choice(perk)
+	end
+	return true
 end
 
 local function trigger_impact(frame)
@@ -490,7 +515,6 @@ local function make_anim_state(entry, debug)
 end
 
 local function begin_debug_anim(entry)
-	imprint = nil
 	anim = make_anim_state(entry, true)
 end
 
@@ -498,12 +522,18 @@ function M.is_active()
 	return anim ~= nil
 end
 
-function M.play(entry, callback)
-	if anim or not entry then return false end
-	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
+function M.roll_random_stamp()
+	return roll_random_stamp()
+end
 
-	imprint = nil
+function M.play(entry, callback)
+	if anim then return false end
+	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
+	entry = entry or roll_random_stamp()
+	if not entry then return false end
+
 	anim = make_anim_state(copy_perk(entry), false)
+	if not anim then return false end
 	anim.callback = callback
 	if play_sfx then
 		play_sfx("whoosh2", 0.85, 0.5)
@@ -516,10 +546,7 @@ function M.demo_play()
 	if anim and not anim.debug and anim.t < TOTAL_DUR then return end
 
 	anim = nil
-	local pool = perk_cfg.POOL
-	if #pool == 0 then return end
-	demo_index = (demo_index - 1) % #pool + 1
-	M.play(copy_perk(pool[demo_index]))
+	M.play(roll_random_stamp())
 end
 
 function M.debug_step()
@@ -530,10 +557,9 @@ function M.debug_step()
 	end
 
 	if not anim then
-		local pool = perk_cfg.POOL
-		if #pool == 0 then return end
-		demo_index = (demo_index - 1) % #pool + 1
-		begin_debug_anim(copy_perk(pool[demo_index]))
+		local stamp = roll_random_stamp()
+		if not stamp then return end
+		begin_debug_anim(stamp)
 		if play_sfx then
 			play_sfx("whoosh2", 0.85, 0.5)
 		end
@@ -588,7 +614,7 @@ function M.draw_pass()
 	room_translate()
 
 	if imprint and imprint.entry then
-		local x, y, w, h = stamp_slot_rect_px()
+		local x, y, w, h = stamp_cell_rect_px()
 		local alpha = 1
 		if anim and anim.impacted then
 			local imprint_t = math.min(1, (anim.t - STRIKE_DUR) / IMPRINT_DUR)
@@ -691,6 +717,20 @@ end
 function M.reset()
 	anim = nil
 	imprint = nil
+end
+
+function M.has_imprint()
+	return imprint ~= nil
+end
+
+function M.current_imprint()
+	return imprint and imprint.entry
+end
+
+-- Panel + per-slot cell rects for layout tests and tooling.
+function M.debug_grid_layout()
+	local panel_x, panel_y, panel_w = stamp_panel_rect_px()
+	return stamp_grid.layout(panel_x, panel_y, panel_w)
 end
 
 return M

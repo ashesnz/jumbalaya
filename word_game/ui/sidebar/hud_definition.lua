@@ -3,6 +3,7 @@
 local Layout = require("word_game.ui.layout")
 local hand_progress = require("word_game.ui.sidebar.hand_progress")
 local deck = require("word_game.model.cards.deck")
+local stamp_grid = require("word_game.ui.stamp_grid")
 
 local M = {}
 
@@ -14,14 +15,12 @@ local VAULT_OUTER_PAD = 0
 local VAULT_FILL_PAD = 0.06
 local VAULT_BOTTOM_PAD = 0.22
 local VAULT_FILL_CHILDREN = 7
-local STAMP_SLOT_H_PX = 50
 
 -- Word list hidden from vault; list_nodes()/list_definition() kept for reuse elsewhere.
 local SHOW_VAULT_WORD_LIST = false
 
 local function stamp_slot_height()
-	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
-	return STAMP_SLOT_H_PX / ts + 0.04
+	return stamp_grid.panel_height_tiles()
 end
 
 local function list_height()

@@ -6,6 +6,18 @@ M.DEFAULT_OFFER_COUNT = 3
 M.DEFAULT_TOKEN_COST = 10
 M.RANDOM_SEED_PREFIX = "perk_pick_"
 
+-- Six vault stamp icons on Perks.png (71×95 cells), row 0 columns 0–5.
+M.STAMP_SPRITES = {
+	{ id = "vault_stamp_1", name = "Vault Stamp 1", pos = { x = 0, y = 0 } },
+	{ id = "vault_stamp_2", name = "Vault Stamp 2", pos = { x = 1, y = 0 } },
+	{ id = "vault_stamp_3", name = "Vault Stamp 3", pos = { x = 2, y = 0 } },
+	{ id = "vault_stamp_4", name = "Vault Stamp 4", pos = { x = 3, y = 0 } },
+	{ id = "vault_stamp_5", name = "Vault Stamp 5", pos = { x = 4, y = 0 } },
+	{ id = "vault_stamp_6", name = "Vault Stamp 6", pos = { x = 5, y = 0 } },
+}
+M.STAMP_CELL_W_PX = 71
+M.STAMP_CELL_H_PX = 95
+
 M.SHOWDOWN_BONUSES = {
 	extra_play = "plays",
 	extra_redraw = "redraws",
