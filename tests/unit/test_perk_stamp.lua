@@ -314,28 +314,48 @@ T.describe("perk stamp panel layout", function()
 
 	local layout = Stamp.debug_grid_layout()
 
-	T.it("exposes six stamp sprites on the perks sheet", function()
-		T.assert_equal(#perk_cfg.STAMP_SPRITES, 6)
-	end)
-
-	T.it("sizes one stamp cell across the vault width", function()
+	T.it("sizes stamp slot proportionally to vault width", function()
 		local panel_w = layout.panel.w
-		T.assert_almost_equal(layout.cell.w + stamp_grid.pad_px() * 2, panel_w, 0.5,
-			"single stamp should span the vault panel width")
-		T.assert_almost_equal(layout.cell.h / layout.cell.w, stamp_grid.ASPECT, 0.001,
-			"stamp cell should match Perks.png aspect")
+		local expected_w = panel_w * perk_cfg.STAMP_SLOT_WIDTH_FRAC
+		local expected_h = expected_w * perk_cfg.STAMP_SLOT_ASPECT
+		T.assert_almost_equal(layout.cell.w, expected_w, 0.5, "stamp slot width")
+		T.assert_almost_equal(layout.cell.h, expected_h, 0.5, "stamp slot height")
+		T.assert_almost_equal(
+			layout.cell.x - layout.panel.x,
+			(panel_w - layout.cell.w) * 0.5,
+			0.5,
+			"stamp slot should be centered horizontally"
+		)
 	end)
 
-	T.it("rolls a random stamp from the sprite list", function()
+	T.it("scales stamp slot when panel width changes", function()
+		local w_narrow, h_narrow = stamp_grid.slot_size_px(200)
+		local w_wide, h_wide = stamp_grid.slot_size_px(300)
+		T.assert_true(w_wide > w_narrow, "wider vault should yield wider stamp slot")
+		T.assert_almost_equal(h_wide / w_wide, h_narrow / w_narrow, 0.001,
+			"aspect ratio should stay constant")
+	end)
+
+	T.it("rolls a random perk from the pool", function()
 		math.randomseed(42)
 		local seen = {}
 		for _ = 1, 30 do
 			local stamp = Stamp.roll_random_stamp()
 			T.assert_not_nil(stamp)
-			T.assert_not_nil(stamp.pos)
-			seen[stamp.pos.x .. "," .. stamp.pos.y] = true
+			T.assert_not_nil(stamp.id)
+			T.assert_not_nil(perk_cfg.by_id(stamp.id), "stamp perk should exist in POOL")
+			seen[stamp.id] = true
 		end
-		T.assert_true(#perk_cfg.STAMP_SPRITES >= 1)
+		T.assert_true(#perk_cfg.POOL >= 1)
+	end)
+
+	T.it("plays a queued perk when the stamp is triggered", function()
+		Stamp.reset()
+		G.GAME = G.GAME or {}
+		local target = perk_cfg.by_id("wide_hand")
+		T.assert_true(Stamp.queue(target))
+		local queued = Stamp.roll_random_stamp()
+		T.assert_equal(queued.id, "wide_hand")
 	end)
 
 	T.it("places one imprint on the panel and replaces it on restamp", function()

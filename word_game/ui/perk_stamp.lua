@@ -165,10 +165,14 @@ local function copy_perk(entry)
 	}
 end
 
-local function roll_random_stamp()
-	local sprites = perk_cfg.STAMP_SPRITES
-	if not sprites or #sprites == 0 then return nil end
-	return copy_perk(sprites[math.random(1, #sprites)])
+local function resolve_stamp_perk(entry)
+	if entry then return copy_perk(entry) end
+	if G.GAME and G.GAME.pending_stamp_perk then
+		local pending = copy_perk(G.GAME.pending_stamp_perk)
+		G.GAME.pending_stamp_perk = nil
+		return pending
+	end
+	return perk_model.roll_stamp_perk()
 end
 
 -- Project a local 3D point.  y is up; screen y grows downward.
@@ -284,7 +288,8 @@ end
 local function perk_quad(entry)
 	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.Perk
 	if not atlas or not atlas.image or not entry or not entry.pos then return end
-	local pw, ph = atlas.px or 71, atlas.py or 95
+	local pw = perk_cfg.ATLAS_CELL_W_PX or atlas.px or 71
+	local ph = perk_cfg.ATLAS_CELL_H_PX or atlas.py or 95
 	local iw, ih = atlas.image:getDimensions()
 	return atlas.image, love.graphics.newQuad(
 		entry.pos.x * pw, entry.pos.y * ph, pw, ph, iw, ih), pw, ph
@@ -523,16 +528,24 @@ function M.is_active()
 end
 
 function M.roll_random_stamp()
-	return roll_random_stamp()
+	return resolve_stamp_perk()
+end
+
+function M.queue(entry)
+	if not entry or not entry.id then return false end
+	local resolved = perk_cfg.by_id(entry.id) or entry
+	G.GAME = G.GAME or {}
+	G.GAME.pending_stamp_perk = copy_perk(resolved)
+	return true
 end
 
 function M.play(entry, callback)
 	if anim then return false end
 	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
-	entry = entry or roll_random_stamp()
+	entry = resolve_stamp_perk(entry)
 	if not entry then return false end
 
-	anim = make_anim_state(copy_perk(entry), false)
+	anim = make_anim_state(entry, false)
 	if not anim then return false end
 	anim.callback = callback
 	if play_sfx then
@@ -546,7 +559,7 @@ function M.demo_play()
 	if anim and not anim.debug and anim.t < TOTAL_DUR then return end
 
 	anim = nil
-	M.play(roll_random_stamp())
+	M.play(resolve_stamp_perk())
 end
 
 function M.debug_step()
@@ -557,7 +570,7 @@ function M.debug_step()
 	end
 
 	if not anim then
-		local stamp = roll_random_stamp()
+		local stamp = resolve_stamp_perk()
 		if not stamp then return end
 		begin_debug_anim(stamp)
 		if play_sfx then

@@ -5,9 +5,8 @@ local perk_cfg = require("word_game.config.perks")
 
 local M = {}
 
-M.CELL_W_PX = perk_cfg.STAMP_CELL_W_PX or 71
-M.CELL_H_PX = perk_cfg.STAMP_CELL_H_PX or 95
-M.ASPECT = M.CELL_H_PX / M.CELL_W_PX
+M.SLOT_WIDTH_FRAC = perk_cfg.STAMP_SLOT_WIDTH_FRAC
+M.SLOT_ASPECT = perk_cfg.STAMP_SLOT_ASPECT
 
 local REF_TILE_PX = 71
 
@@ -23,20 +22,17 @@ function M.vault_width_px()
 	return Layout.sidebar_width() * M.tile_scale()
 end
 
-function M.cell_width_px(panel_w)
+function M.slot_size_px(panel_w)
 	panel_w = panel_w or M.vault_width_px()
-	return panel_w - M.pad_px() * 2
-end
-
-function M.cell_height_px(cell_w)
-	cell_w = cell_w or M.cell_width_px()
-	return cell_w * M.ASPECT
+	local w = panel_w * M.SLOT_WIDTH_FRAC
+	local h = w * M.SLOT_ASPECT
+	return w, h
 end
 
 function M.panel_height_px(panel_w)
 	panel_w = panel_w or M.vault_width_px()
-	local pad = M.pad_px()
-	return M.cell_height_px(M.cell_width_px(panel_w)) + pad * 2
+	local _, slot_h = M.slot_size_px(panel_w)
+	return slot_h + M.pad_px() * 2
 end
 
 function M.panel_height_tiles()
@@ -48,10 +44,10 @@ function M.cell_rect_px(panel_x, panel_y, panel_w, panel_h)
 	panel_h = panel_h or M.panel_height_px(panel_w)
 	panel_x = panel_x or 0
 	panel_y = panel_y or 0
-	local pad = M.pad_px()
-	local cell_w = M.cell_width_px(panel_w)
-	local cell_h = M.cell_height_px(cell_w)
-	return panel_x + pad, panel_y + pad, cell_w, cell_h
+	local slot_w, slot_h = M.slot_size_px(panel_w)
+	local x = panel_x + (panel_w - slot_w) * 0.5
+	local y = panel_y + (panel_h - slot_h) * 0.5
+	return x, y, slot_w, slot_h
 end
 
 function M.layout(panel_x, panel_y, panel_w)

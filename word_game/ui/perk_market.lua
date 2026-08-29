@@ -274,6 +274,10 @@ G.FUNCS.alpha_voucher_pick = function(e)
 		return
 	end
 
+	if WORD_GAME and WORD_GAME.PerkStamp and WORD_GAME.PerkStamp.queue then
+		WORD_GAME.PerkStamp.queue(entry)
+	end
+
 	local cost = math.floor(entry.token_cost or 0)
 	if WORD_GAME and WORD_GAME.TokenReward and WORD_GAME.TokenReward.spend_fly then
 		WORD_GAME.TokenReward.spend_fly(cost)

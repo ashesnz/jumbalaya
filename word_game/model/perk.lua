@@ -30,6 +30,13 @@ local function copy_perk(entry)
 	}
 end
 
+function M.roll_stamp_perk()
+	local pool = cfg.POOL
+	if #pool == 0 then return nil end
+	local idx = rand_int(cfg.RANDOM_SEED_PREFIX .. "stamp", 1, #pool)
+	return copy_perk(pool[idx])
+end
+
 function M.roll_offer(count)
 	count = count or cfg.DEFAULT_OFFER_COUNT
 	local pool = cfg.POOL
