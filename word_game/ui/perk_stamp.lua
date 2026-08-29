@@ -263,12 +263,26 @@ local function edge_line(a, b, alpha, width)
 	love.graphics.line(a[1], a[2], b[1], b[2])
 end
 
-local function face_outline(a, b, c, d, alpha, width)
+local unpack = table.unpack or unpack
+
+-- Strokes a connected polyline through pts.  When closed, the first point is
+-- repeated at the end so the loop encloses a face with a border on every
+-- side; when open, the last segment back to pts[1] is omitted so a hidden
+-- edge (e.g. the far back edge of a face) never gets stroked.
+local function stroke_loop(pts, closed, alpha, width)
 	love.graphics.setColor(0, 0, 0, alpha * 0.92)
 	love.graphics.setLineWidth(width or 1.6)
 	love.graphics.setLineJoin("miter")
-	love.graphics.line(
-		a[1], a[2], b[1], b[2], c[1], c[2], d[1], d[2], a[1], a[2])
+	local coords = {}
+	for _, p in ipairs(pts) do
+		coords[#coords + 1] = p[1]
+		coords[#coords + 1] = p[2]
+	end
+	if closed then
+		coords[#coords + 1] = pts[1][1]
+		coords[#coords + 1] = pts[1][2]
+	end
+	love.graphics.line(unpack(coords))
 end
 
 local function stamp_pose(t, anim_state)
@@ -328,32 +342,40 @@ local function draw_hand(c, scale, alpha)
 	love.graphics.ellipse("line", grip_x + 2 * s, grip_y - 2 * s, 16 * s, 13 * s)
 end
 
-local function draw_stamp_3d(ox, oy, scale, yaw, pitch, squash_y, alpha, roll)
-	local c = body_corners(ox, oy, scale, yaw, pitch, squash_y, roll)
-
+-- Fills and strokes the wooden body + rubber pad for an already-projected
+-- set of corners `c` (as returned by body_corners / debug_mesh).  Split out
+-- so both the real draw pass and the debug tooling share one code path.
+local function draw_stamp_body(c, alpha)
 	-- One wooden prism: body and pad share a colour, so they are filled as
-	-- full-height faces.  Internal wood/pad seams are not drawn.
+	-- full-height faces (no visible seam in the fill itself).
 	quad_fill(c.btl, c.btr, c.rbr, c.rbl, WOOD, alpha)
 	quad_fill(c.btl, c.ftl, c.rfl, c.rbl, WOOD, alpha)
 	quad_fill(c.ftl, c.ftr, c.btr, c.btl, WOOD, alpha)
 	quad_fill(c.ftr, c.btr, c.rbr, c.rfr, WOOD, alpha)
 	quad_fill(c.ftl, c.ftr, c.rfr, c.rfl, WOOD, alpha)
 
-	-- Visible silhouettes.  Skip every edge that sits on the far/back plane.
-	edge_line(c.ftl, c.ftr, alpha)
-	edge_line(c.ftr, c.btr, alpha)
-	edge_line(c.ftl, c.btl, alpha)
-	face_outline(c.ftl, c.ftr, c.rfr, c.rfl, alpha)
-	edge_line(c.ftr, c.rfr, alpha)
-	edge_line(c.rfr, c.rbr, alpha)
+	-- Visible silhouettes and face borders. Each face is stroked as its own
+	-- closed loop so every border shows up individually, including wood and
+	-- rubber front/right faces. The top rim stays open so the hidden far/back
+	-- edge is never stroked.
+	stroke_loop({ c.btl, c.ftl, c.ftr, c.btr }, false, alpha)
+	stroke_loop({ c.ftl, c.ftr, c.fbr, c.fbl }, true, alpha)
+	stroke_loop({ c.fbl, c.fbr, c.rfr, c.rfl }, true, alpha)
+	stroke_loop({ c.ftr, c.btr, c.bbr, c.fbr }, true, alpha)
+	stroke_loop({ c.fbr, c.bbr, c.rbr, c.rfr }, true, alpha)
+end
+
+local function draw_stamp_3d(ox, oy, scale, yaw, pitch, squash_y, alpha, roll)
+	local c = body_corners(ox, oy, scale, yaw, pitch, squash_y, roll)
+
+	draw_stamp_body(c, alpha)
 
 	quad_fill(c.hbl, c.hbr, c.hfr, c.hfl, WOOD, alpha)
 	quad_fill(c.hbr, c.hbf, c.htf, c.hfr, WOOD, alpha)
 	quad_fill(c.hfl, c.hfr, c.htf, c.htb, WOOD, alpha)
-	edge_line(c.hbl, c.hbr, alpha, 1.2)
-	edge_line(c.hbr, c.hfr, alpha, 1.2)
-	edge_line(c.hfr, c.hfl, alpha, 1.2)
-	edge_line(c.hfl, c.hbl, alpha, 1.2)
+	stroke_loop({ c.hbl, c.hbr, c.hfr, c.hfl }, true, alpha * 0.9, 1.2)
+	stroke_loop({ c.hbr, c.hbf, c.htf, c.hfr }, true, alpha * 0.9, 1.2)
+	stroke_loop({ c.hfl, c.hfr, c.htf, c.htb }, true, alpha * 0.9, 1.2)
 
 	draw_hand(c, scale, alpha)
 end
@@ -384,8 +406,7 @@ local function draw_type_imprint(entry, x, y, w, h, alpha)
 
 	love.graphics.setColor(WOOD_EDGE[1], WOOD_EDGE[2], WOOD_EDGE[3], alpha * 0.75)
 	love.graphics.setLineWidth(2)
-	love.graphics.line(x, y, x + w, y)
-	love.graphics.line(x, y + h, x + w, y + h)
+	love.graphics.rectangle("line", x, y, w, h, 3, 3)
 end
 
 local function apply_imprint(entry)
@@ -573,6 +594,68 @@ function M.draw_pass()
 		love.graphics.setShader()
 	end
 	love.graphics.setColor(cr, cg, cb, ca)
+end
+
+-- Returns the projected outline structure for a stamp posed at the given
+-- params: named loops for the faces that get their own border (front, right,
+-- and an open top rim), the raw projected corners, a screen-space bounding
+-- box, and the back-plane edges that must never be stroked. Intended for
+-- tests/tools; production drawing lives in draw_stamp_body/draw_stamp_3d.
+function M.debug_mesh(ox, oy, scale, yaw, pitch, squash_y, roll)
+	squash_y = squash_y or 1
+	yaw = yaw or LANDING_YAW
+	pitch = pitch or LANDING_PITCH
+	roll = roll or LANDING_ROLL
+	local c = body_corners(ox, oy, scale, yaw, pitch, squash_y, roll)
+
+	local loops = {
+		{ name = "top", closed = false, pts = { c.btl, c.ftl, c.ftr, c.btr } },
+		{ name = "front", closed = true, pts = { c.ftl, c.ftr, c.fbr, c.fbl } },
+		{ name = "rubber_front", closed = true, pts = { c.fbl, c.fbr, c.rfr, c.rfl } },
+		{ name = "right", closed = true, pts = { c.ftr, c.btr, c.bbr, c.fbr } },
+		{ name = "rubber_right", closed = true, pts = { c.fbr, c.bbr, c.rbr, c.rfr } },
+		{ name = "handle_front", closed = true, pts = { c.hbl, c.hbr, c.hfr, c.hfl } },
+		{ name = "handle_right", closed = true, pts = { c.hbr, c.hbf, c.htf, c.hfr } },
+		{ name = "handle_top", closed = true, pts = { c.hfl, c.hfr, c.htf, c.htb } },
+	}
+
+	local hidden_back = {
+		{ c.btl, c.btr },
+		{ c.bbl, c.bbr },
+		{ c.rbl, c.rbr },
+	}
+
+	local min_x, min_y, max_x, max_y = math.huge, math.huge, -math.huge, -math.huge
+	for _, pt in pairs(c) do
+		min_x = math.min(min_x, pt[1])
+		max_x = math.max(max_x, pt[1])
+		min_y = math.min(min_y, pt[2])
+		max_y = math.max(max_y, pt[2])
+	end
+
+	return {
+		loops = loops,
+		corners = c,
+		bounds = { x = min_x, y = min_y, w = max_x - min_x, h = max_y - min_y },
+		hidden_back = hidden_back,
+	}
+end
+
+-- Runs the real draw path (draw_stamp_3d) at an explicit pose, for tests and
+-- visual debugging outside of the strike animation.
+function M.debug_draw_stamp(ox, oy, scale, yaw, pitch, squash_y, alpha, roll)
+	squash_y = squash_y or 1
+	alpha = alpha or 1
+	yaw = yaw or LANDING_YAW
+	pitch = pitch or LANDING_PITCH
+	roll = roll or LANDING_ROLL
+	draw_stamp_3d(ox, oy, scale, yaw, pitch, squash_y, alpha, roll)
+end
+
+-- Runs the real imprint draw path for tests/tools, without needing an
+-- active strike animation.
+function M.debug_draw_imprint(entry, x, y, w, h, alpha)
+	draw_type_imprint(entry, x, y, w, h, alpha)
 end
 
 function M.reset()
