@@ -349,20 +349,25 @@ local function draw_stamp_body(c, alpha)
 	-- One wooden prism: body and pad share a colour, so they are filled as
 	-- full-height faces (no visible seam in the fill itself).
 	quad_fill(c.btl, c.btr, c.rbr, c.rbl, WOOD, alpha)
-	quad_fill(c.btl, c.ftl, c.rfl, c.rbl, WOOD, alpha)
+	quad_fill(c.btl, c.ftl, c.fbl, c.bbl, WOOD, alpha)
+	quad_fill(c.bbl, c.fbl, c.rfl, c.rbl, WOOD, alpha)
 	quad_fill(c.ftl, c.ftr, c.btr, c.btl, WOOD, alpha)
-	quad_fill(c.ftr, c.btr, c.rbr, c.rfr, WOOD, alpha)
+	quad_fill(c.ftr, c.btr, c.bbr, c.fbr, WOOD, alpha)
+	quad_fill(c.fbr, c.bbr, c.rbr, c.rfr, WOOD, alpha)
 	quad_fill(c.ftl, c.ftr, c.rfr, c.rfl, WOOD, alpha)
+	quad_fill(c.fbl, c.fbr, c.rfr, c.rfl, WOOD, alpha)
 
 	-- Visible silhouettes and face borders. Each face is stroked as its own
 	-- closed loop so every border shows up individually, including wood and
-	-- rubber front/right faces. The top rim stays open so the hidden far/back
+	-- rubber front/right/left faces. The top rim stays open so the hidden far/back
 	-- edge is never stroked.
 	stroke_loop({ c.btl, c.ftl, c.ftr, c.btr }, false, alpha)
 	stroke_loop({ c.ftl, c.ftr, c.fbr, c.fbl }, true, alpha)
 	stroke_loop({ c.fbl, c.fbr, c.rfr, c.rfl }, true, alpha)
 	stroke_loop({ c.ftr, c.btr, c.bbr, c.fbr }, true, alpha)
 	stroke_loop({ c.fbr, c.bbr, c.rbr, c.rfr }, true, alpha)
+	stroke_loop({ c.btl, c.ftl, c.fbl, c.bbl }, true, alpha)
+	stroke_loop({ c.bbl, c.fbl, c.rfl, c.rbl }, true, alpha)
 end
 
 local function draw_stamp_3d(ox, oy, scale, yaw, pitch, squash_y, alpha, roll)
@@ -373,9 +378,13 @@ local function draw_stamp_3d(ox, oy, scale, yaw, pitch, squash_y, alpha, roll)
 	quad_fill(c.hbl, c.hbr, c.hfr, c.hfl, WOOD, alpha)
 	quad_fill(c.hbr, c.hbf, c.htf, c.hfr, WOOD, alpha)
 	quad_fill(c.hfl, c.hfr, c.htf, c.htb, WOOD, alpha)
+	quad_fill(c.hbl, c.hfl, c.htb, c.hbb, WOOD, alpha)
+	quad_fill(c.hbb, c.hbf, c.htf, c.htb, WOOD, alpha)
 	stroke_loop({ c.hbl, c.hbr, c.hfr, c.hfl }, true, alpha * 0.9, 1.2)
 	stroke_loop({ c.hbr, c.hbf, c.htf, c.hfr }, true, alpha * 0.9, 1.2)
 	stroke_loop({ c.hfl, c.hfr, c.htf, c.htb }, true, alpha * 0.9, 1.2)
+	stroke_loop({ c.hbl, c.hfl, c.htb, c.hbb }, true, alpha * 0.9, 1.2)
+	stroke_loop({ c.hbb, c.hbf, c.htf, c.htb }, true, alpha * 0.9, 1.2)
 
 	draw_hand(c, scale, alpha)
 end
@@ -614,9 +623,13 @@ function M.debug_mesh(ox, oy, scale, yaw, pitch, squash_y, roll)
 		{ name = "rubber_front", closed = true, pts = { c.fbl, c.fbr, c.rfr, c.rfl } },
 		{ name = "right", closed = true, pts = { c.ftr, c.btr, c.bbr, c.fbr } },
 		{ name = "rubber_right", closed = true, pts = { c.fbr, c.bbr, c.rbr, c.rfr } },
+		{ name = "left", closed = true, pts = { c.btl, c.ftl, c.fbl, c.bbl } },
+		{ name = "rubber_left", closed = true, pts = { c.bbl, c.fbl, c.rfl, c.rbl } },
 		{ name = "handle_front", closed = true, pts = { c.hbl, c.hbr, c.hfr, c.hfl } },
 		{ name = "handle_right", closed = true, pts = { c.hbr, c.hbf, c.htf, c.hfr } },
 		{ name = "handle_top", closed = true, pts = { c.hfl, c.hfr, c.htf, c.htb } },
+		{ name = "handle_left", closed = true, pts = { c.hbl, c.hfl, c.htb, c.hbb } },
+		{ name = "handle_back", closed = true, pts = { c.hbb, c.hbf, c.htf, c.htb } },
 	}
 
 	local hidden_back = {
