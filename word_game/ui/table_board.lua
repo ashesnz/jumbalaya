@@ -79,7 +79,9 @@ function M.draw_spotlight_overlay(game, overlay)
 		and WORD_GAME and WORD_GAME.TableDiscard and WORD_GAME.TableDiscard.uses_table_draw() then
 		love.graphics.push()
 		G.discard:translate_container()
+		WORD_GAME.TableDiscard.begin_board_draw()
 		G.discard:draw()
+		WORD_GAME.TableDiscard.end_board_draw()
 		love.graphics.pop()
 	end
 	if overlay.redraw_confetti and WORD_GAME and WORD_GAME.Confetti then
@@ -172,7 +174,9 @@ function M.draw_hand_pass(game)
 		and table_discard and table_discard.uses_table_draw() then
 		love.graphics.push()
 		G.discard:translate_container()
+		table_discard.begin_board_draw()
 		G.discard:draw()
+		table_discard.end_board_draw()
 		love.graphics.pop()
 	end
 

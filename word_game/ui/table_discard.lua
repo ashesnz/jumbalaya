@@ -65,6 +65,32 @@ local function bin_atlas()
 	return G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.bin
 end
 
+--- Texture pixel viewport for one sheet cell (not the full atlas).
+function M.sprite_viewport(frame)
+	local atlas = bin_atlas()
+	if not atlas or not atlas.image then
+		return 0, 0, 1, 1, 1, 1
+	end
+	local iw, ih = atlas.image:getDimensions()
+	local cols = atlas.cols or M.SPRITE_COLS
+	local rows = atlas.rows or 2
+	local cell_w = iw / cols
+	local cell_h = ih / rows
+	local col, row = M.sprite_cell(frame)
+	return col * cell_w, row * cell_h, cell_w, cell_h, iw, ih
+end
+
+function M.begin_board_draw()
+	G.ARGS = G.ARGS or {}
+	G.ARGS.table_discard_board_draw = true
+end
+
+function M.end_board_draw()
+	if G.ARGS then
+		G.ARGS.table_discard_board_draw = false
+	end
+end
+
 function M.point_in_bin(x, y)
 	if not G.discard or not G.discard.T then return false end
 	local pad_x = G.CARD_W * 0.12
@@ -112,10 +138,8 @@ local function draw_bin(area, ts)
 	local oy = area.T.y + math.max(0, (slot_h - H) * M.BIN_SLOT_Y_ALIGN)
 
 	local frame = M.sprite_frame()
-	local col, row = M.sprite_cell(frame)
-	local iw, ih = atlas.image:getDimensions()
-	local fw, fh = atlas.px, atlas.py
-	local quad = love.graphics.newQuad(col * fw, row * fh, fw, fh, iw, ih)
+	local qx, qy, qw, qh, iw, ih = M.sprite_viewport(frame)
+	local quad = love.graphics.newQuad(qx, qy, qw, qh, iw, ih)
 
 	local dragging = G.INPUT and G.INPUT.dragging and G.INPUT.dragging.target
 	local highlight = dragging and M.can_discard_card(dragging) and M.point_in_bin(
@@ -128,7 +152,7 @@ local function draw_bin(area, ts)
 	else
 		love.graphics.setColor(0.92, 0.92, 0.92, 1)
 	end
-	love.graphics.draw(atlas.image, quad, ox * ts, oy * ts, 0, (W * ts) / fw, (H * ts) / fh)
+	love.graphics.draw(atlas.image, quad, ox * ts, oy * ts, 0, (W * ts) / qw, (H * ts) / qh)
 	love.graphics.setColor(1, 1, 1, 1)
 end
 

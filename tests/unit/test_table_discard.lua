@@ -79,6 +79,24 @@ T.describe("table discard bin", function()
 		T.assert_false(table_discard.is_full())
 	end)
 
+	T.it("sprite viewport covers one sheet cell, not the full atlas", function()
+		local table_discard = require("word_game.ui.table_discard")
+		G.TEXTURE_ATLASES = G.TEXTURE_ATLASES or {}
+		G.TEXTURE_ATLASES.bin = {
+			cols = 2,
+			rows = 2,
+			image = { getDimensions = function() return 498, 501 end },
+		}
+		local qx, qy, qw, qh, iw, ih = table_discard.sprite_viewport(0)
+		T.assert_almost_equal(qw, iw / 2, 0.01, "cell width should be half the atlas")
+		T.assert_almost_equal(qh, ih / 2, 0.01, "cell height should be half the atlas")
+		T.assert_equal(qx, 0)
+		T.assert_equal(qy, 0)
+		local qx1, qy1 = table_discard.sprite_viewport(1)
+		T.assert_almost_equal(qx1, iw / 2, 0.01, "frame 1 should be the top-right cell")
+		T.assert_equal(qy1, 0)
+	end)
+
 	T.it("discards a hand card, updates the bin sprite, and deals a replacement", function()
 		MockEnv.setup()
 		local table_discard = require("word_game.ui.table_discard")

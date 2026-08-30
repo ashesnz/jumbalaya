@@ -345,6 +345,11 @@ function CardArea:draw()
 	if not self.states.visible then return end
 	if not self.cards then return end
 	if G.VIEWING_DECK and (self==G.deck or self==G.hand) then return end
+	if self == G.discard and WORD_GAME and WORD_GAME.TableDiscard
+		and WORD_GAME.TableDiscard.uses_table_draw()
+		and not (G.ARGS and G.ARGS.table_discard_board_draw) then
+		return
+	end
 
 	self.ARGS.invisible_area_types = self.ARGS.invisible_area_types or {discard=1, perk=1, usable=1, title = 1, title_2 = 1, placement=1, shelf=1}
 	if self.ARGS.invisible_area_types[self.config.type] or
