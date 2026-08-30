@@ -322,6 +322,11 @@ function M.present_boss_word(wr, on_complete)
 				blocking = true,
 				func = function()
 					word_feedback.show_above_hand_centered(step.text, G.C.GOLD, step.hold)
+					if step.text == "1"
+						and WORD_GAME and WORD_GAME.BossWordAnnounce
+						and WORD_GAME.BossWordAnnounce.play_theme then
+						WORD_GAME.BossWordAnnounce.play_theme("Garden Theme")
+					end
 					if play_sfx then
 						if index == 1 then
 							play_sfx("timpani", 0.9, 0.7)

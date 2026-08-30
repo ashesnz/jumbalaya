@@ -1,8 +1,8 @@
 --[[
-	word_game/ui/boss_word_announce.lua - Boss word ribbon aligned to the dealt hand.
+	word_game/ui/boss_word_announce.lua - Boss countdown ribbons below the timer.
 
-	Sweeps the boss banner texture below the timeline timer, centered on the
-	dealt hand row, then stays visible for the rest of the boss hand.
+	Boss word: sweeps left-to-right at "Are you ready?"
+	Theme: sweeps right-to-left at "1", sits below boss word, banner rotated 180°.
 ]]
 
 local Layout = require("word_game.ui.layout")
@@ -14,9 +14,11 @@ local M = {}
 local SWEEP_TIME = 0.55
 local SIZE_SCALE = 0.5
 local TIMER_GAP_PX = 45
+local BANNER_STACK_GAP_PX = 10
 local REF_TILE_PX = 73
 
-local state = nil
+local boss_banner = nil
+local theme_banner = nil
 
 local function clamp01(t)
 	if t < 0 then return 0 end
@@ -55,62 +57,116 @@ local function pixels_per_tile()
 	return px > 0 and px or REF_TILE_PX
 end
 
-local function gap_below_timer_px()
-	local scale = pixels_per_tile() / REF_TILE_PX
-	return TIMER_GAP_PX * scale
+local function px_to_tiles(px)
+	return px / pixels_per_tile()
 end
 
 local function gap_below_timer_tiles()
-	return gap_below_timer_px() / pixels_per_tile()
+	local scale = pixels_per_tile() / REF_TILE_PX
+	return px_to_tiles(TIMER_GAP_PX * scale)
 end
 
-local function measure_anchor()
+local function stack_gap_tiles()
+	local scale = pixels_per_tile() / REF_TILE_PX
+	return px_to_tiles(BANNER_STACK_GAP_PX * scale)
+end
+
+local function boss_layout_tiles()
 	local timer = Layout.timeline_rect()
 	local banner = Layout.banner_rect()
 	if not timer or not banner then return nil end
 	local hand = word_feedback.hand_dealt_metrics()
-	local ts = G.TILESCALE * G.TILESIZE
 	local banner_h = banner.h * SIZE_SCALE
-	-- Ribbon art extends ~7.5% above the layout box; keep that clear of the timer.
 	local ornament_pad = banner_h * 0.075
 	local gap = gap_below_timer_tiles() + ornament_pad
 	local top = timer.y + timer.h + gap
 	local cx = hand and hand.cx or (timer.x + timer.w * 0.5)
-	local cy = top + banner_h * 0.5
 	return {
-		cx = cx * ts,
-		cy = cy * ts,
-		w = ((hand and hand.gap_w) or banner.w) * ts * SIZE_SCALE,
-		h = banner.h * ts * SIZE_SCALE,
+		cx = cx,
+		cy = top + banner_h * 0.5,
+		w = (hand and hand.gap_w or banner.w) * SIZE_SCALE,
+		h = banner_h,
 	}
 end
 
-function M.is_active()
-	return state ~= nil
+local function layout_tiles(slot)
+	local boss = boss_layout_tiles()
+	if not boss then return nil end
+	if slot == "boss" then
+		return boss
+	end
+	local stack_gap = stack_gap_tiles()
+	return {
+		cx = boss.cx,
+		cy = boss.cy + boss.h * 0.5 + stack_gap + boss.h * 0.5,
+		w = boss.w,
+		h = boss.h,
+	}
 end
 
-function M.play(text)
-	text = text or "BOSS WORD"
-	if state and state.text == text then return end
-	state = {
+local function layout_pixels(slot)
+	local tiles = layout_tiles(slot)
+	if not tiles then return nil end
+	local ts = G.TILESCALE * G.TILESIZE
+	return {
+		cx = tiles.cx * ts,
+		cy = tiles.cy * ts,
+		w = tiles.w * ts,
+		h = tiles.h * ts,
+	}
+end
+
+local function new_banner(text, opts)
+	opts = opts or {}
+	return {
 		text = text,
 		t = 0,
 		sweep_time = SWEEP_TIME,
+		direction = opts.direction or "ltr",
+		rotate = opts.rotate or false,
+		slot = opts.slot or "boss",
 	}
+end
+
+local function advance_banner(banner, dt)
+	if not banner then return end
+	if banner.t < banner.sweep_time then
+		banner.t = math.min(banner.sweep_time, banner.t + dt)
+	end
+end
+
+function M.is_active()
+	return boss_banner ~= nil or theme_banner ~= nil
+end
+
+function M.play_boss(text)
+	text = text or "BOSS WORD"
+	if boss_banner and boss_banner.text == text then return end
+	boss_banner = new_banner(text, { direction = "ltr", slot = "boss" })
 	if play_sfx then
 		play_sfx("timpani", 0.95, 0.82)
 	end
 end
 
+function M.play_theme(text)
+	text = text or "Garden Theme"
+	if theme_banner and theme_banner.text == text then return end
+	theme_banner = new_banner(text, { direction = "rtl", rotate = true, slot = "theme" })
+end
+
+-- Back-compat with score banner facade.
+function M.play(text)
+	M.play_boss(text)
+end
+
 function M.clear()
-	state = nil
+	boss_banner = nil
+	theme_banner = nil
 end
 
 function M.update(dt)
-	if not state then return end
-	if state.t < state.sweep_time then
-		state.t = math.min(state.sweep_time, state.t + dt)
-	end
+	advance_banner(boss_banner, dt)
+	advance_banner(theme_banner, dt)
 end
 
 local function draw_professional_text(msg, msg_tw, msg_th, alpha)
@@ -124,36 +180,25 @@ local function draw_professional_text(msg, msg_tw, msg_th, alpha)
 	love.graphics.print(msg, tx, ty - 1)
 end
 
-function M.draw()
-	if not state or not G.GAME or not G.ROOM then return end
-	if G.STATE ~= G.STATES.TABLE_BOARD then return end
-
-	local rect = measure_anchor()
+local function draw_banner(banner)
+	local rect = layout_pixels(banner.slot)
 	if not rect then return end
 
-	local sweep_u = clamp01(state.t / state.sweep_time)
+	local sweep_u = clamp01(banner.t / banner.sweep_time)
 	local eased = 1 - (1 - sweep_u) * (1 - sweep_u) * (1 - sweep_u)
 	local sweeping = sweep_u < 1
+	local from_right = banner.direction == "rtl"
 
-	local msg = state.text
+	local msg = banner.text
 	local msg_font_px = math.max(14, math.floor(rect.h * 0.58))
 	local msg_font = fonts.title_font(msg_font_px)
 	local msg_tw = msg_font:getWidth(msg)
 	local msg_th = msg_font:getHeight()
 
-	local prev_font = love.graphics.getFont and love.graphics.getFont()
-	local cr, cg, cb, ca = 1, 1, 1, 1
-	if love.graphics.getColor then
-		cr, cg, cb, ca = love.graphics.getColor()
-	end
-	local prev_shader = love.graphics.getShader and love.graphics.getShader()
-
 	love.graphics.push()
-	if love.graphics.setShader then love.graphics.setShader() end
-	room_translate()
 	love.graphics.translate(rect.cx, rect.cy)
 
-	local band_l, band_r = nil, nil
+	local band_l, band_r, band_cx = nil, nil, nil
 	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.boss_banner
 	if atlas and atlas.image and love.graphics.draw then
 		local iw, ih = atlas.image:getDimensions()
@@ -163,12 +208,20 @@ function M.draw()
 			img_w = rect.w * 1.3
 			img_h = img_w * (ih / iw)
 		end
-		local start_x = -(rect.w * 0.5 + img_w * 0.5 + 60)
-		local bx = start_x + (0 - start_x) * eased
-		band_l = bx - img_w * 0.5
-		band_r = bx + img_w * 0.5
+		local offscreen = rect.w * 0.5 + img_w * 0.5 + 60
+		local start_x = from_right and offscreen or -offscreen
+		band_cx = start_x + (0 - start_x) * eased
+		band_l = band_cx - img_w * 0.5
+		band_r = band_cx + img_w * 0.5
 		love.graphics.setColor(1, 1, 1, 1)
-		love.graphics.draw(atlas.image, band_l, -img_h * 0.5, 0, img_w / iw, img_h / ih)
+		if banner.rotate then
+			love.graphics.draw(
+				atlas.image, band_cx, 0, math.pi,
+				img_w / iw, img_h / ih, iw * 0.5, ih * 0.5
+			)
+		else
+			love.graphics.draw(atlas.image, band_l, -img_h * 0.5, 0, img_w / iw, img_h / ih)
+		end
 	end
 
 	love.graphics.setFont(msg_font)
@@ -190,6 +243,31 @@ function M.draw()
 		else
 			love.graphics.setScissor()
 		end
+	end
+
+	love.graphics.pop()
+end
+
+function M.draw()
+	if not M.is_active() or not G.GAME or not G.ROOM then return end
+	if G.STATE ~= G.STATES.TABLE_BOARD then return end
+
+	local prev_font = love.graphics.getFont and love.graphics.getFont()
+	local cr, cg, cb, ca = 1, 1, 1, 1
+	if love.graphics.getColor then
+		cr, cg, cb, ca = love.graphics.getColor()
+	end
+	local prev_shader = love.graphics.getShader and love.graphics.getShader()
+
+	love.graphics.push()
+	if love.graphics.setShader then love.graphics.setShader() end
+	room_translate()
+
+	if boss_banner then
+		draw_banner(boss_banner)
+	end
+	if theme_banner then
+		draw_banner(theme_banner)
 	end
 
 	love.graphics.pop()

@@ -253,6 +253,33 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 		T.assert_true(ok, "sb.draw should execute without error: " .. tostring(err))
 	end)
 
+	T.it("plays a theme banner on the countdown one mark", function()
+		MockEnv.setup()
+		local announce = require("word_game.ui.boss_word_announce")
+
+		_G.G.STATE = _G.G.STATES.TABLE_BOARD
+		_G.G.hand = {
+			T = { x = 2.0, y = 7.0, w = 6.0, h = 2.0 },
+			cards = {},
+		}
+		_G.G.TEXTURE_ATLASES = _G.G.TEXTURE_ATLASES or {}
+		_G.G.TEXTURE_ATLASES.boss_banner = {
+			image = {
+				getDimensions = function() return 1180, 211 end,
+			},
+		}
+
+		announce.play_boss("BOSS WORD")
+		announce.play_theme("Garden Theme")
+		T.assert_true(announce.is_active(), "both banners should be active")
+
+		local ok, err = pcall(announce.draw_pass)
+		T.assert_true(ok, "stacked banner draw should succeed: " .. tostring(err))
+
+		announce.clear()
+		T.assert_false(announce.is_active(), "clear should remove both banners")
+	end)
+
 	T.it("plays a full-width boss word ribbon sweep", function()
 		MockEnv.setup()
 		local announce = require("word_game.ui.boss_word_announce")
