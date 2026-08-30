@@ -20,6 +20,8 @@ local RIBBON_MIN_WIDTH_SCALE = 1.3
 
 local boss_banner = nil
 local theme_banner = nil
+local content_origin = nil
+local BANNER_IMAGE_PATH = "resources/assets/banner.png"
 
 local function clamp01(t)
 	if t < 0 then return 0 end
@@ -106,34 +108,101 @@ local function stack_layout_pixels()
 	}
 end
 
-local function ribbon_size(rect)
+local function ribbon_texture_size()
 	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.boss_banner
-	if not atlas or not atlas.image then
-		return rect.w * RIBBON_MIN_WIDTH_SCALE, rect.h * RIBBON_HEIGHT_SCALE
+	if atlas and atlas.image and atlas.image.getDimensions then
+		return atlas.image:getDimensions()
 	end
-	local iw, ih = atlas.image:getDimensions()
+	return 1180, 211
+end
+
+local function ribbon_size(rect)
+	local iw, ih = ribbon_texture_size()
 	local img_h = rect.h * RIBBON_HEIGHT_SCALE
 	local img_w = img_h * (iw / ih)
 	if img_w < rect.w * RIBBON_MIN_WIDTH_SCALE then
 		img_w = rect.w * RIBBON_MIN_WIDTH_SCALE
 		img_h = img_w * (ih / iw)
 	end
-	return img_w, img_h
+	return img_w, img_h, iw, ih
 end
 
--- Testable layout: shared left/right edges, separated ribbon bodies (arrowhead stack).
+-- Opaque ribbon art is not centered in banner.png (more padding on the left).
+-- Flipping around the texture midpoint therefore shifts Garden left by ~10–20px.
+-- Both ribbons pivot around the opaque content center so visual corners match.
+local function scan_opaque_bounds(iw, ih)
+	if not (love and love.image and love.image.newImageData) then
+		return nil
+	end
+	local ok, data = pcall(love.image.newImageData, BANNER_IMAGE_PATH)
+	if not ok or not data or not data.getPixel then
+		return nil
+	end
+	iw = data.getWidth and data:getWidth() or iw
+	ih = data.getHeight and data:getHeight() or ih
+	local minx, maxx = iw, -1
+	local miny, maxy = ih, -1
+	for y = 0, ih - 1 do
+		for x = 0, iw - 1 do
+			local r, g, b, a = data:getPixel(x, y)
+			if (a or 0) > 0.06 then
+				if x < minx then minx = x end
+				if x > maxx then maxx = x end
+				if y < miny then miny = y end
+				if y > maxy then maxy = y end
+			end
+		end
+	end
+	if maxx < minx then
+		return nil
+	end
+	return { minx = minx, maxx = maxx, miny = miny, maxy = maxy }
+end
+
+local function ribbon_content_origin(iw, ih)
+	if content_origin and content_origin.iw == iw and content_origin.ih == ih then
+		return content_origin
+	end
+	local bounds = content_origin and content_origin.forced
+	if not bounds then
+		bounds = scan_opaque_bounds(iw, ih)
+	end
+	if not bounds then
+		bounds = { minx = 0, maxx = iw - 1, miny = 0, maxy = ih - 1 }
+	end
+	content_origin = {
+		iw = iw,
+		ih = ih,
+		minx = bounds.minx,
+		maxx = bounds.maxx,
+		ox = (bounds.minx + bounds.maxx) * 0.5,
+		oy = ih * 0.5,
+		forced = content_origin and content_origin.forced,
+	}
+	return content_origin
+end
+
+function M.set_content_bounds_for_test(bounds)
+	content_origin = bounds and { forced = bounds } or nil
+end
+
+-- Testable layout: shared visual corners, separated ribbon bodies (arrowhead stack).
 function M.measure_stack()
 	local stack = stack_layout_tiles()
 	if not stack then return nil end
-	local ts = G.TILESCALE * G.TILESIZE
-	local img_w_px, _ = ribbon_size({ w = stack.w * ts, h = stack.h * ts })
+	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
+	local img_w_px, _, iw, ih = ribbon_size({ w = stack.w * ts, h = stack.h * ts })
 	local img_w = img_w_px / ts
+	local origin = ribbon_content_origin(iw, ih)
+	local scale_x = img_w / iw
 	local boss_top = stack.boss_cy - stack.span
 	local boss_bottom = stack.boss_cy + stack.span
 	local theme_top = stack.theme_cy - stack.span
 	local theme_bottom = stack.theme_cy + stack.span
-	local left = stack.cx - img_w * 0.5
-	local right = stack.cx + img_w * 0.5
+	local boss_left = stack.cx + (origin.minx - origin.ox) * scale_x
+	local boss_right = stack.cx + (origin.maxx - origin.ox) * scale_x
+	local garden_left = stack.cx + (origin.maxx - origin.ox) * (-scale_x)
+	local garden_right = stack.cx + (origin.minx - origin.ox) * (-scale_x)
 	return {
 		cx = stack.cx,
 		w = stack.w,
@@ -143,17 +212,17 @@ function M.measure_stack()
 		boss_cy = stack.boss_cy,
 		theme_cy = stack.theme_cy,
 		img_w = img_w,
-		left = left,
-		right = right,
+		left = boss_left,
+		right = boss_right,
 		boss_top = boss_top,
 		boss_bottom = boss_bottom,
 		theme_top = theme_top,
 		theme_bottom = theme_bottom,
 		ribbon_gap = theme_top - boss_bottom,
-		boss_bottom_left = { x = left, y = boss_bottom },
-		boss_bottom_right = { x = right, y = boss_bottom },
-		garden_top_left = { x = left, y = theme_top },
-		garden_top_right = { x = right, y = theme_top },
+		boss_bottom_left = { x = boss_left, y = boss_bottom },
+		boss_bottom_right = { x = boss_right, y = boss_bottom },
+		garden_top_left = { x = garden_left, y = theme_top },
+		garden_top_right = { x = garden_right, y = theme_top },
 	}
 end
 
@@ -240,6 +309,7 @@ local function draw_banner(banner, stack, img_w, img_h)
 	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.boss_banner
 	if atlas and atlas.image and love.graphics.draw then
 		local iw, ih = atlas.image:getDimensions()
+		local origin = ribbon_content_origin(iw, ih)
 		local offscreen = stack.w * 0.5 + img_w * 0.5 + 60
 		local start_x = from_right and offscreen or -offscreen
 		band_cx = start_x + (0 - start_x) * eased
@@ -250,7 +320,7 @@ local function draw_banner(banner, stack, img_w, img_h)
 		if banner.mirror then
 			sx = -sx
 		end
-		love.graphics.draw(atlas.image, band_cx, 0, 0, sx, img_h / ih, iw * 0.5, ih * 0.5)
+		love.graphics.draw(atlas.image, band_cx, 0, 0, sx, img_h / ih, origin.ox, origin.oy)
 	end
 
 	love.graphics.setFont(msg_font)

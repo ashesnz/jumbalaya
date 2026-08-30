@@ -258,6 +258,8 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 		local announce = require("word_game.ui.boss_word_announce")
 
 		_G.G.STATE = _G.G.STATES.TABLE_BOARD
+		_G.G.TILESCALE = 1
+		_G.G.TILESIZE = 73
 		_G.G.hand = {
 			T = { x = 2.0, y = 7.0, w = 6.0, h = 2.0 },
 			cards = {},
@@ -268,6 +270,9 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 				getDimensions = function() return 1180, 211 end,
 			},
 		}
+		-- banner.png has more left padding than right; flipping around the
+		-- texture midpoint used to leave Garden ~10–20px too far left.
+		announce.set_content_bounds_for_test({ minx = 228, maxx = 993, miny = 15, maxy = 196 })
 
 		announce.play_boss("BOSS WORD")
 		announce.play_theme("Garden Theme")
@@ -280,24 +285,17 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 		T.assert_true(stack.theme_top > stack.boss_bottom,
 			"theme ribbon should sit below the boss ribbon without touching")
 
-		local ts = (_G.G.TILESCALE or 1) * (_G.G.TILESIZE or 1)
-		local gap_px = stack.ribbon_gap * ts
+		local gap_px = stack.ribbon_gap * (_G.G.TILESCALE * _G.G.TILESIZE)
 		T.assert_true(gap_px >= 10, "ribbon gap should be a visible separation in pixels")
-
-		-- Arrowhead stack: shared horizontal bounds, opposite sweep/mirror on theme.
-		T.assert_almost_equal(stack.left, stack.cx - stack.img_w * 0.5, 0.001)
-		T.assert_almost_equal(stack.right, stack.cx + stack.img_w * 0.5, 0.001)
 		T.assert_true(stack.theme_cy > stack.boss_cy, "theme should be below boss")
 
-		-- Corner alignment checks as requested:
-		-- 1. Left top corner of Garden theme aligned with bottom left corner of Boss word
 		T.assert_almost_equal(stack.garden_top_left.x, stack.boss_bottom_left.x, 0.001,
-			"Left top corner of Garden theme must align with bottom left corner of Boss word in X")
-		-- 2. Bottom right corner of Boss word aligned with top right corner of Garden theme
-		T.assert_almost_equal(stack.boss_bottom_right.x, stack.garden_top_right.x, 0.001,
-			"Bottom right corner of Boss word must align with top right corner of Garden theme in X")
+			"Garden Theme top-left must line up with Boss Word bottom-left")
+		T.assert_almost_equal(stack.garden_top_right.x, stack.boss_bottom_right.x, 0.001,
+			"Garden Theme top-right must line up with Boss Word bottom-right")
 
 		announce.clear()
+		announce.set_content_bounds_for_test(nil)
 	end)
 
 	T.it("plays a theme banner on the countdown one mark", function()
