@@ -274,14 +274,10 @@ end
 
 function M.reset_game()
 	M.setup()
-	if G.VAULT_LIST and G.VAULT_LIST.remove then
-		pcall(function() G.VAULT_LIST:remove() end)
-	end
 	if G.VAULT_HUD and G.VAULT_HUD.remove then
 		pcall(function() G.VAULT_HUD:remove() end)
 	end
 	G.VAULT_HUD = nil
-	G.VAULT_LIST = nil
 	G.word_sidebar_uibox = nil
 	local jg = G.placement_table and G.placement_table.jumble_geometry
 	G.placement_table = {
@@ -290,7 +286,6 @@ function M.reset_game()
 	}
 	G.GAME = {
 		points = 0,
-		table_word_history = {},
 		seed_streams = { seed = "TEST", hashed_seed = 0 },
 		word_round = {
 			set = 1,

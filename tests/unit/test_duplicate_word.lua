@@ -24,15 +24,6 @@ T.describe("Duplicate Word Tracking (word_game.model.round)", function()
 		T.assert_false(round.is_word_played("DOG"), "DOG should not be marked as played")
 	end)
 
-	T.it("checks historical fallback in table_word_history", function()
-		G.GAME.word_round.played_words = {}
-		G.GAME.table_word_history = {
-			{ word = "BIRD" },
-		}
-		T.assert_true(round.is_word_played("BIRD"), "BIRD in table_word_history should be detected")
-		T.assert_true(round.is_word_played("bird"), "bird in table_word_history should be detected case-insensitively")
-	end)
-
 	T.it("clears played words when advancing to a new hand or stage", function()
 		round.record_word_play("TEST")
 		T.assert_true(round.is_word_played("TEST"))

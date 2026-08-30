@@ -37,7 +37,7 @@ When altering letter cards, touch the full pipeline as needed:
 1. `_tools/build_letter_atlas.py` → PNGs + `deck_face_colors.lua`
 2. `app/startup/assets.lua` atlas spec
 3. `word_game/model/cards/definitions.lua`
-4. `letter_card_faces.lua` / `card_visuals.lua` / `letter_tile.lua`
+4. `letter_card_faces.lua` / `card_visuals.lua`
 5. `tests/unit/test_letter_card_faces.lua`
 
 Source art for rebuild: `assets/JumbalayaDeck.jpg` or legacy deck PNG grid.

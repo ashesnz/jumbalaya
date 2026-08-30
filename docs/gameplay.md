@@ -91,7 +91,7 @@ During a stage you see:
 - **Play button** (right of hand) — submit a word or bank a solved puzzle; **hold 5 seconds** for a full-hand redraw.
 - **Score banner** — current puzzle **points × multiplier** chips and **“N Points to get”** toward the stage target.
 - **Draw pile** — jumble deck stack; shows remaining cards. Token pile stacks above it after you earn tokens.
-- **Sidebar** — stage odometer, recent banks, perk name when selected.
+- **Sidebar** — stage odometer, perk name when selected.
 
 The old **discard bin** is hidden during jumble hands. Drag-to-bin discards from the Scrabble loop are inactive.
 
@@ -213,10 +213,6 @@ Most perk descriptions still reference the legacy AP system. Only **`extra_play`
 ---
 
 ## Between stages
-
-### The Vault
-
-Tracks unique words across a match in legacy code. Jumble play logs puzzle banks to the sidebar instead of vault AP entries.
 
 ### The Trade (Card Marketplace)
 

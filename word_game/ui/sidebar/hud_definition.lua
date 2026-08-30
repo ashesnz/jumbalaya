@@ -1,4 +1,4 @@
---[[ word_game/ui/sidebar/hud_definition.lua - Vault HUD layout and word list rows ]]
+--[[ word_game/ui/sidebar/hud_definition.lua - Vault HUD layout ]]
 
 local Layout = require("word_game.ui.layout")
 local hand_progress = require("word_game.ui.sidebar.hand_progress")
@@ -7,16 +7,10 @@ local stamp_grid = require("word_game.ui.stamp_grid")
 
 local M = {}
 
-local SCALE = 0.48
-local LIST_ROW_H = 0.40
-
 local VAULT_ROOT_PAD = 0
 local VAULT_OUTER_PAD = 0
 local VAULT_FILL_PAD = 0.06
 local VAULT_BOTTOM_PAD = 0.22
-local VAULT_FILL_CHILDREN = 7
-
-local SHOW_VAULT_WORD_LIST = true
 
 local function stamp_slot_height()
 	local count = 1
@@ -26,25 +20,16 @@ local function stamp_slot_height()
 	return stamp_grid.panel_height_tiles(count)
 end
 
-local function list_height()
-	if not SHOW_VAULT_WORD_LIST then
-		return 0
-	end
-	local history = G.GAME and G.GAME.table_word_history or {}
-	return math.max(0.40, #history * LIST_ROW_H)
-end
-
 local function vault_fixed_content_height()
 	local _, deck_h = Layout.deck_slot_size()
 	local rows = 0.82
 		+ stamp_slot_height()
 		+ 0.45
 		+ 0.45
-		+ list_height()
-		+ 0.08
 		+ deck_h
 		+ VAULT_BOTTOM_PAD
-	local fill_pad = VAULT_FILL_PAD * (VAULT_FILL_CHILDREN + 1)
+	local fill_nodes = 7
+	local fill_pad = VAULT_FILL_PAD * (fill_nodes + 1)
 	local outer_pad = VAULT_OUTER_PAD * 2
 	return VAULT_ROOT_PAD * 2 + outer_pad + fill_pad + rows
 end
@@ -84,59 +69,10 @@ local function deck_count_node(box_w)
 	}}
 end
 
-local function list_slot(entry)
-	local scale = SCALE
-	local box_w = box_width()
-	if not entry then
-		return nil
-	end
-	local echo = entry.echo and entry.echo > 0 and (" e" .. entry.echo) or ""
-	local score_text = tostring(entry.score or 0) .. echo
-	local word_node = {
-		n = G.UI.TEXT,
-		config = {
-			text = entry.word or "",
-			scale = 0.85 * scale,
-			colour = G.C.WHITE,
-			shadow = false,
-		},
-	}
-	return { n = G.UI.ROW, config = {
-		align = "cm",
-		padding = 0.015,
-		minw = box_w * 0.90,
-		minh = LIST_ROW_H,
-		colour = G.C.CLEAR,
-	}, nodes = {
-		{ n = G.UI.COLUMN, config = { align = "cl", minw = box_w * 0.62, maxw = box_w * 0.62 }, nodes = { word_node } },
-		{ n = G.UI.COLUMN, config = { align = "cr", minw = box_w * 0.28 }, nodes = {
-			{ n = G.UI.ROW, config = { align = "cr" }, nodes = {
-				{ n = G.UI.TEXT, config = { text = score_text, scale = 0.9 * scale, colour = G.C.UI.TEXT_LIGHT, shadow = false } },
-			}},
-		}},
-	}}
-end
-
 function M.sync_action_buttons()
 	if WORD_GAME and WORD_GAME.HandShuffle then
 		WORD_GAME.HandShuffle.ensure()
 	end
-end
-
-function M.list_nodes()
-	local history = G.GAME and G.GAME.table_word_history or {}
-	local rows = {}
-	for i = 1, #history do
-		local slot = list_slot(history[i])
-		if slot then
-			rows[#rows + 1] = slot
-		end
-	end
-	return rows
-end
-
-function M.list_definition()
-	return { n = G.UI.ROOT, config = { align = "tm", colour = G.C.CLEAR, minw = box_width() }, nodes = M.list_nodes() }
 end
 
 function M.hud_definition()
@@ -223,15 +159,6 @@ function M.hud_definition()
 			minh = VAULT_BOTTOM_PAD,
 		}, nodes = {} },
 	}
-
-	if SHOW_VAULT_WORD_LIST then
-		table.insert(fill_nodes, 3, { n = G.UI.ROW, config = {
-			align = "tm",
-			id = "row_embedded_list",
-			minw = box_w,
-			padding = 0.02,
-		}, nodes = M.list_nodes() })
-	end
 
 	return { n = G.UI.ROOT, config = {
 		align = "tm",

@@ -121,7 +121,6 @@
 ---@field starting_params { hand_size: number, discards: number, hands: number, consumable_slots: number }
 ---@field round number @deprecated poker-only
 ---@field word_round WordRound|nil
----@field table_word_history table|nil
 ---@field placement_word string|nil
 ---@field placement_word_valid boolean|nil
 ---@field word_score_animating boolean|nil

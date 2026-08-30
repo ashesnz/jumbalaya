@@ -19,15 +19,13 @@ T.describe("Layout & Sidebar Geometry (word_game.ui.layout)", function()
 		T.assert_almost_equal(frac, 3.0 / 20, 0.0001, "Sidebar fraction should be 3.0 / 20 = 0.15")
 	end)
 
-	T.it("constructs sidebar HUD without plays left odometer and with clean unboxed word list", function()
+	T.it("constructs sidebar HUD without plays left odometer or word list", function()
 		local sidebar_fn = require("word_game.ui.sidebar")
 		local sidebar = sidebar_fn()
-		G.GAME.table_word_history = {}
 
 		local hud = sidebar.hud_definition()
 		T.assert_not_nil(hud, "HUD definition should exist")
 
-		-- Verify no plays_odometer node in HUD definition
 		local function has_id(node, target_id)
 			if node.config and node.config.id == target_id then return true end
 			for _, child in pairs(node.nodes or {}) do
@@ -37,26 +35,8 @@ T.describe("Layout & Sidebar Geometry (word_game.ui.layout)", function()
 		end
 
 		T.assert_false(has_id(hud, "plays_odometer"), "Plays left odometer must be completely removed")
-		T.assert_true(has_id(hud, "row_embedded_list"), "Embedded word list row must exist")
+		T.assert_false(has_id(hud, "row_embedded_list"), "Embedded word list row must not exist")
 
-		-- Add puzzle fixed letters to sidebar history
-		sidebar:add_play("C _ T", 24)
-		sidebar:add_play("_ A R", 18)
-
-		local nodes = sidebar.list_nodes()
-		T.assert_equal(#nodes, 2, "Should have exactly 2 nodes for 2 puzzle plays")
-		T.assert_equal(G.GAME.table_word_history[1].word, "C _ T")
-		T.assert_equal(G.GAME.table_word_history[1].score, 24)
-		T.assert_equal(G.GAME.table_word_history[2].word, "_ A R")
-		T.assert_equal(G.GAME.table_word_history[2].score, 18)
-
-		-- Verify unboxed (clear colour, no emboss)
-		for _, row in ipairs(nodes) do
-			T.assert_equal(row.config.colour, G.C.CLEAR, "Word row must not have a box background colour")
-			T.assert_nil(row.config.emboss, "Word row must not have box shadow emboss")
-		end
-
-		-- Verify node order inside row_vault_fill has row_vault_spacer before row_deck
 		local fill_node
 		local function find_fill(node)
 			if node.config and node.config.id == "row_vault_fill" then

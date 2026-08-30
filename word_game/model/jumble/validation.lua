@@ -105,8 +105,15 @@ local function answer_signature(hand_counts, puzzle, limit)
 	for letter, count in pairs(hand_counts or {}) do
 		parts[#parts + 1] = letter .. ":" .. count
 	end
-	local history = G.GAME and G.GAME.table_word_history
-	parts[#parts + 1] = "history:" .. #(history or {})
+	local wr = G.GAME and G.GAME.word_round
+	local played = wr and wr.played_words
+	local played_count = 0
+	if played then
+		for _ in pairs(played) do
+			played_count = played_count + 1
+		end
+	end
+	parts[#parts + 1] = "played:" .. played_count
 	table.sort(parts)
 	return table.concat(parts, "|")
 end

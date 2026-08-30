@@ -25,7 +25,6 @@ function M.init_run()
 		target = round_config.hand_target(1, 1),
 		played_words = {},
 	}
-	G.GAME.table_word_history = {}
 	G.GAME.points = 0
 	G.GAME.round_resets = G.GAME.round_resets or {}
 	G.GAME.round_resets.ante = 1
@@ -129,32 +128,11 @@ function M.start_hand(set, hand_index)
 	backgrounds.stage(set, hand_index)
 end
 
--- Uppercase index over table_word_history, rebuilt lazily when the log's
--- length changes (entries are append/clear only). Keeps the per-word
--- duplicate check O(1) even when the hot paths ask thousands of times.
-local history_index = nil
-local history_index_len = -1
-
 function M.is_word_played(word)
 	if not word or word == "" then return false end
 	word = string.upper(word)
 	local wr = G.GAME and G.GAME.word_round
-	if wr and wr.played_words and wr.played_words[word] then
-		return true
-	end
-	local history = G.GAME and G.GAME.table_word_history
-	if not history then return false end
-
-	if history_index == nil or history_index_len ~= #history then
-		history_index = {}
-		for _, entry in ipairs(history) do
-			if entry and entry.word then
-				history_index[string.upper(entry.word)] = true
-			end
-		end
-		history_index_len = #history
-	end
-	return history_index[word] == true
+	return wr and wr.played_words and wr.played_words[word]
 end
 
 function M.record_word_play(word)

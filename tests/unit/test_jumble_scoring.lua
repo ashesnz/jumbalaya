@@ -51,9 +51,6 @@ T.describe("Jumble scoring and odometer", function()
 
 	T.it("calculates total puzzle score as math.floor(points * multi) on advance", function()
 		local flow = require("word_game.model.play")
-		local sidebar = require("word_game.ui.sidebar")()
-		WORD_GAME.Sidebar = sidebar
-		G.GAME.table_word_history = {}
 
 		local wr = {
 			target = 100,
@@ -79,9 +76,6 @@ T.describe("Jumble scoring and odometer", function()
 		flow.play_jumble_word()
 
 		T.assert_equal(wr.jumble.total_score, 24, "Total score should be math.floor(15 * 1.6) = 24")
-		T.assert_equal(#G.GAME.table_word_history, 1, "Should paste 1 play entry to vault sidebar for puzzle")
-		T.assert_equal(G.GAME.table_word_history[1].word, "C…T", "Vault sidebar entry word should be puzzle pattern")
-		T.assert_equal(G.GAME.table_word_history[1].score, 24, "Vault sidebar entry score should be 24")
 
 		local wr2 = {
 			target = 200,
@@ -170,7 +164,6 @@ T.describe("Jumble scoring and odometer", function()
 		local flow = require("word_game.model.play")
 		local sb = require("word_game.ui.score_banner")
 		WORD_GAME.ScoreBanner = sb
-		G.GAME.table_word_history = {}
 		G.GAME.word_round = {
 			target = 20,
 			mode = "jumble",

@@ -23,7 +23,6 @@ function M.play_jumble_word(opts)
 	effects.capture_token_timer_if_cleared(result.new_rem <= 0, { skip_focus = boss_trigger })
 
 	if result.kind == "bank_puzzle" then
-		effects.sidebar_add_puzzle_play(result.puzzle_label, result.puzzle_total)
 		if result.cleared then
 			effects.set_word_score_animating(true)
 			effects.add_points(result.puzzle_total)
