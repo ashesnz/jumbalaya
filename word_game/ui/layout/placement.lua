@@ -240,12 +240,15 @@ function M.set_screen_positions(opts)
 			G.deck.T.h = deck.h
 			if G.deck.hard_set_T then G.deck:hard_set_T(deck.x, deck.y, deck.w, deck.h) end
 			end
-			if G.discard and G.discard.T then
-			G.discard.T.x = deck.x
-			G.discard.T.y = deck.y
-			G.discard.T.w = deck.w
-			G.discard.T.h = deck.h
-			if G.discard.hard_set_T then G.discard:hard_set_T(deck.x, deck.y, deck.w, deck.h) end
+			if G.discard and G.discard.T and WORD_GAME.Layout.discard_rect then
+				local discard = WORD_GAME.Layout.discard_rect()
+				G.discard.T.x = discard.x
+				G.discard.T.y = discard.y
+				G.discard.T.w = discard.w
+				G.discard.T.h = discard.h
+				if G.discard.hard_set_T then
+					G.discard:hard_set_T(discard.x, discard.y, discard.w, discard.h)
+				end
 			end
 		else
 			if G.deck and G.deck.T then
@@ -256,7 +259,9 @@ function M.set_screen_positions(opts)
 
 		dealt_hand.apply_screen_position()
 
-		if G.discard and G.discard.T then
+		local table_discard = WORD_GAME and WORD_GAME.TableDiscard
+		if G.discard and G.discard.T
+			and not (table_discard and table_discard.uses_table_draw and table_discard.uses_table_draw()) then
 			G.discard.T.x = rect.x + rect.w * 0.5
 			G.discard.T.y = rect.y + rect.h * 0.5
 		end

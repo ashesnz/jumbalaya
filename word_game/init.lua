@@ -24,6 +24,7 @@ local M = {
 	TableBoard = require("word_game.ui.table_board"),
 	Layout = require("word_game.ui.layout"),
 	TableDeck = require("word_game.ui.table_deck"),
+	TableDiscard = require("word_game.ui.table_discard"),
 	LetterOverlay = require("word_game.ui.letter_overlay"),
 	ScoreBanner = require("word_game.ui.score_banner"),
 	TimelineTimer = require("word_game.ui.timeline_timer"),

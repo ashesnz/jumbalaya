@@ -13,11 +13,13 @@
 
 local hand = require("word_game.ui.cardarea.hand")
 local deck = require("word_game.ui.cardarea.deck")
+local discard = require("word_game.ui.cardarea.discard")
 local placement = require("word_game.ui.cardarea.placement")
 
 local TYPE_HANDLERS = {
 	hand = hand,
 	deck = deck,
+	discard = discard,
 	placement = placement,
 }
 
@@ -325,6 +327,7 @@ function CardArea:update(dt)
 		end
 	end
 	deck.update(self, dt)
+	discard.update(self, dt)
 	--Check and see if controller is being used
 	if G.INPUT.HID.controller and self ~= G.hand then self:clear_selection() end
 	self.config.temp_limit = math.max(#self.cards, self.config.card_limit)
@@ -402,6 +405,7 @@ function CardArea:draw()
 	self.ARGS.draw_layers = self.ARGS.draw_layers or self.config.draw_layers or {'shadow', 'card'}
 	for k, v in ipairs(self.ARGS.draw_layers) do
 		deck.draw_layer(self, v, draw_card_layer)
+		discard.draw_layer(self, v, draw_card_layer)
 		placement.draw_layer(self, v, draw_card_layer)
 
 		if self.config.type == 'usable' or self.config.type == 'shop' or self.config.type == 'title_2' then
@@ -415,16 +419,6 @@ function CardArea:draw()
 			for i = 1, #self.cards do
 				if self.cards[i] ~= G.INPUT.focused.target then
 					if self.cards[i].selected then
-						draw_card_layer(self.cards[i], v)
-					end
-				end
-			end
-		end
-
-		if self.config.type == 'discard' then
-			for i = 1, #self.cards do
-				if self.cards[i] ~= G.INPUT.focused.target then
-					if math.abs(self.cards[i].VT.x - self.T.x) > 1 then
 						draw_card_layer(self.cards[i], v)
 					end
 				end
@@ -704,6 +698,13 @@ function CardArea:click()
 		if WORD_GAME and WORD_GAME.TableDeck and WORD_GAME.TableDeck.uses_table_draw() then
 			WORD_GAME.TableDeck.show_info()
 		end
+	end
+end
+
+function CardArea:release(dragged)
+	local handler = type_handler(self)
+	if handler and handler.release then
+		handler.release(self, dragged)
 	end
 end
 

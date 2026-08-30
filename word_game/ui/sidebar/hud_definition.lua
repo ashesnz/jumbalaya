@@ -21,12 +21,13 @@ end
 
 local function vault_fixed_content_height()
 	local _, deck_h = Layout.deck_slot_size()
+	local _, discard_h = Layout.discard_slot_size()
 	local rows = stamp_slot_height()
-		+ 0.45
-		+ 0.45
 		+ deck_h
+		+ 0.35
+		+ discard_h
 		+ VAULT_BOTTOM_PAD
-	local fill_nodes = 6
+	local fill_nodes = 5
 	local fill_pad = VAULT_FILL_PAD * (fill_nodes + 1)
 	local outer_pad = VAULT_OUTER_PAD * 2
 	return VAULT_ROOT_PAD * 2 + outer_pad + fill_pad + rows
@@ -93,44 +94,6 @@ function M.hud_definition()
 			id = "row_vault_spacer",
 			minh = vault_spacer_height(),
 		}, nodes = {} },
-		{ n = G.UI.ROW, config = {
-			id = "row_perk_stamp_play",
-			minh = 0.45,
-			align = "cm",
-			padding = 0.04,
-			minw = box_w * 0.88,
-			r = 0.08,
-			hover = true,
-			colour = G.C.UI.BACKGROUND_INACTIVE,
-			button = "perk_stamp_play",
-			shadow = true,
-		}, nodes = {
-			{ n = G.UI.TEXT, config = {
-				text = "Stamp Play",
-				scale = 0.24,
-				colour = G.C.UI.TEXT_LIGHT,
-				shadow = true,
-			}},
-		}},
-		{ n = G.UI.ROW, config = {
-			id = "row_perk_stamp",
-			minh = 0.45,
-			align = "cm",
-			padding = 0.04,
-			minw = box_w * 0.88,
-			r = 0.08,
-			hover = true,
-			colour = G.C.UI.BACKGROUND_INACTIVE,
-			button = "perk_stamp_demo",
-			shadow = true,
-		}, nodes = {
-			{ n = G.UI.TEXT, config = {
-				text = "Stamp Frame",
-				scale = 0.24,
-				colour = G.C.UI.TEXT_LIGHT,
-				shadow = true,
-			}},
-		}},
 		(function()
 			local dw, dh = Layout.deck_slot_size()
 			return { n = G.UI.ROW, config = {
@@ -144,6 +107,18 @@ function M.hud_definition()
 			}}
 		end)(),
 		deck_count_node(box_w),
+		(function()
+			local dw, dh = Layout.discard_slot_size()
+			return { n = G.UI.ROW, config = {
+				align = "cm",
+				id = "row_discard",
+				minw = box_w,
+				minh = dh,
+				maxh = dh,
+			}, nodes = {
+				{ n = G.UI.BOX, config = { w = dw, h = dh } },
+			}}
+		end)(),
 		{ n = G.UI.ROW, config = {
 			id = "row_vault_bottom_pad",
 			minh = VAULT_BOTTOM_PAD,

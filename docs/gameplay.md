@@ -91,9 +91,9 @@ During a stage you see:
 - **Play button** (right of hand) — submit a word or bank a solved puzzle; **hold 5 seconds** for a full-hand redraw.
 - **Score banner** — current puzzle **points × multiplier** chips and **“N Points to get”** toward the stage target.
 - **Draw pile** — jumble deck stack; shows remaining cards. Token pile stacks above it after you earn tokens.
-- **Sidebar** — perk stamps, deck pile, cards-left counter.
+- **Sidebar** — perk stamps, deck pile, cards-left counter, discard bin.
 
-The old **discard bin** is hidden during jumble hands. Drag-to-bin discards from the Scrabble loop are inactive.
+Drag a hand card onto the **discard bin** (below the cards-left text) to discard it; a new card deals in from the deck pile above.
 
 ---
 

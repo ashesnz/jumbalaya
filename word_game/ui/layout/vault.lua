@@ -54,6 +54,11 @@ function M.deck_slot_size()
 	return TableDeck.footprint(G.CARD_W * scale, G.CARD_H * scale)
 end
 
+function M.discard_slot_size()
+	local TableDiscard = require("word_game.ui.table_discard")
+	return TableDiscard.footprint(G.CARD_W, G.CARD_H)
+end
+
 function M.deck_rect()
 	local w, h = M.deck_slot_size()
 	local row = G.VAULT_HUD and G.VAULT_HUD:find_node_by_id("row_deck")
@@ -82,6 +87,26 @@ function M.deck_rect()
 	}
 end
 
+function M.discard_rect()
+	local w, h = M.discard_slot_size()
+	local row = G.VAULT_HUD and G.VAULT_HUD:find_node_by_id("row_discard")
+	if row and row.T then
+		return {
+			x = row.T.x + math.max(0, ((row.T.w or w) - w) * 0.5),
+			y = row.T.y + math.max(0, ((row.T.h or h) - h) * 0.5),
+			w = w,
+			h = h,
+		}
+	end
+	local deck = M.deck_rect()
+	return {
+		x = deck.x + math.max(0, (deck.w - w) * 0.5),
+		y = deck.y + deck.h + 0.08,
+		w = w,
+		h = h,
+	}
+end
+
 function M.update_vault_attach()
 	if not G.VAULT_ATTACH then return end
 	local vault = M.vault_rect()
@@ -89,7 +114,9 @@ function M.update_vault_attach()
 	G.VAULT_ATTACH.T.y = vault.y
 	G.VAULT_ATTACH.T.w = vault.w
 	G.VAULT_ATTACH.T.h = vault.h
-	G.VAULT_ATTACH:hard_set_T(vault.x, vault.y, vault.w, vault.h)
+	if G.VAULT_ATTACH.hard_set_T then
+		G.VAULT_ATTACH:hard_set_T(vault.x, vault.y, vault.w, vault.h)
+	end
 end
 
 function M.update_panel_attach()

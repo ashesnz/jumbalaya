@@ -45,6 +45,9 @@ function WordSidebar:ensure()
 	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_deck_count") then
 		self:destroy()
 	end
+	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_discard") then
+		self:destroy()
+	end
 	if G.VAULT_HUD then
 		WordSidebar.sync_action_buttons()
 		return G.VAULT_HUD

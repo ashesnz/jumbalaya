@@ -60,6 +60,12 @@ T.describe("Timeline Timer & Shape Math", function()
 	end)
 
 	T.it("resets back to 60s when a new hand is started", function()
+		mock_env.reset_game()
+		WORD_GAME.Sidebar = {
+			refresh = function() end,
+			clear_hand = function() end,
+			sync_visibility = function() end,
+		}
 		local tt = require("word_game.ui.timeline_timer")
 		local round = require("word_game.model.round")
 		WORD_GAME.TimelineTimer = tt
@@ -71,6 +77,7 @@ T.describe("Timeline Timer & Shape Math", function()
 		-- Start new hand
 		round.start_hand(1, 1)
 		T.assert_equal(tt.time_remaining, 60.0, "Timeline timer must reset to 60s on new hand")
+		WORD_GAME.Sidebar = nil
 	end)
 
 	T.it("positions timeline rect above the score banner and matches card area width", function()
@@ -133,6 +140,12 @@ T.describe("Timeline Timer & Shape Math", function()
 	end)
 
 	T.it("syncs stage label when a new hand is started", function()
+		mock_env.reset_game()
+		WORD_GAME.Sidebar = {
+			refresh = function() end,
+			clear_hand = function() end,
+			sync_visibility = function() end,
+		}
 		local stage_label = require("word_game.ui.stage_label")
 		local round = require("word_game.model.round")
 		stage_label.force_sync()
@@ -141,6 +154,7 @@ T.describe("Timeline Timer & Shape Math", function()
 		round.start_hand(1, 3)
 		T.assert_equal(stage_label.left_count, 1)
 		T.assert_equal(stage_label.right_count, 3)
+		WORD_GAME.Sidebar = nil
 	end)
 
 	T.it("rolls stage label digits when advancing to the next hand", function()
