@@ -1,0 +1,31 @@
+--[[ tests/unit/test_atlas_dpiscale.lua - @2x atlas loading on mobile ]]
+
+local T = require("tests.framework")
+local AtlasDpiscale = require("app.startup.atlas_dpiscale")
+
+T.describe("atlas dpiscale", function()
+	T.it("always loads @2x sprite atlases with dpiscale=2 on mobile", function()
+		T.assert_true(AtlasDpiscale.is_retina_atlas("letters"))
+		T.assert_true(AtlasDpiscale.is_retina_atlas("letter_frame"))
+		T.assert_true(AtlasDpiscale.is_retina_atlas("Jumbalaya"))
+		T.assert_true(AtlasDpiscale.is_retina_atlas("jumbalaya_base"))
+		T.assert_true(AtlasDpiscale.is_retina_atlas("ui_1"))
+		T.assert_equal(AtlasDpiscale.for_atlas("letters", 1), 2)
+		T.assert_equal(AtlasDpiscale.for_atlas("letter_frame", 1), 2)
+		T.assert_equal(AtlasDpiscale.for_atlas("Jumbalaya", 1), 2)
+		T.assert_equal(AtlasDpiscale.for_atlas("jumbalaya_base", 1), 2)
+		T.assert_equal(AtlasDpiscale.for_atlas("letters", 2), 2)
+	end)
+
+	T.it("keeps native-resolution loading for full-bleed backgrounds", function()
+		T.assert_true(AtlasDpiscale.is_native_atlas("playing_back"))
+		T.assert_true(AtlasDpiscale.is_native_atlas("title_garden"))
+		T.assert_equal(AtlasDpiscale.for_atlas("playing_back", 1), 1)
+		T.assert_equal(AtlasDpiscale.for_atlas("title_garden", 2), 1)
+	end)
+
+	T.it("falls back to texture_scaling for unspecified atlases", function()
+		T.assert_equal(AtlasDpiscale.for_atlas("unknown_atlas", 1), 1)
+		T.assert_equal(AtlasDpiscale.for_atlas("unknown_atlas", 2), 2)
+	end)
+end)

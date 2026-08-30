@@ -27,7 +27,7 @@ end
 --- drivers' uniform initialization): mouse_screen_pos, screen_scale,
 --- hovering, dissolve, time, texture_details, image_details, burn_colour_1/2,
 --- shadow — then any caller-supplied uniforms via the bulk send.
-function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt, other_obj, ms, mr, mx, my, custom_shader, tilt_shadow)
+function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt, other_obj, ms, mr, mx, my, custom_shader, tilt_shadow, overlay)
 	if not self.states.visible then return end
 
 	local draw_major = self.role.draw_major or self
@@ -103,7 +103,7 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 	if other_obj then
 		self:project_onto(other_obj, ms, mr, mx, my)
 	else
-		self:draw_self()
+		self:draw_self(overlay)
 	end
 
 	love.graphics.setShader()

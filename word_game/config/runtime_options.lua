@@ -9,6 +9,7 @@ M.flags = {
     BASIC_CREDITS = false,
     EXTERNAL_LINKS = true,
     ENABLE_PERF_OVERLAY = false,
+    ATLAS_DEBUG_OVERLAY = false,
     NO_SAVING = false,
     MUTE = false,
     SOUND_THREAD = true,

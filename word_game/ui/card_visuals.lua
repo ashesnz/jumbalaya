@@ -501,10 +501,8 @@ function Card:draw_front()
 		end
 	elseif not self.greyed then
 		if LetterFaces.is_letter_card(self) then
-			-- Same tinted-frame path as every other letter card: yellow gold here.
-			G.OVERLAY_TINT = letter_card_tint(self)
-			self.children.center:apply_shader_effect('dissolve')
-			G.OVERLAY_TINT = nil
+			local tint = letter_card_tint(self)
+			self.children.center:apply_shader_effect('dissolve', nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, tint)
 			if self.bonus_card then
 				draw_bonus_gold_shimmer(self)
 			end

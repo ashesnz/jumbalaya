@@ -237,6 +237,7 @@ function Game:present_frame()
 	perf_checkpoint('canvas', 'draw')
 
 	debug_overlay.draw(self)
+	require("app.startup.atlas_diagnostics").draw_overlay()
 	perf_checkpoint('debug', 'draw')
 end
 

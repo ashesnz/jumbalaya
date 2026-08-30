@@ -58,7 +58,7 @@ local MockEnv = require("tests.helpers.mock_env")
 		for _, spec in ipairs(game.asset_atli) do
 			if spec.name == "Jumbalaya" then
 				found_jumbalaya = true
-				T.assert_true(string.find(spec.path, "Jumbalaya.png") ~= nil, "Jumbalaya path should point to Jumbalaya.png")
+				T.assert_true(string.find(spec.filename, "Jumbalaya.png") ~= nil, "Jumbalaya filename should be Jumbalaya.png")
 			end
 		end
 		T.assert_true(found_jumbalaya, "Jumbalaya atlas spec must be registered in asset_atli")

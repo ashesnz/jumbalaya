@@ -51,8 +51,9 @@ function TitleLogo:construct(X, Y, W, H)
 	end
 
 	self.base_image = base_atlas.image
-	self.base_w = base_atlas.px or BASE_W
-	self.base_h = base_atlas.py or BASE_H
+	-- Layout anchors are authored in 1x logical space (933×267), not PNG pixel size.
+	self.base_w = BASE_W
+	self.base_h = BASE_H
 	local full_atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.Jumbalaya
 	self.full_image = full_atlas and full_atlas.image or self.base_image
 
@@ -149,8 +150,10 @@ function TitleLogo:apply_shader_effect()
 		sh:send("dissolve", math.abs(_draw_major.dissolve or 0))
 		sh:send("dissolve_wipe", _draw_major.dissolve_wipe or 0)
 		sh:send("time", 123.33412 * ((_draw_major.ID or 1) / 1.14212) % 3000)
-		sh:send("texture_details", {0, 0, self.base_w, self.base_h})
-		sh:send("image_details", {self.base_w, self.base_h})
+		local title_image = (self.dissolve or 0) > 0 and self.full_image or self.base_image
+		local title_w, title_h = title_image:getDimensions()
+		sh:send("texture_details", {0, 0, title_w, title_h})
+		sh:send("image_details", {title_w, title_h})
 		sh:send("burn_colour_1", _draw_major.dissolve_colours and _draw_major.dissolve_colours[1] or G.C.CLEAR)
 		sh:send("burn_colour_2", _draw_major.dissolve_colours and _draw_major.dissolve_colours[2] or G.C.CLEAR)
 		sh:send("shadow", false)

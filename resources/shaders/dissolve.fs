@@ -39,6 +39,19 @@ float value_noise(vec2 p)
 vec4 effect(vec4 colour, Image tex, vec2 texture_coords, vec2 screen_coords)
 {
 	vec4 pix = Texel(tex, texture_coords);
+	float t = clamp(dissolve, 0.0, 1.0);
+
+	// Solid cards (hand, table, etc.): skip animated grain/rim. The time-varying
+	// grain was designed for dissolve FX only; on iOS Metal it visibly flickers.
+	if (t < 0.001) {
+		if (shadow) {
+			return vec4(0.0, 0.0, 0.0, pix.a * 0.22) * colour;
+		}
+		vec2 md = (screen_coords - mouse_screen_pos) / max(screen_scale, 1.0);
+		float sheen = exp(-dot(md, md) * 1.6) * hovering * 0.10;
+		return vec4(pix.rgb + sheen, pix.a) * colour;
+	}
+
 	vec2 uv = (texture_details.xy + texture_coords * texture_details.zw) / image_details;
 
 	// Fibrous two-octave noise, stable per tile thanks to atlas UV space.
@@ -46,7 +59,6 @@ vec4 effect(vec4 colour, Image tex, vec2 texture_coords, vec2 screen_coords)
 	// Slight drift so the crumble creeps rather than sitting frozen.
 	grain += 0.04 * sin(uv.y * 21.0 + time * 0.7);
 
-	float t = clamp(dissolve, 0.0, 1.0);
 	float wipe = dissolve_wipe;
 	float rag = (hash21(vec2(floor(uv.x * 24.0), 7.0)) - 0.5) * 0.08
 		+ (hash21(vec2(floor(uv.x * 24.0), floor(time * 7.0))) - 0.5) * 0.03;

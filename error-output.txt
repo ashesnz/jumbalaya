@@ -1,3 +1,25 @@
+[atlas]
+letters path=resources/textures/2x/JumbalayaLetters.png src=2x dpiscale=2 gpu=923x190 atlas_px=71x95 filter=linear,linear
+letter_frame path=resources/textures/2x/JumbalayaCardFrame.png src=2x dpiscale=2 gpu=71x95 atlas_px=71x95 filter=linear,linear
+playing_back path=resources/textures/2x/PlayingDeck.png src=2x dpiscale=2 gpu=228x312 atlas_px=228x312 filter=linear,linear
+Perk path=resources/textures/2x/Perks.png src=2x dpiscale=2 gpu=454x138 atlas_px=303x138 filter=linear,linear
+ui_1 path=resources/textures/2x/ui_assets.png src=2x dpiscale=2 gpu=72x36 atlas_px=18x18 filter=linear,linear
+Jumbalaya path=resources/textures/2x/Jumbalaya.png src=2x dpiscale=2 gpu=933x267 atlas_px=933x267 filter=linear,linear
+jumbalaya_base path=resources/textures/2x/Jumbalaya_base.png src=2x dpiscale=2 gpu=933x267 atlas_px=933x267 filter=linear,linear
+jumbalaya_start_a path=resources/textures/2x/Jumbalaya_start_A.png src=2x dpiscale=2 gpu=103x143 atlas_px=103x143 filter=linear,linear
+jumbalaya_end_a path=resources/textures/2x/Jumbalaya_end_A.png src=2x dpiscale=2 gpu=123x152 atlas_px=123x152 filter=linear,linear
+title_garden path=resources/textures/2x/title_garden.png src=2x dpiscale=2 gpu=768x512 atlas_px=768x512 filter=linear,linear
+gamepad_ui path=resources/textures/2x/gamepad_ui.png src=2x dpiscale=2 gpu=640x128 atlas_px=32x32 filter=linear,linear
+icons path=resources/textures/2x/icons.png src=2x dpiscale=2 gpu=264x264 atlas_px=66x66 filter=linear,linear
+bin path=resources/textures/2x/Bin.png src=2x dpiscale=2 gpu=249x251 atlas_px=249x251 filter=nearest,nearest
+shuffle_icon path=resources/textures/2x/shuffle_icon.png src=2x dpiscale=2 gpu=56x56 atlas_px=56x56 filter=linear,linear
+remove_placement_icon path=resources/textures/2x/remove_placement_icon.png src=2x dpiscale=2 gpu=56x56 atlas_px=56x56 filter=linear,linear
+play_icon path=resources/textures/2x/play_icon.png src=2x dpiscale=2 gpu=56x56 atlas_px=56x56 filter=linear,linear
+tokens path=resources/textures/2x/coin_stack.png src=2x dpiscale=2 gpu=261x240 atlas_px=261x240 filter=linear,linear
+coin path=resources/textures/2x/coin.png src=2x dpiscale=2 gpu=261x239 atlas_px=261x239 filter=linear,linear
+boss_banner path=resources/textures/2x/banner.png src=2x dpiscale=2 gpu=590x106 atlas_px=590x106 filter=linear,linear
+marketplace_bg path=resources/textures/2x/Marketplace.png src=2x dpiscale=2 gpu=704x384 atlas_px=704x384 filter=linear,linear
+os=OS X texture_scaling=2 window=1024x576
 Steam not available — running without Steam integration
 SAVING PROGRESS
 SAVING SETTINGS
