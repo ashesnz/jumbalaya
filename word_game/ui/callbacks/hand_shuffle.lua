@@ -14,5 +14,5 @@ G.FUNCS.jumble_next = function()
 	if WORD_GAME and WORD_GAME.Play then
 		WORD_GAME.Play.jumble_next()
 	end
-	HandShuffle.sync_visibility()
+	HandShuffle.sync()
 end

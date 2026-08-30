@@ -27,6 +27,7 @@ local M = {
 	LetterOverlay = require("word_game.ui.letter_overlay"),
 	ScoreBanner = require("word_game.ui.score_banner"),
 	TimelineTimer = require("word_game.ui.timeline_timer"),
+	StageLabel = require("word_game.ui.stage_label"),
 	TokenReward = require("word_game.ui.token_reward"),
 	HandClearFocus = require("word_game.ui.hand_clear_focus"),
 	Confetti = require("word_game.ui.confetti"),

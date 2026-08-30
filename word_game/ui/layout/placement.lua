@@ -275,8 +275,7 @@ function M.set_screen_positions(opts)
 		end
 
 		if WORD_GAME and WORD_GAME.HandShuffle and not opts.skip_hand_shuffle then
-			WORD_GAME.HandShuffle.sync_visibility()
-			WORD_GAME.HandShuffle.sync_position()
+			WORD_GAME.HandShuffle.sync()
 		end
 		local placement = G.placement_table and G.placement_table.area
 		if G.placement_table and G.placement_table.apply_screen_position then

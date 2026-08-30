@@ -107,8 +107,8 @@ local function jump_to_hand(ctx, set, hand_index)
 	if set == 1 and hand_index == round_config.BONUS_STACK_HAND_FIRST then
 		seed_bonus_gutter()
 	end
-	if WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync_visibility then
-		WORD_GAME.HandShuffle.sync_visibility()
+	if WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync then
+		WORD_GAME.HandShuffle.sync()
 	end
 	if WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync_position then
 		WORD_GAME.HandShuffle.sync_position()

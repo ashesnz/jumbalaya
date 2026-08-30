@@ -84,14 +84,14 @@ When a new stage starts:
 
 During a stage you see:
 
-- **Timeline fuse** — 60s countdown bar where Milo’s portrait used to be (`word_game/ui/timeline_timer.lua`). Burns green → red from the right. Cosmetic pressure; it does not end the run when it hits zero.
+- **Timeline fuse** — 60s countdown bar above the play column (`word_game/ui/timeline_timer.lua`). Stage label (e.g. `1-1`) sits above the fuse with odometer rolls on hand advance. Burns green → red from the right.
 - **Pattern row** — fixed anchor letters plus slots you fill from your hand (`word_game/board/jumble_geometry.lua`, `word_game/ui/jumble_fixed_letters.lua`).
 - **Your hand** — up to 7 letter cards at the bottom.
 - **Shuffle button** (left of hand) — reshuffles cards already in your hand.
 - **Play button** (right of hand) — submit a word or bank a solved puzzle; **hold 5 seconds** for a full-hand redraw.
 - **Score banner** — current puzzle **points × multiplier** chips and **“N Points to get”** toward the stage target.
 - **Draw pile** — jumble deck stack; shows remaining cards. Token pile stacks above it after you earn tokens.
-- **Sidebar** — stage odometer, perk name when selected.
+- **Sidebar** — perk stamps, deck pile, cards-left counter.
 
 The old **discard bin** is hidden during jumble hands. Drag-to-bin discards from the Scrabble loop are inactive.
 

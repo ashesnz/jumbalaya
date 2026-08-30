@@ -457,6 +457,12 @@ function M.sync_position()
 	place_action_bars()
 end
 
+function M.buttons_present()
+	if not G.hand_action_bar or G.hand_action_bar.REMOVED then return false end
+	if not G.hand_shuffle_bar or G.hand_shuffle_bar.REMOVED then return false end
+	return M.play_button_uie() ~= nil and M.shuffle_button_uie() ~= nil
+end
+
 function M.visible()
 	return G.STATE == G.STATES.TABLE_BOARD
 		and G.ROOM_ATTACH ~= nil
@@ -554,6 +560,9 @@ function M.stabilize()
 end
 
 function M.stabilize_table_board()
+	if M.visible() and not M.buttons_present() then
+		M.sync()
+	end
 	M.stabilize()
 	snap_hand_container()
 	if G.GAME and G.GAME.placement_recall_animating then return end
@@ -611,11 +620,10 @@ function M.ensure()
 	end
 	local has_play = G.hand_action_bar
 		and not G.hand_action_bar.REMOVED
-		and (G.hand_action_bar:find_node_by_id("play_hand_icon")
-			or G.hand_action_bar:find_node_by_id("play_hand_icon_text"))
+		and G.hand_action_bar:find_node_by_id("hand_play_button")
 	local has_shuffle = G.hand_shuffle_bar
 		and not G.hand_shuffle_bar.REMOVED
-		and G.hand_shuffle_bar:find_node_by_id("hand_shuffle_icon")
+		and G.hand_shuffle_bar:find_node_by_id("hand_shuffle_button")
 	if has_play and has_shuffle then
 		M.sync_visibility()
 		return
@@ -679,11 +687,14 @@ function M.destroy()
 end
 
 function M.sync()
-	if M.visible() then
-		M.ensure()
-	else
+	if not M.visible() then
 		M.destroy()
+		return false
 	end
+	M.ensure()
+	M.sync_position()
+	M.sync_visibility()
+	return M.buttons_present()
 end
 
 return M

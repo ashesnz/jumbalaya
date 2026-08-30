@@ -181,8 +181,8 @@ function M.place_in_row(session, card)
 	area:hard_set_cards()
 
 	placement_word.refresh_from_jumble_slots(jumble.state().slots)
-	if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync_visibility then
-		WORD_GAME.HandShuffle.sync_visibility()
+	if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync then
+		WORD_GAME.HandShuffle.sync()
 	end
 	return true
 end
@@ -241,8 +241,8 @@ function M.try_snap(session, card)
 		local function finish_bonus_return()
 			placement_word.clear()
 			play_sfx("card_slide1", nil, 0.8)
-			if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync_visibility then
-				WORD_GAME.HandShuffle.sync_visibility()
+			if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync then
+				WORD_GAME.HandShuffle.sync()
 			end
 		end
 
@@ -285,8 +285,8 @@ function M.try_snap(session, card)
 		and M.point_in_return_zone(session, cx, cy) then
 		if M.return_to_hand(session, card) then
 			play_sfx("card_slide1", nil, 0.8)
-			if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync_visibility then
-				WORD_GAME.HandShuffle.sync_visibility()
+			if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync then
+				WORD_GAME.HandShuffle.sync()
 			end
 			return
 		end

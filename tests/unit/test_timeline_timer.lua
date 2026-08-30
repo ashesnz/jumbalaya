@@ -131,4 +131,31 @@ T.describe("Timeline Timer & Shape Math", function()
 		T.assert_equal(tt.time_remaining, 60.0)
 		T.assert_true(tt.is_active)
 	end)
+
+	T.it("syncs stage label when a new hand is started", function()
+		local stage_label = require("word_game.ui.stage_label")
+		local round = require("word_game.model.round")
+		stage_label.force_sync()
+		stage_label.left_count = 1
+		stage_label.right_count = 1
+		round.start_hand(1, 3)
+		T.assert_equal(stage_label.left_count, 1)
+		T.assert_equal(stage_label.right_count, 3)
+	end)
+
+	T.it("rolls stage label digits when advancing to the next hand", function()
+		local stage_label = require("word_game.ui.stage_label")
+		G.GAME = G.GAME or {}
+		G.GAME.word_round = { set = 1, hand_index = 1 }
+		stage_label.force_sync()
+		stage_label.roll_to_next_hand()
+		T.assert_not_nil(stage_label.right_roll, "Hand digit should roll on advance")
+		T.assert_equal(stage_label.right_roll.from, 1)
+		T.assert_equal(stage_label.right_roll.to, 2)
+		stage_label.update(0.15)
+		T.assert_not_nil(stage_label.right_roll, "Roll should still be in progress mid-animation")
+		stage_label.update(0.30)
+		T.assert_nil(stage_label.right_roll, "Roll should finish after full duration")
+		T.assert_equal(stage_label.right_count, 2)
+	end)
 end)

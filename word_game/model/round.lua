@@ -54,7 +54,10 @@ function M.restore_from_save()
 		WORD_GAME.ScoreBanner.snap_to_actual()
 	end
 	if WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.reset then
-		WORD_GAME.TimelineTimer.reset(60.0)
+		WORD_GAME.	TimelineTimer.reset(60.0)
+	end
+	if WORD_GAME and WORD_GAME.StageLabel and WORD_GAME.StageLabel.force_sync then
+		WORD_GAME.StageLabel.force_sync()
 	end
 	if WORD_GAME and WORD_GAME.Sidebar then
 		WORD_GAME.Sidebar:ensure()
@@ -116,6 +119,10 @@ function M.start_hand(set, hand_index)
 
 	if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.clear_hand then
 		WORD_GAME.Sidebar:clear_hand()
+	end
+
+	if WORD_GAME and WORD_GAME.StageLabel and WORD_GAME.StageLabel.sync then
+		WORD_GAME.StageLabel.sync()
 	end
 
 	refresh()

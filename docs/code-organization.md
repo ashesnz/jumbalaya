@@ -83,7 +83,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `TokenReward` | 1-1 token fly animations |
 | `HandShuffle` / `PlayHoldRedraw` | Shuffle + Play buttons, hold-to-redraw |
 | `TradeUI` / `DealerUI` / `PerkMarketplace` | Marketplace and shop overlays |
-| `Sidebar` | Stage odometer |
+| `Sidebar` | Vault HUD (stamps, deck) |
 | Hosts / portraits / overlays | `PlayerHost`, `AllyHost`, `GuestHost`, `PlayerPortrait`, `CardInspect`, `CardHover`, `Confetti`, `FloatUpText`, `HandClearFocus`, `EndMatch`, `TableDeck`, `LetterOverlay` |
 
 Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of deep requires.
@@ -143,7 +143,7 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `perk_market.lua` | Early-showdown shop overlay |
 | `table_deck.lua` | Draw pile + token pile rendering |
 | `hand_clear_focus.lua` | Spotlight during 1-1 token award |
-| `sidebar.lua` | Stage odometer |
+| `sidebar.lua` | Vault HUD (stamps, deck) |
 | `widgets/` | Shared UI controls (`buttons.lua`, `sliders.lua`) and `G.UIDEF` helpers |
 | `overlays/` | Options, settings, win/game-over overlays (`options.lua`, `results.lua`) |
 | `stats.lua` | Profile statistics UI |

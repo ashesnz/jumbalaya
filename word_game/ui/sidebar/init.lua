@@ -39,12 +39,6 @@ function WordSidebar:ensure()
 	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_stamp_slot") then
 		self:destroy()
 	end
-	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_hand_progress") then
-		self:destroy()
-	end
-	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("hand_progress_odometer") then
-		self:destroy()
-	end
 	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_deck") then
 		self:destroy()
 	end
@@ -52,6 +46,7 @@ function WordSidebar:ensure()
 		self:destroy()
 	end
 	if G.VAULT_HUD then
+		WordSidebar.sync_action_buttons()
 		return G.VAULT_HUD
 	end
 
@@ -77,7 +72,6 @@ function WordSidebar:destroy()
 		G.VAULT_HUD:remove()
 		G.VAULT_HUD = nil
 	end
-	hand_progress.reset()
 	G.word_sidebar_uibox = nil
 end
 

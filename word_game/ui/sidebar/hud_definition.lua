@@ -1,7 +1,6 @@
 --[[ word_game/ui/sidebar/hud_definition.lua - Vault HUD layout ]]
 
 local Layout = require("word_game.ui.layout")
-local hand_progress = require("word_game.ui.sidebar.hand_progress")
 local deck = require("word_game.model.cards.deck")
 local stamp_grid = require("word_game.ui.stamp_grid")
 
@@ -22,13 +21,12 @@ end
 
 local function vault_fixed_content_height()
 	local _, deck_h = Layout.deck_slot_size()
-	local rows = 0.82
-		+ stamp_slot_height()
+	local rows = stamp_slot_height()
 		+ 0.45
 		+ 0.45
 		+ deck_h
 		+ VAULT_BOTTOM_PAD
-	local fill_nodes = 7
+	local fill_nodes = 6
 	local fill_pad = VAULT_FILL_PAD * (fill_nodes + 1)
 	local outer_pad = VAULT_OUTER_PAD * 2
 	return VAULT_ROOT_PAD * 2 + outer_pad + fill_pad + rows
@@ -70,8 +68,8 @@ local function deck_count_node(box_w)
 end
 
 function M.sync_action_buttons()
-	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.ensure()
+	if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync then
+		WORD_GAME.HandShuffle.sync()
 	end
 end
 
@@ -84,14 +82,6 @@ function M.hud_definition()
 	local fill_h = math.max(3.5, inner_h - VAULT_OUTER_PAD * 2)
 
 	local fill_nodes = {
-		{ n = G.UI.ROW, config = {
-			align = "cm",
-			padding = 0,
-			minw = box_w,
-			id = "row_hand_progress",
-		}, nodes = {
-			hand_progress.odometer_node(box_w),
-		}},
 		{ n = G.UI.ROW, config = {
 			id = "row_stamp_slot",
 			minh = stamp_h,

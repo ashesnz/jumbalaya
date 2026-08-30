@@ -35,7 +35,8 @@ T.describe("Layout & Sidebar Geometry (word_game.ui.layout)", function()
 		end
 
 		T.assert_false(has_id(hud, "plays_odometer"), "Plays left odometer must be completely removed")
-		T.assert_false(has_id(hud, "row_embedded_list"), "Embedded word list row must not exist")
+		T.assert_false(has_id(hud, "row_hand_progress"), "Set/hand odometer must not be in the vault sidebar")
+		T.assert_false(has_id(hud, "hand_progress_odometer"), "Hand progress odometer must not be in the vault sidebar")
 
 		local fill_node
 		local function find_fill(node)

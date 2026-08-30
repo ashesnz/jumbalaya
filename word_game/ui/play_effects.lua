@@ -541,7 +541,7 @@ function M.present_jumble_next(jumble, wr, opts)
 				M.set_word_score_animating(false)
 				M.sync_sidebar_actions()
 				if WORD_GAME and WORD_GAME.HandShuffle then
-					WORD_GAME.HandShuffle.sync_visibility()
+					WORD_GAME.HandShuffle.sync()
 				end
 				if opts and opts.on_complete then
 					opts.on_complete()

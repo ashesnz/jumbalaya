@@ -7,6 +7,7 @@
 ]]
 
 local Layout = require("word_game.ui.layout")
+local StageLabel = require("word_game.ui.stage_label")
 
 local M = {}
 
@@ -164,6 +165,7 @@ function M.reset(duration)
 	M.is_active = true
 	M.frozen_for_reward = false
 	M.sparks = {}
+	StageLabel.sync()
 end
 
 function M.pause()
@@ -210,6 +212,8 @@ function M.update(dt)
 			table.remove(M.sparks, i)
 		end
 	end
+
+	StageLabel.update(dt)
 
 	-- Spawn new ember sparks at fuse boundary when active
 	if M.time_remaining > 0 and M.time_remaining < M.TOTAL_DURATION and #M.sparks < 25 then
@@ -263,6 +267,8 @@ function M.draw()
 	if love.graphics.setLineJoin then
 		love.graphics.setLineJoin("bevel")
 	end
+
+	StageLabel.draw_above_timer(x, y, w, h)
 
 	local shape_verts = M.build_shape_polygon(x, y, w, h, slant, r)
 

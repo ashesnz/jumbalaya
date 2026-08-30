@@ -71,8 +71,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.play_hold_redraw)", function()
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.HandShuffle = WORD_GAME.HandShuffle or {}
 		WORD_GAME.HandShuffle.play_button_uie = function() return mock_btn end
-
-		local dealt_count = 0
+		WORD_GAME.HandShuffle.sync = function() return true end
 		WORD_GAME.Deck = WORD_GAME.Deck or {}
 		WORD_GAME.Deck.deal_into_hand = function(target_size, on_complete)
 			dealt_count = target_size
@@ -352,6 +351,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.play_hold_redraw)", function()
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.HandShuffle = WORD_GAME.HandShuffle or {}
 		WORD_GAME.HandShuffle.play_button_uie = function() return mock_btn end
+		WORD_GAME.HandShuffle.sync = function() return true end
 
 		local refreshed = false
 		WORD_GAME.PlayerHost = {

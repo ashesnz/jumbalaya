@@ -257,6 +257,11 @@ function M.setup()
 		_G.WORD_GAME.TimelineTimer = timeline_timer
 	end
 
+	local ok_sl, stage_label = pcall(require, "word_game.ui.stage_label")
+	if ok_sl then
+		_G.WORD_GAME.StageLabel = stage_label
+	end
+
 	local ok_flow, flow = pcall(require, "word_game.model.play")
 	if ok_flow then
 		_G.WORD_GAME.Play = flow

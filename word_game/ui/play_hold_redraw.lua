@@ -226,8 +226,8 @@ local function finish_redraw()
 	if G.hand and G.hand.relayout then
 		G.hand:relayout()
 	end
-	if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync_visibility then
-		WORD_GAME.HandShuffle.sync_visibility()
+	if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync then
+		WORD_GAME.HandShuffle.sync()
 	end
 end
 

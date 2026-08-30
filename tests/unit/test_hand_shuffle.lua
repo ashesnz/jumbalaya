@@ -171,4 +171,96 @@ T.describe("Hand shuffle/remove button", function()
 		T.assert_almost_equal(two_card_x, seven_card_x, 0.001)
 		HandShuffle.destroy()
 	end)
+
+	T.it("recreates play and shuffle buttons after an early sync with no hand", function()
+		local HandShuffle = require("word_game.ui.hand_shuffle")
+		setup_hand_shuffle_env()
+		G.hand = nil
+		HandShuffle.destroy()
+		T.assert_false(HandShuffle.sync(), "Sync without a hand should not leave buttons")
+
+		G.hand = { T = { x = 3, y = 8, w = 12, h = 2.8 }, cards = { {}, {}, {}, {}, {}, {}, {} } }
+		T.assert_true(HandShuffle.sync(), "Sync after the hand exists should create buttons")
+		T.assert_true(HandShuffle.buttons_present(), "Play and shuffle buttons should exist")
+		local shuffle_btn = HandShuffle.shuffle_button_uie()
+		local play_btn = HandShuffle.play_button_uie()
+		T.assert_not_nil(shuffle_btn)
+		T.assert_not_nil(play_btn)
+		T.assert_true(shuffle_btn.states.visible, "Shuffle button should be visible in gameplay")
+		T.assert_true(play_btn.states.visible, "Play button should be visible in gameplay")
+		T.assert_equal(shuffle_btn.config.button, "shuffle_hand")
+		T.assert_equal(play_btn.config.button, "play_placement_word")
+		HandShuffle.destroy()
+	end)
+
+	T.it("keeps play and shuffle buttons present through table board sync cycles", function()
+		local HandShuffle = require("word_game.ui.hand_shuffle")
+		local table_board = require("word_game.ui.table_board")
+		setup_hand_shuffle_env()
+		WORD_GAME.HandShuffle = HandShuffle
+		G.hand = nil
+		HandShuffle.destroy()
+
+		HandShuffle.sync()
+		T.assert_false(HandShuffle.buttons_present(), "Buttons should not exist before the hand is dealt")
+
+		G.hand = { T = { x = 3, y = 8, w = 12, h = 2.8 }, cards = { {}, {}, {}, {}, {}, {}, {} } }
+		table_board.update({ STATE = G.STATE }, 0.016)
+		T.assert_true(HandShuffle.buttons_present(), "Table board update should restore action buttons")
+		T.assert_true(HandShuffle.play_button_uie().states.visible)
+		T.assert_true(HandShuffle.shuffle_button_uie().states.visible)
+
+		table_board.update({ STATE = G.STATE }, 0.016)
+		T.assert_true(HandShuffle.buttons_present(), "Buttons should stay present on subsequent updates")
+		HandShuffle.destroy()
+	end)
+
+	T.it("keeps play and shuffle buttons present in jumble gameplay mode", function()
+		local HandShuffle = require("word_game.ui.hand_shuffle")
+		setup_hand_shuffle_env()
+		G.hand = { T = { x = 3, y = 8, w = 12, h = 2.8 }, cards = { {}, {}, {}, {}, {}, {}, {} } }
+		G.GAME.word_round = { mode = "jumble", jumble = { slots = {} } }
+		WORD_GAME.Jumble = {
+			is_active = function() return true end,
+			state = function() return G.GAME.word_round.jumble end,
+		}
+		HandShuffle.destroy()
+		T.assert_true(HandShuffle.sync(), "Jumble mode should still create action buttons")
+		local play_btn = HandShuffle.play_button_uie()
+		local shuffle_btn = HandShuffle.shuffle_button_uie()
+		T.assert_equal(play_btn.config.button, "play_placement_word")
+		T.assert_equal(shuffle_btn.config.button, "shuffle_hand")
+		T.assert_true(play_btn.states.visible)
+		T.assert_true(shuffle_btn.states.visible)
+		HandShuffle.destroy()
+	end)
+
+	T.it("restores buttons via sidebar sync when vault sync runs before the hand is dealt", function()
+		local HandShuffle = require("word_game.ui.hand_shuffle")
+		local hud_definition = require("word_game.ui.sidebar.hud_definition")
+		setup_hand_shuffle_env()
+		WORD_GAME.HandShuffle = HandShuffle
+		G.hand = nil
+		HandShuffle.destroy()
+		hud_definition.sync_action_buttons()
+		T.assert_false(HandShuffle.buttons_present())
+
+		G.hand = { T = { x = 3, y = 8, w = 12, h = 2.8 }, cards = { {}, {}, {}, {}, {}, {}, {} } }
+		hud_definition.sync_action_buttons()
+		T.assert_true(HandShuffle.buttons_present(), "Sidebar sync should create buttons once the hand exists")
+		HandShuffle.destroy()
+	end)
+
+	T.it("removes play and shuffle buttons outside table board gameplay", function()
+		local HandShuffle = require("word_game.ui.hand_shuffle")
+		setup_hand_shuffle_env()
+		G.hand = { T = { x = 3, y = 8, w = 12, h = 2.8 }, cards = { {}, {}, {}, {}, {}, {}, {} } }
+		HandShuffle.sync()
+		T.assert_true(HandShuffle.buttons_present())
+
+		G.STATE = G.STATES.MENU or 99
+		HandShuffle.sync()
+		T.assert_false(HandShuffle.buttons_present(), "Buttons should be removed outside gameplay")
+		HandShuffle.destroy()
+	end)
 end)
