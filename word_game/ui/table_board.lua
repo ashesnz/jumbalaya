@@ -41,6 +41,9 @@ function M.update(game, dt)
 			WORD_GAME.Jumble.refresh_hud()
 		end
 	end
+	if WORD_GAME and WORD_GAME.BossWordAnnounce and WORD_GAME.BossWordAnnounce.update then
+		WORD_GAME.BossWordAnnounce.update(dt)
+	end
 	if game.placement_table then
 		game.placement_table:update(dt)
 	end
@@ -89,6 +92,9 @@ function M.draw_spotlight_overlay(game, overlay)
 		end
 		if WORD_GAME and WORD_GAME.FloatUpText then
 			WORD_GAME.FloatUpText.draw_pass()
+		end
+		if WORD_GAME and WORD_GAME.BossWordAnnounce and WORD_GAME.BossWordAnnounce.draw_pass then
+			WORD_GAME.BossWordAnnounce.draw_pass()
 		end
 	end
 
@@ -204,6 +210,9 @@ function M.draw_attention_passes(game)
 	end
 	if WORD_GAME and WORD_GAME.FloatUpText then
 		WORD_GAME.FloatUpText.draw_pass()
+	end
+	if WORD_GAME and WORD_GAME.BossWordAnnounce and WORD_GAME.BossWordAnnounce.draw_pass then
+		WORD_GAME.BossWordAnnounce.draw_pass()
 	end
 end
 

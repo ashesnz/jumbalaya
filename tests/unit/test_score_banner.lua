@@ -228,8 +228,6 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 		MockEnv.setup()
 		local sb = require("word_game.ui.score_banner")
 		local jumble = require("word_game.model.jumble")
-		local flow = require("word_game.model.play")
-		local Layout = require("word_game.ui.layout")
 
 		_G.G.STATE = _G.G.STATES.TABLE_BOARD
 		_G.WORD_GAME.Jumble = jumble
@@ -251,9 +249,42 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 		sb.reset_jumble_score()
 		sb.roll_jumble_score(0, 2, 1.0, 2.5)
 
-		-- Render call should succeed
 		local ok, err = pcall(sb.draw)
 		T.assert_true(ok, "sb.draw should execute without error: " .. tostring(err))
+	end)
+
+	T.it("plays a full-width boss word ribbon sweep", function()
+		MockEnv.setup()
+		local announce = require("word_game.ui.boss_word_announce")
+		local sb = require("word_game.ui.score_banner")
+
+		_G.G.STATE = _G.G.STATES.TABLE_BOARD
+		_G.G.GAME.word_hud = {}
+		_G.G.hand = {
+			T = { x = 2.0, y = 7.0, w = 6.0, h = 2.0 },
+			cards = {},
+		}
+		_G.G.TEXTURE_ATLASES = _G.G.TEXTURE_ATLASES or {}
+		_G.G.TEXTURE_ATLASES.boss_banner = {
+			image = {
+				getDimensions = function() return 1180, 211 end,
+			},
+		}
+
+		T.assert_false(announce.is_active(), "announce should start inactive")
+		sb.set_banner_mode("boss_word", "BOSS WORD")
+		T.assert_true(announce.is_active(), "boss banner mode should trigger the sweep")
+
+		sb.set_banner_mode("boss_word", "BOSS WORD")
+
+		local ok, err = pcall(announce.draw_pass)
+		T.assert_true(ok, "boss word announce draw should succeed: " .. tostring(err))
+
+		announce.update(2.0)
+		T.assert_true(announce.is_active(), "announce should persist after the sweep lands")
+
+		sb.set_banner_mode("normal")
+		T.assert_false(announce.is_active(), "announce should clear when boss mode ends")
 	end)
 
 	T.it("balances the graphics stack while showing boss banner text", function()

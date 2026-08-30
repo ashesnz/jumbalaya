@@ -7,6 +7,7 @@
 local fonts = require("word_game.ui.score_banner.fonts")
 local jumble = require("word_game.ui.score_banner.jumble")
 local draw = require("word_game.ui.score_banner.draw")
+local boss_word_announce = require("word_game.ui.boss_word_announce")
 
 local M = jumble
 
@@ -44,8 +45,17 @@ end
 
 function M.set_banner_mode(mode, message)
 	local hud = M.state()
-	hud.banner_mode = mode or "normal"
+	local next_mode = mode or "normal"
+	if next_mode ~= "boss_prep" and next_mode ~= "boss_word" then
+		boss_word_announce.clear()
+	end
+	hud.banner_mode = next_mode
 	hud.banner_message = message
+	if next_mode == "boss_prep" or next_mode == "boss_word" then
+		local text = message
+			or (next_mode == "boss_prep" and "Boss Level!" or "BOSS WORD")
+		boss_word_announce.play(text)
+	end
 end
 
 function M.reset(target)
@@ -54,6 +64,7 @@ function M.reset(target)
 	hud.remaining = target or 0
 	hud.banner_mode = "normal"
 	hud.banner_message = nil
+	boss_word_announce.clear()
 	M.sync_label(hud)
 end
 

@@ -278,12 +278,7 @@ function M.present_boss_word(wr, on_complete)
 	end
 
 	if G.hand and wr.jumble then
-		wr.jumble.locked_hand_layout = {
-			x = G.hand.T.x,
-			y = G.hand.T.y,
-			w = G.hand.T.w,
-			h = G.hand.T.h,
-		}
+		wr.jumble.locked_hand_layout = nil
 	end
 
 	M.set_word_score_animating(true)
@@ -295,6 +290,10 @@ function M.present_boss_word(wr, on_complete)
 	end
 
 	local function run_countdown(done)
+		if WORD_GAME and WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.set_banner_mode then
+			WORD_GAME.ScoreBanner.set_banner_mode("boss_word", "BOSS WORD")
+		end
+
 		local steps = {
 			{ text = "Are you ready?", hold = 1.0, delay = 0.15 },
 			{ text = "3", hold = 0.75, delay = 0 },
@@ -390,6 +389,7 @@ function M.present_boss_word(wr, on_complete)
 		local letters = jumble.boss_hand_letters(puzzle.boss_word, puzzle.pattern)
 		deck_mod.deal_boss_hand(letters, function()
 			M.sync_hand_after_deal()
+			word_feedback.lock_hand_layout(wr)
 			after_boss_deal()
 		end, { fast = true })
 	end

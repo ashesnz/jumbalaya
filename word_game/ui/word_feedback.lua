@@ -48,7 +48,10 @@ local function hand_dealt_metrics()
 	return {
 		cx = left + row_w * 0.5,
 		cy = top + row_h * 0.5,
+		left = left,
 		top = top,
+		w = row_w,
+		h = row_h,
 		bottom = bottom,
 		gap_w = math.min(math.max(row_w, G.hand.T.w), felt.w * 0.82),
 		inner_h = math.max(row_h, G.hand.T.h),
@@ -174,6 +177,23 @@ end
 
 function M.is_invalid_reason(reason)
 	return reason == "Not a valid word" or reason == "Does not match"
+end
+
+function M.hand_dealt_metrics()
+	return hand_dealt_metrics()
+end
+
+function M.lock_hand_layout(wr)
+	if not wr or not wr.jumble then return end
+	wr.jumble.locked_hand_layout = nil
+	local metrics = hand_dealt_metrics()
+	if not metrics then return end
+	wr.jumble.locked_hand_layout = {
+		x = metrics.left,
+		y = metrics.top,
+		w = metrics.w,
+		h = metrics.h,
+	}
 end
 
 return M
