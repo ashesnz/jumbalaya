@@ -80,15 +80,6 @@ function M.show_validation_error(err)
 	play_sfx("cancel", 0.8, 0.6)
 end
 
-function M.sidebar_add_puzzle_play(puzzle_label, puzzle_total)
-	if WORD_GAME and WORD_GAME.Sidebar then
-		WORD_GAME.Sidebar:add_play(puzzle_label, puzzle_total, nil, {
-			total_score = puzzle_total,
-			word = puzzle_label,
-		})
-	end
-end
-
 function M.set_word_score_animating(active)
 	if G.GAME then
 		G.GAME.word_score_animating = active
@@ -511,7 +502,9 @@ function M.present_word_play_after_cards(jumble, j, result, on_hand_cleared, on_
 		return
 	end
 
-	M.run_card_return_sequence(result.used_cards, after_cards_cleared, result.cleared)
+	-- Jumble word plays always return used cards to the deck (gameplay.md §Playing a puzzle).
+	-- Stage target reached is handled separately via on_hand_cleared → populate_jumble_deck.
+	M.run_card_return_sequence(result.used_cards, after_cards_cleared, true)
 end
 
 function M.present_jumble_next(jumble, wr, opts)

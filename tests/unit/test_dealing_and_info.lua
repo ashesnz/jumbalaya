@@ -189,7 +189,7 @@ T.describe("Vault deck information", function()
 		T.assert_equal(G.GAME.deck_left_count, 4, "Sync should reflect deck changes after a draw")
 	end)
 
-	T.it("discards played cards instead of returning them to the deck", function()
+	T.it("returns played cards to the deck during jumble word plays", function()
 		local effects = require("word_game.ui.play_effects")
 		G.GAME = G.GAME or {}
 		G.GAME.deck_left_count = 5
@@ -207,43 +207,129 @@ T.describe("Vault deck information", function()
 		G.TIMELINE = {
 			enqueue = function(_, ev) queued[#queued + 1] = ev end,
 		}
-		effects.run_card_return_sequence({ {} }, function() end)
+		local card = { area = { remove_card = function() end } }
+		effects.run_card_return_sequence({ card }, function() end, true)
 		for _, ev in ipairs(queued) do
 			if ev.func then ev.func() end
 		end
 		G.TIMELINE = orig_manager
 		deck.destroy_card = orig_destroy
-		T.assert_equal(destroyed, 1, "Played cards should be destroyed for the round")
-		T.assert_equal(#G.deck.cards, 5, "Discarding played cards should not refill the deck")
-		T.assert_equal(G.GAME.deck_left_count, 5, "Cards left should not change when cards are played")
+		T.assert_equal(destroyed, 0, "Jumble word plays should not destroy used cards")
+		T.assert_equal(#G.deck.cards, 6, "Used cards should return to the deck pile")
+		T.assert_equal(G.GAME.deck_left_count, 6, "Cards-left display should include returned cards")
+		T.assert_false(card.REMOVED, "Returned cards should remain active")
 	end)
 
-	T.it("restores the full deck after a cleared round", function()
+	T.it("keeps the full deck count when advancing through jumble stages", function()
 		local effects = require("word_game.ui.play_effects")
-		G.GAME = { deck_left_count = 5, word_round = { mode = "jumble" } }
-		local returned = {}
+		local jumble = require("word_game.model.jumble")
+
+		local cards = {}
+		G.playing_cards = {}
 		G.deck = {
-			cards = {},
-			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
+			cards = cards,
+			config = { card_limit = 52 },
+			emplace = function(self, card) table.insert(self.cards, card) end,
+			remove_card = function(self) return table.remove(self.cards) end,
+			shuffle = function() end,
+			hard_set_T = function() end,
 		}
-		local card = { area = { remove_card = function() end } }
-		local queued = {}
-		local original_manager = G.TIMELINE
-		G.TIMELINE = { enqueue = function(_, event) queued[#queued + 1] = event end }
-		local original_populate = deck.populate_jumble_deck
-		deck.populate_jumble_deck = function()
-			returned[#returned + 1] = card
-			G.deck.cards = { card, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {} }
-			deck.sync_deck_count_display()
+		G.hand = {
+			cards = {},
+			config = {},
+			emplace = function(self, card) table.insert(self.cards, card) end,
+			remove_card = function(self, card)
+				for i, c in ipairs(self.cards) do
+					if c == card then
+						table.remove(self.cards, i)
+						break
+					end
+				end
+			end,
+			set_ranks = function() end,
+			relayout = function() end,
+			snap_VT = function() end,
+			hard_set_cards = function() end,
+		}
+		G.discard = {
+			cards = {},
+			emplace = function(self, card) table.insert(self.cards, card) end,
+			remove_card = function(self, card)
+				for i, c in ipairs(self.cards) do
+					if c == card then
+						table.remove(self.cards, i)
+						break
+					end
+				end
+			end,
+			hard_set_cards = function() end,
+		}
+		G.placement_table = {
+			area = {
+				cards = {},
+				emplace = function(self, card) table.insert(self.cards, card) end,
+				remove_card = function(self, card)
+					for i, c in ipairs(self.cards) do
+						if c == card then
+							table.remove(self.cards, i)
+							break
+						end
+					end
+				end,
+				hard_set_cards = function() end,
+			},
+			on_remove_card = function() end,
+		}
+		G.GAME.deck_alpha = { pos = { x = 0, y = 0 } }
+
+		deck.populate_starting_deck()
+		local expected = #deck.STARTING_LETTERS
+		local orig_ensure = jumble.ensure_playable_puzzle
+		jumble.ensure_playable_puzzle = function() return true end
+
+		local function drain_timeline(queued)
+			for _, ev in ipairs(queued) do
+				if ev.func then ev.func() end
+			end
 		end
-		effects.run_card_return_sequence({ card }, function() end, true)
-		for _, event in ipairs(queued) do event.func() end
-		deck.populate_jumble_deck = original_populate
-		G.TIMELINE = original_manager
-		T.assert_equal(#returned, 0, "Return sequence should not rebuild the deck itself")
-		T.assert_equal(#G.deck.cards, 1, "Cleared cards should return to the deck")
-		T.assert_equal(G.GAME.deck_left_count, 1, "Cards-left display should include returned cards")
-		T.assert_false(card.REMOVED, "Returned cards should remain active")
+
+		for hand_index = 1, 5 do
+			G.GAME.word_round = {
+				set = 1,
+				hand_index = hand_index,
+				mode = "jumble",
+				target = 9999,
+				played_words = {},
+			}
+			deck.populate_jumble_deck()
+			deck.deal_jumble_hand()
+
+			T.assert_equal(#G.playing_cards, expected,
+				"Stage 1-" .. hand_index .. " should retain every deck card")
+			T.assert_equal(deck.cards_left() + deck.held_count(), expected,
+				"Stage 1-" .. hand_index .. " deck plus held cards should equal the full deck")
+
+			for _ = 1, 3 do
+				local used = {}
+				if G.hand.cards[1] then
+					used[#used + 1] = G.hand.cards[1]
+				end
+				local queued = {}
+				local orig_manager = G.TIMELINE
+				G.TIMELINE = { enqueue = function(_, ev) queued[#queued + 1] = ev end }
+				effects.run_card_return_sequence(used, function() end, true)
+				drain_timeline(queued)
+				G.TIMELINE = orig_manager
+			end
+
+			deck.populate_jumble_deck()
+		end
+
+		jumble.ensure_playable_puzzle = orig_ensure
+		T.assert_equal(#G.playing_cards, expected,
+			"Advancing to stage 1-5 should leave the full starter deck intact")
+		T.assert_equal(deck.cards_left(), expected,
+			"Stage 1-5 should start with the full deck count after repopulation")
 	end)
 end)
 
