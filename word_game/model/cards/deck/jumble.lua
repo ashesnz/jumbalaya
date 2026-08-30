@@ -222,6 +222,9 @@ return function(context)
 
 	function M.deal_jumble_hand()
 		if not G.hand then return end
+		if WORD_GAME and WORD_GAME.TableDiscard and WORD_GAME.TableDiscard.reset then
+			WORD_GAME.TableDiscard.reset()
+		end
 		M.clear_hand_and_placement()
 		local hand_size = G.TABLE_HAND_SIZE or 7
 		local to_deal = math.min(hand_size, #(G.deck.cards or {}))
@@ -289,6 +292,10 @@ return function(context)
 			or G.GAME.hand_shuffle_animating or G.GAME.placement_recall_animating) then
 			return false
 		end
+		local table_discard = WORD_GAME and WORD_GAME.TableDiscard
+		if table_discard and table_discard.is_full and table_discard.is_full() then
+			return false
+		end
 
 		local function after_discard()
 			M.draw_jumble_replacement()
@@ -308,8 +315,8 @@ return function(context)
 			end
 		end
 
-		if WORD_GAME and WORD_GAME.TableDiscard and WORD_GAME.TableDiscard.play_discard_anim then
-			WORD_GAME.TableDiscard.play_discard_anim()
+		if table_discard and table_discard.record_discard then
+			table_discard.record_discard()
 		end
 
 		if G.TIMELINE and G.TIMELINE.enqueue then

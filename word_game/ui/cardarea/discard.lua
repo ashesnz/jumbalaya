@@ -12,7 +12,6 @@ function M.update(self, dt)
 		self.states.collide.can = true
 		self.states.hover.can = true
 		self.states.release_on.can = true
-		table_discard.update(dt)
 	else
 		self.states.collide.can = false
 		self.states.hover.can = false

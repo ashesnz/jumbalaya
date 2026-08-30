@@ -93,7 +93,7 @@ During a stage you see:
 - **Draw pile** — jumble deck stack; shows remaining cards. Token pile stacks above it after you earn tokens.
 - **Sidebar** — perk stamps, deck pile, cards-left counter, discard bin.
 
-Drag a hand card onto the **discard bin** (below the cards-left text) to discard it; a new card deals in from the deck pile above.
+Drag a hand card onto the **discard bin** (below the cards-left text) to discard it; a new card deals in from the deck pile above. The bin sprite fills up as you discard (empty → 1 → 2 → 3 cards shown); you may discard **up to 3 cards per hand**, then the bin is full until the next hand deal.
 
 ---
 

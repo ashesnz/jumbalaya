@@ -43,10 +43,47 @@ T.describe("table discard bin", function()
 		MockEnv.reset_game()
 	end)
 
-	T.it("discards a hand card and requests a replacement deal", function()
+	T.it("starts on the empty top-left sprite and advances through the 2x2 sheet", function()
+		local table_discard = require("word_game.ui.table_discard")
+		table_discard.reset()
+
+		T.assert_equal(table_discard.sprite_frame(), 0, "empty bin uses frame 0")
+		local col, row = table_discard.sprite_cell(0)
+		T.assert_equal(col, 0, "frame 0 should be top-left column")
+		T.assert_equal(row, 0, "frame 0 should be top-left row")
+
+		T.assert_true(table_discard.record_discard())
+		T.assert_equal(table_discard.sprite_frame(), 1)
+		col, row = table_discard.sprite_cell(1)
+		T.assert_equal(col, 1, "frame 1 should be top-right")
+		T.assert_equal(row, 0)
+
+		T.assert_true(table_discard.record_discard())
+		T.assert_equal(table_discard.sprite_frame(), 2)
+		col, row = table_discard.sprite_cell(2)
+		T.assert_equal(col, 0, "frame 2 should be bottom-left")
+		T.assert_equal(row, 1)
+
+		T.assert_true(table_discard.record_discard())
+		T.assert_equal(table_discard.sprite_frame(), 3)
+		col, row = table_discard.sprite_cell(3)
+		T.assert_equal(col, 1, "frame 3 should be bottom-right")
+		T.assert_equal(row, 1)
+
+		T.assert_false(table_discard.record_discard(), "fourth discard should be rejected")
+		T.assert_true(table_discard.is_full())
+		T.assert_equal(table_discard.sprite_frame(), 3, "sprite stays on full bin")
+
+		table_discard.reset()
+		T.assert_equal(table_discard.sprite_frame(), 0, "reset returns to empty bin")
+		T.assert_false(table_discard.is_full())
+	end)
+
+	T.it("discards a hand card, updates the bin sprite, and deals a replacement", function()
 		MockEnv.setup()
 		local table_discard = require("word_game.ui.table_discard")
 		local deck = require("word_game.model.cards.deck")
+		table_discard.reset()
 
 		G.STATE = G.STATES.TABLE_BOARD
 		G.TIMELINE = nil
@@ -117,9 +154,84 @@ T.describe("table discard bin", function()
 			return { id = "new" }
 		end
 
+		T.assert_equal(table_discard.sprite_frame(), 0)
 		T.assert_true(table_discard.try_discard(card), "drop on bin should discard")
 		T.assert_true(replaced, "discard should deal a replacement")
+		T.assert_equal(table_discard.sprite_frame(), 1, "bin sprite should advance after discard")
+
 		deck.draw_jumble_replacement = orig_replacement
+		MockEnv.reset_game()
+	end)
+
+	T.it("blocks discards once the bin is full", function()
+		MockEnv.setup()
+		local table_discard = require("word_game.ui.table_discard")
+		local deck = require("word_game.model.cards.deck")
+		table_discard.reset()
+
+		for _ = 1, table_discard.MAX_FILLS do
+			T.assert_true(table_discard.record_discard())
+		end
+		T.assert_true(table_discard.is_full())
+
+		G.STATE = G.STATES.TABLE_BOARD
+		G.TIMELINE = nil
+		G.GAME = {
+			word_round = { mode = "jumble" },
+			word_score_animating = false,
+			hand_redraw_animating = false,
+		}
+		G.CARD_W = 1
+		G.CARD_H = 1.4
+		G.discard = { T = { x = 17.5, y = 9.2, w = 0.58, h = 0.81 }, cards = {} }
+		G.hand = { cards = {} }
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.TableDiscard = table_discard
+		WORD_GAME.Deck = deck
+
+		local card = {
+			area = G.hand,
+			T = { x = 17.6, y = 9.3, w = 1, h = 1.4 },
+		}
+		G.hand.cards[1] = card
+
+		T.assert_false(table_discard.can_discard_card(card), "full bin should block drag discard")
+		T.assert_false(table_discard.try_discard(card), "full bin should reject drop")
+		T.assert_false(deck.discard_from_hand(card), "full bin should reject model discard")
+
+		MockEnv.reset_game()
+	end)
+
+	T.it("resets the bin sprite when a fresh jumble hand is dealt", function()
+		MockEnv.setup()
+		local table_discard = require("word_game.ui.table_discard")
+		local deck = require("word_game.model.cards.deck")
+		table_discard.reset()
+		table_discard.record_discard()
+		table_discard.record_discard()
+		T.assert_equal(table_discard.sprite_frame(), 2)
+
+		G.hand = {
+			cards = {},
+			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
+			set_ranks = function() end,
+			relayout = function() end,
+			snap_VT = function() end,
+			hard_set_cards = function() end,
+		}
+		G.deck = {
+			cards = { {}, {} },
+			remove_card = function(self) return table.remove(self.cards) end,
+		}
+		G.GAME = { word_round = { mode = "jumble" } }
+		G.placement_table = { area = { cards = {}, hard_set_cards = function() end } }
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.TableDiscard = table_discard
+		WORD_GAME.Jumble = { ensure_playable_puzzle = function() end }
+
+		deck.deal_jumble_hand()
+		T.assert_equal(table_discard.sprite_frame(), 0, "new hand should clear the bin sprite")
+
 		MockEnv.reset_game()
 	end)
 end)
