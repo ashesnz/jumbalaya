@@ -13,9 +13,7 @@ local M = {}
 
 local SWEEP_TIME = 0.55
 local SIZE_SCALE = 0.5
-local TIMER_GAP_MIN_PX = 10
-local TIMER_GAP_MAX_PX = 20
-local TIMER_GAP_BASE_PX = 15
+local TIMER_GAP_PX = 45
 local REF_TILE_PX = 73
 
 local state = nil
@@ -52,21 +50,18 @@ local function room_translate()
 	)
 end
 
-local function tile_scale_px()
-	local tile = G.TILESIZE or 1
-	local scale = G.TILESCALE or 1
-	local px = tile * scale
-	if px <= 0 then px = REF_TILE_PX end
-	return px
+local function pixels_per_tile()
+	local px = (G.TILESIZE or 1) * (G.TILESCALE or 1)
+	return px > 0 and px or REF_TILE_PX
 end
 
-local function timer_gap_tiles()
-	local px_per_tile = tile_scale_px()
-	local gap_px = math.max(
-		TIMER_GAP_MIN_PX,
-		math.min(TIMER_GAP_MAX_PX, TIMER_GAP_BASE_PX * (px_per_tile / REF_TILE_PX))
-	)
-	return gap_px / px_per_tile
+local function gap_below_timer_px()
+	local scale = pixels_per_tile() / REF_TILE_PX
+	return TIMER_GAP_PX * scale
+end
+
+local function gap_below_timer_tiles()
+	return gap_below_timer_px() / pixels_per_tile()
 end
 
 local function measure_anchor()
@@ -78,7 +73,7 @@ local function measure_anchor()
 	local banner_h = banner.h * SIZE_SCALE
 	-- Ribbon art extends ~7.5% above the layout box; keep that clear of the timer.
 	local ornament_pad = banner_h * 0.075
-	local gap = timer_gap_tiles() + ornament_pad
+	local gap = gap_below_timer_tiles() + ornament_pad
 	local top = timer.y + timer.h + gap
 	local cx = hand and hand.cx or (timer.x + timer.w * 0.5)
 	local cy = top + banner_h * 0.5
