@@ -2,7 +2,7 @@
 	word_game/ui/boss_word_announce.lua - Boss countdown ribbons below the timer.
 
 	Boss word: sweeps left-to-right at "Are you ready?"
-	Theme: sweeps right-to-left at "1", sits below boss word, banner rotated 180°.
+	Theme: sweeps right-to-left at "1", mirrored below boss with a gap — arrowhead stack.
 ]]
 
 local Layout = require("word_game.ui.layout")
@@ -14,8 +14,9 @@ local M = {}
 local SWEEP_TIME = 0.55
 local SIZE_SCALE = 0.5
 local TIMER_GAP_PX = 45
-local BANNER_STACK_GAP_PX = 10
 local REF_TILE_PX = 73
+local RIBBON_HEIGHT_SCALE = 1.15
+local RIBBON_MIN_WIDTH_SCALE = 1.3
 
 local boss_banner = nil
 local theme_banner = nil
@@ -61,58 +62,98 @@ local function px_to_tiles(px)
 	return px / pixels_per_tile()
 end
 
-local function gap_below_timer_tiles()
+local function banner_gap_tiles()
 	local scale = pixels_per_tile() / REF_TILE_PX
 	return px_to_tiles(TIMER_GAP_PX * scale)
 end
 
-local function stack_gap_tiles()
-	local scale = pixels_per_tile() / REF_TILE_PX
-	return px_to_tiles(BANNER_STACK_GAP_PX * scale)
+local function ribbon_half_span_tiles(banner_h)
+	return banner_h * 0.5 * RIBBON_HEIGHT_SCALE
 end
 
-local function boss_layout_tiles()
+local function stack_layout_tiles()
 	local timer = Layout.timeline_rect()
 	local banner = Layout.banner_rect()
 	if not timer or not banner then return nil end
-	local hand = word_feedback.hand_dealt_metrics()
 	local banner_h = banner.h * SIZE_SCALE
-	local ornament_pad = banner_h * 0.075
-	local gap = gap_below_timer_tiles() + ornament_pad
-	local top = timer.y + timer.h + gap
-	local cx = hand and hand.cx or (timer.x + timer.w * 0.5)
+	local span = ribbon_half_span_tiles(banner_h)
+	local cx = timer.x + timer.w * 0.5
+	local w = banner.w * SIZE_SCALE
+	local boss_cy = timer.y + timer.h + banner_gap_tiles() + span
+	local gap = banner_gap_tiles()
+	local theme_cy = boss_cy + span + gap + span
 	return {
 		cx = cx,
-		cy = top + banner_h * 0.5,
-		w = (hand and hand.gap_w or banner.w) * SIZE_SCALE,
+		w = w,
 		h = banner_h,
+		span = span,
+		gap = gap,
+		boss_cy = boss_cy,
+		theme_cy = theme_cy,
 	}
 end
 
-local function layout_tiles(slot)
-	local boss = boss_layout_tiles()
-	if not boss then return nil end
-	if slot == "boss" then
-		return boss
-	end
-	local stack_gap = stack_gap_tiles()
-	return {
-		cx = boss.cx,
-		cy = boss.cy + boss.h * 0.5 + stack_gap + boss.h * 0.5,
-		w = boss.w,
-		h = boss.h,
-	}
-end
-
-local function layout_pixels(slot)
-	local tiles = layout_tiles(slot)
-	if not tiles then return nil end
+local function stack_layout_pixels()
+	local stack = stack_layout_tiles()
+	if not stack then return nil end
 	local ts = G.TILESCALE * G.TILESIZE
 	return {
-		cx = tiles.cx * ts,
-		cy = tiles.cy * ts,
-		w = tiles.w * ts,
-		h = tiles.h * ts,
+		cx = stack.cx * ts,
+		w = stack.w * ts,
+		h = stack.h * ts,
+		boss_cy = stack.boss_cy * ts,
+		theme_cy = stack.theme_cy * ts,
+	}
+end
+
+local function ribbon_size(rect)
+	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.boss_banner
+	if not atlas or not atlas.image then
+		return rect.w * RIBBON_MIN_WIDTH_SCALE, rect.h * RIBBON_HEIGHT_SCALE
+	end
+	local iw, ih = atlas.image:getDimensions()
+	local img_h = rect.h * RIBBON_HEIGHT_SCALE
+	local img_w = img_h * (iw / ih)
+	if img_w < rect.w * RIBBON_MIN_WIDTH_SCALE then
+		img_w = rect.w * RIBBON_MIN_WIDTH_SCALE
+		img_h = img_w * (ih / iw)
+	end
+	return img_w, img_h
+end
+
+-- Testable layout: shared left/right edges, separated ribbon bodies (arrowhead stack).
+function M.measure_stack()
+	local stack = stack_layout_tiles()
+	if not stack then return nil end
+	local ts = G.TILESCALE * G.TILESIZE
+	local img_w_px, _ = ribbon_size({ w = stack.w * ts, h = stack.h * ts })
+	local img_w = img_w_px / ts
+	local boss_top = stack.boss_cy - stack.span
+	local boss_bottom = stack.boss_cy + stack.span
+	local theme_top = stack.theme_cy - stack.span
+	local theme_bottom = stack.theme_cy + stack.span
+	local left = stack.cx - img_w * 0.5
+	local right = stack.cx + img_w * 0.5
+	return {
+		cx = stack.cx,
+		w = stack.w,
+		h = stack.h,
+		span = stack.span,
+		gap = stack.gap,
+		boss_cy = stack.boss_cy,
+		theme_cy = stack.theme_cy,
+		img_w = img_w,
+		left = left,
+		right = right,
+		boss_top = boss_top,
+		boss_bottom = boss_bottom,
+		theme_top = theme_top,
+		theme_bottom = theme_bottom,
+		ribbon_gap = theme_top - boss_bottom,
+		boss_bottom_left = { x = left, y = boss_bottom },
+		boss_bottom_right = { x = right, y = boss_bottom },
+		garden_top_left = { x = left, y = theme_top },
+		garden_top_right = { x = right, y = theme_top },
 	}
 end
 
@@ -123,7 +164,7 @@ local function new_banner(text, opts)
 		t = 0,
 		sweep_time = SWEEP_TIME,
 		direction = opts.direction or "ltr",
-		rotate = opts.rotate or false,
+		mirror = opts.mirror or false,
 		slot = opts.slot or "boss",
 	}
 end
@@ -151,10 +192,9 @@ end
 function M.play_theme(text)
 	text = text or "Garden Theme"
 	if theme_banner and theme_banner.text == text then return end
-	theme_banner = new_banner(text, { direction = "rtl", rotate = true, slot = "theme" })
+	theme_banner = new_banner(text, { direction = "rtl", mirror = true, slot = "theme" })
 end
 
--- Back-compat with score banner facade.
 function M.play(text)
 	M.play_boss(text)
 end
@@ -180,48 +220,37 @@ local function draw_professional_text(msg, msg_tw, msg_th, alpha)
 	love.graphics.print(msg, tx, ty - 1)
 end
 
-local function draw_banner(banner)
-	local rect = layout_pixels(banner.slot)
-	if not rect then return end
-
+local function draw_banner(banner, stack, img_w, img_h)
+	local cy = banner.slot == "theme" and stack.theme_cy or stack.boss_cy
 	local sweep_u = clamp01(banner.t / banner.sweep_time)
 	local eased = 1 - (1 - sweep_u) * (1 - sweep_u) * (1 - sweep_u)
 	local sweeping = sweep_u < 1
 	local from_right = banner.direction == "rtl"
 
 	local msg = banner.text
-	local msg_font_px = math.max(14, math.floor(rect.h * 0.58))
+	local msg_font_px = math.max(14, math.floor(stack.h * 0.58))
 	local msg_font = fonts.title_font(msg_font_px)
 	local msg_tw = msg_font:getWidth(msg)
 	local msg_th = msg_font:getHeight()
 
 	love.graphics.push()
-	love.graphics.translate(rect.cx, rect.cy)
+	love.graphics.translate(stack.cx, cy)
 
 	local band_l, band_r, band_cx = nil, nil, nil
 	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.boss_banner
 	if atlas and atlas.image and love.graphics.draw then
 		local iw, ih = atlas.image:getDimensions()
-		local img_h = rect.h * 1.15
-		local img_w = img_h * (iw / ih)
-		if img_w < rect.w * 1.3 then
-			img_w = rect.w * 1.3
-			img_h = img_w * (ih / iw)
-		end
-		local offscreen = rect.w * 0.5 + img_w * 0.5 + 60
+		local offscreen = stack.w * 0.5 + img_w * 0.5 + 60
 		local start_x = from_right and offscreen or -offscreen
 		band_cx = start_x + (0 - start_x) * eased
 		band_l = band_cx - img_w * 0.5
 		band_r = band_cx + img_w * 0.5
 		love.graphics.setColor(1, 1, 1, 1)
-		if banner.rotate then
-			love.graphics.draw(
-				atlas.image, band_cx, 0, math.pi,
-				img_w / iw, img_h / ih, iw * 0.5, ih * 0.5
-			)
-		else
-			love.graphics.draw(atlas.image, band_l, -img_h * 0.5, 0, img_w / iw, img_h / ih)
+		local sx = img_w / iw
+		if banner.mirror then
+			sx = -sx
 		end
+		love.graphics.draw(atlas.image, band_cx, 0, 0, sx, img_h / ih, iw * 0.5, ih * 0.5)
 	end
 
 	love.graphics.setFont(msg_font)
@@ -252,6 +281,10 @@ function M.draw()
 	if not M.is_active() or not G.GAME or not G.ROOM then return end
 	if G.STATE ~= G.STATES.TABLE_BOARD then return end
 
+	local stack = stack_layout_pixels()
+	if not stack then return end
+	local img_w, img_h = ribbon_size(stack)
+
 	local prev_font = love.graphics.getFont and love.graphics.getFont()
 	local cr, cg, cb, ca = 1, 1, 1, 1
 	if love.graphics.getColor then
@@ -264,10 +297,10 @@ function M.draw()
 	room_translate()
 
 	if boss_banner then
-		draw_banner(boss_banner)
+		draw_banner(boss_banner, stack, img_w, img_h)
 	end
 	if theme_banner then
-		draw_banner(theme_banner)
+		draw_banner(theme_banner, stack, img_w, img_h)
 	end
 
 	love.graphics.pop()

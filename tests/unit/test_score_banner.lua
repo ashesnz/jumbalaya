@@ -253,6 +253,53 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 		T.assert_true(ok, "sb.draw should execute without error: " .. tostring(err))
 	end)
 
+	T.it("forms a separated arrowhead stack with aligned ribbon edges and non-touching gap", function()
+		MockEnv.setup()
+		local announce = require("word_game.ui.boss_word_announce")
+
+		_G.G.STATE = _G.G.STATES.TABLE_BOARD
+		_G.G.hand = {
+			T = { x = 2.0, y = 7.0, w = 6.0, h = 2.0 },
+			cards = {},
+		}
+		_G.G.TEXTURE_ATLASES = _G.G.TEXTURE_ATLASES or {}
+		_G.G.TEXTURE_ATLASES.boss_banner = {
+			image = {
+				getDimensions = function() return 1180, 211 end,
+			},
+		}
+
+		announce.play_boss("BOSS WORD")
+		announce.play_theme("Garden Theme")
+
+		local stack = announce.measure_stack()
+		T.assert_not_nil(stack, "stack layout should be measurable")
+		T.assert_true(stack.ribbon_gap > 0, "boss and theme ribbons must not touch each other")
+		T.assert_almost_equal(stack.ribbon_gap, stack.gap, 0.001,
+			"visual gap between ribbons should match the configured banner gap")
+		T.assert_true(stack.theme_top > stack.boss_bottom,
+			"theme ribbon should sit below the boss ribbon without touching")
+
+		local ts = (_G.G.TILESCALE or 1) * (_G.G.TILESIZE or 1)
+		local gap_px = stack.ribbon_gap * ts
+		T.assert_true(gap_px >= 10, "ribbon gap should be a visible separation in pixels")
+
+		-- Arrowhead stack: shared horizontal bounds, opposite sweep/mirror on theme.
+		T.assert_almost_equal(stack.left, stack.cx - stack.img_w * 0.5, 0.001)
+		T.assert_almost_equal(stack.right, stack.cx + stack.img_w * 0.5, 0.001)
+		T.assert_true(stack.theme_cy > stack.boss_cy, "theme should be below boss")
+
+		-- Corner alignment checks as requested:
+		-- 1. Left top corner of Garden theme aligned with bottom left corner of Boss word
+		T.assert_almost_equal(stack.garden_top_left.x, stack.boss_bottom_left.x, 0.001,
+			"Left top corner of Garden theme must align with bottom left corner of Boss word in X")
+		-- 2. Bottom right corner of Boss word aligned with top right corner of Garden theme
+		T.assert_almost_equal(stack.boss_bottom_right.x, stack.garden_top_right.x, 0.001,
+			"Bottom right corner of Boss word must align with top right corner of Garden theme in X")
+
+		announce.clear()
+	end)
+
 	T.it("plays a theme banner on the countdown one mark", function()
 		MockEnv.setup()
 		local announce = require("word_game.ui.boss_word_announce")
