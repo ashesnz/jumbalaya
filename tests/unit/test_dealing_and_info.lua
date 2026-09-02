@@ -331,6 +331,96 @@ T.describe("Vault deck information", function()
 		T.assert_equal(deck.cards_left(), expected,
 			"Stage 1-5 should start with the full deck count after repopulation")
 	end)
+
+	T.it("reports jumble cards left as pool size minus hand size", function()
+		G.GAME.word_round = { mode = "jumble", set = 1, hand_index = 1 }
+		G.playing_cards = {}
+		for i = 1, 12 do
+			G.playing_cards[#G.playing_cards + 1] = { ability = { letter = "E" } }
+		end
+		G.hand = { cards = {} }
+		for i = 1, 7 do
+			G.hand.cards[#G.hand.cards + 1] = G.playing_cards[i]
+		end
+		G.deck = { cards = {} }
+		for i = 8, 12 do
+			G.deck.cards[#G.deck.cards + 1] = G.playing_cards[i]
+		end
+		G.placement_table = { area = { cards = {} } }
+		T.assert_equal(deck.cards_left(), 5, "Cards left should be total pool minus hand")
+		T.assert_equal(deck.draw_pile_count(), 5, "Draw pile should still track physical deck cards")
+
+		G.hand.cards[#G.hand.cards + 1] = table.remove(G.deck.cards)
+		deck.sync_deck_count_display()
+		T.assert_equal(deck.cards_left(), 4, "Drawing into hand should decrement cards left")
+		T.assert_equal(G.GAME.deck_left_count, 4, "HUD counter should follow cards left")
+	end)
+
+	T.it("reshuffles discard into deck and deals seven when hand and deck are empty", function()
+		G.GAME.word_round = { mode = "jumble", set = 1, hand_index = 1 }
+		G.hand = {
+			cards = {},
+			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
+			set_ranks = function() end,
+			relayout = function() end,
+			snap_VT = function() end,
+			hard_set_cards = function() end,
+		}
+		G.deck = {
+			cards = {},
+			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
+			remove_card = function(self) return table.remove(self.cards) end,
+			config = {},
+		}
+		G.discard = {
+			cards = {},
+			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
+			remove_card = function(self, card)
+				for i, c in ipairs(self.cards) do
+					if c == card then
+						table.remove(self.cards, i)
+						return card
+					end
+				end
+			end,
+			hard_set_cards = function() end,
+		}
+		G.placement_table = { area = { cards = {} } }
+		G.playing_cards = {}
+		for i = 1, 12 do
+			local card = { ability = { letter = "E", letter_color = "red" } }
+			G.playing_cards[#G.playing_cards + 1] = card
+			G.discard:emplace(card)
+		end
+		local orig_jumble = WORD_GAME and WORD_GAME.Jumble
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.Jumble = { ensure_playable_puzzle = function() return true end }
+		WORD_GAME.TableDiscard = { reset = function() end }
+
+		T.assert_true(deck.try_jumble_reshuffle_and_deal())
+		T.assert_equal(#G.discard.cards, 0, "Discard pile should be empty after recycle")
+		T.assert_equal(#G.hand.cards, 7, "Player should receive a full hand of seven cards")
+		T.assert_equal(#G.deck.cards, 5, "Remaining cards should stay in the deck")
+		T.assert_equal(deck.cards_left(), 5, "Cards left should be pool minus the new hand")
+
+		WORD_GAME.Jumble = orig_jumble
+	end)
+
+	T.it("does not reshuffle while cards remain in hand, deck, or placement", function()
+		G.GAME.word_round = { mode = "jumble", set = 1, hand_index = 1 }
+		G.hand = { cards = { { ability = { letter = "A" } } } }
+		G.deck = { cards = { { ability = { letter = "C" } } } }
+		G.discard = { cards = { { ability = { letter = "B" } } } }
+		G.placement_table = { area = { cards = {} } }
+		T.assert_false(deck.needs_jumble_reshuffle(), "Hand still has cards")
+
+		G.hand.cards = {}
+		T.assert_false(deck.needs_jumble_reshuffle(), "Deck still has cards")
+
+		G.deck.cards = {}
+		G.placement_table.area.cards = { { ability = { letter = "D" } } }
+		T.assert_false(deck.needs_jumble_reshuffle(), "Placement still has cards")
+	end)
 end)
 
 T.describe("Info Text & Score Notification Alignment (word_game.model.play)", function()

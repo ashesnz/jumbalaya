@@ -257,11 +257,17 @@ local function finish_used_cards(used_cards, return_to_deck)
 end
 
 function M.deal_and_refresh(on_complete)
-	deck.deal_into_hand(G.TABLE_HAND_SIZE or 7, function()
+	local function finish()
 		M.request_layout_refresh()
 		M.sync_hand_after_deal()
 		if on_complete then on_complete() end
-	end)
+	end
+	if deck.is_jumble_deck and deck.is_jumble_deck()
+		and deck.needs_jumble_reshuffle and deck.needs_jumble_reshuffle() then
+		deck.try_jumble_reshuffle_and_deal(finish)
+		return
+	end
+	deck.deal_into_hand(G.TABLE_HAND_SIZE or 7, finish)
 end
 
 function M.present_boss_word(wr, on_complete)

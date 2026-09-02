@@ -19,6 +19,9 @@ function M.deal()
 		end
 		if populate then populate() end
 		if WORD_GAME.Deck.deal_jumble_hand then WORD_GAME.Deck.deal_jumble_hand() end
+		if WORD_GAME.Deck.sync_deck_count_display then
+			WORD_GAME.Deck.sync_deck_count_display()
+		end
 		if WORD_GAME.Jumble then
 			WORD_GAME.Jumble.refresh_hud()
 		end

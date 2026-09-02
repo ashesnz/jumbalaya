@@ -220,6 +220,70 @@ return function(context)
 		end
 	end
 
+	function M.recycle_discard_into_deck()
+		if not G.discard or not G.discard.cards or #G.discard.cards == 0 then
+			return false
+		end
+		for i = #G.discard.cards, 1, -1 do
+			local card = G.discard.cards[i]
+			G.discard:remove_card(card)
+			G.deck:emplace(card)
+		end
+		if G.discard.hard_set_cards then
+			G.discard:hard_set_cards()
+		end
+		M.shuffle_deck()
+		M.sync_deck_count_display()
+		if WORD_GAME and WORD_GAME.TableDiscard and WORD_GAME.TableDiscard.reset then
+			WORD_GAME.TableDiscard.reset()
+		end
+		return true
+	end
+
+	function M.needs_jumble_reshuffle()
+		if not M.is_jumble_deck() then return false end
+		if M.hand_card_count() > 0 then return false end
+		if M.draw_pile_count() > 0 then return false end
+		local placement = G.placement_table and G.placement_table.area and G.placement_table.area.cards
+		if placement and #placement > 0 then return false end
+		local discard_count = (G.discard and G.discard.cards and #G.discard.cards) or 0
+		return discard_count > 0
+	end
+
+	function M.try_jumble_reshuffle_and_deal(on_complete)
+		if not M.needs_jumble_reshuffle() then
+			if on_complete then on_complete() end
+			return false
+		end
+		if not M.recycle_discard_into_deck() then
+			if on_complete then on_complete() end
+			return false
+		end
+
+		local hand_size = G.TABLE_HAND_SIZE or 7
+		local to_deal = math.min(hand_size, #(G.deck.cards or {}))
+		for _ = 1, to_deal do
+			local card = G.deck:remove_card()
+			if card and G.hand then
+				G.hand:emplace(card)
+			end
+		end
+		if G.hand then
+			G.hand:set_ranks()
+			G.hand:relayout()
+			G.hand:snap_VT()
+			G.hand:hard_set_cards()
+		end
+		M.sync_deck_count_display()
+		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.ensure_playable_puzzle then
+			WORD_GAME.Jumble.ensure_playable_puzzle()
+		end
+		G.ARGS = G.ARGS or {}
+		G.ARGS.pending_layout = true
+		if on_complete then on_complete() end
+		return true
+	end
+
 	function M.deal_jumble_hand()
 		if not G.hand then return end
 		if WORD_GAME and WORD_GAME.TableDiscard and WORD_GAME.TableDiscard.reset then
@@ -246,6 +310,12 @@ return function(context)
 
 	function M.draw_jumble_replacement()
 		if not G.hand then return nil end
+		if M.draw_pile_count() == 0 then
+			if M.try_jumble_reshuffle_and_deal() then
+				return G.hand.cards and G.hand.cards[#G.hand.cards]
+			end
+			return nil
+		end
 		local card = G.deck:remove_card()
 		if not card then return nil end
 		local function finish()
@@ -299,6 +369,7 @@ return function(context)
 
 		local function after_discard()
 			M.draw_jumble_replacement()
+			M.sync_deck_count_display()
 			if G.hand then
 				G.hand:hard_set_cards()
 			end
