@@ -298,14 +298,8 @@ function M.set_screen_positions(opts)
 			WORD_GAME.HandShuffle.mark_layout_settle(4)
 		end
 	end
-	if G.STAGE == G.STAGES.MAIN_MENU and G.title_top then
-		G.title_top.T.x = G.TILE_W/2 - G.title_top.T.w/2
-		G.title_top.T.y = G.TILE_H/2 - G.title_top.T.h/2 -(G.debug_splash_size_toggle and 2 or 1.2)
-
-		G.title_top:snap_VT()
-	end
-	if G.STAGE == G.STAGES.MAIN_MENU and layout_main_menu_mode_buttons then
-		layout_main_menu_mode_buttons()
+	if G.STAGE == G.STAGES.MAIN_MENU and layout_main_menu then
+		layout_main_menu()
 	end
 end
 

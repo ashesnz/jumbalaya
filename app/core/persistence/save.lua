@@ -111,7 +111,6 @@ function Game:discard_run()
 		if self.buttons then self.buttons:remove(); self.buttons = nil end
 		if self.deck_preview then self.deck_preview:remove(); self.deck_preview = nil end
 		if self.MAIN_MENU_UI then self.MAIN_MENU_UI:remove(); self.MAIN_MENU_UI = nil end
-		if self.MAIN_MENU_MODES_UI then self.MAIN_MENU_MODES_UI:remove(); self.MAIN_MENU_MODES_UI = nil end
 		if self.SPLASH_FRONT then self.SPLASH_FRONT:remove(); self.SPLASH_FRONT = nil end
 		if self.SPLASH_BACK then self.SPLASH_BACK:remove(); self.SPLASH_BACK = nil end
 		if self.SPLASH_LOGO then self.SPLASH_LOGO:remove(); self.SPLASH_LOGO = nil end

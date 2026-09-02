@@ -70,7 +70,7 @@ function LayoutView:attach_node(node, parent)
 	end
 
 	if (node.n and node.n == G.UI.COLUMN or node.n == G.UI.ROW or node.n == G.UI.ROOT) and node.nodes then
-		for _, v in pairs(node.nodes) do
+		for _, v in ipairs(node.nodes) do
 			self:attach_node(v, ui_e)
 		end
 	end

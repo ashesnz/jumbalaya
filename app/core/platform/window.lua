@@ -152,6 +152,8 @@ function love.resize(width, height)
 	end
 	if G.STAGE == G.STAGES.RUN and G.hand then
 		apply_run_layout()
+	elseif G.STAGE == G.STAGES.MAIN_MENU and layout_main_menu then
+		layout_main_menu()
 	end
 end
 

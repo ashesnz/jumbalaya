@@ -15,10 +15,8 @@ local MockEnv = require("tests.helpers.mock_env")
 		require("word_game.ui.widgets")
 		require("word_game.ui.menu")
 
-		local ui_tree = build_main_menu_mode_buttons()
-		local utility_tree = build_main_menu_buttons()
-		T.assert_not_nil(ui_tree, "Main menu mode UI tree should be created")
-		T.assert_not_nil(utility_tree, "Main menu utility UI tree should be created")
+		local ui_tree = build_main_menu_buttons()
+		T.assert_not_nil(ui_tree, "Main menu UI tree should be created")
 
 		local buttons_found = {}
 		local function scan_nodes(node)
@@ -34,7 +32,6 @@ local MockEnv = require("tests.helpers.mock_env")
 		end
 
 		scan_nodes(ui_tree)
-		scan_nodes(utility_tree)
 
 		T.assert_true(buttons_found["begin_classic_run"], "Classic button must be present")
 		T.assert_true(buttons_found["begin_time_run"], "Time Run button must be present")
@@ -212,6 +209,253 @@ local MockEnv = require("tests.helpers.mock_env")
 		T.assert_not_nil(G.FUNCS.begin_classic_run, "Classic mode callback must exist")
 		T.assert_not_nil(G.FUNCS.begin_time_run, "Time Run mode callback must exist")
 		T.assert_nil(G.FUNCS.show_credits, "Credits overlay callback should be removed")
+	end)
+
+	T.it("keeps mode buttons above utility bar with separation", function()
+		MockEnv.reset_game()
+		require("app.core.util.tables")
+		require("app.core.util.geometry")
+		require("word_game.ui.localize")
+		require("word_game.ui.widgets")
+		require("word_game.ui.menu")
+
+		G.C.L_BLACK = G.C.L_BLACK or { 0.1, 0.1, 0.1, 1 }
+		G.C.BLUE = G.C.BLUE or { 0.2, 0.4, 0.8, 1 }
+		G.C.GREEN = G.C.GREEN or { 0.2, 0.7, 0.3, 1 }
+		G.C.ORANGE = G.C.ORANGE or { 0.9, 0.5, 0.1, 1 }
+		G.C.FILTER = G.C.FILTER or { 0.5, 0.5, 0.5, 1 }
+		G.C.RED = G.C.RED or { 0.8, 0.2, 0.2, 1 }
+		G.C.UI = G.C.UI or {}
+		G.C.UI.TEXT_LIGHT = G.C.UI.TEXT_LIGHT or { 1, 1, 1, 1 }
+		G.C.UI.BUTTON_HOVER = G.C.UI.BUTTON_HOVER or { 0.35, 0.35, 0.35, 1 }
+
+		local real_font = alpha_button_font
+		alpha_button_font = function()
+			return {
+				FONT = {
+					getWidth = function(_, str) return #(str or "") * 10 end,
+					getHeight = function() return 20 end,
+				},
+				TEXT_HEIGHT_SCALE = 0.7,
+				TEXT_OFFSET = { x = 0, y = 0 },
+				FONTSCALE = 0.12,
+				squish = 1,
+			}
+		end
+
+		local ui = LayoutView({
+			definition = build_main_menu_buttons(),
+			config = { align = "cm", major = G.ROOM_ATTACH },
+		})
+		local stack_gap = main_menu_stack_gap_tiles(ui)
+		alpha_button_font = real_font
+		ui:remove()
+
+		local ts = (G.TILESIZE or 20) * (G.TILESCALE or 1)
+		local min_gap = 20 / ts
+		T.assert_not_nil(stack_gap, "Mode and utility stacks must be measurable")
+		T.assert_true(stack_gap >= min_gap * 0.85,
+			string.format("Utility row must sit below mode buttons (gap %.3f, need %.3f)",
+				stack_gap, min_gap * 0.85))
+	end)
+
+	T.it("matches Classic and Time Run button edges to the Stats button", function()
+		MockEnv.reset_game()
+		require("app.core.util.tables")
+		require("app.core.util.geometry")
+		require("word_game.ui.localize")
+		require("word_game.ui.widgets")
+		require("word_game.ui.menu")
+
+		G.C.L_BLACK = G.C.L_BLACK or { 0.1, 0.1, 0.1, 1 }
+		G.C.BLUE = G.C.BLUE or { 0.2, 0.4, 0.8, 1 }
+		G.C.GREEN = G.C.GREEN or { 0.2, 0.7, 0.3, 1 }
+		G.C.ORANGE = G.C.ORANGE or { 0.9, 0.5, 0.1, 1 }
+		G.C.FILTER = G.C.FILTER or { 0.5, 0.5, 0.5, 1 }
+		G.C.RED = G.C.RED or { 0.8, 0.2, 0.2, 1 }
+		G.C.UI = G.C.UI or {}
+		G.C.UI.TEXT_LIGHT = G.C.UI.TEXT_LIGHT or { 1, 1, 1, 1 }
+		G.C.UI.BUTTON_HOVER = G.C.UI.BUTTON_HOVER or { 0.35, 0.35, 0.35, 1 }
+
+		local real_font = alpha_button_font
+		alpha_button_font = function()
+			return {
+				FONT = {
+					getWidth = function(_, str) return #(str or "") * 10 end,
+					getHeight = function() return 20 end,
+				},
+				TEXT_HEIGHT_SCALE = 0.7,
+				TEXT_OFFSET = { x = 0, y = 0 },
+				FONTSCALE = 0.12,
+				squish = 1,
+			}
+		end
+
+		local ui = LayoutView({
+			definition = build_main_menu_buttons(),
+			config = { align = "cm", major = G.ROOM_ATTACH },
+		})
+		G.MAIN_MENU_UI = ui
+		layout_main_menu_mode_column()
+		local edges = main_menu_mode_utility_edge_alignment(ui, { recalculate = false })
+		alpha_button_font = real_font
+		ui:remove()
+		G.MAIN_MENU_UI = nil
+
+		T.assert_not_nil(edges, "Mode and utility button bounds must be measurable")
+		local stats = edges.stats
+		local classic = edges.classic
+		local time_run = edges.time_run
+		local tol = 0.02
+
+		T.assert_almost_equal(classic.x, stats.x, tol,
+			"Classic left edge should match Stats left edge")
+		T.assert_almost_equal(classic.right, stats.right, tol,
+			"Classic right edge should match Stats right edge")
+		T.assert_almost_equal(time_run.x, stats.x, tol,
+			"Time Run left edge should match Stats left edge")
+		T.assert_almost_equal(time_run.right, stats.right, tol,
+			"Time Run right edge should match Stats right edge")
+		T.assert_almost_equal(classic.w, stats.w, tol,
+			"Classic width should match Stats width")
+		T.assert_almost_equal(time_run.w, stats.w, tol,
+			"Time Run width should match Stats width")
+	end)
+
+	T.it("wraps Classic and Time Run chrome to button width, not the utility bar width", function()
+		MockEnv.reset_game()
+		require("app.core.util.tables")
+		require("app.core.util.geometry")
+		require("word_game.ui.localize")
+		require("word_game.ui.widgets")
+		require("word_game.ui.menu")
+
+		G.C.L_BLACK = G.C.L_BLACK or { 0.1, 0.1, 0.1, 1 }
+		G.C.BLUE = G.C.BLUE or { 0.2, 0.4, 0.8, 1 }
+		G.C.GREEN = G.C.GREEN or { 0.2, 0.7, 0.3, 1 }
+		G.C.ORANGE = G.C.ORANGE or { 0.9, 0.5, 0.1, 1 }
+		G.C.FILTER = G.C.FILTER or { 0.5, 0.5, 0.5, 1 }
+		G.C.RED = G.C.RED or { 0.8, 0.2, 0.2, 1 }
+		G.C.UI = G.C.UI or {}
+		G.C.UI.TEXT_LIGHT = G.C.UI.TEXT_LIGHT or { 1, 1, 1, 1 }
+		G.C.UI.BUTTON_HOVER = G.C.UI.BUTTON_HOVER or { 0.35, 0.35, 0.35, 1 }
+
+		local real_font = alpha_button_font
+		alpha_button_font = function()
+			return {
+				FONT = {
+					getWidth = function(_, str) return #(str or "") * 10 end,
+					getHeight = function() return 20 end,
+				},
+				TEXT_HEIGHT_SCALE = 0.7,
+				TEXT_OFFSET = { x = 0, y = 0 },
+				FONTSCALE = 0.12,
+				squish = 1,
+			}
+		end
+
+		local ui = LayoutView({
+			definition = build_main_menu_buttons(),
+			config = { align = "cm", major = G.ROOM_ATTACH },
+		})
+		local widths = main_menu_chrome_widths(ui)
+		alpha_button_font = real_font
+		ui:remove()
+
+		T.assert_not_nil(widths, "Chrome widths must be measurable")
+		T.assert_true(widths.util > widths.mode * 1.5,
+			"Utility bar should be wider than the mode button stack")
+		T.assert_true(widths.mode < 4.5,
+			"Mode chrome should hug the buttons, not span the title screen")
+	end)
+
+	T.it("keeps Jumbalaya title clear of menu buttons across viewport sizes", function()
+		MockEnv.reset_game()
+		require("app.core.util.tables")
+		require("app.core.util.geometry")
+		require("word_game.ui.localize")
+		require("word_game.ui.widgets")
+		require("word_game.ui.menu")
+
+		G.C.L_BLACK = G.C.L_BLACK or { 0.1, 0.1, 0.1, 1 }
+		G.C.BLUE = G.C.BLUE or { 0.2, 0.4, 0.8, 1 }
+		G.C.GREEN = G.C.GREEN or { 0.2, 0.7, 0.3, 1 }
+		G.C.ORANGE = G.C.ORANGE or { 0.9, 0.5, 0.1, 1 }
+		G.C.FILTER = G.C.FILTER or { 0.5, 0.5, 0.5, 1 }
+		G.C.RED = G.C.RED or { 0.8, 0.2, 0.2, 1 }
+		G.C.UI = G.C.UI or {}
+		G.C.UI.TEXT_LIGHT = G.C.UI.TEXT_LIGHT or { 1, 1, 1, 1 }
+		G.C.UI.BUTTON_HOVER = G.C.UI.BUTTON_HOVER or { 0.35, 0.35, 0.35, 1 }
+		G.STAGE = G.STAGES.MAIN_MENU
+
+		local real_font = alpha_button_font
+		alpha_button_font = function()
+			return {
+				FONT = {
+					getWidth = function(_, str) return #(str or "") * 10 end,
+					getHeight = function() return 20 end,
+				},
+				TEXT_HEIGHT_SCALE = 0.7,
+				TEXT_OFFSET = { x = 0, y = 0 },
+				FONTSCALE = 0.12,
+				squish = 1,
+			}
+		end
+
+		local function min_title_gap_tiles()
+			return main_menu_title_menu_gap_px() / ((G.TILESIZE or 20) * (G.TILESCALE or 1))
+		end
+
+		local function assert_layout_for_viewport(label, tile_w, tile_h, tilescale)
+			G.TILE_W = tile_w
+			G.TILE_H = tile_h
+			G.TILESIZE = 20
+			G.TILESCALE = tilescale
+			G.ROOM_ATTACH.T.w = tile_w
+			G.ROOM_ATTACH.T.h = tile_h
+
+			G.title_top = {
+				T = { x = 0, y = 0, w = 1, h = 1 },
+				VT = { x = 0, y = 0, w = 1, h = 1 },
+				snap_VT = function() end,
+				hard_set_T = function(self, x, y, w, h)
+					self.T.x, self.T.y, self.T.w, self.T.h = x, y, w, h
+				end,
+			}
+
+			local ui = LayoutView({
+				definition = build_main_menu_buttons(),
+				config = {
+					align = "bmi",
+					offset = { x = 0, y = main_menu_bottom_offset() },
+					major = G.ROOM_ATTACH,
+					bond = "Weak",
+				},
+			})
+			G.MAIN_MENU_UI = ui
+			layout_main_menu()
+
+			local gap = main_menu_layout_gap()
+			local min_gap = min_title_gap_tiles()
+			T.assert_not_nil(gap, label .. ": layout gap should be measurable")
+			T.assert_true(gap >= min_gap * 0.9,
+				string.format("%s: title/menu gap %.3f tiles below minimum %.3f", label, gap, min_gap))
+
+			local layout = main_menu_resolve_logo_layout(ui.T.h)
+			T.assert_true(layout.gap >= min_gap * 0.9,
+				string.format("%s: resolved layout gap %.3f below minimum %.3f", label, layout.gap, min_gap))
+
+			ui:remove()
+			G.MAIN_MENU_UI = nil
+			G.title_top = nil
+		end
+
+		assert_layout_for_viewport("desktop 1280x720", 20, 11.5, 3.65)
+		assert_layout_for_viewport("narrow phone", 20, 11.5, 2.2)
+		assert_layout_for_viewport("short screen", 20, 9, 2.5)
+		assert_layout_for_viewport("tablet scale", 20, 11.5, 2.8)
+
+		alpha_button_font = real_font
 	end)
 
 	T.it("TitleLogo juggles start and end A's, replacing each other and returning", function()

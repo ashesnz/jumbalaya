@@ -20,8 +20,8 @@ function LayoutNode:set_wh()
 		end
 	end
 	for _, w in pairs(self.children) do
-		if w.ui_kind == G.UI.ROW then w.T.w = max_w end
-		if w.ui_kind == G.UI.COLUMN then w.T.h = max_h end
+		if w.ui_kind == G.UI.ROW and not w.config.no_stretch then w.T.w = max_w end
+		if w.ui_kind == G.UI.COLUMN and not w.config.no_stretch then w.T.h = max_h end
 	end
 
 	return self.T.w, self.T.h

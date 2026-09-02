@@ -7,16 +7,14 @@ local Menu = {}
 function Menu.set_main_ui()
     G.MAIN_MENU_UI = LayoutView{
         definition = build_main_menu_buttons(),
-        config = {align = "bmi", offset = {x = 0, y = 10}, major = G.ROOM_ATTACH, bond = 'Weak'},
+        config = {
+            align = "bmi",
+            offset = {x = 0, y = main_menu_bottom_offset()},
+            major = G.ROOM_ATTACH,
+            bond = 'Weak',
+        },
     }
-    G.MAIN_MENU_UI.alignment.offset.y = 0
-    G.MAIN_MENU_UI:align_to_major()
-
-    G.MAIN_MENU_MODES_UI = LayoutView{
-        definition = build_main_menu_mode_buttons(),
-        config = {align = "cm", offset = {x = 0, y = 0}, major = G.ROOM_ATTACH, bond = 'Weak'},
-    }
-    layout_main_menu_mode_buttons()
+    layout_main_menu()
 
     if G.F_PROFILE_BUTTON then
         Scheduler.add{
@@ -36,8 +34,8 @@ function Menu.set_main_ui()
         }
     end
 
-    if G.INPUT and G.MAIN_MENU_MODES_UI and G.MAIN_MENU_MODES_UI:find_node_by_id('main_menu_classic') then
-        G.INPUT:snap_to{node = G.MAIN_MENU_MODES_UI:find_node_by_id('main_menu_classic')}
+    if G.INPUT and G.MAIN_MENU_UI and G.MAIN_MENU_UI:find_node_by_id('main_menu_classic') then
+        G.INPUT:snap_to{node = G.MAIN_MENU_UI:find_node_by_id('main_menu_classic')}
     end
 end
 

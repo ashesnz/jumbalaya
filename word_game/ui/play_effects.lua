@@ -90,6 +90,13 @@ function M.set_word_score_animating(active)
 	if G.GAME then
 		G.GAME.word_score_animating = active
 	end
+	-- deal_boss_hand and other sequences call set_ranks while this flag is still
+	-- true, which leaves drag.can false until ranks are refreshed.
+	if not active
+		and WORD_GAME and WORD_GAME.PlayerHost
+		and WORD_GAME.PlayerHost.refresh_card_input then
+		WORD_GAME.PlayerHost.refresh_card_input()
+	end
 end
 
 function M.add_points(amount)

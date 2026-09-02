@@ -1,6 +1,7 @@
 --[[ tests/unit/test_stage3_boss_words.lua - Stage 1-3 boss puzzle rules ]]
 
 local T = require("tests.framework")
+local mock_env = require("tests.helpers.mock_env")
 
 T.describe("Stage 1-3 boss words", function()
 	T.it("defines nine-letter boss words", function()
@@ -264,5 +265,177 @@ T.describe("Stage 1-3 boss words", function()
 		local word, err = jumble.validate_current()
 		T.assert_equal(word, "VEGETABLE", "validation error: " .. tostring(err))
 		T.assert_nil(err)
+	end)
+
+	T.it("re-enables hand drag after boss deal set_ranks during word_score_animating", function()
+		mock_env.reset_game()
+		local InputLock = require("word_game.model.input_lock")
+		local play_effects = require("word_game.ui.play_effects")
+
+		G.GAME = {
+			word_score_animating = true,
+			hand_redraw_animating = false,
+			hand_shuffle_animating = false,
+			placement_recall_animating = false,
+		}
+		G.GAME.word_round = {
+			mode = "jumble",
+			jumble = { boss_word_active = true, boss_puzzle_hidden = false },
+		}
+
+		local hand_card = {
+			ability = { letter = "A", set = "Default" },
+			T = { x = 5, y = 8, w = 2, h = 2.8 },
+			VT = { x = 5, y = 8, w = 2, h = 2.8 },
+			states = { drag = { can = true, is = false }, collide = { can = true } },
+			selected = false,
+			set_card_area = function(self, area) self.area = area end,
+			remove_from_area = function(self) self.area = nil end,
+		}
+
+		G.hand = {
+			cards = { hand_card },
+			T = { x = 3, y = 8, w = 10, h = 2.8 },
+			config = { type = "hand" },
+			remove_card = function(self, card)
+				for i, c in ipairs(self.cards) do
+					if c == card then
+						table.remove(self.cards, i)
+						card.area = nil
+						return card
+					end
+				end
+			end,
+			emplace = function(self, card)
+				self.cards[#self.cards + 1] = card
+				card.area = self
+			end,
+			relayout = function() end,
+			snap_VT = function() end,
+			hard_set_cards = function() end,
+			set_ranks = function(self)
+				for _, card in ipairs(self.cards) do
+					if InputLock.is_table_busy() then
+						card.states.drag.can = false
+					else
+						card.states.drag.can = true
+					end
+				end
+			end,
+		}
+		hand_card.area = G.hand
+
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.PlayerHost = {
+			refresh_card_input = function()
+				if G.hand then G.hand:set_ranks() end
+			end,
+		}
+		WORD_GAME.PlayHoldRedraw = WORD_GAME.PlayHoldRedraw or { is_animating = function() return false end }
+
+		-- Mirrors deal_boss_hand finish while countdown animation is still running.
+		G.hand:set_ranks()
+		T.assert_false(hand_card.states.drag.can, "set_ranks during score animation must block drag")
+
+		play_effects.set_word_score_animating(false)
+		T.assert_true(hand_card.states.drag.can, "Clearing score animation must restore hand drag")
+	end)
+
+	T.it("places a hand card into a boss word blank slot", function()
+		mock_env.reset_game()
+		local jumble = require("word_game.model.jumble")
+		local snap = require("word_game.board.snap")
+		local geo = require("word_game.board.jumble_geometry")
+		local puzzle = jumble.boss_puzzle(1, 3)
+		local slots = jumble.parse_slots(puzzle)
+
+		G.GAME = G.GAME or {}
+		G.GAME.word_round = {
+			mode = "jumble",
+			jumble = {
+				boss_word_active = true,
+				boss_puzzle_hidden = false,
+				puzzle = puzzle,
+				slots = slots,
+			},
+		}
+		G.TABLE_HAND_SIZE = 7
+		G.CARD_W = 2
+		G.CARD_H = 2.8
+		G.TILE_W = 20
+		G.TILE_H = 11.5
+		G.hand = {
+			cards = {},
+			T = { x = 3, y = 8.5, w = 10, h = 2.8 },
+			remove_card = function(self, card)
+				for i, c in ipairs(self.cards) do
+					if c == card then
+						table.remove(self.cards, i)
+						card.area = nil
+						return card
+					end
+				end
+			end,
+			emplace = function(self, card)
+				self.cards[#self.cards + 1] = card
+				card.area = self
+			end,
+			relayout = function() end,
+			snap_VT = function() end,
+			hard_set_cards = function() end,
+		}
+
+		local placement_area = {
+			cards = {},
+			T = { x = 0.5, y = 5, w = 18, h = 2.8 },
+			hard_set_cards = function() end,
+			relayout = function() end,
+		}
+		local session = {
+			area = placement_area,
+			card_shimmer_t = {},
+			jumble_geometry = geo,
+			relayout = function() end,
+			ctx = {
+				card_w = function() return G.CARD_W end,
+				card_h = function() return G.CARD_H end,
+			},
+		}
+		G.placement_table = session
+
+		local blank_i = nil
+		for i, slot in ipairs(slots) do
+			if slot.kind == "blank" then
+				blank_i = i
+				break
+			end
+		end
+		T.assert_not_nil(blank_i, "Boss puzzle should have blank slots")
+
+		placement_area.T.w = geo.area_width(session.ctx)
+		local centers = geo.slot_centers(session)
+		local cx = centers[slots[blank_i].index]
+		T.assert_not_nil(cx, "Boss blank should have a slot center")
+
+		local card = {
+			ability = { letter = "Z", set = "Default" },
+			T = { x = cx - G.CARD_W / 2, y = 5, w = G.CARD_W, h = G.CARD_H },
+			VT = { x = cx - G.CARD_W / 2, y = 5, w = G.CARD_W, h = G.CARD_H },
+			states = { drag = { can = true, is = false }, collide = { can = true } },
+			selected = false,
+			set_card_area = function(self, area) self.area = area end,
+			remove_from_area = function(self) self.area = nil end,
+		}
+		G.hand.cards[#G.hand.cards + 1] = card
+		card.area = G.hand
+
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.Jumble = jumble
+		WORD_GAME.HandShuffle = { try_sync = function() end }
+
+		local placed = snap.place_in_row(session, card)
+		T.assert_true(placed, "Boss hand card should snap into a blank slot")
+		T.assert_equal(slots[blank_i].card, card, "Blank slot should hold the placed card")
+		T.assert_equal(card.area, placement_area, "Card should belong to placement area")
 	end)
 end)

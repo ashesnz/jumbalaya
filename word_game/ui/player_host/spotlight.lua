@@ -8,8 +8,8 @@ return function(ctx)
 	local BUBBLE_ALIGN = ctx.BUBBLE_ALIGN
 
 	function PlayerHost.refresh_card_input()
-		if G.hand then G.hand:set_ranks() end
-		if G.placement_table and G.placement_table.area then
+		if G.hand and G.hand.set_ranks then G.hand:set_ranks() end
+		if G.placement_table and G.placement_table.area and G.placement_table.area.set_ranks then
 			G.placement_table.area:set_ranks()
 		end
 	end
