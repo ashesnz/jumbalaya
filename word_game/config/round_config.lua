@@ -1,7 +1,8 @@
 --[[ word_game/config/round_config.lua - Set / Hand targets and play limits ]]
 
 local M = {
-	HAND_SIZE = 7,
+	DISCARDS_PER_HAND = 3,
+	TIMELINE_SECONDS = 60,
 	SETS_TO_WIN = 8,
 	MIN_WORD_LEN = 3,
 	MAX_WORD_LEN = 7,

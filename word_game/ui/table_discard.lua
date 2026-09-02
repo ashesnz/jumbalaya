@@ -5,15 +5,21 @@
 ]]
 
 local felt = require("word_game.ui.layout.felt")
+local round_config = require("word_game.config.round_config")
+local InputLock = require("word_game.model.input_lock")
+local Match = require("word_game.model.match")
 
 local M = {
 	BIN_SIZE = 0.62,
 	BIN_SLOT_Y_ALIGN = 0.88,
-	MAX_FILLS = 3,
 	SPRITE_COLS = 2,
 }
 
 local fill_count = 0
+
+function M.max_fills()
+	return round_config.DISCARDS_PER_HAND
+end
 
 local function read_count()
 	if G.GAME and G.GAME.discard_bin_count ~= nil then
@@ -49,7 +55,7 @@ function M.fill_count()
 end
 
 function M.discards_left()
-	return math.max(0, M.MAX_FILLS - read_count())
+	return math.max(0, M.max_fills() - read_count())
 end
 
 local function discards_left_odometer()
@@ -79,11 +85,19 @@ function M.roll_discards_left(from_left, to_left)
 end
 
 function M.is_full()
-	return read_count() >= M.MAX_FILLS
+	return read_count() >= M.max_fills()
 end
 
 function M.should_show_end_run()
 	return M.is_full()
+end
+
+function M.sync_discard_area()
+	if not G.discard or not G.discard.states then return end
+	local can_bin = M.uses_table_draw() and not M.should_show_end_run()
+	G.discard.states.collide.can = can_bin
+	G.discard.states.hover.can = can_bin
+	G.discard.states.release_on.can = can_bin
 end
 
 function M.hide_bin_cards()
@@ -114,6 +128,7 @@ function M.sync_vault_ui()
 		M.hide_bin_cards()
 	end
 	M.sync_discards_left_display()
+	M.sync_discard_area()
 	local hud = require("word_game.ui.sidebar.hud_definition")
 	if hud.sync_discard_row then
 		hud.sync_discard_row()
@@ -122,49 +137,26 @@ end
 
 function M.end_run()
 	if not M.is_full() then return false end
-	if G.GAME and (G.GAME.word_score_animating or G.GAME.hand_redraw_animating
-		or G.GAME.hand_shuffle_animating or G.GAME.placement_recall_animating) then
-		return false
-	end
-	if WORD_GAME and WORD_GAME.PlayHoldRedraw and WORD_GAME.PlayHoldRedraw.is_animating() then
-		return false
-	end
-	if type(delete_saved_run) == "function" then
-		delete_saved_run()
-	end
-	local alpha = require("word_game.model.state").get()
-	if alpha then
-		alpha.match_over = true
-		alpha.match_won = false
-	elseif G.GAME then
-		G.GAME.alpha = G.GAME.alpha or {}
-		G.GAME.alpha.match_over = true
-		G.GAME.alpha.match_won = false
-	end
-	if G.SETTINGS then
-		G.SETTINGS.paused = true
-	end
-	G.STATE = G.STATES.GAME_OVER
-	G.STATE_COMPLETE = false
-	return true
+	if InputLock.is_table_busy() then return false end
+	return Match.end_run({ won = false })
 end
 
 --- Sprite index 0–2 while the bin is active (never show the full-bin frame).
 function M.sprite_frame()
 	if M.should_show_end_run() then return 0 end
-	return math.min(read_count(), M.MAX_FILLS - 1)
+	return math.min(read_count(), M.max_fills() - 1)
 end
 
 --- Row-major cell in the 2×2 sheet for `frame` (0 = top-left).
 function M.sprite_cell(frame)
-	frame = math.max(0, math.min(frame or 0, M.MAX_FILLS))
+	frame = math.max(0, math.min(frame or 0, M.max_fills()))
 	local cols = M.SPRITE_COLS
 	return frame % cols, math.floor(frame / cols)
 end
 
 function M.record_discard()
 	local count = read_count()
-	if count >= M.MAX_FILLS then return false end
+	if count >= M.max_fills() then return false end
 	local from_left = M.discards_left()
 	write_count(count + 1)
 	M.roll_discards_left(from_left, M.discards_left())
@@ -222,13 +214,7 @@ function M.can_discard_card(card)
 	if M.is_full() then return false end
 	if not card or card.REMOVED or card.area ~= G.hand then return false end
 	if card.bonus_card or card.boss_temp then return false end
-	if G.GAME and (G.GAME.word_score_animating or G.GAME.hand_redraw_animating
-		or G.GAME.hand_shuffle_animating or G.GAME.placement_recall_animating) then
-		return false
-	end
-	if WORD_GAME and WORD_GAME.PlayHoldRedraw and WORD_GAME.PlayHoldRedraw.is_animating() then
-		return false
-	end
+	if InputLock.is_table_busy() then return false end
 	return true
 end
 

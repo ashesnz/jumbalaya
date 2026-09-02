@@ -5,6 +5,8 @@
 	slide down off screen and 7 new cards deal in one at a time from the deck.
 ]]
 local Scheduler = require "app.effects.scheduler"
+local InputLock = require("word_game.model.input_lock")
+local hand_size_cfg = require("word_game.config.hand_size")
 
 
 local M = {}
@@ -97,10 +99,7 @@ end
 
 function M.can_hold()
 	if animating then return false end
-	if G.GAME and G.GAME.word_score_animating then return false end
-	if G.GAME and G.GAME.hand_redraw_animating then return false end
-	if G.GAME and G.GAME.hand_shuffle_animating then return false end
-	if G.GAME and G.GAME.placement_recall_animating then return false end
+	if InputLock.is_table_busy() then return false end
 	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
 	if gameplay_overlays_active() then return false end
 	local btn = play_button_uie()
@@ -226,8 +225,8 @@ local function finish_redraw()
 	if G.hand and G.hand.relayout then
 		G.hand:relayout()
 	end
-	if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync then
-		WORD_GAME.HandShuffle.sync()
+	if WORD_GAME and WORD_GAME.HandShuffle then
+		WORD_GAME.HandShuffle.try_sync()
 	end
 end
 
@@ -252,7 +251,7 @@ local function trigger_redraw()
 			finish_redraw()
 			return
 		end
-		WORD_GAME.Deck.deal_into_hand(G.TABLE_HAND_SIZE or 7, finish_redraw)
+		WORD_GAME.Deck.deal_into_hand(hand_size_cfg.get(), finish_redraw)
 	end)
 end
 

@@ -1,6 +1,7 @@
 -- Vowel guarantees and requested-letter hand adjustments.
 return function(context)
 	local M = context.module
+	local hand_size_cfg = require("word_game.config.hand_size")
 	local card_letter = context.card_letter
 	local deck_owns = context.deck_owns
 	local fly_from_deck_to_hand = context.fly_from_deck_to_hand
@@ -81,7 +82,7 @@ return function(context)
 		if not G.hand or M.held_has_vowel() then return false end
 		if not M.deck_has_vowel() then return false end
 
-		local target = G.TABLE_HAND_SIZE or 7
+		local target = hand_size_cfg.get()
 		if M.held_count() < target then
 			local card = take_letter_from_deck(true)
 			if card then

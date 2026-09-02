@@ -3,6 +3,7 @@
 local M = {}
 
 local felt_layout = require("word_game.ui.layout.felt")
+local hand_size_cfg = require("word_game.config.hand_size")
 
 local HAND_BOTTOM_MARGIN = 0.25
 
@@ -34,7 +35,7 @@ function M.apply_screen_position()
 		snap_moveable(G.hand)
 		return
 	end
-	local hand_size = G.TABLE_HAND_SIZE or G.hand.config.card_limit or 7
+	local hand_size = hand_size_cfg.get()
 	local hand_w = get_hand_area_width(hand_size)
 	local hand_h = (G.CARD_H or G.hand.T.h) * 0.95
 	local felt = felt_layout.hand_felt_rect()

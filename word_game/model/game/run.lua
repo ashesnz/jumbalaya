@@ -218,7 +218,8 @@ function Game:start_run(args)
         end}
     end
 
-    local hand_size = self.GAME.starting_params.hand_size
+    local hand_size_cfg = require("word_game.config.hand_size")
+    local hand_size = hand_size_cfg.get()
 
     if not self.placement_table then
         self.placement_table = require("word_game.board").PlacementTable(self)

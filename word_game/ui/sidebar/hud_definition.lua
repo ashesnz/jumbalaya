@@ -117,18 +117,13 @@ function M.sync_discard_row()
 	local show_end = table_discard.should_show_end_run()
 	local end_btn = G.VAULT_HUD:find_node_by_id("end_run_button")
 	set_node_visible(end_btn, show_end)
-	if G.discard and G.discard.states then
-		local can_bin = table_discard.uses_table_draw() and not show_end
-		G.discard.states.collide.can = can_bin
-		G.discard.states.hover.can = can_bin
-		G.discard.states.release_on.can = can_bin
-	end
+	table_discard.sync_discard_area()
 	G.VAULT_HUD:recalculate()
 end
 
 function M.sync_action_buttons()
-	if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync then
-		WORD_GAME.HandShuffle.sync()
+	if WORD_GAME and WORD_GAME.HandShuffle then
+		WORD_GAME.HandShuffle.try_sync()
 	end
 end
 

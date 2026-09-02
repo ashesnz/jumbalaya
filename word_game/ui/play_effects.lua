@@ -7,6 +7,7 @@ local word_feedback = require("word_game.ui.word_feedback")
 local boss_word_stack = require("word_game.ui.boss_word_stack")
 local card_fly_off = require("word_game.ui.card_fly_off")
 local round_config = require("word_game.config.round_config")
+local hand_size_cfg = require("word_game.config.hand_size")
 local Easing = require "app.effects.easing"
 local Scheduler = require "app.effects.scheduler"
 
@@ -240,7 +241,7 @@ function M.deal_and_refresh(on_complete)
 		deck.try_jumble_reshuffle_and_deal(finish)
 		return
 	end
-	deck.deal_into_hand(G.TABLE_HAND_SIZE or 7, finish)
+	deck.deal_into_hand(hand_size_cfg.get(), finish)
 end
 
 function M.present_boss_word(wr, on_complete)
@@ -332,8 +333,8 @@ function M.present_boss_word(wr, on_complete)
 			if wr.jumble then
 				wr.jumble.boss_word_staging = false
 			end
-			if WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.reset then
-				WORD_GAME.TimelineTimer.reset(60.0)
+			if WORD_GAME and WORD_GAME.Round and WORD_GAME.Round.reset_timeline then
+				WORD_GAME.Round.reset_timeline()
 			end
 			if not jumble.reveal_boss_puzzle(wr) then
 				M.set_word_score_animating(false)
@@ -524,7 +525,7 @@ function M.present_jumble_next(jumble, wr, opts)
 				M.set_word_score_animating(false)
 				M.sync_sidebar_actions()
 				if WORD_GAME and WORD_GAME.HandShuffle then
-					WORD_GAME.HandShuffle.sync()
+					WORD_GAME.HandShuffle.try_sync()
 				end
 				if opts and opts.on_complete then
 					opts.on_complete()

@@ -57,9 +57,8 @@ function M.discard_slot_size()
 	return TableDiscard.footprint(G.CARD_W, G.CARD_H)
 end
 
-function M.deck_rect()
-	local w, h = M.deck_slot_size()
-	local row = G.VAULT_HUD and G.VAULT_HUD:find_node_by_id("row_deck")
+local function slot_rect(row_id, w, h)
+	local row = G.VAULT_HUD and G.VAULT_HUD:find_node_by_id(row_id)
 	if row and row.T then
 		return {
 			x = row.T.x + math.max(0, ((row.T.w or w) - w) * 0.5),
@@ -68,6 +67,13 @@ function M.deck_rect()
 			h = h,
 		}
 	end
+	return nil
+end
+
+function M.deck_rect()
+	local w, h = M.deck_slot_size()
+	local rect = slot_rect("row_deck", w, h)
+	if rect then return rect end
 
 	local hud = G.VAULT_HUD
 	local col_x, col_w
@@ -87,15 +93,8 @@ end
 
 function M.discard_rect()
 	local w, h = M.discard_slot_size()
-	local row = G.VAULT_HUD and G.VAULT_HUD:find_node_by_id("row_discard")
-	if row and row.T then
-		return {
-			x = row.T.x + math.max(0, ((row.T.w or w) - w) * 0.5),
-			y = row.T.y + math.max(0, ((row.T.h or h) - h) * 0.5),
-			w = w,
-			h = h,
-		}
-	end
+	local rect = slot_rect("row_discard", w, h)
+	if rect then return rect end
 	local deck = M.deck_rect()
 	return {
 		x = deck.x + math.max(0, (deck.w - w) * 0.5),

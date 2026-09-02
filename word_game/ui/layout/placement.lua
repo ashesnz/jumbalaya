@@ -5,6 +5,7 @@
 local felt = require("word_game.ui.layout.felt")
 local vault = require("word_game.ui.layout.vault")
 local dealt_hand = require("word_game.ui.dealt_hand")
+local hand_size_cfg = require("word_game.config.hand_size")
 
 local M = {}
 
@@ -32,7 +33,7 @@ function M.card_area_width()
 		local pctx = {
 			card_w = function() return G.CARD_W or 1.0 end,
 			card_h = function() return G.CARD_H or 1.4 end,
-			card_limit = function() return G.TABLE_HAND_SIZE or 8 end,
+			card_limit = function() return hand_size_cfg.get() end,
 		}
 		local w = playout.area_width(pctx)
 		if w and w > 0 then return w end
@@ -280,7 +281,7 @@ function M.set_screen_positions(opts)
 		end
 
 		if WORD_GAME and WORD_GAME.HandShuffle and not opts.skip_hand_shuffle then
-			WORD_GAME.HandShuffle.sync()
+			WORD_GAME.HandShuffle.try_sync()
 		end
 		local placement = G.placement_table and G.placement_table.area
 		if G.placement_table and G.placement_table.apply_screen_position then

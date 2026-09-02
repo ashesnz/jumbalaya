@@ -4,6 +4,7 @@ local Scheduler = require "app.effects.scheduler"
 return function(context)
 	local M = context.module
 	local Layout = require "word_game.ui.layout"
+	local hand_size_cfg = require("word_game.config.hand_size")
 	local needs_vowel = context.needs_vowel
 	local take_letter_from_deck = context.take_letter_from_deck
 
@@ -43,7 +44,7 @@ return function(context)
 	M.DEAL_DELAY = 0.14
 
 	function M.deal_one_to_hand(target_size)
-		target_size = target_size or (G.TABLE_HAND_SIZE or 7)
+		target_size = target_size or hand_size_cfg.get()
 		if not G.hand or M.held_count() >= target_size then return false end
 		local card = take_letter_from_deck(needs_vowel())
 		if not card then return false end
@@ -51,7 +52,7 @@ return function(context)
 	end
 
 	function M.deal_into_hand(target_size, on_complete)
-		target_size = target_size or (G.TABLE_HAND_SIZE or 7)
+		target_size = target_size or hand_size_cfg.get()
 		local need = math.max(0, target_size - M.held_count())
 		local function finish()
 			M.ensure_vowel_in_hand()
@@ -87,17 +88,17 @@ return function(context)
 	end
 
 	function M.deal_fresh_hand(on_complete)
-		local hand_size = G.TABLE_HAND_SIZE or 7
+		local hand_size_n = hand_size_cfg.get()
 		if G.hand then
-			G.hand.config.card_limit = hand_size
-			G.hand.config.selected_limit = hand_size
+			G.hand.config.card_limit = hand_size_n
+			G.hand.config.selected_limit = hand_size_n
 		end
 		Layout.request_refresh()
-		return M.deal_into_hand(hand_size, on_complete)
+		return M.deal_into_hand(hand_size_n, on_complete)
 	end
 
 	function M.draw_to_hand(target_size)
-		target_size = target_size or (G.TABLE_HAND_SIZE or 7)
+		target_size = target_size or hand_size_cfg.get()
 		while G.hand and M.held_count() < target_size do
 			local card = take_letter_from_deck(needs_vowel())
 			if not card then break end

@@ -1,6 +1,7 @@
 -- Held-card accounting and playable-hand rerolls.
 return function(context)
 	local M = context.module
+	local hand_size_cfg = require("word_game.config.hand_size")
 
 	local function deck_owns(card)
 		return card and (not card.area or card.area == G.deck)
@@ -76,7 +77,7 @@ return function(context)
 
 	function M.held_is_playable()
 		if not Dictionary then return true end
-		if M.held_count() < (G.TABLE_HAND_SIZE or 7) then return true end
+		if M.held_count() < hand_size_cfg.get() then return true end
 		return Dictionary.has_playable_word(held_letter_counts())
 	end
 
@@ -167,7 +168,7 @@ return function(context)
 		if not Dictionary or not should_ensure_playable() then return true end
 		Dictionary.load()
 
-		local target = G.TABLE_HAND_SIZE or 7
+		local target = hand_size_cfg.get()
 		if M.held_count() < target then return true end
 		if Dictionary.has_playable_word(held_letter_counts()) then return true end
 

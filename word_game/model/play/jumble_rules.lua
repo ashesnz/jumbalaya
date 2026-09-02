@@ -1,5 +1,7 @@
 --[[ word_game/model/play/jumble_rules.lua - Pure jumble play logic (no UI) ]]
 
+local InputLock = require("word_game.model.input_lock")
+
 local M = {}
 
 local round = require("word_game.model.round")
@@ -55,7 +57,7 @@ end
 
 function M.play_blocked(j)
 	if not j then return true end
-	if G.GAME and G.GAME.word_score_animating then return true end
+	if InputLock.is_table_busy() then return true end
 	return false
 end
 
@@ -64,7 +66,7 @@ function M.can_jumble_next(jumble)
 	local wr = G.GAME and G.GAME.word_round
 	local j = jumble.state()
 	if not wr or not j or not j.solved then return false end
-	if G.GAME and G.GAME.word_score_animating then return false end
+	if InputLock.is_table_busy() then return false end
 	return true
 end
 

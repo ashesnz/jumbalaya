@@ -21,6 +21,7 @@ function M.init_run()
 		target = round_config.hand_target(1, 1),
 		played_words = {},
 	}
+	G.GAME.discard_bin_count = 0
 	G.GAME.points = 0
 	G.GAME.round_resets = G.GAME.round_resets or {}
 	G.GAME.round_resets.ante = 1
@@ -47,7 +48,7 @@ function M.restore_from_save()
 		WORD_GAME.ScoreBanner.snap_to_actual()
 	end
 	if WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.reset then
-		WORD_GAME.	TimelineTimer.reset(60.0)
+		M.reset_timeline()
 	end
 	if WORD_GAME and WORD_GAME.StageLabel and WORD_GAME.StageLabel.force_sync then
 		WORD_GAME.StageLabel.force_sync()
@@ -99,9 +100,8 @@ function M.start_hand(set, hand_index)
 	end
 
 	local jumble = require("word_game.model.jumble")
-	if jumble.is_active_hand(set, hand_index)
-		and WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.reset then
-		WORD_GAME.TimelineTimer.reset(60.0)
+	if jumble.is_active_hand(set, hand_index) then
+		M.reset_timeline()
 	end
 
 	if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.clear_hand then
@@ -173,6 +173,12 @@ function M.advance_hand()
 
 	M.start_hand(wr.set, wr.hand_index + 1)
 	return "next"
+end
+
+function M.reset_timeline()
+	if WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.reset then
+		WORD_GAME.TimelineTimer.reset(round_config.TIMELINE_SECONDS)
+	end
 end
 
 function M.display_hand_name()

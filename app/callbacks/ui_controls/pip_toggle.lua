@@ -48,28 +48,23 @@ end
 ---@param e {}
 --**e** Is the slider UIE that called this function
 function G.FUNCS.flip_switch(e)
-  e.config.ref_table.ref_table[e.config.ref_table.ref_value] = not e.config.ref_table.ref_table[e.config.ref_table.ref_value]
-  if e.config.toggle_callback then 
-    e.config.toggle_callback(e.config.ref_table.ref_table[e.config.ref_table.ref_value])
+  local ref = e.config.ref_table
+  local value_table = ref.ref_table
+  local key = ref.ref_value
+  value_table[key] = not value_table[key]
+  if e.config.toggle_callback then
+    e.config.toggle_callback(value_table[key])
   end
-end
-
---for the toggle
---
----@param e {}
---**e** Is the slider UIE that called this function
-function G.FUNCS.flip_switch(e)
-  if not e.config.ref_table.ref_table[e.config.ref_table.ref_value] and e.config.toggle_active then
+  if not value_table[key] and e.config.toggle_active then
     e.config.toggle_active = nil
-    e.config.colour = e.config.ref_table.inactive_colour
+    e.config.colour = ref.inactive_colour
     e.children[1].states.visible = false
     e.children[1].config.object.states.visible = false
-  elseif e.config.ref_table.ref_table[e.config.ref_table.ref_value] and not e.config.toggle_active then
+  elseif value_table[key] and not e.config.toggle_active then
     e.config.toggle_active = true
-    e.config.colour = e.config.ref_table.active_colour
+    e.config.colour = ref.active_colour
     e.children[1].states.visible = true
     e.children[1].config.object.states.visible = true
   end
-  
 end
 

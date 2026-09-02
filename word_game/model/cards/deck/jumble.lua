@@ -2,6 +2,7 @@
 
 local Scheduler = require "app.effects.scheduler"
 local CardMotion = require "app.effects.card_motion"
+local hand_size_cfg = require("word_game.config.hand_size")
 
 return function(context)
 	local M = context.module
@@ -262,8 +263,7 @@ return function(context)
 			return false
 		end
 
-		local hand_size = G.TABLE_HAND_SIZE or 7
-		local to_deal = math.min(hand_size, #(G.deck.cards or {}))
+		local to_deal = math.min(hand_size_cfg.get(), #(G.deck.cards or {}))
 		for _ = 1, to_deal do
 			local card = G.deck:remove_card()
 			if card and G.hand then
@@ -292,8 +292,7 @@ return function(context)
 			WORD_GAME.TableDiscard.reset()
 		end
 		M.clear_hand_and_placement()
-		local hand_size = G.TABLE_HAND_SIZE or 7
-		local to_deal = math.min(hand_size, #(G.deck.cards or {}))
+		local to_deal = math.min(hand_size_cfg.get(), #(G.deck.cards or {}))
 		for _ = 1, to_deal do
 			local card = G.deck:remove_card()
 			if card then
@@ -358,14 +357,8 @@ return function(context)
 
 	function M.discard_from_hand(card)
 		if not M.is_jumble_deck() then return false end
-		if not card or card.area ~= G.hand or card.REMOVED then return false end
-		if card.bonus_card or card.boss_temp then return false end
-		if G.GAME and (G.GAME.word_score_animating or G.GAME.hand_redraw_animating
-			or G.GAME.hand_shuffle_animating or G.GAME.placement_recall_animating) then
-			return false
-		end
 		local table_discard = WORD_GAME and WORD_GAME.TableDiscard
-		if table_discard and table_discard.is_full and table_discard.is_full() then
+		if not table_discard or not table_discard.can_discard_card(card) then
 			return false
 		end
 
@@ -382,8 +375,9 @@ return function(context)
 				G.discard:relayout()
 				G.discard:hard_set_cards()
 			end
-			if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync then
-				WORD_GAME.HandShuffle.sync()
+			local hs = WORD_GAME and WORD_GAME.HandShuffle
+			if hs and (hs.try_sync or hs.sync) then
+				(hs.try_sync or hs.sync)()
 			end
 			if G.GAME and G.GAME.round_scores then
 				G.GAME.round_scores.cards_discarded = G.GAME.round_scores.cards_discarded or { amt = 0 }
@@ -434,7 +428,7 @@ return function(context)
 	end
 
 	function M.refill_jumble_held(target_size)
-		target_size = target_size or G.TABLE_HAND_SIZE or 7
+		target_size = target_size or hand_size_cfg.get()
 		while M.held_count() < target_size do
 			if not M.draw_jumble_replacement() then break end
 		end

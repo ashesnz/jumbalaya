@@ -2,6 +2,8 @@
 	word_game/ui/cardarea/hand.lua - Hand CardArea type behaviour.
 ]]
 
+local hand_size_cfg = require("word_game.config.hand_size")
+
 local M = {}
 
 local function table_board()
@@ -25,7 +27,7 @@ function M.relayout(self)
 		local card_w = self.card_w or G.CARD_W
 		local group_w = card_w + math.max(n - 1, 0) * card_w * spacing
 		local start_x = self.T.x + (self.T.w - group_w) / 2
-		local fan_n = G.TABLE_HAND_SIZE or self.config.card_limit or 7
+		local fan_n = hand_size_cfg.get()
 		for k, card in ipairs(self.cards) do
 			if not card.states.drag.is and not card.shuffle_hop and not card.placement_recall_slide then
 				local slot = k + (fan_n - n) * 0.5

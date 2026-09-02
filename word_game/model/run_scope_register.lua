@@ -34,8 +34,8 @@ return function(word_game)
 		end
 	end)
 	call("TimelineTimer", function()
-		if word_game.TimelineTimer and word_game.TimelineTimer.reset then
-			word_game.TimelineTimer.reset(60.0)
+		if word_game.Round and word_game.Round.reset_timeline then
+			word_game.Round.reset_timeline()
 		end
 	end)
 	call("TokenReward", word_game.TokenReward and word_game.TokenReward.reset)

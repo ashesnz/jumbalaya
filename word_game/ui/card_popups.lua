@@ -131,6 +131,15 @@ function rows_to_infotip(desc_nodes, name)
 end
 
 
+function clear_overlay_infotip()
+  if not G.OVERLAY_MENU then return end
+  local infotip = G.OVERLAY_MENU:find_node_by_id('overlay_menu_infotip')
+  if infotip and infotip.config.object then
+    infotip.config.object:remove()
+    infotip.config.object = EaseNode()
+  end
+end
+
 function overlay_infotip(text_rows)
   local t = {}
   if type(text_rows) ~= 'table' then text_rows = {"ERROR"} end

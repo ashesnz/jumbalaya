@@ -5,6 +5,8 @@ local felt_layout = require("word_game.ui.layout.felt")
 local hand_shuffle_anim = require("word_game.ui.hand_shuffle_anim")
 local hand_placement_recall_anim = require("word_game.ui.hand_placement_recall_anim")
 local bonus_stack = require("word_game.ui.boss_word_stack")
+local InputLock = require("word_game.model.input_lock")
+local hand_size_cfg = require("word_game.config.hand_size")
 local characters = { intro_step_keys = function() return nil end, intro_uses_play_button = function() return true end }
 
 local M = {}
@@ -218,7 +220,7 @@ local function layout_pos_sig()
 		G.CARD_H or 0,
 		felt.x,
 		felt.w,
-		G.TABLE_HAND_SIZE or 7
+		hand_size_cfg.get()
 	)
 end
 
@@ -228,7 +230,7 @@ local function button_anchors()
 	end
 	local size = button_size()
 	local gap = play_gap()
-	local hand_size = G.TABLE_HAND_SIZE or 7
+	local hand_size = hand_size_cfg.get()
 	local hand_w = get_hand_area_width(hand_size)
 	local hand_h = (G.CARD_H or 1.4) * 0.95
 	local felt = felt_layout.hand_felt_rect()
@@ -432,10 +434,7 @@ end
 
 function M.return_placement_cards_to_hand()
 	if not M.placement_has_cards() then return end
-	if G.GAME and G.GAME.hand_redraw_animating then return end
-	if G.GAME and G.GAME.word_score_animating then return end
-	if G.GAME and G.GAME.hand_shuffle_animating then return end
-	if G.GAME and G.GAME.placement_recall_animating then return end
+	if InputLock.is_table_busy() then return end
 	if G.INPUT and G.INPUT.dragging and G.INPUT.dragging.target then return end
 	if hand_placement_recall_anim.animate(function()
 		M.sync_visibility()
@@ -565,7 +564,7 @@ function M.stabilize_table_board()
 	end
 	M.stabilize()
 	snap_hand_container()
-	if G.GAME and G.GAME.placement_recall_animating then return end
+	if G.GAME and InputLock.is_table_busy() then return end
 	local settle = G.GAME and G.GAME.hand_layout_settle or 0
 	if settle > 0 or hand_position_drift() then
 		snap_hand_cards()
@@ -604,10 +603,7 @@ end
 function M.shuffle_hand()
 	if M.placement_has_cards() then return end
 	if not G.hand or #G.hand.cards < 2 then return end
-	if G.GAME and G.GAME.hand_redraw_animating then return end
-	if G.GAME and G.GAME.word_score_animating then return end
-	if G.GAME and G.GAME.hand_shuffle_animating then return end
-	if G.GAME and G.GAME.placement_recall_animating then return end
+	if InputLock.is_table_busy() then return end
 	if G.INPUT and G.INPUT.dragging and G.INPUT.dragging.target then return end
 	G.hand:clear_selection()
 	hand_shuffle_anim.animate(G.hand)
@@ -695,6 +691,10 @@ function M.sync()
 	M.sync_position()
 	M.sync_visibility()
 	return M.buttons_present()
+end
+
+function M.try_sync()
+	return M.sync()
 end
 
 return M

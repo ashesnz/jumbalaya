@@ -92,4 +92,36 @@ G.FUNCS.wipe_out = function()
     blocking = true, timer = 'REAL', func = function() return true end}
 end
 
+function G:queue_during_wipe(fn)
+  G.FUNCS.wipe_in()
+  Scheduler.add{
+    mode = 'instant',
+    persistent = true,
+    func = function()
+      fn()
+      return true
+    end,
+  }
+  G.FUNCS.wipe_out()
+end
+
+function G:queue_wipe_transition(steps, opts)
+  opts = opts or {}
+  if opts.flush_timeline and G.TIMELINE then G.TIMELINE:flush() end
+  if opts.pause then G.SETTINGS.paused = true end
+  G.FUNCS.wipe_in(opts.message, opts.no_card, opts.timefac, opts.alt_colour)
+  for _, step in ipairs(steps or {}) do
+    local fn = type(step) == "function" and step or step.func
+    Scheduler.add{
+      persistent = true,
+      blockable = type(step) == "table" and step.blockable ~= false or true,
+      blocking = type(step) == "table" and step.blocking or false,
+      func = function()
+        return fn()
+      end,
+    }
+  end
+  G.FUNCS.wipe_out()
+end
+
 return true

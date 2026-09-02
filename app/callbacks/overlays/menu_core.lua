@@ -4,11 +4,7 @@
 local Scheduler = require "app.effects.scheduler"
 G.FUNCS.switch_tab = function(e)
   if not e then return end
-  local _infotip_object = G.OVERLAY_MENU:find_node_by_id('overlay_menu_infotip')
-  if _infotip_object and _infotip_object.config.object then 
-    _infotip_object.config.object:remove() 
-    _infotip_object.config.object = EaseNode()
-  end
+  clear_overlay_infotip()
 
   local tab_contents = e.LayoutView:find_node_by_id('tab_contents')
   tab_contents.config.object:remove()

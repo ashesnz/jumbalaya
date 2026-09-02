@@ -27,6 +27,15 @@ function WordSidebar.sync_visibility()
 	end
 end
 
+local REQUIRED_VAULT_ROWS = {
+	"row_vault_spacer",
+	"row_stamp_slot",
+	"row_deck",
+	"row_deck_count",
+	"row_discard",
+	"row_discards_left",
+}
+
 function WordSidebar:ensure()
 	if WordSidebar.is_hidden() then
 		self:destroy()
@@ -34,23 +43,13 @@ function WordSidebar:ensure()
 	end
 	if G.STAGE ~= G.STAGES.RUN then return end
 	if not G.ROOM_ATTACH then return end
-	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_vault_spacer") then
-		self:destroy()
-	end
-	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_stamp_slot") then
-		self:destroy()
-	end
-	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_deck") then
-		self:destroy()
-	end
-	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_deck_count") then
-		self:destroy()
-	end
-	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_discard") then
-		self:destroy()
-	end
-	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_discards_left") then
-		self:destroy()
+	if G.VAULT_HUD then
+		for _, row_id in ipairs(REQUIRED_VAULT_ROWS) do
+			if not G.VAULT_HUD:find_node_by_id(row_id) then
+				self:destroy()
+				break
+			end
+		end
 	end
 	if G.VAULT_HUD then
 		deck.sync_deck_count_display()

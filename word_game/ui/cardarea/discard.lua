@@ -8,15 +8,7 @@ local M = {}
 
 function M.update(self, dt)
 	if self ~= G.discard then return end
-	if table_discard.uses_table_draw() and not table_discard.should_show_end_run() then
-		self.states.collide.can = true
-		self.states.hover.can = true
-		self.states.release_on.can = true
-	else
-		self.states.collide.can = false
-		self.states.hover.can = false
-		self.states.release_on.can = false
-	end
+	table_discard.sync_discard_area()
 	for _, card in ipairs(self.cards or {}) do
 		if card.area == self then
 			card.states.drag.can = false

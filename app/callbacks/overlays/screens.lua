@@ -113,20 +113,14 @@ G.FUNCS.change_lang = function(e)
   else
     G.SETTINGS.language = lang.key
     G:set_language()
-    G.TIMELINE:flush()
-    G.FUNCS.wipe_in()
-    Scheduler.add{
-      persistent = true,
-      blockable = true, 
-      blocking = false,
-      func = function()
+    G:queue_wipe_transition({
+      function()
         G:discard_run()
         G:load_card_definitions()
         G:open_main_menu()
         return true
-      end
-    }
-    G.FUNCS.wipe_out()
+      end,
+    }, { flush_timeline = true })
   end
 end
 

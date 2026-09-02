@@ -42,11 +42,8 @@ end
 
 G.FUNCS.load_profile = function(delete_prof_data)
   G.STORED_RUN = nil
-  G.TIMELINE:flush()
-  G.FUNCS.wipe_in()
-  Scheduler.add{
-    persistent = true,
-    func = function()
+  G:queue_wipe_transition({
+    function()
       G:discard_run()
       local _name = nil
       if G.PROFILES[G.focused_profile].name and G.PROFILES[G.focused_profile].name ~= '' then
@@ -59,19 +56,17 @@ G.FUNCS.load_profile = function(delete_prof_data)
       G.PROFILES[G.focused_profile].name = _name
       G:load_card_definitions()
       return true
-    end
-  }
-  Scheduler.add{
-    persistent = true,
-    blockable = true, 
-    blocking = false,
-    func = function()
-      G:open_main_menu()
-      G.WRITE_FLAGS.force = true
-      return true
-    end
-  }
-  G.FUNCS.wipe_out()
+    end,
+    {
+      blockable = true,
+      blocking = false,
+      func = function()
+        G:open_main_menu()
+        G.WRITE_FLAGS.force = true
+        return true
+      end,
+    },
+  }, { flush_timeline = true })
 end
 
 G.FUNCS.can_delete_profile = function(e)
