@@ -1,4 +1,5 @@
 local Easing = require "app.effects.easing"
+local InputLock = require("word_game.model.input_lock")
 
 return function(ctx)
 	local PlayerHost = ctx.PlayerHost
@@ -106,7 +107,7 @@ return function(ctx)
 	end
 
 	function PlayerHost.allows_card_drag(area)
-		if G.GAME and G.GAME.hand_redraw_animating then
+		if InputLock.is_table_busy() then
 			return false
 		end
 		if WORD_GAME and WORD_GAME.HandClearFocus and WORD_GAME.HandClearFocus.is_active() then

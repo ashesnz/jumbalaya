@@ -10,6 +10,7 @@ T.describe("Debug stage jump (devtools.sections.stage)", function()
 	local DebugContext = require("devtools.context")
 	local opening_deal = require("word_game.model.play.opening_deal")
 	local round_config = require("word_game.config.round_config")
+	local hand_size_cfg = require("word_game.config.hand_size")
 
 	T.it("deals the opening hand after jumping to a jumble stage", function()
 		local saved_word_game = WORD_GAME
@@ -138,9 +139,9 @@ T.describe("Debug stage jump (devtools.sections.stage)", function()
 
 		stage_section.seed_bonus_gutter()
 
-		T.assert_equal(#created_letters, round_config.HAND_SIZE,
+		T.assert_equal(#created_letters, hand_size_cfg.get(),
 			"Stage 1-4 debug should create seven bonus cards")
-		T.assert_equal(#promoted, round_config.HAND_SIZE,
+		T.assert_equal(#promoted, hand_size_cfg.get(),
 			"Stage 1-4 debug should promote seven bonus cards")
 		T.assert_equal(destroyed, 0, "No prior bonus cards should exist on first seed")
 	end)

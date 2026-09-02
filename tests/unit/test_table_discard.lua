@@ -240,7 +240,7 @@ T.describe("table discard bin", function()
 		WORD_GAME.Jumble = { is_active = function() return true end }
 		WORD_GAME.TableDiscard = table_discard
 		WORD_GAME.Deck = deck
-		WORD_GAME.HandShuffle = { sync = function() end }
+		WORD_GAME.HandShuffle = { sync = function() end, try_sync = function() end }
 
 		local card = {
 			area = G.hand,
@@ -340,7 +340,7 @@ T.describe("table discard bin", function()
 		WORD_GAME.Jumble = { is_active = function() return true end }
 		WORD_GAME.TableDiscard = table_discard
 		WORD_GAME.Deck = deck
-		WORD_GAME.HandShuffle = { sync = function() end }
+		WORD_GAME.HandShuffle = { sync = function() end, try_sync = function() end }
 
 		local card = {
 			area = G.hand,
@@ -370,7 +370,7 @@ T.describe("table discard bin", function()
 		local deck = require("word_game.model.cards.deck")
 		table_discard.reset()
 
-		for _ = 1, table_discard.MAX_FILLS do
+		for _ = 1, table_discard.max_fills() do
 			T.assert_true(table_discard.record_discard())
 		end
 		T.assert_true(table_discard.is_full())

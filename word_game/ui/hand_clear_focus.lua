@@ -25,8 +25,8 @@ local function refresh_input()
 	if G.placement_table and G.placement_table.area and G.placement_table.area.set_ranks then
 		G.placement_table.area:set_ranks()
 	end
-	if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync then
-		WORD_GAME.HandShuffle.sync()
+	if WORD_GAME and WORD_GAME.HandShuffle then
+		WORD_GAME.HandShuffle.try_sync()
 	end
 	if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.sync_action_buttons then
 		WORD_GAME.Sidebar.sync_action_buttons()
