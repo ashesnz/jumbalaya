@@ -8,7 +8,6 @@ function build_options()
   local restart = nil
   local main_menu = nil
   local card_gallery = nil
-  local credits = nil
 
   Scheduler.add{
     blockable = false,
@@ -38,9 +37,6 @@ function build_options()
       Components.button({col = true, onClick = 'copy_run_seed', label = {localize('ui_copy')}, colour = G.C.BLUE, textSize = 0.3, width = 1.3, height = 0.5,}),
     }}
   end
-  if G.STAGE == G.STAGES.MAIN_MENU then
-    credits = Components.button{ label = {localize('ui_credits')}, onClick = "show_credits", width = 5}
-  end
 
   local settings = Components.button({onClick = 'open_settings', label = {localize('ui_settings')}, width = 5, focus_args = {snap_to = true}})
   local high_scores = Components.button{ label = {localize('ui_stats')}, onClick = "show_high_scores", width = 5}
@@ -52,7 +48,6 @@ function build_options()
       main_menu,
       high_scores,
       card_gallery,
-      credits
     }})
   return t
 end

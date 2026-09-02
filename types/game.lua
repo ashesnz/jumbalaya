@@ -207,7 +207,6 @@
 ---@field F_TROPHIES boolean
 ---@field F_PS4_PLAYSTATION_GLYPHS boolean
 ---@field F_EXTERNAL_LINKS boolean
----@field F_BASIC_CREDITS boolean
 ---@field F_SWAP_AB_PIPS boolean
 ---@field focused_profile number
 ---@field save_settings fun(self: Game)

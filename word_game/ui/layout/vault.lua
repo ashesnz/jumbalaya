@@ -22,13 +22,11 @@ function M.vault_rect()
 	if win_h <= 0 then
 		win_h = (G.TILE_H or 11.5) + 2 * ((G.ROOM_PADDING_H or 0.7))
 	end
-	local top = M.vault_edge()
-	local bottom = M.vault_bottom_edge()
 	return {
 		x = felt.vault_right_x() - sidebar_w,
-		y = -room_y + top,
+		y = -room_y,
 		w = sidebar_w,
-		h = math.max(6, win_h - top - bottom),
+		h = math.max(6, win_h),
 	}
 end
 

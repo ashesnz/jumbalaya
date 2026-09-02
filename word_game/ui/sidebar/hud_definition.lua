@@ -5,13 +5,40 @@ local deck = require("word_game.model.cards.deck")
 local stamp_grid = require("word_game.ui.stamp_grid")
 local Components = require("word_game.ui.widgets.components")
 local table_discard = require("word_game.ui.table_discard")
+local Odometer = require("word_game.ui.odometer")
 
 local M = {}
 
 local VAULT_ROOT_PAD = 0
-local VAULT_OUTER_PAD = 0
 local VAULT_FILL_PAD = 0.06
 local VAULT_BOTTOM_PAD = 0.22
+local VAULT_COUNTER_SCALE = 0.38
+local VAULT_COUNTER_ROW_H = 0.35
+
+local function vault_counter_text_config(opts)
+	local cfg = {
+		scale = VAULT_COUNTER_SCALE,
+		colour = G.C.UI.TEXT_LIGHT,
+		shadow = true,
+	}
+	if opts.text then cfg.text = opts.text end
+	if opts.id then cfg.id = opts.id end
+	if opts.ref_table then cfg.ref_table = opts.ref_table end
+	if opts.ref_value then cfg.ref_value = opts.ref_value end
+	return cfg
+end
+
+local function vault_counter_row(box_w, row_id, label, value_node)
+	return { n = G.UI.ROW, config = {
+		align = "cm",
+		id = row_id,
+		minw = box_w,
+		padding = 0,
+	}, nodes = {
+		{ n = G.UI.TEXT, config = vault_counter_text_config({ text = label }) },
+		value_node,
+	}}
+end
 
 local function stamp_slot_height()
 	local count = 1
@@ -26,13 +53,13 @@ local function vault_fixed_content_height()
 	local _, discard_h = Layout.discard_slot_size()
 	local rows = stamp_slot_height()
 		+ deck_h
-		+ 0.35
+		+ VAULT_COUNTER_ROW_H
 		+ discard_h
+		+ VAULT_COUNTER_ROW_H
 		+ VAULT_BOTTOM_PAD
-	local fill_nodes = 5
+	local fill_nodes = 6
 	local fill_pad = VAULT_FILL_PAD * (fill_nodes + 1)
-	local outer_pad = VAULT_OUTER_PAD * 2
-	return VAULT_ROOT_PAD * 2 + outer_pad + fill_pad + rows
+	return VAULT_ROOT_PAD * 2 + fill_pad + rows
 end
 
 local function vault_spacer_height()
@@ -46,27 +73,33 @@ end
 local function deck_count_node(box_w)
 	G.ARGS = G.ARGS or {}
 	deck.sync_deck_count_display()
-	return { n = G.UI.ROW, config = {
-		align = "cm",
-		id = "row_deck_count",
-		minw = box_w,
-		padding = 0,
-	}, nodes = {
-		{ n = G.UI.TEXT, config = {
-			text = "Cards left: ",
-			scale = 0.38,
-			colour = G.C.UI.TEXT_LIGHT,
-			shadow = true,
-		}},
-		{ n = G.UI.TEXT, config = {
+	return vault_counter_row(box_w, "row_deck_count", "Cards left: ", {
+		n = G.UI.TEXT,
+		config = vault_counter_text_config({
 			id = "text_deck_count",
 			ref_table = G.ARGS,
 			ref_value = "deck_left_count",
-			scale = 0.38,
-			colour = G.C.UI.TEXT_LIGHT,
-			shadow = true,
-		}},
-	}}
+		}),
+	})
+end
+
+local function discards_left_node(box_w)
+	G.ARGS = G.ARGS or {}
+	table_discard.sync_discards_left_display(true)
+	return vault_counter_row(box_w, "row_discards_left", "Discards left: ", {
+		n = G.UI.OBJECT,
+		config = {
+			id = "discards_left_odometer",
+			object = Odometer({
+				label = "",
+				text_scale = VAULT_COUNTER_SCALE,
+				text_shadow = true,
+				value = table_discard.discards_left(),
+				value_fn = function() return table_discard.discards_left() end,
+				colour = G.C.UI.TEXT_LIGHT,
+			}),
+		},
+	})
 end
 
 local function set_node_visible(node, visible)
@@ -103,9 +136,8 @@ function M.hud_definition()
 	local box_w = box_width()
 	local vault_h = Layout.vault_height()
 	local stamp_h = stamp_slot_height()
-
 	local inner_h = math.max(4, vault_h - VAULT_ROOT_PAD * 2)
-	local fill_h = math.max(3.5, inner_h - VAULT_OUTER_PAD * 2)
+	local vault_grey = G.C.DYN_UI.MAIN
 
 	local fill_nodes = {
 		{ n = G.UI.ROW, config = {
@@ -153,6 +185,7 @@ function M.hud_definition()
 				}),
 			}}
 		end)(),
+		discards_left_node(box_w),
 		{ n = G.UI.ROW, config = {
 			id = "row_vault_bottom_pad",
 			minh = VAULT_BOTTOM_PAD,
@@ -162,29 +195,19 @@ function M.hud_definition()
 	return { n = G.UI.ROOT, config = {
 		align = "tm",
 		padding = VAULT_ROOT_PAD,
-		colour = G.C.UI.TRANSPARENT_DARK,
+		colour = vault_grey,
 		minh = vault_h,
 		minw = box_w,
 	}, nodes = {
 		{ n = G.UI.ROW, config = {
 			align = "tm",
-			padding = VAULT_OUTER_PAD,
-			colour = G.C.DYN_UI.MAIN,
-			r = 0.1,
-			id = "row_vault_outer",
+			padding = VAULT_FILL_PAD,
+			colour = vault_grey,
+			r = 0,
+			id = "row_vault_fill",
 			minh = inner_h,
 			minw = box_w,
-		}, nodes = {
-			{ n = G.UI.ROW, config = {
-				align = "tm",
-				colour = G.C.DYN_UI.BOSS_DARK,
-				r = 0.1,
-				id = "row_vault_fill",
-				minh = fill_h,
-				minw = box_w,
-				padding = VAULT_FILL_PAD,
-			}, nodes = fill_nodes },
-		}},
+		}, nodes = fill_nodes },
 	}}
 end
 
@@ -193,20 +216,15 @@ function M.relayout_vault()
 	deck.sync_deck_count_display()
 	local vault_h = Layout.vault_height()
 	local inner_h = math.max(4, vault_h - VAULT_ROOT_PAD * 2)
-	local fill_h = math.max(3.5, inner_h - VAULT_OUTER_PAD * 2)
 	local root = G.VAULT_HUD.root_node
-	local outer = G.VAULT_HUD:find_node_by_id("row_vault_outer")
 	local fill = G.VAULT_HUD:find_node_by_id("row_vault_fill")
 	local spacer = G.VAULT_HUD:find_node_by_id("row_vault_spacer")
 	local stamp_slot = G.VAULT_HUD:find_node_by_id("row_stamp_slot")
 	if root and root.config then
 		root.config.minh = vault_h
 	end
-	if outer then
-		outer.config.minh = inner_h
-	end
 	if fill then
-		fill.config.minh = fill_h
+		fill.config.minh = inner_h
 	end
 	if spacer then
 		spacer.config.minh = vault_spacer_height()
@@ -215,6 +233,7 @@ function M.relayout_vault()
 		stamp_slot.config.minh = stamp_slot_height()
 	end
 	M.sync_discard_row()
+	table_discard.sync_discards_left_display(true)
 	G.VAULT_HUD:recalculate()
 	if G.VAULT_ATTACH then
 		Layout.update_vault_attach()

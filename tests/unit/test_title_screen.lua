@@ -1,5 +1,5 @@
 --[[ tests/unit/test_title_screen.lua
-     Tests for the Jumbalaya title screen, Play / Options / Quit buttons,
+     Tests for the Jumbalaya title screen, mode buttons, utility bar,
      Stage 1-1 transition, and title screen bypass configuration.
 ]]
 
@@ -7,7 +7,7 @@ local T = require("tests.framework")
 local MockEnv = require("tests.helpers.mock_env")
 
 	T.describe("Title Screen & Jumbalaya Menu", function()
-	T.it("generates main menu UI tree containing only Play, Options, and Quit buttons", function()
+	T.it("generates main menu UI tree with Classic, Time Run, Settings, Stats, and Quit", function()
 		MockEnv.setup()
 		require("app.core.util.tables")
 		require("app.core.util.geometry")
@@ -15,8 +15,10 @@ local MockEnv = require("tests.helpers.mock_env")
 		require("word_game.ui.widgets")
 		require("word_game.ui.menu")
 
-		local ui_tree = build_main_menu_buttons()
-		T.assert_not_nil(ui_tree, "Main menu UI tree should be created")
+		local ui_tree = build_main_menu_mode_buttons()
+		local utility_tree = build_main_menu_buttons()
+		T.assert_not_nil(ui_tree, "Main menu mode UI tree should be created")
+		T.assert_not_nil(utility_tree, "Main menu utility UI tree should be created")
 
 		local buttons_found = {}
 		local function scan_nodes(node)
@@ -32,10 +34,16 @@ local MockEnv = require("tests.helpers.mock_env")
 		end
 
 		scan_nodes(ui_tree)
+		scan_nodes(utility_tree)
 
-		T.assert_true(buttons_found["begin_run"], "Play button with start_run callback must be present")
-		T.assert_true(buttons_found["open_options"], "Options button must be present")
+		T.assert_true(buttons_found["begin_classic_run"], "Classic button must be present")
+		T.assert_true(buttons_found["begin_time_run"], "Time Run button must be present")
+		T.assert_true(buttons_found["open_settings"], "Settings button must be present")
+		T.assert_true(buttons_found["show_high_scores"], "Stats button must be present")
 		T.assert_true(buttons_found["quit"], "Quit button must be present")
+		T.assert_nil(buttons_found["begin_run"], "Legacy Play button should not be on the title screen")
+		T.assert_nil(buttons_found["open_options"], "Options overlay should not be on the title screen")
+		T.assert_nil(buttons_found["show_credits"], "Credits button should be removed")
 		T.assert_nil(buttons_found["card_gallery"], "Collection button should not be present on main menu")
 		T.assert_nil(buttons_found["go_to_discord"], "Discord button should not be present on main menu")
 		T.assert_nil(buttons_found["go_to_twitter"], "Twitter button should not be present on main menu")
@@ -119,7 +127,7 @@ local MockEnv = require("tests.helpers.mock_env")
 		end
 
 		game2:launch()
-		T.assert_true(run2_started, "start_run should be invoked immediately when F_SKIP_TITLE_SCREEN is true")
+		T.assert_true(run2_started, "start_run should be invoked immediately when F_SKIP_TITLE_SCREEN = true")
 
 		-- Test with title_screen = true (default behavior opens main menu)
 		local game3 = Game()
@@ -146,7 +154,7 @@ local MockEnv = require("tests.helpers.mock_env")
 		T.assert_true(menu_opened, "open_main_menu should be opened on initial boot by default")
 	end)
 
-	T.it("Play button transitions cleanly into Stage 1-1 gameplay board", function()
+	T.it("Classic button transitions cleanly into Stage 1-1 gameplay board", function()
 		MockEnv.setup()
 		require("app.bootstrap")
 		require("word_game.model.cards.card")
@@ -166,16 +174,22 @@ local MockEnv = require("tests.helpers.mock_env")
 		package.loaded["app.callbacks.settings"] = nil
 		require("app.callbacks.settings")
 
-		T.assert_not_nil(G.FUNCS.begin_run, "G.FUNCS.begin_run must be defined")
+		T.assert_not_nil(G.FUNCS.begin_classic_run, "G.FUNCS.begin_classic_run must be defined")
 
 		local start_board_called = false
+		local run_mode = nil
 		local real_start_board = G.start_gameplay_board
 		G.start_gameplay_board = function(self)
 			start_board_called = true
 			if real_start_board then real_start_board(self) end
 		end
+		local real_start_run = G.start_run
+		G.start_run = function(self, args)
+			run_mode = args and args.run_mode
+			return real_start_run(self, args)
+		end
 
-		G.FUNCS.begin_run()
+		G.FUNCS.begin_classic_run()
 
 		-- Process queued transition event
 		for i = 1, 60 do
@@ -184,29 +198,20 @@ local MockEnv = require("tests.helpers.mock_env")
 			G.TIMELINE:advance(0.016)
 		end
 
+		T.assert_equal(run_mode, "classic", "Classic should start a classic run")
 		T.assert_true(start_board_called, "start_gameplay_board should be called from start_run")
 		T.assert_not_nil(G.GAME.word_round, "G.GAME.word_round must be initialized")
 		T.assert_equal(1, G.GAME.word_round.set, "Stage set should be 1")
 		T.assert_equal(1, G.GAME.word_round.hand_index, "Stage hand_index should be 1 (Stage 1-1)")
 	end)
 
-	T.it("Options button opens existing options modal", function()
+	T.it("registers direct settings and mode run callbacks", function()
 		MockEnv.setup()
 		require("app.bootstrap")
-		require("word_game.ui.widgets")
-		require("word_game.ui.overlays")
-
-		package.loaded["app.callbacks.settings"] = nil
-		require("app.callbacks.settings")
-
-		local overlay_opened = false
-		G.FUNCS.show_overlay = function(args)
-			overlay_opened = true
-			T.assert_not_nil(args.definition, "Options modal must have a definition")
-		end
-
-		G.FUNCS.open_options()
-		T.assert_true(overlay_opened, "G.FUNCS.open_options should open the options overlay menu")
+		T.assert_not_nil(G.FUNCS.open_settings, "Settings should open directly from the title bar")
+		T.assert_not_nil(G.FUNCS.begin_classic_run, "Classic mode callback must exist")
+		T.assert_not_nil(G.FUNCS.begin_time_run, "Time Run mode callback must exist")
+		T.assert_nil(G.FUNCS.show_credits, "Credits overlay callback should be removed")
 	end)
 
 	T.it("TitleLogo juggles start and end A's, replacing each other and returning", function()

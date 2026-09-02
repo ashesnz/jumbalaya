@@ -190,6 +190,7 @@ function Game:start_run(args)
 
     if not saveTable then
         if args.seed then self.GAME.seeded = true end
+        if args.run_mode then self.GAME.run_mode = args.run_mode end
         local memory_entropy = tonumber(tostring({}):sub(7), 16) or 0
         local runtime_entropy = os.time()
             + math.floor(((love.timer and love.timer.getTime()) or 0) * 1000000)

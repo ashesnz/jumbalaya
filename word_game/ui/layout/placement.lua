@@ -303,6 +303,9 @@ function M.set_screen_positions(opts)
 
 		G.title_top:snap_VT()
 	end
+	if G.STAGE == G.STAGES.MAIN_MENU and layout_main_menu_mode_buttons then
+		layout_main_menu_mode_buttons()
+	end
 end
 
 function M.refresh_placement_layout()

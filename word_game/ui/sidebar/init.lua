@@ -5,6 +5,7 @@ local hud_definition = require("word_game.ui.sidebar.hud_definition")
 local hand_progress = require("word_game.ui.sidebar.hand_progress")
 local sidebar_callbacks = require("word_game.ui.sidebar.callbacks")
 local deck = require("word_game.model.cards.deck")
+local table_discard = require("word_game.ui.table_discard")
 
 local WordSidebar = {}
 
@@ -49,10 +50,14 @@ function WordSidebar:ensure()
 	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_discard") then
 		self:destroy()
 	end
+	if G.VAULT_HUD and not G.VAULT_HUD:find_node_by_id("row_discards_left") then
+		self:destroy()
+	end
 	if G.VAULT_HUD then
 		deck.sync_deck_count_display()
 		WordSidebar.sync_action_buttons()
 		hud_definition.sync_discard_row()
+		table_discard.sync_discards_left_display(true)
 		return G.VAULT_HUD
 	end
 
@@ -69,6 +74,7 @@ function WordSidebar:ensure()
 	G.VAULT_HUD:recalculate()
 	G.word_sidebar_uibox = G.VAULT_HUD
 	hud_definition.sync_discard_row()
+	table_discard.sync_discards_left_display(true)
 	WordSidebar.sync_action_buttons()
 	Layout.set_screen_positions()
 	return G.VAULT_HUD

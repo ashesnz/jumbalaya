@@ -83,16 +83,16 @@ end
 
 function M.setup()
 	M.ensure_engine_globals()
-	G.C = G.C or {
+		G.C = G.C or {
 		CLEAR = { 0, 0, 0, 0 },
 		RED = { 1, 0, 0, 1 },
 		GREEN = { 0, 1, 0, 1 },
 		GOLD = { 1, 0.8, 0, 1 },
 		WHITE = { 1, 1, 1, 1 },
-		UI = { TRANSPARENT_DARK = { 0, 0, 0, 0.5 } },
-		DYN_UI = { BOSS_MAIN = { 1, 1, 1, 1 }, BOSS_DARK = { 0, 0, 0, 1 }, MAIN = { 1, 1, 1, 1 } },
+		UI = { TRANSPARENT_DARK = { 0, 0, 0, 0.5 }, TEXT_LIGHT = { 1, 1, 1, 1 } },
+		DYN_UI = { BOSS_MAIN = { 1, 1, 1, 1 }, BOSS_DARK = { 0, 0, 0, 1 }, MAIN = { 0.22, 0.32, 0.35, 1 } },
 	}
-	G.UI = G.UI or { ROOT = 1, R = 2, C = 3, T = 4, O = 5 }
+	G.UI = G.UI or { ROOT = 1, ROW = 2, COL = 3, TEXT = 4, OBJECT = 5, BOX = 6 }
 	G.TILE_W = G.TILE_W or 20
 	G.TILE_H = G.TILE_H or 11
 	G.CARD_W = G.CARD_W or 1

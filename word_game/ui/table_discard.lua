@@ -41,10 +41,41 @@ end
 
 function M.reset()
 	write_count(0)
+	M.sync_discards_left_display(true)
 end
 
 function M.fill_count()
 	return read_count()
+end
+
+function M.discards_left()
+	return math.max(0, M.MAX_FILLS - read_count())
+end
+
+local function discards_left_odometer()
+	if not G.VAULT_HUD or not G.VAULT_HUD.find_node_by_id then return nil end
+	local node = G.VAULT_HUD:find_node_by_id("discards_left_odometer")
+	return node and node.config and node.config.object
+end
+
+function M.sync_discards_left_display(force)
+	local left = M.discards_left()
+	G.ARGS = G.ARGS or {}
+	G.ARGS.discards_left_count = left
+	local odometer = discards_left_odometer()
+	if not odometer then return end
+	if force or not odometer.roll then
+		odometer.display_count = left
+	end
+end
+
+function M.roll_discards_left(from_left, to_left)
+	local odometer = discards_left_odometer()
+	if odometer and odometer.start_roll then
+		odometer:start_roll(from_left, to_left)
+	else
+		M.sync_discards_left_display(true)
+	end
 end
 
 function M.is_full()
@@ -58,16 +89,31 @@ end
 function M.hide_bin_cards()
 	if not G.discard or not G.discard.cards then return end
 	for _, card in ipairs(G.discard.cards) do
-		if card and not card.played_pool and card.states then
-			card.states.visible = false
-		end
+		M.stash_bin_card(card)
 	end
+end
+
+function M.stash_bin_card(card)
+	if not card or card.played_pool then return end
+	card.bin_stash = true
+	if card.states then
+		card.states.visible = false
+	end
+end
+
+function M.is_pile_card_visible(card, discard_area)
+	if not card or not discard_area then return false end
+	if not M.uses_table_draw() or M.should_show_end_run() then return false end
+	if card.played_pool or card.bin_stash then return false end
+	if card.states and card.states.visible == false then return false end
+	return false
 end
 
 function M.sync_vault_ui()
 	if M.should_show_end_run() then
 		M.hide_bin_cards()
 	end
+	M.sync_discards_left_display()
 	local hud = require("word_game.ui.sidebar.hud_definition")
 	if hud.sync_discard_row then
 		hud.sync_discard_row()
@@ -119,7 +165,9 @@ end
 function M.record_discard()
 	local count = read_count()
 	if count >= M.MAX_FILLS then return false end
+	local from_left = M.discards_left()
 	write_count(count + 1)
+	M.roll_discards_left(from_left, M.discards_left())
 	return true
 end
 

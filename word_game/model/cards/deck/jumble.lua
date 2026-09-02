@@ -228,6 +228,7 @@ return function(context)
 			local card = G.discard.cards[i]
 			G.discard:remove_card(card)
 			card.played_pool = nil
+			card.bin_stash = nil
 			if card.states then
 				card.states.visible = true
 			end
@@ -369,6 +370,9 @@ return function(context)
 		end
 
 		local function after_discard()
+			if table_discard and table_discard.stash_bin_card then
+				table_discard.stash_bin_card(card)
+			end
 			M.draw_jumble_replacement()
 			M.sync_deck_count_display()
 			if G.hand then
@@ -413,9 +417,6 @@ return function(context)
 				delay = 0.22,
 				blocking = true,
 				func = function()
-					if bin_now_full and card and card.states then
-						card.states.visible = false
-					end
 					after_discard()
 					return true
 				end,

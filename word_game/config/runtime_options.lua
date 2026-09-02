@@ -6,7 +6,6 @@ M.flags = {
     QUIT_BUTTON = true,
     SKIP_TUTORIAL = true,
     SKIP_TITLE_SCREEN = false,
-    BASIC_CREDITS = false,
     EXTERNAL_LINKS = true,
     ENABLE_PERF_OVERLAY = false,
     ATLAS_DEBUG_OVERLAY = false,

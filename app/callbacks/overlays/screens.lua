@@ -15,13 +15,6 @@ G.FUNCS.open_settings = function(e, instant)
 }
 end
 
-G.FUNCS.show_credits = function(e)
-  G.SETTINGS.paused = true
-  G.FUNCS.show_overlay{
-    definition = G.DEFINITIONS.credits(),
-  }
-end
-
 G.FUNCS.language_selection = function(e)
   G.SETTINGS.paused = true
   G.FUNCS.show_overlay{

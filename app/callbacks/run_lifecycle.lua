@@ -30,6 +30,14 @@ G.FUNCS.begin_run = function(e, args)
   G.FUNCS.wipe_out()
 end
 
+G.FUNCS.begin_classic_run = function(e)
+  G.FUNCS.begin_run(e, { run_mode = "classic" })
+end
+
+G.FUNCS.begin_time_run = function(e)
+  G.FUNCS.begin_run(e, { run_mode = "time_run" })
+end
+
 G.FUNCS.return_to_menu = function(e)
   G.SETTINGS.paused = true
   G.TIMELINE:flush()

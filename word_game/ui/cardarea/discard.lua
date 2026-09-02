@@ -36,14 +36,7 @@ function M.draw_layer(self, v, draw_card_layer)
 		if v == "card" then
 			table_discard.draw(self)
 		end
-		for i = 1, #(self.cards or {}) do
-			local card = self.cards[i]
-			if card.played_pool or (card.states and card.states.visible == false) then
-				-- Word-played cards are stashed invisibly for reshuffle.
-			elseif card ~= G.INPUT.focused.target and math.abs(card.VT.x - self.T.x) > 0.4 then
-				draw_card_layer(card, v)
-			end
-		end
+		return
 	else
 		for i = 1, #(self.cards or {}) do
 			local card = self.cards[i]

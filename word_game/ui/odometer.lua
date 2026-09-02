@@ -56,6 +56,21 @@ local function roll_view(roll, fallback)
 	return roll.from, roll.to, ease_out(roll.t / roll.dur), true
 end
 
+local function ui_text_metrics(scale, sample)
+	local font_obj = G.LANG and G.LANG.font or {}
+	local font_face = font_obj.FONT
+	local squish = font_obj.squish or 1
+	local font_scale = font_obj.FONTSCALE or 0.12
+	local height_scale = font_obj.TEXT_HEIGHT_SCALE or 0.7
+	local tile = G.TILESIZE or 1
+	local text = sample or "8"
+	local text_w = (font_face and font_face.getWidth and font_face:getWidth(text)) or 8
+	local text_h = (font_face and font_face.getHeight and font_face:getHeight()) or 20
+	local w = text_w * squish * scale * font_scale / tile
+	local h = text_h * scale * font_scale * height_scale / tile
+	return w, h, font_obj, squish, font_scale, height_scale, text_h
+end
+
 function Odometer:construct(config)
 	config = config or {}
 	self.label = config.label or "Plays Left"
@@ -69,6 +84,8 @@ function Odometer:construct(config)
 	self.subtitle_fn = config.subtitle_fn
 	self.subtitle_colour = config.subtitle_colour or G.C.RED
 	self.config = config
+	self.text_scale = config.text_scale
+	self.text_shadow = config.text_shadow
 
 	if self.pair then
 		self.left_count = config.left or 1
@@ -79,6 +96,9 @@ function Odometer:construct(config)
 
 	local w = config.w or 2.6
 	local h = config.h or 1.25
+	if self.text_scale then
+		w, h = ui_text_metrics(self.text_scale, "8")
+	end
 	EaseNode.construct(self, 0, 0, w, h)
 	self.states.hover.can = false
 	self.states.click.can = false
@@ -152,8 +172,82 @@ function Odometer:update(dt)
 	end
 end
 
+function Odometer:draw_text_scale()
+	local w, h = self.VT.w, self.VT.h
+	local scale = self.text_scale
+	local _, _, font_obj, squish, font_scale, height_scale, raw_h = ui_text_metrics(scale, "8")
+	local font_face = font_obj.FONT
+	if not font_face then return end
+
+	local tile = G.TILESIZE or 1
+	local draw_scale_x = scale * squish * font_scale / tile
+	local draw_scale_y = scale * font_scale / tile
+	local digit_h = raw_h * draw_scale_y
+	local slot_w = math.max(font_face:getWidth("0"), font_face:getWidth("8")) * draw_scale_x
+	local digit_x = 0
+	local digit_y = 0
+	local col = self.colour or (G.C.UI and G.C.UI.TEXT_LIGHT) or { 1, 1, 1, 1 }
+
+	local function print_num(text, y)
+		local tw = font_face:getWidth(text) * draw_scale_x
+		local x = digit_x + (slot_w - tw) * 0.5
+		if self.text_shadow then
+			love.graphics.setColor(0, 0, 0, 0.25 * (col[4] or 1))
+			love.graphics.print(text, x + 0.01, y + 0.015, 0, draw_scale_x, draw_scale_y)
+		end
+		love.graphics.setColor(col[1], col[2], col[3], col[4] or 1)
+		love.graphics.print(text, x, y, 0, draw_scale_x, draw_scale_y)
+	end
+
+	local function draw_rolling_digit(from, to, rolling, roll_t)
+		if love.graphics.transformPoint and love.graphics.intersectScissor and love.graphics.getScissor and love.graphics.setScissor then
+			local x1, y1 = love.graphics.transformPoint(digit_x, digit_y)
+			local x2, y2 = love.graphics.transformPoint(digit_x + slot_w, digit_y)
+			local x3, y3 = love.graphics.transformPoint(digit_x, digit_y + digit_h)
+			local x4, y4 = love.graphics.transformPoint(digit_x + slot_w, digit_y + digit_h)
+			local sx = math.min(x1, x2, x3, x4)
+			local sy = math.min(y1, y2, y3, y4)
+			local sw = math.max(x1, x2, x3, x4) - sx
+			local sh = math.max(y1, y2, y3, y4) - sy
+			local psx, psy, psw, psh = love.graphics.getScissor()
+			love.graphics.intersectScissor(sx, sy, sw, sh)
+			if rolling then
+				print_num(tostring(from), digit_y - roll_t * digit_h)
+				print_num(tostring(to), digit_y + (1 - roll_t) * digit_h)
+			else
+				print_num(tostring(from), digit_y)
+			end
+			if psx then
+				love.graphics.setScissor(psx, psy, psw, psh)
+			else
+				love.graphics.setScissor()
+			end
+		elseif rolling then
+			print_num(tostring(from), digit_y - roll_t * digit_h)
+			print_num(tostring(to), digit_y + (1 - roll_t) * digit_h)
+		else
+			print_num(tostring(from), digit_y)
+		end
+	end
+
+	local prev_font = love.graphics.getFont()
+	love.graphics.setFont(font_face)
+	local from, to, roll_t, rolling = roll_view(self.roll, self.display_count or self:current_value())
+	draw_rolling_digit(from, to, rolling, roll_t)
+	if prev_font then love.graphics.setFont(prev_font) end
+	love.graphics.setColor(1, 1, 1, 1)
+end
+
 function Odometer:draw()
 	if not self.states.visible then return end
+
+	if self.text_scale then
+		push_node_transform(self, 1)
+		self:draw_text_scale()
+		love.graphics.pop()
+		track_hit_target(self)
+		return
+	end
 
 	local w, h = self.VT.w, self.VT.h
 	push_node_transform(self, 1)
