@@ -499,24 +499,59 @@ T.describe("Vault deck information", function()
 		local orig_jumble = WORD_GAME and WORD_GAME.Jumble
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.Jumble = { ensure_playable_puzzle = function() return true end }
-		WORD_GAME.TableDiscard = { reset = function() end }
 
-		local queued = {}
-		local orig_manager = G.TIMELINE
-		G.TIMELINE = {
-			enqueue = function(_, ev) queued[#queued + 1] = ev end,
-		}
 		T.assert_true(deck.try_jumble_reshuffle_and_deal())
-		for _, ev in ipairs(queued) do
-			if ev.func then ev.func() end
-		end
-		G.TIMELINE = orig_manager
 		T.assert_equal(#G.discard.cards, 0, "Discard pile should be empty after recycle")
 		T.assert_equal(#G.hand.cards, 7, "Player should receive a full hand of seven cards")
 		T.assert_equal(#G.deck.cards, 5, "Remaining cards should stay in the deck")
 		T.assert_equal(deck.cards_left(), 5, "Cards left should match the physical draw pile")
 
 		WORD_GAME.Jumble = orig_jumble
+	end)
+
+	T.it("keeps the discard bin fill count when recycling into the deck", function()
+		local table_discard = require("word_game.ui.table_discard")
+		table_discard.reset()
+		table_discard.record_discard()
+		table_discard.record_discard()
+		T.assert_equal(table_discard.sprite_frame(), 2)
+
+		G.GAME = G.GAME or {}
+		G.GAME.word_round = { mode = "jumble", set = 1, hand_index = 1 }
+		G.hand = {
+			cards = {},
+			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
+			set_ranks = function() end,
+			relayout = function() end,
+			snap_VT = function() end,
+			hard_set_cards = function() end,
+		}
+		G.deck = {
+			cards = {},
+			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
+			remove_card = function(self) return table.remove(self.cards) end,
+			config = {},
+		}
+		G.discard = {
+			cards = { { ability = { letter = "E" } } },
+			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
+			remove_card = function(self, card)
+				for i, c in ipairs(self.cards) do
+					if c == card then
+						table.remove(self.cards, i)
+						return card
+					end
+				end
+			end,
+			hard_set_cards = function() end,
+		}
+		G.placement_table = { area = { cards = {} } }
+		G.playing_cards = G.discard.cards
+
+		deck.try_jumble_reshuffle_and_deal()
+
+		T.assert_equal(table_discard.sprite_frame(), 2, "Bin fill should persist across reshuffle")
+		T.assert_equal(G.GAME.discard_bin_count, 2, "Bin count should stay on G.GAME")
 	end)
 
 	T.it("does not reshuffle while cards remain in hand, deck, or placement", function()

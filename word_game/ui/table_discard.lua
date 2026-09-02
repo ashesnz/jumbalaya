@@ -15,6 +15,20 @@ local M = {
 
 local fill_count = 0
 
+local function read_count()
+	if G.GAME and G.GAME.discard_bin_count ~= nil then
+		fill_count = G.GAME.discard_bin_count
+	end
+	return fill_count
+end
+
+local function write_count(count)
+	fill_count = math.max(0, count or 0)
+	if G.GAME then
+		G.GAME.discard_bin_count = fill_count
+	end
+end
+
 local function felt_boss()
 	return felt.is_boss_sequence()
 end
@@ -26,20 +40,20 @@ function M.uses_table_draw()
 end
 
 function M.reset()
-	fill_count = 0
+	write_count(0)
 end
 
 function M.fill_count()
-	return fill_count
+	return read_count()
 end
 
 function M.is_full()
-	return fill_count >= M.MAX_FILLS
+	return read_count() >= M.MAX_FILLS
 end
 
 --- Sprite index 0–3 for the current bin fill level (0 = empty, top-left).
 function M.sprite_frame()
-	return math.min(fill_count, M.MAX_FILLS)
+	return math.min(read_count(), M.MAX_FILLS)
 end
 
 --- Row-major cell in the 2×2 sheet for `frame` (0 = top-left).
@@ -50,8 +64,9 @@ function M.sprite_cell(frame)
 end
 
 function M.record_discard()
-	if fill_count >= M.MAX_FILLS then return false end
-	fill_count = fill_count + 1
+	local count = read_count()
+	if count >= M.MAX_FILLS then return false end
+	write_count(count + 1)
 	return true
 end
 
