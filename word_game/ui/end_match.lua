@@ -2,8 +2,6 @@
 
 local widgets = require("word_game.ui.widgets")
 local state = require("word_game.model.state")
-local vault = require("word_game.model.vault")
-local almanac = require("word_game.model.almanac")
 local Easing = require("app.effects.easing")
 
 local M = {}
@@ -11,7 +9,6 @@ local M = {}
 function M.definition(won)
 	local alpha = state.get()
 	local stats = alpha and alpha.stats or {}
-	local counts = almanac.counts()
 	local title = won and "MATCH WON" or "MATCH OVER"
 	local colour = won and G.C.GOLD or G.C.RED
 
@@ -27,16 +24,7 @@ function M.definition(won)
 				{ n = G.UI.TEXT, config = { text = "Highest Boost: ×" .. tostring(stats.highest_boost or 0), scale = 0.36, colour = G.C.UI.TEXT_LIGHT, shadow = true } },
 			}},
 			{ n = G.UI.ROW, config = { align = "cm", padding = 0.04 }, nodes = {
-				{ n = G.UI.TEXT, config = { text = "Vault: " .. vault.count() .. " unique  ·  Sweeps: " .. tostring(stats.sweeps or 0), scale = 0.36, colour = G.C.GOLD, shadow = true } },
-			}},
-			{ n = G.UI.ROW, config = { align = "cm", padding = 0.08 }, nodes = {
-				{ n = G.UI.TEXT, config = {
-					text = "Almanac  Perks " .. counts.perks.have .. "/" .. counts.perks.total
-						.. "  Upgrades " .. counts.upgrades.have .. "/" .. counts.upgrades.total,
-					scale = 0.3,
-					colour = G.C.UI.TEXT_INACTIVE,
-					shadow = true,
-				}},
+				{ n = G.UI.TEXT, config = { text = "Sweeps: " .. tostring(stats.sweeps or 0), scale = 0.36, colour = G.C.GOLD, shadow = true } },
 			}},
 			{ n = G.UI.ROW, config = { align = "cm", padding = 0.1 }, nodes = {
 				widgets.button("Back to Menu", "return_to_menu", G.C.RED, 3.4, 0.75),
@@ -83,7 +71,7 @@ function M.overlay_definition(won)
 			{ n = G.UI.ROW, config = { align = "cm", padding = 0.12, colour = G.C.BLACK, r = 0.1, emboss = 0.05 }, nodes = {
 				M.stat_line("Best word", tostring(stats.best_word or "—") .. "  (" .. tostring(stats.best_word_score or 0) .. ")"),
 				M.stat_line("Words played", stats.words_played or 0),
-				M.stat_line("Vault", vault.count() .. " unique"),
+				M.stat_line("Sweeps", stats.sweeps or 0),
 			}},
 			{ n = G.UI.ROW, config = { align = "cm", padding = 0.12 }, nodes = {
 				{ n = G.UI.ROW, config = {

@@ -45,13 +45,9 @@
 ---@field [string] any
 
 ---@class AlphaState
----@field chips number
 ---@field tokens number
----@field vault table
 ---@field perks table
 ---@field perk_slots number
----@field wildcards table
----@field wild_twin_pending boolean
 ---@field stats table
 ---@field trade_used_this_hand boolean
 ---@field match_over boolean
@@ -86,12 +82,9 @@
 ---@class WordRound
 ---@field set number
 ---@field hand_index number
----@field plays_left number
----@field redraws_left number
 ---@field target number
 ---@field played_words string[]
 ---@field mode string|nil
----@field words_left number|nil
 ---@field hand_name string|nil
 ---@field jumble JumbleState|nil
 ---@field [string] any

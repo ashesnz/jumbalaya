@@ -654,10 +654,6 @@ function Card:draw(layer)
 			self.children.focused_ui:draw()
 		end
 
-		if WORD_GAME and WORD_GAME.LetterOverlay then
-			WORD_GAME.LetterOverlay.draw(self)
-		end
-
 		track_hit_target(self)
 		self:draw_boundingrect()
 	end

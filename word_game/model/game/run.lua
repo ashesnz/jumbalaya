@@ -26,9 +26,7 @@ function Game:start_gameplay_board()
     G.GAME.round = 1
     G.GAME.round_resets.ante = G.GAME.round_resets.ante or 1
     G.GAME.current_round.hands_left = G.GAME.round_resets.hands
-    G.GAME.current_round.discards_left = G.GAME.round_resets.discards
     G.GAME.current_round.hands_played = 0
-    G.GAME.current_round.discards_used = 0
 
     G.STATE = G.STATES.TABLE_BOARD
     G.STATE_COMPLETE = true
@@ -183,7 +181,6 @@ function Game:start_run(args)
     if not saveTable then 
         self.GAME.selected_back:apply_to_run()
         self.GAME.round_resets.hands = self.GAME.starting_params.hands
-        self.GAME.round_resets.discards = self.GAME.starting_params.discards
     end
 
     G.GAME.chips_text = ''
@@ -292,7 +289,6 @@ function Game:start_run(args)
     Scheduler.delayed{delay = 0.5}
 
     if not saveTable then
-        G.GAME.current_round.discards_left = G.GAME.round_resets.discards
         G.GAME.current_round.hands_left = G.GAME.round_resets.hands
         self.deck:shuffle()
         self.deck:hard_set_T()

@@ -71,11 +71,6 @@ function M.stamp_sprite_at(col, row)
 	return M.STAMP_SPRITES[(row - 1) * M.STAMP_COLS + col]
 end
 
-M.SHOWDOWN_BONUSES = {
-	extra_play = "plays",
-	extra_redraw = "redraws",
-}
-
 M.DESCRIPTION_VARIABLES = {
 	["Overstock Plus"] = { "c_shop_dollars_spent" },
 	["Liquidation"] = {},

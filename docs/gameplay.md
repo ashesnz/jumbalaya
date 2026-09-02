@@ -198,17 +198,11 @@ Hold-to-redraw is independent of the old discard counter. It is blocked only dur
 
 ---
 
-## Perks (early showdowns)
+## Perks
 
-On **sets 1–3, hand 3** (`round_config.is_perk_hand`):
+Perks are acquired via the **rubber-stamp flow** on the vault (`word_game/ui/perk_stamp.lua`). Purchased perks are stored on `G.GAME.alpha.perks` and selected perk metadata on `G.GAME.selected_perk`.
 
-1. Timeline stays paused until the shop closes.
-2. **Perk marketplace** opens with **3 random offers** from `config/perks.lua`.
-3. Each perk costs **10–100 tokens** (steps of 10), rolled per offer.
-4. Purchase spends tokens with a reverse fly animation.
-5. After picking (or skipping), timeline resets to 60s and play begins.
-
-Most perk descriptions still reference the legacy AP system. Only **`extra_play`** and **`extra_redraw`** have wired effects today; others are stored on `G.GAME.selected_perk` for future hooks.
+Most perk descriptions still reference the legacy AP system; perk effects are partially wired for future hooks.
 
 ---
 
@@ -249,7 +243,7 @@ Non-release builds include a debug panel (Tab or **DBG** button):
 | Pattern layout & snap | `word_game/board/jumble_geometry.lua`, `word_game/board/snap.lua` |
 | Score banner | `word_game/ui/score_banner.lua` |
 | Timeline & tokens | `word_game/ui/timeline_timer.lua`, `word_game/ui/token_reward.lua` |
-| Perks | `word_game/config/perks.lua`, `word_game/ui/perk_market.lua` |
+| Perks | `word_game/config/perks.lua`, `word_game/ui/perk_stamp.lua` |
 | Hand controls | `word_game/ui/hand_shuffle.lua`, `word_game/ui/play_hold_redraw.lua` |
 | Match flow | `word_game/model/round.lua`, `word_game/ui/trade.lua` |
 | Trade | `word_game/model/trade.lua` |

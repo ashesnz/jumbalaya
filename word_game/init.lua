@@ -2,8 +2,8 @@
 	word_game package - Jumbalaya domain facade.
 
 	Structure:
-	  config/  - static tables (AP, vault, perks, upgrades)
-	  model/   - match rules (scoring, vault, round, trade)
+	  config/  - static tables (perks, economy, puzzles)
+	  model/   - match rules (scoring, round, trade)
 	  ui/      - TABLE_BOARD presentation and overlays
 
 	Game class, G singleton, startup, save, and loop are loaded by app/bootstrap.lua.
@@ -27,7 +27,6 @@ local M = {
 	Layout = require("word_game.ui.layout"),
 	TableDeck = require("word_game.ui.table_deck"),
 	TableDiscard = require("word_game.ui.table_discard"),
-	LetterOverlay = require("word_game.ui.letter_overlay"),
 	ScoreBanner = require("word_game.ui.score_banner"),
 	TimelineTimer = require("word_game.ui.timeline_timer"),
 	StageLabel = require("word_game.ui.stage_label"),

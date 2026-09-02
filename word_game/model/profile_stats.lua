@@ -7,37 +7,8 @@
 local Scheduler = require "app.effects.scheduler"
 
 
-function alert_no_space(card, area)
-  G.INPUT.locks.no_space = true
-  spawn_attention({
-      scale = 0.9, text = localize('term_no_space_ex'), hold = 0.9, align = 'cm',
-      cover = area, cover_padding = 0.1, cover_colour = with_alpha(G.C.BLACK, 0.7)
-  })
-  card:pulse(0.3, 0.2)
-  for i = 1, #area.cards do
-    area.cards[i]:pulse(0.15)
-  end
-  Scheduler.add{mode = 'delayed', delay = 0.06*G.SETTINGS.GAMESPEED, blockable = false, blocking = false, func = function()
-    play_sfx('tarot2', 0.76, 0.4);return true end}
-    play_sfx('tarot2', 1, 0.4)
-
-    Scheduler.add{mode = 'delayed', delay = 0.5*G.SETTINGS.GAMESPEED, blockable = false, blocking = false,
-    func = function()
-      G.INPUT.locks.no_space = nil
-    return true end}
-end
-
-function find_joker(name, non_debuff)
-  -- Legacy probe over the old companion/consumable trays; both stay empty in the
-  -- letter-deck game, so this can only ever report 'not found'.
-  return {}
-end
-
 function send_score(_score)
   return _score
-end
-
-function send_name()
 end
 
 function check_and_set_high_score(score, amt)

@@ -12,8 +12,8 @@ return {
 			delete_saved_run()
 			if G and G.discard_run then G:discard_run() end
 		end)
-		panel:action("add_points", function(ctx)
-			if ctx:is_run_stage() then state.earn(10) end
+		panel:action("add_tokens", function(ctx)
+			if ctx:is_run_stage() then state.add_tokens(10) end
 		end)
 		panel:action("toggle_background", function(ctx)
 			ctx.game.debug_background_toggle = not ctx.game.debug_background_toggle
@@ -29,7 +29,7 @@ return {
 	build = function(_panel)
 		return layout.section("Run", layout.button_columns({
 			{label = "Delete Save", action = "delete_save"},
-			{label = "+10 Points", action = "add_points"},
+			{label = "+10 Tokens", action = "add_tokens"},
 			{label = "Background", action = "toggle_background"},
 			{label = "Lose Run", action = "lose_game"},
 		}))

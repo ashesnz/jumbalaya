@@ -10,7 +10,6 @@ local teardown_hooks = {}
 
 local RUN_ARG_DEFAULTS = {
 	deck_left_count = 0,
-	discards_left_count = 3,
 }
 
 local function ensure_run_table()

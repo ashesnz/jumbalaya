@@ -84,8 +84,6 @@ end
 
 function M.start_hand(wr)
 	wr.mode = "jumble"
-	wr.plays_left = 999
-	wr.words_left = 999
 	wr.target = wr.target or 20
 	modifier_effects.reset_stage_state(wr)
 	local alpha = G.GAME and G.GAME.alpha

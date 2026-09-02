@@ -146,7 +146,6 @@ function M.on_hand_cleared(opts)
 		opts.boss_next = true
 	end
 
-	round.unused_play_payout()
 	if WORD_GAME.Sidebar and WORD_GAME.Sidebar.roll_to_next_hand then
 		WORD_GAME.Sidebar.roll_to_next_hand()
 	end
@@ -190,30 +189,6 @@ function M.on_hand_cleared(opts)
 		return
 	end
 	play_clear_sequence()
-end
-
-function M.on_hand_failed()
-	local function set_failed()
-		local alpha = state.get()
-		if alpha then
-			alpha.match_over = true
-			alpha.match_won = false
-		end
-		G.STATE = G.STATES.GAME_OVER
-		G.STATE_COMPLETE = false
-	end
-	if G.TIMELINE and G.TIMELINE.enqueue then
-		Scheduler.add{
-			mode = "delayed",
-			delay = 0.55,
-			func = function()
-				set_failed()
-				return true
-			end,
-		}
-	else
-		set_failed()
-	end
 end
 
 function M.continue_after_dealer()

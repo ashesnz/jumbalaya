@@ -4,9 +4,6 @@ local StageLabel = require("word_game.ui.stage_label")
 
 local M = {}
 
-function M.roll_plays()
-end
-
 function M.roll_to_next_hand()
 	if WORD_GAME and WORD_GAME.StageLabel and WORD_GAME.StageLabel.roll_to_next_hand then
 		WORD_GAME.StageLabel.roll_to_next_hand()

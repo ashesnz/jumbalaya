@@ -82,9 +82,9 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `TimelineTimer` | 60s fuse HUD |
 | `TokenReward` | 1-1 token fly animations |
 | `HandShuffle` / `PlayHoldRedraw` | Shuffle + Play buttons, hold-to-redraw |
-| `TradeUI` / `DealerUI` / `PerkMarketplace` | Marketplace and shop overlays |
+| `TradeUI` / `PerkStamp` | Marketplace and perk stamp overlays |
 | `Sidebar` | Vault HUD (stamps, deck) |
-| Hosts / portraits / overlays | `PlayerHost`, `AllyHost`, `GuestHost`, `PlayerPortrait`, `CardInspect`, `CardHover`, `Confetti`, `FloatUpText`, `HandClearFocus`, `EndMatch`, `TableDeck`, `LetterOverlay` |
+| Hosts / portraits / overlays | `PlayerHost`, `AllyHost`, `GuestHost`, `PlayerPortrait`, `CardInspect`, `CardHover`, `Confetti`, `FloatUpText`, `HandClearFocus`, `EndMatch`, `TableDeck` |
 
 Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of deep requires.
 
@@ -140,7 +140,7 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `hand_shuffle.lua` | Circular shuffle/play buttons flanking hand |
 | `play_hold_redraw.lua` | Hold Play 5s ring, recall slots, discard hand, redeal |
 | `jumble_fixed_letters.lua` | Fixed puzzle letter tile drawing and transition animation |
-| `perk_market.lua` | Early-showdown shop overlay |
+| `perk_stamp.lua` | Rubber-stamp perk acquisition on the vault |
 | `table_deck.lua` | Draw pile + token pile rendering |
 | `hand_clear_focus.lua` | Spotlight during 1-1 token award |
 | `sidebar.lua` | Vault HUD (stamps, deck) |

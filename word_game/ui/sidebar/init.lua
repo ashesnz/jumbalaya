@@ -9,7 +9,6 @@ local table_discard = require("word_game.ui.table_discard")
 
 local WordSidebar = {}
 
-WordSidebar.roll_plays = hand_progress.roll_plays
 WordSidebar.roll_to_next_hand = hand_progress.roll_to_next_hand
 WordSidebar.hud_definition = hud_definition.hud_definition
 WordSidebar.relayout_vault = hud_definition.relayout_vault

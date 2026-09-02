@@ -3,7 +3,6 @@ local Scheduler = require "app.effects.scheduler"
 
 
 local round_config = require("word_game.config.round_config")
-local economy = require("word_game.config.economy")
 local state = require("word_game.model.state")
 
 local M = {}
@@ -16,12 +15,9 @@ end
 
 function M.init_run()
 	state.get()
-	local alpha = state.get()
 	G.GAME.word_round = {
 		set = 1,
 		hand_index = 1,
-		plays_left = round_config.PLAYS_PER_HAND,
-		redraws_left = round_config.REDRAWS_PER_HAND,
 		target = round_config.hand_target(1, 1),
 		played_words = {},
 	}
@@ -41,9 +37,6 @@ function M.restore_from_save()
 	end
 	wr.set = wr.set or 1
 	wr.hand_index = wr.hand_index or 1
-	wr.plays_left = wr.plays_left or round_config.PLAYS_PER_HAND
-	wr.words_left = wr.words_left or wr.plays_left
-	wr.redraws_left = wr.redraws_left or round_config.REDRAWS_PER_HAND
 	wr.target = wr.target or round_config.hand_target(wr.set, wr.hand_index)
 	wr.hand_name = wr.hand_name or round_config.hand_name(wr.hand_index, wr.set)
 	G.GAME.round_resets = G.GAME.round_resets or {}
@@ -80,16 +73,10 @@ function M.start_hand(set, hand_index)
 	local wr = G.GAME.word_round
 	wr.set = set
 	wr.hand_index = hand_index
-	wr.plays_left = round_config.PLAYS_PER_HAND
-	wr.words_left = wr.plays_left
-	wr.redraws_left = round_config.REDRAWS_PER_HAND
 	wr.target = round_config.hand_target(set, hand_index)
 	wr.hand_name = round_config.hand_name(hand_index, set)
 	wr.played_words = {}
 	wr.boss_character = nil
-
-	-- Dynamic values
-	wr.dynamic_letter_values = nil
 
 	if WORD_GAME and WORD_GAME.BossWordStack and WORD_GAME.BossWordStack.on_hand_start then
 		WORD_GAME.BossWordStack.on_hand_start(set, hand_index)
@@ -161,35 +148,9 @@ function M.add_score(amount)
 	refresh()
 end
 
-function M.use_word_play()
-	local wr = G.GAME.word_round
-	if not wr then return end
-	local from = wr.plays_left or 0
-	wr.plays_left = math.max(0, from - 1)
-	wr.words_left = wr.plays_left
-	if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.roll_plays then
-		WORD_GAME.Sidebar.roll_plays(from, wr.plays_left)
-	end
-	refresh()
-end
-
-function M.add_play()
-	local wr = G.GAME.word_round
-	if not wr then return end
-	wr.plays_left = (wr.plays_left or 0) + 1
-	wr.words_left = wr.plays_left
-	refresh()
-end
-
 function M.hand_cleared()
 	return (G.GAME.points or 0) >= (G.GAME.word_round and G.GAME.word_round.target or 0)
 end
-
-function M.out_of_plays()
-	return (G.GAME.word_round and G.GAME.word_round.plays_left or 0) <= 0
-end
-
-M.out_of_words = M.out_of_plays
 
 function M.is_final_hand()
 	local wr = G.GAME.word_round
@@ -213,17 +174,6 @@ function M.advance_hand()
 	M.start_hand(wr.set, wr.hand_index + 1)
 	return "next"
 end
-
-function M.unused_play_payout()
-	local wr = G.GAME.word_round
-	if not wr then return 0 end
-	local unused = wr.plays_left or 0
-	local points = economy.hand_payout(unused)
-	state.earn(points)
-	return points
-end
-
-M.unused_word_payout = M.unused_play_payout
 
 function M.display_hand_name()
 	local wr = G.GAME.word_round

@@ -91,18 +91,6 @@ function M.apply_choice(perk)
 	return true
 end
 
-function M.apply_showdown_bonus(perk)
-	local wr = G.GAME and G.GAME.word_round
-	if not wr or not perk then return end
-	local bonus = cfg.SHOWDOWN_BONUSES[perk.id]
-	if bonus == "plays" then
-		wr.plays_left = (wr.plays_left or 0) + 1
-		wr.words_left = wr.plays_left
-	elseif bonus == "redraws" then
-		wr.redraws_left = (wr.redraws_left or 0) + 1
-	end
-end
-
 function M.pool_candidate(center, used_perks, shop_cards)
 
 	if not center or center.set ~= "Perk" then return false end

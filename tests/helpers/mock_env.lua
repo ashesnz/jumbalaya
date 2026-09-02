@@ -302,7 +302,6 @@ function M.reset_game()
 		word_round = {
 			set = 1,
 			hand_index = 1,
-			plays_left = 6,
 			played_words = {},
 		},
 	}

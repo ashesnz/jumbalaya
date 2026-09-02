@@ -21,6 +21,7 @@ require "app.core.platform.display"
 require "app.core.audio.sound"
 require "word_game.ui.number_format"
 require "word_game.model.profile_stats"
+require "word_game.ui.colour"
 require "word_game.ui.localize"
 
 require "app.core.ui.panel"

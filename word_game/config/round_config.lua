@@ -1,9 +1,7 @@
 --[[ word_game/config/round_config.lua - Set / Hand targets and play limits ]]
 
 local M = {
-	PLAYS_PER_HAND = 6,
 	HAND_SIZE = 7,
-	REDRAWS_PER_HAND = 3,
 	SETS_TO_WIN = 8,
 	MIN_WORD_LEN = 3,
 	MAX_WORD_LEN = 7,
@@ -108,19 +106,6 @@ function M.is_final_hand(set, hand_index)
 	set = set or 1
 	hand_index = hand_index or 1
 	return set >= M.SETS_TO_WIN and hand_index >= M.hands_in_set(set)
-end
-
--- Sets 1–3 showdown hands used to gate the early perk marketplace (removed).
-function M.is_early_showdown(set, hand_index)
-	return false
-end
-
-function M.is_perk_hand(set, hand_index)
-	return false
-end
-
-function M.is_perk_market_after(set, hand_index)
-	return false
 end
 
 function M.is_stage3_cinematic_hand(set, hand_index)

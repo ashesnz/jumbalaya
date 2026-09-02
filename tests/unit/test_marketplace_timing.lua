@@ -1,17 +1,9 @@
---[[ tests/unit/test_marketplace_timing.lua - Stage progression and marketplace timing ]]
+--[[ tests/unit/test_marketplace_timing.lua - Stage progression timing ]]
 
 local T = require("tests.framework")
 
-T.describe("Marketplace transition timing", function()
-	local round_config = require("word_game.config.round_config")
+T.describe("Stage progression timing", function()
 	local round = require("word_game.model.round")
-
-	T.it("does not open the perk marketplace after showdown hands", function()
-		T.assert_false(round_config.is_perk_market_after(1, 2))
-		T.assert_false(round_config.is_perk_market_after(1, 3))
-		T.assert_false(round_config.is_perk_market_after(1, 1))
-		T.assert_false(round_config.is_perk_market_after(2, 2))
-	end)
 
 	T.it("advances from stage 1-4 to 1-5", function()
 		G.GAME = G.GAME or {}
