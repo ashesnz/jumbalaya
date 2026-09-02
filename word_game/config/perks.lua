@@ -1,11 +1,9 @@
---[[ word_game/config/perks.lua - Perk pool for the showdown marketplace ]]
+--[[ word_game/config/perks.lua - Perk pool for stamp rewards ]]
 
 local dimensions = require("word_game.config.dimensions")
 
 local M = {}
 
-M.DEFAULT_OFFER_COUNT = 3
-M.DEFAULT_TOKEN_COST = 10
 M.RANDOM_SEED_PREFIX = "perk_pick_"
 M.SLOT_COUNT = 12
 

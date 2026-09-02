@@ -11,18 +11,6 @@ local M = {
 		[1] = 9,
 	},
 
-	-- GDD length table: flat AP bonus and base Boost
-	LENGTH = {
-		[3] = { ap = 10, boost = 1 },
-		[4] = { ap = 20, boost = 2 },
-		[5] = { ap = 35, boost = 3 },
-		[6] = { ap = 50, boost = 5 },
-		[7] = { ap = 80, boost = 8, sweep_ap = 50 },
-	},
-
-	SWEEP_BOOST = 8,
-	GRAND_SLAM_BOOST = 12,
-
 	HAND_CYCLE = { "Standard", "Standard", "Showdown" },
 
 	HAND_TARGETS = {
@@ -44,10 +32,6 @@ local M = {
 	-- Set 1 hand 7: Milo + Aleisha stay left, boss drops, Marco joins.
 	MARCO_CINEMATIC = { set = 1, hand = 7 },
 }
-
-function M.length_bonus(len)
-	return M.LENGTH[len] or M.LENGTH[M.MAX_WORD_LEN]
-end
 
 function M.hands_in_set(set)
 	set = set or 1

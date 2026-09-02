@@ -25,8 +25,6 @@ function Game:start_gameplay_board()
 
     G.GAME.round = 1
     G.GAME.round_resets.ante = G.GAME.round_resets.ante or 1
-    G.GAME.current_round.hands_left = G.GAME.round_resets.hands
-    G.GAME.current_round.hands_played = 0
 
     G.STATE = G.STATES.TABLE_BOARD
     G.STATE_COMPLETE = true
@@ -82,20 +80,11 @@ function Game:init_game_object()
             times_rerolled = {label = 'Times Rerolled', amt = 0},
         },
         tile_usage = {},
-        usable_usage = {},
-        usable_usage_total = {
-            orbit = 0,
-            phantom = 0,
-            all = 0,
-        },
-        hand_usage = {},
-        stake = 1,
         modifiers = {},
         starting_params = require("word_game.config.run_params").get(),
         round = 0,
         seed_streams = {},
         starting_deck_size = 12,
-        STOP_USE = 0,
         points = 0,
         current_round = {
             current_hand = {
@@ -166,8 +155,6 @@ function Game:start_run(args)
     RunScope.begin_run(game_table, { from_save = saveTable ~= nil })
     self.GAME = G.GAME
     self.GAME.modifiers = self.GAME.modifiers or {}
-    self.GAME.stake = 1
-    self.GAME.STOP_USE = 0
     self.GAME.selected_back = WORD_GAME.Back.new(selected_back)
     self.GAME.selected_back_key = selected_back
 
@@ -180,7 +167,6 @@ function Game:start_run(args)
 
     if not saveTable then 
         self.GAME.selected_back:apply_to_run()
-        self.GAME.round_resets.hands = self.GAME.starting_params.hands
     end
 
     G.GAME.chips_text = ''
@@ -289,7 +275,6 @@ function Game:start_run(args)
     Scheduler.delayed{delay = 0.5}
 
     if not saveTable then
-        G.GAME.current_round.hands_left = G.GAME.round_resets.hands
         self.deck:shuffle()
         self.deck:hard_set_T()
     end

@@ -11,9 +11,7 @@ end
 function InputRouter:queue_R_cursor_press(x, y)
 	if self.locks.frame then return end
 	if not G.SETTINGS.paused and G.hand and G.hand.selected[1] then
-		if self.locked
-			or self.locks.frame
-			or (G.GAME.STOP_USE and G.GAME.STOP_USE > 0) then
+		if self.locked or self.locks.frame then
 			return
 		end
 		G.hand:clear_selection()
