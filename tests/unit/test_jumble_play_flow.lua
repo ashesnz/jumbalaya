@@ -70,6 +70,7 @@ T.describe("Jumble play flow integration", function()
 		local round = require("word_game.model.round")
 
 		local deck_cards = {}
+		G.playing_cards = deck_cards
 		G.deck = {
 			cards = deck_cards,
 			config = { card_limit = 52 },

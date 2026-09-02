@@ -189,12 +189,12 @@ T.describe("Vault deck information", function()
 		T.assert_equal(G.GAME.deck_left_count, 4, "Sync should reflect deck changes after a draw")
 	end)
 
-	T.it("returns played cards to the deck during jumble word plays", function()
+	T.it("sends played cards to the discard pile during jumble word plays", function()
 		local effects = require("word_game.ui.play_effects")
 		G.GAME = G.GAME or {}
 		G.GAME.deck_left_count = 5
-		G.deck = {
-			cards = { {}, {}, {}, {}, {} },
+		G.discard = {
+			cards = {},
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 		}
 		local destroyed = 0
@@ -215,8 +215,7 @@ T.describe("Vault deck information", function()
 		G.TIMELINE = orig_manager
 		deck.destroy_card = orig_destroy
 		T.assert_equal(destroyed, 0, "Jumble word plays should not destroy used cards")
-		T.assert_equal(#G.deck.cards, 6, "Used cards should return to the deck pile")
-		T.assert_equal(G.GAME.deck_left_count, 6, "Cards-left display should include returned cards")
+		T.assert_equal(#G.discard.cards, 1, "Used cards should go to the discard pile")
 		T.assert_false(card.REMOVED, "Returned cards should remain active")
 	end)
 
@@ -347,7 +346,7 @@ T.describe("Vault deck information", function()
 			G.deck.cards[#G.deck.cards + 1] = G.playing_cards[i]
 		end
 		G.placement_table = { area = { cards = {} } }
-		T.assert_equal(deck.cards_left(), 5, "Cards left should be total pool minus hand")
+		T.assert_equal(deck.cards_left(), 5, "Cards left should be pool size minus hand size")
 		T.assert_equal(deck.draw_pile_count(), 5, "Draw pile should still track physical deck cards")
 
 		G.hand.cards[#G.hand.cards + 1] = table.remove(G.deck.cards)
@@ -401,7 +400,7 @@ T.describe("Vault deck information", function()
 		T.assert_equal(#G.discard.cards, 0, "Discard pile should be empty after recycle")
 		T.assert_equal(#G.hand.cards, 7, "Player should receive a full hand of seven cards")
 		T.assert_equal(#G.deck.cards, 5, "Remaining cards should stay in the deck")
-		T.assert_equal(deck.cards_left(), 5, "Cards left should be pool minus the new hand")
+		T.assert_equal(deck.cards_left(), 5, "Cards left should be pool size minus hand size")
 
 		WORD_GAME.Jumble = orig_jumble
 	end)

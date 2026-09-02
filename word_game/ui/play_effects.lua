@@ -201,8 +201,8 @@ function M.run_card_return_sequence(used_cards, on_after, return_to_deck)
 						boss_word_stack.consume_card(card)
 					elseif return_to_deck then
 						card.REMOVED = nil
-						if G.deck and G.deck.emplace then
-							G.deck:emplace(card)
+						if G.discard and G.discard.emplace then
+							G.discard:emplace(card)
 						end
 						deck.sync_deck_count_display()
 					else
@@ -234,8 +234,8 @@ local function finish_used_card(card, return_to_deck)
 		boss_word_stack.consume_card(card)
 	elseif return_to_deck then
 		card.REMOVED = nil
-		if G.deck and G.deck.emplace then
-			G.deck:emplace(card)
+		if G.discard and G.discard.emplace then
+			G.discard:emplace(card)
 		end
 	else
 		deck.destroy_card(card)
