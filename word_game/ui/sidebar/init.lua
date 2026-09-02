@@ -52,6 +52,7 @@ function WordSidebar:ensure()
 	if G.VAULT_HUD then
 		deck.sync_deck_count_display()
 		WordSidebar.sync_action_buttons()
+		hud_definition.sync_discard_row()
 		return G.VAULT_HUD
 	end
 
@@ -67,6 +68,7 @@ function WordSidebar:ensure()
 	})
 	G.VAULT_HUD:recalculate()
 	G.word_sidebar_uibox = G.VAULT_HUD
+	hud_definition.sync_discard_row()
 	WordSidebar.sync_action_buttons()
 	Layout.set_screen_positions()
 	return G.VAULT_HUD

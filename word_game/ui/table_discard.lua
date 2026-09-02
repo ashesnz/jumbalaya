@@ -51,9 +51,62 @@ function M.is_full()
 	return read_count() >= M.MAX_FILLS
 end
 
---- Sprite index 0–3 for the current bin fill level (0 = empty, top-left).
+function M.should_show_end_run()
+	return M.is_full()
+end
+
+function M.hide_bin_cards()
+	if not G.discard or not G.discard.cards then return end
+	for _, card in ipairs(G.discard.cards) do
+		if card and not card.played_pool and card.states then
+			card.states.visible = false
+		end
+	end
+end
+
+function M.sync_vault_ui()
+	if M.should_show_end_run() then
+		M.hide_bin_cards()
+	end
+	local hud = require("word_game.ui.sidebar.hud_definition")
+	if hud.sync_discard_row then
+		hud.sync_discard_row()
+	end
+end
+
+function M.end_run()
+	if not M.is_full() then return false end
+	if G.GAME and (G.GAME.word_score_animating or G.GAME.hand_redraw_animating
+		or G.GAME.hand_shuffle_animating or G.GAME.placement_recall_animating) then
+		return false
+	end
+	if WORD_GAME and WORD_GAME.PlayHoldRedraw and WORD_GAME.PlayHoldRedraw.is_animating() then
+		return false
+	end
+	if type(delete_saved_run) == "function" then
+		delete_saved_run()
+	end
+	local alpha = require("word_game.model.state").get()
+	if alpha then
+		alpha.match_over = true
+		alpha.match_won = false
+	elseif G.GAME then
+		G.GAME.alpha = G.GAME.alpha or {}
+		G.GAME.alpha.match_over = true
+		G.GAME.alpha.match_won = false
+	end
+	if G.SETTINGS then
+		G.SETTINGS.paused = true
+	end
+	G.STATE = G.STATES.GAME_OVER
+	G.STATE_COMPLETE = false
+	return true
+end
+
+--- Sprite index 0–2 while the bin is active (never show the full-bin frame).
 function M.sprite_frame()
-	return math.min(read_count(), M.MAX_FILLS)
+	if M.should_show_end_run() then return 0 end
+	return math.min(read_count(), M.MAX_FILLS - 1)
 end
 
 --- Row-major cell in the 2×2 sheet for `frame` (0 = top-left).
@@ -172,7 +225,7 @@ local function draw_bin(area, ts)
 end
 
 function M.draw(area)
-	if not area then return end
+	if not area or M.should_show_end_run() then return end
 	local ts = G.TILESCALE * G.TILESIZE
 	draw_bin(area, ts)
 end

@@ -3,6 +3,8 @@
 local Layout = require("word_game.ui.layout")
 local deck = require("word_game.model.cards.deck")
 local stamp_grid = require("word_game.ui.stamp_grid")
+local Components = require("word_game.ui.widgets.components")
+local table_discard = require("word_game.ui.table_discard")
 
 local M = {}
 
@@ -67,6 +69,30 @@ local function deck_count_node(box_w)
 	}}
 end
 
+local function set_node_visible(node, visible)
+	if not node then return end
+	if node.states then
+		node.states.visible = visible
+	end
+	if node.config then
+		node.config.visible = visible
+	end
+end
+
+function M.sync_discard_row()
+	if not G.VAULT_HUD then return end
+	local show_end = table_discard.should_show_end_run()
+	local end_btn = G.VAULT_HUD:find_node_by_id("end_run_button")
+	set_node_visible(end_btn, show_end)
+	if G.discard and G.discard.states then
+		local can_bin = table_discard.uses_table_draw() and not show_end
+		G.discard.states.collide.can = can_bin
+		G.discard.states.hover.can = can_bin
+		G.discard.states.release_on.can = can_bin
+	end
+	G.VAULT_HUD:recalculate()
+end
+
 function M.sync_action_buttons()
 	if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync then
 		WORD_GAME.HandShuffle.sync()
@@ -115,7 +141,16 @@ function M.hud_definition()
 				minh = dh,
 				maxh = dh,
 			}, nodes = {
-				{ n = G.UI.BOX, config = { w = dw, h = dh } },
+				Components.button({
+					id = "end_run_button",
+					onClick = "end_run_from_discard_bin",
+					label = { "End Run" },
+					colour = G.C.RED,
+					width = dw,
+					height = dh * 0.88,
+					textSize = 0.34,
+					focus_args = { nav = "wide", snap_to = true },
+				}),
 			}}
 		end)(),
 		{ n = G.UI.ROW, config = {
@@ -179,6 +214,7 @@ function M.relayout_vault()
 	if stamp_slot then
 		stamp_slot.config.minh = stamp_slot_height()
 	end
+	M.sync_discard_row()
 	G.VAULT_HUD:recalculate()
 	if G.VAULT_ATTACH then
 		Layout.update_vault_attach()

@@ -8,7 +8,7 @@ local M = {}
 
 function M.update(self, dt)
 	if self ~= G.discard then return end
-	if table_discard.uses_table_draw() then
+	if table_discard.uses_table_draw() and not table_discard.should_show_end_run() then
 		self.states.collide.can = true
 		self.states.hover.can = true
 		self.states.release_on.can = true
@@ -30,6 +30,9 @@ end
 function M.draw_layer(self, v, draw_card_layer)
 	if self.config.type ~= "discard" then return end
 	if self == G.discard and table_discard.uses_table_draw() then
+		if table_discard.should_show_end_run() then
+			return
+		end
 		if v == "card" then
 			table_discard.draw(self)
 		end

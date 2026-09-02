@@ -12,9 +12,11 @@ function Game:update_match_end(dt)
 		play_sfx('whoosh2', 0.9, 0.7)
 
 		G.SETTINGS.paused = true
-		local overlay_def = build_game_over()
+		local overlay_def
 		if WORD_GAME and WORD_GAME.EndMatch and WORD_GAME.EndMatch.overlay_definition then
 			overlay_def = WORD_GAME.EndMatch.overlay_definition(false)
+		else
+			overlay_def = build_game_over()
 		end
 		G.FUNCS.show_overlay{
 			definition = overlay_def,

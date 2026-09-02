@@ -21,4 +21,10 @@ return function(sidebar, hud_definition)
 			WORD_GAME.PlayerHost.advance_stage3_ally()
 		end
 	end
+	G.FUNCS.end_run_from_discard_bin = function()
+		local table_discard = WORD_GAME and WORD_GAME.TableDiscard
+		if table_discard and table_discard.end_run then
+			table_discard.end_run()
+		end
+	end
 end

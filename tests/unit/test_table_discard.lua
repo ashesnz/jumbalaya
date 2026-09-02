@@ -65,18 +65,55 @@ T.describe("table discard bin", function()
 		T.assert_equal(row, 1)
 
 		T.assert_true(table_discard.record_discard())
-		T.assert_equal(table_discard.sprite_frame(), 3)
-		col, row = table_discard.sprite_cell(3)
-		T.assert_equal(col, 1, "frame 3 should be bottom-right")
-		T.assert_equal(row, 1)
+		T.assert_true(table_discard.should_show_end_run(), "third discard should swap bin for End Run")
+		T.assert_equal(table_discard.sprite_frame(), 0, "bin sprite should not show the full frame once End Run is active")
 
 		T.assert_false(table_discard.record_discard(), "fourth discard should be rejected")
 		T.assert_true(table_discard.is_full())
-		T.assert_equal(table_discard.sprite_frame(), 3, "sprite stays on full bin")
+		T.assert_true(table_discard.should_show_end_run(), "sprite stays replaced by End Run")
 
 		table_discard.reset()
+		T.assert_false(table_discard.should_show_end_run())
 		T.assert_equal(table_discard.sprite_frame(), 0, "reset returns to empty bin")
 		T.assert_false(table_discard.is_full())
+	end)
+
+	T.it("offers End Run instead of the full bin sprite after three discards", function()
+		local table_discard = require("word_game.ui.table_discard")
+		table_discard.reset()
+		table_discard.record_discard()
+		table_discard.record_discard()
+		T.assert_false(table_discard.should_show_end_run())
+		table_discard.record_discard()
+		T.assert_true(table_discard.should_show_end_run())
+		T.assert_false(table_discard.uses_table_draw() and not table_discard.should_show_end_run(), "bin draw should be off once full")
+	end)
+
+	T.it("end_run triggers game over when the bin is full", function()
+		MockEnv.setup()
+		local table_discard = require("word_game.ui.table_discard")
+		G.STATES.GAME_OVER = 4
+		table_discard.reset()
+		for _ = 1, 3 do
+			table_discard.record_discard()
+		end
+		G.GAME = G.GAME or {}
+		G.GAME.alpha = { match_over = false, match_won = false }
+		G.GAME.word_score_animating = false
+		G.GAME.hand_redraw_animating = false
+		G.GAME.hand_shuffle_animating = false
+		G.GAME.placement_recall_animating = false
+		G.RUN = { active = true }
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.PlayHoldRedraw = { is_animating = function() return false end }
+		G.STATE = G.STATES.TABLE_BOARD
+		G.STATE_COMPLETE = true
+		T.assert_true(table_discard.end_run())
+		T.assert_equal(G.STATE, G.STATES.GAME_OVER)
+		T.assert_equal(G.GAME.alpha.match_over, true)
+		T.assert_equal(G.GAME.alpha.match_won, false)
+		T.assert_equal(G.STATE_COMPLETE, false)
+		MockEnv.reset_game()
 	end)
 
 	T.it("sprite viewport covers one sheet cell, not the full atlas", function()

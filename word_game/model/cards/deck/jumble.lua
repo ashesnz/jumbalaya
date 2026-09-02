@@ -390,6 +390,13 @@ return function(context)
 		if table_discard and table_discard.record_discard then
 			table_discard.record_discard()
 		end
+		local bin_now_full = table_discard and table_discard.is_full and table_discard.is_full()
+		if bin_now_full and card and card.states then
+			card.states.visible = false
+		end
+		if table_discard and table_discard.sync_vault_ui then
+			table_discard.sync_vault_ui()
+		end
 
 		if G.TIMELINE and G.TIMELINE.enqueue then
 			CardMotion.move{
@@ -406,6 +413,9 @@ return function(context)
 				delay = 0.22,
 				blocking = true,
 				func = function()
+					if bin_now_full and card and card.states then
+						card.states.visible = false
+					end
 					after_discard()
 					return true
 				end,

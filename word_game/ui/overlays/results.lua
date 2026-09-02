@@ -85,7 +85,9 @@ function build_game_over()
   local show_lose_cta = false
 
 
-  local eased_red = deep_clone(G.GAME.round_resets.ante <= G.GAME.win_ante and G.C.RED or G.C.BLUE)
+  local ante = (G.GAME.round_resets and G.GAME.round_resets.ante) or 0
+  local win_ante = G.GAME.win_ante or ante
+  local eased_red = deep_clone(ante <= win_ante and G.C.RED or G.C.BLUE)
   eased_red[4] = 0
   Easing.value{ref_table = eased_red, ref_value = 4, mod = 0.8, not_blockable = true}
   local t = build_generic_options({ bg_colour = eased_red ,no_back = true, padding = 0, contents = {
