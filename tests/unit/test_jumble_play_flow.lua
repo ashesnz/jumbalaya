@@ -70,7 +70,8 @@ T.describe("Jumble play flow integration", function()
 		local round = require("word_game.model.round")
 
 		local deck_cards = {}
-		G.playing_cards = deck_cards
+		local playing_cards = {}
+		G.playing_cards = playing_cards
 		G.deck = {
 			cards = deck_cards,
 			config = { card_limit = 52 },
@@ -78,6 +79,7 @@ T.describe("Jumble play flow integration", function()
 				table.insert(self.cards, card)
 			end,
 		}
+		G.RUN = { active = true }
 		G.GAME.deck_left_count = 0
 
 		G.GAME.alpha = {
@@ -95,6 +97,7 @@ T.describe("Jumble play flow integration", function()
 		local ok, card = trade.add_letter({ letter = "Z", color = "red" })
 		T.assert_true(ok, "Drafting letter Z should succeed")
 		T.assert_equal(#G.deck.cards, initial_count + 1, "Deck should have 1 additional card")
+		T.assert_equal(#G.playing_cards, 1, "Playing cards should track the drafted card")
 		T.assert_equal(G.deck.cards[#G.deck.cards].ability.letter, "Z")
 		T.assert_equal(G.GAME.deck_left_count, #G.deck.cards, "Adding a card should update the deck count")
 
@@ -124,11 +127,18 @@ T.describe("Jumble play flow integration", function()
 		local deck = require("word_game.model.cards.deck")
 		local cards = {}
 		G.playing_cards = {}
+		G.RUN = { active = true }
 		G.deck = {
 			cards = cards,
 			config = {},
 			emplace = function(self, card) table.insert(self.cards, card) end,
-			remove_card = function(self) return table.remove(self.cards) end,
+			remove_card = function(self, card)
+				for i, c in ipairs(self.cards) do
+					if c == card then
+						return table.remove(self.cards, i)
+					end
+				end
+			end,
 			shuffle = function() end,
 			hard_set_T = function() end,
 		}
@@ -136,9 +146,39 @@ T.describe("Jumble play flow integration", function()
 			cards = {},
 			config = {},
 			emplace = function(self, card) table.insert(self.cards, card) end,
+			remove_card = function(self, card)
+				for i, c in ipairs(self.cards) do
+					if c == card then
+						return table.remove(self.cards, i)
+					end
+				end
+			end,
 			set_ranks = function() end,
 			relayout = function() end,
 			snap_VT = function() end,
+			hard_set_cards = function() end,
+		}
+		G.discard = {
+			cards = {},
+			remove_card = function(self, card)
+				for i, c in ipairs(self.cards) do
+					if c == card then
+						return table.remove(self.cards, i)
+					end
+				end
+			end,
+			hard_set_cards = function() end,
+		}
+		G.placement_table = G.placement_table or {}
+		G.placement_table.area = {
+			cards = {},
+			remove_card = function(self, card)
+				for i, c in ipairs(self.cards) do
+					if c == card then
+						return table.remove(self.cards, i)
+					end
+				end
+			end,
 			hard_set_cards = function() end,
 		}
 		G.GAME = G.GAME or {}

@@ -311,7 +311,9 @@ end
 
 function M.refresh_placement_layout()
 	if G.STAGE ~= G.STAGES.RUN or not G.placement_table then return end
-	G.placement_table:apply_screen_position()
+	if G.placement_table.apply_screen_position then
+		G.placement_table:apply_screen_position()
+	end
 	local placement = G.placement_table.area
 	if placement then
 		placement:snap_VT()

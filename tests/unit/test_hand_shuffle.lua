@@ -30,6 +30,8 @@ local function setup_hand_shuffle_env()
 	G.placement_table = G.placement_table or { area = { cards = {} } }
 	G.GAME = G.GAME or {}
 	G.GAME.alpha = G.GAME.alpha or {}
+	G.ARGS = G.ARGS or {}
+	G.ARGS.pending_layout = false
 	WORD_GAME = WORD_GAME or {}
 	WORD_GAME.Jumble = {
 		is_active = function() return false end,

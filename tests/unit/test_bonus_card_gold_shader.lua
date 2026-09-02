@@ -295,9 +295,10 @@ T.describe("bonus card gold visuals", function()
 			},
 			ARGS = {},
 		}
-		card.children.center.apply_shader_effect = function(_, shader)
+		card.children.center.apply_shader_effect = function(_, shader, ...)
 			if shader == "dissolve" then
-				center_dissolve_tint = G.OVERLAY_TINT
+				local args = { ... }
+				center_dissolve_tint = args[11] or G.OVERLAY_TINT
 			end
 			shader_calls[#shader_calls + 1] = "center:" .. shader
 		end

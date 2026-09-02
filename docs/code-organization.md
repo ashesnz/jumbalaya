@@ -53,7 +53,7 @@ Callbacks are grouped by responsibility under `app/callbacks/` and `word_game/ui
 | Settings, text input, overlays, run lifecycle | `app/callbacks/settings.lua` |
 | Shared timed effects | `app/callbacks/effects.lua` |
 | Card tooltips | `word_game/ui/card_tooltip.lua` |
-| Screen wipe transitions | `app/screen_wipe.lua` |
+| Screen wipe transitions | `app/screen_wipe.lua` (`G:queue_during_wipe`, `G:queue_wipe_transition`) |
 
 `app/bootstrap.lua` loads callbacks in dependency order and wires `Controller._input_actions` from `app/input_actions.lua` so `app/runtime/controller.lua` does not require application code.
 
@@ -82,6 +82,10 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `TimelineTimer` | 60s fuse HUD |
 | `TokenReward` | 1-1 token fly animations |
 | `HandShuffle` / `PlayHoldRedraw` | Shuffle + Play buttons, hold-to-redraw |
+| `HandSize` | `get()` — single hand-size accessor for dealing and layout |
+| `InputLock` | `is_table_busy()` — shared animation/input gate |
+| `Match` | `end_run()` — centralized discard-bin surrender / game-over transition |
+| `TableDiscard` | Discard bin state, eligibility, HUD sync |
 | `TradeUI` / `PerkStamp` | Marketplace and perk stamp overlays |
 | `Sidebar` | Vault HUD (stamps, deck) |
 | Hosts / portraits / overlays | `PlayerHost`, `AllyHost`, `GuestHost`, `PlayerPortrait`, `CardInspect`, `CardHover`, `Confetti`, `FloatUpText`, `HandClearFocus`, `EndMatch`, `TableDeck` |
@@ -96,7 +100,8 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 
 | File | Purpose |
 |------|---------|
-| `round_config.lua` | 8×3 hand targets, showdown/perk/cinematic flags |
+| `round_config.lua` | Hand targets, `DISCARDS_PER_HAND`, `TIMELINE_SECONDS`, showdown/cinematic flags |
+| `hand_size.lua` | Authoritative jumble hand size (`hand_size.get()` → `G.TABLE_HAND_SIZE` or 7) |
 | `jumble.lua` | Letter pool (AERTNLS), deck copies, disabled 30s timer flag |
 | `jumble_puzzles.lua` | Router for the 24 stage modules |
 | `jumble_puzzles/*.lua` | Individual stage pattern tables such as `1_1.lua` |
@@ -110,11 +115,13 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `jumble/` | Puzzle spec, slot topology, validation, slots, and hand lifecycle |
 | `play/` | Play-button orchestration (`play_word`, jumble bank/advance, hand clear) |
 | `placement_word.lua` | `G.GAME.placement_word` / `placement_word_valid` from cards or jumble slots |
-| `round.lua` | `start_hand` → `jumble.start_hand`, advance set/hand |
+| `round.lua` | `start_hand` → `jumble.start_hand`, advance set/hand, `reset_timeline()` |
+| `input_lock.lua` | Animation-busy gate for play/discard/drag |
+| `match.lua` | Match-end / game-over transition from discard bin |
 | `profile_stats.lua` | Profile stats, discovery tallies, career stats, input locks |
 | `deck/jumble.lua` | Populate jumble deck, `deal_jumble_hand` |
 | `deck/dealing.lua` | Animated `deal_into_hand` (one card at a time) |
-| `perk.lua` | Offer roll, purchase, apply (partial) |
+| `perk.lua` | Stamp roll, apply choice, selection |
 | `state.lua` | Match persistence, `alpha.tokens` |
 
 ### Cards (`word_game/model/cards/`)

@@ -3,15 +3,16 @@
 local config = require "word_game.board.config"
 local topology = require "word_game.model.jumble.slot_topology"
 
+local hand_size_cfg = require("word_game.config.hand_size")
+
 local M = {}
 
 local SPAN_HAND_GAP = 0.7
 local SPAN_SLOT_GAP = 0.07
 local SPAN_SLOT_SPACING = 1.0 + SPAN_SLOT_GAP
-local STANDARD_ROW_SLOTS = 7
 
 local function row_slot_cap()
-	return (G and G.TABLE_HAND_SIZE) or STANDARD_ROW_SLOTS
+	return hand_size_cfg.get()
 end
 
 local function jumble_state()

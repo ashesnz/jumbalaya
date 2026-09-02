@@ -8,33 +8,47 @@ Jumbalaya is a roguelike **jumble** word game: pattern puzzles, a **points × mu
 
 ## Match structure
 
-A **match** (run) is a sequence of **sets**. Each set has exactly **3 hands**:
+A **match** (run) is a sequence of **sets**. **Set 1** is a nine-hand tutorial arc (`1-1` … `1-9`); sets **2–8** each have **3 hands** (two Standard, one Showdown).
 
-| Hand index | Type | Label |
-|-----------:|------|-------|
-| 1 | Standard | Standard Hand |
-| 2 | Standard | Standard Hand |
-| 3 | Showdown | Showdown Hand |
+| Set | Hands | Notes |
+|----:|------:|-------|
+| 1 | 9 | Tutorial arc: token reward, boss intro, bonus-stack gutter, Marco cinematic |
+| 2–8 | 3 each | Standard → Standard → Showdown |
 
-- **Win** by clearing the Showdown on **set 8**.
-- Progress is shown as **set-hand** (e.g. `1-3` = set 1, showdown).
+- **Win** by clearing the Showdown on **set 8** (`1-9` in set 1 is the final Showdown there).
+- Progress is shown as **set-hand** (e.g. `1-3` = set 1, hand 3).
 
 Every stage in sets 1–8 runs in **jumble mode** (`word_game/model/jumble.lua` → `is_active_hand`).
 
 ### Hand targets
 
-Each stage has a score **target**. Banked puzzle totals must reach or exceed it.
+Each stage has a score **target**. Banked puzzle totals must reach or exceed it. Values live in `word_game/config/round_config.lua` → `HAND_TARGETS` and are read through `round_config.hand_target(set, hand)`.
+
+**Set 1** (tutorial):
+
+| Hand | Target |
+|-----:|-------:|
+| 1-1 | 2 |
+| 1-2 | 2 |
+| 1-3 | 2 |
+| 1-4 | 150 |
+| 1-5 | 20 |
+| 1-6 | 30 |
+| 1-7 | 40 |
+| 1-8 | 50 |
+| 1-9 | 60 |
+
+**Sets 2–8** (three hands each):
 
 | Set | Hand 1 | Hand 2 | Showdown |
 |----:|-------:|-------:|---------:|
-| 1 | 20 | 40 | 50 |
-| 2 | 100 | 140 | 175 |
-| 3 | 200 | 280 | 350 |
-| 4 | 400 | 560 | 700 |
-| 5 | 800 | 1,120 | 1,400 |
-| 6 | 1,600 | 2,240 | 2,800 |
-| 7 | 3,200 | 4,480 | 5,600 |
-| 8 | 6,400 | 8,960 | 11,200 |
+| 2 | 400 | 560 | 700 |
+| 3 | 800 | 1,120 | 1,400 |
+| 4 | 1,600 | 2,240 | 2,800 |
+| 5 | 3,200 | 4,480 | 5,600 |
+| 6 | 6,400 | 8,960 | 11,200 |
+| 7 | 12,800 | 17,920 | 22,400 |
+| 8 | 25,600 | 35,840 | 44,800 |
 
 From set 3 onward, each set **doubles** the previous row. Runs past set 8 keep doubling from the set 8 row (`round_config.hand_target`).
 
@@ -66,9 +80,9 @@ Continue puzzles / redraw hand
 When a new stage starts:
 
 - Jumble state resets (`puzzle_index`, `total_score`, current puzzle points/multiplier).
-- Timeline resets to **60 seconds** (except perk-hand pause — see below).
-- After hand 1 or 2: same set, next hand index.
-- After hand 3 (Showdown): next set, hand 1.
+- Timeline resets to **60 seconds** (`round_config.TIMELINE_SECONDS`; see `Round.reset_timeline()`).
+- Discard bin resets (`table_discard.reset()` — up to `round_config.DISCARDS_PER_HAND` fills per hand).
+- After the last hand in a set: next set, hand 1. Set 1 advances through all nine hands before set 2.
 
 ### After clearing a stage
 

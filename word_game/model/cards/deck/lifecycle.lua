@@ -32,9 +32,7 @@ return function(context)
 
 	 function M.draft_letter(letter, color)
 	 	G.deck.config = G.deck.config or {}
-		local card = M.create_letter_card(letter, color)
-		G.playing_cards = G.playing_cards or {}
-		G.playing_cards[#G.playing_cards + 1] = card
+	 local card = M.create_letter_card(letter, color)
 		G.deck:emplace(card)
 		G.deck.config.card_limit = (G.deck.config.card_limit or #M.STARTING_LETTERS) + 1
 		M.sync_deck_count_display()
