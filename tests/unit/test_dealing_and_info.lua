@@ -331,7 +331,7 @@ T.describe("Vault deck information", function()
 			"Stage 1-5 should start with the full deck count after repopulation")
 	end)
 
-	T.it("reports jumble cards left as pool size minus hand size", function()
+	T.it("reports jumble cards left as the physical draw pile count", function()
 		G.GAME.word_round = { mode = "jumble", set = 1, hand_index = 1 }
 		G.playing_cards = {}
 		for i = 1, 12 do
@@ -346,13 +346,55 @@ T.describe("Vault deck information", function()
 			G.deck.cards[#G.deck.cards + 1] = G.playing_cards[i]
 		end
 		G.placement_table = { area = { cards = {} } }
-		T.assert_equal(deck.cards_left(), 5, "Cards left should be pool size minus hand size")
-		T.assert_equal(deck.draw_pile_count(), 5, "Draw pile should still track physical deck cards")
+		T.assert_equal(deck.cards_left(), 5, "Cards left should match cards still in the draw pile")
+		T.assert_equal(deck.draw_pile_count(), 5, "Draw pile should track physical deck cards")
 
 		G.hand.cards[#G.hand.cards + 1] = table.remove(G.deck.cards)
 		deck.sync_deck_count_display()
 		T.assert_equal(deck.cards_left(), 4, "Drawing into hand should decrement cards left")
 		T.assert_equal(G.GAME.deck_left_count, 4, "HUD counter should follow cards left")
+	end)
+
+	T.it("vault HUD cards-left matches the physical deck after jumble deal", function()
+		G.GAME.word_round = { mode = "jumble", set = 1, hand_index = 1 }
+		G.playing_cards = {}
+		G.deck = {
+			cards = {},
+			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
+			remove_card = function(self) return table.remove(self.cards) end,
+			config = {},
+			hard_set_T = function() end,
+		}
+		G.hand = {
+			cards = {},
+			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
+			set_ranks = function() end,
+			relayout = function() end,
+			snap_VT = function() end,
+			hard_set_cards = function() end,
+		}
+		G.discard = { cards = {} }
+		G.placement_table = { area = { cards = {} } }
+		local create_letter_card = deck.create_letter_card
+		deck.create_letter_card = function(letter, color)
+			return { ability = { letter = letter, letter_color = color } }
+		end
+		deck.populate_jumble_deck()
+		deck.create_letter_card = create_letter_card
+
+		-- Vault HUD is often built before the opening deal; a stale zero must refresh.
+		G.GAME.deck_left_count = 0
+		hud_definition.hud_definition()
+		T.assert_equal(G.GAME.deck_left_count, #deck.STARTING_LETTERS,
+			"HUD build should sync cards left to the full draw pile before dealing")
+
+		deck.deal_jumble_hand()
+		deck.sync_deck_count_display()
+		local expected = #G.deck.cards
+		T.assert_equal(G.GAME.deck_left_count, expected,
+			"HUD counter should match the physical draw pile after dealing")
+		T.assert_equal(deck.cards_left(), expected,
+			"cards_left should match the physical draw pile after dealing")
 	end)
 
 	T.it("reshuffles discard into deck and deals seven when hand and deck are empty", function()
@@ -400,7 +442,7 @@ T.describe("Vault deck information", function()
 		T.assert_equal(#G.discard.cards, 0, "Discard pile should be empty after recycle")
 		T.assert_equal(#G.hand.cards, 7, "Player should receive a full hand of seven cards")
 		T.assert_equal(#G.deck.cards, 5, "Remaining cards should stay in the deck")
-		T.assert_equal(deck.cards_left(), 5, "Cards left should be pool size minus hand size")
+		T.assert_equal(deck.cards_left(), 5, "Cards left should match the physical draw pile")
 
 		WORD_GAME.Jumble = orig_jumble
 	end)

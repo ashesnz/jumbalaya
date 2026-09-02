@@ -27,20 +27,7 @@ return function(context)
 		return 0
 	end
 
-	function M.jumble_pool_count()
-		local count = 0
-		for _, card in ipairs(G.playing_cards or {}) do
-			if card and not card.REMOVED and not card.boss_temp and not card.bonus_card then
-				count = count + 1
-			end
-		end
-		return count
-	end
-
 	function M.cards_left()
-		if M.is_jumble_deck and M.is_jumble_deck() then
-			return math.max(0, M.jumble_pool_count() - M.hand_card_count())
-		end
 		return M.draw_pile_count()
 	end
 

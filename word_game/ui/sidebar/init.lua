@@ -4,6 +4,7 @@ local Layout = require("word_game.ui.layout")
 local hud_definition = require("word_game.ui.sidebar.hud_definition")
 local hand_progress = require("word_game.ui.sidebar.hand_progress")
 local sidebar_callbacks = require("word_game.ui.sidebar.callbacks")
+local deck = require("word_game.model.cards.deck")
 
 local WordSidebar = {}
 
@@ -49,6 +50,7 @@ function WordSidebar:ensure()
 		self:destroy()
 	end
 	if G.VAULT_HUD then
+		deck.sync_deck_count_display()
 		WordSidebar.sync_action_buttons()
 		return G.VAULT_HUD
 	end

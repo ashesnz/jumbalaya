@@ -43,9 +43,7 @@ end
 
 local function deck_count_node(box_w)
 	G.GAME = G.GAME or {}
-	if G.GAME.deck_left_count == nil then
-		G.GAME.deck_left_count = deck.cards_left()
-	end
+	deck.sync_deck_count_display()
 	return { n = G.UI.ROW, config = {
 		align = "cm",
 		id = "row_deck_count",
