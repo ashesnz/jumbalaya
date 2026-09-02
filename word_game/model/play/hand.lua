@@ -107,7 +107,7 @@ local function play_hand_clear()
 	if WORD_GAME and WORD_GAME.Confetti then
 		WORD_GAME.Confetti.burst()
 	end
-	word_feedback.show("Hand Cleared", G.C.GREEN, 1.8, 0.15)
+	word_feedback.show("Hand Cleared", G.C.GOLD, 1.8, 0.15)
 	play_sfx("applause", 1, 0.9)
 	play_sfx("timpani", 0.92, 0.9)
 	play_sfx("card_tick", 0.6, 0.5)

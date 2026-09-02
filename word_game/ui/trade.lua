@@ -126,7 +126,7 @@ local function action_button_label_nodes(label, cost)
 			text = tostring(cost),
 			scale = BUTTON_LABEL_SCALE,
 			font = alpha_button_font(),
-			colour = G.C.GOLD or G.C.UI.BUTTON_TEXT,
+			colour = G.C.UI.BUTTON_TEXT,
 			shadow = true,
 		}},
 	}

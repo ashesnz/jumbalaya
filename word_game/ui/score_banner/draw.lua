@@ -290,21 +290,23 @@ function M.draw(sb)
 
 	if not sb.hide_points_to_get and not felt_layout.is_boss_sequence() then
 		local to_get_val = sb.points_to_get or (G.GAME and G.GAME.word_round and G.GAME.word_round.target) or 20
-		local to_get_txt = tostring(to_get_val) .. " Points to get"
-		local to_get_font_px = math.max(16, math.floor(h * 0.45))
-		local to_get_font = fonts.title_font(to_get_font_px)
-		love.graphics.setFont(to_get_font)
-		local to_get_tw = to_get_font:getWidth(to_get_txt)
-		local to_get_th = to_get_font:getHeight()
+		if to_get_val > 0 then
+			local to_get_txt = tostring(to_get_val) .. " Points to get"
+			local to_get_font_px = math.max(16, math.floor(h * 0.45))
+			local to_get_font = fonts.title_font(to_get_font_px)
+			love.graphics.setFont(to_get_font)
+			local to_get_tw = to_get_font:getWidth(to_get_txt)
+			local to_get_th = to_get_font:getHeight()
 
-		local to_get_cx, to_get_cy = sb.calc_points_to_get_pos(cx, ts)
-		local to_get_tx = to_get_cx - to_get_tw * 0.5
-		local to_get_ty = to_get_cy - to_get_th * 0.5
+			local to_get_cx, to_get_cy = sb.calc_points_to_get_pos(cx, ts)
+			local to_get_tx = to_get_cx - to_get_tw * 0.5
+			local to_get_ty = to_get_cy - to_get_th * 0.5
 
-		love.graphics.setColor(0.04, 0.08, 0.16, 0.75)
-		love.graphics.print(to_get_txt, to_get_tx + 1.5, to_get_ty + 1.5)
-		love.graphics.setColor(0.98, 0.96, 0.90, 1)
-		love.graphics.print(to_get_txt, to_get_tx, to_get_ty)
+			love.graphics.setColor(0.04, 0.08, 0.16, 0.75)
+			love.graphics.print(to_get_txt, to_get_tx + 1.5, to_get_ty + 1.5)
+			love.graphics.setColor(0.98, 0.96, 0.90, 1)
+			love.graphics.print(to_get_txt, to_get_tx, to_get_ty)
+		end
 	end
 
 	love.graphics.pop()

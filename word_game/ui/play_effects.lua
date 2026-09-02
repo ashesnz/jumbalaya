@@ -66,7 +66,11 @@ function M.roll_jumble_banners(result)
 			)
 		end
 	end
-	if WORD_GAME.ScoreBanner.roll_points_to_get then
+	if result.cleared then
+		if WORD_GAME.ScoreBanner.hide_points_to_get_display then
+			WORD_GAME.ScoreBanner.hide_points_to_get_display()
+		end
+	elseif WORD_GAME.ScoreBanner.roll_points_to_get then
 		WORD_GAME.ScoreBanner.roll_points_to_get(result.old_rem, result.new_rem, 0.4)
 	end
 end
