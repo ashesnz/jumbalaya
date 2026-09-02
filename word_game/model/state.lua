@@ -35,6 +35,7 @@ end
 
 function M.get()
 	if not G or not G.GAME then return nil end
+	if G.RUN and G.RUN.active == false then return nil end
 	G.GAME.alpha = G.GAME.alpha or M.new()
 	return G.GAME.alpha
 end

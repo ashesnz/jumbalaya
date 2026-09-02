@@ -32,8 +32,11 @@ return function(context)
 	end
 
 	function M.sync_deck_count_display()
+		local count = M.cards_left()
+		G.ARGS = G.ARGS or {}
+		G.ARGS.deck_left_count = count
 		if G.GAME then
-			G.GAME.deck_left_count = M.cards_left()
+			G.GAME.deck_left_count = count
 		end
 	end
 

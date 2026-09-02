@@ -197,4 +197,13 @@ function FloatUpText.draw_pass()
 	end
 end
 
+function FloatUpText.clear()
+	for i = #live, 1, -1 do
+		local item = live[i]
+		if item and item.remove then
+			item:remove()
+		end
+	end
+end
+
 return FloatUpText

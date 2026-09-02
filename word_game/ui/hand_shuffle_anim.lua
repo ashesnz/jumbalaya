@@ -188,4 +188,8 @@ function M.animate(hand, on_complete)
 	}
 end
 
+function M.reset()
+	animating = false
+end
+
 return M

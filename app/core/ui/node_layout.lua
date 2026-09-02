@@ -67,24 +67,25 @@ end
 --- Keeps bound text current: lazily builds the drawable, refreshes it when
 --- ref_table[ref_value] changes, recalculating the box when length changes.
 function LayoutNode:update_text()
+	if self.config.ref_table and self.config.ref_value
+		and self.config.ref_table[self.config.ref_value] ~= self.config.prev_value then
+		self.config.text = tostring(self.config.ref_table[self.config.ref_value])
+		if self.config.text_drawable and self.config.text_drawable.set then
+			self.config.text_drawable:set(self.config.text)
+		end
+		if not self.config.no_recalc and self.config.prev_value
+			and string.len(tostring(self.config.prev_value)) ~= string.len(self.config.text) then
+			self.LayoutView:recalculate()
+		end
+		self.config.prev_value = self.config.ref_table[self.config.ref_value]
+	end
+
 	if self.config and self.config.text and not self.config.text_drawable then
 		self.config.lang = self.config.lang or G.LANG
 		local font_obj = self.config.font or (self.config.lang and self.config.lang.font)
 		if love.graphics and love.graphics.newText and font_obj and font_obj.FONT then
 			self.config.text_drawable = love.graphics.newText(font_obj.FONT, {G.C.WHITE, self.config.text})
 		end
-	end
-
-	if self.config.ref_table and self.config.ref_table[self.config.ref_value] ~= self.config.prev_value then
-		self.config.text = tostring(self.config.ref_table[self.config.ref_value])
-		if self.config.text_drawable and self.config.text_drawable.set then
-			self.config.text_drawable:set(self.config.text)
-		end
-		if not self.config.no_recalc and self.config.prev_value
-			and string.len(self.config.prev_value) ~= string.len(self.config.text) then
-			self.LayoutView:recalculate()
-		end
-		self.config.prev_value = self.config.ref_table[self.config.ref_value]
 	end
 end
 

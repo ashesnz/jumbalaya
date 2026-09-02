@@ -183,10 +183,11 @@ T.describe("Vault deck information", function()
 		G.deck = { cards = { {}, {}, {}, {}, {} } }
 		G.hand = { cards = {} }
 		deck.sync_deck_count_display()
-		T.assert_equal(G.GAME.deck_left_count, 5, "Sync should publish the current deck size")
+		T.assert_equal(G.ARGS.deck_left_count, 5, "Sync should publish the current deck size")
 		G.deck.cards = { {}, {}, {}, {} }
 		deck.sync_deck_count_display()
-		T.assert_equal(G.GAME.deck_left_count, 4, "Sync should reflect deck changes after a draw")
+		T.assert_equal(G.ARGS.deck_left_count, 4, "Sync should reflect deck changes after a draw")
+		T.assert_equal(G.GAME.deck_left_count, 4, "G.GAME mirror should follow cards left")
 	end)
 
 	T.it("sends played cards to the discard pile during jumble word plays", function()
@@ -352,7 +353,8 @@ T.describe("Vault deck information", function()
 		G.hand.cards[#G.hand.cards + 1] = table.remove(G.deck.cards)
 		deck.sync_deck_count_display()
 		T.assert_equal(deck.cards_left(), 4, "Drawing into hand should decrement cards left")
-		T.assert_equal(G.GAME.deck_left_count, 4, "HUD counter should follow cards left")
+		T.assert_equal(G.ARGS.deck_left_count, 4, "HUD counter should follow cards left")
+		T.assert_equal(G.GAME.deck_left_count, 4, "G.GAME mirror should follow cards left")
 	end)
 
 	T.it("vault HUD cards-left matches the physical deck after jumble deal", function()
@@ -374,7 +376,7 @@ T.describe("Vault deck information", function()
 			hard_set_cards = function() end,
 		}
 		G.discard = { cards = {} }
-		G.placement_table = { area = { cards = {} } }
+		G.placement_table = { area = { cards = {}, hard_set_cards = function() end } }
 		local create_letter_card = deck.create_letter_card
 		deck.create_letter_card = function(letter, color)
 			return { ability = { letter = letter, letter_color = color } }
@@ -382,19 +384,80 @@ T.describe("Vault deck information", function()
 		deck.populate_jumble_deck()
 		deck.create_letter_card = create_letter_card
 
-		-- Vault HUD is often built before the opening deal; a stale zero must refresh.
-		G.GAME.deck_left_count = 0
+		G.ARGS = G.ARGS or {}
+		G.ARGS.deck_left_count = 0
 		hud_definition.hud_definition()
-		T.assert_equal(G.GAME.deck_left_count, #deck.STARTING_LETTERS,
+		T.assert_equal(G.ARGS.deck_left_count, #deck.STARTING_LETTERS,
 			"HUD build should sync cards left to the full draw pile before dealing")
+		T.assert_equal(G.GAME.deck_left_count, #deck.STARTING_LETTERS,
+			"G.GAME mirror should match the draw pile before dealing")
 
 		deck.deal_jumble_hand()
 		deck.sync_deck_count_display()
 		local expected = #G.deck.cards
-		T.assert_equal(G.GAME.deck_left_count, expected,
+		T.assert_equal(G.ARGS.deck_left_count, expected,
 			"HUD counter should match the physical draw pile after dealing")
+		T.assert_equal(G.GAME.deck_left_count, expected,
+			"G.GAME mirror should match the physical draw pile after dealing")
 		T.assert_equal(deck.cards_left(), expected,
 			"cards_left should match the physical draw pile after dealing")
+	end)
+
+	T.it("vault HUD text node reads G.ARGS even when G.GAME is replaced", function()
+		mock_env.ensure_engine_globals()
+		require("app.core.ui.panel")
+		G.LANG = G.LANG or {
+			font = {
+				FONT = love.graphics.newFont(12),
+				FONTSCALE = 0.12,
+				squish = 1,
+				TEXT_HEIGHT_SCALE = 0.7,
+				TEXT_OFFSET = { x = 0, y = 0 },
+			},
+		}
+		G.C.UI = G.C.UI or { TEXT_LIGHT = { 1, 1, 1, 1 } }
+		G.UI = G.UI or { ROOT = 1, ROW = 2, TEXT = 4 }
+		G.TILESCALE = G.TILESCALE or 1
+		G.TILESIZE = G.TILESIZE or 20
+		G.UI.padding = G.UI.padding or 0.1
+		G.VAULT_ATTACH = G.VAULT_ATTACH or { T = { x = 17, y = 0, w = 3, h = 10 } }
+
+		local stale_game = { deck_left_count = 0 }
+		G.GAME = stale_game
+		G.deck = { cards = { {}, {}, {}, {}, {} } }
+		G.hand = { cards = { {}, {}, {}, {}, {}, {}, {} } }
+		G.placement_table = { area = { cards = {} } }
+		deck.sync_deck_count_display()
+		T.assert_equal(G.ARGS.deck_left_count, 5, "Sync should publish the live draw pile count")
+
+		local view = LayoutView({
+			definition = hud_definition.hud_definition(),
+			config = {
+				align = "tri",
+				offset = { x = 0, y = 0 },
+				major = G.VAULT_ATTACH,
+			},
+		})
+		view:recalculate()
+
+		local text_node = view:find_node_by_id("text_deck_count")
+		T.assert_not_nil(text_node, "Vault HUD should contain the cards-left ref text node")
+		text_node:update_text()
+		T.assert_equal(text_node.config.text, "5",
+			"Rendered cards-left text should match the physical draw pile")
+
+		G.GAME = { deck_left_count = 0 }
+		text_node:update_text()
+		T.assert_equal(text_node.config.text, "5",
+			"Cards-left text must stay bound to G.ARGS when G.GAME is replaced")
+
+		G.deck.cards = { {}, {}, {} }
+		deck.sync_deck_count_display()
+		text_node:update_text()
+		T.assert_equal(text_node.config.text, "3",
+			"Cards-left text should refresh when the draw pile changes")
+
+		view:remove()
 	end)
 
 	T.it("reshuffles discard into deck and deals seven when hand and deck are empty", function()

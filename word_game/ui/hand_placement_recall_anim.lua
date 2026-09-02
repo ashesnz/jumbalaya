@@ -278,4 +278,8 @@ function M.animate(on_complete)
 	return true
 end
 
+function M.reset()
+	animating = false
+end
+
 return M

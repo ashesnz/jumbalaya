@@ -4,6 +4,17 @@
 
 local Layout = require "word_game.ui.layout"
 local Scheduler = require "app.effects.scheduler"
+local RunScope = require "word_game.model.run_scope"
+
+--- Tear down run-scoped UI and caches (delegates to RunScope).
+function Game:teardown_run_ui()
+	RunScope.teardown()
+end
+
+--- Reset G.ARGS fields that mirror per-run gameplay state for HUD/runtime glue.
+function Game:reset_run_args()
+	RunScope.reset_args()
+end
 
 function Game:start_gameplay_board()
     G.INPUT.locks.load = nil
@@ -29,6 +40,9 @@ function Game:start_gameplay_board()
 
     if G.FUNCS.ensure_table_board_sidebar then
         G.FUNCS.ensure_table_board_sidebar()
+    end
+    if WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.sync_deck_count_display then
+        WORD_GAME.Deck.sync_deck_count_display()
     end
    	if WORD_GAME and WORD_GAME.PlayerHost and WORD_GAME.PlayerHost.ensure then
         WORD_GAME.PlayerHost.ensure()
@@ -127,6 +141,11 @@ function Game:start_run(args)
     end
     G.STORED_RUN = nil
 
+    local viewed_back = self.GAME and self.GAME.viewed_back
+    local selected_back_name = self.GAME and self.GAME.selected_back and self.GAME.selected_back.name
+
+    self:teardown_run_ui()
+
     self:prep_stage(G.STAGES.RUN, saveTable and saveTable.STATE or G.STATES.TABLE_BOARD)
     
     G.STAGE = G.STAGES.RUN
@@ -141,11 +160,13 @@ function Game:start_run(args)
     end
 
     local selected_back = saveTable and saveTable.BACK.name
-        or (self.GAME and self.GAME.viewed_back and self.GAME.viewed_back.name)
-        or (self.GAME and self.GAME.selected_back and self.GAME.selected_back.name)
+        or (viewed_back and viewed_back.name)
+        or selected_back_name
         or 'Alpha Deck'
     selected_back = deck_center_from_name(selected_back)
-    self.GAME = saveTable and saveTable.GAME or self:init_game_object()
+    local game_table = saveTable and saveTable.GAME or self:init_game_object()
+    RunScope.begin_run(game_table, { from_save = saveTable ~= nil })
+    self.GAME = G.GAME
     self.GAME.modifiers = self.GAME.modifiers or {}
     self.GAME.stake = 1
     self.GAME.STOP_USE = 0
@@ -262,12 +283,6 @@ function Game:start_run(args)
 	if not saveTable and WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.populate_starting_deck then
 		WORD_GAME.Deck.populate_starting_deck()
 	end
-
-    G.ARGS.spin = {
-        amount = 0,
-        real = 0,
-        eased = 0
-    }
 
     local backgrounds = require "word_game.ui.layout.backgrounds"
     backgrounds.run()

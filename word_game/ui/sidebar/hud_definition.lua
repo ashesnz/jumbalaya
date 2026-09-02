@@ -42,7 +42,7 @@ local function box_width()
 end
 
 local function deck_count_node(box_w)
-	G.GAME = G.GAME or {}
+	G.ARGS = G.ARGS or {}
 	deck.sync_deck_count_display()
 	return { n = G.UI.ROW, config = {
 		align = "cm",
@@ -57,7 +57,8 @@ local function deck_count_node(box_w)
 			shadow = true,
 		}},
 		{ n = G.UI.TEXT, config = {
-			ref_table = G.GAME,
+			id = "text_deck_count",
+			ref_table = G.ARGS,
 			ref_value = "deck_left_count",
 			scale = 0.38,
 			colour = G.C.UI.TEXT_LIGHT,
@@ -154,6 +155,7 @@ end
 
 function M.relayout_vault()
 	if not G.VAULT_HUD then return end
+	deck.sync_deck_count_display()
 	local vault_h = Layout.vault_height()
 	local inner_h = math.max(4, vault_h - VAULT_ROOT_PAD * 2)
 	local fill_h = math.max(3.5, inner_h - VAULT_OUTER_PAD * 2)

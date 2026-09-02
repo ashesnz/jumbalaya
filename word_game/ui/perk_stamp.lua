@@ -640,8 +640,8 @@ end
 
 function M.queue(entry)
 	if not entry or not entry.id then return false end
+	if not G.GAME then return false end
 	local resolved = perk_cfg.by_id(entry.id) or entry
-	G.GAME = G.GAME or {}
 	G.GAME.pending_stamp_perk = copy_perk(resolved)
 	return true
 end
@@ -857,11 +857,15 @@ function M.debug_next_land_px()
 	return target_index, land_cy, slot_y
 end
 
-function M.reset()
+function M.clear_runtime()
 	anim = nil
 	imprints = {}
 	pending_target_index = nil
 	stamp_puff.reset()
+end
+
+function M.reset()
+	M.clear_runtime()
 	if G.VAULT_HUD and G.VAULT_HUD.remove then
 		pcall(function() G.VAULT_HUD:remove() end)
 	end

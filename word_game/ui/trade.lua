@@ -996,4 +996,13 @@ function M.on_skip_remove()
 	refresh_or_finish()
 end
 
+function M.teardown_run()
+	offer = nil
+	session = nil
+	standalone = false
+	flyer = nil
+	flyer_callback = nil
+	transform_item = nil
+end
+
 return M

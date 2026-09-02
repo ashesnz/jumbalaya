@@ -103,6 +103,9 @@ end
 --- Tears down all session UI/state (used when discarding a run or switching
 --- profiles) and resets the stage machine.
 function Game:discard_run()
+	local RunScope = require("word_game.model.run_scope")
+	RunScope.teardown()
+
 	if self.ROOM then
 		teardown_tree(G.STAGE_OBJECTS[G.STAGE])
 		if self.buttons then self.buttons:remove(); self.buttons = nil end
@@ -113,7 +116,6 @@ function Game:discard_run()
 		if self.SPLASH_LOGO then self.SPLASH_LOGO:remove(); self.SPLASH_LOGO = nil end
 		if self.GAME_OVER_UI then self.GAME_OVER_UI:remove(); self.GAME_OVER_UI = nil end
 		if self.collection_alert then self.collection_alert:remove(); self.collection_alert = nil end
-		if WORD_GAME and WORD_GAME.Sidebar then WORD_GAME.Sidebar:destroy() end
 		if self.placement_table then
 			self.placement_table.area = nil
 		end
@@ -133,13 +135,13 @@ function Game:discard_run()
 			end
 		end
 		G.LIVE.CARD = {}
+		G.LIVE.CARDAREA = {}
 	end
 	G.VIEWING_DECK = nil
 	G.TIMELINE:flush()
 	G.INPUT:shift_context_layer(-1000)
 	G.INPUT.focus_cursor_stack = {}
 	G.INPUT.focus_cursor_stack_level = 1
-	if G.GAME then G.GAME.won = false end
 
 	G.STATE = -1
 end

@@ -236,6 +236,13 @@ function M.setup()
 	-- Ensure root package paths are set
 	package.path = "./?.lua;./?/init.lua;" .. package.path
 
+	package.preload["dictionary.words_set"] = package.preload["dictionary.words_set"] or function()
+		return {
+			CAT = true, CAR = true, ACE = true, TEA = true, EAT = true,
+			ACT = true, ART = true, ARE = true, EAR = true, ERA = true,
+		}
+	end
+
 	local ok, dict = pcall(require, "dictionary")
 	if ok then
 		_G.Dictionary = dict
@@ -299,6 +306,7 @@ function M.reset_game()
 			played_words = {},
 		},
 	}
+	G.ARGS = G.ARGS or {}
 end
 
 function M.teardown_boot_pollution()

@@ -13,8 +13,10 @@ require "word_game.ui.menu"
 
 local WordSidebar = require("word_game.ui.sidebar")
 local sidebar = WordSidebar()
+local RunScope = require("word_game.model.run_scope")
 
 local M = {
+	RunScope = RunScope,
 	Deck = require("word_game.model.cards.deck"),
 	Back = require("word_game.model.cards.deck.back"),
 	Round = require("word_game.model.round"),
@@ -42,6 +44,8 @@ local M = {
 	PerkStamp = require("word_game.ui.perk_stamp"),
 	EndMatch = require("word_game.ui.end_match"),
 	HandShuffle = require("word_game.ui.hand_shuffle"),
+	HandShuffleAnim = require("word_game.ui.hand_shuffle_anim"),
+	HandPlacementRecallAnim = require("word_game.ui.hand_placement_recall_anim"),
 	PlayHoldRedraw = require("word_game.ui.play_hold_redraw"),
 	PlayEffects = require("word_game.ui.play_effects"),
 	BossWordStack = require("word_game.ui.boss_word_stack"),
@@ -50,5 +54,7 @@ local M = {
 }
 
 sidebar:install()
+
+require("word_game.model.run_scope_register")(M)
 
 return M
