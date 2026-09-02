@@ -35,14 +35,18 @@ function M.draw_layer(self, v, draw_card_layer)
 		end
 		for i = 1, #(self.cards or {}) do
 			local card = self.cards[i]
-			if card ~= G.INPUT.focused.target and math.abs(card.VT.x - self.T.x) > 0.4 then
+			if card.played_pool or (card.states and card.states.visible == false) then
+				-- Word-played cards are stashed invisibly for reshuffle.
+			elseif card ~= G.INPUT.focused.target and math.abs(card.VT.x - self.T.x) > 0.4 then
 				draw_card_layer(card, v)
 			end
 		end
 	else
 		for i = 1, #(self.cards or {}) do
 			local card = self.cards[i]
-			if card ~= G.INPUT.focused.target and math.abs(card.VT.x - self.T.x) > 1 then
+			if card.played_pool or (card.states and card.states.visible == false) then
+				-- Hidden played-pool cards never render in the sidebar bin.
+			elseif card ~= G.INPUT.focused.target and math.abs(card.VT.x - self.T.x) > 1 then
 				draw_card_layer(card, v)
 			end
 		end

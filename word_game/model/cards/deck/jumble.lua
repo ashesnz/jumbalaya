@@ -227,6 +227,10 @@ return function(context)
 		for i = #G.discard.cards, 1, -1 do
 			local card = G.discard.cards[i]
 			G.discard:remove_card(card)
+			card.played_pool = nil
+			if card.states then
+				card.states.visible = true
+			end
 			G.deck:emplace(card)
 		end
 		if G.discard.hard_set_cards then
@@ -262,25 +266,72 @@ return function(context)
 
 		local hand_size = G.TABLE_HAND_SIZE or 7
 		local to_deal = math.min(hand_size, #(G.deck.cards or {}))
+		local STAGGER = 0.1
+
+		local function finish()
+			if G.hand then
+				G.hand:set_ranks()
+				G.hand:relayout()
+				G.hand:snap_VT()
+				G.hand:hard_set_cards()
+			end
+			M.sync_deck_count_display()
+			if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.ensure_playable_puzzle then
+				WORD_GAME.Jumble.ensure_playable_puzzle()
+			end
+			G.ARGS = G.ARGS or {}
+			G.ARGS.pending_layout = true
+			if on_complete then on_complete() end
+		end
+
+		if to_deal <= 0 then
+			finish()
+			return true
+		end
+
+		if G.TIMELINE and G.TIMELINE.enqueue then
+			for i = 1, to_deal do
+				Scheduler.add{
+					mode = "window",
+					delay = (i - 1) * STAGGER,
+					blocking = true,
+					func = function()
+						local card = G.deck:remove_card()
+						if card and G.hand then
+							G.deck:emplace(card)
+							CardMotion.move{
+								from = G.deck,
+								to = G.hand,
+								percent = 50,
+								direction = "up",
+								stay_flipped = false,
+								card = card,
+								delay = 0.08,
+							}
+						end
+						return true
+					end,
+				}
+			end
+			Scheduler.add{
+				mode = "delayed",
+				delay = (to_deal - 1) * STAGGER + 0.25,
+				blocking = true,
+				func = function()
+					finish()
+					return true
+				end,
+			}
+			return true
+		end
+
 		for _ = 1, to_deal do
 			local card = G.deck:remove_card()
 			if card and G.hand then
 				G.hand:emplace(card)
 			end
 		end
-		if G.hand then
-			G.hand:set_ranks()
-			G.hand:relayout()
-			G.hand:snap_VT()
-			G.hand:hard_set_cards()
-		end
-		M.sync_deck_count_display()
-		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.ensure_playable_puzzle then
-			WORD_GAME.Jumble.ensure_playable_puzzle()
-		end
-		G.ARGS = G.ARGS or {}
-		G.ARGS.pending_layout = true
-		if on_complete then on_complete() end
+		finish()
 		return true
 	end
 

@@ -42,6 +42,7 @@ local M = {
 	PlayerHost = require("word_game.ui.player_host"),
 	TradeUI = require("word_game.ui.trade"),
 	PerkStamp = require("word_game.ui.perk_stamp"),
+	CardFlyOff = require("word_game.ui.card_fly_off"),
 	EndMatch = require("word_game.ui.end_match"),
 	HandShuffle = require("word_game.ui.hand_shuffle"),
 	HandShuffleAnim = require("word_game.ui.hand_shuffle_anim"),

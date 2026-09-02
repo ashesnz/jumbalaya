@@ -5,6 +5,7 @@ local M = {}
 local deck = require("word_game.model.cards.deck")
 local word_feedback = require("word_game.ui.word_feedback")
 local boss_word_stack = require("word_game.ui.boss_word_stack")
+local card_fly_off = require("word_game.ui.card_fly_off")
 local round_config = require("word_game.config.round_config")
 local Easing = require "app.effects.easing"
 local Scheduler = require "app.effects.scheduler"
@@ -186,58 +187,30 @@ end
 
 function M.run_card_return_sequence(used_cards, on_after, return_to_deck)
 	M.show_bonus_flyovers(used_cards)
-	local count = #used_cards
-	if count > 0 then
-		for i, card in ipairs(used_cards) do
-			M.queue_event(Tween({
-				mode = "window",
-				delay = (i == 1) and 0.04 or 0.10,
-				blocking = true,
-				func = function()
-					if card.area then
-						card.area:remove_card(card)
-					end
-					if boss_word_stack.is_bonus_card(card) then
-						boss_word_stack.consume_card(card)
-					elseif return_to_deck then
-						card.REMOVED = nil
-						if G.discard and G.discard.emplace then
-							G.discard:emplace(card)
-						end
-						deck.sync_deck_count_display()
-					else
-						deck.destroy_card(card)
-					end
-					play_sfx("card_slide1", 0.85 + (i / math.max(1, count)) * 0.2, 0.6)
-					return true
-				end,
-			}))
-		end
-	end
-
-	M.queue_event(Tween({
-		mode = "delayed",
-		delay = 0.04,
-		blocking = true,
-		func = function()
+	card_fly_off.fly_cards_off(used_cards, M.queue_event, {
+		return_to_deck = return_to_deck,
+		on_complete = function()
+			deck.sync_deck_count_display()
 			if on_after then on_after() end
-			return true
 		end,
-	}))
+	})
 end
 
 local function finish_used_card(card, return_to_deck)
-	if card.area then
-		card.area:remove_card(card)
-	end
 	if boss_word_stack.is_bonus_card(card) then
+		if card.area then
+			card.area:remove_card(card)
+		end
 		boss_word_stack.consume_card(card)
 	elseif return_to_deck then
-		card.REMOVED = nil
-		if G.discard and G.discard.emplace then
-			G.discard:emplace(card)
+		if card.area then
+			card.area:remove_card(card)
 		end
+		card_fly_off.stash_played_card(card)
 	else
+		if card.area then
+			card.area:remove_card(card)
+		end
 		deck.destroy_card(card)
 	end
 end

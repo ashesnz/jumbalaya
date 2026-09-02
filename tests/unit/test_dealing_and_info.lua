@@ -190,7 +190,7 @@ T.describe("Vault deck information", function()
 		T.assert_equal(G.GAME.deck_left_count, 4, "G.GAME mirror should follow cards left")
 	end)
 
-	T.it("sends played cards to the discard pile during jumble word plays", function()
+	T.it("sends played cards to the hidden played pool during jumble word plays", function()
 		local effects = require("word_game.ui.play_effects")
 		G.GAME = G.GAME or {}
 		G.GAME.deck_left_count = 5
@@ -216,8 +216,8 @@ T.describe("Vault deck information", function()
 		G.TIMELINE = orig_manager
 		deck.destroy_card = orig_destroy
 		T.assert_equal(destroyed, 0, "Jumble word plays should not destroy used cards")
-		T.assert_equal(#G.discard.cards, 1, "Used cards should go to the discard pile")
-		T.assert_false(card.REMOVED, "Returned cards should remain active")
+		T.assert_equal(#G.discard.cards, 1, "Used cards should enter the played pool")
+		T.assert_true(G.discard.cards[1].played_pool, "Played cards should be tagged for hidden storage")
 	end)
 
 	T.it("keeps the full deck count when advancing through jumble stages", function()
@@ -501,7 +501,16 @@ T.describe("Vault deck information", function()
 		WORD_GAME.Jumble = { ensure_playable_puzzle = function() return true end }
 		WORD_GAME.TableDiscard = { reset = function() end }
 
+		local queued = {}
+		local orig_manager = G.TIMELINE
+		G.TIMELINE = {
+			enqueue = function(_, ev) queued[#queued + 1] = ev end,
+		}
 		T.assert_true(deck.try_jumble_reshuffle_and_deal())
+		for _, ev in ipairs(queued) do
+			if ev.func then ev.func() end
+		end
+		G.TIMELINE = orig_manager
 		T.assert_equal(#G.discard.cards, 0, "Discard pile should be empty after recycle")
 		T.assert_equal(#G.hand.cards, 7, "Player should receive a full hand of seven cards")
 		T.assert_equal(#G.deck.cards, 5, "Remaining cards should stay in the deck")
