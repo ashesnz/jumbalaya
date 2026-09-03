@@ -83,9 +83,8 @@ function M.compute_word_effects(word, used_cards, j, wr)
 	local word_len = #word
 	local prev_words = #(j.puzzle_words or {})
 	local played_at = now()
-	local seconds_since = played_at - (j.last_word_played_at or j.puzzle_started_at or played_at)
 
-	if active_modified(used_cards, "A") and word:find("A", 1, true) and seconds_since <= 5 then
+	if active_modified(used_cards, "A") and word:find("A", 1, true) then
 		effects.bonus_multi = effects.bonus_multi + 0.2
 	end
 	if active_modified(used_cards, "B") and word:find("B", 1, true) then
@@ -110,7 +109,7 @@ function M.compute_word_effects(word, used_cards, j, wr)
 		effects.bonus_points = effects.bonus_points + 5
 	end
 	if active_modified(used_cards, "I") and word:find("I", 1, true) then
-		effects.set_next_word_multi = 0.2
+		effects.bonus_points = effects.bonus_points + 1
 	end
 	if active_modified(used_cards, "J") and word:find("J", 1, true) and not j.modifier_j_used then
 		effects.bonus_points = effects.bonus_points + 10
@@ -130,10 +129,7 @@ function M.compute_word_effects(word, used_cards, j, wr)
 		effects.set_next_word_multi = 0.3
 	end
 	if active_modified(used_cards, "O") and word:find("O", 1, true) then
-		local remaining = timeline_seconds()
-		if remaining < 15 then
-			effects.time_bonus = effects.time_bonus + 2
-		end
+		effects.bonus_multi = effects.bonus_multi + 0.2
 	end
 	if active_modified(used_cards, "P") and word:find("P", 1, true) and word_len >= 6 then
 		effects.bonus_points = effects.bonus_points + math.floor(word_len * 0.5)
@@ -149,6 +145,9 @@ function M.compute_word_effects(word, used_cards, j, wr)
 	end
 	if active_modified(used_cards, "T") and word:find("T", 1, true) then
 		effects.time_bonus = effects.time_bonus + 1
+	end
+	if active_modified(used_cards, "U") and word:find("U", 1, true) then
+		effects.bonus_points = effects.bonus_points + 1
 	end
 	if active_modified(used_cards, "Y") and word:find("Y", 1, true) then
 		local remaining = timeline_seconds()

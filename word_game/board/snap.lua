@@ -5,6 +5,7 @@ local jumble_geometry = require "word_game.board.jumble_geometry"
 local shimmer = require "word_game.board.shimmer"
 local placement_word = require "word_game.model.placement_word"
 local bonus_stack = require "word_game.ui.boss_word_stack"
+local modifier_feedback = require "word_game.ui.modifier_feedback"
 local hand_size_cfg = require("word_game.config.hand_size")
 
 local M = {}
@@ -81,6 +82,7 @@ function M.restore_bonus_card(session, card, origin_slot, origin_insert)
 				session.area:hard_set_cards()
 			end
 			placement_word.refresh_from_jumble_slots(jumble.state().slots)
+			modifier_feedback.show_on_placed_card(card)
 			return true
 		end
 	end
@@ -185,6 +187,7 @@ function M.place_in_row(session, card)
 	if WORD_GAME and WORD_GAME.HandShuffle then
 		WORD_GAME.HandShuffle.try_sync()
 	end
+	modifier_feedback.show_on_placed_card(card)
 	return true
 end
 

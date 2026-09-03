@@ -20,26 +20,6 @@ local function can_supply(hand_counts, needed)
 	return true
 end
 
-local function can_supply_with_u_substitute(hand_counts, needed)
-	if can_supply(hand_counts, needed) then return true end
-	local deck = require("word_game.model.cards.deck")
-	if not deck.deck_has_modified_letter("U") then return false end
-	for _, vowel in ipairs({ "A", "E", "I", "O", "U" }) do
-		local deficit = (needed[vowel] or 0) - (hand_counts[vowel] or 0)
-		if deficit == 1 then
-			local adjusted = {}
-			for letter, n in pairs(needed) do
-				adjusted[letter] = n
-			end
-			adjusted[vowel] = adjusted[vowel] - 1
-			if can_supply(hand_counts, adjusted) then
-				return true
-			end
-		end
-	end
-	return false
-end
-
 --- Letter multiset the hand must supply (fixed/anchor letters are free).
 function M.letters_needed_from_hand(word, puzzle)
 	if not word or not puzzle then return {} end
@@ -73,7 +53,7 @@ end
 
 function M.hand_can_build_word(hand_counts, word, puzzle)
 	if not M.word_fits_pattern(word, puzzle) then return false end
-	return can_supply_with_u_substitute(hand_counts, M.letters_needed_from_hand(word, puzzle))
+	return can_supply(hand_counts, M.letters_needed_from_hand(word, puzzle))
 end
 
 function M.has_playable_word(hand_counts, puzzle)
