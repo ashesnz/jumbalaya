@@ -1,6 +1,7 @@
 -- Per-letter marketplace modifiers for deck cards (A–Z).
 return function(context)
 	local M = context.module
+	local LetterPalette = require "word_game.config.letter_card_palette"
 
 	M.LETTER_MODIFIERS = {
 		A = "+0.2× multiplier",
@@ -44,11 +45,25 @@ return function(context)
 		return card and card.ability and card.ability.modified == true
 	end
 
+	local function sync_modified_face(card)
+		local letter = M.card_letter(card)
+		if not letter then return end
+		local color = LetterPalette.MODIFIED_FACE_COLOR
+		M.tag_card(card, letter, color)
+		local front = M.front(letter, color)
+		if front and card.apply_face then
+			card:apply_face(front, false)
+		elseif front and card.set_sprites then
+			card:set_sprites(card.config and card.config.center, front)
+		end
+	end
+
 	function M.apply_to_card(card)
 		if not card or not card.ability then return false end
 		if M.is_modified(card) then return false end
 		card.ability.modified = true
 		card.edition = nil
+		sync_modified_face(card)
 		return true
 	end
 

@@ -7,7 +7,6 @@ local M = {}
 M.PATTERNS = {
 	{ center = "L", pin_index = 2, min = 3, max = 7 },
 	{ center = "P", pin_index = 3, min = 3, max = 7 },
-    { pattern = "_D_E___", min = 4, max = 7 },
 	{ center = "D", min = 3, max = 7 },
 	{ center = "S", min = 3, max = 7 },
 	{ center = "A", min = 3, max = 7 },
@@ -19,6 +18,7 @@ M.PATTERNS = {
 	{ suffix = "C", min = 3, max = 7 },
 	{ prefix = "I", min = 3, max = 7 },
 	{ prefix = "Y", min = 3, max = 7 },
+    { pattern = "_D_E___", min = 4, max = 7 },
 }
 
 return M

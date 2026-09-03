@@ -23,6 +23,8 @@ M.progress_pending = 0
 M.display_frac = 0
 M.display_goal_frac = 1
 M.goal_reached = false
+M.post_target_scoring = false
+M.post_target_pulse = 0
 M.puzzle_word_count = 0
 M.smoke_active = false
 M.slide_boost_t = 0
@@ -202,6 +204,11 @@ function M.sync_progress()
 	M.puzzle_word_count = #(j and j.puzzle_words or {})
 	M.smoke_active = M.puzzle_word_count >= SMOKE_WORD_THRESHOLD
 	M.goal_reached = (banked + pending) >= target
+	M.post_target_scoring = M.goal_reached
+end
+
+function M.pulse_post_target()
+	M.post_target_pulse = 1
 end
 
 function M.progress_score_total()
@@ -378,6 +385,8 @@ function M.reset(duration)
 	M.display_frac = 0
 	M.display_goal_frac = 1
 	M.goal_reached = false
+	M.post_target_scoring = false
+	M.post_target_pulse = 0
 	M.puzzle_word_count = 0
 	M.smoke_active = false
 	M.slide_boost_t = 0
@@ -403,6 +412,8 @@ function M.reset_progress(target)
 	M.display_frac = 0
 	M.display_goal_frac = 1
 	M.goal_reached = false
+	M.post_target_scoring = false
+	M.post_target_pulse = 0
 	M.puzzle_word_count = 0
 	M.smoke_active = false
 	M.slide_boost_t = 0
@@ -497,6 +508,9 @@ function M.update(dt)
 		if M.slide_boost_t and M.slide_boost_t > 0 then
 			M.slide_boost_t = math.max(0, M.slide_boost_t - dt)
 		end
+		if M.post_target_pulse and M.post_target_pulse > 0 then
+			M.post_target_pulse = math.max(0, M.post_target_pulse - dt * 2.4)
+		end
 		local lerp_speed = (M.frozen_for_reward and 12 or 8) + boost
 		M.display_frac = M.display_frac + (target_frac - M.display_frac) * math.min(1, dt * lerp_speed)
 		M.display_goal_frac = M.display_goal_frac + (goal_frac - M.display_goal_frac) * math.min(1, dt * lerp_speed)
@@ -552,6 +566,41 @@ function M.update(dt)
 	end
 end
 
+local function draw_post_target_badge(cx, top_y, bar_h)
+	if not M.post_target_scoring then return end
+	local t = (G.TIMERS and G.TIMERS.REAL) or 0
+	local pulse = 0.5 + 0.5 * math.sin(t * 5.5)
+	local pop = 1 + (M.post_target_pulse or 0) * 0.42
+	local badge_y = top_y - bar_h * 0.46
+	local font_px = math.max(13, bar_h * 0.34) * pop
+	local font = timer_font(font_px)
+	if not font then return end
+
+	local ring_r = font_px * 0.72
+	local ring_scale = 1 + pulse * 0.1 + (M.post_target_pulse or 0) * 0.22
+	love.graphics.setLineWidth(math.max(2, bar_h * 0.05) * (0.85 + pulse * 0.35))
+	love.graphics.setColor(1, 0.82, 0.22, 0.28 + pulse * 0.22 + (M.post_target_pulse or 0) * 0.35)
+	love.graphics.circle("line", cx, badge_y, ring_r * ring_scale)
+	love.graphics.setLineWidth(math.max(1.2, bar_h * 0.028))
+	love.graphics.setColor(1, 0.95, 0.55, 0.18 + pulse * 0.12)
+	love.graphics.circle("line", cx, badge_y, ring_r * ring_scale * 1.28)
+
+	local label = "×2"
+	local tw = font:getWidth(label)
+	local th = font:getHeight()
+	love.graphics.setFont(font)
+	love.graphics.setColor(0.04, 0.06, 0.12, 0.88)
+	for ox = -1.5, 1.5, 1.5 do
+		for oy = -1.5, 1.5, 1.5 do
+			if ox ~= 0 or oy ~= 0 then
+				love.graphics.print(label, cx - tw * 0.5 + ox, badge_y - th * 0.5 + oy)
+			end
+		end
+	end
+	love.graphics.setColor(1, 0.92 - pulse * 0.12, 0.42 - pulse * 0.08, 1)
+	love.graphics.print(label, cx - tw * 0.5, badge_y - th * 0.5)
+end
+
 function M.draw()
 	if not love or not love.graphics or not love.graphics.polygon then return end
 	if not G.GAME or not G.ROOM then return end
@@ -585,6 +634,9 @@ function M.draw()
 	end
 
 	StageLabel.draw_above_timer(x, y, w, h)
+
+	local badge_cx = x + (w - slant * 0.5) * 0.5
+	draw_post_target_badge(badge_cx, y, h)
 
 	local shake = M.display_shake_strength()
 	if shake > 0 then

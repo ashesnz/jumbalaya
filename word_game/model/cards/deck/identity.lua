@@ -39,6 +39,10 @@ return function(context)
 	end
 
 	function M.color_from_card(card)
+		if card and card.ability and card.ability.modified == true then
+			local LetterPalette = require "word_game.config.letter_card_palette"
+			return LetterPalette.MODIFIED_FACE_COLOR
+		end
 		if card and card.ability and card.ability.letter_color then
 			return card.ability.letter_color
 		end
@@ -67,10 +71,10 @@ return function(context)
 		if (not front or not front.pos) and card.config and card.config.card_key and G.P_CARDS then
 			front = G.P_CARDS[card.config.card_key]
 		end
-		if (not front or not front.pos) and card.base and card.base.id then
+		if not front or not front.pos then
 			local letter = card.ability and card.ability.letter
 				or (card.config and card.config.card and card.config.card.letter)
-				or M.letter_from_id(card.base.id)
+				or (card.base and card.base.id and M.letter_from_id(card.base.id))
 			local color = M.color_from_card(card)
 			if letter then
 				front = M.front(letter, color or "black")

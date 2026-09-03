@@ -56,6 +56,8 @@ function M.preview_puzzle_total_after_word(j, word, used_cards)
 	local effects = modifier_effects.apply_word_effects(word, used_cards, j, wr)
 	local word_pts = #word + (effects.bonus_points or 0)
 	word_pts = word_pts + bonus_stack.bonus_points_for(used_cards)
+	local committed = M.committed_earned(j)
+	word_pts = M.scale_post_target_points(j, word_pts, committed)
 	local new_pts = old_pts + word_pts
 	local count = #(j.puzzle_words or {}) + 1
 	local new_multi = 1.0
@@ -100,6 +102,26 @@ function M.committed_earned(j)
 	return (j.total_score or 0) + M.puzzle_total(j)
 end
 
+function M.committed_before_word(j, old_pts, old_multi)
+	if not j then return 0 end
+	return (j.total_score or 0) + math.floor((old_pts or 0) * (old_multi or 1.0))
+end
+
+--- Classic mode: once the stage target is met, further scoring is doubled.
+function M.post_target_active(j, committed)
+	if not RunMode.is_classic() or not j then return false end
+	committed = committed or M.committed_earned(j)
+	return committed >= M.round_target()
+end
+
+function M.post_target_multiplier(j, committed)
+	return M.post_target_active(j, committed) and 2 or 1
+end
+
+function M.scale_post_target_points(j, points, committed)
+	return points * M.post_target_multiplier(j, committed)
+end
+
 function M.placement_preview_got(j)
 	if not j then return 0 end
 	local word, used_cards = placement_preview_word(j)
@@ -132,7 +154,6 @@ end
 function M.play_blocked(j)
 	if not j then return true end
 	if InputLock.is_table_busy() then return true end
-	if RunMode.classic_stage_complete() then return true end
 	return false
 end
 
@@ -156,8 +177,13 @@ function M.evaluate_play(jumble, j)
 		if bank_bonus > 0 then
 			j.puzzle_points = (j.puzzle_points or 0) + bank_bonus
 		end
-		local puzzle_total = M.puzzle_total(j)
+		local raw_puzzle_total = M.puzzle_total(j)
+		local puzzle_total = raw_puzzle_total
 		local old_total = j.total_score or 0
+		local post_target = M.post_target_active(j, old_total)
+		if post_target then
+			puzzle_total = puzzle_total * 2
+		end
 		local new_total = old_total + puzzle_total
 		j.total_score = new_total
 		local old_rem = M.score_remaining(old_total, target)
@@ -172,6 +198,7 @@ function M.evaluate_play(jumble, j)
 			new_rem = new_rem,
 			cleared = new_rem <= 0,
 			puzzle_label = puzzle_label,
+			post_target_doubled = post_target and raw_puzzle_total > 0,
 		}
 	end
 
@@ -181,6 +208,10 @@ function M.evaluate_play(jumble, j)
 	end
 
 	local used_cards = M.collect_used_cards(j.slots)
+	local pre_pts = j.puzzle_points or 0
+	local pre_multi = j.puzzle_multi or 1.0
+	local committed = M.committed_before_word(j, pre_pts, pre_multi)
+	local post_target = M.post_target_active(j, committed)
 	local old_pts, new_pts, old_multi, new_multi = jumble.record_puzzle_word(word, { used_cards = used_cards })
 	round.record_word_play(word)
 	j.bonus_available = false
@@ -213,6 +244,7 @@ function M.evaluate_play(jumble, j)
 		word_pts = word_pts,
 		cleared = new_rem <= 0,
 		used_cards = used_cards,
+		post_target_doubled = post_target and new_pts > pre_pts,
 	}
 end
 

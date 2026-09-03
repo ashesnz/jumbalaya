@@ -51,6 +51,22 @@ function M.triggers_boss_word(result)
 		and j and not j.boss_word_active and not j.boss_word_staging
 end
 
+function M.show_post_target_multiplier_fx(result)
+	if not result or not result.post_target_doubled then return end
+	local tt = WORD_GAME and WORD_GAME.TimelineTimer
+	if tt and tt.pulse_post_target then
+		tt.pulse_post_target()
+	end
+	local FloatUp = WORD_GAME and WORD_GAME.FloatUpText
+	if FloatUp and FloatUp.from_timeline then
+		FloatUp.from_timeline("×2", {
+			colour = G.C and G.C.GOLD or { 1, 0.85, 0.2, 1 },
+			font_px = 32,
+			speed = 1.25,
+		})
+	end
+end
+
 function M.roll_jumble_banners(result)
 	if not (WORD_GAME and WORD_GAME.ScoreBanner) then return end
 	local function bump_timeline_progress()
@@ -80,8 +96,10 @@ function M.roll_jumble_banners(result)
 				result.old_pts, result.new_pts, result.old_multi, result.new_multi
 			)
 		end
+		M.show_post_target_multiplier_fx(result)
 		bump_timeline_progress()
 	elseif result.kind == "bank_puzzle" then
+		M.show_post_target_multiplier_fx(result)
 		bump_timeline_progress()
 	end
 	if result.cleared and RunMode.ends_hand_on_target() then

@@ -18,6 +18,8 @@ function M.try_play()
 	if RunMode.classic_stage_complete() then
 		if not placement_has_cards() then
 			word_feedback.show_classic_proceed({ hold = 2.2 })
+		elseif WORD_GAME and WORD_GAME.Play then
+			WORD_GAME.Play.play_word()
 		end
 		return
 	end

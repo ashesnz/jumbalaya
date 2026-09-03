@@ -128,6 +128,26 @@ function FloatUpText.spawn(config)
 	return FloatUpText(config)
 end
 
+function FloatUpText.from_timeline(text, opts)
+	opts = opts or {}
+	local Layout = require("word_game.ui.layout")
+	local rect = Layout.timeline_rect and Layout.timeline_rect() or { x = 0, y = 0, w = 4, h = 0.7 }
+	local w = opts.w or 1.2
+	local h = opts.h or 0.55
+	return FloatUpText.spawn({
+		x = rect.x + rect.w * 0.5 - w * 0.5,
+		y = rect.y - h * 0.55,
+		w = w,
+		h = h,
+		text = text,
+		colour = opts.colour,
+		life = opts.life or 1.35,
+		speed = opts.speed or 1.1,
+		wobble = opts.wobble or 0.05,
+		font_px = opts.font_px or 30,
+	})
+end
+
 function FloatUpText.from_card(card, text, opts)
 	opts = opts or {}
 	if not card or not card.T then return nil end

@@ -130,7 +130,7 @@ T.describe("Classic run mode", function()
 		T.assert_true(vault_btn.is_next_mode())
 	end)
 
-	T.it("blocks further play once the classic target is reached", function()
+	T.it("allows further play once the classic target is reached", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"
 		G.STATE = G.STATES.TABLE_BOARD
@@ -148,7 +148,83 @@ T.describe("Classic run mode", function()
 		tt.sync_progress()
 
 		T.assert_true(RunMode.classic_stage_complete())
-		T.assert_true(rules.play_blocked(G.GAME.word_round.jumble))
+		T.assert_false(rules.play_blocked(G.GAME.word_round.jumble))
+	end)
+
+	T.it("doubles word points after the classic target is already reached", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "classic"
+		G.GAME.word_round = {
+			set = 1,
+			hand_index = 1,
+			target = 25,
+			mode = "jumble",
+			played_words = {},
+			jumble = {
+				total_score = 30,
+				puzzle_points = 0,
+				puzzle_multi = 1.0,
+				puzzle_words = {},
+				solved = false,
+				slots = {},
+			},
+		}
+		local jumble = require("word_game.model.jumble")
+		local rules = require("word_game.model.play.jumble_rules")
+
+		local old_pts, new_pts = jumble.record_puzzle_word("CATS", { used_cards = {} })
+		T.assert_equal(new_pts - old_pts, 8, "Four-letter word should double to eight after target")
+
+		G.GAME.word_round.jumble.total_score = 20
+		G.GAME.word_round.jumble.puzzle_points = 0
+		G.GAME.word_round.jumble.puzzle_words = {}
+		local preview = rules.preview_puzzle_total_after_word(
+			G.GAME.word_round.jumble, "CATS", {})
+		T.assert_equal(preview, 4)
+
+		old_pts, new_pts = jumble.record_puzzle_word("CATS", { used_cards = {} })
+		T.assert_equal(new_pts - old_pts, 4, "Word should not double before the target is reached")
+	end)
+
+	T.it("doubles banked puzzle totals when the stage was already past target", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "classic"
+		G.GAME.word_round = {
+			set = 1,
+			hand_index = 1,
+			target = 25,
+			mode = "jumble",
+			played_words = {},
+			jumble = {
+				total_score = 30,
+				puzzle_points = 5,
+				puzzle_multi = 1.0,
+				puzzle_words = { "CAT" },
+				solved = true,
+				slots = {},
+			},
+		}
+		local rules = require("word_game.model.play.jumble_rules")
+		local jumble = require("word_game.model.jumble")
+		local result = rules.evaluate_play(jumble, G.GAME.word_round.jumble)
+		T.assert_equal(result.kind, "bank_puzzle")
+		T.assert_equal(result.new_total, 40, "Five puzzle points should double to ten when banking past target")
+		T.assert_true(result.post_target_doubled)
+	end)
+
+	T.it("shows post-target scoring on the classic timeline slider", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "classic"
+		local tt = require("word_game.ui.timeline_timer")
+		G.GAME.word_round = {
+			target = 25,
+			jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0 },
+		}
+		tt.reset_progress(25)
+		tt.sync_progress()
+		T.assert_true(tt.post_target_scoring)
+		tt.pulse_post_target()
+		T.assert_true(tt.post_target_pulse > 0)
 	end)
 
 	T.it("shows the proceed hint only when play is pressed with an empty card area", function()
@@ -199,8 +275,10 @@ T.describe("Classic run mode", function()
 
 		captured = nil
 		G.placement_table.area.cards = { { ability = { letter = "A" } } }
+		local played = false
+		WORD_GAME.Play = { play_word = function() played = true end }
 		placement_controls.try_play()
-		T.assert_nil(captured, "Play with cards in the area should not show the proceed hint")
+		T.assert_true(played, "Play with cards in the area should keep scoring after the target is reached")
 
 		spawn_attention = original_attention
 	end)

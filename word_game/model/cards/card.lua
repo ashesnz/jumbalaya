@@ -329,6 +329,11 @@ function Card:load(saved)
     self.children = { shadow = EaseNode(0, 0, 0, 0) }
 
     self:set_sprites(self.config.center, self.config.card)
+
+    if self.ability and self.ability.modified then
+        local deck = require("word_game.model.cards.deck")
+        deck.restore_letter_face(self)
+    end
 end
 
 
