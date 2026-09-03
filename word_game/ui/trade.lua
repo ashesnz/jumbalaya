@@ -42,6 +42,40 @@ function M.session_add_cost(session_state)
 	return trade.ACTION_COSTS.add + (session_state and session_state.add_cost_bonus or 0)
 end
 
+function M.can_afford_action(action, session_state)
+	local balance = state.tokens()
+	if action == "add" then
+		return balance >= M.session_add_cost(session_state)
+	end
+	if action == "remove" then
+		return balance >= trade.ACTION_COSTS.remove
+	end
+	if action == "modifier" then
+		return balance >= trade.ACTION_COSTS.modifier
+	end
+	return false
+end
+
+function M.is_action_disabled(action, item, session_state)
+	if action == "add" then
+		return not M.can_afford_action("add", session_state)
+	end
+	if action == "remove" then
+		return not trade.item_in_deck(item) or not M.can_afford_action("remove", session_state)
+	end
+	if action == "modifier" then
+		local already_modified = item.card and deck.is_modified(item.card)
+		local modified_this_session = session_state
+			and session_state.modified
+			and session_state.modified[item]
+		return not trade.item_in_deck(item)
+			or modified_this_session
+			or already_modified
+			or not M.can_afford_action("modifier", session_state)
+	end
+	return true
+end
+
 local function make_face_card(item, w, h)
 	if not G.GAME or not G.P_CARDS or not deck.letter_center() then
 		return nil
@@ -230,12 +264,10 @@ local function deck_count_node(item, placeholder)
 end
 
 local function action_column(item, mode, done, session_state)
-	local in_deck = trade.item_in_deck(item)
-	local already_modified = item.card and deck.is_modified(item.card)
-	local modify_disabled = not in_deck
-		or (session_state and session_state.modified[item])
-		or already_modified
-	local remove_disabled = not in_deck
+	local add_cost = M.session_add_cost(session_state)
+	local add_disabled = M.is_action_disabled("add", item, session_state)
+	local modify_disabled = M.is_action_disabled("modifier", item, session_state)
+	local remove_disabled = M.is_action_disabled("remove", item, session_state)
 	local column_nodes = {}
 	local deck_count = deck_count_node(item)
 	if deck_count then
@@ -256,7 +288,7 @@ local function action_column(item, mode, done, session_state)
 		column_nodes[#column_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.0 }, nodes = { desc } }
 	end
 	column_nodes[#column_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
-		action_button(item, "add", M.session_add_cost(session_state), G.C.BLUE, false),
+		action_button(item, "add", add_cost, G.C.BLUE, add_disabled),
 	}}
 	column_nodes[#column_nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
 		action_button(item, "remove", 20, G.C.RED, remove_disabled),
@@ -914,6 +946,10 @@ function M.on_pick(e)
 	if not item or not session then return end
 	if action == "remove" and (session.removed or session.removing[item]) then return end
 	if action == "modifier" and session.modified[item] then return end
+	if not M.can_afford_action(action, session) then
+		fail("Not enough tokens")
+		return
+	end
 
 	local cost = action == "add" and M.session_add_cost(session) or nil
 	local ok, result = trade.apply(item, { action = action, cost = cost, defer_used = true })
