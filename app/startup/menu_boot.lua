@@ -14,8 +14,15 @@ function Game:boot_initial_screen()
 		or (self.SETTINGS and self.SETTINGS.title_screen == false)
 	if skip_title then
 		G.SETTINGS.tutorial_complete = true
-		self:start_run({})
-		self:start_gameplay_board()
+		if G.queue_during_wipe then
+			G:queue_during_wipe(function()
+				G:start_run({})
+				G:start_gameplay_board()
+			end)
+		else
+			self:start_run({})
+			self:start_gameplay_board()
+		end
 	else
 		self:open_main_menu()
 	end

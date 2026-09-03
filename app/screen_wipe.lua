@@ -1,6 +1,26 @@
 -- Application screen transitions and their particle effects.
 local Scheduler = require "app.effects.scheduler"
 
+local function sync_screen_wipe_card()
+	local card = G.screenwipecard
+	if not card or not G.screenwipe then return end
+	local host = G.screenwipe.find_node_by_id and G.screenwipe:find_node_by_id('screenwipe_card')
+	if host then
+		card:set_role({
+			role_type = 'Minor',
+			major = host,
+			xy_bond = 'Strong',
+			wh_bond = 'Weak',
+			scale_bond = 'Weak',
+		})
+	end
+	card.states.visible = true
+	card:hard_set_T(card.T.x, card.T.y, G.CARD_W, G.CARD_H)
+	if card.move_with_major then
+		card:move_with_major(0)
+	end
+end
+
 G.FUNCS.wipe_in = function(message, no_card, timefac, alt_colour)
   timefac = timefac or 1
   if G.screenwipe then return end
@@ -11,11 +31,13 @@ G.FUNCS.wipe_in = function(message, no_card, timefac, alt_colour)
     white = {1, 1, 1, 1}
   }
   if not no_card then
-    G.screenwipecard = Card(1, 1, G.CARD_W, G.CARD_H, pick_random(G.P_CARDS), G.P_CENTERS.letter_base)
+    G.screenwipecard = Card(0, 0, G.CARD_W, G.CARD_H, pick_random(G.P_CARDS), G.P_CENTERS.letter_base)
     G.screenwipecard.sprite_facing = 'back'
     G.screenwipecard.facing = 'back'
     G.screenwipecard.states.hover.can = false
+    G.screenwipecard.states.visible = true
     G.screenwipecard:pulse(0.5, 1)
+    G.screenwipecard:hard_set_T(0, 0, G.CARD_W, G.CARD_H)
   end
   local message_t = nil
   if message then
@@ -25,13 +47,23 @@ G.FUNCS.wipe_in = function(message, no_card, timefac, alt_colour)
     end
   end
 
+  local row_nodes = {}
+  if message then
+    row_nodes[#row_nodes + 1] = {n=G.UI.ROW, config={id = 'text', align = "cm", padding = 0.7}, nodes=message_t}
+  end
+  if not no_card then
+    row_nodes[#row_nodes + 1] = {n=G.UI.OBJECT, config={
+      id = 'screenwipe_card',
+      object = G.screenwipecard,
+      w = G.CARD_W,
+      h = G.CARD_H,
+    }}
+  end
+
   G.screenwipe = LayoutView{
     definition =
       {n=G.UI.ROOT, config = {align = "cm", minw =0, minh =0 ,padding = 0.15, r = 0.1, colour = G.C.CLEAR}, nodes={
-        {n=G.UI.ROW, config={align = "cm"}, nodes={
-          message and {n=G.UI.ROW, config={id = 'text', align = "cm", padding = 0.7}, nodes=message_t} or nil,
-          not no_card and {n=G.UI.OBJECT, config={object = G.screenwipecard, role = {role_type = 'Major'}}} or nil
-        }},
+        {n=G.UI.ROW, config={align = "cm"}, nodes=row_nodes},
       }},
     config = {align="cm", offset = {x=0,y=0}, major = G.ROOM_ATTACH}
   }
@@ -42,6 +74,8 @@ G.FUNCS.wipe_in = function(message, no_card, timefac, alt_colour)
   })
   G.STAGE_OBJECT_INTERRUPT = nil
   G.screenwipe.alignment.offset.y = 0
+  if G.screenwipe.recalculate then G.screenwipe:recalculate() end
+  sync_screen_wipe_card()
   if message then
     for _, v in ipairs(G.screenwipe:find_node_by_id('text').children) do
       v.children[1].config.object:pulse()

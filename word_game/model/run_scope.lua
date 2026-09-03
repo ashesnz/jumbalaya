@@ -79,7 +79,11 @@ function M.reset_globals()
 	G.playing_cards = {}
 	G.playing_card = 0
 	if G.LIVE then
+		local wipe_card = G.screenwipecard
 		G.LIVE.CARD = {}
+		if wipe_card then
+			G.LIVE.CARD[#G.LIVE.CARD + 1] = wipe_card
+		end
 		G.LIVE.CARDAREA = {}
 	end
 	G.word_sidebar_uibox = nil
