@@ -171,13 +171,14 @@ function M.place_in_row(session, card)
 		return false
 	end
 
-	jumble.assign_card_to_blank(slot_i, card, insert_pos)
-	card:set_card_area(area)
 	card.placement_locked = nil
 	card.states.drag.can = true
 	card.states.collide.can = true
 	card.states.drag.is = false
 	card.selected = false
+
+	jumble.assign_card_to_blank(slot_i, card, insert_pos)
+	card:set_card_area(area)
 
 	shimmer.start_card(session, card)
 	jumble_geometry.relayout(session)

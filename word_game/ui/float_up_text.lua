@@ -14,6 +14,7 @@ local live = {}
 local DEFAULT_COLOUR = { 0.0, 1.0, 0.965, 1 }
 local SHADOW = { 0.07, 0.05, 0.08, 0.9 }
 local CARD_BONUS_START_OFFSET = 0.65
+local CARD_ABOVE_GAP = 0.14
 
 local function title_font(px)
 	px = math.max(10, math.floor(px + 0.5))
@@ -145,6 +146,33 @@ function FloatUpText.from_timeline(text, opts)
 		speed = opts.speed or 1.1,
 		wobble = opts.wobble or 0.05,
 		font_px = opts.font_px or 30,
+	})
+end
+
+function FloatUpText.card_layout_rect(card)
+	if not card or not card.T then return nil end
+	local t = card.T
+	return t.x, t.y, t.w, t.h
+end
+
+function FloatUpText.from_card_above(card, text, opts)
+	opts = opts or {}
+	local cx, cy, cw, ch = FloatUpText.card_layout_rect(card)
+	if not cx then return nil end
+	local w = opts.w or 1.5
+	local h = opts.h or 0.5
+	local gap = opts.above_gap or CARD_ABOVE_GAP
+	return FloatUpText.spawn({
+		x = cx + cw * 0.5 - w * 0.5,
+		y = cy - h - gap,
+		w = w,
+		h = h,
+		text = text,
+		colour = opts.colour,
+		life = opts.life,
+		speed = opts.speed,
+		wobble = opts.wobble,
+		font_px = opts.font_px,
 	})
 end
 

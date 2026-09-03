@@ -12,8 +12,8 @@ function M.show_on_placed_card(card)
 	local text = deck.modifier_ui_text(deck.card_letter(card))
 	if not text then return end
 	local FloatUp = WORD_GAME and WORD_GAME.FloatUpText
-	if not FloatUp or not FloatUp.from_card then return end
-	FloatUp.from_card(card, text, {
+	if not FloatUp or not FloatUp.from_card_above then return end
+	FloatUp.from_card_above(card, text, {
 		colour = G.C and G.C.GOLD or DEFAULT_COLOUR,
 		font_px = 26,
 		life = 1.35,

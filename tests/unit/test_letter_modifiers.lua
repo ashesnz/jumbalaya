@@ -227,15 +227,34 @@ T.describe("Modifier placement feedback (word_game.ui.modifier_feedback)", funct
 	local feedback = require("word_game.ui.modifier_feedback")
 	local float_up_text = require("word_game.ui.float_up_text")
 
+	T.it("starts modifier float text above the card top edge", function()
+		local captured
+		local original_spawn = float_up_text.spawn
+		float_up_text.spawn = function(config)
+			captured = config
+			return config
+		end
+
+		local card = { T = { x = 2, y = 4, w = 1, h = 1.4 } }
+		float_up_text.from_card_above(card, "+1 point", { h = 0.5 })
+		float_up_text.spawn = original_spawn
+
+		T.assert_not_nil(captured, "modifier float text should be spawned")
+		T.assert_true(captured.y + captured.h <= card.T.y + 0.001,
+			"modifier float text should sit fully above the card top")
+		T.assert_almost_equal(captured.y, card.T.y - 0.5 - 0.14, 0.01,
+			"modifier float text should use the above-card gap offset")
+	end)
+
 	T.it("shows floating ui_text above a modified card placed in the row", function()
 		local spawned = nil
-		local original = float_up_text.from_card
-		float_up_text.from_card = function(card, text, opts)
+		local original = float_up_text.from_card_above
+		float_up_text.from_card_above = function(card, text, opts)
 			spawned = { card = card, text = text, opts = opts }
 		end
 		local card = { ability = { letter = "I", modified = true }, T = { x = 2, y = 3, w = 1, h = 1.4 } }
 		feedback.show_on_placed_card(card)
-		float_up_text.from_card = original
+		float_up_text.from_card_above = original
 		T.assert_not_nil(spawned)
 		T.assert_equal(spawned.text, "+1 point")
 		T.assert_equal(spawned.card, card)
@@ -243,12 +262,12 @@ T.describe("Modifier placement feedback (word_game.ui.modifier_feedback)", funct
 
 	T.it("does not show feedback for unmodified cards", function()
 		local spawned = false
-		local original = float_up_text.from_card
-		float_up_text.from_card = function()
+		local original = float_up_text.from_card_above
+		float_up_text.from_card_above = function()
 			spawned = true
 		end
 		feedback.show_on_placed_card({ ability = { letter = "I", modified = false } })
-		float_up_text.from_card = original
+		float_up_text.from_card_above = original
 		T.assert_false(spawned)
 	end)
 end)
