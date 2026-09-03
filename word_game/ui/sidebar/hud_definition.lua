@@ -170,6 +170,7 @@ function M.hud_definition()
 		(function()
 			local dw, dh = Layout.discard_slot_size()
 			local btn_h = dh * 0.88
+			local label_scale = 0.34
 			return { n = G.UI.ROW, config = {
 				align = "cm",
 				id = "row_discard",
@@ -188,22 +189,38 @@ function M.hud_definition()
 					id = "end_run_button",
 					minw = dw,
 					minh = btn_h,
+					maxw = dw,
+					maxh = btn_h,
 					focus_args = { nav = "wide", snap_to = true },
 				}, nodes = {
-					{ n = G.UI.TEXT, config = {
-						id = "end_run_label",
-						text = "End Run",
-						scale = 0.34,
-						colour = G.C.UI.TEXT_LIGHT,
-						shadow = true,
+					{ n = G.UI.ROW, config = {
+						id = "end_run_label_row",
+						align = "cm",
+						minw = dw,
+						minh = btn_h,
+					}, nodes = {
+						{ n = G.UI.TEXT, config = {
+							id = "end_run_label",
+							text = "End Run",
+							scale = label_scale,
+							colour = G.C.UI.TEXT_LIGHT,
+							shadow = true,
+						}},
 					}},
-					{ n = G.UI.TEXT, config = {
-						id = "end_run_next_arrow",
-						text = "→",
-						scale = 0.62,
-						colour = G.C.BLUE,
-						shadow = true,
-						visible = false,
+					{ n = G.UI.ROW, config = {
+						id = "end_run_arrow_row",
+						align = "cm",
+						minw = dw,
+						minh = btn_h,
+					}, nodes = {
+						{ n = G.UI.TEXT, config = {
+							id = "end_run_next_arrow",
+							text = "→",
+							scale = label_scale,
+							colour = G.C.UI.TEXT_LIGHT,
+							shadow = true,
+							visible = false,
+						}},
 					}},
 				}},
 			}}

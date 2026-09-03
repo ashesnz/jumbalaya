@@ -78,6 +78,14 @@ local function arrow_node(col)
 	return find_node(col, "end_run_next_arrow")
 end
 
+local function label_row(col)
+	return find_node(col, "end_run_label_row")
+end
+
+local function arrow_row(col)
+	return find_node(col, "end_run_arrow_row")
+end
+
 local function set_node_visible(node, visible)
 	if not node then return end
 	if node.states then
@@ -103,6 +111,8 @@ local function set_display_mode(col, mode, opts)
 	local arrow = arrow_node(col)
 	if mode == "next" then
 		col.config.colour = opts.panel_colour or blue_colour()
+		set_node_visible(label_row(col), false)
+		set_node_visible(arrow_row(col), true)
 		set_node_visible(label, false)
 		set_node_visible(arrow, true)
 		if arrow and arrow.config then
@@ -111,6 +121,8 @@ local function set_display_mode(col, mode, opts)
 		end
 	else
 		col.config.colour = opts.panel_colour or red_colour()
+		set_node_visible(label_row(col), true)
+		set_node_visible(arrow_row(col), false)
 		set_node_visible(label, true)
 		set_node_visible(arrow, false)
 	end
