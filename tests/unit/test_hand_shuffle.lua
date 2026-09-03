@@ -253,6 +253,37 @@ T.describe("Hand shuffle/remove button", function()
 		HandShuffle.destroy()
 	end)
 
+	T.it("disables the play button once the classic target is reached", function()
+		local HandShuffle = require("word_game.ui.hand_shuffle")
+		local tt = require("word_game.ui.timeline_timer")
+		setup_hand_shuffle_env()
+		G.GAME.run_mode = "classic"
+		G.GAME.word_round = {
+			mode = "jumble",
+			target = 25,
+			jumble = {
+				total_score = 30,
+				puzzle_points = 0,
+				puzzle_multi = 1.0,
+				slots = {},
+			},
+		}
+		WORD_GAME.TimelineTimer = tt
+		WORD_GAME.Jumble = {
+			is_active = function() return true end,
+			state = function() return G.GAME.word_round.jumble end,
+		}
+		tt.reset_progress(25)
+		tt.sync_progress()
+		G.hand = { T = { x = 3, y = 8, w = 12, h = 2.8 }, cards = { {}, {}, {}, {}, {}, {}, {} } }
+		HandShuffle.destroy()
+		T.assert_true(HandShuffle.sync())
+		local play_btn = HandShuffle.play_button_uie()
+		T.assert_nil(play_btn.config.button, "Play should be disabled after the classic target is met")
+		T.assert_false(play_btn.states.collide.can)
+		HandShuffle.destroy()
+	end)
+
 	T.it("removes play and shuffle buttons outside table board gameplay", function()
 		local HandShuffle = require("word_game.ui.hand_shuffle")
 		setup_hand_shuffle_env()

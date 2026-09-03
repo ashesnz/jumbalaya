@@ -117,10 +117,11 @@ T.describe("table discard bin", function()
 
 		T.assert_true(table_discard.record_discard())
 		if table_discard.bin_enabled() then
-			T.assert_true(table_discard.should_show_end_run(), "third discard should swap bin for End Run")
-			T.assert_equal(table_discard.sprite_frame(), 0, "bin sprite should not show the full frame once End Run is active")
+			T.assert_true(table_discard.end_run_button_visible(), "End Run button stays visible when bin fills")
+			T.assert_true(table_discard.should_show_end_run(), "third discard should enable End Run action")
+			T.assert_equal(table_discard.sprite_frame(), 0, "bin sprite should not show the full frame once bin is full")
 		else
-			T.assert_false(table_discard.should_show_end_run(), "off table board End Run follows table state only")
+			T.assert_false(table_discard.end_run_button_visible(), "off table board End Run button follows table state only")
 			T.assert_equal(table_discard.sprite_frame(), 2, "sprite still tracks fill count off table board")
 		end
 
@@ -140,10 +141,13 @@ T.describe("table discard bin", function()
 		local table_discard = require("word_game.ui.table_discard")
 		table_discard.reset()
 		G.STATE = G.STATES.TABLE_BOARD
-		T.assert_true(table_discard.should_show_end_run(), "End Run should always show on table board")
+		G.STAGE = G.STAGES.RUN
+		T.assert_true(table_discard.end_run_button_visible(), "End Run button should always show on table board")
+		T.assert_true(table_discard.should_show_end_run(), "End Run action should be available on table board")
 		table_discard.record_discard()
-		T.assert_true(table_discard.should_show_end_run(), "discards do not hide End Run while bin is disabled")
-		T.assert_false(table_discard.uses_table_draw() and not table_discard.should_show_end_run(), "bin draw should stay off")
+		T.assert_true(table_discard.end_run_button_visible(), "discards do not hide End Run while bin is disabled")
+		T.assert_true(table_discard.should_show_end_run(), "discards do not block End Run while bin is disabled")
+		T.assert_false(table_discard.uses_table_draw() and not table_discard.end_run_button_visible(), "bin draw should stay off")
 	end)
 
 	T.it("end_run triggers game over from the sidebar button", function()

@@ -92,16 +92,25 @@ function M.is_full()
 	return read_count() >= M.max_fills()
 end
 
+function M.end_run_button_visible()
+	if G.STAGE ~= G.STAGES.RUN then return false end
+	if felt.is_boss_sequence() then return false end
+	return G.STATE == G.STATES.TABLE_BOARD
+end
+
+function M.bin_sprite_visible()
+	return M.bin_enabled() and M.uses_table_draw() and not M.is_full()
+end
+
 function M.should_show_end_run()
-	if not M.bin_enabled() then
-		return G.STATE == G.STATES.TABLE_BOARD
-	end
+	if not M.end_run_button_visible() then return false end
+	if not M.bin_enabled() then return true end
 	return M.is_full()
 end
 
 function M.sync_discard_area()
 	if not G.discard or not G.discard.states then return end
-	local can_bin = M.bin_enabled() and M.uses_table_draw() and not M.should_show_end_run()
+	local can_bin = M.bin_sprite_visible()
 	G.discard.states.collide.can = can_bin
 	G.discard.states.hover.can = can_bin
 	G.discard.states.release_on.can = can_bin
@@ -124,14 +133,14 @@ end
 
 function M.is_pile_card_visible(card, discard_area)
 	if not card or not discard_area then return false end
-	if not M.uses_table_draw() or M.should_show_end_run() then return false end
+	if not M.uses_table_draw() or not M.bin_sprite_visible() then return false end
 	if card.played_pool or card.bin_stash then return false end
 	if card.states and card.states.visible == false then return false end
 	return false
 end
 
 function M.sync_vault_ui()
-	if M.should_show_end_run() then
+	if not M.bin_sprite_visible() then
 		M.hide_bin_cards()
 	end
 	M.sync_discards_left_display()
@@ -150,7 +159,7 @@ end
 
 --- Sprite index 0–2 while the bin is active (never show the full-bin frame).
 function M.sprite_frame()
-	if M.should_show_end_run() then return 0 end
+	if M.bin_enabled() and not M.bin_sprite_visible() then return 0 end
 	return math.min(read_count(), M.max_fills() - 1)
 end
 
@@ -267,7 +276,7 @@ local function draw_bin(area, ts)
 end
 
 function M.draw(area)
-	if not area or not M.bin_enabled() or M.should_show_end_run() then return end
+	if not area or not M.bin_sprite_visible() then return end
 	local ts = G.TILESCALE * G.TILESIZE
 	draw_bin(area, ts)
 end

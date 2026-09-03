@@ -130,6 +130,96 @@ T.describe("Classic run mode", function()
 		T.assert_true(vault_btn.is_next_mode())
 	end)
 
+	T.it("blocks further play once the classic target is reached", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "classic"
+		G.STATE = G.STATES.TABLE_BOARD
+		G.GAME.word_round = {
+			set = 1,
+			hand_index = 1,
+			target = 25,
+			jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0, slots = {} },
+		}
+		local RunMode = require("word_game.model.run_mode")
+		local rules = require("word_game.model.play.jumble_rules")
+		local tt = require("word_game.ui.timeline_timer")
+		WORD_GAME.TimelineTimer = tt
+		tt.reset_progress(25)
+		tt.sync_progress()
+
+		T.assert_true(RunMode.classic_stage_complete())
+		T.assert_true(rules.play_blocked(G.GAME.word_round.jumble))
+	end)
+
+	T.it("shows the proceed hint only when play is pressed with an empty card area", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "classic"
+		G.STATE = G.STATES.TABLE_BOARD
+		G.GAME.word_round = {
+			set = 1,
+			hand_index = 1,
+			target = 25,
+			mode = "jumble",
+			jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0, slots = {} },
+		}
+		G.placement_table = { area = { T = { x = 4, y = 4, w = 10, h = 2 }, cards = {} } }
+		G.hand = { T = { x = 3, y = 8, w = 12, h = 2.8 }, cards = {} }
+		G.TILE_W = 20
+		G.TILE_H = 11.5
+		G.ROOM_ATTACH = { T = { x = 0, y = 0, w = 20, h = 11.5 } }
+		_G.get_table_felt_rect = _G.get_table_felt_rect or function()
+			return { x = 0.8, y = 2.0, w = 15.4, h = 8.0 }
+		end
+		local RunMode = require("word_game.model.run_mode")
+		local placement_controls = require("word_game.ui.placement_controls")
+		local HandShuffle = require("word_game.ui.hand_shuffle")
+		local tt = require("word_game.ui.timeline_timer")
+		WORD_GAME.TimelineTimer = tt
+		WORD_GAME.HandShuffle = HandShuffle
+		WORD_GAME.Jumble = {
+			is_active = function() return true end,
+			state = function() return G.GAME.word_round.jumble end,
+		}
+		tt.reset_progress(25)
+		tt.sync_progress()
+
+		local captured = nil
+		local original_attention = spawn_attention
+		spawn_attention = function(args)
+			captured = args
+		end
+
+		placement_controls.try_play()
+		T.assert_not_nil(captured, "Empty card area should show the proceed hint")
+		T.assert_equal(captured.text, RunMode.classic_proceed_message())
+		T.assert_equal(captured.colour, G.C.RED)
+
+		captured = nil
+		G.placement_table.area.cards = { { ability = { letter = "A" } } }
+		placement_controls.try_play()
+		T.assert_nil(captured, "Play with cards in the area should not show the proceed hint")
+
+		spawn_attention = original_attention
+	end)
+
+	T.it("styles the proceed hint like Hand Cleared in red", function()
+		mock_env.reset_game()
+		local RunMode = require("word_game.model.run_mode")
+		local word_feedback = require("word_game.ui.word_feedback")
+
+		local captured = nil
+		local original_attention = spawn_attention
+		spawn_attention = function(args)
+			captured = args
+		end
+		word_feedback.show_classic_proceed()
+		spawn_attention = original_attention
+		T.assert_not_nil(captured)
+		T.assert_equal(captured.text, RunMode.classic_proceed_message())
+		T.assert_equal(captured.colour, G.C.RED)
+		T.assert_equal(captured.hold, 2.8)
+	end)
+
 	T.it("rolls the classic timeline score down during token award", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"

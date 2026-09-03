@@ -22,10 +22,7 @@ end
 function M.draw_layer(self, v, draw_card_layer)
 	if self.config.type ~= "discard" then return end
 	if self == G.discard and table_discard.uses_table_draw() then
-		if table_discard.should_show_end_run() then
-			return
-		end
-		if v == "card" then
+		if table_discard.bin_sprite_visible() and v == "card" then
 			table_discard.draw(self)
 		end
 		return

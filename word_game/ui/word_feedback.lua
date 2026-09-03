@@ -171,6 +171,18 @@ function M.show_above_hand_centered(text, colour, hold, offset_y)
 	})
 end
 
+function M.show_classic_proceed(opts)
+	opts = opts or {}
+	local RunMode = require("word_game.model.run_mode")
+	M.show(RunMode.classic_proceed_message(), G.C.RED, opts.hold or 2.8, opts.offset_y or 0.15)
+	local major = (G.placement_table and G.placement_table.area)
+		or G.PLAY_ATTACH
+		or G.ROOM_ATTACH
+	if major and major.pulse then
+		major:pulse(0.35, 0.2)
+	end
+end
+
 function M.show_invalid()
 	M.show(INVALID_WORD_TEXT, G.C.RED, 1.6)
 end

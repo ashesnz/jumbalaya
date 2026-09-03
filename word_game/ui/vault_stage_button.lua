@@ -2,8 +2,8 @@
 	word_game/ui/vault_stage_button.lua - End Run / Next vault button (classic stage goal).
 
 	When the classic target is met, animates the sidebar button from red "End Run"
-	to a blue right arrow. Pressing Next banks pending score, flies tokens, rolls
-	the timeline score down to zero, then advances the hand.
+	to a blue panel with "Next". Pressing Next banks pending score, flies tokens,
+	rolls the timeline score down to zero, then advances the hand.
 ]]
 
 local RunMode = require("word_game.model.run_mode")
@@ -14,12 +14,56 @@ local Play = require("word_game.model.play")
 local M = {}
 
 local TRANSITION_DUR = 0.55
-local ICON_ARROW = "→"
+local LABEL_END_RUN = "End Run"
+local LABEL_NEXT = "Next"
+
+local function font_metrics()
+	local lang = (G and G.LANG) or {}
+	local font_obj = lang.font or {}
+	return {
+		face = font_obj.FONT,
+		font_scale = font_obj.FONTSCALE or 0.12,
+		squish = font_obj.squish or 1,
+		height_scale = font_obj.TEXT_HEIGHT_SCALE or 0.7,
+	}
+end
+
+local function text_box_size(text, scale)
+	local metrics = font_metrics()
+	local tile = (G.TILESIZE or 20) * (G.TILESCALE or 1)
+	local text_w = (metrics.face and metrics.face.getWidth and metrics.face:getWidth(text))
+		or (string.len(text) * 10)
+	local text_h = (metrics.face and metrics.face.getHeight and metrics.face:getHeight())
+		or 20
+	local px_w = text_w * metrics.squish * scale * (G.TILESCALE or 1) * metrics.font_scale
+	local px_h = text_h * scale * (G.TILESCALE or 1) * metrics.font_scale * metrics.height_scale
+	return px_w / tile, px_h / tile
+end
+
+local function label_scale_for(text, btn_side)
+	local max_w = (btn_side or 0.62) * 0.9
+	local max_h = (btn_side or 0.62) * 0.9
+	local scale = 0.34
+	local w, h = text_box_size(text, scale)
+	if w > max_w or h > max_h then
+		local w_scale = w > 0 and (scale * max_w / w) or scale
+		local h_scale = h > 0 and (scale * max_h / h) or scale
+		scale = math.min(w_scale, h_scale)
+	end
+	return math.max(0.14, scale)
+end
+
+function M.label_scale_for(text)
+	local Layout = require("word_game.ui.layout")
+	local dw, dh = Layout.discard_slot_size()
+	return label_scale_for(text, math.min(dw, dh))
+end
 
 local anim = {
 	mode = "end_run",
 	transitioning = false,
 	transition_t = 0,
+	known_next_mode = false,
 }
 
 local function red_colour()
@@ -30,7 +74,7 @@ local function blue_colour()
 	return (G and G.C and G.C.BLUE) or { 0.2, 0.5, 1, 1 }
 end
 
-local function arrow_colour()
+local function label_colour()
 	return (G and G.C and G.C.UI and G.C.UI.TEXT_LIGHT) or { 1, 1, 1, 1 }
 end
 
@@ -74,28 +118,6 @@ local function label_node(col)
 	return find_node(col, "end_run_label")
 end
 
-local function arrow_node(col)
-	return find_node(col, "end_run_next_arrow")
-end
-
-local function label_row(col)
-	return find_node(col, "end_run_label_row")
-end
-
-local function arrow_row(col)
-	return find_node(col, "end_run_arrow_row")
-end
-
-local function set_node_visible(node, visible)
-	if not node then return end
-	if node.states then
-		node.states.visible = visible
-	end
-	if node.config then
-		node.config.visible = visible
-	end
-end
-
 local function set_button_rotation(col, radians)
 	if not col then return end
 	col.T = col.T or {}
@@ -104,32 +126,39 @@ local function set_button_rotation(col, radians)
 	col.VT.r = radians
 end
 
+local function set_label_text(label, text)
+	if not label or not label.config then return end
+	label.config.text = text
+	label.config.text_drawable = nil
+	label.config.prev_value = nil
+	label.config.scale = M.label_scale_for(text)
+	if label.update_text then label:update_text() end
+	if label.LayoutView and label.LayoutView.recalculate then
+		label.LayoutView:recalculate()
+	end
+end
+
 local function set_display_mode(col, mode, opts)
 	if not col or not col.config then return end
 	opts = opts or {}
 	local label = label_node(col)
-	local arrow = arrow_node(col)
 	if mode == "next" then
 		col.config.colour = opts.panel_colour or blue_colour()
-		set_node_visible(label_row(col), false)
-		set_node_visible(arrow_row(col), true)
-		set_node_visible(label, false)
-		set_node_visible(arrow, true)
-		if arrow and arrow.config then
-			arrow.config.text = ICON_ARROW
-			arrow.config.colour = opts.arrow_colour or arrow_colour()
+		set_label_text(label, opts.label_text or LABEL_NEXT)
+		if label and label.config then
+			label.config.colour = opts.label_colour or label_colour()
 		end
 	else
 		col.config.colour = opts.panel_colour or red_colour()
-		set_node_visible(label_row(col), true)
-		set_node_visible(arrow_row(col), false)
-		set_node_visible(label, true)
-		set_node_visible(arrow, false)
+		set_label_text(label, opts.label_text or LABEL_END_RUN)
+		if label and label.config then
+			label.config.colour = opts.label_colour or label_colour()
+		end
 	end
 end
 
 function M.is_next_mode()
-	if not table_discard.should_show_end_run() then return false end
+	if not table_discard.end_run_button_visible() then return false end
 	if not RunMode.is_classic() then return false end
 	local tt = WORD_GAME and WORD_GAME.TimelineTimer
 	if not tt or not tt.is_progress_mode or not tt.is_progress_mode() then return false end
@@ -141,6 +170,7 @@ function M.reset()
 	anim.mode = "end_run"
 	anim.transitioning = false
 	anim.transition_t = 0
+	anim.known_next_mode = false
 	local col = button_column()
 	if col and col.config then
 		col.config.button = "end_run_from_discard_bin"
@@ -153,7 +183,7 @@ function M.sync()
 	local col = button_column()
 	if not col or not col.config then return end
 
-	local show = table_discard.should_show_end_run()
+	local show = table_discard.end_run_button_visible()
 	if col.states then
 		col.states.visible = show
 	end
@@ -173,7 +203,7 @@ end
 
 function M.update(dt)
 	dt = dt or 0
-	if G.STATE ~= G.STATES.TABLE_BOARD or not table_discard.should_show_end_run() then
+	if not table_discard.end_run_button_visible() then
 		if anim.mode ~= "end_run" or anim.transitioning then
 			M.reset()
 		end
@@ -182,6 +212,13 @@ function M.update(dt)
 
 	local next_mode = M.is_next_mode()
 	local col = button_column()
+
+	if next_mode ~= anim.known_next_mode then
+		anim.known_next_mode = next_mode
+		if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync_visibility then
+			WORD_GAME.HandShuffle.sync_visibility()
+		end
+	end
 
 	if next_mode and anim.mode == "end_run" and not anim.transitioning then
 		anim.transitioning = true
@@ -205,7 +242,7 @@ function M.update(dt)
 			col.config.button = "classic_stage_next"
 			set_display_mode(col, "next", {
 				panel_colour = lerp_colour(red_colour(), blue_colour(), morph),
-				arrow_colour = arrow_colour(),
+				label_text = LABEL_NEXT,
 			})
 		end
 

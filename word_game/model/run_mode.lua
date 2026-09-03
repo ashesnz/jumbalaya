@@ -53,4 +53,16 @@ function M.ends_hand_on_target()
 	return not M.is_classic()
 end
 
+function M.classic_stage_complete()
+	if not M.is_classic() then return false end
+	local tt = WORD_GAME and WORD_GAME.TimelineTimer
+	if not tt or not tt.is_progress_mode or not tt.is_progress_mode() then return false end
+	if tt.sync_progress then tt.sync_progress() end
+	return tt.goal_reached == true
+end
+
+function M.classic_proceed_message()
+	return "Proceed to the next level by pressing Next."
+end
+
 return M

@@ -7,6 +7,7 @@ local hand_placement_recall_anim = require("word_game.ui.hand_placement_recall_a
 local bonus_stack = require("word_game.ui.boss_word_stack")
 local InputLock = require("word_game.model.input_lock")
 local hand_size_cfg = require("word_game.config.hand_size")
+local RunMode = require("word_game.model.run_mode")
 local characters = { intro_step_keys = function() return nil end, intro_uses_play_button = function() return true end }
 
 local M = {}
@@ -510,6 +511,15 @@ local function sync_play_button(play_btn, show)
 	end
 
 	play_btn.states.visible = true
+
+	if RunMode.classic_stage_complete() then
+		play_btn.config.button = nil
+		play_btn.config.colour = play_button_colour()
+		play_btn.config.force_collision = false
+		play_btn.states.collide.can = false
+		set_play_display(play_btn, "sprite")
+		return
+	end
 
 	if jumble_active() then
 		play_btn.config.button = "play_placement_word"

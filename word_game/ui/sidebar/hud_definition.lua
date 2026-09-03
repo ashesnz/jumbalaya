@@ -117,7 +117,7 @@ end
 function M.sync_discard_row()
 	if not G.VAULT_HUD then return end
 	local end_btn = G.VAULT_HUD:find_node_by_id("end_run_button")
-	set_node_visible(end_btn, table_discard.should_show_end_run())
+	set_node_visible(end_btn, table_discard.end_run_button_visible())
 	local discards_row = G.VAULT_HUD:find_node_by_id("row_discards_left")
 	if discards_row then
 		set_node_visible(discards_row, table_discard.bin_enabled())
@@ -169,58 +169,37 @@ function M.hud_definition()
 		deck_count_node(box_w),
 		(function()
 			local dw, dh = Layout.discard_slot_size()
-			local btn_h = dh * 0.88
-			local label_scale = 0.34
+			local btn_side = math.min(dw, dh)
+			local vault_btn = require("word_game.ui.vault_stage_button")
 			return { n = G.UI.ROW, config = {
 				align = "cm",
 				id = "row_discard",
 				minw = box_w,
-				minh = dh,
-				maxh = dh,
+				minh = btn_side,
+				maxh = btn_side,
 			}, nodes = {
 				{ n = G.UI.COLUMN, config = {
 					align = "cm",
-					padding = Components.CHROME.padding,
+					padding = 0,
 					r = Components.CHROME.radius,
 					hover = true,
 					colour = G.C.RED,
 					hover_colour = G.C.UI.BUTTON_HOVER,
 					button = "end_run_from_discard_bin",
 					id = "end_run_button",
-					minw = dw,
-					minh = btn_h,
-					maxw = dw,
-					maxh = btn_h,
+					minw = btn_side,
+					minh = btn_side,
+					maxw = btn_side,
+					maxh = btn_side,
+					visible = true,
 					focus_args = { nav = "wide", snap_to = true },
 				}, nodes = {
-					{ n = G.UI.ROW, config = {
-						id = "end_run_label_row",
-						align = "cm",
-						minw = dw,
-						minh = btn_h,
-					}, nodes = {
-						{ n = G.UI.TEXT, config = {
-							id = "end_run_label",
-							text = "End Run",
-							scale = label_scale,
-							colour = G.C.UI.TEXT_LIGHT,
-							shadow = true,
-						}},
-					}},
-					{ n = G.UI.ROW, config = {
-						id = "end_run_arrow_row",
-						align = "cm",
-						minw = dw,
-						minh = btn_h,
-					}, nodes = {
-						{ n = G.UI.TEXT, config = {
-							id = "end_run_next_arrow",
-							text = "→",
-							scale = label_scale,
-							colour = G.C.UI.TEXT_LIGHT,
-							shadow = true,
-							visible = false,
-						}},
+					{ n = G.UI.TEXT, config = {
+						id = "end_run_label",
+						text = "End Run",
+						scale = vault_btn.label_scale_for("End Run"),
+						colour = G.C.UI.TEXT_LIGHT,
+						shadow = true,
 					}},
 				}},
 			}}
