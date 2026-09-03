@@ -61,8 +61,23 @@ function M.classic_stage_complete()
 	return tt.goal_reached == true
 end
 
+function M.classic_stage_target()
+	local wr = G.GAME and G.GAME.word_round
+	if wr and wr.target then
+		return math.max(1, math.floor(wr.target))
+	end
+	local tt = WORD_GAME and WORD_GAME.TimelineTimer
+	if tt and tt.progress_target then
+		return math.max(1, math.floor(tt.progress_target))
+	end
+	return 1
+end
+
 function M.classic_proceed_message()
-	return "Proceed to the next level by pressing Next."
+	return string.format(
+		"Target %d Reached! Click Next to Continue.",
+		M.classic_stage_target()
+	)
 end
 
 return M

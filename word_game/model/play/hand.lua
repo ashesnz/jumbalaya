@@ -127,6 +127,14 @@ end
 
 function M.on_hand_cleared(opts)
 	opts = opts or {}
+	local wr = G.GAME and G.GAME.word_round
+	local j = wr and wr.jumble
+	if not opts.boss_cleared
+		and j and j.slots
+		and WORD_GAME and WORD_GAME.Jumble
+		and WORD_GAME.Jumble.clear_blank_cards then
+		WORD_GAME.Jumble.clear_blank_cards(j.slots)
+	end
 	if not opts.boss_cleared
 		and WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.is_jumble_deck
 		and WORD_GAME.Deck.is_jumble_deck()
@@ -137,8 +145,6 @@ function M.on_hand_cleared(opts)
 		G.GAME.word_score_animating = true
 	end
 
-	local wr = G.GAME and G.GAME.word_round
-	local j = wr and wr.jumble
 	if wr and round_config.is_boss_word_hand(wr.set, wr.hand_index) and j
 		and not j.boss_word_active and not opts.boss_cleared then
 		-- Stage 1-3 celebrates like every other hand, then flows into the

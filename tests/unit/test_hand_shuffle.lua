@@ -253,7 +253,7 @@ T.describe("Hand shuffle/remove button", function()
 		HandShuffle.destroy()
 	end)
 
-	T.it("disables the play button once the classic target is reached", function()
+	T.it("keeps the play button clickable once the classic target is reached", function()
 		local HandShuffle = require("word_game.ui.hand_shuffle")
 		local tt = require("word_game.ui.timeline_timer")
 		setup_hand_shuffle_env()
@@ -262,7 +262,7 @@ T.describe("Hand shuffle/remove button", function()
 			mode = "jumble",
 			target = 25,
 			jumble = {
-				total_score = 30,
+				total_score = 32,
 				puzzle_points = 0,
 				puzzle_multi = 1.0,
 				slots = {},
@@ -279,8 +279,8 @@ T.describe("Hand shuffle/remove button", function()
 		HandShuffle.destroy()
 		T.assert_true(HandShuffle.sync())
 		local play_btn = HandShuffle.play_button_uie()
-		T.assert_nil(play_btn.config.button, "Play should be disabled after the classic target is met")
-		T.assert_false(play_btn.states.collide.can)
+		T.assert_equal(play_btn.config.button, "play_placement_word")
+		T.assert_true(play_btn.states.collide.can)
 		HandShuffle.destroy()
 	end)
 

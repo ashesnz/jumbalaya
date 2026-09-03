@@ -13,9 +13,23 @@ return function(context)
 		return wr and wr.mode == "jumble"
 	end
 
+	local function purge_deck_area()
+		if not G.deck then return end
+		if G.deck.remove_card and G.deck.cards then
+			for i = #G.deck.cards, 1, -1 do
+				G.deck:remove_card(G.deck.cards[i])
+			end
+		elseif G.deck.cards then
+			G.deck.cards = {}
+		end
+		if G.deck.hard_set_cards then
+			G.deck:hard_set_cards()
+		end
+	end
+
 	local function purge_table_cards()
 		local function purge(area)
-			if not area or not area.cards then return end
+			if not area or not area.cards or not area.remove_card then return end
 			for i = #area.cards, 1, -1 do
 				local card = area.cards[i]
 				if G.placement_table and area == G.placement_table.area then
@@ -27,6 +41,7 @@ return function(context)
 				area:hard_set_cards()
 			end
 		end
+		purge_deck_area()
 		purge(G.hand)
 		purge(G.discard)
 		purge(G.placement_table and G.placement_table.area)
@@ -38,15 +53,20 @@ return function(context)
 			M.populate_starting_deck()
 			return
 		end
-		G.deck.cards = {}
 		for _, card in ipairs(G.playing_cards) do
 			if card and not card.REMOVED and not card.boss_temp and not card.bonus_card then
-				G.deck:emplace(card)
+				if G.deck.emplace then
+					G.deck:emplace(card)
+				end
 			end
 		end
-		G.deck.config.card_limit = #G.deck.cards
+		if G.deck.config then
+			G.deck.config.card_limit = #G.deck.cards
+		end
 		M.shuffle_deck()
-		G.deck:hard_set_T()
+		if G.deck.hard_set_T then
+			G.deck:hard_set_T()
+		end
 		M.sync_deck_count_display()
 	end
 

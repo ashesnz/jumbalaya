@@ -513,10 +513,10 @@ local function sync_play_button(play_btn, show)
 	play_btn.states.visible = true
 
 	if RunMode.classic_stage_complete() then
-		play_btn.config.button = nil
+		play_btn.config.button = "play_placement_word"
 		play_btn.config.colour = play_button_colour()
-		play_btn.config.force_collision = false
-		play_btn.states.collide.can = false
+		play_btn.config.force_collision = true
+		play_btn.states.collide.can = true
 		set_play_display(play_btn, "sprite")
 		return
 	end

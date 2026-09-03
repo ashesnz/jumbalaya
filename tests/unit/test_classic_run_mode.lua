@@ -160,7 +160,7 @@ T.describe("Classic run mode", function()
 			hand_index = 1,
 			target = 25,
 			mode = "jumble",
-			jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0, slots = {} },
+			jumble = { total_score = 32, puzzle_points = 0, puzzle_multi = 1.0, slots = {} },
 		}
 		G.placement_table = { area = { T = { x = 4, y = 4, w = 10, h = 2 }, cards = {} } }
 		G.hand = { T = { x = 3, y = 8, w = 12, h = 2.8 }, cards = {} }
@@ -183,6 +183,9 @@ T.describe("Classic run mode", function()
 		tt.reset_progress(25)
 		tt.sync_progress()
 
+		T.assert_true(RunMode.classic_stage_complete(), "Score above target should count as reached")
+		T.assert_equal(RunMode.classic_proceed_message(), "Target 25 Reached! Click Next to Continue.")
+
 		local captured = nil
 		local original_attention = spawn_attention
 		spawn_attention = function(args)
@@ -191,7 +194,7 @@ T.describe("Classic run mode", function()
 
 		placement_controls.try_play()
 		T.assert_not_nil(captured, "Empty card area should show the proceed hint")
-		T.assert_equal(captured.text, RunMode.classic_proceed_message())
+		T.assert_equal(captured.text, "Target 25 Reached! Click Next to Continue.")
 		T.assert_equal(captured.colour, G.C.RED)
 
 		captured = nil
@@ -215,7 +218,7 @@ T.describe("Classic run mode", function()
 		word_feedback.show_classic_proceed()
 		spawn_attention = original_attention
 		T.assert_not_nil(captured)
-		T.assert_equal(captured.text, RunMode.classic_proceed_message())
+		T.assert_equal(captured.text, "Target 25 Reached! Click Next to Continue.")
 		T.assert_equal(captured.colour, G.C.RED)
 		T.assert_equal(captured.hold, 2.8)
 	end)
