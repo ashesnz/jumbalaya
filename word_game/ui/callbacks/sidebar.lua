@@ -22,9 +22,20 @@ return function(sidebar, hud_definition)
 		end
 	end
 	G.FUNCS.end_run_from_discard_bin = function()
+		local vault_btn = WORD_GAME and WORD_GAME.VaultStageButton
+		if vault_btn and vault_btn.press then
+			vault_btn.press()
+			return
+		end
 		local table_discard = WORD_GAME and WORD_GAME.TableDiscard
 		if table_discard and table_discard.end_run then
 			table_discard.end_run()
+		end
+	end
+	G.FUNCS.classic_stage_next = function()
+		local vault_btn = WORD_GAME and WORD_GAME.VaultStageButton
+		if vault_btn and vault_btn.collect_and_advance then
+			vault_btn.collect_and_advance()
 		end
 	end
 end

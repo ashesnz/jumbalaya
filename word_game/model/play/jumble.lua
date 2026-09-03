@@ -5,6 +5,11 @@ local round = require("word_game.model.round")
 local rules = require("word_game.model.play.jumble_rules")
 local effects = require("word_game.ui.play_effects")
 local word_feedback = require("word_game.ui.word_feedback")
+local RunMode = require("word_game.model.run_mode")
+
+local function ends_hand_on_target(cleared)
+	return cleared and RunMode.ends_hand_on_target()
+end
 
 function M.play_jumble_word(opts)
 	opts = opts or {}
@@ -20,10 +25,10 @@ function M.play_jumble_word(opts)
 
 	effects.roll_jumble_banners(result)
 	local boss_trigger = effects.triggers_boss_word(result)
-	effects.capture_token_timer_if_cleared(result.new_rem <= 0, { skip_focus = boss_trigger })
+	effects.capture_token_timer_if_cleared(ends_hand_on_target(result.cleared), { skip_focus = boss_trigger })
 
 	if result.kind == "bank_puzzle" then
-		if result.cleared then
+		if ends_hand_on_target(result.cleared) then
 			effects.set_word_score_animating(true)
 			effects.add_points(result.puzzle_total)
 			M.on_hand_cleared()

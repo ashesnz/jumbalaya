@@ -109,7 +109,7 @@ T.describe("Jumble play flow integration", function()
 		round.advance_hand()
 		T.assert_equal(G.GAME.word_round.set, 1)
 		T.assert_equal(G.GAME.word_round.hand_index, 2, "Should advance to stage 1-2")
-		T.assert_equal(G.GAME.word_round.target, 2, "Level 2 target should be 2 points")
+		T.assert_equal(G.GAME.word_round.target, 50, "Level 2 target should be 50 points")
 		T.assert_equal(#G.GAME.word_round.played_words, 0, "Played words reset for stage 1-2")
 	end)
 

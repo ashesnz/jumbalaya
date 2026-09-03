@@ -30,6 +30,7 @@ local M = {
 	InputLock = require("word_game.model.input_lock"),
 	HandSize = require("word_game.config.hand_size"),
 	TableDiscard = require("word_game.ui.table_discard"),
+	VaultStageButton = require("word_game.ui.vault_stage_button"),
 	ScoreBanner = require("word_game.ui.score_banner"),
 	TimelineTimer = require("word_game.ui.timeline_timer"),
 	StageLabel = require("word_game.ui.stage_label"),

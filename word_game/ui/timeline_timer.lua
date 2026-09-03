@@ -21,11 +21,13 @@ M.progress_target = 1
 M.progress_score = 0
 M.progress_pending = 0
 M.display_frac = 0
+M.display_goal_frac = 1
 M.goal_reached = false
 M.puzzle_word_count = 0
 M.smoke_active = false
 M.slide_boost_t = 0
 M.display_combo = 0
+M.score_roll = nil
 
 local SMOKE_WORD_THRESHOLD = 3
 local SHAKE_WORD_THRESHOLD = 5
@@ -185,6 +187,7 @@ end
 
 function M.sync_progress()
 	if not M.is_progress_mode() then return end
+	if M.frozen_for_reward or M.score_roll then return end
 	local wr = G.GAME and G.GAME.word_round
 	local j = wr and wr.jumble
 	local target = math.max(1, (wr and wr.target) or M.progress_target or 1)
@@ -201,10 +204,29 @@ function M.sync_progress()
 	M.goal_reached = (banked + pending) >= target
 end
 
+function M.progress_score_total()
+	return (M.progress_score or 0) + (M.progress_pending or 0)
+end
+
 function M.progress_total_fraction()
 	local target = math.max(1, M.progress_target or 1)
-	local score = (M.progress_score or 0) + (M.progress_pending or 0)
+	local score = M.progress_score_total()
+	if score >= target then
+		return 1
+	end
 	return clamp01(score / target)
+end
+
+--- Vertical goal seam when classic target is met; moves left as score exceeds target.
+function M.progress_goal_marker_fraction()
+	if not M.goal_reached then return nil end
+	local target = math.max(1, M.progress_target or 1)
+	local score = math.max(target, M.progress_score_total())
+	return clamp01(target / score)
+end
+
+function M.display_goal_marker_fraction()
+	return M.display_goal_frac or 1
 end
 
 function M.on_word_played(_old_total, _new_total)
@@ -222,17 +244,23 @@ function M.reset_puzzle_smoke()
 end
 
 function M.format_progress_label()
-	local score = M.progress_score or 0
+	local banked = M.progress_score or 0
 	local target = math.max(1, M.progress_target or 1)
 	local pending = M.progress_pending or 0
+	local projected = banked + pending
+	if M.score_roll then
+		local shown = math.floor(banked + 0.5)
+		return string.format("%d / %d", shown, target)
+	end
 	if M.frozen_for_reward then
-		return string.format("%d", math.floor(score + 0.5))
+		return string.format("%d", math.floor(banked + 0.5))
 	end
-	local to_go = math.max(0, target - score - pending)
-	if to_go <= 0 then
-		return "GOAL REACHED"
+	if projected >= target then
+		return string.format("%d / %d", math.floor(projected + 0.5), target)
 	end
-	return string.format("%d / %d", score, target)
+	local animated = math.floor(clamp01(M.display_frac or 0) * target + 0.5)
+	local shown = math.min(target, math.max(animated, projected))
+	return string.format("%d / %d", shown, target)
 end
 
 function M.progress_fill_fraction()
@@ -348,25 +376,32 @@ function M.reset(duration)
 	M.progress_score = 0
 	M.progress_pending = 0
 	M.display_frac = 0
+	M.display_goal_frac = 1
 	M.goal_reached = false
 	M.puzzle_word_count = 0
 	M.smoke_active = false
 	M.slide_boost_t = 0
 	M.display_combo = 0
+	M.score_roll = nil
 	local wr = G.GAME and G.GAME.word_round
 	M.progress_target = math.max(1, (wr and wr.target) or 1)
 	M.sync_progress()
 	StageLabel.sync()
+	if WORD_GAME and WORD_GAME.VaultStageButton and WORD_GAME.VaultStageButton.reset then
+		WORD_GAME.VaultStageButton.reset()
+	end
 end
 
 function M.reset_progress(target)
 	M.is_active = false
 	M.frozen_for_reward = false
+	M.score_roll = nil
 	M.sparks = {}
 	M.progress_target = math.max(1, target or 1)
 	M.progress_score = 0
 	M.progress_pending = 0
 	M.display_frac = 0
+	M.display_goal_frac = 1
 	M.goal_reached = false
 	M.puzzle_word_count = 0
 	M.smoke_active = false
@@ -374,6 +409,23 @@ function M.reset_progress(target)
 	M.display_combo = 0
 	M.sync_progress()
 	StageLabel.sync()
+	if WORD_GAME and WORD_GAME.VaultStageButton and WORD_GAME.VaultStageButton.reset then
+		WORD_GAME.VaultStageButton.reset()
+	end
+end
+
+function M.start_score_roll(from, to, duration)
+	from = math.max(0, math.floor(from or 0))
+	to = math.max(0, math.floor(to or 0))
+	duration = duration or 0.75
+	M.progress_score = from
+	M.progress_pending = 0
+	M.display_frac = clamp01(from / math.max(1, M.progress_target or 1))
+	M.display_goal_frac = M.progress_goal_marker_fraction() or 1
+	M.goal_reached = from >= (M.progress_target or 1)
+	M.is_active = false
+	M.frozen_for_reward = true
+	M.score_roll = { from = from, to = to, t = 0, dur = duration }
 end
 
 function M.pause()
@@ -392,6 +444,7 @@ function M.freeze_reward_display(token_amount)
 		M.progress_score = token_amount
 		M.progress_pending = 0
 		M.display_frac = clamp01(token_amount / math.max(1, M.progress_target or 1))
+		M.display_goal_frac = M.progress_goal_marker_fraction() or 1
 		M.goal_reached = token_amount >= (M.progress_target or 1)
 	else
 		M.time_remaining = token_amount
@@ -410,17 +463,43 @@ function M.add_time(seconds)
 	M.time_remaining = math.min(M.TOTAL_DURATION, M.time_remaining + seconds)
 end
 
+local function ease_out_cubic(t)
+	t = clamp01(t)
+	local inv = 1 - t
+	return 1 - inv * inv * inv
+end
+
 function M.update(dt)
 	dt = dt or 0
 	if M.is_progress_mode() then
-		M.sync_progress()
+		if M.score_roll then
+			local roll = M.score_roll
+			roll.t = roll.t + dt
+			local u = ease_out_cubic(roll.t / roll.dur)
+			local val = roll.from + (roll.to - roll.from) * u
+			M.progress_score = val
+			M.progress_pending = 0
+			local target = math.max(1, M.progress_target or 1)
+			M.display_frac = clamp01(val / target)
+			if M.goal_reached then
+				M.display_goal_frac = clamp01(target / math.max(target, val))
+			end
+			if roll.t >= roll.dur then
+				M.progress_score = roll.to
+				M.score_roll = nil
+			end
+		elseif not M.frozen_for_reward then
+			M.sync_progress()
+		end
 		local target_frac = M.progress_total_fraction()
+		local goal_frac = M.progress_goal_marker_fraction() or 1
 		local boost = (M.slide_boost_t or 0) > 0 and 10 or 0
 		if M.slide_boost_t and M.slide_boost_t > 0 then
 			M.slide_boost_t = math.max(0, M.slide_boost_t - dt)
 		end
 		local lerp_speed = (M.frozen_for_reward and 12 or 8) + boost
 		M.display_frac = M.display_frac + (target_frac - M.display_frac) * math.min(1, dt * lerp_speed)
+		M.display_goal_frac = M.display_goal_frac + (goal_frac - M.display_goal_frac) * math.min(1, dt * lerp_speed)
 		M.update_display_intensity(dt)
 	else
 		if M.is_active and M.time_remaining > 0 then
@@ -477,9 +556,6 @@ function M.draw()
 	if not love or not love.graphics or not love.graphics.polygon then return end
 	if not G.GAME or not G.ROOM then return end
 	if G.STATE ~= G.STATES.TABLE_BOARD then return end
-
-	local dt = math.min(0.05, love.timer and love.timer.getDelta() or 0.016)
-	M.update(dt)
 
 	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
 	local rect = Layout.timeline_rect and Layout.timeline_rect() or Layout.portrait_rect()
@@ -595,6 +671,20 @@ function M.draw()
 		if glow_scale > 1.2 then
 			love.graphics.setColor(SPARK_GLOW[1], SPARK_GLOW[2], SPARK_GLOW[3], math.min(0.55, 0.18 + (glow_scale - 1) * 0.12))
 			love.graphics.circle("fill", mid_fuse_x, mid_fuse_y, halo_r * 1.45)
+		end
+	end
+
+	if M.is_progress_mode() and M.goal_reached then
+		local goal_frac = M.display_goal_marker_fraction()
+		if goal_frac < 0.995 then
+			local goal_top = x + (w - slant) * goal_frac
+			local goal_bot = x + w * goal_frac
+			love.graphics.setLineWidth(math.max(5, h * 0.12))
+			love.graphics.setColor(1, 0.92, 0.45, 0.5)
+			love.graphics.line(goal_top, y - 1, goal_bot, y + h + 1)
+			love.graphics.setLineWidth(math.max(2.5, h * 0.055))
+			love.graphics.setColor(1, 1, 1, 0.95)
+			love.graphics.line(goal_top, y, goal_bot, y + h)
 		end
 	end
 

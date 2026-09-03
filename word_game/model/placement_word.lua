@@ -8,6 +8,9 @@ function M.clear()
 	if not G.GAME then return end
 	G.GAME.placement_word = ""
 	G.GAME.placement_word_valid = false
+	if WORD_GAME and WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.sync_points_to_get_preview then
+		WORD_GAME.ScoreBanner.sync_points_to_get_preview(true)
+	end
 end
 
 function M.refresh_from_cards(cards)
@@ -33,6 +36,9 @@ function M.refresh_from_jumble_slots(slots)
 		G.GAME.placement_word_valid = Dictionary.is_valid(word) and not round.is_word_played(word)
 	else
 		G.GAME.placement_word_valid = false
+	end
+	if WORD_GAME and WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.sync_points_to_get_preview then
+		WORD_GAME.ScoreBanner.sync_points_to_get_preview(true)
 	end
 end
 

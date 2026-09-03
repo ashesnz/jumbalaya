@@ -23,3 +23,37 @@ os=OS X texture_scaling=2 window=1024x576
 Steam not available — running without Steam integration
 SAVING PROGRESS
 SAVING SETTINGS
+=== Jumbalaya Error ===
+word_game/ui/vault_stage_button.lua:242: attempt to index local 'Hand' (a function value)
+
+stack traceback:
+	app/error_handler.lua:139: in function 'handler'
+	[love "boot.lua"]:352: in function '__index'
+	word_game/ui/vault_stage_button.lua:242: in function 'collect_and_advance'
+	word_game/ui/callbacks/sidebar.lua:38: in function <word_game/ui/callbacks/sidebar.lua:35>
+	app/core/ui/node_interaction.lua:53: in function 'click'
+	app/core/input/update_dispatch.lua:31: in function 'update_dispatch'
+	app/core/input/router.lua:101: in function 'update'
+	app/core/session/loop.lua:86: in function 'update'
+	app/core/session/lifecycle.lua:122: in function 'update'
+	app/core/session/lifecycle.lua:43: in function <app/core/session/lifecycle.lua:16>
+	[C]: in function 'xpcall'
+	[love "boot.lua"]:377: in function <[love "boot.lua"]:344>
+=== Jumbalaya Error ===
+word_game/ui/vault_stage_button.lua:242: attempt to index local 'Hand' (a function value)
+
+stack traceback:
+	app/error_handler.lua:139: in function 'handler'
+	[love "boot.lua"]:352: in function '__index'
+	word_game/ui/vault_stage_button.lua:242: in function 'collect_and_advance'
+	word_game/ui/callbacks/sidebar.lua:38: in function <word_game/ui/callbacks/sidebar.lua:35>
+	app/core/ui/node_interaction.lua:53: in function 'click'
+	app/core/input/update_dispatch.lua:31: in function 'update_dispatch'
+	app/core/input/router.lua:101: in function 'update'
+	app/core/session/loop.lua:86: in function 'update'
+	app/core/session/lifecycle.lua:122: in function 'update'
+	app/core/session/lifecycle.lua:43: in function <app/core/session/lifecycle.lua:16>
+	[C]: in function 'xpcall'
+	[love "boot.lua"]:377: in function <[love "boot.lua"]:344>
+
+Error log saved to: /Users/ashwin/Library/Application Support/LOVE/Jumbalaya/error.log

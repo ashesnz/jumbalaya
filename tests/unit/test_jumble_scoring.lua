@@ -127,24 +127,27 @@ T.describe("Jumble scoring and odometer", function()
 		T.assert_almost_equal(sb.jumble_multi, 1.0, 0.01)
 	end)
 
-	T.it("initializes round target to 50 points for stage 1-1 and 2 points for stage 1-2", function()
+	T.it("initializes round target to 25 points for stage 1-1 and 50 points for stage 1-2", function()
 		local pcfg = require("word_game.board.config")
 		T.assert_equal(pcfg.ANCHOR_PAD_Y_FRAC, 0.078, "Anchor pad frac lowered to 0.078")
 
 		local round_cfg = require("word_game.config.round_config")
-		T.assert_equal(round_cfg.hand_target(1, 1), 50, "Stage 1-1 target should be 50 points")
-		T.assert_equal(round_cfg.hand_target(1, 2), 2, "Stage 1-2 target should be 2 points")
+		T.assert_equal(round_cfg.hand_target(1, 1), 25, "Stage 1-1 target should be 25 points")
+		T.assert_equal(round_cfg.hand_target(1, 2), 50, "Stage 1-2 target should be 50 points")
+		T.assert_equal(round_cfg.hand_target(1, 9), 100, "Stage 1-9 target should be 100 points")
 
 		local wr = { target = round_cfg.hand_target(1, 1) }
 		jumble.start_hand(wr)
-		T.assert_equal(wr.target, 50, "Jumble preserves round_config target on start_hand")
+		T.assert_equal(wr.target, 25, "Jumble preserves round_config target on start_hand")
 	end)
 
 	T.it("executes fast odometer countdown for points to get in under 0.5s", function()
 		local sb = require("word_game.ui.score_banner")
 		G.GAME.word_round = { target = 20, jumble = { total_score = 0 } }
 		sb.reset_jumble_score()
-		T.assert_equal(sb.points_to_get, 20, "Initial points to get should be 20")
+		T.assert_equal(sb.points_to_get, 20, "Initial remaining should be 20")
+		T.assert_equal(sb.points_earned, 0)
+		T.assert_equal(sb.points_got, 0)
 
 		sb.roll_points_to_get(20, 15, 0.40)
 		T.assert_not_nil(sb.to_get_roll, "to_get_roll active")
@@ -163,7 +166,9 @@ T.describe("Jumble scoring and odometer", function()
 	T.it("decrements points to get odometer when each word is played in jumble mode", function()
 		local flow = require("word_game.model.play")
 		local sb = require("word_game.ui.score_banner")
+		local rules = require("word_game.model.play.jumble_rules")
 		WORD_GAME.ScoreBanner = sb
+		WORD_GAME.Jumble = jumble
 		G.GAME.word_round = {
 			target = 20,
 			mode = "jumble",
@@ -185,7 +190,10 @@ T.describe("Jumble scoring and odometer", function()
 		}
 		G.GAME.word_score_animating = false
 		sb.reset_jumble_score()
-		T.assert_equal(sb.points_to_get, 20)
+		T.assert_equal(sb.points_to_get, 17, "Placed CAT should preview 3 points toward the target")
+		T.assert_equal(sb.points_earned, 0)
+		T.assert_equal(sb.points_got, 3)
+		T.assert_equal(rules.remaining_to_target(G.GAME.word_round.jumble, 20), 17)
 		local feedback
 		local original_attention_text = spawn_attention
 		spawn_attention = function(config)
@@ -195,9 +203,10 @@ T.describe("Jumble scoring and odometer", function()
 		local word, err = jumble.validate_current()
 		T.assert_equal(word, "CAT", "Validation error: " .. tostring(err))
 		flow.play_jumble_word()
-		T.assert_not_nil(sb.to_get_roll, "to_get_roll should be triggered on word play")
-		T.assert_equal(sb.to_get_roll.from, 20)
-		T.assert_equal(sb.to_get_roll.to, 17)
+		sb.update(0.5)
+		T.assert_equal(sb.points_to_get, 17, "Remaining should stay at 17 after scoring CAT")
+		T.assert_equal(sb.points_earned, 3)
+		T.assert_equal(sb.points_got, 0)
 
 		G.GAME.word_round.target = 100
 		G.GAME.word_round.jumble.solved = true
@@ -205,8 +214,77 @@ T.describe("Jumble scoring and odometer", function()
 		G.GAME.word_round.jumble.puzzle_multi = 6
 		G.GAME.word_round.jumble.total_score = 0
 		G.GAME.word_round.jumble.slots[2].card = nil
+		sb.sync_points_to_get_preview(false)
+		T.assert_equal(sb.points_to_get, 76, "Committed puzzle score should count before banking")
 		flow.play_jumble_word()
 		spawn_attention = original_attention_text
 		T.assert_equal(feedback, "24 Points Scored!", "Jumble score feedback should show points scored")
+	end)
+
+	T.it("updates points to get when placement cards change", function()
+		local sb = require("word_game.ui.score_banner")
+		local placement_word = require("word_game.model.placement_word")
+		WORD_GAME.ScoreBanner = sb
+		WORD_GAME.Jumble = jumble
+		G.GAME.word_round = {
+			target = 25,
+			mode = "jumble",
+			played_words = {},
+			jumble = {
+				total_score = 5,
+				puzzle_points = 0,
+				puzzle_multi = 1.0,
+				puzzle_words = {},
+				slots = {
+					{ kind = "fixed", letter = "C" },
+					{ kind = "blank", card = nil },
+					{ kind = "fixed", letter = "T" },
+				},
+				puzzle = "C_T",
+			},
+		}
+		sb.reset_jumble_score()
+		T.assert_equal(sb.points_to_get, 20, "No placement should use banked score only")
+		T.assert_equal(sb.points_earned, 5)
+		T.assert_equal(sb.points_got, 0)
+
+		G.GAME.word_round.jumble.slots[2].card = { ability = { letter = "A" } }
+		placement_word.refresh_from_jumble_slots(G.GAME.word_round.jumble.slots)
+		sb.update(0.2)
+		T.assert_equal(sb.points_to_get, 17, "Valid placed word should preview its puzzle points")
+		T.assert_equal(sb.points_earned, 5)
+		T.assert_equal(sb.points_got, 3)
+		T.assert_equal(sb.format_score_equation(), "5 Earnt + 3 = 17 Remaining")
+	end)
+
+	T.it("previews remaining from placed letters even when the word is invalid", function()
+		local sb = require("word_game.ui.score_banner")
+		local placement_word = require("word_game.model.placement_word")
+		local rules = require("word_game.model.play.jumble_rules")
+		WORD_GAME.ScoreBanner = sb
+		WORD_GAME.Jumble = jumble
+		G.GAME.word_round = {
+			target = 25,
+			mode = "jumble",
+			played_words = {},
+			jumble = {
+				total_score = 0,
+				puzzle_points = 0,
+				puzzle_multi = 1.0,
+				puzzle_words = {},
+				slots = {
+					{ kind = "fixed", letter = "C" },
+					{ kind = "blank", card = { ability = { letter = "X" } } },
+					{ kind = "fixed", letter = "T" },
+				},
+				puzzle = "C_T",
+			},
+		}
+		sb.reset_jumble_score()
+		placement_word.refresh_from_jumble_slots(G.GAME.word_round.jumble.slots)
+		sb.update(0.2)
+		T.assert_false(G.GAME.placement_word_valid, "Invalid words stay invalid until play")
+		T.assert_equal(sb.points_got, 3, "Invalid CXT should still preview 3 points")
+		T.assert_equal(rules.remaining_to_target(G.GAME.word_round.jumble, 25), 22)
 	end)
 end)

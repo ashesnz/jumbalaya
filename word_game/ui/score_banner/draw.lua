@@ -289,13 +289,23 @@ function M.draw(sb)
 	love.graphics.pop()
 
 	if not sb.hide_points_to_get and not felt_layout.is_boss_sequence() then
-		local to_get_val = sb.points_to_get or (G.GAME and G.GAME.word_round and G.GAME.word_round.target) or 20
-		if to_get_val > 0 then
-			local to_get_txt = tostring(to_get_val) .. " Points to get"
-			local to_get_font_px = math.max(16, math.floor(h * 0.45))
+		local remaining = sb.points_to_get or 0
+		local got = sb.points_got or 0
+		if remaining > 0 or got > 0 then
+			local to_get_txt = sb.format_score_equation and sb.format_score_equation()
+				or string.format("%d Earnt + %d = %d Remaining",
+					math.floor(sb.points_earned or 0), got, remaining)
+			local to_get_font_px = math.max(12, math.floor(h * 0.34))
 			local to_get_font = fonts.title_font(to_get_font_px)
 			love.graphics.setFont(to_get_font)
+			local felt_w = (Layout.felt_rect().w or 20) * ts
 			local to_get_tw = to_get_font:getWidth(to_get_txt)
+			while to_get_tw > felt_w * 0.94 and to_get_font_px > 10 do
+				to_get_font_px = to_get_font_px - 1
+				to_get_font = fonts.title_font(to_get_font_px)
+				love.graphics.setFont(to_get_font)
+				to_get_tw = to_get_font:getWidth(to_get_txt)
+			end
 			local to_get_th = to_get_font:getHeight()
 
 			local to_get_cx, to_get_cy = sb.calc_points_to_get_pos(cx, ts)

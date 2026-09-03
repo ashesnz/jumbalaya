@@ -8,6 +8,7 @@ local boss_word_stack = require("word_game.ui.boss_word_stack")
 local card_fly_off = require("word_game.ui.card_fly_off")
 local round_config = require("word_game.config.round_config")
 local hand_size_cfg = require("word_game.config.hand_size")
+local RunMode = require("word_game.model.run_mode")
 local Easing = require "app.effects.easing"
 local Scheduler = require "app.effects.scheduler"
 
@@ -30,7 +31,7 @@ end
 
 function M.capture_token_timer_if_cleared(cleared, opts)
 	opts = opts or {}
-	if not cleared then return end
+	if not cleared or not RunMode.ends_hand_on_target() then return end
 	if not opts.skip_focus
 		and WORD_GAME and WORD_GAME.HandClearFocus and WORD_GAME.HandClearFocus.begin then
 		WORD_GAME.HandClearFocus.begin()
@@ -83,12 +84,12 @@ function M.roll_jumble_banners(result)
 	elseif result.kind == "bank_puzzle" then
 		bump_timeline_progress()
 	end
-	if result.cleared then
+	if result.cleared and RunMode.ends_hand_on_target() then
 		if WORD_GAME.ScoreBanner.hide_points_to_get_display then
 			WORD_GAME.ScoreBanner.hide_points_to_get_display()
 		end
-	elseif WORD_GAME.ScoreBanner.roll_points_to_get then
-		WORD_GAME.ScoreBanner.roll_points_to_get(result.old_rem, result.new_rem, 0.4)
+	elseif WORD_GAME.ScoreBanner.sync_points_to_get_preview then
+		WORD_GAME.ScoreBanner.sync_points_to_get_preview(true, { remain_dur = 0.4 })
 	end
 end
 
@@ -469,11 +470,12 @@ end
 function M.present_word_play_after_cards(jumble, j, result, on_hand_cleared, on_complete)
 	local is_boss_success = j.boss_word_active
 		and result.word == (j.puzzle and j.puzzle.boss_word)
+	local end_hand = result.cleared and RunMode.ends_hand_on_target()
 
 	local function after_cards_cleared()
 		jumble.clear_blank_cards(j.slots)
 		jumble.sync_placement_cards(j.slots)
-		if result.cleared then
+		if end_hand then
 			j.total_score = result.new_score
 			M.add_points(result.word_pts)
 			M.set_word_score_animating(true)
@@ -493,11 +495,11 @@ function M.present_word_play_after_cards(jumble, j, result, on_hand_cleared, on_
 		end
 	end
 
-	if result.cleared then
+	if end_hand then
 		M.set_word_score_animating(true)
 	end
 
-	if M.triggers_boss_word(result) and result.cleared then
+	if M.triggers_boss_word(result) and end_hand then
 		finish_used_cards(result.used_cards, true)
 		after_cards_cleared()
 		return

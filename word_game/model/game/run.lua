@@ -5,6 +5,7 @@
 local Layout = require "word_game.ui.layout"
 local Scheduler = require "app.effects.scheduler"
 local RunScope = require "word_game.model.run_scope"
+local RunMode = require "word_game.model.run_mode"
 
 --- Tear down run-scoped UI and caches (delegates to RunScope).
 function Game:teardown_run_ui()
@@ -173,7 +174,11 @@ function Game:start_run(args)
 
     if not saveTable then
         if args.seed then self.GAME.seeded = true end
-        if args.run_mode then self.GAME.run_mode = args.run_mode end
+        local run_mode = RunMode.resolve_for_new_run(args.run_mode)
+        self.GAME.run_mode = run_mode
+        if args.run_mode then
+            RunMode.set_preferred(run_mode)
+        end
         local memory_entropy = tonumber(tostring({}):sub(7), 16) or 0
         local runtime_entropy = os.time()
             + math.floor(((love.timer and love.timer.getTime()) or 0) * 1000000)

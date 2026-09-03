@@ -14,11 +14,14 @@ M.SPIN_DUR = 0.50
 
 M.jumble_points = 0
 M.jumble_multi = 1.0
+M.points_earned = 0
+M.points_got = 0
 M.points_to_get = 20
 M.hide_points_to_get = false
 M.points_roll = nil
 M.multi_roll = nil
 M.to_get_roll = nil
+M.got_roll = nil
 
 M.points_burst = nil
 M.multi_burst = nil
@@ -184,6 +187,39 @@ end
 function M.hide_points_to_get_display()
 	M.hide_points_to_get = true
 	M.to_get_roll = nil
+	M.got_roll = nil
+end
+
+function M.format_score_equation()
+	local earned = math.floor(M.points_earned or 0)
+	local got = math.floor(M.points_got or 0)
+	local remaining = math.floor(M.points_to_get or 0)
+	return string.format("%d Earnt + %d = %d Remaining", earned, got, remaining)
+end
+
+function M.apply_score_breakdown(breakdown, animate, remain_dur)
+	if not breakdown then return end
+	local new_earned = breakdown.earned or 0
+	local new_got = breakdown.got or 0
+	local new_rem = breakdown.remaining or 0
+
+	M.points_earned = new_earned
+
+	local old_got = M.points_got or 0
+	if animate and old_got ~= new_got and not M.got_roll then
+		M.roll_got_preview(old_got, new_got, 0.18)
+	else
+		M.points_got = new_got
+		M.got_roll = nil
+	end
+
+	local old_rem = M.points_to_get or new_rem
+	if animate and old_rem ~= new_rem and not M.to_get_roll then
+		M.roll_points_to_get(old_rem, new_rem, remain_dur or 0.18)
+	else
+		M.points_to_get = new_rem
+		M.to_get_roll = nil
+	end
 end
 
 function M.reset_jumble_score()
@@ -200,10 +236,37 @@ function M.reset_jumble_score()
 	M.multi_rot = 0
 	M.points_burst = nil
 	M.multi_burst = nil
-	local target = (G.GAME and G.GAME.word_round and G.GAME.word_round.target) or 20
-	local total = (G.GAME and G.GAME.word_round and G.GAME.word_round.jumble and G.GAME.word_round.jumble.total_score) or 0
-	M.points_to_get = math.max(0, target - total)
 	M.to_get_roll = nil
+	M.got_roll = nil
+	M.sync_points_to_get_preview(false)
+end
+
+function M.sync_points_to_get_preview(animate, opts)
+	if M.hide_points_to_get then return end
+	local wr = G.GAME and G.GAME.word_round
+	local j = wr and wr.jumble
+	local rules = require("word_game.model.play.jumble_rules")
+	local target = (wr and wr.target) or rules.round_target()
+	M.apply_score_breakdown(rules.score_breakdown(j, target), animate, opts and opts.remain_dur)
+end
+
+function M.roll_got_preview(from_val, to_val, dur)
+	from_val = from_val or M.points_got or 0
+	to_val = to_val or from_val
+	dur = dur or M.TO_GET_ROLL_TIME
+
+	if from_val ~= to_val then
+		M.got_roll = {
+			from = from_val,
+			to = to_val,
+			t = 0,
+			dur = dur,
+			last_val = from_val,
+		}
+	else
+		M.points_got = to_val
+		M.got_roll = nil
+	end
 end
 
 function M.roll_points_to_get(from_val, to_val, dur)
@@ -331,6 +394,20 @@ function M.update(dt)
 		if M.to_get_roll.t >= M.to_get_roll.dur then
 			M.points_to_get = M.to_get_roll.to
 			M.to_get_roll = nil
+		end
+	end
+	if M.got_roll then
+		M.got_roll.t = M.got_roll.t + dt
+		local progress = math.min(1, M.got_roll.t / M.got_roll.dur)
+		local cur = math.floor(M.got_roll.from + progress * (M.got_roll.to - M.got_roll.from) + 0.5)
+		if cur ~= M.got_roll.last_val then
+			M.got_roll.last_val = cur
+			if play_sfx then play_sfx("card_tick", 0.65, 0.35) end
+		end
+		M.points_got = cur
+		if M.got_roll.t >= M.got_roll.dur then
+			M.points_got = M.got_roll.to
+			M.got_roll = nil
 		end
 	end
 end

@@ -215,7 +215,11 @@ function M.try_award(callback)
 	end
 
 	local tt = WORD_GAME and WORD_GAME.TimelineTimer
-	if tt and tt.freeze_reward_display then
+	local flyer_count = math.min(amount, MAX_REWARD_FLYERS)
+	local fly_duration = FLY_DUR + STAGGER * math.max(0, flyer_count - 1)
+	if RunMode.is_classic() and tt and tt.start_score_roll then
+		tt.start_score_roll(amount, 0, fly_duration)
+	elseif tt and tt.freeze_reward_display then
 		tt.freeze_reward_display(amount)
 	elseif tt then
 		tt.is_active = false

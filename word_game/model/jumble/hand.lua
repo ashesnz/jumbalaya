@@ -263,6 +263,9 @@ function M.refresh_hud()
 		local hud = WORD_GAME.ScoreBanner.state()
 		hud.to_go_label = "SCORE"
 		hud.remaining = j.total_score or 0
+		if WORD_GAME.ScoreBanner.sync_points_to_get_preview then
+			WORD_GAME.ScoreBanner.sync_points_to_get_preview(false)
+		end
 	end
 	if WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.sync_progress then
 		WORD_GAME.TimelineTimer.sync_progress()

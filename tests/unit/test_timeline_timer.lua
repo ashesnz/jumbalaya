@@ -137,10 +137,30 @@ T.describe("Timeline Timer & Shape Math", function()
 		tt.reset_progress(50)
 		tt.sync_progress()
 		T.assert_true(tt.is_progress_mode())
-		T.assert_equal(tt.format_progress_label(), "18 / 50")
+		T.assert_equal(tt.format_progress_label(), "26 / 50")
 		T.assert_almost_equal(tt.progress_fill_fraction(), 0.36, 0.01)
 		T.assert_almost_equal(tt.progress_total_fraction(), 0.52, 0.01)
 		T.assert_false(tt.is_active, "Classic mode must not run a countdown timer")
+	end)
+
+	T.it("keeps the slider width fixed and slides the goal seam left after target is exceeded", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "classic"
+		local tt = require("word_game.ui.timeline_timer")
+		G.GAME.word_round = {
+			target = 25,
+			jumble = { total_score = 50, puzzle_points = 0, puzzle_multi = 1.0, puzzle_words = {} },
+		}
+		tt.reset_progress(25)
+		tt.sync_progress()
+		T.assert_true(tt.goal_reached)
+		T.assert_almost_equal(tt.progress_total_fraction(), 1, 0.001, "Fill should cap at full width")
+		T.assert_almost_equal(tt.progress_goal_marker_fraction(), 0.5, 0.001, "Goal seam should move left as score doubles")
+		T.assert_equal(tt.format_progress_label(), "50 / 25")
+
+		G.GAME.word_round.jumble.total_score = 100
+		tt.sync_progress()
+		T.assert_almost_equal(tt.progress_goal_marker_fraction(), 0.25, 0.001, "More score should push the goal seam further left")
 	end)
 
 	T.it("animates the slider toward projected score on each word play", function()
@@ -163,6 +183,7 @@ T.describe("Timeline Timer & Shape Math", function()
 		tt.update(0.25)
 		T.assert_true(tt.display_frac > 0, "Slider should advance after a word is played")
 		T.assert_true(tt.display_frac < 3 / 50 + 0.01, "Slider should lerp toward projected score")
+		T.assert_equal(tt.format_progress_label(), "3 / 50", "Label should include in-progress puzzle score")
 	end)
 
 	T.it("engages smoke only after the third word on the same puzzle", function()
@@ -301,11 +322,11 @@ T.describe("Timeline Timer & Shape Math", function()
 		local tt = require("word_game.ui.timeline_timer")
 		local round = require("word_game.model.round")
 		WORD_GAME.TimelineTimer = tt
-		G.GAME.word_round = { set = 1, hand_index = 1, target = 50, played_words = {} }
+		G.GAME.word_round = { set = 1, hand_index = 1, target = 25, played_words = {} }
 
 		round.start_hand(1, 1)
 		T.assert_true(tt.is_progress_mode())
-		T.assert_equal(tt.progress_target, 50)
+		T.assert_equal(tt.progress_target, 25)
 		T.assert_equal(tt.progress_score, 0)
 		WORD_GAME.Sidebar = nil
 	end)

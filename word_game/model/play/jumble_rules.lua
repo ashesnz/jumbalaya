@@ -47,6 +47,79 @@ function M.puzzle_total(j)
 	return math.floor(pts * multi)
 end
 
+function M.preview_puzzle_total_after_word(j, word, used_cards)
+	if not j or not word then return M.puzzle_total(j) end
+	local bonus_stack = require("word_game.ui.boss_word_stack")
+	local wr = G.GAME and G.GAME.word_round
+	local old_pts = j.puzzle_points or 0
+	local effects = modifier_effects.apply_word_effects(word, used_cards, j, wr)
+	local word_pts = #word + (effects.bonus_points or 0)
+	word_pts = word_pts + bonus_stack.bonus_points_for(used_cards)
+	local new_pts = old_pts + word_pts
+	local count = #(j.puzzle_words or {}) + 1
+	local new_multi = 1.0
+	if count >= 2 then
+		new_multi = 1.0 + (count - 1) * 0.2
+		new_multi = math.floor(new_multi * 10 + 0.5) / 10
+	end
+	new_multi = modifier_effects.apply_next_word_floor(new_multi, j)
+	new_multi = modifier_effects.apply_combo_bonus(new_multi, effects.combo_bonus)
+	new_multi = math.floor((new_multi + (effects.bonus_multi or 0)) * 10 + 0.5) / 10
+	return math.floor(new_pts * new_multi)
+end
+
+local function placement_preview_word(j)
+	if not j or not j.slots then return nil end
+	if M.placed_count(j.slots) <= 0 then return nil end
+	local jumble = WORD_GAME and WORD_GAME.Jumble
+	if not jumble or not jumble.build_placement_preview_word then return nil end
+	local word = jumble.build_placement_preview_word(j.slots)
+	if not word or word == "" then return nil end
+	local used_cards = M.collect_used_cards(j.slots)
+	word = modifier_effects.adjust_word_for_q(word, used_cards)
+	if word == "" then return nil end
+	for _, played in ipairs(j.puzzle_words or {}) do
+		if played == word then return nil end
+	end
+	return word, used_cards
+end
+
+function M.projected_stage_score(j)
+	if not j then return 0 end
+	return M.committed_earned(j) + M.placement_preview_got(j)
+end
+
+function M.remaining_to_target(j, target)
+	target = target or M.round_target()
+	return M.score_remaining(M.projected_stage_score(j), target)
+end
+
+function M.committed_earned(j)
+	if not j then return 0 end
+	return (j.total_score or 0) + M.puzzle_total(j)
+end
+
+function M.placement_preview_got(j)
+	if not j then return 0 end
+	local word, used_cards = placement_preview_word(j)
+	if not word then return 0 end
+	local committed_puzzle = M.puzzle_total(j)
+	local preview = M.preview_puzzle_total_after_word(j, word, used_cards)
+	return math.max(0, preview - committed_puzzle)
+end
+
+function M.score_breakdown(j, target)
+	target = target or M.round_target()
+	local earned = M.committed_earned(j)
+	local got = M.placement_preview_got(j)
+	local remaining = M.score_remaining(earned + got, target)
+	return {
+		earned = earned,
+		got = got,
+		remaining = remaining,
+	}
+end
+
 function M.total_with_puzzle(j, pts, multi)
 	return (j.total_score or 0) + math.floor(pts * multi)
 end

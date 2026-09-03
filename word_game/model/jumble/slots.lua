@@ -141,6 +141,36 @@ function M.build_word(slots)
 	return table.concat(chars)
 end
 
+--- Word formed by fixed letters and placed cards; skips empty blanks (placement HUD preview).
+function M.build_placement_preview_word(slots)
+	if not slots then return "" end
+	local chars = {}
+	for _, slot in ipairs(slots) do
+		if slot.kind == "fixed" then
+			for i = 1, #slot.letter do
+				chars[#chars + 1] = slot.letter:sub(i, i)
+			end
+		elseif slot.kind == "span" then
+			for _, card in ipairs(slot.cards or {}) do
+				if Dictionary then
+					local letter = Dictionary.letter_from_card(card)
+					if letter then
+						chars[#chars + 1] = letter
+					end
+				end
+			end
+		elseif slot.kind == "blank" then
+			if slot.card and Dictionary then
+				local letter = Dictionary.letter_from_card(slot.card)
+				if letter then
+					chars[#chars + 1] = letter
+				end
+			end
+		end
+	end
+	return table.concat(chars)
+end
+
 function M.all_blanks_filled(slots, puzzle)
 	if puzzle and puzzle.kind == "span" then
 		if puzzle.center then

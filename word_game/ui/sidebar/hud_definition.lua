@@ -123,6 +123,9 @@ function M.sync_discard_row()
 		set_node_visible(discards_row, table_discard.bin_enabled())
 	end
 	table_discard.sync_discard_area()
+	if WORD_GAME and WORD_GAME.VaultStageButton and WORD_GAME.VaultStageButton.sync then
+		WORD_GAME.VaultStageButton.sync()
+	end
 	G.VAULT_HUD:recalculate()
 end
 
@@ -166,6 +169,7 @@ function M.hud_definition()
 		deck_count_node(box_w),
 		(function()
 			local dw, dh = Layout.discard_slot_size()
+			local btn_h = dh * 0.88
 			return { n = G.UI.ROW, config = {
 				align = "cm",
 				id = "row_discard",
@@ -173,16 +177,35 @@ function M.hud_definition()
 				minh = dh,
 				maxh = dh,
 			}, nodes = {
-				Components.button({
-					id = "end_run_button",
-					onClick = "end_run_from_discard_bin",
-					label = { "End Run" },
+				{ n = G.UI.COLUMN, config = {
+					align = "cm",
+					padding = Components.CHROME.padding,
+					r = Components.CHROME.radius,
+					hover = true,
 					colour = G.C.RED,
-					width = dw,
-					height = dh * 0.88,
-					textSize = 0.34,
+					hover_colour = G.C.UI.BUTTON_HOVER,
+					button = "end_run_from_discard_bin",
+					id = "end_run_button",
+					minw = dw,
+					minh = btn_h,
 					focus_args = { nav = "wide", snap_to = true },
-				}),
+				}, nodes = {
+					{ n = G.UI.TEXT, config = {
+						id = "end_run_label",
+						text = "End Run",
+						scale = 0.34,
+						colour = G.C.UI.TEXT_LIGHT,
+						shadow = true,
+					}},
+					{ n = G.UI.TEXT, config = {
+						id = "end_run_next_arrow",
+						text = "→",
+						scale = 0.62,
+						colour = G.C.BLUE,
+						shadow = true,
+						visible = false,
+					}},
+				}},
 			}}
 		end)(),
 	}
