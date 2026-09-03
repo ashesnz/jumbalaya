@@ -35,7 +35,9 @@ function M.capture_token_timer_if_cleared(cleared, opts)
 		and WORD_GAME and WORD_GAME.HandClearFocus and WORD_GAME.HandClearFocus.begin then
 		WORD_GAME.HandClearFocus.begin()
 	end
-	if WORD_GAME and WORD_GAME.TokenReward and WORD_GAME.TokenReward.capture_timer then
+	if WORD_GAME and WORD_GAME.TokenReward and WORD_GAME.TokenReward.capture_reward then
+		WORD_GAME.TokenReward.capture_reward()
+	elseif WORD_GAME and WORD_GAME.TokenReward and WORD_GAME.TokenReward.capture_timer then
 		WORD_GAME.TokenReward.capture_timer()
 	end
 end
@@ -50,6 +52,15 @@ end
 
 function M.roll_jumble_banners(result)
 	if not (WORD_GAME and WORD_GAME.ScoreBanner) then return end
+	local function bump_timeline_progress()
+		local tt = WORD_GAME and WORD_GAME.TimelineTimer
+		if not tt or not tt.on_word_played or not result then return end
+		if result.kind == "word_play" then
+			tt.on_word_played(result.old_score, result.new_score)
+		elseif result.kind == "bank_puzzle" then
+			tt.on_word_played(result.old_total, result.new_total)
+		end
+	end
 	if M.triggers_boss_word(result) then
 		if WORD_GAME.ScoreBanner.hide_points_to_get_display then
 			WORD_GAME.ScoreBanner.hide_points_to_get_display()
@@ -59,6 +70,7 @@ function M.roll_jumble_banners(result)
 				result.old_pts, result.new_pts, result.old_multi, result.new_multi
 			)
 		end
+		bump_timeline_progress()
 		return
 	end
 	if result.kind == "word_play" then
@@ -67,6 +79,9 @@ function M.roll_jumble_banners(result)
 				result.old_pts, result.new_pts, result.old_multi, result.new_multi
 			)
 		end
+		bump_timeline_progress()
+	elseif result.kind == "bank_puzzle" then
+		bump_timeline_progress()
 	end
 	if result.cleared then
 		if WORD_GAME.ScoreBanner.hide_points_to_get_display then

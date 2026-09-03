@@ -1,13 +1,14 @@
 --[[
-	word_game/ui/token_reward.lua - Stage 1-1 timer-to-token reward fly animation.
+	word_game/ui/token_reward.lua - Stage-end reward fly animation.
 
-	When the player clears hand 1-1, remaining timeline seconds (floored)
-	become tokens. 	Coins fly from the timeline into the token pile.
+	Time Run (1-1): leftover timeline seconds become tokens.
+	Classic: banked stage score becomes tokens (1 point = 1 token).
 ]]
 
 local Layout = require("word_game.ui.layout")
 local state = require("word_game.model.state")
 local round_config = require("word_game.config.round_config")
+local RunMode = require("word_game.model.run_mode")
 
 local M = {}
 
@@ -25,6 +26,10 @@ local landed = 0
 local spawn_acc = 0
 local end_x, end_y = 0, 0
 local captured_time = nil
+local captured_score = nil
+local MAX_REWARD_FLYERS = 12
+local tokens_left = 0
+local grant_per_flyer = 1
 local grant_on_land = true
 local fly_from_x, fly_from_y, fly_to_x, fly_to_y
 
@@ -53,12 +58,27 @@ end
 
 function M.is_eligible()
 	local wr = G.GAME and G.GAME.word_round
-	return wr and round_config.is_token_reward_hand(wr.set, wr.hand_index)
+	if not wr then return false end
+	if RunMode.is_classic() then
+		return true
+	end
+	return round_config.is_token_reward_hand(wr.set, wr.hand_index)
+end
+
+local function banked_score()
+	local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
+	return (j and j.total_score) or (G.GAME and G.GAME.points) or 0
 end
 
 function M.earned_amount()
+	if captured_score ~= nil then
+		return math.floor(captured_score)
+	end
 	if captured_time ~= nil then
 		return math.floor(captured_time)
+	end
+	if RunMode.is_classic() then
+		return math.floor(banked_score())
 	end
 	local tt = WORD_GAME and WORD_GAME.TimelineTimer
 	if not tt then return 0 end
@@ -66,7 +86,22 @@ function M.earned_amount()
 end
 
 function M.capture_timer()
-	if not M.is_eligible() or captured_time ~= nil then return end
+	M.capture_reward()
+end
+
+function M.capture_reward()
+	if not M.is_eligible() then return end
+	if RunMode.is_classic() then
+		if captured_score ~= nil then return end
+		captured_score = banked_score()
+		local tt = WORD_GAME and WORD_GAME.TimelineTimer
+		if tt then
+			tt.is_active = false
+			if tt.sync_progress then tt.sync_progress() end
+		end
+		return
+	end
+	if captured_time ~= nil then return end
 	local tt = WORD_GAME and WORD_GAME.TimelineTimer
 	if not tt then return end
 	captured_time = tt.time_remaining or 0
@@ -135,18 +170,28 @@ end
 
 local function on_flyer_landed()
 	if grant_on_land then
-		state.add_tokens(1)
-		if WORD_GAME and WORD_GAME.TableDeck and WORD_GAME.TableDeck.bump_token_display then
-			WORD_GAME.TableDeck.bump_token_display()
-		end
-		if play_sfx then
-			play_sfx("coin2", 0.85 + math.random() * 0.2, 0.55 + math.random() * 0.15)
+		local grant = math.min(grant_per_flyer, tokens_left)
+		tokens_left = tokens_left - grant
+		if grant > 0 then
+			state.add_tokens(grant)
+			if WORD_GAME and WORD_GAME.TableDeck and WORD_GAME.TableDeck.bump_token_display then
+				for _ = 1, grant do
+					WORD_GAME.TableDeck.bump_token_display()
+				end
+			end
+			if play_sfx then
+				play_sfx("coin2", 0.85 + math.random() * 0.2, 0.55 + math.random() * 0.15)
+			end
 		end
 	end
 	landed = landed + 1
 end
 
 local function finish()
+	if grant_on_land and tokens_left > 0 then
+		state.add_tokens(tokens_left)
+		tokens_left = 0
+	end
 	active = false
 	flyers = {}
 	spawned = 0
@@ -165,6 +210,7 @@ function M.try_award(callback)
 	local amount = M.earned_amount()
 	if amount <= 0 then
 		captured_time = nil
+		captured_score = nil
 		return false
 	end
 
@@ -173,10 +219,17 @@ function M.try_award(callback)
 		tt.freeze_reward_display(amount)
 	elseif tt then
 		tt.is_active = false
-		tt.time_remaining = amount
+		if RunMode.is_classic() then
+			tt.progress_score = amount
+			tt.progress_pending = 0
+		else
+			tt.time_remaining = amount
+		end
 	end
 
-	total = amount
+	total = math.min(amount, MAX_REWARD_FLYERS)
+	tokens_left = amount
+	grant_per_flyer = math.max(1, math.ceil(amount / total))
 	spawned = 0
 	landed = 0
 	spawn_acc = 0
@@ -321,6 +374,9 @@ function M.reset()
 	landed = 0
 	spawn_acc = 0
 	captured_time = nil
+	captured_score = nil
+	tokens_left = 0
+	grant_per_flyer = 1
 	grant_on_land = true
 end
 

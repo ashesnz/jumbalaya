@@ -39,6 +39,13 @@ function M.apply_puzzle(wr, puzzle)
 	j.slots = M.parse_slots(puzzle)
 	modifier_effects.reset_puzzle_state(j)
 
+	if WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.reset_puzzle_smoke then
+		WORD_GAME.TimelineTimer.reset_puzzle_smoke()
+	end
+	if WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.sync_progress then
+		WORD_GAME.TimelineTimer.sync_progress()
+	end
+
 	if WORD_GAME and WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.reset_jumble_score then
 		WORD_GAME.ScoreBanner.reset_jumble_score()
 	end
@@ -256,6 +263,9 @@ function M.refresh_hud()
 		local hud = WORD_GAME.ScoreBanner.state()
 		hud.to_go_label = "SCORE"
 		hud.remaining = j.total_score or 0
+	end
+	if WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.sync_progress then
+		WORD_GAME.TimelineTimer.sync_progress()
 	end
 end
 

@@ -3,6 +3,7 @@ local Scheduler = require "app.effects.scheduler"
 
 
 local round_config = require("word_game.config.round_config")
+local RunMode = require("word_game.model.run_mode")
 local state = require("word_game.model.state")
 
 local M = {}
@@ -176,7 +177,16 @@ function M.advance_hand()
 end
 
 function M.reset_timeline()
-	if WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.reset then
+	if not WORD_GAME or not WORD_GAME.TimelineTimer then return end
+	local wr = G.GAME and G.GAME.word_round
+	if RunMode.is_classic() then
+		local target = (wr and wr.target) or round_config.hand_target(1, 1)
+		if WORD_GAME.TimelineTimer.reset_progress then
+			WORD_GAME.TimelineTimer.reset_progress(target)
+		end
+		return
+	end
+	if WORD_GAME.TimelineTimer.reset then
 		WORD_GAME.TimelineTimer.reset(round_config.TIMELINE_SECONDS)
 	end
 end

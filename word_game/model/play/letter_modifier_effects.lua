@@ -2,6 +2,7 @@
 
 local deck = require("word_game.model.cards.deck")
 local modifiers = deck
+local RunMode = require("word_game.model.run_mode")
 
 local M = {}
 
@@ -23,6 +24,7 @@ local function timeline_seconds()
 end
 
 local function add_timeline_seconds(seconds)
+	if RunMode.is_classic() then return end
 	if not seconds or seconds <= 0 then return end
 	local timer = WORD_GAME and WORD_GAME.TimelineTimer
 	if timer and timer.add_time then

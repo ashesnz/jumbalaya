@@ -126,7 +126,193 @@ T.describe("Timeline Timer & Shape Math", function()
 		T.assert_equal(tt.format_time(tt.time_remaining), "49")
 	end)
 
+	T.it("shows classic score progress instead of a countdown timer", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "classic"
+		local tt = require("word_game.ui.timeline_timer")
+		G.GAME.word_round = {
+			target = 50,
+			jumble = { total_score = 18, puzzle_points = 4, puzzle_multi = 2.0, puzzle_words = {} },
+		}
+		tt.reset_progress(50)
+		tt.sync_progress()
+		T.assert_true(tt.is_progress_mode())
+		T.assert_equal(tt.format_progress_label(), "18 / 50")
+		T.assert_almost_equal(tt.progress_fill_fraction(), 0.36, 0.01)
+		T.assert_almost_equal(tt.progress_total_fraction(), 0.52, 0.01)
+		T.assert_false(tt.is_active, "Classic mode must not run a countdown timer")
+	end)
+
+	T.it("animates the slider toward projected score on each word play", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "classic"
+		local tt = require("word_game.ui.timeline_timer")
+		G.GAME.word_round = {
+			target = 50,
+			jumble = {
+				total_score = 0,
+				puzzle_points = 3,
+				puzzle_multi = 1.0,
+				puzzle_words = { "CAT" },
+			},
+		}
+		tt.reset_progress(50)
+		tt.display_frac = 0
+		tt.on_word_played(0, 3)
+		T.assert_almost_equal(tt.progress_total_fraction(), 3 / 50, 0.01)
+		tt.update(0.25)
+		T.assert_true(tt.display_frac > 0, "Slider should advance after a word is played")
+		T.assert_true(tt.display_frac < 3 / 50 + 0.01, "Slider should lerp toward projected score")
+	end)
+
+	T.it("engages smoke only after the third word on the same puzzle", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "classic"
+		local tt = require("word_game.ui.timeline_timer")
+
+		local function sync_words(words)
+			G.GAME.word_round = {
+				target = 50,
+				jumble = {
+					total_score = 0,
+					puzzle_points = #words * 3,
+					puzzle_multi = 1.0,
+					puzzle_words = words,
+				},
+			}
+			tt.reset_progress(50)
+			tt.sync_progress()
+		end
+
+		sync_words({ "CAT" })
+		T.assert_false(tt.smoke_active, "First word on a puzzle must not smoke")
+		sync_words({ "CAT", "CART" })
+		T.assert_false(tt.smoke_active, "Second word on a puzzle must not smoke")
+		sync_words({ "CAT", "CART", "CREST" })
+		T.assert_true(tt.smoke_active, "Third word on a puzzle should engage smoke")
+	end)
+
+	T.it("resets smoke when advancing to a new puzzle", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "classic"
+		local tt = require("word_game.ui.timeline_timer")
+		G.GAME.word_round = {
+			target = 50,
+			jumble = {
+				total_score = 0,
+				puzzle_points = 9,
+				puzzle_multi = 1.0,
+				puzzle_words = { "CAT", "CART", "CREST" },
+			},
+		}
+		tt.reset_progress(50)
+		tt.sync_progress()
+		tt.display_combo = 3
+		T.assert_true(tt.smoke_active)
+		table.insert(tt.sparks, { age = 0, life = 1, x = 0, y = 0, vx = 0, vy = 0, alpha = 1, size = 3, color = { 1, 1, 1, 1 } })
+
+		tt.reset_puzzle_smoke()
+		G.GAME.word_round.jumble.puzzle_words = {}
+		tt.sync_progress()
+		T.assert_false(tt.smoke_active)
+		T.assert_true(tt.display_combo_level() > 0, "Smoke and glow should ease out instead of snapping off")
+		for _ = 1, 30 do
+			tt.update_display_intensity(0.1)
+		end
+		T.assert_almost_equal(tt.display_combo_level(), 0, 0.05, "Intensity should settle back to calm")
+	end)
+
+	T.it("eases vibration down after a high combo puzzle ends", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "classic"
+		local tt = require("word_game.ui.timeline_timer")
+		G.GAME.word_round = {
+			target = 50,
+			jumble = {
+				total_score = 0,
+				puzzle_points = 0,
+				puzzle_multi = 1.0,
+				puzzle_words = { "A", "B", "C", "D", "E", "F" },
+			},
+		}
+		tt.reset_progress(50)
+		tt.sync_progress()
+		tt.display_combo = tt.combo_level()
+		T.assert_true(tt.display_shake_strength() > 0)
+
+		G.GAME.word_round.jumble.puzzle_words = {}
+		tt.sync_progress()
+		T.assert_true(tt.display_shake_strength() > 0, "Shake should linger briefly after the puzzle resets")
+		for _ = 1, 40 do
+			tt.update_display_intensity(0.1)
+		end
+		T.assert_almost_equal(tt.display_shake_strength(), 0, 0.05, "Shake should ease back to still")
+	end)
+
+	T.it("escalates glow, smoke, and shake after the third consecutive word", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "classic"
+		local tt = require("word_game.ui.timeline_timer")
+
+		local function sync_words(words)
+			G.GAME.word_round = {
+				target = 50,
+				jumble = {
+					total_score = 0,
+					puzzle_points = #words * 3,
+					puzzle_multi = 1.0,
+					puzzle_words = words,
+				},
+			}
+			tt.reset_progress(50)
+			tt.sync_progress()
+		end
+
+		sync_words({ "CAT", "CART", "CREST" })
+		local level3_glow = tt.smoke_glow_scale()
+		local level3_cap = tt.smoke_particle_cap()
+		T.assert_equal(tt.combo_level(), 1)
+		T.assert_equal(tt.shake_strength(), 0)
+
+		sync_words({ "CAT", "CART", "CREST", "CREAM" })
+		T.assert_equal(tt.combo_level(), 2)
+		T.assert_true(tt.smoke_glow_scale() > level3_glow, "Fourth word should enlarge the seam glow")
+		T.assert_true(tt.smoke_particle_cap() > level3_cap, "Fourth word should allow more smoke particles")
+		T.assert_equal(tt.shake_strength(), 0, "Shake should not start until the fifth word")
+
+		sync_words({ "CAT", "CART", "CREST", "CREAM", "CREEP" })
+		T.assert_equal(tt.combo_level(), 3)
+		T.assert_true(tt.smoke_glow_scale() > level3_glow)
+		T.assert_true(tt.shake_strength() > 0, "Fifth word should start shaking the timer bar")
+
+		sync_words({ "CAT", "CART", "CREST", "CREAM", "CREEP", "CREED" })
+		T.assert_equal(tt.combo_level(), 4)
+		T.assert_true(tt.shake_strength() > 1.6, "Sixth word should shake harder than the fifth")
+	end)
+
+	T.it("resets to a score slider on new classic hands", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "classic"
+		WORD_GAME.Sidebar = {
+			refresh = function() end,
+			clear_hand = function() end,
+			sync_visibility = function() end,
+		}
+		local tt = require("word_game.ui.timeline_timer")
+		local round = require("word_game.model.round")
+		WORD_GAME.TimelineTimer = tt
+		G.GAME.word_round = { set = 1, hand_index = 1, target = 50, played_words = {} }
+
+		round.start_hand(1, 1)
+		T.assert_true(tt.is_progress_mode())
+		T.assert_equal(tt.progress_target, 50)
+		T.assert_equal(tt.progress_score, 0)
+		WORD_GAME.Sidebar = nil
+	end)
+
 	T.it("pauses countdown until resumed or reset", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "time_run"
 		local tt = require("word_game.ui.timeline_timer")
 		tt.reset()
 		tt.update(10.0)

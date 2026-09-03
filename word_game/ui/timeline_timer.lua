@@ -1,13 +1,13 @@
 --[[
-	word_game/ui/timeline_timer.lua - Mathematical timeline timer HUD.
+	word_game/ui/timeline_timer.lua - Timeline HUD (timer fuse or classic score slider).
 
-	Replaces Milo with a dynamic timeline bar that animates from green to red
-	starting from the right-hand side over 60 seconds like a burning fuse,
-	featuring an overlay countdown timer (60 to 0) drawn mathematically without images.
+	Time Run: burning fuse countdown (60s → 0).
+	Classic: score progress bar toward the stage target (dice-have-no-eyes style).
 ]]
 
 local Layout = require("word_game.ui.layout")
 local StageLabel = require("word_game.ui.stage_label")
+local RunMode = require("word_game.model.run_mode")
 
 local M = {}
 
@@ -16,6 +16,114 @@ M.time_remaining = 60.0
 M.is_active = true
 M.frozen_for_reward = false
 M.sparks = {}
+
+M.progress_target = 1
+M.progress_score = 0
+M.progress_pending = 0
+M.display_frac = 0
+M.goal_reached = false
+M.puzzle_word_count = 0
+M.smoke_active = false
+M.slide_boost_t = 0
+M.display_combo = 0
+
+local SMOKE_WORD_THRESHOLD = 3
+local SHAKE_WORD_THRESHOLD = 5
+local COMBO_RISE_SPEED = 14
+local COMBO_FALL_SPEED = 2.6
+local SHAKE_COMBO_OFFSET = SHAKE_WORD_THRESHOLD - SMOKE_WORD_THRESHOLD
+
+local function combo_level(word_count)
+	word_count = word_count or 0
+	if word_count < SMOKE_WORD_THRESHOLD then return 0 end
+	return word_count - SMOKE_WORD_THRESHOLD + 1
+end
+
+local function glow_scale_for(level)
+	if level <= 0 then return 1 end
+	return 1 + (level - 1) * 0.38
+end
+
+local function spawn_chance_for(level)
+	if level <= 0 then return 0 end
+	return math.min(0.98, 0.62 + (level - 1) * 0.14)
+end
+
+local function particle_cap_for(level)
+	if level <= 0 then return 0 end
+	return math.min(72, 22 + level * 10)
+end
+
+local function shake_for_combo(level)
+	if level <= SHAKE_COMBO_OFFSET then return 0 end
+	return (level - SHAKE_COMBO_OFFSET) * 1.6
+end
+
+local function target_combo_level()
+	return combo_level(M.puzzle_word_count)
+end
+
+local function display_combo_level()
+	return M.display_combo or 0
+end
+
+function M.combo_level()
+	return target_combo_level()
+end
+
+function M.display_combo_level()
+	return display_combo_level()
+end
+
+function M.smoke_glow_scale()
+	return glow_scale_for(target_combo_level())
+end
+
+function M.display_smoke_glow_scale()
+	return glow_scale_for(display_combo_level())
+end
+
+function M.smoke_spawn_chance()
+	return spawn_chance_for(target_combo_level())
+end
+
+function M.display_smoke_spawn_chance()
+	return spawn_chance_for(display_combo_level())
+end
+
+function M.smoke_particle_cap()
+	return particle_cap_for(target_combo_level())
+end
+
+function M.display_smoke_particle_cap()
+	return particle_cap_for(display_combo_level())
+end
+
+function M.shake_strength()
+	if not M.is_progress_mode() or M.frozen_for_reward then return 0 end
+	return shake_for_combo(target_combo_level())
+end
+
+function M.display_shake_strength()
+	if not M.is_progress_mode() or M.frozen_for_reward then return 0 end
+	return shake_for_combo(display_combo_level())
+end
+
+function M.update_display_intensity(dt)
+	if not M.is_progress_mode() then
+		M.display_combo = 0
+		return
+	end
+	local target = target_combo_level()
+	if target > M.display_combo then
+		M.display_combo = M.display_combo + (target - M.display_combo) * math.min(1, dt * COMBO_RISE_SPEED)
+	elseif target < M.display_combo then
+		M.display_combo = M.display_combo + (target - M.display_combo) * math.min(1, dt * COMBO_FALL_SPEED)
+	end
+	if target == 0 and M.display_combo < 0.02 then
+		M.display_combo = 0
+	end
+end
 
 local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
 local font_cache = {}
@@ -71,6 +179,78 @@ end
 
 -- Formats the countdown timer text:
 -- Whole number (>= 10s), 1 decimal point (< 10s and >= 5s), 2 decimal points (< 5s).
+function M.is_progress_mode()
+	return RunMode.is_classic()
+end
+
+function M.sync_progress()
+	if not M.is_progress_mode() then return end
+	local wr = G.GAME and G.GAME.word_round
+	local j = wr and wr.jumble
+	local target = math.max(1, (wr and wr.target) or M.progress_target or 1)
+	local banked = (j and j.total_score) or 0
+	local pending = 0
+	if j and (j.puzzle_points or 0) > 0 then
+		pending = math.floor((j.puzzle_points or 0) * (j.puzzle_multi or 1))
+	end
+	M.progress_target = target
+	M.progress_score = banked
+	M.progress_pending = pending
+	M.puzzle_word_count = #(j and j.puzzle_words or {})
+	M.smoke_active = M.puzzle_word_count >= SMOKE_WORD_THRESHOLD
+	M.goal_reached = (banked + pending) >= target
+end
+
+function M.progress_total_fraction()
+	local target = math.max(1, M.progress_target or 1)
+	local score = (M.progress_score or 0) + (M.progress_pending or 0)
+	return clamp01(score / target)
+end
+
+function M.on_word_played(_old_total, _new_total)
+	if not M.is_progress_mode() or M.frozen_for_reward then return end
+	M.sync_progress()
+	local target = target_combo_level()
+	if target > M.display_combo then
+		M.display_combo = target
+	end
+	M.slide_boost_t = 0.4
+end
+
+function M.reset_puzzle_smoke()
+	M.slide_boost_t = 0
+end
+
+function M.format_progress_label()
+	local score = M.progress_score or 0
+	local target = math.max(1, M.progress_target or 1)
+	local pending = M.progress_pending or 0
+	if M.frozen_for_reward then
+		return string.format("%d", math.floor(score + 0.5))
+	end
+	local to_go = math.max(0, target - score - pending)
+	if to_go <= 0 then
+		return "GOAL REACHED"
+	end
+	return string.format("%d / %d", score, target)
+end
+
+function M.progress_fill_fraction()
+	local target = math.max(1, M.progress_target or 1)
+	local score = M.progress_score or 0
+	return clamp01(score / target)
+end
+
+function M.progress_pending_fraction()
+	local target = math.max(1, M.progress_target or 1)
+	local score = M.progress_score or 0
+	local pending = M.progress_pending or 0
+	if pending <= 0 then return 0, M.progress_fill_fraction() end
+	local from_frac = clamp01(score / target)
+	local to_frac = clamp01((score + pending) / target)
+	return from_frac, to_frac
+end
+
 function M.format_time(time_val)
 	local t = math.max(0, time_val or 0)
 	if M.frozen_for_reward then
@@ -162,9 +342,37 @@ end
 function M.reset(duration)
 	M.TOTAL_DURATION = duration or 60.0
 	M.time_remaining = M.TOTAL_DURATION
-	M.is_active = true
+	M.is_active = not M.is_progress_mode()
 	M.frozen_for_reward = false
 	M.sparks = {}
+	M.progress_score = 0
+	M.progress_pending = 0
+	M.display_frac = 0
+	M.goal_reached = false
+	M.puzzle_word_count = 0
+	M.smoke_active = false
+	M.slide_boost_t = 0
+	M.display_combo = 0
+	local wr = G.GAME and G.GAME.word_round
+	M.progress_target = math.max(1, (wr and wr.target) or 1)
+	M.sync_progress()
+	StageLabel.sync()
+end
+
+function M.reset_progress(target)
+	M.is_active = false
+	M.frozen_for_reward = false
+	M.sparks = {}
+	M.progress_target = math.max(1, target or 1)
+	M.progress_score = 0
+	M.progress_pending = 0
+	M.display_frac = 0
+	M.goal_reached = false
+	M.puzzle_word_count = 0
+	M.smoke_active = false
+	M.slide_boost_t = 0
+	M.display_combo = 0
+	M.sync_progress()
 	StageLabel.sync()
 end
 
@@ -180,7 +388,14 @@ end
 
 function M.freeze_reward_display(token_amount)
 	token_amount = math.max(0, math.floor(token_amount or 0))
-	M.time_remaining = token_amount
+	if M.is_progress_mode() then
+		M.progress_score = token_amount
+		M.progress_pending = 0
+		M.display_frac = clamp01(token_amount / math.max(1, M.progress_target or 1))
+		M.goal_reached = token_amount >= (M.progress_target or 1)
+	else
+		M.time_remaining = token_amount
+	end
 	M.is_active = false
 	M.frozen_for_reward = true
 end
@@ -197,8 +412,20 @@ end
 
 function M.update(dt)
 	dt = dt or 0
-	if M.is_active and M.time_remaining > 0 then
-		M.time_remaining = math.max(0, M.time_remaining - dt)
+	if M.is_progress_mode() then
+		M.sync_progress()
+		local target_frac = M.progress_total_fraction()
+		local boost = (M.slide_boost_t or 0) > 0 and 10 or 0
+		if M.slide_boost_t and M.slide_boost_t > 0 then
+			M.slide_boost_t = math.max(0, M.slide_boost_t - dt)
+		end
+		local lerp_speed = (M.frozen_for_reward and 12 or 8) + boost
+		M.display_frac = M.display_frac + (target_frac - M.display_frac) * math.min(1, dt * lerp_speed)
+		M.update_display_intensity(dt)
+	else
+		if M.is_active and M.time_remaining > 0 then
+			M.time_remaining = math.max(0, M.time_remaining - dt)
+		end
 	end
 
 	-- Update spark particles
@@ -215,17 +442,30 @@ function M.update(dt)
 
 	StageLabel.update(dt)
 
-	-- Spawn new ember sparks at fuse boundary when active
-	if M.time_remaining > 0 and M.time_remaining < M.TOTAL_DURATION and #M.sparks < 25 then
-		if math.random() < 0.65 then
+	-- Spawn ember sparks at the animated slider edge (classic: eased combo intensity).
+	local spark_active = false
+	if M.is_progress_mode() then
+		spark_active = M.display_combo_level() > 0.04
+			and M.display_frac > 0.001
+			and M.display_frac < 0.999
+	else
+		spark_active = M.time_remaining > 0 and M.time_remaining < M.TOTAL_DURATION
+	end
+	if spark_active then
+		local level = M.is_progress_mode() and M.display_combo_level() or 1
+		local cap = M.is_progress_mode() and M.display_smoke_particle_cap() or 25
+		local chance = M.is_progress_mode() and M.display_smoke_spawn_chance() or 0.65
+		if #M.sparks < cap and math.random() < chance then
+			local size_boost = M.is_progress_mode() and (level * 0.55) or 0
+			local speed_boost = M.is_progress_mode() and (level * 8) or 0
 			table.insert(M.sparks, {
-				x = 0,
-				y = 0,
-				vx = (math.random() - 0.5) * 35,
-				vy = -math.random(20, 65),
-				size = math.random(2, 5),
+				x = (math.random() - 0.5) * (10 + level * 4),
+				y = (math.random() - 0.5) * (6 + level * 2),
+				vx = (math.random() - 0.5) * (35 + speed_boost),
+				vy = -math.random(20 + level * 6, 65 + level * 12),
+				size = math.random(2, 5) + size_boost,
 				age = 0,
-				life = 0.25 + math.random() * 0.35,
+				life = 0.25 + math.random() * (0.35 + level * 0.08),
 				alpha = 1,
 				color = math.random() < 0.5 and SPARK_CORE or SPARK_GLOW,
 			})
@@ -270,6 +510,15 @@ function M.draw()
 
 	StageLabel.draw_above_timer(x, y, w, h)
 
+	local shake = M.display_shake_strength()
+	if shake > 0 then
+		love.graphics.push()
+		local real_time = (G.TIMERS and G.TIMERS.REAL) or 0
+		local ox = math.sin(real_time * 52) * shake
+		local oy = math.cos(real_time * 47) * shake * 0.72
+		love.graphics.translate(ox, oy)
+	end
+
 	local shape_verts = M.build_shape_polygon(x, y, w, h, slant, r)
 
 	-- 1. Outer drop shadow
@@ -279,44 +528,74 @@ function M.draw()
 		love.graphics.polygon("fill", unpack(shadow_verts))
 	end
 
-	-- Fraction of remaining green from left (1.0 = full green, 0.0 = full red)
-	local frac_remaining = clamp01(M.time_remaining / M.TOTAL_DURATION)
-	local top_split_x = x + (w - slant) * frac_remaining
-	local bot_split_x = x + w * frac_remaining
+	local frac_remaining
+	local frac_filled
+	local top_split_x
+	local bot_split_x
+	if M.is_progress_mode() then
+		frac_filled = clamp01(M.display_frac or 0)
+		frac_remaining = 1 - frac_filled
+		top_split_x = x + (w - slant) * frac_filled
+		bot_split_x = x + w * frac_filled
+	else
+		frac_remaining = clamp01(M.time_remaining / M.TOTAL_DURATION)
+		top_split_x = x + (w - slant) * frac_remaining
+		bot_split_x = x + w * frac_remaining
+	end
 
-	-- 2. Draw timeline base (Red / Burnt fuse portion)
+	-- 2. Draw timeline base (Red / unfilled track)
 	love.graphics.setColor(RED_MID)
 	love.graphics.polygon("fill", unpack(shape_verts))
 
-	-- Draw Green (Remaining time) Portion on the left
-	local green_verts = M.build_green_polygon(x, y, w, h, slant, r, frac_remaining)
-	if green_verts then
-		love.graphics.setColor(GREEN_MID)
-		love.graphics.polygon("fill", unpack(green_verts))
+	if M.is_progress_mode() then
+		local green_verts = M.build_green_polygon(x, y, w, h, slant, r, frac_filled)
+		if green_verts then
+			love.graphics.setColor(GREEN_MID)
+			love.graphics.polygon("fill", unpack(green_verts))
+		end
+	else
+		local green_verts = M.build_green_polygon(x, y, w, h, slant, r, frac_remaining)
+		if green_verts then
+			love.graphics.setColor(GREEN_MID)
+			love.graphics.polygon("fill", unpack(green_verts))
+		end
 	end
 
 	-- Draw Glowing Fuse Burning Seam
-	if frac_remaining > 0.001 and frac_remaining < 0.999 then
+	local seam_active = M.is_progress_mode()
+		and M.display_combo_level() > 0.04
+		and frac_filled > 0.001 and frac_filled < 0.999
+		or (not M.is_progress_mode() and frac_remaining > 0.001 and frac_remaining < 0.999)
+	if seam_active then
 		local real_time = (G.TIMERS and G.TIMERS.REAL) or 0
 		local flicker = math.sin(real_time * 24) * 0.15 + math.cos(real_time * 37) * 0.1
+		local level = M.is_progress_mode() and M.display_combo_level() or 1
+		local glow_scale = M.is_progress_mode() and M.display_smoke_glow_scale() or 1
+		local glow_alpha = M.is_progress_mode() and (0.75 + flicker + (level - 1) * 0.08) or (0.75 + flicker)
 
 		-- Outer glow along the seam
-		love.graphics.setLineWidth(math.max(6, h * 0.18))
-		love.graphics.setColor(SPARK_GLOW[1], SPARK_GLOW[2], SPARK_GLOW[3], 0.75 + flicker)
+		love.graphics.setLineWidth(math.max(6, h * 0.18) * glow_scale)
+		love.graphics.setColor(SPARK_GLOW[1], SPARK_GLOW[2], SPARK_GLOW[3], math.min(1, glow_alpha))
 		love.graphics.line(top_split_x, y - 2, bot_split_x, y + h + 2)
 
 		-- Core hot spark line
-		love.graphics.setLineWidth(math.max(2.5, h * 0.08))
+		love.graphics.setLineWidth(math.max(2.5, h * 0.08) * (0.85 + glow_scale * 0.15))
 		love.graphics.setColor(SPARK_CORE[1], SPARK_CORE[2], SPARK_CORE[3], 0.95)
 		love.graphics.line(top_split_x, y, bot_split_x, y + h)
 
-		-- Glowing ember sparks along the fuse
+		-- Glowing ember at the animated slider edge
 		local mid_fuse_x = (top_split_x + bot_split_x) * 0.5
 		local mid_fuse_y = y + h * 0.5
-		love.graphics.setColor(SPARK_CORE[1], SPARK_CORE[2], SPARK_CORE[3], 0.85 + flicker)
-		love.graphics.circle("fill", mid_fuse_x, mid_fuse_y, math.max(3, h * 0.14))
-		love.graphics.setColor(SPARK_GLOW[1], SPARK_GLOW[2], SPARK_GLOW[3], 0.45)
-		love.graphics.circle("fill", mid_fuse_x, mid_fuse_y, math.max(6, h * 0.28))
+		local core_r = math.max(3, h * 0.14) * glow_scale
+		local halo_r = math.max(6, h * 0.28) * glow_scale
+		love.graphics.setColor(SPARK_CORE[1], SPARK_CORE[2], SPARK_CORE[3], math.min(1, 0.85 + flicker))
+		love.graphics.circle("fill", mid_fuse_x, mid_fuse_y, core_r)
+		love.graphics.setColor(SPARK_GLOW[1], SPARK_GLOW[2], SPARK_GLOW[3], math.min(1, 0.45 + (glow_scale - 1) * 0.22))
+		love.graphics.circle("fill", mid_fuse_x, mid_fuse_y, halo_r)
+		if glow_scale > 1.2 then
+			love.graphics.setColor(SPARK_GLOW[1], SPARK_GLOW[2], SPARK_GLOW[3], math.min(0.55, 0.18 + (glow_scale - 1) * 0.12))
+			love.graphics.circle("fill", mid_fuse_x, mid_fuse_y, halo_r * 1.45)
+		end
 	end
 
 	-- 3. Outer border outline
@@ -334,8 +613,10 @@ function M.draw()
 		love.graphics.circle("fill", sx, sy, s.size)
 	end
 
-	-- 5. Draw Countdown Timer Text (60 to 0) centered on top of the shape
-	local count_str = M.format_time(M.time_remaining)
+	-- 5. Draw center label (countdown or score progress)
+	local count_str = M.is_progress_mode()
+		and M.format_progress_label()
+		or M.format_time(M.time_remaining)
 	local font_px = math.max(16, h * 0.62)
 	local font = timer_font(font_px)
 
@@ -361,13 +642,20 @@ function M.draw()
 		love.graphics.print(count_str, text_cx - tw * 0.5 + 1.5, text_cy - th * 0.5 + 2.0)
 
 		-- Main Text Color
-		if M.time_remaining <= 10 and M.time_remaining > 0 then
+		if M.is_progress_mode() and (M.goal_reached or M.frozen_for_reward) then
+			local pulse = math.abs(math.sin(((G.TIMERS and G.TIMERS.REAL) or 0) * 6))
+			love.graphics.setColor(1.0, 0.95 - pulse * 0.2, 0.55 - pulse * 0.15, 1)
+		elseif not M.is_progress_mode() and M.time_remaining <= 10 and M.time_remaining > 0 then
 			local pulse_red = math.abs(math.sin(((G.TIMERS and G.TIMERS.REAL) or 0) * 8))
 			love.graphics.setColor(1.0, 0.85 - pulse_red * 0.35, 0.85 - pulse_red * 0.35, 1)
 		else
 			love.graphics.setColor(1.0, 1.0, 1.0, 1.0)
 		end
 		love.graphics.print(count_str, text_cx - tw * 0.5, text_cy - th * 0.5)
+	end
+
+	if shake > 0 then
+		love.graphics.pop()
 	end
 
 	love.graphics.pop()

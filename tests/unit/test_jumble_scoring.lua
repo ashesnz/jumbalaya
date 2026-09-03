@@ -127,17 +127,17 @@ T.describe("Jumble scoring and odometer", function()
 		T.assert_almost_equal(sb.jumble_multi, 1.0, 0.01)
 	end)
 
-	T.it("initializes round target to 2 points for stage 1-1 and 40 points for stage 1-2", function()
+	T.it("initializes round target to 50 points for stage 1-1 and 2 points for stage 1-2", function()
 		local pcfg = require("word_game.board.config")
 		T.assert_equal(pcfg.ANCHOR_PAD_Y_FRAC, 0.078, "Anchor pad frac lowered to 0.078")
 
 		local round_cfg = require("word_game.config.round_config")
-		T.assert_equal(round_cfg.hand_target(1, 1), 2, "Stage 1-1 target should be 2 points")
+		T.assert_equal(round_cfg.hand_target(1, 1), 50, "Stage 1-1 target should be 50 points")
 		T.assert_equal(round_cfg.hand_target(1, 2), 2, "Stage 1-2 target should be 2 points")
 
 		local wr = { target = round_cfg.hand_target(1, 1) }
 		jumble.start_hand(wr)
-		T.assert_equal(wr.target, 2, "Jumble preserves round_config target on start_hand")
+		T.assert_equal(wr.target, 50, "Jumble preserves round_config target on start_hand")
 	end)
 
 	T.it("executes fast odometer countdown for points to get in under 0.5s", function()
