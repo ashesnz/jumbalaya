@@ -161,11 +161,24 @@ function M.draw_board(game)
 	end
 end
 
+function M.should_draw_sidebar_deck()
+	if not G.deck then return false end
+	if boss_sequence_active() then return false end
+	if WORD_GAME and WORD_GAME.TableDeck and WORD_GAME.TableDeck.uses_table_draw() then
+		return true
+	end
+	return #G.deck.cards > 0
+end
+
 function M.draw_hand_pass(game)
-	if G.deck and #G.deck.cards > 0 and not boss_sequence_active() then
+	if M.should_draw_sidebar_deck() then
 		love.graphics.push()
 		G.deck:translate_container()
-		G.deck:draw()
+		if WORD_GAME and WORD_GAME.TableDeck and WORD_GAME.TableDeck.uses_table_draw() then
+			WORD_GAME.TableDeck.draw(G.deck)
+		else
+			G.deck:draw()
+		end
 		love.graphics.pop()
 	end
 

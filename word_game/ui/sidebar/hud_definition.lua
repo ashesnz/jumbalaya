@@ -55,8 +55,10 @@ local function vault_fixed_content_height()
 		+ deck_h
 		+ VAULT_COUNTER_ROW_H
 		+ discard_h
-		+ VAULT_COUNTER_ROW_H
 		+ VAULT_BOTTOM_PAD
+	if table_discard.bin_enabled() then
+		rows = rows + VAULT_COUNTER_ROW_H
+	end
 	local fill_nodes = 6
 	local fill_pad = VAULT_FILL_PAD * (fill_nodes + 1)
 	return VAULT_ROOT_PAD * 2 + fill_pad + rows
@@ -114,9 +116,12 @@ end
 
 function M.sync_discard_row()
 	if not G.VAULT_HUD then return end
-	local show_end = table_discard.should_show_end_run()
 	local end_btn = G.VAULT_HUD:find_node_by_id("end_run_button")
-	set_node_visible(end_btn, show_end)
+	set_node_visible(end_btn, table_discard.should_show_end_run())
+	local discards_row = G.VAULT_HUD:find_node_by_id("row_discards_left")
+	if discards_row then
+		set_node_visible(discards_row, table_discard.bin_enabled())
+	end
 	table_discard.sync_discard_area()
 	G.VAULT_HUD:recalculate()
 end
@@ -180,12 +185,14 @@ function M.hud_definition()
 				}),
 			}}
 		end)(),
-		discards_left_node(box_w),
-		{ n = G.UI.ROW, config = {
-			id = "row_vault_bottom_pad",
-			minh = VAULT_BOTTOM_PAD,
-		}, nodes = {} },
 	}
+	if table_discard.bin_enabled() then
+		fill_nodes[#fill_nodes + 1] = discards_left_node(box_w)
+	end
+	fill_nodes[#fill_nodes + 1] = { n = G.UI.ROW, config = {
+		id = "row_vault_bottom_pad",
+		minh = VAULT_BOTTOM_PAD,
+	}, nodes = {} }
 
 	return { n = G.UI.ROOT, config = {
 		align = "tm",

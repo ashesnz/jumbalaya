@@ -16,6 +16,10 @@ M.CLICK_BLOCK = 0.18
 M.DISCARD_STAGGER = 0.05
 M.RING_WIDTH = 3.5
 
+function M.enabled()
+	return false
+end
+
 local hold_t = 0
 local holding = false
 local block_click = false
@@ -98,6 +102,7 @@ function M.hold_progress()
 end
 
 function M.can_hold()
+	if not M.enabled() then return false end
 	if animating then return false end
 	if InputLock.is_table_busy() then return false end
 	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
@@ -256,6 +261,7 @@ local function trigger_redraw()
 end
 
 function M.consume_click()
+	if not M.enabled() then return false end
 	if block_click then
 		block_click = false
 		peak_hold_t = 0
@@ -269,6 +275,7 @@ function M.consume_click()
 end
 
 function M.update(dt)
+	if not M.enabled() then return end
 	dt = dt or 0
 
 	if gameplay_overlays_active() then
@@ -341,6 +348,7 @@ local function find_sprite_object(uie)
 end
 
 function M.draw()
+	if not M.enabled() then return end
 	if gameplay_overlays_active() then return end
 	if not holding or hold_t <= 0 then return end
 

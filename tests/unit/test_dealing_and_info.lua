@@ -510,7 +510,9 @@ T.describe("Vault deck information", function()
 	end)
 
 	T.it("keeps the discard bin fill count when recycling into the deck", function()
+		if not require("word_game.ui.table_discard").bin_enabled() then return end
 		local table_discard = require("word_game.ui.table_discard")
+		G.STATE = G.STATES.MENU or 2
 		table_discard.reset()
 		table_discard.record_discard()
 		table_discard.record_discard()
@@ -568,6 +570,30 @@ T.describe("Vault deck information", function()
 		G.deck.cards = {}
 		G.placement_table.area.cards = { { ability = { letter = "D" } } }
 		T.assert_false(deck.needs_jumble_reshuffle(), "Placement still has cards")
+	end)
+
+	T.it("keeps the vault deck image visible when cards left reaches zero", function()
+		mock_env.reset_game()
+		G.STATE = G.STATES.TABLE_BOARD
+		G.STAGE = G.STAGES.RUN
+		G.deck = {
+			cards = {},
+			T = { x = 12, y = 4, w = 2.4, h = 1.8 },
+			translate_container = function() end,
+			draw = function() end,
+		}
+		G.ARGS = G.ARGS or {}
+		deck.sync_deck_count_display()
+		T.assert_equal(deck.cards_left(), 0)
+		T.assert_equal(G.ARGS.deck_left_count, 0)
+
+		local table_deck = require("word_game.ui.table_deck")
+		T.assert_true(table_deck.pack_stack_height(0) > 0,
+			"Empty draw pile should still reserve visible pack height in the sidebar")
+
+		local table_board = require("word_game.ui.table_board")
+		T.assert_true(table_board.should_draw_sidebar_deck(),
+			"Sidebar deck pile should still draw at zero cards left")
 	end)
 end)
 

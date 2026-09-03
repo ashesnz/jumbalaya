@@ -17,6 +17,10 @@ local M = {
 
 local fill_count = 0
 
+function M.bin_enabled()
+	return false
+end
+
 function M.max_fills()
 	return round_config.DISCARDS_PER_HAND
 end
@@ -89,12 +93,15 @@ function M.is_full()
 end
 
 function M.should_show_end_run()
+	if not M.bin_enabled() then
+		return G.STATE == G.STATES.TABLE_BOARD
+	end
 	return M.is_full()
 end
 
 function M.sync_discard_area()
 	if not G.discard or not G.discard.states then return end
-	local can_bin = M.uses_table_draw() and not M.should_show_end_run()
+	local can_bin = M.bin_enabled() and M.uses_table_draw() and not M.should_show_end_run()
 	G.discard.states.collide.can = can_bin
 	G.discard.states.hover.can = can_bin
 	G.discard.states.release_on.can = can_bin
@@ -136,7 +143,7 @@ function M.sync_vault_ui()
 end
 
 function M.end_run()
-	if not M.is_full() then return false end
+	if M.bin_enabled() and not M.is_full() then return false end
 	if InputLock.is_table_busy() then return false end
 	return Match.end_run({ won = false })
 end
@@ -210,6 +217,7 @@ function M.point_in_bin(x, y)
 end
 
 function M.can_discard_card(card)
+	if not M.bin_enabled() then return false end
 	if not M.uses_table_draw() then return false end
 	if M.is_full() then return false end
 	if not card or card.REMOVED or card.area ~= G.hand then return false end
@@ -259,7 +267,7 @@ local function draw_bin(area, ts)
 end
 
 function M.draw(area)
-	if not area or M.should_show_end_run() then return end
+	if not area or not M.bin_enabled() or M.should_show_end_run() then return end
 	local ts = G.TILESCALE * G.TILESIZE
 	draw_bin(area, ts)
 end

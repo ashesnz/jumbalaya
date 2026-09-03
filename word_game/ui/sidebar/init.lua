@@ -33,7 +33,6 @@ local REQUIRED_VAULT_ROWS = {
 	"row_deck",
 	"row_deck_count",
 	"row_discard",
-	"row_discards_left",
 }
 
 function WordSidebar:ensure()

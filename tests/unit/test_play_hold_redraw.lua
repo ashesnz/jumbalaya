@@ -13,6 +13,22 @@ T.describe("Play Button Hold Redraw (word_game.ui.play_hold_redraw)", function()
 	mock_env.reset_game()
 	local PlayHoldRedraw = require("word_game.ui.play_hold_redraw")
 
+	T.it("is disabled until unlocked later in the run", function()
+		T.assert_false(PlayHoldRedraw.enabled(), "hold redraw should stay off for now")
+		G.STATE = G.STATES.TABLE_BOARD
+		G.GAME = { word_score_animating = false, hand_redraw_animating = false }
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.HandShuffle = WORD_GAME.HandShuffle or {}
+		WORD_GAME.HandShuffle.play_button_uie = function()
+			return { states = { visible = true }, config = { button = "play_word" } }
+		end
+		WORD_GAME.TradeUI = { is_open = function() return false end }
+		T.assert_false(PlayHoldRedraw.can_hold(), "can_hold should stay false while disabled")
+	end)
+
+	-- Exercise implementation behind the feature flag.
+	PlayHoldRedraw.enabled = function() return true end
+
 	T.it("has a 5.0 second hold duration", function()
 		T.assert_equal(PlayHoldRedraw.HOLD_DURATION, 5.0, "HOLD_DURATION should be 5.0 seconds")
 	end)
@@ -72,6 +88,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.play_hold_redraw)", function()
 		WORD_GAME.HandShuffle = WORD_GAME.HandShuffle or {}
 		WORD_GAME.HandShuffle.play_button_uie = function() return mock_btn end
 		WORD_GAME.HandShuffle.sync = function() return true end
+		WORD_GAME.HandShuffle.try_sync = function() end
 		WORD_GAME.Deck = WORD_GAME.Deck or {}
 		WORD_GAME.Deck.deal_into_hand = function(target_size, on_complete)
 			dealt_count = target_size
@@ -352,6 +369,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.play_hold_redraw)", function()
 		WORD_GAME.HandShuffle = WORD_GAME.HandShuffle or {}
 		WORD_GAME.HandShuffle.play_button_uie = function() return mock_btn end
 		WORD_GAME.HandShuffle.sync = function() return true end
+		WORD_GAME.HandShuffle.try_sync = function() end
 
 		local refreshed = false
 		WORD_GAME.PlayerHost = {

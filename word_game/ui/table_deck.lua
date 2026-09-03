@@ -196,6 +196,14 @@ local function stack_height(n)
 	return math.max(0.14, math.min(M.MAX_STACK, 0.12 + n * 0.0056))
 end
 
+function M.pack_stack_height(card_count)
+	card_count = card_count or 0
+	if card_count <= 0 then
+		return math.max(0.14, stack_height(1) * 0.85)
+	end
+	return stack_height(card_count)
+end
+
 local function snap(px, py)
 	return math.floor(px + 0.5), math.floor(py + 0.5)
 end
@@ -299,7 +307,7 @@ function M.token_center_px(area)
 	local W = G.CARD_W * M.SIZE
 	local D = G.CARD_H * M.SIZE
 	local n = area.cards and #area.cards or 0
-	local H = stack_height(n)
+	local H = M.pack_stack_height(n)
 	local r = math.min(W, D) * 0.11
 
 	local minx, miny = math.huge, math.huge
@@ -371,7 +379,7 @@ function M.draw(area)
 	local W = G.CARD_W * M.SIZE
 	local D = G.CARD_H * M.SIZE
 	local n = #area.cards
-	local H = stack_height(n)
+	local H = M.pack_stack_height(n)
 	local r = math.min(W, D) * 0.11
 
 	local minx, miny = math.huge, math.huge
@@ -460,7 +468,7 @@ function M.draw(area)
 
 	-- Top face: rounded card back lying on the table.
 	local atlas, quad = back_atlas(area)
-	if n > 0 and atlas and quad then
+	if atlas and quad then
 		local qx, qy, qw, qh = quad:getViewport()
 		local iw, ih = atlas.image:getDimensions()
 		local u1, v1 = qx / iw, qy / ih
