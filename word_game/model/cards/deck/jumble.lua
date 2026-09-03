@@ -13,13 +13,15 @@ return function(context)
 		return wr and wr.mode == "jumble"
 	end
 
-	local function purge_deck_area()
+	local function reset_deck_pile()
 		if not G.deck then return end
-		if G.deck.remove_card and G.deck.cards then
+		if G.deck.cards then
 			for i = #G.deck.cards, 1, -1 do
-				G.deck:remove_card(G.deck.cards[i])
+				local card = G.deck.cards[i]
+				if card and card.remove_from_area then
+					card:remove_from_area()
+				end
 			end
-		elseif G.deck.cards then
 			G.deck.cards = {}
 		end
 		if G.deck.hard_set_cards then
@@ -41,7 +43,6 @@ return function(context)
 				area:hard_set_cards()
 			end
 		end
-		purge_deck_area()
 		purge(G.hand)
 		purge(G.discard)
 		purge(G.placement_table and G.placement_table.area)
@@ -53,8 +54,17 @@ return function(context)
 			M.populate_starting_deck()
 			return
 		end
+		reset_deck_pile()
 		for _, card in ipairs(G.playing_cards) do
 			if card and not card.REMOVED and not card.boss_temp and not card.bonus_card then
+				if card.remove_from_area then
+					card:remove_from_area()
+				end
+				card.played_pool = nil
+				card.bin_stash = nil
+				if card.states then
+					card.states.visible = true
+				end
 				if G.deck.emplace then
 					G.deck:emplace(card)
 				end
@@ -308,6 +318,12 @@ return function(context)
 
 	function M.deal_jumble_hand()
 		if not G.hand then return end
+		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.clear_blank_cards then
+			local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
+			if j and j.slots then
+				WORD_GAME.Jumble.clear_blank_cards(j.slots)
+			end
+		end
 		if WORD_GAME and WORD_GAME.TableDiscard and WORD_GAME.TableDiscard.reset then
 			WORD_GAME.TableDiscard.reset()
 		end

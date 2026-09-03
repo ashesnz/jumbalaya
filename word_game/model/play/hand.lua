@@ -7,7 +7,12 @@ local round = require("word_game.model.round")
 local round_config = require("word_game.config.round_config")
 local state = require("word_game.model.state")
 local word_feedback = require("word_game.ui.word_feedback")
+local play_effects = require("word_game.ui.play_effects")
 local CardMotion = require("app.effects.card_motion")
+
+local function set_score_animating(active)
+	play_effects.set_word_score_animating(active)
+end
 
 local function discard_remaining_hand()
 	if not G.hand then return 0 end
@@ -35,7 +40,7 @@ local function open_after_hand(opts)
 	if WORD_GAME and WORD_GAME.HandClearFocus and WORD_GAME.HandClearFocus.end_focus then
 		WORD_GAME.HandClearFocus.end_focus()
 	end
-	G.GAME.word_score_animating = false
+	set_score_animating(false)
 	local host = G.player_host
 	if host then
 		host:remove_speech_bubble()
@@ -84,9 +89,7 @@ local function open_after_hand(opts)
 		-- and bring up the boss stage.
 		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.begin_boss_word then
 			WORD_GAME.Jumble.begin_boss_word(wr, function()
-				if G.GAME then
-					G.GAME.word_score_animating = false
-				end
+				set_score_animating(false)
 			end)
 		end
 		return
@@ -138,11 +141,11 @@ function M.on_hand_cleared(opts)
 	if not opts.boss_cleared
 		and WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.is_jumble_deck
 		and WORD_GAME.Deck.is_jumble_deck()
-		and WORD_GAME.Deck.populate_jumble_deck then
-		WORD_GAME.Deck.populate_jumble_deck()
+		and WORD_GAME.Deck.reset_table_deck then
+		WORD_GAME.Deck.reset_table_deck()
 	end
 	if G.GAME then
-		G.GAME.word_score_animating = true
+		set_score_animating(true)
 	end
 
 	if wr and round_config.is_boss_word_hand(wr.set, wr.hand_index) and j
@@ -211,39 +214,28 @@ function M.continue_after_dealer()
 		M.end_match(true)
 		return
 	end
-	if WORD_GAME and WORD_GAME.Deck then
-		WORD_GAME.Deck.reset_table_deck()
-	end
-	if G.GAME then
-		G.GAME.word_score_animating = true
-	end
-	local function after_deal()
+	set_score_animating(true)
+	local function deal_next_stage()
+		if WORD_GAME and WORD_GAME.Deck then
+			WORD_GAME.Deck.reset_table_deck()
+		end
+		require("word_game.model.play.opening_deal").deal()
 		if WORD_GAME and WORD_GAME.Sidebar then
 			WORD_GAME.Sidebar:refresh()
 		end
-		if G.GAME then
-			G.GAME.word_score_animating = false
-		end
+		set_score_animating(false)
 	end
 	if G.TIMELINE and G.TIMELINE.enqueue then
 		Scheduler.add{
 			mode = "delayed",
 			delay = 0.18,
 			func = function()
-				if WORD_GAME and WORD_GAME.Deck then
-					WORD_GAME.Deck.reset_table_deck()
-				end
-				require("word_game.model.play.opening_deal").deal()
-				after_deal()
+				deal_next_stage()
 				return true
 			end,
 		}
 	else
-		if WORD_GAME and WORD_GAME.Deck then
-			WORD_GAME.Deck.reset_table_deck()
-		end
-		require("word_game.model.play.opening_deal").deal()
-		after_deal()
+		deal_next_stage()
 	end
 end
 
