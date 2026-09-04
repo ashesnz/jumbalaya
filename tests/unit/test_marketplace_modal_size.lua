@@ -59,8 +59,8 @@ T.describe("Marketplace modal size stability on card removal", function()
 		trade.roll_offer = function() return rolled end
 		trade_ui.definition()
 		trade.roll_offer = real_roll
-		G.GAME.alpha = G.GAME.alpha or {}
-		G.GAME.alpha.tokens = 500
+		G.GAME.run_state = G.GAME.run_state or {}
+		G.GAME.run_state.tokens = 500
 
 		local function body_dimensions()
 			local view = LayoutView({

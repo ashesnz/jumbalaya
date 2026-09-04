@@ -119,9 +119,9 @@ function M.teardown()
 	G.GAME = nil
 end
 
-function M.init_new_run_alpha()
+function M.init_new_run_state()
 	local run_state = require("word_game.model.state")
-	G.GAME.alpha = run_state.new()
+	G.GAME.run_state = run_state.new()
 end
 
 function M.begin_run(game_table, opts)
@@ -134,11 +134,13 @@ function M.begin_run(game_table, opts)
 	end
 	M.reset_args()
 	G.GAME = game_table
+	local run_state = require("word_game.model.state")
+	run_state.migrate_legacy_field(G.GAME)
 	G.GAME.run_generation = M.generation()
 	local run = ensure_run_table()
 	run.active = true
 	if not opts.from_save then
-		M.init_new_run_alpha()
+		M.init_new_run_state()
 	end
 	return G.GAME
 end

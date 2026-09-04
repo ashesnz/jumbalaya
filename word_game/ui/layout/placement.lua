@@ -60,13 +60,13 @@ function M.hud_portrait_rect()
 end
 
 function M.cinematic_portrait_active()
-	local alpha = G.GAME and G.GAME.alpha
-	return alpha and alpha.stage3_cinematic and true or false
+	local rs = G.GAME and G.GAME.run_state
+	return rs and rs.stage3_cinematic and true or false
 end
 
 function M.cinematic_portrait_hidden()
-	local alpha = G.GAME and G.GAME.alpha
-	return alpha and alpha.stage3_cinematic and not alpha.stage3_portrait_visible
+	local rs = G.GAME and G.GAME.run_state
+	return rs and rs.stage3_cinematic and not rs.stage3_portrait_visible
 end
 
 function M.cinematic_pose_rect(pose)
@@ -83,11 +83,11 @@ function M.cinematic_pose_rect(pose)
 end
 
 function M.portrait_rect()
-	local alpha = G.GAME and G.GAME.alpha
-	if alpha and alpha.stage3_portrait_rect then
-		return alpha.stage3_portrait_rect
+	local rs = G.GAME and G.GAME.run_state
+	if rs and rs.stage3_portrait_rect then
+		return rs.stage3_portrait_rect
 	end
-	local pose = alpha and alpha.stage3_portrait_pose
+	local pose = rs and rs.stage3_portrait_pose
 	if pose == "center" or pose == "left" then
 		return M.cinematic_pose_rect(pose)
 	end
@@ -129,19 +129,19 @@ function M.cinematic_guest_rest_rect()
 end
 
 function M.ally_portrait_rect()
-	local alpha = G.GAME and G.GAME.alpha
-	if alpha and alpha.stage3_ally_portrait_rect then
-		return alpha.stage3_ally_portrait_rect
+	local rs = G.GAME and G.GAME.run_state
+	if rs and rs.stage3_ally_portrait_rect then
+		return rs.stage3_ally_portrait_rect
 	end
 	return M.cinematic_ally_rest_rect()
 end
 
 function M.guest_portrait_rect()
-	local alpha = G.GAME and G.GAME.alpha
-	if alpha and alpha.stage3_guest_portrait_rect then
-		return alpha.stage3_guest_portrait_rect
+	local rs = G.GAME and G.GAME.run_state
+	if rs and rs.stage3_guest_portrait_rect then
+		return rs.stage3_guest_portrait_rect
 	end
-	if alpha and alpha.stage3_guest_pose == "center" then
+	if rs and rs.stage3_guest_pose == "center" then
 		return M.hud_portrait_rect()
 	end
 	return M.cinematic_guest_rest_rect()

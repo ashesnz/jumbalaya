@@ -131,7 +131,7 @@ local function action_button(item, action, cost, colour, disabled)
 	local label = action == "modifier" and "Modify" or (action:gsub("^%l", string.upper))
 	return { n = G.UI.ROW, config = {
 		align = "cm", padding = 0.12, r = 0.18, minw = G.CARD_W * M.MARKET_CARD_SCALE + 0.45, minh = 0.62,
-		hover = not disabled, button = disabled and nil or "alpha_trade_pick", ref_table = ref, colour = disabled and G.C.UI.BACKGROUND_INACTIVE or colour or G.C.UI.BUTTON,
+		hover = not disabled, button = disabled and nil or "trade_pick", ref_table = ref, colour = disabled and G.C.UI.BACKGROUND_INACTIVE or colour or G.C.UI.BUTTON,
 	        hover_colour = G.C.UI.BUTTON_HOVER, shadow = true, emboss = 0.1, no_jiggle = true,
 	    }, nodes = {
 		{ n = G.UI.ROW, config = { align = "cm", padding = 0.05 }, nodes = action_button_label_nodes(label, cost) },
@@ -292,7 +292,7 @@ function M.marketplace_content_nodes(ctx)
 			{ n = G.UI.COLUMN, config = {
 				align = "cm", minw = 0.72, minh = 0.72, r = 0.16, padding = 0.1,
 				hover = true, colour = G.C.RED, hover_colour = G.C.UI.BUTTON_HOVER,
-				button = "alpha_trade_skip_add", shadow = true, emboss = 0.12, no_jiggle = true,
+				button = "trade_skip_add", shadow = true, emboss = 0.12, no_jiggle = true,
 			}, nodes = {
 				{ n = G.UI.TEXT, config = {
 					text = "X",
@@ -324,7 +324,7 @@ function M.marketplace_content_nodes(ctx)
 			nodes[#nodes + 1] = status_or_skip(
 				session.remove_done,
 				session.removed == "skipped" and "Remove skipped" or "Card removed",
-				"alpha_trade_skip_remove"
+				"trade_skip_remove"
 			)
 		else
 			nodes[#nodes + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.04 }, nodes = {

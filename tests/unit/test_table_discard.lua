@@ -156,7 +156,7 @@ T.describe("table discard bin", function()
 		G.STATES.GAME_OVER = 4
 		table_discard.reset()
 		G.GAME = G.GAME or {}
-		G.GAME.alpha = { match_over = false, match_won = false }
+		G.GAME.run_state = { match_over = false, match_won = false }
 		G.GAME.word_score_animating = false
 		G.GAME.hand_redraw_animating = false
 		G.GAME.hand_shuffle_animating = false
@@ -168,8 +168,8 @@ T.describe("table discard bin", function()
 		G.STATE_COMPLETE = true
 		T.assert_true(table_discard.end_run())
 		T.assert_equal(G.STATE, G.STATES.GAME_OVER)
-		T.assert_equal(G.GAME.alpha.match_over, true)
-		T.assert_equal(G.GAME.alpha.match_won, false)
+		T.assert_equal(G.GAME.run_state.match_over, true)
+		T.assert_equal(G.GAME.run_state.match_won, false)
 		T.assert_equal(G.STATE_COMPLETE, false)
 		MockEnv.reset_game()
 	end)

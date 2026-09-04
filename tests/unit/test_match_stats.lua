@@ -17,7 +17,7 @@ T.describe("Match jumble stats", function()
 
 	T.it("counts each successful word play", function()
 		mock_env.reset_game()
-		G.GAME.alpha = state.new()
+		G.GAME.run_state = state.new()
 		state.record_word_played()
 		state.record_word_played()
 		T.assert_equal(stats().words_played, 2)
@@ -25,7 +25,7 @@ T.describe("Match jumble stats", function()
 
 	T.it("keeps the highest scoring jumble puzzle as the player's best", function()
 		mock_env.reset_game()
-		G.GAME.alpha = state.new()
+		G.GAME.run_state = state.new()
 		state.record_puzzle_score("C_T", 20)
 		state.record_puzzle_score("AR_", 50)
 		state.record_puzzle_score("…S", 40)
@@ -57,7 +57,7 @@ T.describe("Match jumble stats", function()
 
 	T.it("records the banked puzzle score and pattern as the best jumble", function()
 		mock_env.reset_game()
-		G.GAME.alpha = state.new()
+		G.GAME.run_state = state.new()
 		local flow = require("word_game.model.jumble_play")
 		G.GAME.word_round = {
 			target = 100,
@@ -88,7 +88,7 @@ T.describe("Match jumble stats", function()
 
 	T.it("counts played words and tracks the current puzzle score", function()
 		mock_env.reset_game()
-		G.GAME.alpha = state.new()
+		G.GAME.run_state = state.new()
 		local jumble = require("word_game.model.jumble")
 		local rules = require("word_game.model.jumble_play.jumble_rules")
 		G.GAME.word_round = {
@@ -125,7 +125,7 @@ T.describe("Match jumble stats", function()
 
 	T.it("captures an unbanked puzzle at game over if it is the player's best", function()
 		mock_env.reset_game()
-		G.GAME.alpha = state.new()
+		G.GAME.run_state = state.new()
 		G.STATES = G.STATES or {}
 		G.STATES.GAME_OVER = 4
 		G.GAME.word_round = {

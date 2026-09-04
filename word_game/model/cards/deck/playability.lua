@@ -69,8 +69,8 @@ return function(context)
 		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active() then
 			return false
 		end
-		local alpha = G.GAME and G.GAME.alpha
-		if alpha and alpha.character_intro_active then
+		local rs = G.GAME and G.GAME.run_state
+		if rs and rs.character_intro_active then
 		end
 		return true
 	end

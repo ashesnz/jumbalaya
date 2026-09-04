@@ -19,7 +19,7 @@ T.describe("Debug stage jump (devtools.sections.stage)", function()
 		G.STAGE = G.STAGES.RUN
 		G.STATE = G.STATES.TABLE_BOARD
 		G.GAME = G.GAME or {}
-		G.GAME.alpha = { perks = {} }
+		G.GAME.run_state = { perks = {} }
 		G.GAME.word_round = { set = 2, hand_index = 2, mode = "jumble", jumble = { total_score = 5 } }
 		G.TABLE_HAND_SIZE = 7
 

@@ -22,7 +22,7 @@ local function stub_market_env()
 		hard_set_cards = function() end,
 	}
 	G.GAME = G.GAME or {}
-	G.GAME.alpha = G.GAME.alpha or { tokens = 0, perks = {}, trade_used_this_hand = false }
+	G.GAME.run_state = G.GAME.run_state or { tokens = 0, perks = {}, trade_used_this_hand = false }
 end
 
 local function walk_trade_buttons(node, out)
@@ -96,7 +96,7 @@ T.describe("Marketplace button affordability (word_game.ui.trade)", function()
 	local function open_market_for(letter, tokens)
 		trade_ui.teardown_run()
 		G.GAME = G.GAME or {}
-		G.GAME.alpha = { tokens = tokens, perks = {}, trade_used_this_hand = false }
+		G.GAME.run_state = { tokens = tokens, perks = {}, trade_used_this_hand = false }
 		G.RUN = G.RUN or {}
 		G.RUN.active = true
 		local rolled = bind_offer_with_letter(trade, deck, letter)
@@ -119,7 +119,7 @@ T.describe("Marketplace button affordability (word_game.ui.trade)", function()
 
 	T.it("disables add and remove when their costs exceed the balance", function()
 		open_market_for("I", 22)
-		G.GAME.alpha.tokens = 15
+		G.GAME.run_state.tokens = 15
 		local buttons = marketplace_action_buttons(trade_ui)
 		T.assert_false(buttons.add.disabled, "Add should stay enabled at 15 tokens when it costs 10")
 		T.assert_true(buttons.remove.disabled, "Remove should disable at 15 tokens when it costs 20")
@@ -130,7 +130,7 @@ T.describe("Marketplace button affordability (word_game.ui.trade)", function()
 		local rolled, item = open_market_for("I", 22)
 		local ok = trade.apply(item, { action = "remove", cost = trade.ACTION_COSTS.remove, defer_used = true })
 		T.assert_true(ok)
-		T.assert_equal(G.GAME.alpha.tokens, 2, "Remove should spend 20 tokens")
+		T.assert_equal(G.GAME.run_state.tokens, 2, "Remove should spend 20 tokens")
 
 		local buttons = marketplace_action_buttons(trade_ui)
 		T.assert_true(buttons.add.disabled, "Add should disable after spending down to 2 tokens")
@@ -140,7 +140,7 @@ T.describe("Marketplace button affordability (word_game.ui.trade)", function()
 
 	T.it("reports affordability through can_afford_action", function()
 		G.GAME = G.GAME or {}
-		G.GAME.alpha = { tokens = 22, perks = {}, trade_used_this_hand = false }
+		G.GAME.run_state = { tokens = 22, perks = {}, trade_used_this_hand = false }
 		G.RUN = G.RUN or {}
 		G.RUN.active = true
 		local session_state = { add_cost_bonus = 10 }
@@ -148,7 +148,7 @@ T.describe("Marketplace button affordability (word_game.ui.trade)", function()
 		T.assert_true(trade_ui.can_afford_action("remove", session_state))
 		T.assert_false(trade_ui.can_afford_action("modifier", session_state))
 
-		G.GAME.alpha.tokens = 2
+		G.GAME.run_state.tokens = 2
 		T.assert_false(trade_ui.can_afford_action("add", session_state))
 		T.assert_false(trade_ui.can_afford_action("remove", session_state))
 		T.assert_false(trade_ui.can_afford_action("modifier", session_state))

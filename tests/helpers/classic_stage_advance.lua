@@ -92,7 +92,7 @@ end
 function M.configure_round(opts)
 	opts = opts or {}
 	G.GAME.run_mode = "classic"
-	G.GAME.alpha = { tokens = 100, perks = {}, trade_used_this_hand = false }
+	G.GAME.run_state = { tokens = 100, perks = {}, trade_used_this_hand = false }
 	G.GAME.word_round = {
 		set = opts.set or 1,
 		hand_index = opts.hand_index or 1,

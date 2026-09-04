@@ -205,7 +205,7 @@ Hold-to-redraw is independent of the old discard counter. It is blocked only dur
 
 ### Tokens
 
-- Earned on **set 1, hand 1 clear** only: `floor(time_remaining)` tokens added to your pile (`TokenReward`, `state.alpha.tokens`).
+- Earned on **set 1, hand 1 clear** only: `floor(time_remaining)` tokens added to your pile (`TokenReward`, `run_state.tokens`).
 - Gold sticker sprites fly from the timeline into the token stack; counter rolls up.
 - Hand-clear **spotlight** dims the table during the 1-1 reward sequence.
 - Starting tokens: **0** (`economy.STARTING_TOKENS`).
@@ -214,7 +214,7 @@ Hold-to-redraw is independent of the old discard counter. It is blocked only dur
 
 ## Perks
 
-Perks are acquired via the **rubber-stamp flow** on the vault (`word_game/ui/perk_stamp.lua`). Purchased perks are stored on `G.GAME.alpha.perks` and selected perk metadata on `G.GAME.selected_perk`.
+Perks are acquired via the **rubber-stamp flow** on the vault (`word_game/ui/perk_stamp.lua`). Purchased perks are stored on `G.GAME.run_state.perks` and selected perk metadata on `G.GAME.selected_perk`.
 
 Perks are collected as vault stamps for display. Gameplay effects are **not wired yet** — descriptions note planned scoring bonuses; `state.has_perk()` is reserved for future hooks.
 

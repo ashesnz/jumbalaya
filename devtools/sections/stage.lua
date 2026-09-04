@@ -72,13 +72,13 @@ local function jump_to_hand(ctx, set, hand_index)
 	if WORD_GAME.PlayerHost and WORD_GAME.PlayerHost.end_stage3_cinematic then
 		WORD_GAME.PlayerHost.end_stage3_cinematic()
 	end
-	local alpha = G.GAME and G.GAME.alpha
-	if alpha then
-		alpha.stage3_cinematic_seen = nil
-		alpha.marco_cinematic_seen = nil
-		alpha.cinematic_seen = nil
-		alpha.character_intro_active = false
-		alpha.intro_waiting_score = false
+	local rs = G.GAME and G.GAME.run_state
+	if rs then
+		rs.stage3_cinematic_seen = nil
+		rs.marco_cinematic_seen = nil
+		rs.cinematic_seen = nil
+		rs.character_intro_active = false
+		rs.intro_waiting_score = false
 	end
 	local wr = G.GAME and G.GAME.word_round
 	if wr and wr.jumble and WORD_GAME.Deck and WORD_GAME.Deck.destroy_boss_cards then

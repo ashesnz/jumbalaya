@@ -44,7 +44,7 @@
 ---@field couponed any
 ---@field [string] any
 
----@class AlphaState
+---@class RunState
 ---@field tokens number
 ---@field perks table
 ---@field perk_slots number
@@ -92,7 +92,7 @@
 ---@class GameRunState
 ---@field modifiers table
 ---@field round_resets table
----@field alpha AlphaState|nil
+---@field run_state RunState|nil
 ---@field won boolean|nil
 ---@field seeded boolean|nil
 ---@field pseudorandom table

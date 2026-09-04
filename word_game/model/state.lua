@@ -1,4 +1,4 @@
---[[ word_game/model/state.lua - Match-long Jumbalaya state on G.GAME.alpha ]]
+--[[ word_game/model/state.lua - Match-long Jumbalaya state on G.GAME.run_state ]]
 
 local economy = require("word_game.config.economy")
 local perks_cfg = require("word_game.config.perks")
@@ -21,70 +21,84 @@ function M.new()
 	}
 end
 
+--- Migrates legacy save field `G.GAME.alpha` → `run_state` once per load.
+function M.migrate_legacy_field(game)
+	if not game or type(game) ~= "table" then return end
+	if game.run_state then
+		game.alpha = nil
+		return
+	end
+	if game.alpha then
+		game.run_state = game.alpha
+		game.alpha = nil
+	end
+end
+
 function M.get()
 	if not G or not G.GAME then return nil end
 	if G.RUN and G.RUN.active == false then return nil end
-	G.GAME.alpha = G.GAME.alpha or M.new()
-	return G.GAME.alpha
+	M.migrate_legacy_field(G.GAME)
+	G.GAME.run_state = G.GAME.run_state or M.new()
+	return G.GAME.run_state
 end
 
 function M.tokens()
-	local alpha = M.get()
-	return alpha and alpha.tokens or 0
+	local rs = M.get()
+	return rs and rs.tokens or 0
 end
 
 function M.add_tokens(amount)
-	local alpha = M.get()
-	if not alpha then return 0 end
+	local rs = M.get()
+	if not rs then return 0 end
 	amount = math.floor(amount or 0)
 	if amount <= 0 then return 0 end
-	alpha.tokens = (alpha.tokens or 0) + amount
+	rs.tokens = (rs.tokens or 0) + amount
 	return amount
 end
 
 function M.spend_tokens(amount)
-	local alpha = M.get()
-	if not alpha then return false end
+	local rs = M.get()
+	if not rs then return false end
 	amount = math.floor(amount or 0)
 	if amount <= 0 then return true end
-	if (alpha.tokens or 0) < amount then return false end
-	alpha.tokens = alpha.tokens - amount
+	if (rs.tokens or 0) < amount then return false end
+	rs.tokens = rs.tokens - amount
 	return true
 end
 
 function M.has_perk(key)
 	-- Collected perks are cosmetic until scoring hooks are implemented.
-	local alpha = M.get()
-	if not alpha then return false end
-	for _, perk in ipairs(alpha.perks) do
+	local rs = M.get()
+	if not rs then return false end
+	for _, perk in ipairs(rs.perks) do
 		if perk == key then return true end
 	end
 	return false
 end
 
 function M.rightmost_perk()
-	local alpha = M.get()
-	if not alpha then return nil end
-	local slots = alpha.perk_slots or perks_cfg.SLOT_COUNT
-	return alpha.perks[slots] or alpha.perks[#alpha.perks]
+	local rs = M.get()
+	if not rs then return nil end
+	local slots = rs.perk_slots or perks_cfg.SLOT_COUNT
+	return rs.perks[slots] or rs.perks[#rs.perks]
 end
 
 function M.add_perk(id)
 	if not id then return false end
-	local alpha = M.get()
-	if not alpha then return false end
-	alpha.perks = alpha.perks or {}
-	local slots = alpha.perk_slots or perks_cfg.SLOT_COUNT
-	if #alpha.perks >= slots then return false end
-	alpha.perks[#alpha.perks + 1] = id
+	local rs = M.get()
+	if not rs then return false end
+	rs.perks = rs.perks or {}
+	local slots = rs.perk_slots or perks_cfg.SLOT_COUNT
+	if #rs.perks >= slots then return false end
+	rs.perks[#rs.perks + 1] = id
 	return true
 end
 
 function M.ensure_stats()
-	local alpha = M.get()
-	if not alpha then return nil end
-	alpha.stats = alpha.stats or {}
-	local stats = alpha.stats
+	local rs = M.get()
+	if not rs then return nil end
+	rs.stats = rs.stats or {}
+	local stats = rs.stats
 	stats.words_played = stats.words_played or 0
 	stats.best_puzzle_score = stats.best_puzzle_score or 0
 	return stats

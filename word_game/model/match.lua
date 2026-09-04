@@ -9,14 +9,15 @@ function M.end_run(opts)
 	if type(delete_saved_run) == "function" then
 		delete_saved_run()
 	end
-	local alpha = state.get()
-	if alpha then
-		alpha.match_over = true
-		alpha.match_won = opts.won and true or false
+	local rs = state.get()
+	if rs then
+		rs.match_over = true
+		rs.match_won = opts.won and true or false
 	elseif G.GAME then
-		G.GAME.alpha = G.GAME.alpha or {}
-		G.GAME.alpha.match_over = true
-		G.GAME.alpha.match_won = opts.won and true or false
+		state.migrate_legacy_field(G.GAME)
+		G.GAME.run_state = G.GAME.run_state or {}
+		G.GAME.run_state.match_over = true
+		G.GAME.run_state.match_won = opts.won and true or false
 	end
 	if G.SETTINGS then
 		G.SETTINGS.paused = true

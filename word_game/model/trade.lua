@@ -9,13 +9,13 @@ local LetterPalette = require("word_game.config.letter_card_palette")
 local M = {}
 
 local TIERS = {
-	{ ap = 1, letters = { "A", "E", "I", "O", "U", "L", "N", "S", "T", "R" } },
-	{ ap = 2, letters = { "D", "G" } },
-	{ ap = 3, letters = { "B", "C", "M", "P" } },
-	{ ap = 4, letters = { "F", "H", "V", "W", "Y" } },
-	{ ap = 5, letters = { "K" } },
-	{ ap = 8, letters = { "J", "X" } },
-	{ ap = 10, letters = { "Q", "Z" } },
+	{ value = 1, letters = { "A", "E", "I", "O", "U", "L", "N", "S", "T", "R" } },
+	{ value = 2, letters = { "D", "G" } },
+	{ value = 3, letters = { "B", "C", "M", "P" } },
+	{ value = 4, letters = { "F", "H", "V", "W", "Y" } },
+	{ value = 5, letters = { "K" } },
+	{ value = 8, letters = { "J", "X" } },
+	{ value = 10, letters = { "Q", "Z" } },
 }
 
 M.ACTION_COSTS = {
@@ -113,7 +113,7 @@ local function roll_add_offer()
 	return {
 		mode = "add",
 		row = row,
-		ap = tier.ap,
+		value = tier.value,
 		pool = tier.letters,
 		letters = picks,
 	}

@@ -84,7 +84,7 @@ T.describe("Jumble play flow integration", function()
 		G.RUN = { active = true }
 		G.GAME.deck_left_count = 0
 
-		G.GAME.alpha = {
+		G.GAME.run_state = {
 			trade_used_this_hand = false,
 			tokens = 10,
 			perks = {},
@@ -194,7 +194,7 @@ T.describe("Jumble play flow integration", function()
 	T.it("updates the token counter while the marketplace hides the table deck area", function()
 		local table_deck = require("word_game.ui.table_deck")
 		local state = require("word_game.model.state")
-		G.GAME.alpha = { tokens = 20, perks = {} }
+		G.GAME.run_state = { tokens = 20, perks = {} }
 		table_deck.reset()
 		state.spend_tokens(10)
 		table_deck.spend_tokens_display(10)

@@ -127,7 +127,7 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `deck/jumble.lua` | Populate jumble deck, `deal_jumble_hand` |
 | `deck/dealing.lua` | Animated `deal_into_hand` (one card at a time) |
 | `perk.lua` | Stamp roll, apply choice, selection |
-| `state.lua` | Match persistence, `alpha.tokens` |
+| `state.lua` | Match persistence, `run_state.tokens` |
 
 ### Cards (`word_game/model/cards/`)
 
@@ -161,7 +161,8 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `sidebar.lua` | Vault HUD (stamps, deck) |
 | `widgets/` | Shared UI controls (`buttons.lua`, `sliders.lua`) and `G.DEFINITIONS` helpers |
 | `overlays/` | Options, settings, win/game-over overlays (`options.lua`, `results.lua`) |
-| `fx.lua` | Floating score and attention effects (`spawn_attention` primitive) |
+| `word_feedback.lua` | Gameplay attention text; owns `spawn_attention` primitive |
+| `fx.lua` | Boot shim that loads `word_feedback` (installs global `spawn_attention`) |
 | `menu/` | Main menu (`definition`, `layout`, `animate`; facade in `init`) |
 | `card_ui.lua`, `card_visuals.lua` | Card presentation and visual helpers |
 
@@ -203,11 +204,11 @@ Three modules handle distinct score feedback layers on TABLE_BOARD. Use this rou
 | Persistent HUD | `score_banner/` | Rolling points × multiplier chips and “Points to get” |
 | Ephemeral sentences | `word_feedback.lua` | Immediate board messages during play (invalid word, hand cleared, boss countdown) |
 | Model queue | `model/feedback.lua` | Rules/model code that must not import UI; drained by `word_feedback.flush_pending()` |
-| Low-level primitive | `fx.lua` → `spawn_attention` | Anchor-specific or engine-level text; avoid from model |
+| Low-level primitive | `word_feedback.spawn_attention` | Anchor-specific or engine-level text; avoid from model |
 | Play cinematics | `play_effects/` | Full play resolution FX; delegates copy to `word_feedback` |
 | Per-card popups | `float_up_text.lua` | Short +2 / +mult rises from individual cards |
 
-`spawn_attention` remains a global for legacy Balatro call sites; new gameplay copy should go through `word_feedback` or `model/feedback`.
+`spawn_attention` is installed as a global by `word_feedback.lua` (via `fx.lua` at boot). New gameplay copy should go through `word_feedback` helpers or `model/feedback`.
 
 ---
 

@@ -58,7 +58,7 @@ local function live_letter_count(letter)
 end
 
 local function state_tokens()
-	return G.GAME.alpha and G.GAME.alpha.tokens or 0
+	return G.GAME.run_state and G.GAME.run_state.tokens or 0
 end
 
 T.describe("Marketplace duplicate removal (word_game.model.trade)", function()
@@ -198,8 +198,8 @@ T.describe("Marketplace dissolve slot refill (word_game.ui.trade)", function()
 
 		local cards = build_deck("E", 3)
 		local item = make_remove_item(cards[1])
-		G.GAME.alpha = G.GAME.alpha or {}
-		G.GAME.alpha.tokens = 1000
+		G.GAME.run_state = G.GAME.run_state or {}
+		G.GAME.run_state.tokens = 1000
 
 		adopt_session(trade_ui, make_offer(item))
 		pick_remove(trade_ui, item)
@@ -222,8 +222,8 @@ T.describe("Marketplace dissolve slot refill (word_game.ui.trade)", function()
 
 		local cards = build_deck("E", 1)
 		local item = make_remove_item(cards[1])
-		G.GAME.alpha = G.GAME.alpha or {}
-		G.GAME.alpha.tokens = 1000
+		G.GAME.run_state = G.GAME.run_state or {}
+		G.GAME.run_state.tokens = 1000
 
 		adopt_session(trade_ui, make_offer(item))
 		pick_remove(trade_ui, item)
@@ -246,9 +246,9 @@ T.describe("Marketplace dissolve slot refill (word_game.ui.trade)", function()
 		local item = { mode = "market", letter = "Z", color = "red" }
 		local offer = { add = { mode = "market", letters = { item } }, remove = nil, showdown = false }
 
-		G.GAME.alpha = G.GAME.alpha or {}
+		G.GAME.run_state = G.GAME.run_state or {}
 		-- Exactly enough for one purchase: after buying, nothing is affordable.
-		G.GAME.alpha.tokens = trade.ACTION_COSTS.add
+		G.GAME.run_state.tokens = trade.ACTION_COSTS.add
 
 		-- Spy on the run continuation so we can detect the modal closing.
 		local calls = {}
@@ -292,8 +292,8 @@ T.describe("Marketplace dissolve slot refill (word_game.ui.trade)", function()
 		local real_play = WORD_GAME.Play
 		WORD_GAME.Play = { continue_after_dealer = function() calls[#calls + 1] = "continue" end }
 
-		G.GAME.alpha = G.GAME.alpha or {}
-		G.GAME.alpha.tokens = 66 -- buys at 10 and 20 keep the modal alive
+		G.GAME.run_state = G.GAME.run_state or {}
+		G.GAME.run_state.tokens = 66 -- buys at 10 and 20 keep the modal alive
 
 		adopt_session(trade_ui, offer)
 
@@ -326,7 +326,7 @@ T.describe("Marketplace dissolve slot refill (word_game.ui.trade)", function()
 
 		-- Even if a pending token reward credits the balance mid-flight,
 		-- the purchase already drained us: the modal must still close.
-		G.GAME.alpha.tokens = 100
+		G.GAME.run_state.tokens = 100
 
 		land_flyer()
 
@@ -355,8 +355,8 @@ T.describe("Marketplace dissolve slot refill (word_game.ui.trade)", function()
 		WORD_GAME.TableDeck = require("word_game.ui.table_deck")
 		WORD_GAME.TableDeck.reset()
 
-		G.GAME.alpha = G.GAME.alpha or {}
-		G.GAME.alpha.tokens = 32
+		G.GAME.run_state = G.GAME.run_state or {}
+		G.GAME.run_state.tokens = 32
 
 		adopt_session(trade_ui, offer)
 
