@@ -4,7 +4,7 @@
 	Letters start hidden and appear at full size one-by-one, left to right,
 	with a paper tick — like a typewriter on the white bubble.
 ]]
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 
 
 local M = {}

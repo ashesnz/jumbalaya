@@ -7,7 +7,7 @@
 	Knows nothing about Card — works for any Moveable-style node.
 ]]
 
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 
 local DissolveFX = {}
 

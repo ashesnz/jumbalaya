@@ -1,6 +1,6 @@
 --[[ app/effects/easing.lua - Numeric and colour easing effects ]]
 
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 
 local Easing = {}
 

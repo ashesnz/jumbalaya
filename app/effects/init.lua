@@ -5,6 +5,6 @@ return {
     card_motion = require "app.effects.card_motion",
     menu = require "app.effects.menu",
     runtime = require "app.effects.runtime",
-    scheduler = require "app.effects.scheduler",
+    scheduler = require "app.effects.timeline_scheduler",
     status_text = require "app.effects.status_text",
 }

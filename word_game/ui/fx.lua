@@ -1,10 +1,10 @@
 --[[
-	word_game/ui/fx.lua - Floating attention text (score pops, comic bursts).
+	word_game/ui/fx.lua - Low-level attention text primitive (UIBox + FlowText).
 
-	These stay globals (`build_*`, `G.DEFINITIONS.*`) so existing call sites
-	do not change. Loaded from main.lua.
+	Prefer word_feedback for gameplay copy; model code should use model/feedback.lua.
+	These stay globals (`spawn_attention`, `build_*`) for legacy call sites.
 ]]
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 
 
 function spawn_attention(args)

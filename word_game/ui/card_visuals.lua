@@ -2,7 +2,7 @@
 
 ---@class (partial) Card : EaseNode
 
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 local DissolveFX = require "app.effects.dissolve_fx"
 local LetterFaces = require "word_game.ui.letter_card_faces"
 local LetterPalette = require "word_game.config.letter_card_palette"

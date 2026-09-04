@@ -3,7 +3,7 @@
 ]]
 
 local Layout = require "word_game.ui.layout"
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 local RunScope = require "word_game.model.run_scope"
 local RunMode = require "word_game.model.run_mode"
 

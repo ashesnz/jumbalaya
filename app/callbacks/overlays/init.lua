@@ -1,3 +1,3 @@
 --[[ app/callbacks/overlays/init.lua ]]
 require("app.callbacks.overlays.menu_core")
-require("app.callbacks.overlays.screens")
+require("word_game.ui.callbacks.overlays").install()

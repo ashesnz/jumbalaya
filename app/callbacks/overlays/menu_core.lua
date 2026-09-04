@@ -1,7 +1,7 @@
 --[[ app/callbacks/overlays/ ]]
 
 
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 G.FUNCS.switch_tab = function(e)
   if not e then return end
   clear_overlay_infotip()

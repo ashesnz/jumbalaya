@@ -1,13 +1,6 @@
---[[
-	word_game/model/profile_stats.lua - minimal card discovery hooks.
+--[[ word_game/model/profile_stats.lua - card discovery persistence ]]
 
-	Balatro-era collection tallies were removed; these stubs keep card
-	discovery persistence without profile/collection UI.
-]]
-local Scheduler = require "app.effects.scheduler"
-
-function set_profile_progress()
-end
+local Scheduler = require "app.effects.timeline_scheduler"
 
 function discover_card(card)
 	if not card or card.discovered or card.wip then return end
@@ -19,7 +12,4 @@ function discover_card(card)
 			return true
 		end,
 	}
-end
-
-function sync_discover_counts()
 end

@@ -9,6 +9,7 @@ local Layout = require("word_game.ui.layout")
 local LetterPalette = require("word_game.config.letter_card_palette")
 local trade_layout = require("word_game.ui.trade.layout")
 local trade_fly = require("word_game.ui.trade.fly")
+local word_feedback = require("word_game.ui.word_feedback")
 
 local M = {}
 local unpack_nodes = table.unpack or unpack
@@ -591,14 +592,7 @@ local function refresh_or_finish()
 end
 
 local function fail(text)
-	spawn_attention({
-		scale = 0.7,
-		text = tostring(text),
-		hold = 1.4,
-		align = "cm",
-		major = G.ROOM_ATTACH,
-		colour = G.C.RED,
-	})
+	word_feedback.show_screen_centered(tostring(text), G.C.RED, 1.4)
 end
 
 function M.is_flying()

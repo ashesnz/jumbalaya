@@ -7,7 +7,7 @@
 	  build(panel)     - return a layout.section() node
 ]]
 local Kind = require "app.core.object"
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 
 
 local DebugContext = require "devtools.context"

@@ -4,7 +4,7 @@
 	Hold for 5s: yellow ring drains clockwise from 12 o'clock, then hand cards
 	slide down off screen and 7 new cards deal in one at a time from the deck.
 ]]
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 local InputLock = require("word_game.model.input_lock")
 local hand_size_cfg = require("word_game.config.hand_size")
 

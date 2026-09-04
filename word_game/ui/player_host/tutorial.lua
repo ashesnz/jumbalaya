@@ -1,5 +1,5 @@
 
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 return function(ctx)
 	local PlayerHost = ctx.PlayerHost
 	local characters = ctx.characters

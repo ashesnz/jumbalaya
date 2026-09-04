@@ -1,5 +1,5 @@
 --[[
-	app/effects/scheduler.lua - local tween scheduling for runtime effects.
+	app/effects/timeline_scheduler.lua - G.TIMELINE tween scheduling for runtime effects.
 
 	Thin conveniences over the global timeline: each helper stamps the tween
 	mode, hands the options table to Tween(), and files it on G.TIMELINE.

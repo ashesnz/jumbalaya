@@ -2,7 +2,7 @@
 
 ---@class (partial) Card : EaseNode
 
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 
 function Card:apply_center(center, initial, delay_sprites)
     local old_center = self.config.center

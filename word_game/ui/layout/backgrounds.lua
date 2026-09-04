@@ -7,7 +7,7 @@
 	scheduler event and eases the felt colour per stage.
 ]]
 
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 
 local M = {}
 

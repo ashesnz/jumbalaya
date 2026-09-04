@@ -1,6 +1,6 @@
 --[[ word_game/ui/hand_shuffle_anim.lua - Smooth riffle shuffle animation for the hand ]]
 
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 
 local M = {}
 

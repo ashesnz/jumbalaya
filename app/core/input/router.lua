@@ -1,7 +1,7 @@
 --[[ app/core/input/router.lua - routes pointer, keyboard, and gamepad input ]]
 
 local Kind = require("app.core.object")
-local Scheduler = require("app.effects.scheduler")
+local Scheduler = require("app.effects.timeline_scheduler")
 
 ---@class InputRouter : Kind
 InputRouter = Kind:derive("InputRouter")

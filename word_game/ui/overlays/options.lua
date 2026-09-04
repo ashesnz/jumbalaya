@@ -1,5 +1,5 @@
 --[[ word_game/ui/overlays/options.lua - Pause menu and settings overlays ]]
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 local Components = require "word_game.ui.widgets.components"
 
 

@@ -1,5 +1,5 @@
 --[[ word_game/model/jumble_play/hand.lua ]]
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 
 
 return function(M)

@@ -1,7 +1,7 @@
 --[[ app/callbacks/ui_controls/ ]]
 
 
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 local Easing = require "app.effects.easing"
 
 --Creates a binding pip on this UIE if controller is being used

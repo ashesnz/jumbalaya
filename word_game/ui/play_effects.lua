@@ -10,7 +10,7 @@ local round_config = require("word_game.config.round_config")
 local hand_size_cfg = require("word_game.config.hand_size")
 local RunMode = require("word_game.model.run_mode")
 local Easing = require "app.effects.easing"
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 
 M.BOSS_INTRO = {
 	hide_duration = 0.42,

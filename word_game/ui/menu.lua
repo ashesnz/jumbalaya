@@ -8,7 +8,7 @@
 local Layout = require "word_game.ui.layout"
 local Easing = require "app.effects.easing"
 local MenuEffects = require "app.effects.menu"
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 local Components = require "word_game.ui.widgets.components"
 
 function G.DEFINITIONS.profile_select()
@@ -711,7 +711,6 @@ function Game:open_main_menu(change_context)
 			return true
 		end}
 	Scheduler.add{blockable = false, func = function()
-		if set_profile_progress then set_profile_progress() end
 		G.REFRESH_ALERTS = true
 		return true
 	end}

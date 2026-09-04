@@ -1,7 +1,8 @@
 --[[ word_game/ui/hand_placement_recall_anim.lua - Slide placement-row cards back to hand ]]
 
-local Scheduler = require "app.effects.scheduler"
-local bonus_stack = require "word_game.ui.boss_word_stack"
+local Scheduler = require "app.effects.timeline_scheduler"
+local bonus_model = require "word_game.model.bonus_stack"
+local bonus_gutter = require "word_game.board.bonus_gutter"
 
 local M = {}
 
@@ -103,7 +104,7 @@ local function slide_card_to_bonus_stack(card, p_area, delay)
 			if card.area == p_area then
 				p_area:remove_card(card)
 			end
-			bonus_stack.return_card(card)
+			bonus_gutter.return_card(card)
 			local tx, ty = card.T.x, card.T.y
 			local tr = card.T.r or 0
 			local arc = (G.CARD_H or 1.4) * ARC_FRAC
@@ -254,7 +255,7 @@ function M.animate(on_complete)
 
 	local p_area = placement_area()
 	for i, card in ipairs(cards) do
-		if bonus_stack.is_bonus_card(card) then
+		if bonus_model.is_bonus_card(card) then
 			slide_card_to_bonus_stack(card, p_area, (i - 1) * STAGGER)
 		else
 			slide_card_to_hand(card, p_area, (i - 1) * STAGGER)

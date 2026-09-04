@@ -1,18 +1,20 @@
 --[[ word_game/ui/boss_word_stack.lua - Bonus card stack (boss word rewards on stages 1-4 … 1-6) ]]
 
 local model = require("word_game.model.bonus_stack")
+local gutter = require("word_game.board.bonus_gutter")
 local placement_layout = require("word_game.ui.layout.placement")
 local board_config = require("word_game.board.config")
 local DissolveFX = require("app.effects.dissolve_fx")
 local deck = require("word_game.model.cards.deck")
 local LetterPalette = require("word_game.config.letter_card_palette")
 local round_config = require("word_game.config.round_config")
+local word_feedback = require("word_game.ui.word_feedback")
 
 local M = {}
 
 M.BONUS_POINTS = model.BONUS_POINTS
-M.LEFT_WINDOW_MARGIN = 0.14
-M.STACK_Y_LIFT_PX = 20
+M.LEFT_WINDOW_MARGIN = gutter.LEFT_WINDOW_MARGIN
+M.STACK_Y_LIFT_PX = gutter.STACK_Y_LIFT_PX
 
 local TRANSFORM_DISSOLVE_TIME = 0.7
 local TRANSFORM_MATERIALIZE_TIME = 0.6
@@ -91,13 +93,10 @@ function M.stage_cards(cards)
 end
 
 function M.on_hand_start(set, hand_index)
-	if round_config.is_bonus_stack_hand(set, hand_index) then
-		if not model.is_animating() then
-			M.sync_positions()
-		end
-		return
+	model.on_hand_start(set, hand_index)
+	if round_config.is_bonus_stack_hand(set, hand_index) and not model.is_animating() then
+		M.sync_positions()
 	end
-	model.clear()
 end
 
 local function card_letter(card)
@@ -157,39 +156,12 @@ local function gameplay_left_edge()
 	return edge
 end
 
-local function window_left_x()
-	return -((G.ROOM and G.ROOM.T and G.ROOM.T.x) or 0)
-end
-
 function M.stack_y_lift()
-	local dim_ok, dim = pcall(require, "word_game.config.dimensions")
-	local tile = G.TILESIZE or (dim_ok and dim.TILESIZE) or 20
-	local scale = G.TILESCALE or (dim_ok and dim.TILESCALE) or 1
-	local px_per_tile = tile * scale
-	if px_per_tile <= 0 then
-		px_per_tile = (dim_ok and dim.CANVAS_TILE_PX) or 73
-	end
-	return (M.STACK_Y_LIFT_PX or 20) / px_per_tile
+	return gutter.stack_y_lift()
 end
 
 function M.stack_layout()
-	local timer = placement_layout.timeline_rect()
-	local card_w = G.CARD_W or 1
-	local card_h = G.CARD_H or 1.4
-	local margin_x = M.LEFT_WINDOW_MARGIN
-	local margin_y = math.max(0.10, card_h * 0.08)
-	local lift = M.stack_y_lift()
-	local x = window_left_x() + margin_x
-	local y = timer.y + timer.h + margin_y - lift
-	return {
-		x = x,
-		y = y,
-		card_w = card_w,
-		card_h = card_h,
-		step_y = card_h * 0.5,
-		clearance = math.max(0.45, card_w * 0.30),
-		label_y = timer.y + timer.h + margin_y * 0.35 - lift,
-	}
+	return gutter.stack_layout()
 end
 
 function M.clears_gameplay_bounds()
@@ -199,8 +171,7 @@ function M.clears_gameplay_bounds()
 end
 
 function M.target_position(index)
-	local layout = M.stack_layout()
-	return layout.x, layout.y + (index - 1) * layout.step_y
+	return gutter.target_position(index)
 end
 
 function M.stack_index(card)
@@ -466,66 +437,15 @@ function M.remove_card(card)
 end
 
 function M.return_card(card)
-	if not card then return false end
-	if not model.contains(card) then
-		if card.bonus_card then
-			model.add_card(card)
-		else
-			return false
-		end
-	end
-	if card.area then
-		if G.placement_table and card.area == G.placement_table.area
-			and G.placement_table.on_remove_card then
-			G.placement_table:on_remove_card(card)
-		end
-		if card.area.remove_card then
-			card.area:remove_card(card)
-		end
-	end
-	if card.states and card.states.drag then
-		card.states.drag.is = false
-	end
-	if card.set_selected then
-		card:set_selected(false)
-	end
-	local index = M.stack_index(card) or 1
-	local tx, ty = M.target_position(index)
-	if card.hard_set_T then
-		card:hard_set_T(tx, ty, card.T.w, card.T.h)
-	end
-	card.T.r = 0
-	return true
+	return gutter.return_card(card)
 end
 
 function M.point_in_stack(x, y)
-	if not M.is_active() then return false end
-	local layout = M.stack_layout()
-	local count = math.max(1, #(model.cards() or {}))
-	local pad_x = math.max(0.35, layout.card_w * 0.35)
-	local pad_y = math.max(0.35, layout.card_h * 0.25)
-	local top = layout.label_y - layout.card_h * 0.45
-	local bottom = layout.y + (count - 1) * layout.step_y + layout.card_h + pad_y
-	return x >= layout.x - pad_x
-		and x <= layout.x + layout.card_w + pad_x
-		and y >= top
-		and y <= bottom
+	return gutter.point_in_stack(x, y)
 end
 
 function M.drop_in_gutter(session, x, y)
-	if M.point_in_stack(x, y) then return true end
-	if not M.is_active() then return false end
-	local area = session and session.area
-	if not area or not area.T then return false end
-	if x >= area.T.x then return false end
-	local layout = M.stack_layout()
-	local count = math.max(1, #(model.cards() or {}))
-	local pad_y = math.max(0.35, layout.card_h * 0.25)
-	local top = layout.label_y - layout.card_h * 0.55
-	local bottom = layout.y + (count - 1) * layout.step_y + layout.card_h + pad_y
-	local left = window_left_x()
-	local right = layout.x + layout.card_w + math.max(0.35, layout.card_w * 0.35)
-	return x >= left and x <= right and y >= top and y <= bottom
+	return gutter.drop_in_gutter(session, x, y)
 end
 
 function M.bonus_points_for(used_cards)
@@ -542,15 +462,7 @@ local function try_award_gutter_perk()
 	if not perk_stamp.play(rolled) then
 		perk_stamp.queue(rolled)
 	end
-	if spawn_attention then
-		spawn_attention({
-			text = "Perk earned!",
-			scale = 0.55,
-			hold = 1.1,
-			align = "cm",
-			colour = G.C and G.C.GOLD or { 1, 0.85, 0.2, 1 },
-		})
-	end
+	word_feedback.show_screen_centered("Perk earned!", G.C and G.C.GOLD or { 1, 0.85, 0.2, 1 }, 1.1)
 end
 
 function M.consume_card(card)
@@ -584,17 +496,7 @@ local function draw_label(layout)
 end
 
 function M.gutter_pixels(layout)
-	layout = layout or M.stack_layout()
-	local count = math.max(1, #(model.cards() or {}))
-	local pad_x = math.max(0.35, layout.card_w * 0.35)
-	local pad_y = math.max(0.35, layout.card_h * 0.25)
-	local top = layout.label_y - layout.card_h * 0.45
-	local bottom = layout.y + (count - 1) * layout.step_y + layout.card_h + pad_y
-	local ts = G.TILESCALE * G.TILESIZE
-	return layout.x * ts - pad_x * ts,
-		top * ts,
-		(layout.card_w + pad_x * 2) * ts,
-		(bottom - top) * ts
+	return gutter.gutter_pixels(layout)
 end
 
 function M.draw_shadow()

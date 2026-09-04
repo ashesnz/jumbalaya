@@ -1,5 +1,5 @@
 -- Application screen transitions and their particle effects.
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 
 local function sync_screen_wipe_card()
 	local card = G.screenwipecard

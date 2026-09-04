@@ -1,5 +1,5 @@
 return function(ParticleEmitter)
-local Scheduler = require("app.effects.scheduler")
+local Scheduler = require("app.effects.timeline_scheduler")
 
 --- Spawns one particle. Records carry velocity components, a per-particle
 --- lifespan, and a geometry choice — deliberately unlike the old uniform

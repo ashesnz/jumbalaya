@@ -5,7 +5,7 @@
 ---@param e {}
 --**e** Is the UIE that called this function
 
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 G.FUNCS.can_resume_run = function(e)
   if e.config.func then --refers to this function, or 'can_resume_run', so this doesn't run repeatedly
     local _can_continue = nil

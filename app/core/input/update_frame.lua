@@ -1,4 +1,4 @@
-local EffectsScheduler = require("app.effects.scheduler")
+local EffectsScheduler = require("app.effects.timeline_scheduler")
 
 return function(InputRouter)
 function InputRouter:update_frame(dt)

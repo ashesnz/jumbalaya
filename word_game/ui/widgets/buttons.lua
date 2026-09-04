@@ -1,5 +1,5 @@
 --[[ word_game/ui/widgets/buttons.lua - Button and chrome UI builders ]]
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 local Components = require "word_game.ui.widgets.components"
 
 

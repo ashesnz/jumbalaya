@@ -51,7 +51,7 @@ Callbacks are grouped by responsibility under `app/callbacks/` and `word_game/ui
 | Play button / placement | `word_game/ui/placement_controls.lua` (`G.FUNCS.play_placement_word`; not on `WORD_GAME` facade) |
 | Profile load / delete | `app/profile_callbacks.lua` |
 | Settings, text input, run lifecycle | `app/callbacks/settings.lua` |
-| Overlay screens (stable `G.FUNCS` names) | `word_game/ui/callbacks/overlays.lua` (loaded via `app/callbacks/overlays/screens.lua`) |
+| Overlay screens (stable `G.FUNCS` names) | `word_game/ui/callbacks/overlays.lua` (installed from `app/callbacks/overlays/init.lua`) |
 | Shared timed effects | `app/callbacks/effects.lua` |
 | Card tooltips | `word_game/ui/card_tooltip.lua` |
 | Screen wipe transitions | `app/screen_wipe.lua` (`G:queue_during_wipe`, `G:queue_wipe_transition`) |
@@ -117,6 +117,7 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `jumble/` | Puzzle spec, slot topology, validation, slots, and hand lifecycle |
 | `jumble_play/` | Jumble play evaluation (`play_jumble_word` returns result; no UI imports) |
 | `bonus_stack.lua` | Bonus gutter card stack state, scoring, hand-start staging |
+| `board/bonus_gutter.lua` | Bonus stack layout geometry and drag/snap helpers (no UI imports from model) |
 | `placement_word.lua` | `G.GAME.placement_word` / `placement_word_valid` from jumble slots |
 | `round.lua` | `start_hand` → `jumble.start_hand`, advance set/hand, `reset_timeline()` |
 | `input_lock.lua` | Animation-busy gate for play/discard/drag |
@@ -147,7 +148,7 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `trade/` | Marketplace overlay (`layout`, `fly`; session/input in `init`) |
 | `perk_stamp/` | Rubber-stamp perk acquisition (`layout`; 3D strike/draw in `init`) |
 | `play_resolution.lua` | Drains model play result into `play_effects` (keeps `jumble_play` headless-testable) |
-| `boss_word_stack.lua` | Bonus gutter presentation; reads `model/bonus_stack` |
+| `boss_word_stack.lua` | Bonus gutter presentation (animation, draw); reads `model/bonus_stack` + `board/bonus_gutter` |
 | `token_reward.lua` | Timer snapshot, sticker fly, spend reverse animation |
 | `word_feedback.lua` | Ephemeral word-level attention text when a play resolves (single API; drains `model/feedback`) |
 | `float_up_text.lua` | Per-card bonus popups (+2, +mult) rising from played cards |
@@ -195,13 +196,18 @@ Tests that need full play behavior call `play_resolution.resolve(flow)`; tests t
 
 ### Score feedback roles
 
-Three modules handle distinct score feedback layers on TABLE_BOARD:
+Three modules handle distinct score feedback layers on TABLE_BOARD. Use this routing:
 
-| Module | Role |
-|--------|------|
-| `score_banner/` | Persistent HUD: rolling points × multiplier chips and “Points to get” target |
-| `word_feedback.lua` | Ephemeral word-level attention text when a play resolves |
-| `float_up_text.lua` | Short per-card bonus popups (+points, +mult) from individual cards |
+| Layer | Module | When to use |
+|-------|--------|-------------|
+| Persistent HUD | `score_banner/` | Rolling points × multiplier chips and “Points to get” |
+| Ephemeral sentences | `word_feedback.lua` | Immediate board messages during play (invalid word, hand cleared, boss countdown) |
+| Model queue | `model/feedback.lua` | Rules/model code that must not import UI; drained by `word_feedback.flush_pending()` |
+| Low-level primitive | `fx.lua` → `spawn_attention` | Anchor-specific or engine-level text; avoid from model |
+| Play cinematics | `play_effects.lua` | Full play resolution FX; delegates copy to `word_feedback` |
+| Per-card popups | `float_up_text.lua` | Short +2 / +mult rises from individual cards |
+
+`spawn_attention` remains a global for legacy Balatro call sites; new gameplay copy should go through `word_feedback` or `model/feedback`.
 
 ---
 
@@ -280,6 +286,7 @@ Additional rules:
 - Keep deferred `Event` callbacks behaviorally unchanged when moving code.
 - Avoid eager side effects in `init.lua`; construct runtime objects explicitly unless compatibility requires otherwise.
 - Jumble snap/layout must not import UI modules; UI may import model/config.
+- Two schedulers exist by design: `app/core/util/scheduler.lua` (tween lane manager) and `app/effects/timeline_scheduler.lua` (G.TIMELINE wrapper).
 
 ---
 

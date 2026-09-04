@@ -1,4 +1,13 @@
--- word_game/ui/word_feedback.lua - Word-play attention messages
+--[[
+	word_game/ui/word_feedback.lua - Ephemeral board attention text (gameplay layer).
+
+	Callers:
+	  model/feedback.lua  — queue messages from rules (drained each frame)
+	  word_feedback       — immediate placement/hand-gap messages during play
+	  spawn_attention     — low-level UIBox primitive (fx.lua); do not call from model
+	  play_effects        — play cinematics; delegates word messages here
+	  float_up_text       — per-card +points / +mult popups (not full sentences)
+]]
 
 local M = {}
 

@@ -1,6 +1,6 @@
 --[[ app/effects/status_text.lua - Data-driven Jumbalaya status presentation ]]
 
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 
 local StatusText = {}
 

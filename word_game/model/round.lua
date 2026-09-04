@@ -1,5 +1,5 @@
 --[[ word_game/model/round.lua - Set / Hand controller ]]
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 
 
 local round_config = require("word_game.config.round_config")

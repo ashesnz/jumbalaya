@@ -1,6 +1,6 @@
 -- Hand counts plus animated and immediate dealing flows.
 
-local Scheduler = require "app.effects.scheduler"
+local Scheduler = require "app.effects.timeline_scheduler"
 return function(context)
 	local M = context.module
 	local Layout = require "word_game.ui.layout"
