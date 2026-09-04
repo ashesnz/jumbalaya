@@ -88,6 +88,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `InputLock` | `is_table_busy()` — shared animation/input gate |
 | `Match` | `end_run()` — centralized discard-bin surrender / game-over transition |
 | `TableDiscard` | Discard bin state, eligibility, HUD sync |
+| `Perks` | Perk model package (`model/perks`: registry, hand timer) |
 | `TradeUI` / `PerkStamp` | Marketplace and perk stamp overlays |
 | `Sidebar` | Vault HUD (stamps, deck) |
 | Hosts / portraits / overlays | `PlayerHost`, `AllyHost`, `GuestHost`, `PlayerPortrait`, `CardInspect`, `CardHover`, `Confetti`, `FloatUpText`, `HandClearFocus`, `EndMatch`, `TableDeck` |
@@ -107,7 +108,7 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `jumble.lua` | Letter pool (AERTNLS), deck copies, disabled 30s timer flag |
 | `jumble_puzzles.lua` | Router for the 24 stage modules |
 | `jumble_puzzles/*.lua` | Individual stage pattern tables such as `1_1.lua` |
-| `perks.lua` | Perk pool definitions |
+| `perks.lua` | Perk pool definitions (cosmetic until effects wire) |
 | `economy.lua` | Starting tokens/chips, trade pricing |
 
 ### Model (`word_game/model/`)
@@ -126,8 +127,9 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `profile_stats.lua` | Minimal card discovery persistence |
 | `deck/jumble.lua` | Populate jumble deck, `deal_jumble_hand` |
 | `deck/dealing.lua` | Animated `deal_into_hand` (one card at a time) |
-| `perk.lua` | Stamp roll, apply choice, selection |
-| `state.lua` | Match persistence, `run_state.tokens` |
+| `perks/` | Perk registry (`registry.lua`), per-hand timer stub (`timer.lua`; `ENABLED = false`) |
+| `perk.lua` | Shim → `model/perks/registry` |
+| `state.lua` | Match persistence, `run_state.tokens` / `run_state.perks` |
 
 ### Cards (`word_game/model/cards/`)
 
@@ -144,7 +146,7 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 |------|---------|
 | `layout/` | TABLE_BOARD geometry split: `felt.lua` (play column, felt, metrics), `vault.lua` (vault column, deck slot), `placement.lua` (portraits, banner rects, screen positions), `request.lua` (deferred layout flag for model layer) |
 | `score_banner/` | Jumble score chips and “Points to get” (`fonts`, `jumble`, `draw`) |
-| `timeline_timer/` | Fuse bar and countdown (`layout`, `draw`; state/update in `init`) |
+| `perks/` | Perk-adjacent UI: `discard_bin/` (`bin_enabled()` gate), `timeline_timer/` (fuse/slider), `stamp_grid.lua`, `voucher.lua`; shims at `table_discard.lua`, `timeline_timer/`, `stamp_grid.lua`, `perk_voucher.lua` |
 | `trade/` | Marketplace overlay (`definition`, `draw`, `animate`, `fly`, `layout`; session/input in `init`) |
 | `perk_stamp/` | Rubber-stamp perk acquisition (`definition`, `draw`, `animate`, `layout`; facade in `init`) |
 | `play_effects/` | Play resolution cinematics (`definition` feedback/banners, `animate` sequences; facade in `init`) |

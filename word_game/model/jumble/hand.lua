@@ -1,8 +1,7 @@
 --[[ word_game/model/jumble/hand.lua - Jumble hand lifecycle, timer, and puzzle progression ]]
 
 return function(M)
-local TIMER_ENABLED = false
-local TIMER_SECONDS = 30
+local hand_timer = require("word_game.model.perks.timer")
 local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
 local bonus_stack = require("word_game.model.bonus_stack")
 local round_config = require("word_game.config.round_config")
@@ -100,6 +99,7 @@ function M.start_hand(wr)
 		rs.intro_waiting_score = false
 	end
 
+	local timer_state = hand_timer.initial_state()
 	wr.jumble = {
 		total_score = 0,
 		puzzle_index = 1,
@@ -110,8 +110,8 @@ function M.start_hand(wr)
 		puzzle_multi = 1.0,
 		puzzle_words = {},
 		boss_word_active = false,
-		deadline = TIMER_ENABLED and ((G.TIMERS and G.TIMERS.REAL or 0) + TIMER_SECONDS) or nil,
-		time_left = TIMER_ENABLED and TIMER_SECONDS or nil,
+		deadline = timer_state.deadline,
+		time_left = timer_state.time_left,
 	}
 
 	if WORD_GAME and WORD_GAME.ScoreBanner then
@@ -242,21 +242,11 @@ function M.record_puzzle_word(word, opts)
 end
 
 function M.time_left()
-	if not TIMER_ENABLED then return math.huge end
-	local j = M.state()
-	if not j or not j.deadline then return 0 end
-	return math.max(0, j.deadline - (G.TIMERS.REAL or 0))
+	return hand_timer.time_left(M.state())
 end
 
 function M.update_timer()
-	if not TIMER_ENABLED then return false end
-	local j = M.state()
-	if not j then return false end
-	j.time_left = math.ceil(M.time_left())
-	if j.time_left <= 0 then
-		return true
-	end
-	return false
+	return hand_timer.update(M.state())
 end
 
 function M.refresh_hud()
