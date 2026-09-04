@@ -145,12 +145,28 @@ local function tile_scale()
 	return (G.TILESCALE or 1) * (G.TILESIZE or 1)
 end
 
-local function node_rect_px(node)
+local function node_world_xywh(node)
 	if not node then return nil end
-	local t = node.VT or node.T
+	local role = node.role
+	local major = role and role.major
+	local t = node.T or node.VT
 	if not t then return nil end
+	-- LayoutNodes store a local offset on `role`; `T`/`VT` can lag or stay in
+	-- HUD-local space after a relayout. World = major origin + layout offset.
+	if major and major.T and role.offset then
+		return (major.T.x or 0) + (role.offset.x or 0),
+			(major.T.y or 0) + (role.offset.y or 0),
+			t.w or 0,
+			t.h or 0
+	end
+	return t.x or 0, t.y or 0, t.w or 0, t.h or 0
+end
+
+local function node_rect_px(node)
+	local x, y, w, h = node_world_xywh(node)
+	if not x then return nil end
 	local ts = tile_scale()
-	return t.x * ts, t.y * ts, (t.w or 0) * ts, (t.h or 0) * ts
+	return x * ts, y * ts, w * ts, h * ts
 end
 
 local function vault_width_px()
@@ -163,10 +179,7 @@ end
 
 local function stamp_panel_rect_px(layout_count)
 	layout_count = layout_count or layout_stamp_count()
-	if G.VAULT_HUD then
-		require("word_game.ui.sidebar.hud_definition").relayout_vault()
-	end
-	local row = G.VAULT_HUD and G.VAULT_HUD:find_node_by_id("row_stamp_slot")
+	local row = G.VAULT_HUD and G.VAULT_HUD.find_node_by_id and G.VAULT_HUD:find_node_by_id("row_stamp_slot")
 	local rx, ry, rw, rh = node_rect_px(row)
 	if not rx then
 		local vault = Layout.vault_rect()
@@ -878,6 +891,16 @@ end
 
 function M.imprint_count()
 	return #imprints
+end
+
+--- Screen-space cell rects for each landed imprint, top-to-bottom.
+function M.imprint_cell_rects_px()
+	local rects = {}
+	for i = 1, #imprints do
+		local x, y, w, h = stamp_cell_rect_px(i)
+		rects[i] = { x = x, y = y, w = w, h = h }
+	end
+	return rects
 end
 
 function M.stack_count()

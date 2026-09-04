@@ -145,6 +145,25 @@ function M.show_screen_centered(text, colour, hold, offset_y)
 	})
 end
 
+--- Large throbbing 3-2-1 digits, centered on the felt.
+function M.show_boss_countdown(text, hold)
+	if not spawn_attention then return end
+	spawn_attention({
+		text = text,
+		scale = 2.6,
+		hold = hold or 0.85,
+		align = "cm",
+		major = G.ROOM_ATTACH,
+		offset = { x = 0, y = 0 },
+		colour = G.C.GOLD,
+		bump = true,
+		bump_rate = 2.2,
+		bump_amount = 2.4,
+		pulse_amount = 0.9,
+		noisy = true,
+	})
+end
+
 function M.show_above_hand_centered(text, colour, hold, offset_y)
 	local row = hand_dealt_metrics()
 	if not row then

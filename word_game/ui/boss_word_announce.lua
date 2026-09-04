@@ -1,8 +1,8 @@
 --[[
 	word_game/ui/boss_word_announce.lua - Boss countdown ribbons below the timer.
 
-	Boss word: sweeps left-to-right at "Are you ready?"
-	Theme: sweeps right-to-left at "1", mirrored below boss with a gap — arrowhead stack.
+	Boss word: sweeps left-to-right when the 3-2-1 intro ends.
+	Theme: sweeps right-to-left at the same moment, mirrored below boss with a gap — arrowhead stack.
 ]]
 
 local Layout = require("word_game.ui.layout")

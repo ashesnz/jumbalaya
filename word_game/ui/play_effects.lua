@@ -12,6 +12,16 @@ local RunMode = require("word_game.model.run_mode")
 local Easing = require "app.effects.easing"
 local Scheduler = require "app.effects.scheduler"
 
+M.BOSS_INTRO = {
+	hide_duration = 0.42,
+	timer_reveal_duration = 0.48,
+	steps = {
+		{ text = "3", hold = 0.85 },
+		{ text = "2", hold = 0.85 },
+		{ text = "1", hold = 0.85 },
+	},
+}
+
 local function has_event_manager()
 	return G.TIMELINE and G.TIMELINE.enqueue
 end
@@ -307,24 +317,62 @@ function M.present_boss_word(wr, on_complete)
 		WORD_GAME.TimelineTimer.pause()
 	end
 
-	local function run_countdown(done)
+	local function finish_intro()
+		local tt = WORD_GAME and WORD_GAME.TimelineTimer
+		if tt and tt.arm_boss_countdown then
+			tt.arm_boss_countdown(round_config.TIMELINE_SECONDS)
+		end
+		if tt and tt.reveal_countdown_timer then
+			local reveal_dur = has_event_manager() and M.BOSS_INTRO.timer_reveal_duration or 0
+			tt.reveal_countdown_timer(reveal_dur)
+		end
 		if WORD_GAME and WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.set_banner_mode then
 			WORD_GAME.ScoreBanner.set_banner_mode("boss_word", "BOSS WORD")
 		end
+		if WORD_GAME and WORD_GAME.BossWordAnnounce then
+			if WORD_GAME.BossWordAnnounce.play_boss then
+				WORD_GAME.BossWordAnnounce.play_boss("BOSS WORD")
+			end
+			if WORD_GAME.BossWordAnnounce.play_theme then
+				WORD_GAME.BossWordAnnounce.play_theme("Garden Theme")
+			end
+		end
+		local revealed = jumble.reveal_boss_puzzle(wr)
+		if wr.jumble then
+			wr.jumble.boss_word_staging = false
+		end
+		if not revealed then
+			M.set_word_score_animating(false)
+			if on_complete then on_complete() end
+			return
+		end
+		if WORD_GAME and WORD_GAME.Layout and WORD_GAME.Layout.refresh_placement_layout then
+			WORD_GAME.Layout.refresh_placement_layout()
+		elseif G.placement_table and G.placement_table.apply_screen_position then
+			G.placement_table:apply_screen_position()
+		end
+		if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.sync_visibility then
+			WORD_GAME.Sidebar.sync_visibility()
+		end
+		if WORD_GAME and WORD_GAME.HandShuffle then
+			WORD_GAME.HandShuffle.sync_position()
+		end
+		M.request_layout_refresh()
+		M.set_word_score_animating(false)
+		M.sync_sidebar_actions()
+		if play_sfx then
+			play_sfx("coin2", 0.95, 0.85)
+		end
+		if on_complete then on_complete() end
+	end
 
-		local steps = {
-			{ text = "Are you ready?", hold = 1.0, delay = 0.15 },
-			{ text = "3", hold = 0.75, delay = 0 },
-			{ text = "2", hold = 0.75, delay = 0 },
-			{ text = "1", hold = 0.75, delay = 0 },
-			{ text = "Go!", hold = 0.6, delay = 0 },
-		}
-
+	local function run_countdown(done)
+		local steps = M.BOSS_INTRO.steps
 		local function queue_step(index)
 			if index > #steps then
 				M.queue_event(Tween({
 					mode = "delayed",
-					delay = 0.15,
+					delay = 0.12,
 					blocking = true,
 					func = function()
 						if done then done() end
@@ -336,20 +384,13 @@ function M.present_boss_word(wr, on_complete)
 			local step = steps[index]
 			M.queue_event(Tween({
 				mode = "delayed",
-				delay = step.delay,
+				delay = 0,
 				blocking = true,
 				func = function()
-					word_feedback.show_above_hand_centered(step.text, G.C.GOLD, step.hold)
-					if step.text == "1"
-						and WORD_GAME and WORD_GAME.BossWordAnnounce
-						and WORD_GAME.BossWordAnnounce.play_theme then
-						WORD_GAME.BossWordAnnounce.play_theme("Garden Theme")
-					end
+					word_feedback.show_boss_countdown(step.text, step.hold)
 					if play_sfx then
 						if index == 1 then
 							play_sfx("timpani", 0.9, 0.7)
-						elseif index == #steps then
-							play_sfx("coin2", 0.95, 0.85)
 						else
 							play_sfx("card_tick", 0.9, 0.7)
 						end
@@ -367,44 +408,40 @@ function M.present_boss_word(wr, on_complete)
 				end,
 			}))
 		end
-
 		queue_step(1)
 	end
 
-	local function after_boss_deal()
-		run_countdown(function()
-			if wr.jumble then
-				wr.jumble.boss_word_staging = false
-			end
-			if WORD_GAME and WORD_GAME.Round and WORD_GAME.Round.reset_timeline then
-				WORD_GAME.Round.reset_timeline()
-			end
-			if not jumble.reveal_boss_puzzle(wr) then
-				M.set_word_score_animating(false)
-				if on_complete then on_complete() end
-				return
-			end
-			if WORD_GAME and WORD_GAME.Layout and WORD_GAME.Layout.refresh_placement_layout then
-				WORD_GAME.Layout.refresh_placement_layout()
-			elseif G.placement_table and G.placement_table.apply_screen_position then
-				G.placement_table:apply_screen_position()
-			end
-			if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.sync_visibility then
-				WORD_GAME.Sidebar.sync_visibility()
-			end
-			if WORD_GAME and WORD_GAME.HandShuffle then
-				WORD_GAME.HandShuffle.sync_position()
-			end
-			M.request_layout_refresh()
-			M.set_word_score_animating(false)
-			M.sync_sidebar_actions()
-			if on_complete then on_complete() end
+	local hide_done = false
+	local deal_done = false
+	local started = false
+
+	local function start_if_ready()
+		if started or not hide_done or not deal_done then return end
+		started = true
+		run_countdown(finish_intro)
+	end
+
+	local hide_dur = has_event_manager() and M.BOSS_INTRO.hide_duration or 0
+	if WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.hide_slider then
+		WORD_GAME.TimelineTimer.hide_slider(hide_dur, function()
+			hide_done = true
+			start_if_ready()
 		end)
+	else
+		hide_done = true
+	end
+
+	local function after_boss_deal()
+		deal_done = true
+		start_if_ready()
 	end
 
 	local function deal_boss_hand()
 		if not wr.jumble or not wr.jumble.pending_boss then
 			M.set_word_score_animating(false)
+			if wr.jumble then
+				wr.jumble.boss_word_staging = false
+			end
 			if on_complete then on_complete() end
 			return
 		end
@@ -419,6 +456,9 @@ function M.present_boss_word(wr, on_complete)
 
 	if not jumble.prepare_boss_word(wr) then
 		M.set_word_score_animating(false)
+		if wr.jumble then
+			wr.jumble.boss_word_staging = false
+		end
 		if on_complete then on_complete() end
 		return
 	end

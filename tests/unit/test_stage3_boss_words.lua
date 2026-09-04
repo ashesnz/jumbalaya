@@ -438,4 +438,152 @@ T.describe("Stage 1-3 boss words", function()
 		T.assert_equal(slots[blank_i].card, card, "Blank slot should hold the placed card")
 		T.assert_equal(card.area, placement_area, "Card should belong to placement area")
 	end)
+
+	T.it("blocks play while the boss word is staging", function()
+		mock_env.reset_game()
+		local InputLock = require("word_game.model.input_lock")
+		local rules = require("word_game.model.play.jumble_rules")
+		G.GAME.word_score_animating = false
+		G.GAME.word_round = {
+			mode = "jumble",
+			jumble = { boss_word_staging = true },
+		}
+		WORD_GAME.PlayHoldRedraw = { is_animating = function() return false end }
+		T.assert_true(InputLock.is_table_busy())
+		T.assert_true(rules.play_blocked(G.GAME.word_round.jumble))
+		G.GAME.word_round.jumble.boss_word_staging = false
+		T.assert_false(InputLock.is_table_busy())
+		T.assert_false(rules.play_blocked(G.GAME.word_round.jumble))
+	end)
+
+	T.it("shows large centered throbbing 3-2-1 digits", function()
+		mock_env.reset_game()
+		local word_feedback = require("word_game.ui.word_feedback")
+		local captured
+		local orig = spawn_attention
+		spawn_attention = function(args) captured = args end
+		word_feedback.show_boss_countdown("3", 0.85)
+		spawn_attention = orig
+		T.assert_not_nil(captured)
+		T.assert_equal(captured.text, "3")
+		T.assert_true(captured.scale >= 2.4, "Boss countdown digits should be large")
+		T.assert_equal(captured.hold, 0.85)
+		T.assert_true(captured.bump, "Digits should throb")
+		T.assert_equal(captured.offset.x, 0)
+		T.assert_equal(captured.offset.y, 0)
+		T.assert_equal(captured.colour, G.C.GOLD)
+	end)
+
+	T.it("hides the slider, counts 3-2-1, then reveals the boss word with a 60s timer", function()
+		mock_env.reset_game()
+		local saved_timeline = G.TIMELINE
+		G.TIMELINE = nil
+		G.GAME.run_mode = "classic"
+		local play_effects = require("word_game.ui.play_effects")
+		local word_feedback = require("word_game.ui.word_feedback")
+		local InputLock = require("word_game.model.input_lock")
+		local tt = require("word_game.ui.timeline_timer")
+
+		T.assert_equal(#play_effects.BOSS_INTRO.steps, 3)
+		for i, step in ipairs(play_effects.BOSS_INTRO.steps) do
+			T.assert_equal(step.text, tostring(4 - i))
+		end
+
+		local countdown_texts = {}
+		local orig_show = word_feedback.show_boss_countdown
+		word_feedback.show_boss_countdown = function(text, hold)
+			countdown_texts[#countdown_texts + 1] = text
+		end
+
+		local wr = {
+			set = 1,
+			hand_index = 3,
+			target = 25,
+			jumble = { boss_word_staging = true },
+		}
+		G.GAME.word_round = wr
+		G.GAME.word_score_animating = false
+
+		local reset_called = false
+		local puzzle_revealed = false
+		local theme_played = false
+		local boss_played = false
+		local saved = {}
+		for _, key in ipairs({
+			"Round", "ScoreBanner", "BossWordAnnounce", "Jumble", "Deck",
+			"HandShuffle", "Sidebar", "PlayHoldRedraw", "PlayerHost",
+		}) do
+			saved[key] = WORD_GAME[key]
+		end
+
+		WORD_GAME.TimelineTimer = tt
+		tt.reset_progress(25)
+		WORD_GAME.Round = {
+			reset_timeline = function() reset_called = true end,
+		}
+		WORD_GAME.ScoreBanner = {
+			hide_points_to_get_display = function() end,
+			set_banner_mode = function() end,
+		}
+		WORD_GAME.BossWordAnnounce = {
+			play_boss = function() boss_played = true end,
+			play_theme = function() theme_played = true end,
+		}
+		WORD_GAME.Jumble = {
+			prepare_boss_word = function(round)
+				round.jumble.pending_boss = { boss_word = "VEGETABLE", pattern = "___E__B__" }
+				return true
+			end,
+			boss_hand_letters = function()
+				return { "V", "E", "G", "T", "A", "L", "E" }
+			end,
+			reveal_boss_puzzle = function(round)
+				puzzle_revealed = true
+				round.jumble.boss_word_active = true
+				round.jumble.boss_puzzle_hidden = false
+				return true
+			end,
+		}
+		WORD_GAME.Deck = {
+			return_hand_to_deck = function(cb) cb() end,
+			deal_boss_hand = function(letters, cb) cb() end,
+		}
+		WORD_GAME.HandShuffle = {
+			sync_position = function() end,
+			try_sync = function() end,
+		}
+		WORD_GAME.Sidebar = {
+			sync_visibility = function() end,
+			sync_action_buttons = function() end,
+		}
+		WORD_GAME.PlayHoldRedraw = { is_animating = function() return false end }
+		WORD_GAME.PlayerHost = { refresh_card_input = function() end }
+		G.hand = nil
+
+		T.assert_true(InputLock.is_table_busy(), "Staging must lock play before the intro starts")
+
+		local done = false
+		play_effects.present_boss_word(wr, function() done = true end)
+		word_feedback.show_boss_countdown = orig_show
+		for key, value in pairs(saved) do
+			WORD_GAME[key] = value
+		end
+		G.TIMELINE = saved_timeline
+
+		T.assert_equal(table.concat(countdown_texts, ","), "3,2,1")
+		T.assert_true(puzzle_revealed, "Boss puzzle should appear after 1")
+		T.assert_true(boss_played)
+		T.assert_true(theme_played)
+		T.assert_false(reset_called, "Classic reset_timeline would restore the score slider")
+		T.assert_true(done)
+		T.assert_false(wr.jumble.boss_word_staging)
+		T.assert_false(G.GAME.word_score_animating)
+		T.assert_false(InputLock.is_table_busy())
+		T.assert_true(puzzle_revealed and not wr.jumble.boss_word_staging,
+			"Puzzle and play unlock together")
+		T.assert_false(tt.is_progress_mode())
+		T.assert_equal(tt.time_remaining, 60)
+		T.assert_equal(tt.intro_visible, 1)
+		T.assert_true(tt.is_active)
+	end)
 end)

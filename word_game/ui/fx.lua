@@ -43,14 +43,14 @@ function spawn_attention(args)
             T = {args.pos.x,args.pos.y,0,0},
             definition = 
               {n=G.UI.ROOT, config = {align = args.cover_align or 'cm', minw = (args.cover and args.cover.T.w or 0.001) + (args.cover_padding or 0), minh = (args.cover and args.cover.T.h or 0.001) + (args.cover_padding or 0), padding = 0.03, r = 0.1, emboss = args.emboss, colour = args.cover_colour}, nodes={
-                {n=G.UI.OBJECT, config={draw_layer = 1, object = FlowText({scale = args.scale, string = args.text, maxw = args.maxw, colours = {args.colour},float = true, shadow = true, silent = not args.noisy, args.scale, pop_in = 0, pop_in_rate = 6, rotate = args.rotate or nil})}},
+                {n=G.UI.OBJECT, config={draw_layer = 1, object = FlowText({scale = args.scale, string = args.text, maxw = args.maxw, colours = {args.colour},float = not args.bump, shadow = true, silent = not args.noisy, args.scale, pop_in = 0, pop_in_rate = 6, rotate = args.rotate or nil, bump = args.bump, bump_rate = args.bump_rate, bump_amount = args.bump_amount})}},
               }}, 
             config = args.uibox_config
           }
           args.AT.spawn_attention = true
 
           args.text = args.AT.root_node.children[1].config.object
-          args.text:pulse(0.5)
+          args.text:pulse(args.pulse_amount or 0.5)
           
           if args.cover then
             Particles(args.pos.x,args.pos.y, 0,0, {

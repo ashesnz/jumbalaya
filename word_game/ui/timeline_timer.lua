@@ -30,6 +30,9 @@ M.smoke_active = false
 M.slide_boost_t = 0
 M.display_combo = 0
 M.score_roll = nil
+M.intro_visible = 1
+M.intro_anim = nil
+M.countdown_override = false
 
 local SMOKE_WORD_THRESHOLD = 3
 local SHAKE_WORD_THRESHOLD = 5
@@ -184,7 +187,88 @@ end
 -- Formats the countdown timer text:
 -- Whole number (>= 10s), 1 decimal point (< 10s and >= 5s), 2 decimal points (< 5s).
 function M.is_progress_mode()
+	if M.countdown_override then return false end
 	return RunMode.is_classic()
+end
+
+local function reset_intro_visibility()
+	M.intro_visible = 1
+	M.intro_anim = nil
+	M.countdown_override = false
+end
+
+local function ease_out_cubic(t)
+	t = clamp01(t)
+	local inv = 1 - t
+	return 1 - inv * inv * inv
+end
+
+function M.animate_intro(to, duration, on_done)
+	duration = duration or 0.4
+	local from = M.intro_visible
+	if from == nil then from = 1 end
+	if duration <= 0 then
+		M.intro_anim = nil
+		M.intro_visible = to
+		if on_done then on_done() end
+		return
+	end
+	M.intro_anim = {
+		from = from,
+		to = to,
+		t = 0,
+		dur = duration,
+		on_done = on_done,
+	}
+end
+
+function M.hide_slider(duration, on_done)
+	M.pause()
+	M.animate_intro(0, duration or 0.42, on_done)
+end
+
+--- Switch the HUD to a paused 60s fuse, hidden until `reveal_countdown_timer`.
+function M.arm_boss_countdown(duration)
+	M.countdown_override = true
+	M.TOTAL_DURATION = duration or 60.0
+	M.time_remaining = M.TOTAL_DURATION
+	M.is_active = false
+	M.frozen_for_reward = false
+	M.sparks = {}
+	M.progress_score = 0
+	M.progress_pending = 0
+	M.display_frac = 1
+	M.display_goal_frac = 1
+	M.goal_reached = false
+	M.post_target_scoring = false
+	M.post_target_pulse = 0
+	M.puzzle_word_count = 0
+	M.smoke_active = false
+	M.slide_boost_t = 0
+	M.display_combo = 0
+	M.score_roll = nil
+	M.intro_visible = 0
+	M.intro_anim = nil
+	StageLabel.sync()
+end
+
+function M.reveal_countdown_timer(duration, on_done)
+	M.resume()
+	M.animate_intro(1, duration or 0.48, on_done)
+end
+
+local function update_intro_anim(dt)
+	local anim = M.intro_anim
+	if not anim then return end
+	anim.t = (anim.t or 0) + (dt or 0)
+	local u = ease_out_cubic(anim.t / math.max(0.001, anim.dur or 0.4))
+	M.intro_visible = anim.from + (anim.to - anim.from) * u
+	if anim.t >= (anim.dur or 0) then
+		M.intro_visible = anim.to
+		local done = anim.on_done
+		M.intro_anim = nil
+		if done then done() end
+	end
 end
 
 function M.sync_progress()
@@ -375,6 +459,7 @@ function M.build_green_polygon(x, y, w, h, slant, r, frac, n_arc)
 end
 
 function M.reset(duration)
+	reset_intro_visibility()
 	M.TOTAL_DURATION = duration or 60.0
 	M.time_remaining = M.TOTAL_DURATION
 	M.is_active = not M.is_progress_mode()
@@ -402,6 +487,7 @@ function M.reset(duration)
 end
 
 function M.reset_progress(target)
+	reset_intro_visibility()
 	M.is_active = false
 	M.frozen_for_reward = false
 	M.score_roll = nil
@@ -474,14 +560,9 @@ function M.add_time(seconds)
 	M.time_remaining = math.min(M.TOTAL_DURATION, M.time_remaining + seconds)
 end
 
-local function ease_out_cubic(t)
-	t = clamp01(t)
-	local inv = 1 - t
-	return 1 - inv * inv * inv
-end
-
 function M.update(dt)
 	dt = dt or 0
+	update_intro_anim(dt)
 	if M.is_progress_mode() then
 		if M.score_roll then
 			local roll = M.score_roll
@@ -570,6 +651,9 @@ function M.draw()
 	if not love or not love.graphics or not love.graphics.polygon then return end
 	if not G.GAME or not G.ROOM then return end
 	if G.STATE ~= G.STATES.TABLE_BOARD then return end
+	local vis = M.intro_visible
+	if vis == nil then vis = 1 end
+	if vis <= 0.001 then return end
 
 	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
 	local rect = Layout.timeline_rect and Layout.timeline_rect() or Layout.portrait_rect()
@@ -590,6 +674,14 @@ function M.draw()
 	love.graphics.push()
 	love.graphics.setShader()
 	room_translate()
+
+	local cx = x + w * 0.5
+	local cy = y + h * 0.5
+	if vis < 0.999 then
+		love.graphics.translate(cx, cy)
+		love.graphics.scale(0.72 + 0.28 * vis, vis)
+		love.graphics.translate(-cx, -cy)
+	end
 
 	if love.graphics.setLineStyle then
 		love.graphics.setLineStyle("smooth")

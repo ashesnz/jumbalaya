@@ -432,12 +432,92 @@ T.describe("perk stamp panel layout", function()
 		for _ = 1, 70 do Stamp.debug_step() end
 		T.assert_equal(Stamp.imprint_count(), 1)
 		local first = Stamp.current_imprint()
+		local first_rects = Stamp.imprint_cell_rects_px()
+		T.assert_equal(#first_rects, 1)
 
 		for _ = 1, 70 do Stamp.debug_step() end
 		T.assert_equal(Stamp.imprint_count(), 2)
 		local second = Stamp.current_imprint()
 		T.assert_not_nil(first)
 		T.assert_not_nil(second)
+		T.assert_not_equal(first, second)
+
+		local rects = Stamp.imprint_cell_rects_px()
+		T.assert_equal(#rects, 2)
+		T.assert_almost_equal(rects[1].x, rects[2].x, 0.5, "stacked stamps should stay in the same column")
+		T.assert_true(rects[2].y > rects[1].y + rects[1].h,
+			"each new stamp must land below the previous imprint")
+		T.assert_true(rects[1].y <= first_rects[1].y + 1,
+			"the first imprint should stay at the top of the stack")
+	end)
+
+	T.it("draws landed stamps on the side panel even if the slot VT is stale", function()
+		Stamp.reset()
+		G.STATE = G.STATES.TABLE_BOARD
+		G.TILESCALE = 1
+		G.TILESIZE = 71
+		G.TABLE_BOARD_SIDEBAR_WIDTH = 3.0
+		WORD_GAME.Sidebar = { refresh = function() end }
+
+		local vault_x, vault_y = 16.2, 0.2
+		local slot_w, slot_h = 3.0, 1.4
+		local hud = { T = { x = vault_x, y = vault_y, w = slot_w, h = 11 } }
+		local row = {
+			T = { x = 0.05, y = 0.08, w = slot_w, h = slot_h },
+			VT = { x = 0, y = 0, w = slot_w, h = slot_h },
+			role = {
+				major = hud,
+				offset = { x = 0.05, y = 0.08 },
+			},
+		}
+		hud.find_node_by_id = function(_, id)
+			if id == "row_stamp_slot" then return row end
+			return nil
+		end
+		G.VAULT_HUD = hud
+
+		math.randomseed(3)
+		for _ = 1, 70 do Stamp.debug_step() end
+		T.assert_equal(Stamp.imprint_count(), 1)
+		for _ = 1, 70 do Stamp.debug_step() end
+		T.assert_equal(Stamp.imprint_count(), 2)
+
+		local ts = G.TILESCALE * G.TILESIZE
+		local panel_left = (vault_x + 0.05) * ts
+		local panel_top = (vault_y + 0.08) * ts
+		local panel_right = panel_left + slot_w * ts
+		local rects = Stamp.imprint_cell_rects_px()
+		T.assert_equal(#rects, 2)
+		for i, rect in ipairs(rects) do
+			T.assert_true(rect.x >= panel_left - 1, "imprint " .. i .. " should sit on the vault column")
+			T.assert_true(rect.x + rect.w <= panel_right + 1, "imprint " .. i .. " should stay inside the vault")
+			T.assert_true(rect.y >= panel_top - 1, "imprint " .. i .. " should sit on the stamp slot")
+			T.assert_true(math.abs(rect.x) > ts, "imprint must not draw at the room origin")
+		end
+		T.assert_true(rects[2].y > rects[1].y + rects[1].h * 0.5,
+			"second sidebar stamp should appear below the first")
+
+		G.TEXTURE_ATLASES = G.TEXTURE_ATLASES or {}
+		G.TEXTURE_ATLASES.Perk = {
+			image = {
+				getDimensions = function() return 911, 284 end,
+			},
+		}
+		local orig_quad = love.graphics.newQuad
+		local orig_draw = love.graphics.draw
+		love.graphics.newQuad = love.graphics.newQuad or function() return { quad = true } end
+		local draws = {}
+		love.graphics.draw = function(img, quad, x, y)
+			draws[#draws + 1] = { x = x, y = y }
+		end
+		Stamp.draw_pass()
+		love.graphics.draw = orig_draw
+		love.graphics.newQuad = orig_quad
+		T.assert_true(#draws >= 2, "draw_pass should blit each landed stamp onto the side panel")
+		T.assert_true(draws[1].x >= panel_left - 8)
+		T.assert_true(draws[2].y > draws[1].y)
+
+		Stamp.reset()
 	end)
 end)
 

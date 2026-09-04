@@ -379,4 +379,56 @@ T.describe("Timeline Timer & Shape Math", function()
 		T.assert_nil(stage_label.right_roll, "Roll should finish after full duration")
 		T.assert_equal(stage_label.right_count, 2)
 	end)
+
+	T.it("hides the slider then arms a 60s countdown that scales back in", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "classic"
+		local tt = require("word_game.ui.timeline_timer")
+		G.GAME.word_round = {
+			target = 50,
+			jumble = { total_score = 18, puzzle_points = 0, puzzle_multi = 1.0, puzzle_words = {} },
+		}
+		tt.reset_progress(50)
+		T.assert_true(tt.is_progress_mode())
+		T.assert_equal(tt.intro_visible, 1)
+
+		local hidden = false
+		tt.hide_slider(0.4, function() hidden = true end)
+		T.assert_false(hidden)
+		T.assert_not_nil(tt.intro_anim, "Slider hide should start an intro animation")
+		tt.update(0.05)
+		T.assert_true(tt.intro_visible < 1, "Slider should start scaling out on the first update")
+		tt.update(0.45)
+		T.assert_true(hidden)
+		T.assert_almost_equal(tt.intro_visible, 0, 0.01)
+
+		tt.arm_boss_countdown(60)
+		T.assert_false(tt.is_progress_mode(), "Boss intro must force the 60s fuse even in classic")
+		T.assert_equal(tt.TOTAL_DURATION, 60)
+		T.assert_equal(tt.time_remaining, 60)
+		T.assert_equal(tt.intro_visible, 0)
+		T.assert_false(tt.is_active)
+
+		local shown = false
+		tt.reveal_countdown_timer(0.4, function() shown = true end)
+		T.assert_true(tt.is_active, "Timer should start when the fuse appears")
+		tt.update(0.5)
+		T.assert_true(shown)
+		T.assert_almost_equal(tt.intro_visible, 1, 0.01)
+		T.assert_true(tt.time_remaining < 60, "Armed fuse should tick once revealed")
+		T.assert_true(tt.time_remaining > 59, "Reveal should not burn a large chunk of the 60s")
+	end)
+
+	T.it("clears the boss countdown override when a new classic hand starts", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "classic"
+		local tt = require("word_game.ui.timeline_timer")
+		tt.arm_boss_countdown(60)
+		T.assert_false(tt.is_progress_mode())
+		T.assert_equal(tt.intro_visible, 0)
+		tt.reset_progress(25)
+		T.assert_true(tt.is_progress_mode())
+		T.assert_equal(tt.intro_visible, 1)
+		T.assert_false(tt.countdown_override)
+	end)
 end)
