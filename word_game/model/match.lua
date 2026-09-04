@@ -21,6 +21,7 @@ function M.end_run(opts)
 	if G.SETTINGS then
 		G.SETTINGS.paused = true
 	end
+	state.record_current_jumble_if_best()
 	G.STATE = G.STATES.GAME_OVER
 	G.STATE_COMPLETE = false
 	return true

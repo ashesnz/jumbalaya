@@ -240,6 +240,7 @@ function M.continue_after_dealer()
 end
 
 function M.end_match(won)
+	state.record_current_jumble_if_best()
 	local alpha = state.get()
 	if alpha then
 		alpha.match_over = true

@@ -401,4 +401,61 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 		T.assert_almost_equal(captured.y, 3 + 2 * 0.08 + 0.65, 0.01,
 			"card bonus text should use the direct start offset")
 	end)
+
+	T.it("anchors timeline float-up text on the slider's right end", function()
+		MockEnv.setup()
+		local float_up_text = require("word_game.ui.float_up_text")
+		local rect = { x = 4, y = 2, w = 8, h = 0.8 }
+		local origin = float_up_text.timeline_right_origin(rect, { w = 1.2, h = 0.55 })
+		T.assert_almost_equal(origin.x + origin.w * 0.5, 12, 0.001,
+			"Origin center should be the slider's right edge")
+		T.assert_true(origin.x > rect.x + rect.w * 0.5,
+			"Origin should be on the right half, not centered on the bar")
+
+		local captured
+		local original_spawn = float_up_text.spawn
+		float_up_text.spawn = function(config)
+			captured = config
+			return config
+		end
+		local layout = require("word_game.ui.layout")
+		local original_rect = layout.timeline_rect
+		layout.timeline_rect = function()
+			return rect
+		end
+		float_up_text.from_timeline("×2", { w = 1.2, h = 0.55, life = 1.8 })
+		layout.timeline_rect = original_rect
+		float_up_text.spawn = original_spawn
+
+		T.assert_not_nil(captured)
+		T.assert_equal(captured.text, "×2")
+		T.assert_equal(captured.life, 1.8)
+		T.assert_almost_equal(captured.x, origin.x, 0.001)
+		T.assert_almost_equal(captured.y, origin.y, 0.001)
+	end)
+
+	T.it("floats timeline ×2 upward and removes it after its life", function()
+		MockEnv.ensure_engine_globals()
+		MockEnv.reset_game()
+		G.ROOM = G.ROOM or { T = { x = 0, y = 0, w = 20, h = 11 } }
+		local float_up_text = require("word_game.ui.float_up_text")
+		float_up_text.clear()
+		local item = float_up_text.spawn({
+			x = 10,
+			y = 3,
+			w = 1.2,
+			h = 0.55,
+			text = "×2",
+			life = 0.4,
+			speed = 2,
+			wobble = 0,
+		})
+		T.assert_not_nil(item, "×2 float-up should spawn")
+		local y0 = item.T.y
+		item:update(0.08)
+		T.assert_true(item.T.y < y0, "×2 should float upward")
+		T.assert_true((item.alpha or 1) > 0.5, "×2 should stay visible at the start")
+		item:update(0.4)
+		T.assert_true(item.REMOVED, "×2 should disappear after the float-up life")
+	end)
 end)

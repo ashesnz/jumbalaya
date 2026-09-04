@@ -227,6 +227,43 @@ T.describe("Classic run mode", function()
 		T.assert_true(tt.post_target_pulse > 0)
 	end)
 
+	T.it("floats ×2 off the right end of the slider like Hand Cleared", function()
+		mock_env.reset_game()
+		G.GAME.run_mode = "classic"
+		G.C.GOLD = G.C.GOLD or { 1, 0.8, 0, 1 }
+		local play_effects = require("word_game.ui.play_effects")
+		local float_up_text = require("word_game.ui.float_up_text")
+		local captured
+		local original_spawn = float_up_text.spawn
+		float_up_text.spawn = function(config)
+			captured = config
+			return config
+		end
+		WORD_GAME.FloatUpText = float_up_text
+
+		play_effects.show_post_target_multiplier_fx({ post_target_doubled = true })
+		float_up_text.spawn = original_spawn
+
+		T.assert_not_nil(captured, "×2 should use the existing float-up text")
+		T.assert_equal(captured.text, "×2")
+		T.assert_equal(captured.colour, G.C.GOLD, "×2 should use the same gold as Hand Cleared")
+		T.assert_equal(captured.life, 1.8, "×2 should hold then fade like Hand Cleared")
+
+		local layout = require("word_game.ui.layout")
+		local rect = layout.timeline_rect()
+		local origin = float_up_text.timeline_right_origin(rect, {
+			w = captured.w,
+			h = captured.h,
+		})
+		T.assert_almost_equal(captured.x, origin.x, 0.001, "×2 should sit on the slider's right end")
+		T.assert_almost_equal(captured.y, origin.y, 0.001)
+		local center_x = captured.x + captured.w * 0.5
+		T.assert_almost_equal(center_x, rect.x + rect.w, 0.001,
+			"×2 center should match the slider's right tip, not the middle")
+		T.assert_true(center_x > rect.x + rect.w * 0.75,
+			"×2 must stay on the right end of the slider")
+	end)
+
 	T.it("shows the proceed hint only when play is pressed with an empty card area", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"

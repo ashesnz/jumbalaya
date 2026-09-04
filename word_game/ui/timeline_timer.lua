@@ -566,41 +566,6 @@ function M.update(dt)
 	end
 end
 
-local function draw_post_target_badge(cx, top_y, bar_h)
-	if not M.post_target_scoring then return end
-	local t = (G.TIMERS and G.TIMERS.REAL) or 0
-	local pulse = 0.5 + 0.5 * math.sin(t * 5.5)
-	local pop = 1 + (M.post_target_pulse or 0) * 0.42
-	local badge_y = top_y - bar_h * 0.46
-	local font_px = math.max(13, bar_h * 0.34) * pop
-	local font = timer_font(font_px)
-	if not font then return end
-
-	local ring_r = font_px * 0.72
-	local ring_scale = 1 + pulse * 0.1 + (M.post_target_pulse or 0) * 0.22
-	love.graphics.setLineWidth(math.max(2, bar_h * 0.05) * (0.85 + pulse * 0.35))
-	love.graphics.setColor(1, 0.82, 0.22, 0.28 + pulse * 0.22 + (M.post_target_pulse or 0) * 0.35)
-	love.graphics.circle("line", cx, badge_y, ring_r * ring_scale)
-	love.graphics.setLineWidth(math.max(1.2, bar_h * 0.028))
-	love.graphics.setColor(1, 0.95, 0.55, 0.18 + pulse * 0.12)
-	love.graphics.circle("line", cx, badge_y, ring_r * ring_scale * 1.28)
-
-	local label = "×2"
-	local tw = font:getWidth(label)
-	local th = font:getHeight()
-	love.graphics.setFont(font)
-	love.graphics.setColor(0.04, 0.06, 0.12, 0.88)
-	for ox = -1.5, 1.5, 1.5 do
-		for oy = -1.5, 1.5, 1.5 do
-			if ox ~= 0 or oy ~= 0 then
-				love.graphics.print(label, cx - tw * 0.5 + ox, badge_y - th * 0.5 + oy)
-			end
-		end
-	end
-	love.graphics.setColor(1, 0.92 - pulse * 0.12, 0.42 - pulse * 0.08, 1)
-	love.graphics.print(label, cx - tw * 0.5, badge_y - th * 0.5)
-end
-
 function M.draw()
 	if not love or not love.graphics or not love.graphics.polygon then return end
 	if not G.GAME or not G.ROOM then return end
@@ -634,9 +599,6 @@ function M.draw()
 	end
 
 	StageLabel.draw_above_timer(x, y, w, h)
-
-	local badge_cx = x + (w - slant * 0.5) * 0.5
-	draw_post_target_badge(badge_cx, y, h)
 
 	local shake = M.display_shake_strength()
 	if shake > 0 then

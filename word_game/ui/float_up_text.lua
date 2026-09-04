@@ -129,20 +129,34 @@ function FloatUpText.spawn(config)
 	return FloatUpText(config)
 end
 
+--- Origin for slider-end pops: centered on the timeline's right tip.
+function FloatUpText.timeline_right_origin(rect, opts)
+	opts = opts or {}
+	rect = rect or {}
+	local w = opts.w or 1.2
+	local h = opts.h or 0.55
+	local right = (rect.x or 0) + (rect.w or 0)
+	return {
+		x = right - w * 0.5,
+		y = (rect.y or 0) - h * 0.2,
+		w = w,
+		h = h,
+	}
+end
+
 function FloatUpText.from_timeline(text, opts)
 	opts = opts or {}
 	local Layout = require("word_game.ui.layout")
 	local rect = Layout.timeline_rect and Layout.timeline_rect() or { x = 0, y = 0, w = 4, h = 0.7 }
-	local w = opts.w or 1.2
-	local h = opts.h or 0.55
+	local origin = FloatUpText.timeline_right_origin(rect, opts)
 	return FloatUpText.spawn({
-		x = rect.x + rect.w * 0.5 - w * 0.5,
-		y = rect.y - h * 0.55,
-		w = w,
-		h = h,
+		x = origin.x,
+		y = origin.y,
+		w = origin.w,
+		h = origin.h,
 		text = text,
 		colour = opts.colour,
-		life = opts.life or 1.35,
+		life = opts.life or 1.8,
 		speed = opts.speed or 1.1,
 		wobble = opts.wobble or 0.05,
 		font_px = opts.font_px or 30,

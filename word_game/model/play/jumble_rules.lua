@@ -2,6 +2,7 @@
 
 local InputLock = require("word_game.model.input_lock")
 local RunMode = require("word_game.model.run_mode")
+local state = require("word_game.model.state")
 
 local M = {}
 
@@ -157,6 +158,23 @@ function M.play_blocked(j)
 	return false
 end
 
+local function puzzle_label(j)
+	if j and type(j.pattern) == "string" and j.pattern ~= "" then
+		return j.pattern
+	end
+	local puzzle = j and j.puzzle
+	if type(puzzle) ~= "table" then
+		return "Puzzle"
+	end
+	if type(puzzle.display) == "string" and puzzle.display ~= "" then
+		return puzzle.display
+	end
+	if type(puzzle.pattern) == "string" and puzzle.pattern ~= "" then
+		return puzzle.pattern
+	end
+	return "Puzzle"
+end
+
 function M.can_jumble_next(jumble)
 	if not jumble or not jumble.is_active() then return false end
 	local wr = G.GAME and G.GAME.word_round
@@ -188,7 +206,8 @@ function M.evaluate_play(jumble, j)
 		j.total_score = new_total
 		local old_rem = M.score_remaining(old_total, target)
 		local new_rem = M.score_remaining(new_total, target)
-		local puzzle_label = (j.puzzle and (j.puzzle.display or j.puzzle.pattern)) or "Puzzle"
+		local label = puzzle_label(j)
+		state.record_puzzle_score(label, puzzle_total)
 		return {
 			kind = "bank_puzzle",
 			puzzle_total = puzzle_total,
@@ -197,7 +216,7 @@ function M.evaluate_play(jumble, j)
 			old_rem = old_rem,
 			new_rem = new_rem,
 			cleared = new_rem <= 0,
-			puzzle_label = puzzle_label,
+			puzzle_label = label,
 			post_target_doubled = post_target and raw_puzzle_total > 0,
 		}
 	end
@@ -229,6 +248,8 @@ function M.evaluate_play(jumble, j)
 	local old_rem = M.score_remaining(old_score, target)
 	local new_rem = M.score_remaining(new_score, target)
 	local word_pts = M.word_points(new_pts, new_multi)
+	state.record_word_played()
+	state.record_puzzle_score(puzzle_label(j), M.puzzle_total(j))
 
 	return {
 		kind = "word_play",

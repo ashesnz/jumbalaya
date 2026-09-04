@@ -588,6 +588,40 @@ end
 require "word_game.ui.title_logo"
 
 local TITLE_GARDEN_MOSS = {0.12, 0.24, 0.14, 1}
+-- Zoom is the extra size beyond the room; keep these so the crop stays the same.
+local TITLE_GARDEN_EXTRA_W = 60
+local TITLE_GARDEN_EXTRA_H = 22
+-- Slow Ken Burns drift. Amplitudes stay inside the extra crop so edges never show.
+local TITLE_GARDEN_PAN = {
+	amp_x = 10,
+	amp_y = 4.5,
+	period_x = 48,
+	period_y = 64,
+}
+
+function title_garden_sprite_dims(room)
+	room = room or (G.ROOM and G.ROOM.T) or { w = 20, h = 11 }
+	return (room.w or 20) + TITLE_GARDEN_EXTRA_W, (room.h or 11) + TITLE_GARDEN_EXTRA_H
+end
+
+function title_garden_pan_offset(time)
+	time = time or 0
+	local pan = TITLE_GARDEN_PAN
+	local x = math.sin(time * 2 * math.pi / pan.period_x) * pan.amp_x
+	local y = math.sin(time * 2 * math.pi / pan.period_y) * pan.amp_y
+	return x, y
+end
+
+function update_title_garden_pan(dt)
+	local sprite = G.SPLASH_BACK
+	local pan = sprite and sprite.title_garden_pan
+	if type(pan) ~= "table" then return end
+	local off = sprite.alignment and sprite.alignment.offset
+	if not off then return end
+	dt = dt or (G and G.real_dt) or 0
+	pan.t = (pan.t or 0) + dt
+	off.x, off.y = title_garden_pan_offset(pan.t)
+end
 
 local function setup_title_garden_background()
 	if G.SPLASH_BACK then
@@ -598,8 +632,15 @@ local function setup_title_garden_background()
 	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.title_garden
 	if not atlas then return end
 
-	G.SPLASH_BACK = Sprite(-30, -13, G.ROOM.T.w + 60, G.ROOM.T.h + 22, atlas, {x = 0, y = 0})
-	G.SPLASH_BACK:set_alignment({major = G.ROOM_ATTACH, type = "cm", offset = {x = 0, y = 0}})
+	local w, h = title_garden_sprite_dims()
+	G.SPLASH_BACK = Sprite(-30, -13, w, h, atlas, {x = 0, y = 0})
+	G.SPLASH_BACK:set_alignment({
+		major = G.ROOM_ATTACH,
+		type = "cm",
+		bond = "Strong",
+		offset = {x = 0, y = 0},
+	})
+	G.SPLASH_BACK.title_garden_pan = { t = 0 }
 	G.SPLASH_BACK:define_draw_steps({{
 		shader = "garden_title",
 		send = {{name = "time", ref_table = G.TIMERS, ref_value = "REAL"}},

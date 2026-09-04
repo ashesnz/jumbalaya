@@ -523,4 +523,58 @@ local MockEnv = require("tests.helpers.mock_env")
 		T.assert_equal(start_cy, end_s_cy, "Start A should return to home Y when cycle restarts")
 		T.assert_equal(0, end_s_rot, "Start A rotation should reset to 0 when cycle restarts")
 	end)
+
+	T.it("keeps the title garden zoom and pans within the extra crop", function()
+		MockEnv.reset_game()
+		require("app.core.util.tables")
+		require("app.core.util.geometry")
+		require("word_game.ui.localize")
+		require("word_game.ui.widgets")
+		require("word_game.ui.menu")
+
+		G.ROOM = G.ROOM or {}
+		G.ROOM.T = { x = 0, y = 0, w = 20, h = 11 }
+		local w, h = title_garden_sprite_dims(G.ROOM.T)
+		T.assert_equal(w, 80, "Title garden sprite width should stay room + 60")
+		T.assert_equal(h, 33, "Title garden sprite height should stay room + 22")
+
+		local x0, y0 = title_garden_pan_offset(0)
+		T.assert_equal(x0, 0, "Pan should start at the current centered crop")
+		T.assert_equal(y0, 0, "Pan should start at the current centered crop")
+
+		local extra_x = (w - G.ROOM.T.w) * 0.5
+		local extra_y = (h - G.ROOM.T.h) * 0.5
+		for t = 0, 200, 2.5 do
+			local x, y = title_garden_pan_offset(t)
+			T.assert_true(math.abs(x) <= extra_x - 0.5,
+				"Horizontal pan should stay inside the zoomed crop")
+			T.assert_true(math.abs(y) <= extra_y - 0.5,
+				"Vertical pan should stay inside the zoomed crop")
+		end
+
+		local x1, y1 = title_garden_pan_offset(12)
+		T.assert_true(math.abs(x1) > 0.5 or math.abs(y1) > 0.5,
+			"Pan offset should move away from center over time")
+	end)
+
+	T.it("slides the title garden splash offset each frame", function()
+		MockEnv.reset_game()
+		require("app.core.util.tables")
+		require("app.core.util.geometry")
+		require("word_game.ui.localize")
+		require("word_game.ui.widgets")
+		require("word_game.ui.menu")
+
+		G.SPLASH_BACK = {
+			title_garden_pan = { t = 0 },
+			alignment = { offset = { x = 0, y = 0 } },
+		}
+		update_title_garden_pan(12)
+		local x, y = title_garden_pan_offset(12)
+		T.assert_almost_equal(G.SPLASH_BACK.alignment.offset.x, x, 0.0001)
+		T.assert_almost_equal(G.SPLASH_BACK.alignment.offset.y, y, 0.0001)
+		T.assert_almost_equal(G.SPLASH_BACK.title_garden_pan.t, 12, 0.0001)
+		T.assert_true(math.abs(x) > 0.01 or math.abs(y) > 0.01,
+			"A 12s step should move the garden image")
+	end)
 end)

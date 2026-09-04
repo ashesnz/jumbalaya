@@ -6,30 +6,57 @@ local Easing = require("app.effects.easing")
 
 local M = {}
 
-function M.definition(won)
+function M.best_jumble_value(stats)
+	stats = stats or {}
+	local pattern = stats.best_puzzle
+	local score = stats.best_puzzle_score or 0
+	if type(pattern) ~= "string" or pattern == "" then
+		return "—"
+	end
+	return tostring(pattern) .. "  (" .. tostring(score) .. ")"
+end
+
+function M.summary_lines(stats)
+	stats = stats or {}
+	return {
+		{ label = "Your best jumble", value = M.best_jumble_value(stats) },
+		{ label = "Words played", value = stats.words_played or 0 },
+	}
+end
+
+local function match_stats()
+	state.record_current_jumble_if_best()
 	local alpha = state.get()
-	local stats = alpha and alpha.stats or {}
+	return (alpha and alpha.stats) or {}
+end
+
+function M.definition(won)
+	local stats = match_stats()
 	local title = won and "MATCH WON" or "MATCH OVER"
 	local colour = won and G.C.GOLD or G.C.RED
+	local lines = M.summary_lines(stats)
+	local contents = {
+		{ n = G.UI.ROW, config = { align = "cm", padding = 0.12 }, nodes = {
+			{ n = G.UI.TEXT, config = { text = title, scale = 0.7, colour = colour, shadow = true } },
+		}},
+	}
+	for i, line in ipairs(lines) do
+		local padding = i == 1 and 0.06 or 0.04
+		contents[#contents + 1] = { n = G.UI.ROW, config = { align = "cm", padding = padding }, nodes = {
+			{ n = G.UI.TEXT, config = {
+				text = line.label .. ": " .. tostring(line.value),
+				scale = 0.36,
+				colour = G.C.UI.TEXT_LIGHT,
+				shadow = true,
+			}},
+		}}
+	end
+	contents[#contents + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.1 }, nodes = {
+		widgets.button("Back to Menu", "return_to_menu", G.C.RED, 3.4, 0.75),
+	}}
 
 	return build_generic_options({
-		contents = {
-			{ n = G.UI.ROW, config = { align = "cm", padding = 0.12 }, nodes = {
-				{ n = G.UI.TEXT, config = { text = title, scale = 0.7, colour = colour, shadow = true } },
-			}},
-			{ n = G.UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
-				{ n = G.UI.TEXT, config = { text = "Best word: " .. tostring(stats.best_word or "—") .. "  (" .. tostring(stats.best_word_score or 0) .. ")", scale = 0.36, colour = G.C.UI.TEXT_LIGHT, shadow = true } },
-			}},
-			{ n = G.UI.ROW, config = { align = "cm", padding = 0.04 }, nodes = {
-				{ n = G.UI.TEXT, config = { text = "Highest Boost: ×" .. tostring(stats.highest_boost or 0), scale = 0.36, colour = G.C.UI.TEXT_LIGHT, shadow = true } },
-			}},
-			{ n = G.UI.ROW, config = { align = "cm", padding = 0.04 }, nodes = {
-				{ n = G.UI.TEXT, config = { text = "Sweeps: " .. tostring(stats.sweeps or 0), scale = 0.36, colour = G.C.GOLD, shadow = true } },
-			}},
-			{ n = G.UI.ROW, config = { align = "cm", padding = 0.1 }, nodes = {
-				widgets.button("Back to Menu", "return_to_menu", G.C.RED, 3.4, 0.75),
-			}},
-		},
+		contents = contents,
 		no_back = true,
 	})
 end
@@ -41,8 +68,7 @@ function M.stat_line(label, value)
 end
 
 function M.overlay_definition(won)
-	local alpha = state.get()
-	local stats = alpha and alpha.stats or {}
+	local stats = match_stats()
 	local title = won and localize("hdr_you_win") or localize("hdr_game_over")
 	if type(title) ~= "string" or title == "" then
 		title = won and "YOU WIN!" or "GAME OVER"
@@ -51,6 +77,11 @@ function M.overlay_definition(won)
 	local eased = deep_clone(title_col)
 	eased[4] = 0
 	Easing.value{ref_table = eased, ref_value = 4, mod = 0.8, floored = true}
+
+	local stat_nodes = {}
+	for _, line in ipairs(M.summary_lines(stats)) do
+		stat_nodes[#stat_nodes + 1] = M.stat_line(line.label, line.value)
+	end
 
 	return build_generic_options({
 		bg_colour = eased,
@@ -68,11 +99,7 @@ function M.overlay_definition(won)
 					maxw = 6.5,
 				})}},
 			}},
-			{ n = G.UI.ROW, config = { align = "cm", padding = 0.12, colour = G.C.BLACK, r = 0.1, emboss = 0.05 }, nodes = {
-				M.stat_line("Best word", tostring(stats.best_word or "—") .. "  (" .. tostring(stats.best_word_score or 0) .. ")"),
-				M.stat_line("Words played", stats.words_played or 0),
-				M.stat_line("Sweeps", stats.sweeps or 0),
-			}},
+			{ n = G.UI.ROW, config = { align = "cm", padding = 0.12, colour = G.C.BLACK, r = 0.1, emboss = 0.05 }, nodes = stat_nodes },
 			{ n = G.UI.ROW, config = { align = "cm", padding = 0.12 }, nodes = {
 				{ n = G.UI.ROW, config = {
 					id = "from_game_over",

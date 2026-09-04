@@ -59,10 +59,12 @@ function M.show_post_target_multiplier_fx(result)
 	end
 	local FloatUp = WORD_GAME and WORD_GAME.FloatUpText
 	if FloatUp and FloatUp.from_timeline then
+		-- Same gold float-up-and-fade as "Hand Cleared", anchored to the slider tip.
 		FloatUp.from_timeline("×2", {
 			colour = G.C and G.C.GOLD or { 1, 0.85, 0.2, 1 },
 			font_px = 32,
 			speed = 1.25,
+			life = 1.8,
 		})
 	end
 end
