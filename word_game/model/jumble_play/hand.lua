@@ -1,4 +1,4 @@
---[[ word_game/model/play/hand.lua ]]
+--[[ word_game/model/jumble_play/hand.lua ]]
 local Scheduler = require "app.effects.scheduler"
 
 
@@ -6,7 +6,7 @@ return function(M)
 local round = require("word_game.model.round")
 local round_config = require("word_game.config.round_config")
 local state = require("word_game.model.state")
-local word_feedback = require("word_game.ui.word_feedback")
+local feedback = require("word_game.model.feedback")
 local play_effects = require("word_game.ui.play_effects")
 local CardMotion = require("app.effects.card_motion")
 
@@ -81,7 +81,7 @@ local function open_after_hand(opts)
 			return
 		end
 		round.start_hand(wr.set, wr.hand_index + 1)
-		require("word_game.model.play.opening_deal").deal()
+		require("word_game.model.jumble_play.opening_deal").deal()
 		return
 	end
 	if opts.boss_next then
@@ -110,7 +110,7 @@ local function play_hand_clear()
 	if WORD_GAME and WORD_GAME.Confetti then
 		WORD_GAME.Confetti.burst()
 	end
-	word_feedback.show("Hand Cleared", G.C.GOLD, 1.8, 0.15)
+	feedback.show("Hand Cleared", G.C.GOLD, 1.8, 0.15)
 	play_sfx("applause", 1, 0.9)
 	play_sfx("timpani", 0.92, 0.9)
 	play_sfx("card_tick", 0.6, 0.5)
@@ -123,7 +123,7 @@ local function play_boss_clear()
 	if WORD_GAME and WORD_GAME.Confetti then
 		WORD_GAME.Confetti.burst()
 	end
-	word_feedback.show("Boss Defeated!", G.C.GOLD, 1.8, 0.15)
+	feedback.show("Boss Defeated!", G.C.GOLD, 1.8, 0.15)
 	play_sfx("applause", 1, 0.9)
 	play_sfx("timpani", 0.92, 0.9)
 end
@@ -219,7 +219,7 @@ function M.continue_after_dealer()
 		if WORD_GAME and WORD_GAME.Deck then
 			WORD_GAME.Deck.reset_table_deck()
 		end
-		require("word_game.model.play.opening_deal").deal()
+		require("word_game.model.jumble_play.opening_deal").deal()
 		if WORD_GAME and WORD_GAME.Sidebar then
 			WORD_GAME.Sidebar:refresh()
 		end

@@ -8,7 +8,7 @@ T.describe("Debug stage jump (devtools.sections.stage)", function()
 
 	local stage_section = require("devtools.sections.stage")
 	local DebugContext = require("devtools.context")
-	local opening_deal = require("word_game.model.play.opening_deal")
+	local opening_deal = require("word_game.model.jumble_play.opening_deal")
 	local round_config = require("word_game.config.round_config")
 	local hand_size_cfg = require("word_game.config.hand_size")
 

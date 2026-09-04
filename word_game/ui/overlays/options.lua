@@ -7,7 +7,6 @@ function build_options()
   local current_seed = nil
   local restart = nil
   local main_menu = nil
-  local card_gallery = nil
 
   Scheduler.add{
     blockable = false,
@@ -20,7 +19,6 @@ function build_options()
   if G.STAGE == G.STAGES.RUN then
     restart = Components.button{id = 'restart_button', label = {localize('ui_start_new_run')}, onClick = "begin_run", width = 5}
     main_menu = Components.button{ label = {localize('ui_main_menu')}, onClick = "return_to_menu", width = 5}
-    card_gallery = Components.button{ label = {localize('ui_collection')}, onClick = "card_gallery", width = 5, id = 'card_gallery'}
     current_seed = {n=G.UI.ROW, config={align = "cm", padding = 0.05}, nodes={
         {n=G.UI.COLUMN, config={align = "cm", padding = 0}, nodes={
         {n=G.UI.TEXT, config={text = localize('ui_seed')..": ", scale = 0.4, colour = G.C.WHITE}}
@@ -39,15 +37,12 @@ function build_options()
   end
 
   local settings = Components.button({onClick = 'open_settings', label = {localize('ui_settings')}, width = 5, focus_args = {snap_to = true}})
-  local high_scores = Components.button{ label = {localize('ui_stats')}, onClick = "show_high_scores", width = 5}
 
   local t = build_generic_options({ contents = {
       settings,
       G.GAME.seeded and current_seed or nil,
       restart,
       main_menu,
-      high_scores,
-      card_gallery,
     }})
   return t
 end

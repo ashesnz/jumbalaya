@@ -53,12 +53,6 @@ T.describe("Full Game Boot & Run Simulation", function()
 			T.assert_not_nil(G.GAME.word_round, "G.GAME.word_round must be present after starting run")
 			T.assert_equal(1, G.GAME.word_round.set, "Round set should be 1")
 			T.assert_equal(1, G.GAME.word_round.hand_index, "Round hand_index should be 1 (Stage 1-1)")
-
-			-- Test alert popup creation resilience
-			if build_notify_alert then
-				local alert = build_notify_alert('letter_base', 'Companion')
-				T.assert_not_nil(alert, "build_notify_alert should generate UI tree")
-			end
 		end)
 
 		if orig_getOS then

@@ -27,7 +27,7 @@ T.describe("Classic run mode", function()
 		G.GAME.run_mode = "classic"
 		local tt = require("word_game.ui.timeline_timer")
 		local jumble = require("word_game.model.jumble")
-		local rules = require("word_game.model.play.jumble_rules")
+		local rules = require("word_game.model.jumble_play.jumble_rules")
 		WORD_GAME.TimelineTimer = tt
 		WORD_GAME.Jumble = jumble
 
@@ -141,7 +141,7 @@ T.describe("Classic run mode", function()
 			jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0, slots = {} },
 		}
 		local RunMode = require("word_game.model.run_mode")
-		local rules = require("word_game.model.play.jumble_rules")
+		local rules = require("word_game.model.jumble_play.jumble_rules")
 		local tt = require("word_game.ui.timeline_timer")
 		WORD_GAME.TimelineTimer = tt
 		tt.reset_progress(25)
@@ -170,7 +170,7 @@ T.describe("Classic run mode", function()
 			},
 		}
 		local jumble = require("word_game.model.jumble")
-		local rules = require("word_game.model.play.jumble_rules")
+		local rules = require("word_game.model.jumble_play.jumble_rules")
 
 		local old_pts, new_pts = jumble.record_puzzle_word("CATS", { used_cards = {} })
 		T.assert_equal(new_pts - old_pts, 8, "Four-letter word should double to eight after target")
@@ -204,7 +204,7 @@ T.describe("Classic run mode", function()
 				slots = {},
 			},
 		}
-		local rules = require("word_game.model.play.jumble_rules")
+		local rules = require("word_game.model.jumble_play.jumble_rules")
 		local jumble = require("word_game.model.jumble")
 		local result = rules.evaluate_play(jumble, G.GAME.word_round.jumble)
 		T.assert_equal(result.kind, "bank_puzzle")

@@ -1,4 +1,4 @@
---[[ word_game/model/play/opening_deal.lua - deals the opening hand for a stage.
+--[[ word_game/model/jumble_play/opening_deal.lua - deals the opening hand for a stage.
 
 	Jumble stages populate the jumble deck instead of the standard letter deck;
 	either way the hand ends up dealt and the HUD refreshed.

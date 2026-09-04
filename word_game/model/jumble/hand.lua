@@ -3,10 +3,10 @@
 return function(M)
 local TIMER_ENABLED = false
 local TIMER_SECONDS = 30
-local modifier_effects = require("word_game.model.play.letter_modifier_effects")
+local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
 local bonus_stack = require("word_game.ui.boss_word_stack")
 local round_config = require("word_game.config.round_config")
-local jumble_rules = require("word_game.model.play.jumble_rules")
+local jumble_rules = require("word_game.model.jumble_play.jumble_rules")
 
 function M.is_active_hand(set, hand_index)
 	set = set or (G.GAME and G.GAME.word_round and G.GAME.word_round.set) or 1

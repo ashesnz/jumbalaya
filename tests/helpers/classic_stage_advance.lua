@@ -6,7 +6,7 @@ local mock_env = require("tests.helpers.mock_env")
 local InputLock = require("word_game.model.input_lock")
 
 local deck = require("word_game.model.cards.deck")
-local play = require("word_game.model.play")
+local play = require("word_game.model.jumble_play")
 local trade = require("word_game.model.trade")
 local hand_size = require("word_game.config.hand_size")
 local jumble = require("word_game.model.jumble")

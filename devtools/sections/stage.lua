@@ -2,7 +2,7 @@
 
 local layout = require "devtools.layout"
 local round_config = require "word_game.config.round_config"
-local opening_deal = require "word_game.model.play.opening_deal"
+local opening_deal = require "word_game.model.jumble_play.opening_deal"
 
 -- Stage 1-3 boss word with two revealed letters → seven gutter bonus cards on 1-4.
 local DEBUG_BOSS_WORD = "VEGETABLE"

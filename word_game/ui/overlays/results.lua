@@ -36,9 +36,6 @@ function build_win()
         not show_win_cta and Components.button({onClick = 'return_to_menu', label = {localize('ui_main_menu')}, width = 2.5, maxw = 2.5, height = 1, focus_args = {nav = 'wide'}}) or nil,
       }}
     }},
-    {n=G.UI.ROW, config={align = "cm", padding = 0.08}, nodes={
-      Components.button({onClick = 'close_overlay', label = {localize('ui_endless')}, width = 6.5, maxw = 5, height = 1.2, textSize = 0.7, shadow = true, colour = G.C.BLUE, focus_args = {nav = 'wide', button = 'x',set_button_pip = true}}),
-    }},
   }}
   }}
   }}) 

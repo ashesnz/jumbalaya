@@ -99,7 +99,7 @@
 ---@field current_round table|nil
 ---@field round_scores any
 ---@field starting_deck_size number
----@field starting_params { hand_size: number, discards: number, hands: number, consumable_slots: number }
+---@field starting_params { hand_size: number, usable_slots: number }
 ---@field word_round WordRound|nil
 ---@field placement_word string|nil
 ---@field placement_word_valid boolean|nil

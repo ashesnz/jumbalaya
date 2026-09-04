@@ -45,7 +45,6 @@ end
 
 
 function G.DEFINITIONS.profile_option(_profile)
-  sync_discover_counts()
   G.focused_profile = _profile
   local packed = read_save_payload(G.focused_profile..'/'..'profile.acs')
   local profile_data = packed and unpack_source(packed) or nil
@@ -73,7 +72,6 @@ function G.DEFINITIONS.profile_option(_profile)
     }},
     {n=G.UI.ROW, config={align = "cm", padding = 0.1}, nodes={
       {n=G.UI.COLUMN, config={align = "cm", minw = 6}, nodes={
-        (G.PROFILES[_profile].progress and G.PROFILES[_profile].progress.discovered) and make_progress_box(G.PROFILES[_profile].progress, 0.5) or
         {n=G.UI.COLUMN, config={align = "cm", minh = 4, minw = 5.2, colour = G.C.BLACK, r = 0.1}, nodes={
           {n=G.UI.TEXT, config={text = localize('term_empty_caps'), scale = 0.5, colour = G.C.UI.TRANSPARENT_LIGHT}}
         }},
@@ -261,9 +259,9 @@ function main_menu_mode_utility_edge_alignment(ui, opts)
 	if opts.recalculate then ui:recalculate() end
 	local classic = main_menu_button_abs_rect(ui, "main_menu_classic")
 	local time_run = main_menu_button_abs_rect(ui, "main_menu_time_run")
-	local stats = main_menu_button_abs_rect(ui, "show_high_scores")
-	if not classic or not time_run or not stats then return nil end
-	return { classic = classic, time_run = time_run, stats = stats }
+	local settings = main_menu_button_abs_rect(ui, "open_settings")
+	if not classic or not time_run or not settings then return nil end
+	return { classic = classic, time_run = time_run, settings = settings }
 end
 
 function main_menu_mode_utility_column_alignment(ui, opts)
@@ -272,7 +270,7 @@ function main_menu_mode_utility_column_alignment(ui, opts)
 	return {
 		classic = edges.classic.x + edges.classic.w * 0.5,
 		time_run = edges.time_run.x + edges.time_run.w * 0.5,
-		stats = edges.stats.x + edges.stats.w * 0.5,
+		settings = edges.settings.x + edges.settings.w * 0.5,
 	}
 end
 
@@ -283,10 +281,10 @@ function layout_main_menu_mode_column()
 		row.role.offset.x = 0
 	end
 	G.MAIN_MENU_UI:recalculate()
-	local stats_rect = main_menu_button_abs_rect(G.MAIN_MENU_UI, "show_high_scores")
+	local settings_rect = main_menu_button_abs_rect(G.MAIN_MENU_UI, "open_settings")
 	local classic_rect = main_menu_button_abs_rect(G.MAIN_MENU_UI, "main_menu_classic")
-	if not stats_rect or not classic_rect or not row or not row.role then return end
-	local delta = stats_rect.x - classic_rect.x
+	if not settings_rect or not classic_rect or not row or not row.role then return end
+	local delta = settings_rect.x - classic_rect.x
 	if math.abs(delta) < 0.01 then return end
 	row.role.offset.x = delta
 	if G.MAIN_MENU_UI.root_node and G.MAIN_MENU_UI.root_node.move_with_major then
@@ -537,8 +535,6 @@ function build_main_menu_buttons()
 				{n=G.UI.ROW, config=chrome, nodes={
 					menu_button(nil, localize('ui_settings'), 'open_settings', G.C.ORANGE),
 					gap_node(),
-					menu_button(nil, localize('ui_stats'), 'show_high_scores', G.C.FILTER),
-					gap_node(),
 					menu_button(nil, localize('ui_quit_cap'), 'quit', G.C.RED),
 				}},
 			}},
@@ -715,7 +711,6 @@ function Game:open_main_menu(change_context)
 			return true
 		end}
 	Scheduler.add{blockable = false, func = function()
-		if sync_discover_counts then sync_discover_counts() end
 		if set_profile_progress then set_profile_progress() end
 		G.REFRESH_ALERTS = true
 		return true

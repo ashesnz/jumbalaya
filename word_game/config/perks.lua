@@ -1,4 +1,8 @@
---[[ word_game/config/perks.lua - Perk pool for stamp rewards ]]
+--[[ word_game/config/perks.lua - Perk pool for stamp rewards
+
+	Perks are collected on the vault sidebar for display. Gameplay effects are
+	not wired yet — has_perk() is reserved for future scoring hooks.
+]]
 
 local dimensions = require("word_game.config.dimensions")
 
@@ -69,22 +73,7 @@ function M.stamp_sprite_at(col, row)
 	return M.STAMP_SPRITES[(row - 1) * M.STAMP_COLS + col]
 end
 
-M.DESCRIPTION_VARIABLES = {
-	["Overstock Plus"] = { "c_shop_dollars_spent" },
-	["Liquidation"] = {},
-	["Glow Up"] = {},
-	["Petroglyph"] = {},
-	["Retcon"] = {},
-	["Palette"] = {},
-	["Orbit Tycoon"] = { "orbits_bought" },
-	["Reroll Glut"] = { "c_shop_rerolls" },
-	["Observatory"] = { "orbit_wheel_used" },
-	["Nacho Tong"] = { "c_cards_played" },
-	["Recyclomancy"] = { "c_cards_discarded" },
-	["Money Tree"] = { "c_round_interest_cap_streak" },
-	["Antimatter"] = { "v_blank" },
-	["Illusion"] = { "c_playing_cards_bought" },
-}
+M.DESCRIPTION_VARIABLES = {}
 
 -- Sprites from resources/assets/Perks.png (3×2 horizontal voucher grid).
 M.POOL = {
@@ -119,28 +108,28 @@ M.POOL = {
 	{
 		id = "letter_boost",
 		name = "Letter Boost",
-		desc = "High-tier letters score +2 AP.",
+		desc = "High-tier letters score +2 bonus points. (Cosmetic — effect not active yet.)",
 		token_cost = 10,
 		pos = { x = 2, y = 0 },
 	},
 	{
 		id = "red_rush",
 		name = "Red Rush",
-		desc = "Red letters score +1 AP.",
+		desc = "Red letters score +1 bonus point. (Cosmetic — effect not active yet.)",
 		token_cost = 10,
 		pos = { x = 3, y = 0 },
 	},
 	{
 		id = "vowel_veil",
 		name = "Vowel Veil",
-		desc = "Vowels score +2 AP.",
+		desc = "Vowels score +2 bonus points. (Cosmetic — effect not active yet.)",
 		token_cost = 10,
 		pos = { x = 4, y = 0 },
 	},
 	{
 		id = "long_word",
 		name = "Long Word",
-		desc = "Words of 6+ letters gain +15 AP.",
+		desc = "Words of 6+ letters gain +15 bonus points. (Cosmetic — effect not active yet.)",
 		token_cost = 10,
 		pos = { x = 5, y = 0 },
 	},

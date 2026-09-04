@@ -36,6 +36,7 @@ local function hand_dealt_metrics()
 	end
 
 	if not left then
+		if not G.hand.T then return nil end
 		left = G.hand.T.x
 		right = G.hand.T.x + G.hand.T.w
 		top = G.hand.T.y
@@ -60,7 +61,7 @@ end
 
 local function hand_gap_metrics()
 	local area = placement_area()
-	if not area or not G.hand then return nil end
+	if not area or not area.T or not G.hand or not G.hand.T then return nil end
 	local felt = get_table_felt_rect()
 	local top = area.T.y + area.T.h
 	local bottom = G.hand.T.y
@@ -225,6 +226,15 @@ function M.lock_hand_layout(wr)
 		w = metrics.w,
 		h = metrics.h,
 	}
+end
+
+function M.flush_pending()
+	local pending = G.ARGS and G.ARGS.word_feedback_queue
+	if not pending or #pending == 0 then return end
+	G.ARGS.word_feedback_queue = nil
+	for _, item in ipairs(pending) do
+		M.show(item.text, item.colour, item.hold, item.offset_y)
+	end
 end
 
 return M

@@ -218,7 +218,7 @@ function M.validate_current()
 		end
 	end
 	local word = M.build_word(j.slots)
-	local modifier_effects = require("word_game.model.play.letter_modifier_effects")
+	local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
 	word = modifier_effects.adjust_word_for_q(word, used_cards)
 	if not word or #word < 3 then
 		return nil, "Need a longer word"

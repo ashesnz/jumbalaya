@@ -152,7 +152,7 @@ T.describe("Vault stage button", function()
 		local tt = require("word_game.ui.timeline_timer")
 		local token_reward = require("word_game.ui.token_reward")
 		local vault_btn = require("word_game.ui.vault_stage_button")
-		local Play = require("word_game.model.play")
+		local Play = require("word_game.model.jumble_play")
 		WORD_GAME.TimelineTimer = tt
 		WORD_GAME.TokenReward = token_reward
 		WORD_GAME.VaultStageButton = vault_btn
@@ -186,7 +186,7 @@ T.describe("Vault stage button", function()
 			jumble = { total_score = 0, puzzle_points = 0, puzzle_multi = 1.0 },
 		}
 		local vault_btn = require("word_game.ui.vault_stage_button")
-		local Play = require("word_game.model.play")
+		local Play = require("word_game.model.jumble_play")
 		WORD_GAME.Play = Play
 
 		local cleared = false

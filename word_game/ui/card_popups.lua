@@ -1,68 +1,11 @@
 --[[
-	word_game/ui/card_popups.lua - Card popups, tooltips, badges, and unlock overlays.
+	word_game/ui/card_popups.lua - Card focus UI, hover popups, and tooltips.
 
 	These UI definitions remain global because existing card and event call sites
 	use them directly.
 ]]
 
 local Easing = require "app.effects.easing"
-
-function build_notify_alert(_achievement, _type)
-  local _c = G.P_CENTERS and G.P_CENTERS[_achievement]
-  local _atlas = 
-    _type == 'Companion' and (G.TEXTURE_ATLASES["Companion"] or G.TEXTURE_ATLASES["centers"] or G.TEXTURE_ATLASES["letter_frame"]) or
-    _type == 'Perk' and (G.TEXTURE_ATLASES["Perk"] or G.TEXTURE_ATLASES["centers"] or G.TEXTURE_ATLASES["letter_frame"]) or
-    _type == 'Back' and (G.TEXTURE_ATLASES["centers"] or G.TEXTURE_ATLASES["letter_frame"]) or
-    (G.TEXTURE_ATLASES["icons"] or G.TEXTURE_ATLASES["centers"] or G.TEXTURE_ATLASES["letter_frame"])
-
-  _atlas = _atlas or {px = 71, py = 95, name = "letter_frame"}
-  local px = _atlas.px or 71
-  local py = _atlas.py or 95
-
-  local t_s = Sprite(0,0,1.5*(px/py),1.5,_atlas, _c and _c.pos or {x=3, y=0})
-  t_s.states.drag.can = false
-  t_s.states.hover.can = false
-  t_s.states.collide.can = false
- 
-  local subtext = _type == 'achievement' and localize(G.F_TROPHIES and 'term_trophy' or 'term_achievement') or
-    _type == 'Companion' and localize('term_joker') or 
-    _type == 'Perk' and localize('term_perk') or
-    _type == 'Back' and localize('term_deck') or 'ERROR'
-
-  if _achievement == 'ui_challenge' then subtext = localize('term_challenges') end
-  local name = _type == 'achievement' and localize(_achievement, 'achievement_names') or 'ERROR'
-
-    local t = {n=G.UI.ROOT, config = {align = 'cl', r = 0.1, padding = 0.06, colour = G.C.UI.TRANSPARENT_DARK}, nodes={
-    {n=G.UI.ROW, config={align = "cl", padding = 0.2, minw = 20, r = 0.1, colour = G.C.BLACK, outline = 1.5, outline_colour = G.C.GREY}, nodes={
-      {n=G.UI.ROW, config={align = "cm", r = 0.1}, nodes={
-        {n=G.UI.ROW, config={align = "cm", r = 0.1}, nodes={
-          {n=G.UI.OBJECT, config={object = t_s}},
-        }},
-        _type ~= 'achievement' and {n=G.UI.ROW, config={align = "cm", padding = 0.04}, nodes={
-          {n=G.UI.ROW, config={align = "cm", maxw = 3.4}, nodes={
-            {n=G.UI.TEXT, config={text = subtext, scale = 0.5, colour = G.C.FILTER, shadow = true}},
-          }},
-          {n=G.UI.ROW, config={align = "cm", maxw = 3.4}, nodes={
-            {n=G.UI.TEXT, config={text = localize('term_unlocked_ex'), scale = 0.35, colour = G.C.FILTER, shadow = true}},
-          }}
-        }}
-        or {n=G.UI.ROW, config={align = "cm", padding = 0.04}, nodes={
-          {n=G.UI.ROW, config={align = "cm", maxw = 3.4, padding = 0.1}, nodes={
-            {n=G.UI.TEXT, config={text = name, scale = 0.4, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
-          }},
-          {n=G.UI.ROW, config={align = "cm", maxw = 3.4}, nodes={
-            {n=G.UI.TEXT, config={text = subtext, scale = 0.3, colour = G.C.FILTER, shadow = true}},
-          }},
-          {n=G.UI.ROW, config={align = "cm", maxw = 3.4}, nodes={
-            {n=G.UI.TEXT, config={text = localize('term_unlocked_ex'), scale = 0.35, colour = G.C.FILTER, shadow = true}},
-          }}
-        }}
-      }}
-    }}
-  }}
-  return t
-end
-
 
 function G.DEFINITIONS.card_focus_ui(card)
   local card_width = card.T.w

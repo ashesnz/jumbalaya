@@ -1,10 +1,10 @@
---[[ word_game/model/play/jumble.lua ]]
+--[[ word_game/model/jumble_play/jumble.lua ]]
 
 return function(M)
 local round = require("word_game.model.round")
-local rules = require("word_game.model.play.jumble_rules")
+local rules = require("word_game.model.jumble_play.jumble_rules")
 local effects = require("word_game.ui.play_effects")
-local word_feedback = require("word_game.ui.word_feedback")
+local feedback = require("word_game.model.feedback")
 local RunMode = require("word_game.model.run_mode")
 
 local function ends_hand_on_target(cleared)
@@ -60,7 +60,7 @@ function M.end_jumble_hand()
 	wr.jumble = nil
 	G.GAME.word_score_animating = false
 
-	word_feedback.show("Time!  " .. score .. " points", G.C.GOLD, 2.2, 0.35)
+	feedback.show("Time!  " .. score .. " points", G.C.GOLD, 2.2, 0.35)
 	play_sfx("timpani", 0.9, 0.85)
 
 	if WORD_GAME and WORD_GAME.ScoreBanner then
@@ -69,7 +69,7 @@ function M.end_jumble_hand()
 	end
 
 	round.advance_hand()
-	require("word_game.model.play.opening_deal").deal()
+	require("word_game.model.jumble_play.opening_deal").deal()
 	effects.present_end_jumble_sidebar()
 end
 

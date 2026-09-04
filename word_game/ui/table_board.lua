@@ -18,6 +18,10 @@ function M.is_active()
 end
 
 function M.update(game, dt)
+	if G.ARGS and G.ARGS.word_feedback_queue then
+		local word_feedback = require("word_game.ui.word_feedback")
+		word_feedback.flush_pending()
+	end
 	if G.ARGS and G.ARGS.pending_layout then
 		G.ARGS.pending_layout = false
 		local Layout = require("word_game.ui.layout")

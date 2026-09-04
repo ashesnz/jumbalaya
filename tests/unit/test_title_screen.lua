@@ -7,7 +7,7 @@ local T = require("tests.framework")
 local MockEnv = require("tests.helpers.mock_env")
 
 	T.describe("Title Screen & Jumbalaya Menu", function()
-	T.it("generates main menu UI tree with Classic, Time Run, Settings, Stats, and Quit", function()
+	T.it("generates main menu UI tree with Classic, Time Run, Settings, and Quit", function()
 		MockEnv.setup()
 		require("app.core.util.tables")
 		require("app.core.util.geometry")
@@ -36,8 +36,8 @@ local MockEnv = require("tests.helpers.mock_env")
 		T.assert_true(buttons_found["begin_classic_run"], "Classic button must be present")
 		T.assert_true(buttons_found["begin_time_run"], "Time Run button must be present")
 		T.assert_true(buttons_found["open_settings"], "Settings button must be present")
-		T.assert_true(buttons_found["show_high_scores"], "Stats button must be present")
 		T.assert_true(buttons_found["quit"], "Quit button must be present")
+		T.assert_nil(buttons_found["show_high_scores"], "Stats button should not be on the title screen")
 		T.assert_nil(buttons_found["begin_run"], "Legacy Play button should not be on the title screen")
 		T.assert_nil(buttons_found["open_options"], "Options overlay should not be on the title screen")
 		T.assert_nil(buttons_found["show_credits"], "Credits button should be removed")
@@ -259,7 +259,7 @@ local MockEnv = require("tests.helpers.mock_env")
 				stack_gap, min_gap * 0.85))
 	end)
 
-	T.it("matches Classic and Time Run button edges to the Stats button", function()
+	T.it("matches Classic and Time Run button edges to the Settings button", function()
 		MockEnv.reset_game()
 		require("app.core.util.tables")
 		require("app.core.util.geometry")
@@ -303,23 +303,23 @@ local MockEnv = require("tests.helpers.mock_env")
 		G.MAIN_MENU_UI = nil
 
 		T.assert_not_nil(edges, "Mode and utility button bounds must be measurable")
-		local stats = edges.stats
+		local settings = edges.settings
 		local classic = edges.classic
 		local time_run = edges.time_run
 		local tol = 0.02
 
-		T.assert_almost_equal(classic.x, stats.x, tol,
-			"Classic left edge should match Stats left edge")
-		T.assert_almost_equal(classic.right, stats.right, tol,
-			"Classic right edge should match Stats right edge")
-		T.assert_almost_equal(time_run.x, stats.x, tol,
-			"Time Run left edge should match Stats left edge")
-		T.assert_almost_equal(time_run.right, stats.right, tol,
-			"Time Run right edge should match Stats right edge")
-		T.assert_almost_equal(classic.w, stats.w, tol,
-			"Classic width should match Stats width")
-		T.assert_almost_equal(time_run.w, stats.w, tol,
-			"Time Run width should match Stats width")
+		T.assert_almost_equal(classic.x, settings.x, tol,
+			"Classic left edge should match Settings left edge")
+		T.assert_almost_equal(classic.right, settings.right, tol,
+			"Classic right edge should match Settings right edge")
+		T.assert_almost_equal(time_run.x, settings.x, tol,
+			"Time Run left edge should match Settings left edge")
+		T.assert_almost_equal(time_run.right, settings.right, tol,
+			"Time Run right edge should match Settings right edge")
+		T.assert_almost_equal(classic.w, settings.w, tol,
+			"Classic width should match Settings width")
+		T.assert_almost_equal(time_run.w, settings.w, tol,
+			"Time Run width should match Settings width")
 	end)
 
 	T.it("wraps Classic and Time Run chrome to button width, not the utility bar width", function()

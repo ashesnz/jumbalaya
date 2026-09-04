@@ -1,4 +1,4 @@
---[[ word_game/model/play/letter_modifier_effects.lua - Gameplay effects for modified letter cards ]]
+--[[ word_game/model/jumble_play/letter_modifier_effects.lua - Gameplay effects for modified letter cards ]]
 
 local deck = require("word_game.model.cards.deck")
 local modifiers = deck

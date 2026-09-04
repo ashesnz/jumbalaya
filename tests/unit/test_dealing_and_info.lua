@@ -597,7 +597,7 @@ T.describe("Vault deck information", function()
 	end)
 end)
 
-T.describe("Info Text & Score Notification Alignment (word_game.model.play)", function()
+T.describe("Info Text & Score Notification Alignment (word_game.model.jumble_play)", function()
 	mock_env.reset_game()
 
 	T.it("calculates gap metrics between placement area and hand correctly", function()

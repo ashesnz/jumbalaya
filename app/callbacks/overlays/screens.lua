@@ -22,48 +22,6 @@ G.FUNCS.language_selection = function(e)
   }
 end
 
-G.FUNCS.change_viewed_back = function(args)
-  G.GAME.viewed_back:change_to(G.P_CENTER_POOLS.Back[args.to_key])
-  G.FUNCS.card_gallery_decks()
-end
-
-G.FUNCS.card_gallery = function(e)
-  G.SETTINGS.paused = true
-  G.FUNCS.show_overlay{
-    definition = build_card_gallery(),
-  }
-end
-
-
-G.FUNCS.card_gallery_decks = function(e)
-  G.SETTINGS.paused = true
-  G.FUNCS.show_overlay{
-    definition = build_card_gallery_decks(),
-  }
-end
-
-G.FUNCS.card_gallery_editions = function(e)
-  G.SETTINGS.paused = true
-  G.FUNCS.show_overlay{
-    definition = build_card_gallery_editions(),
-  }
-end
-
-
-G.FUNCS.show_high_scores = function(e)
-  G.SETTINGS.paused = true
-  G.FUNCS.show_overlay{
-    definition = build_high_scores(),
-  }
-end
-
-G.FUNCS.usage = function(e)
-  G.SETTINGS.paused = true
-  G.FUNCS.show_overlay{
-    definition = G.DEFINITIONS.usage_tabs()
-  }
-end
-
 G.FUNCS.profile_select = function(e)
   G.SETTINGS.paused = true
   G.focused_profile = G.SETTINGS.profile

@@ -9,7 +9,7 @@
 local RunMode = require("word_game.model.run_mode")
 local InputLock = require("word_game.model.input_lock")
 local table_discard = require("word_game.ui.table_discard")
-local Play = require("word_game.model.play")
+local Play = require("word_game.model.jumble_play")
 
 local M = {}
 

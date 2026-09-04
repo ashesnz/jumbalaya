@@ -13,8 +13,6 @@ require "word_game.ui.widgets"
 require "word_game.ui.card_popups"
 require "word_game.ui.fx"
 require "word_game.ui.overlays"
-require "word_game.ui.stats"
-require "word_game.ui.collection"
 
 require "app.effects"
 require "word_game.ui.card_tooltip"
@@ -72,6 +70,11 @@ end)
 Updaters.register('post_input', 'card_inspect', function(game, dt)
 	if WORD_GAME and WORD_GAME.CardInspect then
 		WORD_GAME.CardInspect.update(dt)
+	end
+end)
+Updaters.register('post_input', 'word_feedback_queue', function()
+	if G.ARGS and G.ARGS.word_feedback_queue then
+		require("word_game.ui.word_feedback").flush_pending()
 	end
 end)
 Updaters.register('post_input', 'trade_card_fly', function(_, dt)

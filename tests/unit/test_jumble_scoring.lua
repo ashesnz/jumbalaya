@@ -50,7 +50,7 @@ T.describe("Jumble scoring and odometer", function()
 	end)
 
 	T.it("calculates total puzzle score as math.floor(points * multi) on advance", function()
-		local flow = require("word_game.model.play")
+		local flow = require("word_game.model.jumble_play")
 
 		local wr = {
 			target = 100,
@@ -164,9 +164,9 @@ T.describe("Jumble scoring and odometer", function()
 	end)
 
 	T.it("decrements points to get odometer when each word is played in jumble mode", function()
-		local flow = require("word_game.model.play")
+		local flow = require("word_game.model.jumble_play")
 		local sb = require("word_game.ui.score_banner")
-		local rules = require("word_game.model.play.jumble_rules")
+		local rules = require("word_game.model.jumble_play.jumble_rules")
 		WORD_GAME.ScoreBanner = sb
 		WORD_GAME.Jumble = jumble
 		G.GAME.word_round = {
@@ -260,7 +260,7 @@ T.describe("Jumble scoring and odometer", function()
 	T.it("previews remaining from placed letters even when the word is invalid", function()
 		local sb = require("word_game.ui.score_banner")
 		local placement_word = require("word_game.model.placement_word")
-		local rules = require("word_game.model.play.jumble_rules")
+		local rules = require("word_game.model.jumble_play.jumble_rules")
 		WORD_GAME.ScoreBanner = sb
 		WORD_GAME.Jumble = jumble
 		G.GAME.word_round = {

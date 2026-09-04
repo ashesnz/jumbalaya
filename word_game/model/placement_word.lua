@@ -13,16 +13,6 @@ function M.clear()
 	end
 end
 
-function M.refresh_from_cards(cards)
-	if not Dictionary or not G.GAME then return end
-	local ok, word = Dictionary.validate_cards(cards or {})
-	if ok and round.is_word_played(word) then
-		ok = false
-	end
-	G.GAME.placement_word = word
-	G.GAME.placement_word_valid = ok
-end
-
 function M.refresh_from_jumble_slots(slots)
 	if not G.GAME then return end
 	local jumble = WORD_GAME and WORD_GAME.Jumble

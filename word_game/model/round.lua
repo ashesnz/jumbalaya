@@ -115,10 +115,6 @@ function M.start_hand(set, hand_index)
 
 	refresh()
 
-	if WORD_GAME and WORD_GAME.Characters and WORD_GAME.Characters.apply_hand_cast then
-		WORD_GAME.Characters.apply_hand_cast(set, hand_index)
-	end
-
 	local backgrounds = require "word_game.ui.layout.backgrounds"
 	backgrounds.stage(set, hand_index)
 end
@@ -189,12 +185,6 @@ function M.reset_timeline()
 	if WORD_GAME.TimelineTimer.reset then
 		WORD_GAME.TimelineTimer.reset(round_config.TIMELINE_SECONDS)
 	end
-end
-
-function M.display_hand_name()
-	local wr = G.GAME.word_round
-	if not wr then return "Hand" end
-	return (wr.hand_name or "Standard") .. " Hand"
 end
 
 return M

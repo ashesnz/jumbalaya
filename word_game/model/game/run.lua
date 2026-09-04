@@ -32,7 +32,7 @@ function Game:start_gameplay_board()
     if WORD_GAME and WORD_GAME.Round then
         WORD_GAME.Round.init_run()
     end
-    local opening_deal = require "word_game.model.play.opening_deal"
+    local opening_deal = require "word_game.model.jumble_play.opening_deal"
     opening_deal.deal()
 
     if G.FUNCS.ensure_table_board_sidebar then

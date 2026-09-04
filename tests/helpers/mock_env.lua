@@ -269,7 +269,7 @@ function M.setup()
 		_G.WORD_GAME.StageLabel = stage_label
 	end
 
-	local ok_flow, flow = pcall(require, "word_game.model.play")
+	local ok_flow, flow = pcall(require, "word_game.model.jumble_play")
 	if ok_flow then
 		_G.WORD_GAME.Play = flow
 	end

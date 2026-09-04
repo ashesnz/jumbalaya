@@ -61,7 +61,7 @@ Obsolete collection, challenge, tutorial, promotional, social, and poker-only ca
 
 ### Pivot note
 
-The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_game/model/play/jumble.lua` → `play_jumble_word`). The **placement row** serves **pattern slots**, not free-form left-to-right spelling.
+The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_game/model/jumble_play/jumble.lua` → `play_jumble_word`). The **placement row** serves **pattern slots**, not free-form left-to-right spelling.
 
 ---
 
@@ -113,12 +113,13 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | File | Purpose |
 |------|---------|
 | `jumble/` | Puzzle spec, slot topology, validation, slots, and hand lifecycle |
-| `play/` | Play-button orchestration (`play_word`, jumble bank/advance, hand clear) |
-| `placement_word.lua` | `G.GAME.placement_word` / `placement_word_valid` from cards or jumble slots |
+| `jumble_play/` | Jumble play-button orchestration (`play_word`, bank/advance, hand clear) |
+| `placement_word.lua` | `G.GAME.placement_word` / `placement_word_valid` from jumble slots |
 | `round.lua` | `start_hand` → `jumble.start_hand`, advance set/hand, `reset_timeline()` |
 | `input_lock.lua` | Animation-busy gate for play/discard/drag |
 | `match.lua` | Match-end / game-over transition from discard bin |
-| `profile_stats.lua` | Profile stats, discovery tallies, career stats, input locks |
+| `feedback.lua` | Model-layer attention text queue (drained by `word_feedback`) |
+| `profile_stats.lua` | Minimal card discovery persistence |
 | `deck/jumble.lua` | Populate jumble deck, `deal_jumble_hand` |
 | `deck/dealing.lua` | Animated `deal_into_hand` (one card at a time) |
 | `perk.lua` | Stamp roll, apply choice, selection |
@@ -132,7 +133,6 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `card.lua` | Runtime letter-card domain behavior |
 | `card_ability.lua` | Card ability behavior |
 | `deck/` | Deck construction, population, and dealing |
-| `round.lua` | Card state helpers used by the active round |
 
 ### UI (`word_game/ui/`)
 
@@ -142,7 +142,7 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `score_banner/` | Jumble score chips and “Points to get” (`fonts`, `jumble`, `draw`) |
 | `timeline_timer.lua` | Fuse bar and countdown |
 | `token_reward.lua` | Timer snapshot, sticker fly, spend reverse animation |
-| `word_feedback.lua` | Word-play attention text on the board (loaded internally; not on facade) |
+| `word_feedback.lua` | Ephemeral word-level attention text when a play resolves (single API; drains `model/feedback`) |
 | `float_up_text.lua` | Per-card bonus popups (+2, +mult) rising from played cards |
 | `hand_shuffle.lua` | Circular shuffle/play buttons flanking hand |
 | `play_hold_redraw.lua` | Hold Play 5s ring, recall slots, discard hand, redeal |
@@ -153,9 +153,7 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `sidebar.lua` | Vault HUD (stamps, deck) |
 | `widgets/` | Shared UI controls (`buttons.lua`, `sliders.lua`) and `G.UIDEF` helpers |
 | `overlays/` | Options, settings, win/game-over overlays (`options.lua`, `results.lua`) |
-| `stats.lua` | Profile statistics UI |
-| `fx.lua` | Floating score and attention effects |
-| `collection.lua` | Collection presentation |
+| `fx.lua` | Floating score and attention effects (`spawn_attention` primitive) |
 | `menu.lua` | Main menu presentation |
 | `card_ui.lua`, `card_visuals.lua` | Card presentation and visual helpers |
 

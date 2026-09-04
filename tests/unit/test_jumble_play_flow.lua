@@ -10,7 +10,7 @@ T.describe("Jumble play flow integration", function()
 	local jumble = require("word_game.model.jumble")
 
 	T.it("advances puzzle when play button is pressed with solved puzzle and empty blanks", function()
-		local flow = require("word_game.model.play")
+		local flow = require("word_game.model.jumble_play")
 		local fixed_letters = require("word_game.ui.jumble_fixed_letters")
 		local wr = {
 			target = 100,
@@ -41,7 +41,7 @@ T.describe("Jumble play flow integration", function()
 	end)
 
 	T.it("rejects play on first attempt without placed cards", function()
-		local flow = require("word_game.model.play")
+		local flow = require("word_game.model.jumble_play")
 		local wr = {
 			mode = "jumble",
 			jumble = {

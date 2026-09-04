@@ -245,7 +245,7 @@ function M.sync_points_to_get_preview(animate, opts)
 	if M.hide_points_to_get then return end
 	local wr = G.GAME and G.GAME.word_round
 	local j = wr and wr.jumble
-	local rules = require("word_game.model.play.jumble_rules")
+	local rules = require("word_game.model.jumble_play.jumble_rules")
 	local target = (wr and wr.target) or rules.round_target()
 	M.apply_score_breakdown(rules.score_breakdown(j, target), animate, opts and opts.remain_dur)
 end

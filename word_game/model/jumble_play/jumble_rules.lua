@@ -1,4 +1,4 @@
---[[ word_game/model/play/jumble_rules.lua - Pure jumble play logic (no UI) ]]
+--[[ word_game/model/jumble_play/jumble_rules.lua - Pure jumble play logic (no UI) ]]
 
 local InputLock = require("word_game.model.input_lock")
 local RunMode = require("word_game.model.run_mode")
@@ -7,7 +7,7 @@ local state = require("word_game.model.state")
 local M = {}
 
 local round = require("word_game.model.round")
-local modifier_effects = require("word_game.model.play.letter_modifier_effects")
+local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
 
 function M.placed_count(slots)
 	local count = 0

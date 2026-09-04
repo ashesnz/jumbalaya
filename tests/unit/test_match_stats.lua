@@ -58,7 +58,7 @@ T.describe("Match jumble stats", function()
 	T.it("records the banked puzzle score and pattern as the best jumble", function()
 		mock_env.reset_game()
 		G.GAME.alpha = state.new()
-		local flow = require("word_game.model.play")
+		local flow = require("word_game.model.jumble_play")
 		G.GAME.word_round = {
 			target = 100,
 			mode = "jumble",
@@ -90,7 +90,7 @@ T.describe("Match jumble stats", function()
 		mock_env.reset_game()
 		G.GAME.alpha = state.new()
 		local jumble = require("word_game.model.jumble")
-		local rules = require("word_game.model.play.jumble_rules")
+		local rules = require("word_game.model.jumble_play.jumble_rules")
 		G.GAME.word_round = {
 			target = 100,
 			mode = "jumble",

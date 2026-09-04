@@ -442,7 +442,7 @@ T.describe("Stage 1-3 boss words", function()
 	T.it("blocks play while the boss word is staging", function()
 		mock_env.reset_game()
 		local InputLock = require("word_game.model.input_lock")
-		local rules = require("word_game.model.play.jumble_rules")
+		local rules = require("word_game.model.jumble_play.jumble_rules")
 		G.GAME.word_score_animating = false
 		G.GAME.word_round = {
 			mode = "jumble",

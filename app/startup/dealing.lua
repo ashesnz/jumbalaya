@@ -3,7 +3,7 @@
 
 	Thin adapters over WORD_GAME.Layout used by the app layer (display,
 	window resize) and tests. Dealing and background staging live in the
-	game packages (word_game/model/play/opening_deal.lua and
+	game packages (word_game/model/jumble_play/opening_deal.lua and
 	word_game/ui/layout/backgrounds.lua).
 ]]
 

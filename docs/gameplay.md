@@ -216,7 +216,7 @@ Hold-to-redraw is independent of the old discard counter. It is blocked only dur
 
 Perks are acquired via the **rubber-stamp flow** on the vault (`word_game/ui/perk_stamp.lua`). Purchased perks are stored on `G.GAME.alpha.perks` and selected perk metadata on `G.GAME.selected_perk`.
 
-Most perk descriptions still reference the legacy AP system; perk effects are partially wired for future hooks.
+Perks are collected as vault stamps for display. Gameplay effects are **not wired yet** — descriptions note planned scoring bonuses; `state.has_perk()` is reserved for future hooks.
 
 ---
 
@@ -251,7 +251,7 @@ Non-release builds include a debug panel (Tab or **DBG** button):
 | Topic | Primary files |
 |-------|----------------|
 | Jumble rules & puzzles | `word_game/model/jumble.lua`, `word_game/config/jumble_puzzle_*_*.lua` |
-| Play / bank flow | `word_game/model/play/` |
+| Play / bank flow | `word_game/model/jumble_play/` |
 | Hand limits & targets | `word_game/config/round_config.lua` |
 | Jumble deck | `word_game/config/jumble.lua`, `word_game/model/deck/jumble.lua` |
 | Pattern layout & snap | `word_game/board/jumble_geometry.lua`, `word_game/board/snap.lua` |
