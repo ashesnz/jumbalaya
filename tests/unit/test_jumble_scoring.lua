@@ -73,7 +73,7 @@ T.describe("Jumble scoring and odometer", function()
 		G.GAME.word_round = wr
 		G.GAME.word_score_animating = false
 
-		flow.play_jumble_word()
+		require("word_game.ui.play_resolution").resolve(flow)
 
 		T.assert_equal(wr.jumble.total_score, 24, "Total score should be math.floor(15 * 1.6) = 24")
 
@@ -98,7 +98,7 @@ T.describe("Jumble scoring and odometer", function()
 		G.GAME.word_round = wr2
 		G.GAME.word_score_animating = false
 
-		flow.play_jumble_word()
+		require("word_game.ui.play_resolution").resolve(flow)
 		T.assert_equal(wr2.jumble.total_score, 108, "Total score should be 100 + math.floor(7 * 1.2) = 108")
 	end)
 
@@ -202,7 +202,7 @@ T.describe("Jumble scoring and odometer", function()
 
 		local word, err = jumble.validate_current()
 		T.assert_equal(word, "CAT", "Validation error: " .. tostring(err))
-		flow.play_jumble_word()
+		require("word_game.ui.play_resolution").resolve(flow)
 		sb.update(0.5)
 		T.assert_equal(sb.points_to_get, 17, "Remaining should stay at 17 after scoring CAT")
 		T.assert_equal(sb.points_earned, 3)
@@ -216,7 +216,7 @@ T.describe("Jumble scoring and odometer", function()
 		G.GAME.word_round.jumble.slots[2].card = nil
 		sb.sync_points_to_get_preview(false)
 		T.assert_equal(sb.points_to_get, 76, "Committed puzzle score should count before banking")
-		flow.play_jumble_word()
+		require("word_game.ui.play_resolution").resolve(flow)
 		spawn_attention = original_attention_text
 		T.assert_equal(feedback, "24 Points Scored!", "Jumble score feedback should show points scored")
 	end)

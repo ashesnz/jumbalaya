@@ -51,7 +51,7 @@ end
 
 function M.preview_puzzle_total_after_word(j, word, used_cards)
 	if not j or not word then return M.puzzle_total(j) end
-	local bonus_stack = require("word_game.ui.boss_word_stack")
+	local bonus_stack = require("word_game.model.bonus_stack")
 	local wr = G.GAME and G.GAME.word_round
 	local old_pts = j.puzzle_points or 0
 	local effects = modifier_effects.apply_word_effects(word, used_cards, j, wr)

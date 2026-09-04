@@ -1,4 +1,4 @@
---[[ word_game/ui/trade.lua - The Card Marketplace overlay ]]
+--[[ word_game/ui/trade/init.lua - The Card Marketplace overlay ]]
 
 local widgets = require("word_game.ui.widgets")
 local trade = require("word_game.model.trade")
@@ -7,17 +7,16 @@ local deck = require("word_game.model.cards.deck")
 local DissolveFX = require("app.effects.dissolve_fx")
 local Layout = require("word_game.ui.layout")
 local LetterPalette = require("word_game.config.letter_card_palette")
+local trade_layout = require("word_game.ui.trade.layout")
+local trade_fly = require("word_game.ui.trade.fly")
 
 local M = {}
 local unpack_nodes = table.unpack or unpack
 local offer
 local session
 local standalone = false
-local flyer
-local flyer_callback
-local FLY_TIME = 0.65
-local ADD_COST_STEP = 10
 local transform_item
+local ADD_COST_STEP = 10
 -- Marketplace cards render slightly smaller than table cards so the modal
 -- contents fit comfortably inside the play-area-sized window.
 local MARKET_CARD_SCALE = 0.82
@@ -356,17 +355,9 @@ local finish_trade
 --- Vertical offset (tiles) centreing the modal on the play-area felt so its
 --- top edge lines up just above the timer and its bottom just below the hand,
 --- then nudged up 20px.
-local function modal_offset_y()
-	local felt = Layout.felt_rect and Layout.felt_rect()
-	if not felt or not G.TILE_H then return 0 end
-	return (felt.y + felt.h * 0.5) - G.TILE_H * 0.5 - 20 / (G.TILESIZE or 64)
-end
-
---- Modal height (tiles) spans the play-area felt, top to bottom.
-local function modal_minh()
-	local felt = Layout.felt_rect and Layout.felt_rect()
-	return felt and felt.h or 1
-end
+local modal_offset_y = trade_layout.modal_offset_y
+local modal_minh = trade_layout.modal_minh
+local room_translate = trade_layout.room_translate
 
 open_overlay = function()
 	G.SETTINGS.paused = true
@@ -550,8 +541,7 @@ end
 local function close_menu()
 	offer = nil
 	session = nil
-	flyer = nil
-	flyer_callback = nil
+	trade_fly.clear()
 	transform_item = nil
 	if G.FUNCS.close_overlay then
 		G.FUNCS.close_overlay()
@@ -611,96 +601,18 @@ local function fail(text)
 	})
 end
 
-local function deck_target_px()
-	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
-	if G.deck and G.deck.T then
-		local t = G.deck.T
-		return (t.x + (t.w or 0) * 0.5) * ts, (t.y + (t.h or 0) * 0.5) * ts
-	end
-	local rect = Layout.deck_rect()
-	return (rect.x + rect.w * 0.5) * ts, (rect.y + rect.h * 0.5) * ts
-end
-
-local function room_translate()
-	local room = G and G.ROOM
-	if not room or not love or not love.graphics then return end
-	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
-	love.graphics.translate(room.T.w * ts * 0.5, room.T.h * ts * 0.5)
-	love.graphics.rotate(room.T.r or 0)
-	love.graphics.translate(
-		-room.T.w * ts * 0.5 + (room.T.x or 0) * ts,
-		-room.T.h * ts * 0.5 + (room.T.y or 0) * ts
-	)
-end
-
-local function draw_flyer_card(item, x, y, rot, alpha)
-	if not item then return end
-	local size = math.max(30, (G.CARD_W or 1) * (G.TILESCALE or 1) * (G.TILESIZE or 1))
-	local LetterFaces = require "word_game.ui.letter_card_faces"
-	LetterFaces.draw_composite(x, y, rot, size, size * ((G.CARD_H or 1) / (G.CARD_W or 1)),
-		item.letter, item.color, alpha)
-end
-
-local function start_card_fly(item, callback, start_x, start_y)
-	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
-	local sx, sy = start_x, start_y
-	if not sx or not sy then
-		local card = item and item.market_card
-		local transform = card and card.T
-		sx = transform and (transform.x + (transform.w or G.CARD_W) * 0.5) * ts
-		sy = transform and (transform.y + (transform.h or G.CARD_H) * 0.5) * ts
-	end
-	if not sx or not sy then
-		local room = G.ROOM and G.ROOM.T
-		sx = ((room and room.w or G.TILE_W or 20) * 0.5) * ts
-		sy = ((room and room.h or G.TILE_H or 11) * 0.45) * ts
-	end
-	local ex, ey = deck_target_px()
-	flyer = {
-		item = item,
-		t = 0,
-		sx = sx,
-		sy = sy,
-		ex = ex,
-		ey = ey,
-		rot = 0,
-		landed = false,
-	}
-	flyer_callback = callback
-end
-
 function M.is_flying()
-	return flyer ~= nil
+	return trade_fly.is_flying()
 end
 
 function M.is_open()
 	return offer ~= nil
 end
 
-local function fly_delta(dt)
-	dt = dt or (G and G.real_dt) or 0.016
-	if (not dt or dt <= 0) and love and love.timer and love.timer.getDelta then
-		dt = love.timer.getDelta()
-	end
-	if not dt or dt <= 0 then dt = 0.016 end
-	return math.min(0.05, dt)
-end
-
 --- Advance the marketplace card fly animation. Called from the post_input
 --- updater so progress continues while G.SETTINGS.paused freezes game dt.
 function M.step_card_fly(dt)
-	if not flyer then return false end
-	flyer.t = flyer.t + fly_delta(dt)
-	local u = math.min(1, flyer.t / FLY_TIME)
-	if u >= 1 and not flyer.landed then
-		local done = flyer_callback
-		flyer.landed = true
-		flyer_callback = nil
-		flyer = nil
-		if done then done() end
-		return true
-	end
-	return false
+	return trade_fly.step_card_fly(dt)
 end
 
 --- Painted just before the overlay menu each frame while the marketplace is
@@ -890,27 +802,7 @@ function M.is_transforming()
 end
 
 function M.draw_pass()
-	if not flyer or not G.ROOM or not love.graphics then return end
-	local u = math.min(1, flyer.t / FLY_TIME)
-	local eased = 1 - (1 - u) * (1 - u)
-	local arc = math.sin(u * math.pi) * 0.8 * (G.TILESIZE or 1) * (G.TILESCALE or 1)
-	local x = flyer.landed and flyer.ex or flyer.sx + (flyer.ex - flyer.sx) * eased
-	local y = flyer.landed and flyer.ey or flyer.sy + (flyer.ey - flyer.sy) * eased - arc
-	flyer.rot = flyer.landed and flyer.rot or (math.pi * 0.08) * math.sin(u * math.pi)
-
-	local prev_shader = love.graphics.getShader()
-	local cr, cg, cb, ca = love.graphics.getColor()
-	love.graphics.push()
-	love.graphics.setShader()
-	room_translate()
-	draw_flyer_card(flyer.item, x, y, flyer.rot, 1)
-	love.graphics.pop()
-	if prev_shader then
-		love.graphics.setShader(prev_shader)
-	else
-		love.graphics.setShader()
-	end
-	love.graphics.setColor(cr, cg, cb, ca)
+	trade_fly.draw_pass()
 end
 
 function M.open()
@@ -939,7 +831,7 @@ function M.open_then_dealer()
 end
 
 function M.on_pick(e)
-	if flyer or transform_item then return end
+	if trade_fly.is_flying() or transform_item then return end
 	local ref = e and e.config and e.config.ref_table
 	local item = ref and ref.item or ref
 	local action = ref and ref.action or "add"
@@ -980,7 +872,7 @@ function M.on_pick(e)
 		-- Rebuild without the affordability check: if this purchase broke
 		-- us, the modal must stay open until the card finishes flying.
 		rebuild_overlay()
-		start_card_fly(item, function()
+		trade_fly.start_card_fly(item, function()
 			if not session then return end
 			item.flying = false
 			session.add_cost_bonus = (session.add_cost_bonus or 0) + ADD_COST_STEP
@@ -1009,7 +901,7 @@ function M.on_pick(e)
 end
 
 function M.on_skip_add()
-	if flyer or transform_item then return end
+	if trade_fly.is_flying() or transform_item then return end
 	if not session or session.add_done then
 		if session and session_complete() then finish_trade() end
 		return
@@ -1021,7 +913,7 @@ function M.on_skip_add()
 end
 
 function M.on_skip_remove()
-	if flyer or transform_item then return end
+	if trade_fly.is_flying() or transform_item then return end
 	if not session or session.remove_done then
 		if session and session_complete() then finish_trade() end
 		return
@@ -1036,8 +928,7 @@ function M.teardown_run()
 	offer = nil
 	session = nil
 	standalone = false
-	flyer = nil
-	flyer_callback = nil
+	trade_fly.clear()
 	transform_item = nil
 end
 

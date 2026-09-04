@@ -52,6 +52,7 @@ local M = {
 	HandPlacementRecallAnim = require("word_game.ui.hand_placement_recall_anim"),
 	PlayHoldRedraw = require("word_game.ui.play_hold_redraw"),
 	PlayEffects = require("word_game.ui.play_effects"),
+	BonusStack = require("word_game.model.bonus_stack"),
 	BossWordStack = require("word_game.ui.boss_word_stack"),
 	BossWordAnnounce = require("word_game.ui.boss_word_announce"),
 	Sidebar = sidebar,

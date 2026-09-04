@@ -4,7 +4,7 @@ return function(M)
 local TIMER_ENABLED = false
 local TIMER_SECONDS = 30
 local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
-local bonus_stack = require("word_game.ui.boss_word_stack")
+local bonus_stack = require("word_game.model.bonus_stack")
 local round_config = require("word_game.config.round_config")
 local jumble_rules = require("word_game.model.jumble_play.jumble_rules")
 

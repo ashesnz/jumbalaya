@@ -127,7 +127,7 @@ T.describe("Stage 1-1 layout stability", function()
 		end
 
 		local flow = require("word_game.model.jumble_play")
-		flow.play_jumble_word()
+		require("word_game.ui.play_resolution").resolve(flow)
 
 		-- Drain play animation events
 		for _ = 1, 200 do

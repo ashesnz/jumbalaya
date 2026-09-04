@@ -403,7 +403,7 @@ function M.assign_card_to_blank(slot_index, card, insert_pos)
 		if slot.card and slot.card ~= card then
 			local displaced = slot.card
 			if displaced.bonus_card then
-				local bonus_stack = require("word_game.ui.boss_word_stack")
+				local bonus_stack = require("word_game.model.bonus_stack")
 				bonus_stack.return_card(displaced)
 			elseif G.hand and displaced.area ~= G.hand then
 				G.hand:emplace(displaced)

@@ -19,6 +19,7 @@ return function(word_game)
 
 	call("TradeUI", word_game.TradeUI and word_game.TradeUI.teardown_run)
 	call("PlacementWord", placement_word.clear)
+	call("BonusStack", word_game.BonusStack and word_game.BonusStack.clear)
 	call("BossWordStack", word_game.BossWordStack and word_game.BossWordStack.clear)
 	call("BossWordAnnounce", word_game.BossWordAnnounce and word_game.BossWordAnnounce.clear)
 	call("Confetti", word_game.Confetti and word_game.Confetti.clear)

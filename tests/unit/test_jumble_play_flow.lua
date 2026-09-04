@@ -30,7 +30,8 @@ T.describe("Jumble play flow integration", function()
 		G.GAME.word_round = wr
 		G.GAME.word_score_animating = false
 
-		flow.play_jumble_word()
+		local play_resolution = require("word_game.ui.play_resolution")
+		play_resolution.resolve(flow)
 
 		T.assert_equal(wr.jumble.puzzle_index, 2, "Puzzle index should advance to 2")
 		T.assert_false(wr.jumble.solved, "New puzzle solved state should be false")
@@ -59,7 +60,8 @@ T.describe("Jumble play flow integration", function()
 		G.GAME.word_round = wr
 		G.GAME.word_score_animating = false
 
-		flow.play_jumble_word()
+		local play_resolution = require("word_game.ui.play_resolution")
+		play_resolution.resolve(flow)
 
 		T.assert_equal(wr.jumble.puzzle_index, 1, "Puzzle index should stay 1")
 		T.assert_false(wr.jumble.solved, "Puzzle should remain unsolved")

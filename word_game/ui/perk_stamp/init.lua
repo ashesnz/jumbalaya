@@ -6,6 +6,7 @@
 ]]
 
 local Layout = require("word_game.ui.layout")
+local stamp_layout = require("word_game.ui.perk_stamp.layout")
 local perk_cfg = require("word_game.config.perks")
 local perk_model = require("word_game.model.perk")
 local perk_voucher = require("word_game.ui.perk_voucher")
@@ -130,47 +131,23 @@ local function imprint_bounce(t)
 end
 
 local function room_translate()
-	local room = G and G.ROOM
-	if not room or not love or not love.graphics then return end
-	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
-	love.graphics.translate(room.T.w * ts * 0.5, room.T.h * ts * 0.5)
-	love.graphics.rotate(room.T.r or 0)
-	love.graphics.translate(
-		-room.T.w * ts * 0.5 + (room.T.x or 0) * ts,
-		-room.T.h * ts * 0.5 + (room.T.y or 0) * ts
-	)
+	stamp_layout.room_translate()
 end
 
 local function tile_scale()
-	return (G.TILESCALE or 1) * (G.TILESIZE or 1)
+	return stamp_layout.tile_scale()
 end
 
 local function node_world_xywh(node)
-	if not node then return nil end
-	local role = node.role
-	local major = role and role.major
-	local t = node.T or node.VT
-	if not t then return nil end
-	-- LayoutNodes store a local offset on `role`; `T`/`VT` can lag or stay in
-	-- HUD-local space after a relayout. World = major origin + layout offset.
-	if major and major.T and role.offset then
-		return (major.T.x or 0) + (role.offset.x or 0),
-			(major.T.y or 0) + (role.offset.y or 0),
-			t.w or 0,
-			t.h or 0
-	end
-	return t.x or 0, t.y or 0, t.w or 0, t.h or 0
+	return stamp_layout.node_world_xywh(node)
 end
 
 local function node_rect_px(node)
-	local x, y, w, h = node_world_xywh(node)
-	if not x then return nil end
-	local ts = tile_scale()
-	return x * ts, y * ts, w * ts, h * ts
+	return stamp_layout.node_rect_px(node)
 end
 
 local function vault_width_px()
-	return Layout.sidebar_width() * tile_scale()
+	return stamp_layout.vault_width_px()
 end
 
 local function stamp_panel_height_px()
@@ -205,21 +182,7 @@ local function stamp_cell_rect_px(index)
 end
 
 local function mouse_to_stamp_space(mx, my)
-	local room = G and G.ROOM and G.ROOM.T
-	if not room then return mx, my end
-	local ts = tile_scale()
-	local cx = room.w * ts * 0.5
-	local cy = room.h * ts * 0.5
-	local ox = -cx + (room.x or 0) * ts
-	local oy = -cy + (room.y or 0) * ts
-	local r = room.r or 0
-	local x = mx - cx
-	local y = my - cy
-	if r ~= 0 then
-		local cr, sr = math.cos(-r), math.sin(-r)
-		x, y = x * cr - y * sr, x * sr + y * cr
-	end
-	return x - ox, y - oy
+	return stamp_layout.mouse_to_stamp_space(mx, my)
 end
 
 local function imprint_index_at(mx, my)
@@ -400,8 +363,7 @@ local function anchor_to_contact(cx, cy, scale, yaw, pitch, squash_y, roll)
 end
 
 local function screen_top_px()
-	local room = G.ROOM and G.ROOM.T
-	return ((room and room.y) or 0) * tile_scale() + 10
+	return stamp_layout.screen_top_px()
 end
 
 local function scale_for_slot(slot_w, yaw, pitch, roll)

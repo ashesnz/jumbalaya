@@ -105,7 +105,7 @@ return function(ctx)
 			if WORD_GAME and WORD_GAME.Sidebar then
 				WORD_GAME.Sidebar.sync_action_buttons()
 			end
-			WORD_GAME.Play.play_word({
+			require("word_game.ui.play_resolution").resolve(WORD_GAME.Play, {
 				keep_intro = true,
 				letters_only = true,
 				on_complete = function()

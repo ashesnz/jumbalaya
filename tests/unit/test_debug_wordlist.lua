@@ -16,7 +16,7 @@ T.describe("Debug wordlist answers", function()
 		G.hand = { cards = { mock_card("A"), mock_card("T") } }
 		G.placement_table = { area = { cards = { mock_card("E") } } }
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.BossWordStack = {
+		WORD_GAME.BonusStack = {
 			is_active = function() return true end,
 			cards = function()
 				return { mock_card("B"), mock_card("O"), mock_card("N") }
@@ -51,7 +51,7 @@ T.describe("Debug wordlist answers", function()
 		G.placement_table = { area = { cards = { placed } } }
 		placed.area = G.placement_table.area
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.BossWordStack = {
+		WORD_GAME.BonusStack = {
 			is_active = function() return true end,
 			cards = function() return { placed, mock_card("Z") } end,
 		}
@@ -76,7 +76,7 @@ T.describe("Debug wordlist answers", function()
 		G.hand = { cards = { mock_card("C") } }
 		G.placement_table = { area = { cards = {} } }
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.BossWordStack = {
+		WORD_GAME.BonusStack = {
 			is_active = function() return false end,
 			cards = function() return { mock_card("Z") } end,
 		}

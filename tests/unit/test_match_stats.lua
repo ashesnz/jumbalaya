@@ -80,7 +80,7 @@ T.describe("Match jumble stats", function()
 		}
 		G.GAME.word_score_animating = false
 
-		flow.play_jumble_word()
+		require("word_game.ui.play_resolution").resolve(flow)
 
 		T.assert_equal(stats().best_puzzle, "C_T")
 		T.assert_equal(stats().best_puzzle_score, 24, "Best jumble should be floor(15 * 1.6) = 24")

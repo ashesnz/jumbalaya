@@ -313,7 +313,7 @@ T.describe("Classic run mode", function()
 		captured = nil
 		G.placement_table.area.cards = { { ability = { letter = "A" } } }
 		local played = false
-		WORD_GAME.Play = { play_word = function() played = true end }
+		WORD_GAME.Play = { play_jumble_word = function() played = true end }
 		placement_controls.try_play()
 		T.assert_true(played, "Play with cards in the area should keep scoring after the target is reached")
 

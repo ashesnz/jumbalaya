@@ -150,7 +150,7 @@ function M.debug_answer_cards()
 			cards[#cards + 1] = card
 		end
 	end
-	local bonus_stack = WORD_GAME and WORD_GAME.BossWordStack
+	local bonus_stack = WORD_GAME and WORD_GAME.BonusStack
 	if bonus_stack and bonus_stack.is_active and bonus_stack.is_active() then
 		for _, card in ipairs(bonus_stack.cards() or {}) do
 			if card and not card.REMOVED then

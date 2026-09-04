@@ -1,5 +1,6 @@
 --[[ word_game/ui/boss_word_stack.lua - Bonus card stack (boss word rewards on stages 1-4 … 1-6) ]]
 
+local model = require("word_game.model.bonus_stack")
 local placement_layout = require("word_game.ui.layout.placement")
 local board_config = require("word_game.board.config")
 local DissolveFX = require("app.effects.dissolve_fx")
@@ -9,7 +10,7 @@ local round_config = require("word_game.config.round_config")
 
 local M = {}
 
-M.BONUS_POINTS = 10
+M.BONUS_POINTS = model.BONUS_POINTS
 M.LEFT_WINDOW_MARGIN = 0.14
 M.STACK_Y_LIFT_PX = 20
 
@@ -21,15 +22,12 @@ local BURN_MATERIALIZE_COLOURS = { G.C.BLACK, G.C.ORANGE, G.C.GOLD, G.C.WHITE }
 local BACKDROP_FILL_ALPHA = 0.18
 local BACKDROP_LINE_ALPHA = 0.28
 
-local stack_cards
-local stack_animating = false
-
 function M.is_animating()
-	return stack_animating
+	return model.is_animating()
 end
 
 function M.is_bonus_card(card)
-	return card and card.bonus_card
+	return model.is_bonus_card(card)
 end
 
 function M.detach(card)
@@ -65,11 +63,11 @@ function M.detach(card)
 end
 
 function M.is_active()
-	return stack_cards ~= nil and #stack_cards > 0
+	return model.is_active()
 end
 
 function M.cards()
-	return stack_cards
+	return model.cards()
 end
 
 function M.set_cards(cards)
@@ -77,29 +75,29 @@ function M.set_cards(cards)
 end
 
 function M.clear()
-	stack_cards = nil
-	stack_animating = false
+	model.clear()
 end
 
 function M.stage_cards(cards)
-	stack_cards = {}
+	local staged = {}
 	for _, card in ipairs(cards or {}) do
 		if card and not card.REMOVED then
 			M.detach(card)
-			stack_cards[#stack_cards + 1] = card
+			staged[#staged + 1] = card
 		end
 	end
-	stack_animating = #stack_cards > 0
+	model.set_cards(staged)
+	model.set_animating(#staged > 0)
 end
 
 function M.on_hand_start(set, hand_index)
 	if round_config.is_bonus_stack_hand(set, hand_index) then
-		if not stack_animating then
+		if not model.is_animating() then
 			M.sync_positions()
 		end
 		return
 	end
-	M.clear()
+	model.clear()
 end
 
 local function card_letter(card)
@@ -127,18 +125,12 @@ end
 --- the fly to the left gutter, so the card already looks like a bonus card.
 function M.become_bonus_card(card)
 	if not card or card.REMOVED then return end
-	card.bonus_card = true
-	card.boss_temp = nil
-	card.placement_locked = nil
-	card.pinned = nil
-	if card.ability then
-		card.ability.bonus = M.BONUS_POINTS
-	end
+	model.mark_bonus_card(card)
 	M.apply_gold_bonus_face(card)
 end
 
 local function reconcile_bonus_faces()
-	for _, card in ipairs(stack_cards or {}) do
+	for _, card in ipairs(model.cards() or {}) do
 		if card and card.bonus_card and not card.REMOVED then
 			M.apply_gold_bonus_face(card)
 		end
@@ -212,21 +204,17 @@ function M.target_position(index)
 end
 
 function M.stack_index(card)
-	if not stack_cards or not card then return nil end
-	for i, c in ipairs(stack_cards) do
-		if c == card then return i end
-	end
-	return nil
+	return model.stack_index(card)
 end
 
 function M.contains(card)
-	return M.stack_index(card) ~= nil
+	return model.contains(card)
 end
 
 function M.sync_positions()
-	if not stack_cards or stack_animating then return end
+	if not model.cards() or model.is_animating() then return end
 	local placement = G.placement_table and G.placement_table.area
-	for i, card in ipairs(stack_cards) do
+	for i, card in ipairs(model.cards() or {}) do
 		if card and not card.REMOVED then
 			if card.area == G.hand and M.is_bonus_card(card) then
 				M.return_card(card)
@@ -258,15 +246,17 @@ function M.sync_positions()
 end
 
 function M.promote_to_bonus(cards)
-	stack_animating = false
-	stack_cards = {}
+	model.set_animating(false)
+	local promoted = {}
 	for _, card in ipairs(cards or {}) do
 		if card and not card.REMOVED then
 			M.detach(card)
 			M.become_bonus_card(card)
-			stack_cards[#stack_cards + 1] = card
+			promoted[#promoted + 1] = card
 		end
 	end
+	model.set_cards(promoted)
+	model.set_animating(false)
 	M.sync_positions()
 end
 
@@ -373,7 +363,7 @@ end
 
 function M.animate_cards_to_stack(queue_event, _easing_mod, opts)
 	opts = opts or {}
-	local cards = stack_cards or {}
+	local cards = model.cards() or {}
 	local card_delay = opts.card_delay or 0.45
 	local stagger = opts.stagger or 0.07
 	local hold = opts.hold or 0.3
@@ -384,10 +374,10 @@ function M.animate_cards_to_stack(queue_event, _easing_mod, opts)
 		return
 	end
 
-	stack_animating = true
+	model.set_animating(true)
 
 	local function finish()
-		stack_animating = false
+		model.set_animating(false)
 		reconcile_bonus_faces()
 		if opts.on_complete then opts.on_complete() end
 	end
@@ -463,32 +453,23 @@ function M.finalize_for_bonus_hand(wr)
 		end
 		j.boss_cards = nil
 	end
-	if not stack_animating then
+	if not model.is_animating() then
 		M.sync_positions()
 	end
 end
 
 function M.remove_card(card)
-	if not stack_cards or not card then return end
-	for i = #stack_cards, 1, -1 do
-		if stack_cards[i] == card then
-			table.remove(stack_cards, i)
-			break
-		end
-	end
-	if stack_cards and #stack_cards == 0 then
-		stack_cards = nil
-	else
+	model.remove_card(card)
+	if model.is_active() then
 		M.sync_positions()
 	end
 end
 
 function M.return_card(card)
 	if not card then return false end
-	if not M.contains(card) then
+	if not model.contains(card) then
 		if card.bonus_card then
-			stack_cards = stack_cards or {}
-			stack_cards[#stack_cards + 1] = card
+			model.add_card(card)
 		else
 			return false
 		end
@@ -520,7 +501,7 @@ end
 function M.point_in_stack(x, y)
 	if not M.is_active() then return false end
 	local layout = M.stack_layout()
-	local count = math.max(1, #(stack_cards or {}))
+	local count = math.max(1, #(model.cards() or {}))
 	local pad_x = math.max(0.35, layout.card_w * 0.35)
 	local pad_y = math.max(0.35, layout.card_h * 0.25)
 	local top = layout.label_y - layout.card_h * 0.45
@@ -538,7 +519,7 @@ function M.drop_in_gutter(session, x, y)
 	if not area or not area.T then return false end
 	if x >= area.T.x then return false end
 	local layout = M.stack_layout()
-	local count = math.max(1, #(stack_cards or {}))
+	local count = math.max(1, #(model.cards() or {}))
 	local pad_y = math.max(0.35, layout.card_h * 0.25)
 	local top = layout.label_y - layout.card_h * 0.55
 	local bottom = layout.y + (count - 1) * layout.step_y + layout.card_h + pad_y
@@ -548,13 +529,7 @@ function M.drop_in_gutter(session, x, y)
 end
 
 function M.bonus_points_for(used_cards)
-	local total = 0
-	for _, card in ipairs(used_cards or {}) do
-		if M.is_bonus_card(card) then
-			total = total + M.BONUS_POINTS
-		end
-	end
-	return total
+	return model.bonus_points_for(used_cards)
 end
 
 local function try_award_gutter_perk()
@@ -579,7 +554,7 @@ local function try_award_gutter_perk()
 end
 
 function M.consume_card(card)
-	M.remove_card(card)
+	model.remove_card(card)
 	if card.area and card.area.remove_card then
 		card.area:remove_card(card)
 	elseif card.remove_from_area then
@@ -610,7 +585,7 @@ end
 
 function M.gutter_pixels(layout)
 	layout = layout or M.stack_layout()
-	local count = math.max(1, #(stack_cards or {}))
+	local count = math.max(1, #(model.cards() or {}))
 	local pad_x = math.max(0.35, layout.card_w * 0.35)
 	local pad_y = math.max(0.35, layout.card_h * 0.25)
 	local top = layout.label_y - layout.card_h * 0.45
@@ -623,7 +598,8 @@ function M.gutter_pixels(layout)
 end
 
 function M.draw_shadow()
-	if not stack_cards or #stack_cards == 0 then return end
+	local cards = model.cards()
+	if not cards or #cards == 0 then return end
 	local layout = M.stack_layout()
 	local px, py, pw, ph = M.gutter_pixels(layout)
 	local radius = board_config.CORNER_RADIUS or 8
@@ -638,14 +614,15 @@ function M.draw_shadow()
 end
 
 function M.draw_pass()
-	if not stack_cards then return end
+	local cards = model.cards()
+	if not cards then return end
 	local layout = M.stack_layout()
-	if M.is_active() and not stack_animating then
+	if M.is_active() and not model.is_animating() then
 		draw_label(layout)
 	end
 	local dragging = G.INPUT and G.INPUT.dragging and G.INPUT.dragging.target
 	local focused = G.INPUT and G.INPUT.focused and G.INPUT.focused.target
-	for _, card in ipairs(stack_cards) do
+	for _, card in ipairs(cards) do
 		if card and not card.REMOVED and not card.area
 			and card ~= dragging and card ~= focused then
 			love.graphics.push()

@@ -1,54 +1,24 @@
---[[ word_game/model/jumble_play/jumble.lua ]]
+--[[ word_game/model/jumble_play/jumble.lua - Jumble play evaluation (no UI) ]]
 
 return function(M)
 local round = require("word_game.model.round")
 local rules = require("word_game.model.jumble_play.jumble_rules")
-local effects = require("word_game.ui.play_effects")
 local feedback = require("word_game.model.feedback")
-local RunMode = require("word_game.model.run_mode")
-
-local function ends_hand_on_target(cleared)
-	return cleared and RunMode.ends_hand_on_target()
-end
 
 function M.play_jumble_word(opts)
 	opts = opts or {}
 	local jumble = WORD_GAME and WORD_GAME.Jumble
 	local j = jumble and jumble.state()
-	local result = rules.evaluate_play(jumble, j)
-	if not result then return end
-
-	if result.kind == "invalid" then
-		effects.show_validation_error(result.err)
-		return
-	end
-
-	effects.roll_jumble_banners(result)
-	local boss_trigger = effects.triggers_boss_word(result)
-	effects.capture_token_timer_if_cleared(ends_hand_on_target(result.cleared), { skip_focus = boss_trigger })
-
-	if result.kind == "bank_puzzle" then
-		if ends_hand_on_target(result.cleared) then
-			effects.set_word_score_animating(true)
-			effects.add_points(result.puzzle_total)
-			M.on_hand_cleared()
-		else
-			effects.show_puzzle_bank_feedback(result.puzzle_total)
-			opts.instant = opts.instant ~= false
-			M.jumble_next(opts)
-		end
-		return
-	end
-
-	effects.present_word_play_after_cards(jumble, j, result, M.on_hand_cleared, opts.on_complete)
+	return rules.evaluate_play(jumble, j)
 end
 
 function M.jumble_next(opts)
 	opts = opts or {}
-	local jumble = WORD_GAME and WORD_GAME.Jumble
-	if not rules.can_jumble_next(jumble) then return end
-	local wr = G.GAME.word_round
-	effects.present_jumble_next(jumble, wr, opts)
+	require("word_game.ui.play_effects").present_jumble_next(
+		WORD_GAME and WORD_GAME.Jumble,
+		G.GAME and G.GAME.word_round,
+		opts
+	)
 end
 
 function M.end_jumble_hand()
@@ -70,7 +40,6 @@ function M.end_jumble_hand()
 
 	round.advance_hand()
 	require("word_game.model.jumble_play.opening_deal").deal()
-	effects.present_end_jumble_sidebar()
 end
 
 end

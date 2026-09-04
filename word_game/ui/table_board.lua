@@ -40,6 +40,10 @@ function M.update(game, dt)
 		if WORD_GAME.Jumble.update_timer() then
 			if WORD_GAME.Play and WORD_GAME.Play.end_jumble_hand then
 				WORD_GAME.Play.end_jumble_hand()
+				local play_effects = require("word_game.ui.play_effects")
+				if play_effects.present_end_jumble_sidebar then
+					play_effects.present_end_jumble_sidebar()
+				end
 			end
 		else
 			WORD_GAME.Jumble.refresh_hud()

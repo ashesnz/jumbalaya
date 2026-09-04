@@ -81,7 +81,7 @@ return function(context)
 	end
 
 	function M.clear_hand_and_placement()
-		local bonus_stack = require("word_game.ui.boss_word_stack")
+		local bonus_stack = require("word_game.model.bonus_stack")
 		local area = G.placement_table and G.placement_table.area
 		if area and area.cards then
 			for i = #area.cards, 1, -1 do
