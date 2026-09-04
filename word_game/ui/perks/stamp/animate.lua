@@ -1,7 +1,7 @@
---[[ word_game/ui/perk_stamp/animate.lua - stamp strike animation and imprint state ]]
+--[[ word_game/ui/perks/stamp/animate.lua - stamp strike animation and imprint state ]]
 
-local definition = require("word_game.ui.perk_stamp.definition")
-local draw = require("word_game.ui.perk_stamp.draw")
+local definition = require("word_game.ui.perks.stamp.definition")
+local draw = require("word_game.ui.perks.stamp.draw")
 local stamp_puff = require("word_game.ui.stamp_puff")
 local state = require("word_game.model.state")
 local perk_cfg = require("word_game.config.perks")

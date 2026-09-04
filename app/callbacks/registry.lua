@@ -11,6 +11,7 @@
 	Word game callbacks (loaded eagerly after WORD_GAME facade):
 	  word_game.ui.callbacks.hand_shuffle - shuffle_hand, jumble_next
 	  word_game.ui.callbacks.trade        - trade_*
+	  word_game.ui.callbacks.placement    - play_placement_word
 
 	Instance-bound sidebar callbacks are registered via sidebar:install():
 	  word_game.ui.callbacks.sidebar      - ensure/rebuild_table_board_sidebar, intro next
@@ -19,6 +20,7 @@
 local word_game_callbacks = {
 	"word_game.ui.callbacks.hand_shuffle",
 	"word_game.ui.callbacks.trade",
+	"word_game.ui.callbacks.placement",
 }
 
 for _, name in ipairs(word_game_callbacks) do

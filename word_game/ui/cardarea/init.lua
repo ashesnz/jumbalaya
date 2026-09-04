@@ -15,6 +15,9 @@ local hand = require("word_game.ui.cardarea.hand")
 local deck = require("word_game.ui.cardarea.deck")
 local discard = require("word_game.ui.cardarea.discard")
 local placement = require("word_game.ui.cardarea.placement")
+local selection = require("word_game.ui.cardarea.selection")
+local relayout_mod = require("word_game.ui.cardarea.relayout")
+local chrome = require("word_game.ui.cardarea.chrome")
 
 local TYPE_HANDLERS = {
 	hand = hand,
@@ -204,84 +207,19 @@ end
 --- @param card table the card being considered (currently unused, kept for API shape)
 --- @return boolean can_select
 function CardArea:can_select(card)
-	local handler = type_handler(self)
-	if handler and handler.can_select then
-		if handler.can_select(self, card) then
-			return true
-		end
-	end
-	if G.INPUT.HID.controller then
-		return false
-	else
-		if self.config.type == 'usable' or
-			(self.config.type == 'shop' and self.config.selected_limit > 0)
-		then
-				return true
-		end
-	end
-	return false
+	return selection.can_select(self, card, TYPE_HANDLERS)
 end
 
---- Adds `card` to `self.selected`, with type-specific eviction rules once
---- the limit is reached:
---- - 'shop': single-select, always evicts the previous pick.
---- - 'placement'/'usable': evicts the oldest pick (self.selected[1]) once at the limit.
---- - everything else (including 'hand'): silently refuses
----   to add once at `config.selected_limit` - the player must deselect
----   first (see `remove_selection`).
---- @param card table card to set_selected
---- @param silent boolean|nil if true, skip the selection sound effect
 function CardArea:add_selection(card, silent)
-	local handler = type_handler(self)
-	if handler and handler.add_selection then
-		return handler.add_selection(self, card, silent)
-	end
-
-	-- Make room under this area's eviction policy first...
-	if self.config.type == 'shop' then
-		-- Single-select: the new pick always evicts the previous one.
-		if self.selected[1] then self:remove_selection(self.selected[1]) end
-	elseif self.config.type == 'usable' then
-		if #self.selected >= self.config.selected_limit then
-			self:remove_selection(self.selected[1]) -- evict the oldest
-		end
-	elseif #self.selected >= self.config.selected_limit then
-		return -- hand and other rows refuse silently; deselect manually
-	end
-
-	-- ...then every area appends identically.
-	self.selected[#self.selected + 1] = card
-	card:set_selected(true)
-	if not silent then play_sfx('card_slide1') end
+	return selection.add_selection(self, card, silent, TYPE_HANDLERS)
 end
 
---- Removes `card` from `self.selected`. Cards marked
---- `ability.forced_selection` in the hand can't be deselected unless
---- `force` is true (used for e.g. debuffed cards that must stay selected).
---- @param card table card to deselect
---- @param force boolean|nil bypass the forced-selection protection
 function CardArea:remove_selection(card, force)
-	if (not force) and  card and card.ability.forced_selection and self == G.hand then return end
-	for i = #self.selected,1,-1 do
-		if self.selected[i] == card then
-			table.remove(self.selected, i)
-			break
-		end
-	end
-	card:set_selected(false)
+	return selection.remove_selection(self, card, force)
 end
 
---- Clears the entire selection, except cards with `ability.forced_selection`
---- in the hand (mirrors the protection in `remove_selection`).
 function CardArea:clear_selection()
-	for i = #self.selected, 1, -1 do
-		local card = self.selected[i]
-		local pinned_by_effect = self == G.hand and card.ability.forced_selection
-		if not pinned_by_effect then
-			card:set_selected(false)
-			table.remove(self.selected, i)
-		end
-	end
+	return selection.clear_selection(self)
 end
 
 --- Assigns each card's `slot` (its 1-based index/position) and sets
@@ -355,38 +293,7 @@ function CardArea:draw()
 	if self.ARGS.invisible_area_types[self.config.type] or
 		(self.config.type == 'deck' and self ~= G.deck) then
 	else
-		if self == G.hand and self.children.area_uibox and not self.config.hide_card_count then
-			self.children.area_uibox:remove()
-			self.children.area_uibox = nil
-		end
-		if self == G.hand then
-			self.config.hide_card_count = true
-		end
-		if not self.children.area_uibox then
-				local show_count = self ~= G.hand
-				local placement_area = G.placement_table and G.placement_table.area
-				local card_count = show_count and {n=G.UI.ROW, config={align = self == placement_area and 'cl' or 'cr', padding = 0.03, no_fill = true}, nodes={
-					{n=G.UI.BOX, config={w = 0.1,h=0.1}},
-					{n=G.UI.TEXT, config={ref_table = self.config, ref_value = 'card_count', scale = 0.3, colour = G.C.WHITE}},
-					{n=G.UI.TEXT, config={text = '/', scale = 0.3, colour = G.C.WHITE}},
-					{n=G.UI.TEXT, config={ref_table = self.config, ref_value = 'card_limit', scale = 0.3, colour = G.C.WHITE}},
-					{n=G.UI.BOX, config={w = 0.1,h=0.1}}
-				}} or nil
-
-				self.children.area_uibox = LayoutView{
-					definition =
-						{n=G.UI.ROOT, config = {align = 'cm', colour = G.C.CLEAR}, nodes={
-							{n=G.UI.ROW, config={minw = self.T.w,minh = self.T.h,align = "cm", padding = 0.1, mid = true, r = 0.1, colour = {0,0,0,0.1}, ref_table = self}, nodes={}},
-							card_count
-						}},
-					config = { align = 'cm', offset = {x=0,y=0}, major = self, parent = self}
-				}
-			end
-		local skip_pad = self == G.deck and WORD_GAME and WORD_GAME.TableDeck
-			and WORD_GAME.TableDeck.uses_table_draw()
-		if not skip_pad then
-			self.children.area_uibox:draw()
-		end
+		chrome.draw_chrome(self)
 	end
 
 	placement.draw_shadows(self)
@@ -429,186 +336,8 @@ function CardArea:draw()
 	end
 end
 
-------------------------------------------------------------------------------
--- Slot math
---
--- Every layout below places cards by answering three questions: which slot a
--- card occupies along the row, how far that slot lifts selected cards, and how
--- much idle tilt/bob the row carries. These helpers centralise that math so
--- each layout only states its own parameters.
-------------------------------------------------------------------------------
-
---- Horizontal progress of slot `slot` when `count` cards share a row built for
---- `max_slots`: cards compress toward the middle as count exceeds capacity.
-local function row_progress(slot, count, max_slots)
-	local span = math.max(max_slots - 1, 1)
-	return (slot - 1) / span - 0.5 * (count - max_slots) / span
-end
-
---- X coordinate for the card in slot `k of count`, optionally compressed into
---- a narrower `span_width` centred inside the area (used by the perk fan).
-local function slot_x(area, card, k, count, max_slots, span_width)
-	local width = span_width or area.T.w
-	local x = area.T.x + (width - area.card_w) * row_progress(k, count, max_slots)
-		+ 0.5 * (area.card_w - card.T.w)
-	if span_width then x = x + (area.T.w - width) / 2 end
-	return x
-end
-
---- Evenly spaced variant: every card owns an equal slice of the row.
-local function even_x(area, card, k, count)
-	if count > 1 then
-		return area.T.x + (area.T.w - area.card_w) * ((k - 1) / (count - 1)) + 0.5 * (area.card_w - card.T.w)
-	end
-	return area.T.x + area.T.w / 2 - area.card_w / 2 + 0.5 * (area.card_w - card.T.w)
-end
-
---- Vertical offset for selected cards; `scale` shrinks the lift on shorter rows.
-local function selection_lift(card, scale)
-	if card.selected then return G.HIGHLIGHT_H * (scale or 1) end
-	return 0
-end
-
---- Slow breathing tilt shared by fanned rows.
-local function fan_tilt(k, count, amplitude, phase_x, phase_y)
-	local lean = amplitude * (-count / 2 - 0.5 + k) / count
-	local wobble = 0.02 * math.sin(2 * G.TIMERS.REAL + phase_x + (phase_y or 0))
-	return lean + wobble
-end
-
---- Gentle vertical bob keyed off the card's own position.
-local function row_bob(x)
-	return 0.03 * math.sin(0.666 * G.TIMERS.REAL + x)
-end
-
--- Parallax drift keeps stacked shadow layers from looking glued to the row.
-local function apply_parallax(card)
-	card.T.x = card.T.x + card.shadow_parallax.x / 30
-end
-
--- Sorts the row back into left-to-right order after positioning moved cards.
-local function sort_by_left_edge(cards)
-	table.sort(cards, function(a, b) return a.T.x + a.T.w / 2 < b.T.x + b.T.w / 2 end)
-end
-
---- Positions every card in `self.cards` (writes `card.T.x/y/r` directly)
---- according to this area's `config.type`. Skipped entirely while a deck
---- preview overlay (`G.view_deck`) is open for hand/deck/discard/play areas.
 function CardArea:relayout()
-	if not self.cards then return end
-	if (self == G.hand or self == G.deck or self == G.discard) and G.view_deck and G.view_deck[1] and G.view_deck[1].cards then return end
-
-	deck.relayout(self)
-	hand.relayout(self)
-
-	local count = #self.cards
-	local layout = self.config.type
-
-	if layout == 'discard' then
-		for k, card in ipairs(self.cards) do
-			face_down_in_pile(card)
-			if not card.states.drag.is then
-				card.T.x = self.T.x + (self.T.w - card.T.w) * card.discard_pos.x
-				card.T.y = self.T.y + (self.T.h - card.T.h) * card.discard_pos.y
-				card.T.r = card.discard_pos.r
-			end
-		end
-	end
-
-	-- Single-card perk rows fan out exactly like title rows.
-	if layout == 'title' or (layout == 'perk' and count == 1) then
-		for k, card in ipairs(self.cards) do
-			if not card.states.drag.is then
-				local max_slots = math.max(count, self.config.temp_limit)
-				card.T.r = fan_tilt(k, count, 0.2, card.T.x)
-				card.T.x = slot_x(self, card, k, count, max_slots)
-				card.T.y = self.T.y + self.T.h / 2 - card.T.h / 2 - selection_lift(card)
-					+ row_bob(card.T.x)
-					+ math.abs(0.5 * (-count / 2 + k - 0.5) / count)
-					- (count > 1 and 0.2 or 0)
-				apply_parallax(card)
-			end
-		end
-		sort_by_left_edge(self.cards)
-	end
-
-	if layout == 'perk' and count > 1 then
-		local span_width = math.max(self.T.w, 3.2)
-		for k, card in ipairs(self.cards) do
-			if not card.states.drag.is then
-				local max_slots = math.max(count, self.config.temp_limit)
-				local side = (k % 2 == 1) and -1 or 1 -- alternate cards zig-zag
-				card.T.r = fan_tilt(k, count, 0.2, card.T.x, card.T.y) + side * 0.08
-				card.T.x = slot_x(self, card, k, count, max_slots, span_width) - side * 0.27
-				card.T.y = self.T.y + self.T.h / 2 - card.T.h / 2 - selection_lift(card)
-					+ row_bob(card.T.x)
-					+ math.abs(0.5 * (-count / 2 + k - 0.5) / count)
-					- (count > 1 and 0.2 or 0)
-				apply_parallax(card)
-			end
-		end
-		table.sort(self.cards, function(a, b) return a.ability.order < b.ability.order end)
-	end
-
-	if layout == 'shop' then
-		for k, card in ipairs(self.cards) do
-			if not card.states.drag.is then
-				local max_slots = math.max(count, self.config.temp_limit)
-				card.T.r = 0
-				card.T.x = slot_x(self, card, k, count, max_slots)
-				if self.config.card_limit == 1 then
-					card.T.x = card.T.x + 0.5 * (self.T.w - card.T.w)
-				end
-				card.T.y = self.T.y + self.T.h / 2 - card.T.h / 2 - selection_lift(card)
-				apply_parallax(card)
-			end
-		end
-		sort_by_left_edge(self.cards)
-	end
-
-	if layout == 'title_2' then
-		for k, card in ipairs(self.cards) do
-			if not card.states.drag.is then
-				card.T.r = fan_tilt(k, count, 0.1, card.T.x)
-				if count > 2 or (count > 1 and self.config.spread) then
-					card.T.x = even_x(self, card, k, count)
-				elseif count > 1 then
-					card.T.x = self.T.x + (self.T.w - self.card_w) * ((k - 0.5) / count) + 0.5 * (self.card_w - card.T.w)
-				else
-					card.T.x = even_x(self, card, k, count)
-				end
-				card.T.y = self.T.y + self.T.h / 2 - card.T.h / 2 - selection_lift(card, 0.5)
-					+ row_bob(card.T.x)
-				apply_parallax(card)
-			end
-		end
-		-- Pinned cards hold their neighbourhood instead of drifting to the edge.
-		table.sort(self.cards, function(a, b)
-			return a.T.x + a.T.w / 2 - 100 * (a.pinned and a.sort_id or 0)
-				< b.T.x + b.T.w / 2 - 100 * (b.pinned and b.sort_id or 0)
-		end)
-	end
-
-	if layout == 'usable' then
-		for k, card in ipairs(self.cards) do
-			if not card.states.drag.is then
-				card.T.x = even_x(self, card, k, count)
-				card.T.y = self.T.y + self.T.h / 2 - card.T.h / 2 - selection_lift(card)
-					+ (not card.selected and 0.05 * math.sin(3.332 * G.TIMERS.REAL + card.T.x) or 0)
-				apply_parallax(card)
-			end
-		end
-		sort_by_left_edge(self.cards)
-	end
-
-	placement.relayout(self)
-
-	for k, card in ipairs(self.cards) do
-		card.slot = k
-	end
-	if self.children.view_deck then
-		self.children.view_deck:set_role{major = self.cards[1] or self}
-	end
+	relayout_mod.relayout(self, face_down_in_pile)
 end
 
 --- Immediately (no tween) sets this area's transform and repositions/snaps

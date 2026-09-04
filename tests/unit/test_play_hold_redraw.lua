@@ -43,6 +43,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.play_hold_redraw)", function()
 			word_score_animating = false,
 			hand_redraw_animating = false,
 			seed_streams = { seed = "TEST", hashed_seed = 0 },
+			word_round = { jumble = { redraws_remaining = 1 } },
 		}
 
 		local mock_btn = {
@@ -76,6 +77,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.play_hold_redraw)", function()
 			word_score_animating = false,
 			hand_redraw_animating = false,
 			seed_streams = { seed = "TEST", hashed_seed = 0 },
+			word_round = { jumble = { redraws_remaining = 1 } },
 		}
 
 		local mock_btn = {
@@ -175,6 +177,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.play_hold_redraw)", function()
 			word_score_animating = false,
 			hand_redraw_animating = false,
 			seed_streams = { seed = "TEST", hashed_seed = 0 },
+			word_round = { jumble = { redraws_remaining = 1 } },
 		}
 
 		local mock_btn = {
@@ -303,6 +306,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.play_hold_redraw)", function()
 			word_score_animating = false,
 			hand_redraw_animating = false,
 			seed_streams = { seed = "TEST", hashed_seed = 0 },
+			word_round = { jumble = { redraws_remaining = 1 } },
 		}
 
 		local mock_btn = {

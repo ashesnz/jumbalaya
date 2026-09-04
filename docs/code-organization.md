@@ -48,7 +48,7 @@ Callbacks are grouped by responsibility under `app/callbacks/` and `word_game/ui
 |------|--------|
 | HUD refresh / rebuild | `word_game/ui/sidebar.lua` via `WORD_GAME.Sidebar` |
 | Screen / placement layout | `word_game/ui/layout/` via `WORD_GAME.Layout` or `require "word_game.ui.layout"`; model code requests deferred layout via `Layout.request_refresh()` |
-| Play button / placement | `word_game/ui/placement_controls.lua` (`G.FUNCS.play_placement_word`; not on `WORD_GAME` facade) |
+| Play button / placement | `word_game/ui/callbacks/placement.lua` (`G.FUNCS.play_placement_word`); logic in `placement_controls.lua` |
 | Profile load / delete | `app/profile_callbacks.lua` |
 | Settings, text input, run lifecycle | `app/callbacks/settings.lua` |
 | Overlay screens (stable `G.FUNCS` names) | `word_game/ui/callbacks/overlays.lua` (installed from `app/callbacks/overlays/init.lua`) |
@@ -148,14 +148,14 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `score_banner/` | Jumble score chips and “Points to get” (`fonts`, `jumble`, `draw`) |
 | `perks/` | Perk-adjacent UI: `discard_bin/` (`bin_enabled()` gate), `timeline_timer/` (fuse/slider), `stamp_grid.lua`, `voucher.lua`; shims at `table_discard.lua`, `timeline_timer/`, `stamp_grid.lua`, `perk_voucher.lua` |
 | `trade/` | Marketplace overlay (`definition`, `draw`, `animate`, `fly`, `layout`; session/input in `init`) |
-| `perk_stamp/` | Rubber-stamp perk acquisition (`definition`, `draw`, `animate`, `layout`; facade in `init`) |
+| `perks/stamp/` | Rubber-stamp perk acquisition (`definition`, `draw`, `animate`, `layout`; facade in `init`; shim at `perk_stamp/`) |
 | `play_effects/` | Play resolution cinematics (`definition` feedback/banners, `animate` sequences; facade in `init`) |
 | `play_resolution.lua` | Drains model play result into `play_effects` (keeps `jumble_play` headless-testable) |
-| `boss_word_stack.lua` | Bonus gutter presentation (animation, draw); reads `model/bonus_stack` + `board/bonus_gutter` |
+| `boss_word_stack/` | Bonus gutter presentation (`layout`, `animate`, `draw`; facade in `init`; model in `bonus_stack`) |
 | `token_reward.lua` | Timer snapshot, sticker fly, spend reverse animation |
 | `word_feedback.lua` | Ephemeral word-level attention text when a play resolves (single API; drains `model/feedback`) |
 | `float_up_text.lua` | Per-card bonus popups (+2, +mult) rising from played cards |
-| `hand_shuffle/` | Circular shuffle/play buttons (`definition`, `layout`, `animate`; facade in `init`) |
+| `hand_shuffle/` | Circular shuffle/play buttons (`definition`, `layout`, `animate`, `shuffle_anim`, `placement_recall_anim`; facade in `init`) |
 | `play_hold_redraw.lua` | Hold Play 5s ring, recall slots, discard hand, redeal |
 | `jumble_fixed_letters.lua` | Fixed puzzle letter tile drawing and transition animation |
 | `table_deck.lua` | Draw pile + token pile rendering |
@@ -167,6 +167,7 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `fx.lua` | Boot shim that loads `word_feedback` (installs global `spawn_attention`) |
 | `menu/` | Main menu (`definition`, `layout`, `animate`; facade in `init`) |
 | `card_ui.lua`, `card_visuals.lua` | Card presentation and visual helpers |
+| `cardarea/` | `CardArea` class (`hand`, `deck`, `discard`, `placement` type handlers; `selection`, `relayout`, `chrome`; facade in `init`) |
 
 ### Board (`word_game/board/`)
 
@@ -183,7 +184,7 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 |------|------|
 | `app/loop.lua` | Engine frame + state dispatch; delegates TABLE_BOARD to `WORD_GAME.TableBoard` |
 | `app/startup.lua` | Thin orchestrator; `startup/profile`, `window`, `dealing` |
-| `word_game/ui/placement_controls.lua` | `play_placement_word` → `play_resolution.resolve(Play)`; loaded by `app/bootstrap.lua` |
+| `word_game/ui/callbacks/placement.lua` | `play_placement_word` → `placement_controls.try_play` |
 
 ### Play resolution split
 

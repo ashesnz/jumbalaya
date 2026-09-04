@@ -1,8 +1,4 @@
---[[ word_game/config/perks.lua - Perk pool for stamp rewards
-
-	Perks are collected on the vault sidebar for display. Gameplay effects are
-	not wired yet — has_perk() is reserved for future scoring hooks.
-]]
+--[[ word_game/config/perks.lua - Perk pool for stamp rewards ]]
 
 local dimensions = require("word_game.config.dimensions")
 
@@ -112,28 +108,28 @@ M.POOL = {
 	{
 		id = "letter_boost",
 		name = "Letter Boost",
-		desc = "High-tier letters score +2 bonus points. (Cosmetic — effect not active yet.)",
+		desc = "High-tier letters score +2 bonus points.",
 		token_cost = 10,
 		pos = { x = 2, y = 0 },
 	},
 	{
 		id = "red_rush",
 		name = "Red Rush",
-		desc = "Red letters score +1 bonus point. (Cosmetic — effect not active yet.)",
+		desc = "Red letters score +1 bonus point.",
 		token_cost = 10,
 		pos = { x = 3, y = 0 },
 	},
 	{
 		id = "vowel_veil",
 		name = "Vowel Veil",
-		desc = "Vowels score +2 bonus points. (Cosmetic — effect not active yet.)",
+		desc = "Vowels score +2 bonus points.",
 		token_cost = 10,
 		pos = { x = 4, y = 0 },
 	},
 	{
 		id = "long_word",
 		name = "Long Word",
-		desc = "Words of 6+ letters gain +15 bonus points. (Cosmetic — effect not active yet.)",
+		desc = "Words of 6+ letters gain +15 bonus points.",
 		token_cost = 10,
 		pos = { x = 5, y = 0 },
 	},

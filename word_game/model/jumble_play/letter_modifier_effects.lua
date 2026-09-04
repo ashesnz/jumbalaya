@@ -1,6 +1,7 @@
 --[[ word_game/model/jumble_play/letter_modifier_effects.lua - Gameplay effects for modified letter cards ]]
 
 local deck = require("word_game.model.cards.deck")
+local perk_effects = require("word_game.model.perks.effects")
 local modifiers = deck
 local RunMode = require("word_game.model.run_mode")
 
@@ -169,6 +170,7 @@ end
 
 function M.apply_word_effects(word, used_cards, j, wr)
 	local effects = M.compute_word_effects(word, used_cards, j, wr)
+	effects = perk_effects.merge_word_effects(effects, perk_effects.compute_word_effects(word, used_cards, j))
 	if effects.time_bonus > 0 then
 		add_timeline_seconds(effects.time_bonus)
 	end

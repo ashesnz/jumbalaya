@@ -1,4 +1,4 @@
---[[ word_game/ui/perk_stamp/draw.lua - 3D rubber-stamp geometry and rendering ]]
+--[[ word_game/ui/perks/stamp/draw.lua - 3D rubber-stamp geometry and rendering ]]
 
 local perk_voucher = require("word_game.ui.perk_voucher")
 

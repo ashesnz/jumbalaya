@@ -3,8 +3,8 @@
 local bonus_model = require("word_game.model.bonus_stack")
 local bonus_gutter = require("word_game.board.bonus_gutter")
 local InputLock = require("word_game.model.input_lock")
-local hand_shuffle_anim = require("word_game.ui.hand_shuffle_anim")
-local hand_placement_recall_anim = require("word_game.ui.hand_placement_recall_anim")
+local hand_shuffle_anim = require("word_game.ui.hand_shuffle.shuffle_anim")
+local hand_placement_recall_anim = require("word_game.ui.hand_shuffle.placement_recall_anim")
 
 local M = {}
 

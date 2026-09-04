@@ -8,6 +8,7 @@ local M = {}
 
 local round = require("word_game.model.round")
 local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
+local perk_effects = require("word_game.model.perks.effects")
 
 function M.placed_count(slots)
 	local count = 0
@@ -59,13 +60,10 @@ function M.preview_puzzle_total_after_word(j, word, used_cards)
 	word_pts = word_pts + bonus_stack.bonus_points_for(used_cards)
 	local committed = M.committed_earned(j)
 	word_pts = M.scale_post_target_points(j, word_pts, committed)
+	word_pts = perk_effects.apply_point_multiplier(word_pts, effects.point_multiplier)
 	local new_pts = old_pts + word_pts
 	local count = #(j.puzzle_words or {}) + 1
-	local new_multi = 1.0
-	if count >= 2 then
-		new_multi = 1.0 + (count - 1) * 0.2
-		new_multi = math.floor(new_multi * 10 + 0.5) / 10
-	end
+	local new_multi = perk_effects.puzzle_multi_for_word_count(count)
 	new_multi = modifier_effects.apply_next_word_floor(new_multi, j)
 	new_multi = modifier_effects.apply_combo_bonus(new_multi, effects.combo_bonus)
 	new_multi = math.floor((new_multi + (effects.bonus_multi or 0)) * 10 + 0.5) / 10
@@ -191,12 +189,13 @@ function M.evaluate_play(jumble, j)
 
 	if placed == 0 and j.solved then
 		local target = M.round_target()
+		perk_effects.on_puzzle_bank(j)
 		local bank_bonus = modifier_effects.bank_bonus_points(j)
 		if bank_bonus > 0 then
 			j.puzzle_points = (j.puzzle_points or 0) + bank_bonus
 		end
 		local raw_puzzle_total = M.puzzle_total(j)
-		local puzzle_total = raw_puzzle_total
+		local puzzle_total = raw_puzzle_total * perk_effects.bank_total_multiplier(j)
 		local old_total = j.total_score or 0
 		local post_target = M.post_target_active(j, old_total)
 		if post_target then

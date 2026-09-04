@@ -1,4 +1,4 @@
---[[ word_game/ui/perk_stamp/definition.lua - perk/stamp data copies and resolution ]]
+--[[ word_game/ui/perks/stamp/definition.lua - perk/stamp data copies and resolution ]]
 
 local perk_cfg = require("word_game.config.perks")
 local perk_model = require("word_game.model.perk")

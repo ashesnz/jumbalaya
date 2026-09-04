@@ -132,6 +132,9 @@ function M.on_hand_cleared(opts)
 	opts = opts or {}
 	local wr = G.GAME and G.GAME.word_round
 	local j = wr and wr.jumble
+	if j and (j.total_score or 0) >= (wr.target or 20) then
+		require("word_game.model.perks.effects").try_award_stage_clear_bonus(j)
+	end
 	if not opts.boss_cleared
 		and j and j.slots
 		and WORD_GAME and WORD_GAME.Jumble

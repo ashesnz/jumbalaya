@@ -3,6 +3,7 @@
 return function(M)
 local hand_timer = require("word_game.model.perks.timer")
 local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
+local perk_effects = require("word_game.model.perks.effects")
 local bonus_stack = require("word_game.model.bonus_stack")
 local round_config = require("word_game.config.round_config")
 local jumble_rules = require("word_game.model.jumble_play.jumble_rules")
@@ -34,10 +35,10 @@ function M.apply_puzzle(wr, puzzle)
 	j.bonus_available = false
 	j.bonus_card_id = nil
 	j.puzzle_points = 0
-	j.puzzle_multi = 1.0
 	j.puzzle_words = {}
 	j.slots = M.parse_slots(puzzle)
 	modifier_effects.reset_puzzle_state(j)
+	perk_effects.on_puzzle_start(j, wr)
 
 	if WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.reset_puzzle_smoke then
 		WORD_GAME.TimelineTimer.reset_puzzle_smoke()
@@ -218,19 +219,17 @@ function M.record_puzzle_word(word, opts)
 	local old_multi = j.puzzle_multi or 1.0
 
 	local effects = modifier_effects.apply_word_effects(word, used_cards, j, wr)
+	perk_effects.apply_time_bank_penalty_on_word(j)
 	local word_pts = #word + (effects.bonus_points or 0)
 	word_pts = word_pts + bonus_stack.bonus_points_for(used_cards)
 	local committed = jumble_rules.committed_before_word(j, old_pts, old_multi)
 	word_pts = jumble_rules.scale_post_target_points(j, word_pts, committed)
+	word_pts = perk_effects.apply_point_multiplier(word_pts, effects.point_multiplier)
 	local new_pts = old_pts + word_pts
 	j.puzzle_words = j.puzzle_words or {}
 	table.insert(j.puzzle_words, word)
 	local count = #j.puzzle_words
-	local new_multi = 1.0
-	if count >= 2 then
-		new_multi = 1.0 + (count - 1) * 0.2
-		new_multi = math.floor(new_multi * 10 + 0.5) / 10
-	end
+	local new_multi = perk_effects.puzzle_multi_for_word_count(count)
 	new_multi = modifier_effects.apply_next_word_floor(new_multi, j)
 	new_multi = modifier_effects.apply_combo_bonus(new_multi, effects.combo_bonus)
 	new_multi = math.floor((new_multi + (effects.bonus_multi or 0)) * 10 + 0.5) / 10

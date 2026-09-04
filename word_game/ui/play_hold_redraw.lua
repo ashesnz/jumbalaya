@@ -7,6 +7,7 @@
 local Scheduler = require "app.effects.timeline_scheduler"
 local InputLock = require("word_game.model.input_lock")
 local hand_size_cfg = require("word_game.config.hand_size")
+local perk_effects = require("word_game.model.perks.effects")
 
 
 local M = {}
@@ -17,7 +18,7 @@ M.DISCARD_STAGGER = 0.05
 M.RING_WIDTH = 3.5
 
 function M.enabled()
-	return false
+	return perk_effects.hold_redraw_enabled()
 end
 
 local hold_t = 0
@@ -237,6 +238,11 @@ end
 
 local function trigger_redraw()
 	if animating or not M.can_hold() then
+		reset_hold()
+		return
+	end
+	local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
+	if not perk_effects.consume_redraw(j) then
 		reset_hold()
 		return
 	end

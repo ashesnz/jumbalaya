@@ -67,10 +67,9 @@ function M.spend_tokens(amount)
 end
 
 function M.has_perk(key)
-	-- Collected perks are cosmetic until scoring hooks are implemented.
 	local rs = M.get()
 	if not rs then return false end
-	for _, perk in ipairs(rs.perks) do
+	for _, perk in ipairs(rs.perks or {}) do
 		if perk == key then return true end
 	end
 	return false

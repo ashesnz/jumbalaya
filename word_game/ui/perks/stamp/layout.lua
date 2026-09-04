@@ -1,4 +1,4 @@
---[[ word_game/ui/perk_stamp/layout.lua - stamp panel geometry and coordinate helpers ]]
+--[[ word_game/ui/perks/stamp/layout.lua - stamp panel geometry and coordinate helpers ]]
 
 local Layout = require("word_game.ui.layout")
 

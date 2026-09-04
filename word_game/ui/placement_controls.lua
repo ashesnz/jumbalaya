@@ -30,6 +30,4 @@ function M.try_play()
 	end
 end
 
-G.FUNCS.play_placement_word = M.try_play
-
 return M

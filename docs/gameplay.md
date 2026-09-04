@@ -214,7 +214,7 @@ Hold-to-redraw is independent of the old discard counter. It is blocked only dur
 
 ## Perks
 
-Perks are acquired via the **rubber-stamp flow** on the vault (`word_game/ui/perk_stamp.lua`). Purchased perks are stored on `G.GAME.run_state.perks` and selected perk metadata on `G.GAME.selected_perk`.
+Perks are acquired via the **rubber-stamp flow** on the vault (`word_game/ui/perks/stamp/`). Purchased perks are stored on `G.GAME.run_state.perks` and gameplay hooks live in `word_game/model/perks/effects.lua`.
 
 Perks are collected as vault stamps for display. Gameplay effects are **not wired yet** — descriptions note planned scoring bonuses; `state.has_perk()` is reserved for future hooks.
 
@@ -257,7 +257,7 @@ Non-release builds include a debug panel (Tab or **DBG** button):
 | Pattern layout & snap | `word_game/board/jumble_geometry.lua`, `word_game/board/snap.lua` |
 | Score banner | `word_game/ui/score_banner.lua` |
 | Timeline & tokens | `word_game/ui/timeline_timer.lua`, `word_game/ui/token_reward.lua` |
-| Perks | `word_game/config/perks.lua`, `word_game/ui/perk_stamp.lua` |
+| Perks | `word_game/config/perks.lua`, `word_game/model/perks/effects.lua`, `word_game/ui/perks/stamp/` |
 | Hand controls | `word_game/ui/hand_shuffle.lua`, `word_game/ui/play_hold_redraw.lua` |
 | Match flow | `word_game/model/round.lua`, `word_game/ui/trade.lua` |
 | Trade | `word_game/model/trade.lua` |
