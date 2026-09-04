@@ -363,7 +363,7 @@ function CardArea:draw()
 			self.config.hide_card_count = true
 		end
 		if not self.children.area_uibox then
-				local show_count = self ~= G.shop_perks and self ~= G.hand
+				local show_count = self ~= G.hand
 				local placement_area = G.placement_table and G.placement_table.area
 				local card_count = show_count and {n=G.UI.ROW, config={align = self == placement_area and 'cl' or 'cr', padding = 0.03, no_fill = true}, nodes={
 					{n=G.UI.BOX, config={w = 0.1,h=0.1}},
@@ -376,20 +376,7 @@ function CardArea:draw()
 				self.children.area_uibox = LayoutView{
 					definition =
 						{n=G.UI.ROOT, config = {align = 'cm', colour = G.C.CLEAR}, nodes={
-							{n=G.UI.ROW, config={minw = self.T.w,minh = self.T.h,align = "cm", padding = 0.1, mid = true, r = 0.1, colour = self ~= G.shop_perks and {0,0,0,0.1} or nil, ref_table = self}, nodes={
-								self == G.shop_perks and
-								{n=G.UI.COLUMN, config={align = "cm", paddin = 0.1, func = 'shop_voucher_empty', visible = false}, nodes={
-									{n=G.UI.ROW, config={align = "cm"}, nodes={
-										{n=G.UI.TEXT, config={text = 'DEFEAT', scale = 0.6, colour = G.C.WHITE}}
-									}},
-									{n=G.UI.ROW, config={align = "cm"}, nodes={
-										{n=G.UI.TEXT, config={text = 'BOSS WORD', scale = 0.4, colour = G.C.WHITE}}
-									}},
-									{n=G.UI.ROW, config={align = "cm"}, nodes={
-										{n=G.UI.TEXT, config={text = 'TO RESTOCK', scale = 0.4, colour = G.C.WHITE}}
-									}},
-								}} or nil,
-							}},
+							{n=G.UI.ROW, config={minw = self.T.w,minh = self.T.h,align = "cm", padding = 0.1, mid = true, r = 0.1, colour = {0,0,0,0.1}, ref_table = self}, nodes={}},
 							card_count
 						}},
 					config = { align = 'cm', offset = {x=0,y=0}, major = self, parent = self}

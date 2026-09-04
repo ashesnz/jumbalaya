@@ -614,3 +614,146 @@ T.describe("perk stamp click popup", function()
 		Stamp.reset()
 	end)
 end)
+
+T.describe("perk stamp Perks.png sidebar imprint", function()
+	pcall(mock_env.setup)
+	G.TILESCALE = 1
+	G.TILESIZE = 71
+	G.TABLE_BOARD_SIDEBAR_WIDTH = 3.0
+	G.STATES = G.STATES or { TABLE_BOARD = 1 }
+	G.STATE = G.STATES.TABLE_BOARD
+	G.ROOM = G.ROOM or { T = { x = 0, y = 0, w = 20, h = 11.5, r = 0 } }
+	WORD_GAME.Sidebar = { refresh = function() end }
+
+	local Stamp = require("word_game.ui.perk_stamp")
+	local perk_cfg = require("word_game.config.perks")
+	local perk_voucher = require("word_game.ui.perk_voucher")
+
+	local function install_perk_atlas(iw, ih)
+		local image = {
+			getDimensions = function() return iw, ih end,
+		}
+		G.TEXTURE_ATLASES = G.TEXTURE_ATLASES or {}
+		G.TEXTURE_ATLASES.Perk = { name = "Perk", image = image, px = 303, py = 138 }
+		return image
+	end
+
+	local function install_vault_slot()
+		local vault_x, vault_y = 16.2, 0.2
+		local slot_w, slot_h = 3.0, 1.4
+		local hud = { T = { x = vault_x, y = vault_y, w = slot_w, h = 11 } }
+		local row = {
+			T = { x = 0.05, y = 0.08, w = slot_w, h = slot_h },
+			VT = { x = 0, y = 0, w = slot_w, h = slot_h },
+			role = {
+				major = hud,
+				offset = { x = 0.05, y = 0.08 },
+			},
+		}
+		hud.find_node_by_id = function(_, id)
+			if id == "row_stamp_slot" then return row end
+			return nil
+		end
+		G.VAULT_HUD = hud
+		local ts = G.TILESCALE * G.TILESIZE
+		return {
+			left = (vault_x + 0.05) * ts,
+			top = (vault_y + 0.08) * ts,
+			right = (vault_x + 0.05 + slot_w) * ts,
+			bottom = (vault_y + 0.08 + slot_h) * ts,
+		}
+	end
+
+	local function capture_atlas_draws()
+		local orig_quad = love.graphics.newQuad
+		local orig_draw = love.graphics.draw
+		local draws = {}
+		love.graphics.newQuad = function(x, y, w, h, sw, sh)
+			return { x = x, y = y, w = w, h = h, sw = sw, sh = sh }
+		end
+		love.graphics.draw = function(img, quad, x, y, rot, sx, sy)
+			draws[#draws + 1] = {
+				img = img,
+				quad = quad,
+				x = x,
+				y = y,
+				rot = rot,
+				sx = sx,
+				sy = sy,
+			}
+		end
+		return {
+			draws = draws,
+			restore = function()
+				love.graphics.newQuad = orig_quad
+				love.graphics.draw = orig_draw
+			end,
+		}
+	end
+
+	T.it("keeps every Perks.png stamp quad inside a dpiscale-halved atlas", function()
+		-- textures/2x/Perks.png is 908×275 loaded with dpiscale=2 → 454×137.5
+		install_perk_atlas(454, 137)
+		for i, stamp in ipairs(perk_cfg.STAMP_SPRITES) do
+			local img, quad, pw, ph = perk_voucher.stamp_quad(stamp)
+			T.assert_not_nil(img, "stamp " .. i .. " must sample Perks.png")
+			T.assert_not_nil(quad, "stamp " .. i .. " must build a quad")
+			T.assert_true(pw > 1 and ph > 1, "stamp " .. i .. " quad must have visible size")
+			T.assert_true(quad.x >= 0)
+			T.assert_true(quad.y >= 0)
+			T.assert_true(quad.x + quad.w <= 454 + 0.01, "stamp " .. i .. " x+w is outside the atlas")
+			T.assert_true(quad.y + quad.h <= 137 + 0.01, "stamp " .. i .. " y+h is outside the atlas")
+		end
+	end)
+
+	T.it("maps pool perk positions onto the 3×2 Perks.png sheet", function()
+		install_perk_atlas(908, 275)
+		for _, perk in ipairs(perk_cfg.POOL) do
+			local region = perk_voucher.stamp_region(perk.pos)
+			T.assert_not_nil(region, perk.id .. " must land on a Perks.png cell")
+			T.assert_true(perk_voucher.draw_stamp(perk, 10, 20, 190, 90),
+				perk.id .. " must blit from Perks.png")
+		end
+	end)
+
+	T.it("blits a random Perks.png perk onto the vault stamp slot after impact", function()
+		Stamp.reset()
+		G.STATE = G.STATES.TABLE_BOARD
+		local panel = install_vault_slot()
+		local image = install_perk_atlas(454, 137)
+		math.randomseed(11)
+
+		for _ = 1, 70 do Stamp.debug_step() end
+		T.assert_equal(Stamp.imprint_count(), 1, "stamp impact should leave an imprint")
+
+		local perk = Stamp.current_imprint_perk()
+		T.assert_not_nil(perk, "imprint should remember the rolled perk")
+		T.assert_not_nil(perk.pos, "rolled perk needs a Perks.png cell")
+		T.assert_true(perk_voucher.draw_stamp(perk, 0, 0, 190, 90),
+			"rolled perk must be drawable from Perks.png")
+
+		local capture = capture_atlas_draws()
+		Stamp.draw_pass()
+		capture.restore()
+
+		local sidebar_blits = 0
+		for _, draw in ipairs(capture.draws) do
+			if draw.img == image then
+				sidebar_blits = sidebar_blits + 1
+				T.assert_not_nil(draw.quad)
+				T.assert_true(draw.quad.w > 1 and draw.quad.h > 1,
+					"Perks.png quad must have a visible source area")
+				T.assert_true(draw.x >= panel.left - 8, "imprint should sit on the vault column")
+				T.assert_true(draw.x < panel.right, "imprint should stay inside the vault")
+				T.assert_true(draw.y >= panel.top - 8, "imprint should sit on the stamp slot")
+				T.assert_true(math.abs(draw.x) > G.TILESIZE, "imprint must not draw at the room origin")
+				T.assert_true((draw.sx or 0) ~= 0 and (draw.sy or 0) ~= 0,
+					"Perks.png blit must have a non-zero scale")
+			end
+		end
+		T.assert_true(sidebar_blits >= 1,
+			"draw_pass must blit a Perks.png ticket onto the right-menu stamp slot")
+
+		Stamp.reset()
+	end)
+end)

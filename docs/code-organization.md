@@ -145,24 +145,24 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `layout/` | TABLE_BOARD geometry split: `felt.lua` (play column, felt, metrics), `vault.lua` (vault column, deck slot), `placement.lua` (portraits, banner rects, screen positions), `request.lua` (deferred layout flag for model layer) |
 | `score_banner/` | Jumble score chips and “Points to get” (`fonts`, `jumble`, `draw`) |
 | `timeline_timer/` | Fuse bar and countdown (`layout`, `draw`; state/update in `init`) |
-| `trade/` | Marketplace overlay (`layout`, `fly`; session/input in `init`) |
-| `perk_stamp/` | Rubber-stamp perk acquisition (`layout`; 3D strike/draw in `init`) |
+| `trade/` | Marketplace overlay (`definition`, `draw`, `animate`, `fly`, `layout`; session/input in `init`) |
+| `perk_stamp/` | Rubber-stamp perk acquisition (`definition`, `draw`, `animate`, `layout`; facade in `init`) |
+| `play_effects/` | Play resolution cinematics (`definition` feedback/banners, `animate` sequences; facade in `init`) |
 | `play_resolution.lua` | Drains model play result into `play_effects` (keeps `jumble_play` headless-testable) |
 | `boss_word_stack.lua` | Bonus gutter presentation (animation, draw); reads `model/bonus_stack` + `board/bonus_gutter` |
 | `token_reward.lua` | Timer snapshot, sticker fly, spend reverse animation |
 | `word_feedback.lua` | Ephemeral word-level attention text when a play resolves (single API; drains `model/feedback`) |
 | `float_up_text.lua` | Per-card bonus popups (+2, +mult) rising from played cards |
-| `hand_shuffle.lua` | Circular shuffle/play buttons flanking hand |
+| `hand_shuffle/` | Circular shuffle/play buttons (`definition`, `layout`, `animate`; facade in `init`) |
 | `play_hold_redraw.lua` | Hold Play 5s ring, recall slots, discard hand, redeal |
 | `jumble_fixed_letters.lua` | Fixed puzzle letter tile drawing and transition animation |
-| `perk_stamp/` | Rubber-stamp perk acquisition on the vault (see package split above) |
 | `table_deck.lua` | Draw pile + token pile rendering |
 | `hand_clear_focus.lua` | Spotlight during 1-1 token award |
 | `sidebar.lua` | Vault HUD (stamps, deck) |
-| `widgets/` | Shared UI controls (`buttons.lua`, `sliders.lua`) and `G.UIDEF` helpers |
+| `widgets/` | Shared UI controls (`buttons.lua`, `sliders.lua`) and `G.DEFINITIONS` helpers |
 | `overlays/` | Options, settings, win/game-over overlays (`options.lua`, `results.lua`) |
 | `fx.lua` | Floating score and attention effects (`spawn_attention` primitive) |
-| `menu.lua` | Main menu presentation |
+| `menu/` | Main menu (`definition`, `layout`, `animate`; facade in `init`) |
 | `card_ui.lua`, `card_visuals.lua` | Card presentation and visual helpers |
 
 ### Board (`word_game/board/`)
@@ -204,7 +204,7 @@ Three modules handle distinct score feedback layers on TABLE_BOARD. Use this rou
 | Ephemeral sentences | `word_feedback.lua` | Immediate board messages during play (invalid word, hand cleared, boss countdown) |
 | Model queue | `model/feedback.lua` | Rules/model code that must not import UI; drained by `word_feedback.flush_pending()` |
 | Low-level primitive | `fx.lua` → `spawn_attention` | Anchor-specific or engine-level text; avoid from model |
-| Play cinematics | `play_effects.lua` | Full play resolution FX; delegates copy to `word_feedback` |
+| Play cinematics | `play_effects/` | Full play resolution FX; delegates copy to `word_feedback` |
 | Per-card popups | `float_up_text.lua` | Short +2 / +mult rises from individual cards |
 
 `spawn_attention` remains a global for legacy Balatro call sites; new gameplay copy should go through `word_feedback` or `model/feedback`.

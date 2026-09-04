@@ -1,4 +1,4 @@
---[[ word_game/ui/play_effects.lua - Play-button UI orchestration (sounds, banners, events) ]]
+--[[ word_game/ui/play_effects/animate.lua - Play motion sequences and card choreography ]]
 
 local M = {}
 
@@ -10,244 +10,14 @@ local round_config = require("word_game.config.round_config")
 local hand_size_cfg = require("word_game.config.hand_size")
 local RunMode = require("word_game.model.run_mode")
 local Easing = require "app.effects.easing"
-local Scheduler = require "app.effects.timeline_scheduler"
+local definition = require("word_game.ui.play_effects.definition")
 
-M.BOSS_INTRO = {
-	hide_duration = 0.42,
-	timer_reveal_duration = 0.48,
-	steps = {
-		{ text = "3", hold = 0.85 },
-		{ text = "2", hold = 0.85 },
-		{ text = "1", hold = 0.85 },
-	},
-}
+local function effects()
+	return require("word_game.ui.play_effects")
+end
 
 local function has_event_manager()
 	return G.TIMELINE and G.TIMELINE.enqueue
-end
-
-function M.queue_event(ev)
-	if has_event_manager() then
-		Scheduler.add{event = ev}
-	elseif ev and ev.func then
-		ev.func()
-	end
-end
-
-function M.request_layout_refresh()
-	G.ARGS = G.ARGS or {}
-	G.ARGS.pending_layout = true
-end
-
-function M.capture_token_timer_if_cleared(cleared, opts)
-	opts = opts or {}
-	if not cleared or not RunMode.ends_hand_on_target() then return end
-	if not opts.skip_focus
-		and WORD_GAME and WORD_GAME.HandClearFocus and WORD_GAME.HandClearFocus.begin then
-		WORD_GAME.HandClearFocus.begin()
-	end
-	if WORD_GAME and WORD_GAME.TokenReward and WORD_GAME.TokenReward.capture_reward then
-		WORD_GAME.TokenReward.capture_reward()
-	elseif WORD_GAME and WORD_GAME.TokenReward and WORD_GAME.TokenReward.capture_timer then
-		WORD_GAME.TokenReward.capture_timer()
-	end
-end
-
-function M.triggers_boss_word(result)
-	if not result or not result.cleared then return false end
-	local wr = G.GAME and G.GAME.word_round
-	local j = wr and wr.jumble
-	return wr and round_config.is_boss_word_hand(wr.set, wr.hand_index)
-		and j and not j.boss_word_active and not j.boss_word_staging
-end
-
-function M.show_post_target_multiplier_fx(result)
-	if not result or not result.post_target_doubled then return end
-	local tt = WORD_GAME and WORD_GAME.TimelineTimer
-	if tt and tt.pulse_post_target then
-		tt.pulse_post_target()
-	end
-	local FloatUp = WORD_GAME and WORD_GAME.FloatUpText
-	if FloatUp and FloatUp.from_timeline then
-		-- Same gold float-up-and-fade as "Hand Cleared", anchored to the slider tip.
-		FloatUp.from_timeline("×2", {
-			colour = G.C and G.C.GOLD or { 1, 0.85, 0.2, 1 },
-			font_px = 32,
-			speed = 1.25,
-			life = 1.8,
-		})
-	end
-end
-
-function M.roll_jumble_banners(result)
-	if not (WORD_GAME and WORD_GAME.ScoreBanner) then return end
-	local function bump_timeline_progress()
-		local tt = WORD_GAME and WORD_GAME.TimelineTimer
-		if not tt or not tt.on_word_played or not result then return end
-		if result.kind == "word_play" then
-			tt.on_word_played(result.old_score, result.new_score)
-		elseif result.kind == "bank_puzzle" then
-			tt.on_word_played(result.old_total, result.new_total)
-		end
-	end
-	if M.triggers_boss_word(result) then
-		if WORD_GAME.ScoreBanner.hide_points_to_get_display then
-			WORD_GAME.ScoreBanner.hide_points_to_get_display()
-		end
-		if result.kind == "word_play" and WORD_GAME.ScoreBanner.roll_jumble_score then
-			WORD_GAME.ScoreBanner.roll_jumble_score(
-				result.old_pts, result.new_pts, result.old_multi, result.new_multi
-			)
-		end
-		bump_timeline_progress()
-		return
-	end
-	if result.kind == "word_play" then
-		if WORD_GAME.ScoreBanner.roll_jumble_score then
-			WORD_GAME.ScoreBanner.roll_jumble_score(
-				result.old_pts, result.new_pts, result.old_multi, result.new_multi
-			)
-		end
-		M.show_post_target_multiplier_fx(result)
-		bump_timeline_progress()
-	elseif result.kind == "bank_puzzle" then
-		M.show_post_target_multiplier_fx(result)
-		bump_timeline_progress()
-	end
-	if result.cleared and RunMode.ends_hand_on_target() then
-		if WORD_GAME.ScoreBanner.hide_points_to_get_display then
-			WORD_GAME.ScoreBanner.hide_points_to_get_display()
-		end
-	elseif WORD_GAME.ScoreBanner.sync_points_to_get_preview then
-		WORD_GAME.ScoreBanner.sync_points_to_get_preview(true, { remain_dur = 0.4 })
-	end
-end
-
-function M.show_validation_error(err)
-	if word_feedback.is_invalid_reason(err) then
-		word_feedback.show_invalid()
-	else
-		word_feedback.show(err or "Cannot play", G.C.RED)
-	end
-	play_sfx("cancel", 0.8, 0.6)
-end
-
-function M.set_word_score_animating(active)
-	if G.GAME then
-		G.GAME.word_score_animating = active
-	end
-	-- deal_boss_hand and other sequences call set_ranks while this flag is still
-	-- true, which leaves drag.can false until ranks are refreshed.
-	if not active
-		and WORD_GAME and WORD_GAME.PlayerHost
-		and WORD_GAME.PlayerHost.refresh_card_input then
-		WORD_GAME.PlayerHost.refresh_card_input()
-	end
-end
-
-function M.add_points(amount)
-	if G.GAME then
-		G.GAME.points = (G.GAME.points or 0) + amount
-	end
-end
-
-function M.sync_hand_after_deal()
-	if G.hand and G.hand.cards[1] then
-		G.hand:relayout()
-		for _, card in ipairs(G.hand.cards) do
-			if not card.bounce and card.states and not card.states.drag.is then
-				card:hard_set_T()
-			end
-		end
-		if G.hand.velocity then
-			G.hand.velocity.x = 0
-			G.hand.velocity.y = 0
-			G.hand.velocity.r = 0
-			G.hand.velocity.scale = 0
-		end
-		G.hand:snap_VT()
-	end
-	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.sync_position()
-	end
-end
-
-function M.align_placement_table()
-	if G.placement_table and G.placement_table.area then
-		G.placement_table:relayout()
-		G.placement_table.area:hard_set_cards()
-	end
-end
-
-function M.show_word_success(word)
-	word_feedback.show(word .. "  +" .. #word, G.C.GREEN, 1.2, 0.35)
-	play_sfx("coin2", 1, 0.9)
-end
-
-function M.show_puzzle_bank_feedback(puzzle_total)
-	word_feedback.show(puzzle_total .. " Points Scored!", G.C.GOLD, 1.5, 0.35)
-	play_sfx("coin2", 1, 0.9)
-end
-
-function M.sync_sidebar_actions()
-	if WORD_GAME and WORD_GAME.Sidebar then
-		WORD_GAME.Sidebar.sync_action_buttons()
-	end
-end
-
-function M.restore_boss_layout(opts)
-	opts = opts or {}
-	if not opts.keep_bonus_stack then
-		boss_word_stack.clear()
-	end
-	local wr = G.GAME and G.GAME.word_round
-	if wr and wr.jumble then
-		wr.jumble.locked_hand_layout = nil
-	end
-	if WORD_GAME and WORD_GAME.Layout then
-		WORD_GAME.Layout.update_all()
-		WORD_GAME.Layout.set_screen_positions()
-	end
-	if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.sync_visibility then
-		WORD_GAME.Sidebar.sync_visibility()
-	end
-	M.request_layout_refresh()
-	M.align_placement_table()
-	if G.hand then
-		G.hand:relayout()
-		G.hand:snap_VT()
-		G.hand:hard_set_cards()
-	end
-	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.sync_position()
-	end
-	if opts.keep_bonus_stack and boss_word_stack.sync_positions
-		and not boss_word_stack.is_animating() then
-		boss_word_stack.sync_positions()
-	end
-end
-
-function M.show_bonus_flyovers(used_cards)
-	local FloatUp = WORD_GAME and WORD_GAME.FloatUpText
-	if not FloatUp or not FloatUp.from_card then return end
-	for _, card in ipairs(used_cards or {}) do
-		if boss_word_stack.is_bonus_card(card) then
-			FloatUp.from_card(card, "+" .. tostring(boss_word_stack.BONUS_POINTS), {
-				colour = G.C and G.C.GOLD or { 1, 0.85, 0.2, 1 },
-			})
-		end
-	end
-end
-
-function M.run_card_return_sequence(used_cards, on_after, return_to_deck)
-	M.show_bonus_flyovers(used_cards)
-	card_fly_off.fly_cards_off(used_cards, M.queue_event, {
-		return_to_deck = return_to_deck,
-		on_complete = function()
-			deck.sync_deck_count_display()
-			if on_after then on_after() end
-		end,
-	})
 end
 
 local function finish_used_card(card, return_to_deck)
@@ -270,7 +40,7 @@ local function finish_used_card(card, return_to_deck)
 end
 
 local function finish_used_cards(used_cards, return_to_deck)
-	M.show_bonus_flyovers(used_cards)
+	definition.show_bonus_flyovers(used_cards)
 	local returned = false
 	for _, card in ipairs(used_cards or {}) do
 		if not boss_word_stack.is_bonus_card(card) and return_to_deck then
@@ -283,10 +53,21 @@ local function finish_used_cards(used_cards, return_to_deck)
 	end
 end
 
+function M.run_card_return_sequence(used_cards, on_after, return_to_deck)
+	definition.show_bonus_flyovers(used_cards)
+	card_fly_off.fly_cards_off(used_cards, effects().queue_event, {
+		return_to_deck = return_to_deck,
+		on_complete = function()
+			deck.sync_deck_count_display()
+			if on_after then on_after() end
+		end,
+	})
+end
+
 function M.deal_and_refresh(on_complete)
 	local function finish()
-		M.request_layout_refresh()
-		M.sync_hand_after_deal()
+		effects().request_layout_refresh()
+		definition.sync_hand_after_deal()
 		if on_complete then on_complete() end
 	end
 	if deck.is_jumble_deck and deck.is_jumble_deck()
@@ -309,7 +90,7 @@ function M.present_boss_word(wr, on_complete)
 		wr.jumble.locked_hand_layout = nil
 	end
 
-	M.set_word_score_animating(true)
+	definition.set_word_score_animating(true)
 	if WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.hide_points_to_get_display then
 		WORD_GAME.ScoreBanner.hide_points_to_get_display()
 	end
@@ -323,7 +104,7 @@ function M.present_boss_word(wr, on_complete)
 			tt.arm_boss_countdown(round_config.TIMELINE_SECONDS)
 		end
 		if tt and tt.reveal_countdown_timer then
-			local reveal_dur = has_event_manager() and M.BOSS_INTRO.timer_reveal_duration or 0
+			local reveal_dur = has_event_manager() and definition.BOSS_INTRO.timer_reveal_duration or 0
 			tt.reveal_countdown_timer(reveal_dur)
 		end
 		if WORD_GAME and WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.set_banner_mode then
@@ -342,7 +123,7 @@ function M.present_boss_word(wr, on_complete)
 			wr.jumble.boss_word_staging = false
 		end
 		if not revealed then
-			M.set_word_score_animating(false)
+			definition.set_word_score_animating(false)
 			if on_complete then on_complete() end
 			return
 		end
@@ -357,9 +138,9 @@ function M.present_boss_word(wr, on_complete)
 		if WORD_GAME and WORD_GAME.HandShuffle then
 			WORD_GAME.HandShuffle.sync_position()
 		end
-		M.request_layout_refresh()
-		M.set_word_score_animating(false)
-		M.sync_sidebar_actions()
+		effects().request_layout_refresh()
+		definition.set_word_score_animating(false)
+		definition.sync_sidebar_actions()
 		if play_sfx then
 			play_sfx("coin2", 0.95, 0.85)
 		end
@@ -367,10 +148,10 @@ function M.present_boss_word(wr, on_complete)
 	end
 
 	local function run_countdown(done)
-		local steps = M.BOSS_INTRO.steps
+		local steps = definition.BOSS_INTRO.steps
 		local function queue_step(index)
 			if index > #steps then
-				M.queue_event(Tween({
+				effects().queue_event(Tween({
 					mode = "delayed",
 					delay = 0.12,
 					blocking = true,
@@ -382,7 +163,7 @@ function M.present_boss_word(wr, on_complete)
 				return
 			end
 			local step = steps[index]
-			M.queue_event(Tween({
+			effects().queue_event(Tween({
 				mode = "delayed",
 				delay = 0,
 				blocking = true,
@@ -395,7 +176,7 @@ function M.present_boss_word(wr, on_complete)
 							play_sfx("card_tick", 0.9, 0.7)
 						end
 					end
-					M.queue_event(Tween({
+					effects().queue_event(Tween({
 						mode = "delayed",
 						delay = step.hold,
 						blocking = true,
@@ -421,7 +202,7 @@ function M.present_boss_word(wr, on_complete)
 		run_countdown(finish_intro)
 	end
 
-	local hide_dur = has_event_manager() and M.BOSS_INTRO.hide_duration or 0
+	local hide_dur = has_event_manager() and definition.BOSS_INTRO.hide_duration or 0
 	if WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.hide_slider then
 		WORD_GAME.TimelineTimer.hide_slider(hide_dur, function()
 			hide_done = true
@@ -438,7 +219,7 @@ function M.present_boss_word(wr, on_complete)
 
 	local function deal_boss_hand()
 		if not wr.jumble or not wr.jumble.pending_boss then
-			M.set_word_score_animating(false)
+			definition.set_word_score_animating(false)
 			if wr.jumble then
 				wr.jumble.boss_word_staging = false
 			end
@@ -448,14 +229,14 @@ function M.present_boss_word(wr, on_complete)
 		local puzzle = wr.jumble.pending_boss
 		local letters = jumble.boss_hand_letters(puzzle.boss_word, puzzle.pattern)
 		deck_mod.deal_boss_hand(letters, function()
-			M.sync_hand_after_deal()
+			definition.sync_hand_after_deal()
 			word_feedback.lock_hand_layout(wr)
 			after_boss_deal()
 		end, { fast = true })
 	end
 
 	if not jumble.prepare_boss_word(wr) then
-		M.set_word_score_animating(false)
+		definition.set_word_score_animating(false)
 		if wr.jumble then
 			wr.jumble.boss_word_staging = false
 		end
@@ -481,7 +262,7 @@ function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_
 	local CARD_STAGGER = 0.07
 	local STACK_HOLD = 0.3
 
-	M.set_word_score_animating(true)
+	definition.set_word_score_animating(true)
 	if WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.pause then
 		WORD_GAME.TimelineTimer.pause()
 	end
@@ -505,7 +286,7 @@ function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_
 		end
 	end
 
-	M.queue_event(Tween({
+	effects().queue_event(Tween({
 		mode = "delayed",
 		delay = 0.05,
 		blocking = true,
@@ -518,7 +299,7 @@ function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_
 		end,
 	}))
 
-	boss_word_stack.animate_cards_to_stack(M.queue_event, nil, {
+	boss_word_stack.animate_cards_to_stack(effects().queue_event, nil, {
 		initial_delay = 0,
 		card_delay = CARD_DELAY,
 		stagger = CARD_STAGGER,
@@ -537,17 +318,17 @@ function M.present_word_play_after_cards(jumble, j, result, on_hand_cleared, on_
 		jumble.sync_placement_cards(j.slots)
 		if end_hand then
 			j.total_score = result.new_score
-			M.add_points(result.word_pts)
-			M.set_word_score_animating(true)
-			M.align_placement_table()
+			definition.add_points(result.word_pts)
+			definition.set_word_score_animating(true)
+			definition.align_placement_table()
 			on_hand_cleared()
 			if on_complete then
 				on_complete({ word = result.word, points = result.new_pts, multi = result.new_multi })
 			end
 		else
 			M.deal_and_refresh(function()
-				M.show_word_success(result.word)
-				M.sync_sidebar_actions()
+				definition.show_word_success(result.word)
+				definition.sync_sidebar_actions()
 				if on_complete then
 					on_complete({ word = result.word, points = result.new_pts, multi = result.new_multi })
 				end
@@ -556,10 +337,10 @@ function M.present_word_play_after_cards(jumble, j, result, on_hand_cleared, on_
 	end
 
 	if end_hand then
-		M.set_word_score_animating(true)
+		definition.set_word_score_animating(true)
 	end
 
-	if M.triggers_boss_word(result) and end_hand then
+	if definition.triggers_boss_word(result) and end_hand then
 		finish_used_cards(result.used_cards, true)
 		after_cards_cleared()
 		return
@@ -577,7 +358,7 @@ end
 
 function M.present_jumble_next(jumble, wr, opts)
 	local jl = require("word_game.ui.jumble_fixed_letters")
-	M.set_word_score_animating(true)
+	definition.set_word_score_animating(true)
 	if play_sfx then play_sfx("card_slide1", 0.85, 0.7) end
 
 	local anim = jl.anim_state()
@@ -586,7 +367,7 @@ function M.present_jumble_next(jumble, wr, opts)
 		Easing.value{ref_table = anim, ref_value = "offset_y", mod = -4.0, timer = "REAL", not_blockable = false, delay = 0.22, ease = "quad"}
 		Easing.value{ref_table = anim, ref_value = "alpha", mod = -1.0, timer = "REAL", not_blockable = false, delay = 0.22, ease = "quad"}
 
-		M.queue_event(Tween({
+		effects().queue_event(Tween({
 			mode = "delayed",
 			delay = 0.24,
 			blocking = true,
@@ -600,14 +381,14 @@ function M.present_jumble_next(jumble, wr, opts)
 			end,
 		}))
 
-		M.queue_event(Tween({
+		effects().queue_event(Tween({
 			mode = "delayed",
 			delay = 0.24,
 			blocking = true,
 			func = function()
 				jl.reset_anim()
-				M.set_word_score_animating(false)
-				M.sync_sidebar_actions()
+				definition.set_word_score_animating(false)
+				definition.sync_sidebar_actions()
 				if WORD_GAME and WORD_GAME.HandShuffle then
 					WORD_GAME.HandShuffle.try_sync()
 				end
@@ -620,7 +401,7 @@ function M.present_jumble_next(jumble, wr, opts)
 	else
 		jumble.advance_puzzle(wr)
 		jl.reset_anim()
-		M.set_word_score_animating(false)
+		definition.set_word_score_animating(false)
 		if opts and opts.on_complete then
 			opts.on_complete()
 		end

@@ -107,7 +107,6 @@ function Game:define_constants()
 
     self.ARGS = {}
     self.FUNCS = {}
-    self.UIDEF = {}
     self.LIVE = {
         NODE = {},
         TRANSFORM = {},
@@ -129,8 +128,6 @@ function Game:define_constants()
     self.DEBUG = false
     self.ANIMATION_FPS = Dimensions.layout.ANIMATION_FPS
     self.VIBRATION = 0
-    self.CHALLENGE_WINS = 5
-    self.CHALLENGES = {}
 
     -- The colour system lives in the palette module; this only assembles it.
     self.C = Palette.build(colour_from_hex)

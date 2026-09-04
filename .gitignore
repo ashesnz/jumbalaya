@@ -102,6 +102,9 @@ error.log
 # ------------------------------------------------------------------------------
 # Lua tooling caches
 # ------------------------------------------------------------------------------
+__pycache__/
+*.pyc
+test_results*.txt
 .luacheckrc.local
 .luarc.json.user
 .venv-textures/

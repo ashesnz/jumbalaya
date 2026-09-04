@@ -8,22 +8,6 @@ local function atlas()
 	return G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.Perk
 end
 
-function M.stamp_region(pos)
-	local col = (pos and pos.x or 0) + 1
-	local row = (pos and pos.y or 0) + 1
-	return cfg.STAMP_REGIONS[row][col]
-end
-
-function M.stamp_quad(entry)
-	local atlas_info = atlas()
-	if not atlas_info or not atlas_info.image or not entry or not entry.pos then return end
-	local region = M.stamp_region(entry.pos)
-	local iw, ih = atlas_info.image:getDimensions()
-	return atlas_info.image,
-		love.graphics.newQuad(region.x, region.y, region.w, region.h, iw, ih),
-		region.w, region.h
-end
-
 function M.voucher_grid_pos(pos)
 	if not pos then return 1, 1 end
 	local col = (pos.x % cfg.VOUCHER_COLS) + 1
@@ -31,19 +15,57 @@ function M.voucher_grid_pos(pos)
 	return col, row
 end
 
+function M.stamp_region(pos)
+	local col, row = M.voucher_grid_pos(pos)
+	return cfg.STAMP_REGIONS[row][col]
+end
+
 function M.voucher_region(pos)
 	local col, row = M.voucher_grid_pos(pos)
 	return cfg.VOUCHER_REGIONS[row][col]
 end
 
-function M.voucher_quad(entry)
+--- Map an authored Perks.png region into the live atlas's logical pixel space.
+function M.region_in_atlas(region, iw, ih)
+	if not region or not iw or not ih or iw <= 0 or ih <= 0 then return nil end
+	local sx = iw / (cfg.SHEET_W or iw)
+	local sy = ih / (cfg.SHEET_H or ih)
+	local x = region.x * sx
+	local y = region.y * sy
+	local w = region.w * sx
+	local h = region.h * sy
+	if x < 0 then
+		w = w + x
+		x = 0
+	end
+	if y < 0 then
+		h = h + y
+		y = 0
+	end
+	if x + w > iw then w = iw - x end
+	if y + h > ih then h = ih - y end
+	if w <= 0 or h <= 0 then return nil end
+	return x, y, w, h
+end
+
+local function atlas_quad(region)
 	local atlas_info = atlas()
-	if not atlas_info or not atlas_info.image or not entry or not entry.pos then return end
-	local region = M.voucher_region(entry.pos)
+	if not atlas_info or not atlas_info.image or not region then return end
+	if not love or not love.graphics or not love.graphics.newQuad then return end
 	local iw, ih = atlas_info.image:getDimensions()
-	return atlas_info.image,
-		love.graphics.newQuad(region.x, region.y, region.w, region.h, iw, ih),
-		region.w, region.h
+	local x, y, w, h = M.region_in_atlas(region, iw, ih)
+	if not x then return end
+	return atlas_info.image, love.graphics.newQuad(x, y, w, h, iw, ih), w, h
+end
+
+function M.stamp_quad(entry)
+	if not entry or not entry.pos then return end
+	return atlas_quad(M.stamp_region(entry.pos))
+end
+
+function M.voucher_quad(entry)
+	if not entry or not entry.pos then return end
+	return atlas_quad(M.voucher_region(entry.pos))
 end
 
 function M.padding(slot_w, slot_h)

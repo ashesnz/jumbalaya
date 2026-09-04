@@ -205,24 +205,6 @@ function Game:start_run(args)
         end
       }
 
-    if saveTable and saveTable.ACTION then
-        -- Replay the queued card-use action from the save, once cards exist.
-        Scheduler.add{delay = 0.5, mode = 'delayed', blocking = false, blockable = false, func = function()
-            Scheduler.add{func = function()
-                Scheduler.add{func = function()
-                    for k, v in pairs(G.LIVE.CARD) do
-                        if v.sort_id == saveTable.ACTION.card then
-                            G.FUNCS.use_card({config = {ref_table = v}}, nil, true)
-                        end
-                    end
-                    return true
-                end}
-                return true
-            end}
-            return true
-        end}
-    end
-
     local hand_size_cfg = require("word_game.config.hand_size")
     local hand_size = hand_size_cfg.get()
 

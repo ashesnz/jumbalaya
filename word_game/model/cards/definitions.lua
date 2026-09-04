@@ -78,11 +78,6 @@ function Game:load_card_definitions()
         finish_holo =       {order = 3,  unlocked = true, discovered = false, name = "Holographic", pos = {x=0,y=0}, atlas = 'letter_frame', set = "Finish", config = {extra = 10}},
         finish_polychrome = {order = 4,  unlocked = true, discovered = false, name = "Polychrome", pos = {x=0,y=0}, atlas = 'letter_frame', set = "Finish", config = {extra = 1.5}},
         finish_negative =   {order = 5,  unlocked = true, discovered = false, name = "Negative", pos = {x=0,y=0}, atlas = 'letter_frame', set = "Finish", config = {extra = 1}},
-
-        --Extras       
-        soul={pos = {x=0,y=1}},
-        undiscovered_joker={pos = {x=5,y=3}},
-        undiscovered_tarot={pos = {x=6,y=3}},
     }
 
     -- Pools actually consumed by the game: Back (deck select/collection/stats),

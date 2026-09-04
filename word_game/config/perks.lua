@@ -18,6 +18,10 @@ M.STAMP_SLOT_WIDTH_FRAC = 190 / ref_vault_w_px
 M.STAMP_SLOT_ASPECT = 90 / 190
 
 -- Perks.png: 3×2 grid of horizontal voucher tickets (measured pixel bounds).
+-- Regions are authored against the native 908×275 sheet. Runtime atlases may
+-- report a different logical size (1x downsample, or 2x loaded with dpiscale=2).
+M.SHEET_W = 908
+M.SHEET_H = 275
 M.STAMP_COLS = 3
 M.STAMP_ROWS = 2
 M.STAMP_REGIONS = {

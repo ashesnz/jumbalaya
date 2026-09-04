@@ -242,21 +242,4 @@ function M.mark_used()
 	end
 end
 
---- Alphabet Soup: take 1 of 2 letters from a random AP row.
-function M.auto()
-	local alpha = state.get()
-	local was_used = alpha and alpha.trade_used_this_hand
-	if alpha then alpha.trade_used_this_hand = false end
-	local rolled = roll_add_offer()
-	local pick = rolled.letters[rand_int("soup_pick", 1, #rolled.letters)]
-	local ok, result = M.add_letter(pick, { cost = 0 })
-	if alpha and not ok and was_used then
-		alpha.trade_used_this_hand = was_used
-	end
-	if ok then
-		return true, "Added " .. (pick.letter or "?") .. " (" .. rolled.ap .. " AP row)"
-	end
-	return false, result
-end
-
 return M

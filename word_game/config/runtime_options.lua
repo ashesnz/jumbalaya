@@ -3,10 +3,7 @@
 local M = {}
 
 M.flags = {
-    QUIT_BUTTON = true,
-    SKIP_TUTORIAL = true,
     SKIP_TITLE_SCREEN = false,
-    EXTERNAL_LINKS = true,
     ENABLE_PERF_OVERLAY = false,
     ATLAS_DEBUG_OVERLAY = false,
     NO_SAVING = false,
@@ -14,7 +11,6 @@ M.flags = {
     SOUND_THREAD = true,
     VIDEO_SETTINGS = true,
     VERBOSE = true,
-    HTTP_SCORES = false,
     RUMBLE = nil,
     CRASH_REPORTS = false,
     NO_ERROR_HAND = false,
@@ -22,7 +18,6 @@ M.flags = {
     NO_ACHIEVEMENTS = false,
     DISP_USERNAME = nil,
     ENGLISH_ONLY = true,
-    GUIDE = false,
     HIDE_BG = false,
     TROPHIES = false,
     PS4_PLAYSTATION_GLYPHS = false,

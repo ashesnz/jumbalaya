@@ -56,7 +56,7 @@ local MockEnv = require("tests.helpers.mock_env")
 
 		local game = Game()
 		game:define_constants()
-		T.assert_not_nil(game.UIDEF, "Global UI definition namespace must be initialized before menu loading")
+		T.assert_not_nil(game.FUNCS, "Callback registry must be initialized before menu loading")
 		game:set_render_settings()
 
 		local found_jumbalaya = false
