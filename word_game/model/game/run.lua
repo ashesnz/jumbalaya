@@ -75,10 +75,7 @@ function Game:init_game_object()
         round_scores = {
             furthest_set = {label = 'Set', amt = 0},
             furthest_round = {label = 'Round', amt = 0},
-            new_collection = {label = 'New Discoveries', amt = 0},
-            cards_played = {label = 'Cards Played', amt = 0},
             cards_discarded = {label = 'Cards Discarded', amt = 0},
-            times_rerolled = {label = 'Times Rerolled', amt = 0},
         },
         tile_usage = {},
         modifiers = {},

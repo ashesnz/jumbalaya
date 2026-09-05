@@ -87,4 +87,15 @@ function DissolveFX.run(target, opts)
 	return parts
 end
 
+DissolveFX.CARD_TRANSFORM_DISSOLVE_TIME = 0.7
+DissolveFX.CARD_TRANSFORM_MATERIALIZE_TIME = 0.6
+
+function DissolveFX.card_transform_dissolve_colours()
+	return { G.C.BLACK, G.C.ORANGE, G.C.RED, G.C.GOLD, G.C.MUTED_GREY }
+end
+
+function DissolveFX.card_transform_materialize_colours()
+	return { G.C.BLACK, G.C.ORANGE, G.C.GOLD, G.C.WHITE }
+end
+
 return DissolveFX

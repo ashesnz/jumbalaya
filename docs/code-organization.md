@@ -88,12 +88,30 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `InputLock` | `is_table_busy()` — shared animation/input gate |
 | `Match` | `end_run()` — centralized discard-bin surrender / game-over transition |
 | `TableDiscard` | Discard bin state, eligibility, HUD sync |
-| `Perks` | Perk model package (`model/perks`: registry, hand timer) |
+| `Perks` | Perk model package (`model/perks`: registry, effects, hand timer) |
 | `TradeUI` / `PerkStamp` | Marketplace and perk stamp overlays |
 | `Sidebar` | Vault HUD (stamps, deck) |
 | Hosts / portraits / overlays | `PlayerHost`, `AllyHost`, `GuestHost`, `PlayerPortrait`, `CardInspect`, `CardHover`, `Confetti`, `FloatUpText`, `HandClearFocus`, `EndMatch`, `TableDeck` |
 
 Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of deep requires.
+
+---
+
+## Perks
+
+Perk-adjacent code is grouped under `word_game/model/perks/` and `word_game/ui/perks/`. Gameplay hooks live in `model/perks/effects.lua` (`WORD_GAME.Perks.Effects`); config pool in `config/perks.lua`.
+
+| Piece | Location | Notes |
+|-------|----------|-------|
+| Effect hooks | `model/perks/effects.lua` | Scoring, combo, hand size, timeline, redraw |
+| Registry / rolls | `model/perks/registry.lua` | Stamp reward selection (`model/perk.lua` shim) |
+| Hand timer | `model/perks/timer.lua` | Per-puzzle deadline stub (`ENABLED = false`); distinct from fuse HUD |
+| Discard bin | `ui/perks/discard_bin/` | Relocated from `ui/table_discard.lua`; `bin_enabled()` gate (off by default) |
+| Timeline fuse | `ui/perks/timeline_timer/` | Relocated from `ui/timeline_timer/`; self-registers updater |
+| Stamp animation | `ui/perks/stamp/` | Relocated from `ui/perk_stamp/` (shim remains) |
+| Stamp grid / voucher | `ui/perks/stamp_grid.lua`, `ui/perks/voucher.lua` | Vault layout and marketplace sprites |
+
+Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship; tie `discard_bin/bin_enabled()` to a perk or run flag.
 
 ---
 
@@ -108,7 +126,7 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `jumble.lua` | Letter pool (AERTNLS), deck copies, disabled 30s timer flag |
 | `jumble_puzzles.lua` | Router for the 24 stage modules |
 | `jumble_puzzles/*.lua` | Individual stage pattern tables such as `1_1.lua` |
-| `perks.lua` | Perk pool definitions (cosmetic until effects wire) |
+| `perks.lua` | Perk pool definitions (`config/perks.lua`; effects in `model/perks/effects.lua`) |
 | `economy.lua` | Starting tokens/chips, trade pricing |
 
 ### Model (`word_game/model/`)
@@ -127,7 +145,7 @@ Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of dee
 | `profile_stats.lua` | Minimal card discovery persistence |
 | `deck/jumble.lua` | Populate jumble deck, `deal_jumble_hand` |
 | `deck/dealing.lua` | Animated `deal_into_hand` (one card at a time) |
-| `perks/` | Perk registry (`registry.lua`), per-hand timer stub (`timer.lua`; `ENABLED = false`) |
+| `perks/` | Perk registry (`registry.lua`), effect hooks (`effects.lua`), per-hand timer stub (`timer.lua`; `ENABLED = false`) |
 | `perk.lua` | Shim → `model/perks/registry` |
 | `state.lua` | Match persistence, `run_state.tokens` / `run_state.perks` |
 

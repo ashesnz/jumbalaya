@@ -3,7 +3,7 @@
 local layout = require "devtools.layout"
 
 return {
-	id = "collection",
+	id = "marketplace",
 	order = 45,
 
 	register = function(panel)

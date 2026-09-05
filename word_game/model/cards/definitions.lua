@@ -4,7 +4,7 @@
 	P_CARDS is the 52 letter faces: `red_A`–`red_Z` and `black_A`–`black_Z`.
 	Glyphs live on JumbalayaLetters.png (13×2 grid); card bodies are tinted at
 	runtime from JumbalayaCardFrame.png via letter_card_palette.lua.
-	Letter body (`letter_base`), tutorial companion card (`companion_pads`), Alpha Deck, and editions live in P_CENTERS.
+	Letter body (`letter_base`), Alpha Deck, and editions live in P_CENTERS.
 ]]
 
 -- Returns true when `key` starts with any of the given Lua patterns.
@@ -66,11 +66,8 @@ function Game:load_card_definitions()
     self.P_CENTERS = {
         letter_base={max = 500, freq = 1, line = 'base', name = "Letter", pos = {x=0,y=0}, atlas = "letter_frame", set = "Default", label = 'Letter', effect = "Base", cost_mult = 1.0, config = {}},
 
-        -- Tutorial companion card (not in shop/collection pools)
-        companion_pads={order = 0, unlocked = true, discovered = true, skip_pool = true, rarity = 1, cost = 0, name = "Pads", pos = {x=0,y=9}, set = "Companion", effect = "", config = {talk_pos = {x=1,y=9}}},
-
         --Backs
-        deck_alpha=              {name = "Alpha Deck",         stake = 1, unlocked = true,order = 1, pos =   {x=0,y=0}, set = "Back", config = {discards = 1}, discovered = true},
+        deck_alpha=              {name = "Alpha Deck",         stake = 1, unlocked = true,order = 1, pos =   {x=0,y=0}, set = "Back", config = {}, discovered = true},
 
         --editions
         finish_base =       {order = 1,  unlocked = true, discovered = false, name = "Base", pos = {x=0,y=0}, atlas = 'letter_frame', set = "Finish", config = {}},
@@ -108,7 +105,7 @@ function Game:load_card_definitions()
     
     -- Centre id prefixes eligible for persistent unlock/discovery badges.
     local UNLOCKABLE_PREFIXES = { '^companion_', '^perk_', '^deck_' }
-    local DISCOVERABLE_PREFIXES = { '^companion_', '^deck_', '^finish_', '^letter_', '^orbit_', '^perk_' }
+    local DISCOVERABLE_PREFIXES = { '^companion_', '^deck_', '^finish_', '^letter_', '^perk_' }
 
     for k, v in pairs(self.P_CENTERS) do
         if not v.wip and not v.demo then

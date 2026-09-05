@@ -6,39 +6,6 @@ return function(ctx)
 	local state = ctx.state
 	local BUBBLE_ALIGN = ctx.BUBBLE_ALIGN
 
-	-- function PlayerHost.maybe_stage3_cinematic()
-	-- 	if G.STATE ~= G.STATES.TABLE_BOARD then return end
-	-- 	local wr = G.GAME and G.GAME.word_round
-	-- 	if not wr then return end
-	-- 	local round_config = require("word_game.config.round_config")
-	-- 	if round_config.is_marco_cinematic_hand(wr.set, wr.hand_index) then
-	-- 		PlayerHost.maybe_marco_cinematic()
-	-- 		return
-	-- 	end
-	-- 	if not round_config.is_stage3_cinematic_hand(wr.set, wr.hand_index) then return end
-	-- 	local alpha = state.get()
-	-- 	if not alpha then return end
-	-- 	if alpha.stage3_cinematic_seen then return end
-	-- 	if alpha.stage3_cinematic then return end
-	--
-	-- 	PlayerHost.reset_stage3_cinematic_state()
-	-- 	alpha.stage3_cinematic = true
-	-- 	PlayerHost.ensure()
-	-- 	local host = G.player_host
-	-- 	if host then
-	-- 		host:remove_speech_bubble()
-	-- 		host:apply_screen_position()
-	-- 	end
-	-- 	PlayerHost.sync_spotlight("milo_stage3_dim")
-	-- 	if not alpha.stage3_slide_started then
-	-- 		alpha.stage3_slide_started = true
-	-- 		PlayerHost.schedule_stage3_portrait_slide()
-	-- 	end
-	-- 	if WORD_GAME and WORD_GAME.Sidebar then
-	-- 		WORD_GAME.Sidebar.sync_action_buttons()
-	-- 	end
-	-- end
-
 	function PlayerHost.show_nudge(text_key)
 		PlayerHost.ensure()
 		local host = G.player_host

@@ -115,7 +115,6 @@ function Game:discard_run()
 		if self.SPLASH_BACK then self.SPLASH_BACK:remove(); self.SPLASH_BACK = nil end
 		if self.SPLASH_LOGO then self.SPLASH_LOGO:remove(); self.SPLASH_LOGO = nil end
 		if self.GAME_OVER_UI then self.GAME_OVER_UI:remove(); self.GAME_OVER_UI = nil end
-		if self.collection_alert then self.collection_alert:remove(); self.collection_alert = nil end
 		if self.placement_table then
 			self.placement_table.area = nil
 		end

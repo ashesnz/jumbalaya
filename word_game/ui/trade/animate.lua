@@ -9,14 +9,24 @@ local M = {}
 local ctx
 local transform_item
 
-local TRANSFORM_DISSOLVE_TIME = 0.7
-local TRANSFORM_MATERIALIZE_TIME = 0.6
-
-local BURN_DISSOLVE_COLOURS = { G.C.BLACK, G.C.ORANGE, G.C.RED, G.C.GOLD, G.C.MUTED_GREY }
-local BURN_MATERIALIZE_COLOURS = { G.C.BLACK, G.C.ORANGE, G.C.GOLD, G.C.WHITE }
-
-local function dissolve_fx()
+local function fx()
 	return require("app.effects.dissolve_fx")
+end
+
+local function transform_dissolve_time()
+	return fx().CARD_TRANSFORM_DISSOLVE_TIME
+end
+
+local function transform_materialize_time()
+	return fx().CARD_TRANSFORM_MATERIALIZE_TIME
+end
+
+local function burn_dissolve_colours()
+	return fx().card_transform_dissolve_colours()
+end
+
+local function burn_materialize_colours()
+	return fx().card_transform_materialize_colours()
 end
 
 function M.init(context)
@@ -73,31 +83,32 @@ function M.start_transform_fx(item)
 	card.states.visible = true
 	card.dissolve = 0
 	card.dissolve_wipe = 0
-	card.dissolve_colours = BURN_DISSOLVE_COLOURS
+	card.dissolve_colours = burn_dissolve_colours()
 
 	play_sfx("whoosh2", math.random() * 0.2 + 0.9, 0.5)
 	play_sfx("crumple" .. math.random(1, 5), math.random() * 0.2 + 0.9, 0.5)
 
 	-- Phase 1: red card burns away like crumpling paper (fibrous noise dissolve).
-	dissolve_fx().run(card, {
+	local dissolve_time = transform_dissolve_time()
+	fx().run(card, {
 		mode = "out",
-		duration = TRANSFORM_DISSOLVE_TIME,
+		duration = dissolve_time,
 		wipe = 0,
 		pulse = true,
-		colours = BURN_DISSOLVE_COLOURS,
-		fade = { delay = 0.7 * TRANSFORM_DISSOLVE_TIME, duration = 0.3 * TRANSFORM_DISSOLVE_TIME },
+		colours = burn_dissolve_colours(),
+		fade = { delay = 0.7 * dissolve_time, duration = 0.3 * dissolve_time },
 		on_finish = function()
 			apply_modified_market_face(card, item)
 			card.dissolve = 1
 			card.dissolve_wipe = 0
-			card.dissolve_colours = BURN_MATERIALIZE_COLOURS
+			card.dissolve_colours = burn_materialize_colours()
 			-- Phase 2: modified card re-forms from the same burnt-paper dissolve, reversed.
-			dissolve_fx().run(card, {
+			fx().run(card, {
 				mode = "in",
-				duration = TRANSFORM_MATERIALIZE_TIME,
+				duration = transform_materialize_time(),
 				wipe = 0,
 				pulse = true,
-				colours = BURN_MATERIALIZE_COLOURS,
+				colours = burn_materialize_colours(),
 				particle = { timer = 0.025, scale = 0.25, speed = 3, lifespan = 0.7 },
 				on_finish = finish_transform_fx,
 			})
@@ -117,7 +128,7 @@ function M.start_remove_dissolve(item)
 	item.removed = true
 	play_sfx("whoosh2", math.random() * 0.2 + 0.9, 0.5)
 	play_sfx("crumple" .. math.random(1, 5), math.random() * 0.2 + 0.9, 0.5)
-	dissolve_fx().run(card, {
+	fx().run(card, {
 		duration = 0.7,
 		colours = { G.C.BLACK, G.C.ORANGE, G.C.RED, G.C.GOLD },
 		pulse = true,

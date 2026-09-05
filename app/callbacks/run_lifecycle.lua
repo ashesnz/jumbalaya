@@ -1,3 +1,8 @@
+--[[
+	app/callbacks/run_lifecycle.lua - Run start / menu return G.FUNCS.
+
+	setup_run and notify_then_setup_run are legacy aliases kept for save/UI compat.
+]]
 
 G.FUNCS.setup_run = function(e)
   G.FUNCS.begin_run(e)

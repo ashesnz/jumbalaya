@@ -2,15 +2,32 @@
 
 local model = require("word_game.model.bonus_stack")
 local layout = require("word_game.ui.boss_word_stack.layout")
-local DissolveFX = require("app.effects.dissolve_fx")
 
 local M = {}
 
-local TRANSFORM_DISSOLVE_TIME = 0.7
-local TRANSFORM_MATERIALIZE_TIME = 0.6
-local TRANSFORM_TOTAL = TRANSFORM_DISSOLVE_TIME + TRANSFORM_MATERIALIZE_TIME + 0.1
-local BURN_DISSOLVE_COLOURS = { G.C.BLACK, G.C.ORANGE, G.C.RED, G.C.GOLD, G.C.MUTED_GREY }
-local BURN_MATERIALIZE_COLOURS = { G.C.BLACK, G.C.ORANGE, G.C.GOLD, G.C.WHITE }
+local function fx()
+	return require("app.effects.dissolve_fx")
+end
+
+local function transform_dissolve_time()
+	return fx().CARD_TRANSFORM_DISSOLVE_TIME
+end
+
+local function transform_materialize_time()
+	return fx().CARD_TRANSFORM_MATERIALIZE_TIME
+end
+
+local function transform_total()
+	return transform_dissolve_time() + transform_materialize_time() + 0.1
+end
+
+local function burn_dissolve_colours()
+	return fx().card_transform_dissolve_colours()
+end
+
+local function burn_materialize_colours()
+	return fx().card_transform_materialize_colours()
+end
 
 local function stack()
 	return require("word_game.ui.boss_word_stack")
@@ -41,7 +58,8 @@ end
 
 local function run_gold_transform(card, on_complete)
 	local S = stack()
-	if not card or not DissolveFX or not DissolveFX.run then
+	local dissolve = fx()
+	if not card or not dissolve or not dissolve.run then
 		S.become_bonus_card(card)
 		if on_complete then on_complete() end
 		return
@@ -52,34 +70,35 @@ local function run_gold_transform(card, on_complete)
 	end
 	card.dissolve = 0
 	card.dissolve_wipe = 0
-	card.dissolve_colours = BURN_DISSOLVE_COLOURS
+	card.dissolve_colours = burn_dissolve_colours()
 
 	if play_sfx then
 		play_sfx("whoosh2", math.random() * 0.2 + 0.9, 0.5)
 		play_sfx("crumple" .. math.random(1, 5), math.random() * 0.2 + 0.9, 0.5)
 	end
 
-	DissolveFX.run(card, {
+	local dissolve_time = transform_dissolve_time()
+	dissolve.run(card, {
 		mode = "out",
-		duration = TRANSFORM_DISSOLVE_TIME,
+		duration = dissolve_time,
 		wipe = 0,
 		pulse = true,
-		colours = BURN_DISSOLVE_COLOURS,
+		colours = burn_dissolve_colours(),
 		fade = {
-			delay = 0.7 * TRANSFORM_DISSOLVE_TIME,
-			duration = 0.3 * TRANSFORM_DISSOLVE_TIME,
+			delay = 0.7 * dissolve_time,
+			duration = 0.3 * dissolve_time,
 		},
 		on_finish = function()
 			S.become_bonus_card(card)
 			card.dissolve = 1
 			card.dissolve_wipe = 0
-			card.dissolve_colours = BURN_MATERIALIZE_COLOURS
-			DissolveFX.run(card, {
+			card.dissolve_colours = burn_materialize_colours()
+			dissolve.run(card, {
 				mode = "in",
-				duration = TRANSFORM_MATERIALIZE_TIME,
+				duration = transform_materialize_time(),
 				wipe = 0,
 				pulse = true,
-				colours = BURN_MATERIALIZE_COLOURS,
+				colours = burn_materialize_colours(),
 				particle = { timer = 0.025, scale = 0.25, speed = 3, lifespan = 0.7 },
 				on_finish = function()
 					card.dissolve = 0
@@ -194,7 +213,7 @@ function M.animate_cards_to_stack(queue_event, _easing_mod, opts)
 	queue_event(Tween({
 		mode = "delayed",
 		timer = "REAL",
-		delay = initial_delay + ((#cards - 1) * stagger) + TRANSFORM_TOTAL + card_delay + hold,
+		delay = initial_delay + ((#cards - 1) * stagger) + transform_total() + card_delay + hold,
 		blocking = true,
 		func = function()
 			for index, card in ipairs(cards) do

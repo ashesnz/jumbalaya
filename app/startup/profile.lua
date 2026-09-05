@@ -26,7 +26,6 @@ function Game:load_profile(_profile)
 			furthest_set = {label = 'Highest Set', amt = 0},
 			most_points = {label = 'Most Points', amt = 0},
 			boss_word_streak = {label = 'Most Boss Words in a Row', amt = 0},
-			collection = {label = 'Collection', amt = 0, tot = 1},
 			win_streak = {label = 'Best Win Streak', amt = 0},
 			current_streak = {label = '', amt = 0},
 			best_word_pattern = {label = 'Most Played Pattern', amt = 0}

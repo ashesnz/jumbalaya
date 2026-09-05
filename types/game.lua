@@ -202,7 +202,6 @@
 ---@field deck CardArea|nil
 ---@field discard CardArea|nil
 ---@field play CardArea|nil
----@field jokers CardArea|nil
 ---@field consumeables CardArea|nil
 ---@field view_deck CardArea[]|nil
 ---@field VIEWING_DECK any

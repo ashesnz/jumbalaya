@@ -2,14 +2,20 @@
 
 local Layout = require("word_game.ui.layout")
 local hud_definition = require("word_game.ui.sidebar.hud_definition")
-local hand_progress = require("word_game.ui.sidebar.hand_progress")
+local StageLabel = require("word_game.ui.stage_label")
 local sidebar_callbacks = require("word_game.ui.sidebar.callbacks")
 local deck = require("word_game.model.cards.deck")
 local table_discard = require("word_game.ui.table_discard")
 
 local WordSidebar = {}
 
-WordSidebar.roll_to_next_hand = hand_progress.roll_to_next_hand
+WordSidebar.roll_to_next_hand = function()
+	if WORD_GAME and WORD_GAME.StageLabel and WORD_GAME.StageLabel.roll_to_next_hand then
+		WORD_GAME.StageLabel.roll_to_next_hand()
+	elseif StageLabel.roll_to_next_hand then
+		StageLabel.roll_to_next_hand()
+	end
+end
 WordSidebar.hud_definition = hud_definition.hud_definition
 WordSidebar.relayout_vault = hud_definition.relayout_vault
 WordSidebar.sync_action_buttons = hud_definition.sync_action_buttons

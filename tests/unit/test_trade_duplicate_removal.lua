@@ -123,6 +123,10 @@ T.describe("Marketplace dissolve slot refill (word_game.ui.trade)", function()
 		local real_fx = package.loaded["app.effects.dissolve_fx"]
 		package.loaded["word_game.ui.trade"] = nil
 		package.loaded["app.effects.dissolve_fx"] = {
+			CARD_TRANSFORM_DISSOLVE_TIME = 0.7,
+			CARD_TRANSFORM_MATERIALIZE_TIME = 0.6,
+			card_transform_dissolve_colours = function() return {} end,
+			card_transform_materialize_colours = function() return {} end,
 			run = function(target, opts)
 				captured.target = target
 				captured.opts = opts
