@@ -244,10 +244,10 @@ end
 
 function M.end_match(won)
 	state.record_current_jumble_if_best()
-	local alpha = state.get()
-	if alpha then
-		alpha.match_over = true
-		alpha.match_won = won and true or false
+	local rs = state.get()
+	if rs then
+		rs.match_over = true
+		rs.match_won = won and true or false
 	end
 	if WORD_GAME.EndMatch then
 		WORD_GAME.EndMatch.open(won)

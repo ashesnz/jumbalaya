@@ -5,7 +5,7 @@ local hud_definition = require("word_game.ui.sidebar.hud_definition")
 local StageLabel = require("word_game.ui.stage_label")
 local sidebar_callbacks = require("word_game.ui.sidebar.callbacks")
 local deck = require("word_game.model.cards.deck")
-local table_discard = require("word_game.ui.table_discard")
+local table_discard = require("word_game.ui.perks.discard_bin")
 
 local WordSidebar = {}
 

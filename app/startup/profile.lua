@@ -2,6 +2,50 @@
 	app/startup/profile.lua - Profile load and language setup.
 ]]
 
+local DEAD_CAREER_STATS = {
+	"c_round_interest_cap_streak",
+	"c_dollars_earned",
+	"c_shop_dollars_spent",
+	"orbits_bought",
+	"c_playing_cards_bought",
+	"c_vouchers_bought",
+	"orbit_wheel_used",
+	"c_shop_rerolls",
+	"c_cards_played",
+	"c_cards_discarded",
+	"c_losses",
+	"c_rounds",
+	"c_hands_played",
+	"c_face_cards_played",
+	"power_cards_sold",
+	"c_cards_sold",
+	"c_single_hand_round_streak",
+	-- Legacy keys merged on load; strip if still present.
+	"c_planets_bought",
+	"c_planetarium_used",
+	"c_jokers_sold",
+}
+
+local function trim_profile(profile)
+	if not profile then return end
+	local stats = profile.career_stats
+	if stats then
+		for _, key in ipairs(DEAD_CAREER_STATS) do
+			stats[key] = nil
+		end
+	end
+	local high_scores = profile.high_scores
+	if high_scores then
+		if high_scores.poker_hand and not high_scores.best_word_pattern then
+			high_scores.best_word_pattern = high_scores.poker_hand
+		end
+		high_scores.collection = nil
+		high_scores.poker_hand = nil
+	end
+	profile.challenges_unlocked = nil
+	profile.challenge_progress = nil
+end
+
 function Game:load_profile(_profile)
 	if not G.PROFILES[_profile] then _profile = 1 end
 	G.SETTINGS.profile = _profile
@@ -32,24 +76,7 @@ function Game:load_profile(_profile)
 		},
 
 		career_stats = {
-			c_round_interest_cap_streak = 0,
-			c_dollars_earned = 0,
-			c_shop_dollars_spent = 0,
-			orbits_bought = 0,
-			c_playing_cards_bought = 0,
-			c_vouchers_bought = 0,
-			orbit_wheel_used = 0,
-			c_shop_rerolls = 0,
-			c_cards_played = 0,
-			c_cards_discarded = 0,
-			c_losses = 0,
 			c_wins = 0,
-			c_rounds = 0,
-			c_hands_played = 0,
-			c_face_cards_played = 0,
-			power_cards_sold = 0,
-			c_cards_sold = 0,
-			c_single_hand_round_streak = 0,
 		},
 		progress = {},
 		tile_usage = {},
@@ -58,11 +85,6 @@ function Game:load_profile(_profile)
 		hand_usage = {},
 		deck_usage = {},
 		deck_stakes = {},
-		challenges_unlocked = nil,
-		challenge_progress = {
-			completed = {},
-			unlocked = {}
-		}
 	}
 
 	local recursive_init
@@ -76,10 +98,12 @@ function Game:load_profile(_profile)
 		end
 	end
 
-	recursive_init(temp_profile, G.PROFILES[G.SETTINGS.profile])
+	local profile = G.PROFILES[G.SETTINGS.profile]
+	recursive_init(temp_profile, profile)
 
 	-- Migrate legacy stat keys from older profile saves.
-	local stats = G.PROFILES[G.SETTINGS.profile].career_stats
+	local stats = profile.career_stats or {}
+	profile.career_stats = stats
 	local legacy_stats = {
 		c_planets_bought = "orbits_bought",
 		c_planetarium_used = "orbit_wheel_used",
@@ -91,11 +115,11 @@ function Game:load_profile(_profile)
 			stats[old_key] = nil
 		end
 	end
-	local high_scores = G.PROFILES[G.SETTINGS.profile].high_scores
-	if high_scores.poker_hand and not high_scores.best_word_pattern then
+	local high_scores = profile.high_scores
+	if high_scores and high_scores.poker_hand and not high_scores.best_word_pattern then
 		high_scores.best_word_pattern = high_scores.poker_hand
-		high_scores.poker_hand = nil
 	end
+	trim_profile(profile)
 end
 
 function Game:set_language()

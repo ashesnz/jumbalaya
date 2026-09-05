@@ -39,7 +39,7 @@ T.describe("table discard bin", function()
 
 		T.assert_not_nil(find_id(def, "row_discard"), "discard row should exist")
 		T.assert_not_nil(find_id(def, "end_run_button"), "End Run button should occupy the discard slot")
-		if not require("word_game.ui.table_discard").bin_enabled() then
+		if not require("word_game.ui.perks.discard_bin").bin_enabled() then
 			T.assert_nil(find_id(def, "row_discards_left"), "discards left row hidden until bin unlocks")
 		else
 			T.assert_not_nil(find_id(def, "row_discards_left"), "discards left row should exist below the bin")
@@ -51,7 +51,7 @@ T.describe("table discard bin", function()
 	end)
 
 	T.it("counts discards left down from 3 to 0 with odometer rolls", function()
-		local table_discard = require("word_game.ui.table_discard")
+		local table_discard = require("word_game.ui.perks.discard_bin")
 		table_discard.reset()
 		T.assert_equal(table_discard.discards_left(), 3)
 
@@ -94,7 +94,7 @@ T.describe("table discard bin", function()
 	end)
 
 	T.it("starts on the empty top-left sprite and advances through the 2x2 sheet", function()
-		local table_discard = require("word_game.ui.table_discard")
+		local table_discard = require("word_game.ui.perks.discard_bin")
 		G.STATE = G.STATES.MENU or 2
 		table_discard.reset()
 
@@ -138,7 +138,7 @@ T.describe("table discard bin", function()
 	end)
 
 	T.it("shows End Run on the table board while the bin is disabled", function()
-		local table_discard = require("word_game.ui.table_discard")
+		local table_discard = require("word_game.ui.perks.discard_bin")
 		table_discard.reset()
 		G.STATE = G.STATES.TABLE_BOARD
 		G.STAGE = G.STAGES.RUN
@@ -152,7 +152,7 @@ T.describe("table discard bin", function()
 
 	T.it("end_run triggers game over from the sidebar button", function()
 		MockEnv.setup()
-		local table_discard = require("word_game.ui.table_discard")
+		local table_discard = require("word_game.ui.perks.discard_bin")
 		G.STATES.GAME_OVER = 4
 		table_discard.reset()
 		G.GAME = G.GAME or {}
@@ -175,7 +175,7 @@ T.describe("table discard bin", function()
 	end)
 
 	T.it("sprite viewport covers one sheet cell, not the full atlas", function()
-		local table_discard = require("word_game.ui.table_discard")
+		local table_discard = require("word_game.ui.perks.discard_bin")
 		G.TEXTURE_ATLASES = G.TEXTURE_ATLASES or {}
 		G.TEXTURE_ATLASES.bin = {
 			cols = 2,
@@ -194,7 +194,7 @@ T.describe("table discard bin", function()
 
 	T.it("blocks drag-to-bin discards while the bin feature is disabled", function()
 		MockEnv.setup()
-		local table_discard = require("word_game.ui.table_discard")
+		local table_discard = require("word_game.ui.perks.discard_bin")
 		local deck = require("word_game.model.cards.deck")
 		table_discard.reset()
 
@@ -231,9 +231,9 @@ T.describe("table discard bin", function()
 	end)
 
 	T.it("discards a hand card, updates the bin sprite, and deals a replacement", function()
-		if not require("word_game.ui.table_discard").bin_enabled() then return end
+		if not require("word_game.ui.perks.discard_bin").bin_enabled() then return end
 		MockEnv.setup()
-		local table_discard = require("word_game.ui.table_discard")
+		local table_discard = require("word_game.ui.perks.discard_bin")
 		local deck = require("word_game.model.cards.deck")
 		table_discard.reset()
 
@@ -317,7 +317,7 @@ T.describe("table discard bin", function()
 
 	T.it("blocks discards while the bin feature is disabled", function()
 		MockEnv.setup()
-		local table_discard = require("word_game.ui.table_discard")
+		local table_discard = require("word_game.ui.perks.discard_bin")
 		local deck = require("word_game.model.cards.deck")
 		table_discard.reset()
 
@@ -350,9 +350,9 @@ T.describe("table discard bin", function()
 	end)
 
 	T.it("resets the bin sprite when a fresh jumble hand is dealt", function()
-		if not require("word_game.ui.table_discard").bin_enabled() then return end
+		if not require("word_game.ui.perks.discard_bin").bin_enabled() then return end
 		MockEnv.setup()
-		local table_discard = require("word_game.ui.table_discard")
+		local table_discard = require("word_game.ui.perks.discard_bin")
 		local deck = require("word_game.model.cards.deck")
 		table_discard.reset()
 		table_discard.record_discard()

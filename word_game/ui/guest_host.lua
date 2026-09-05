@@ -115,8 +115,8 @@ function GuestHost:draw()
 end
 
 function GuestHost.ensure()
-	local alpha = state.get()
-	local want = alpha and alpha.stage3_cinematic and alpha.stage3_guest_visible
+	local rs = state.get()
+	local want = rs and rs.stage3_cinematic and rs.stage3_guest_visible
 	if G.STATE ~= G.STATES.TABLE_BOARD or not want then
 		if G.guest_host then
 			G.guest_host.states.visible = false

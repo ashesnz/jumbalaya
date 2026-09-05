@@ -71,10 +71,10 @@ end
 local function action_visible()
 	if not M.visible() then return false end
 	if jumble_active() then return true end
-	local alpha = state.get()
-	local waiting = alpha and alpha.intro_waiting_score
-	local cinematic = alpha and alpha.stage3_cinematic
-	local ally_talk = cinematic and (alpha.stage3_ally_line or alpha.stage3_guest_line)
+	local rs = state.get()
+	local waiting = rs and rs.intro_waiting_score
+	local cinematic = rs and rs.stage3_cinematic
+	local ally_talk = cinematic and (rs.stage3_ally_line or rs.stage3_guest_line)
 	if waiting or (cinematic and not ally_talk) then return false end
 	return true
 end
@@ -127,12 +127,12 @@ local function sync_play_button(play_btn, show)
 		return
 	end
 
-	local alpha = state.get()
-	local intro = alpha and alpha.character_intro_active
-	local cinematic = alpha and alpha.stage3_cinematic
-	local ally_talk = cinematic and (alpha.stage3_ally_line or alpha.stage3_guest_line)
+	local rs = state.get()
+	local intro = rs and rs.character_intro_active
+	local cinematic = rs and rs.stage3_cinematic
+	local ally_talk = cinematic and (rs.stage3_ally_line or rs.stage3_guest_line)
 	local keys = characters.intro_step_keys()
-	local current_key = keys and alpha and keys[alpha.character_intro_step or 1]
+	local current_key = keys and rs and keys[rs.character_intro_step or 1]
 	local use_play = (not intro) or characters.intro_uses_play_button(current_key)
 
 	if ally_talk then

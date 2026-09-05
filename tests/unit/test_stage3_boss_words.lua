@@ -482,7 +482,7 @@ T.describe("Stage 1-3 boss words", function()
 		local play_effects = require("word_game.ui.play_effects")
 		local word_feedback = require("word_game.ui.word_feedback")
 		local InputLock = require("word_game.model.input_lock")
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 
 		T.assert_equal(#play_effects.BOSS_INTRO.steps, 3)
 		for i, step in ipairs(play_effects.BOSS_INTRO.steps) do

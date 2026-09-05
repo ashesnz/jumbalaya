@@ -26,8 +26,8 @@ end
 
 local function match_stats()
 	state.record_current_jumble_if_best()
-	local alpha = state.get()
-	return (alpha and alpha.stats) or {}
+	local rs = state.get()
+	return (rs and rs.stats) or {}
 end
 
 function M.definition(won)

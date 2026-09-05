@@ -98,12 +98,12 @@ return function(ctx)
 	end
 
 	function PlayerHost.current_intro_key()
-		local alpha = state.get()
-		if not alpha or not alpha.character_intro_active then
+		local rs = state.get()
+		if not rs or not rs.character_intro_active then
 			return nil
 		end
 		local keys = characters.intro_step_keys()
-		return keys and keys[alpha.character_intro_step or 1]
+		return keys and keys[rs.character_intro_step or 1]
 	end
 
 	function PlayerHost.allows_card_drag(area)
@@ -113,8 +113,8 @@ return function(ctx)
 		if WORD_GAME and WORD_GAME.HandClearFocus and WORD_GAME.HandClearFocus.is_active() then
 			return false
 		end
-		local alpha = state.get()
-		if alpha and (alpha.intro_waiting_score or alpha.stage3_cinematic) then
+		local rs = state.get()
+		if rs and (rs.intro_waiting_score or rs.stage3_cinematic) then
 			return false
 		end
 		local key = PlayerHost.current_intro_key()
@@ -167,11 +167,11 @@ return function(ctx)
 			host:remove_speech_bubble()
 		end
 		PlayerHost.clear_spotlight()
-		local alpha = state.get()
-		if alpha then
-			alpha.character_intro_active = false
-			alpha.character_intro_step = nil
-			alpha.intro_waiting_score = nil
+		local rs = state.get()
+		if rs then
+			rs.character_intro_active = false
+			rs.character_intro_step = nil
+			rs.intro_waiting_score = nil
 		end
 		if WORD_GAME and WORD_GAME.Sidebar then
 			WORD_GAME.Sidebar.sync_action_buttons()

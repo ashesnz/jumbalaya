@@ -1,6 +1,6 @@
 --[[ word_game/ui/perks/stamp/draw.lua - 3D rubber-stamp geometry and rendering ]]
 
-local perk_voucher = require("word_game.ui.perk_voucher")
+local perk_voucher = require("word_game.ui.perks.voucher")
 
 local M = {}
 

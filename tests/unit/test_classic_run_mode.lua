@@ -25,7 +25,7 @@ T.describe("Classic run mode", function()
 	T.it("bumps the classic slider and smoke through CAT → CART → CREST then resets on next puzzle", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		local jumble = require("word_game.model.jumble")
 		local rules = require("word_game.model.jumble_play.jumble_rules")
 		WORD_GAME.TimelineTimer = tt
@@ -121,7 +121,7 @@ T.describe("Classic run mode", function()
 			target = 25,
 			jumble = { total_score = 25, puzzle_points = 0, puzzle_multi = 1.0 },
 		}
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		local vault_btn = require("word_game.ui.vault_stage_button")
 		WORD_GAME.TimelineTimer = tt
 		WORD_GAME.VaultStageButton = vault_btn
@@ -142,7 +142,7 @@ T.describe("Classic run mode", function()
 		}
 		local RunMode = require("word_game.model.run_mode")
 		local rules = require("word_game.model.jumble_play.jumble_rules")
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		WORD_GAME.TimelineTimer = tt
 		tt.reset_progress(25)
 		tt.sync_progress()
@@ -215,7 +215,7 @@ T.describe("Classic run mode", function()
 	T.it("shows post-target scoring on the classic timeline slider", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		G.GAME.word_round = {
 			target = 25,
 			jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0 },
@@ -286,7 +286,7 @@ T.describe("Classic run mode", function()
 		local RunMode = require("word_game.model.run_mode")
 		local placement_controls = require("word_game.ui.placement_controls")
 		local HandShuffle = require("word_game.ui.hand_shuffle")
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		WORD_GAME.TimelineTimer = tt
 		WORD_GAME.HandShuffle = HandShuffle
 		WORD_GAME.Jumble = {
@@ -348,7 +348,7 @@ T.describe("Classic run mode", function()
 			target = 25,
 			jumble = { total_score = 30 },
 		}
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		local token_reward = require("word_game.ui.token_reward")
 		WORD_GAME.TimelineTimer = tt
 		WORD_GAME.TokenReward = token_reward

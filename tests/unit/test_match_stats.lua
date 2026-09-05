@@ -11,8 +11,8 @@ T.describe("Match jumble stats", function()
 	local end_match = require("word_game.ui.end_match")
 
 	local function stats()
-		local alpha = state.get()
-		return alpha and alpha.stats or {}
+		local rs = state.get()
+		return rs and rs.stats or {}
 	end
 
 	T.it("counts each successful word play", function()

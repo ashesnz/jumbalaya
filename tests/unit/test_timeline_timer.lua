@@ -8,7 +8,7 @@ local mock_env = require("tests.helpers.mock_env")
 T.describe("Timeline Timer & Shape Math", function()
 	T.it("generates mathematical polygon vertices with rounded corners and slanted right edge", function()
 		mock_env.reset_game()
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		local x, y, w, h, slant, r = 100, 50, 400, 40, 36, 6
 		local verts = tt.build_shape_polygon(x, y, w, h, slant, r, 6)
 
@@ -41,7 +41,7 @@ T.describe("Timeline Timer & Shape Math", function()
 	end)
 
 	T.it("initializes to 60s duration and decrements over 60 seconds", function()
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		tt.reset()
 		T.assert_equal(tt.TOTAL_DURATION, 60.0)
 		T.assert_equal(tt.time_remaining, 60.0)
@@ -66,7 +66,7 @@ T.describe("Timeline Timer & Shape Math", function()
 			clear_hand = function() end,
 			sync_visibility = function() end,
 		}
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		local round = require("word_game.model.round")
 		WORD_GAME.TimelineTimer = tt
 
@@ -94,7 +94,7 @@ T.describe("Timeline Timer & Shape Math", function()
 
 
 	T.it("formats countdown timer text with dynamic decimal precision under 10s and 5s", function()
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		-- >= 10s: whole number
 		T.assert_equal(tt.format_time(60.0), "60")
 		T.assert_equal(tt.format_time(45.2), "45")
@@ -116,7 +116,7 @@ T.describe("Timeline Timer & Shape Math", function()
 	end)
 
 	T.it("freezes reward display to whole seconds matching token count", function()
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		tt.reset()
 		tt.update(49.2)
 		tt.freeze_reward_display(math.floor(49.2))
@@ -129,7 +129,7 @@ T.describe("Timeline Timer & Shape Math", function()
 	T.it("shows classic score progress instead of a countdown timer", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		G.GAME.word_round = {
 			target = 50,
 			jumble = { total_score = 18, puzzle_points = 4, puzzle_multi = 2.0, puzzle_words = {} },
@@ -146,7 +146,7 @@ T.describe("Timeline Timer & Shape Math", function()
 	T.it("keeps the slider width fixed and slides the goal seam left after target is exceeded", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		G.GAME.word_round = {
 			target = 25,
 			jumble = { total_score = 50, puzzle_points = 0, puzzle_multi = 1.0, puzzle_words = {} },
@@ -166,7 +166,7 @@ T.describe("Timeline Timer & Shape Math", function()
 	T.it("animates the slider toward projected score on each word play", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		G.GAME.word_round = {
 			target = 50,
 			jumble = {
@@ -189,7 +189,7 @@ T.describe("Timeline Timer & Shape Math", function()
 	T.it("engages smoke only after the third word on the same puzzle", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 
 		local function sync_words(words)
 			G.GAME.word_round = {
@@ -216,7 +216,7 @@ T.describe("Timeline Timer & Shape Math", function()
 	T.it("resets smoke when advancing to a new puzzle", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		G.GAME.word_round = {
 			target = 50,
 			jumble = {
@@ -246,7 +246,7 @@ T.describe("Timeline Timer & Shape Math", function()
 	T.it("eases vibration down after a high combo puzzle ends", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		G.GAME.word_round = {
 			target = 50,
 			jumble = {
@@ -273,7 +273,7 @@ T.describe("Timeline Timer & Shape Math", function()
 	T.it("escalates glow, smoke, and shake after the third consecutive word", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 
 		local function sync_words(words)
 			G.GAME.word_round = {
@@ -319,7 +319,7 @@ T.describe("Timeline Timer & Shape Math", function()
 			clear_hand = function() end,
 			sync_visibility = function() end,
 		}
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		local round = require("word_game.model.round")
 		WORD_GAME.TimelineTimer = tt
 		G.GAME.word_round = { set = 1, hand_index = 1, target = 25, played_words = {} }
@@ -334,7 +334,7 @@ T.describe("Timeline Timer & Shape Math", function()
 	T.it("pauses countdown until resumed or reset", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "time_run"
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		tt.reset()
 		tt.update(10.0)
 		T.assert_almost_equal(tt.time_remaining, 50.0, 0.01)
@@ -383,7 +383,7 @@ T.describe("Timeline Timer & Shape Math", function()
 	T.it("hides the slider then arms a 60s countdown that scales back in", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		G.GAME.word_round = {
 			target = 50,
 			jumble = { total_score = 18, puzzle_points = 0, puzzle_multi = 1.0, puzzle_words = {} },
@@ -422,7 +422,7 @@ T.describe("Timeline Timer & Shape Math", function()
 	T.it("clears the boss countdown override when a new classic hand starts", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		tt.arm_boss_countdown(60)
 		T.assert_false(tt.is_progress_mode())
 		T.assert_equal(tt.intro_visible, 0)

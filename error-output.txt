@@ -23,3 +23,5 @@ os=OS X texture_scaling=2 window=1024x576
 Steam not available — running without Steam integration
 SAVING PROGRESS
 SAVING SETTINGS
+SAVING SETTINGS
+SAVING SETTINGS

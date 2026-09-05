@@ -1,6 +1,6 @@
 --[[ word_game/ui/perk_voucher_sprite.lua - Moveable perk voucher for UI/market ]]
 
-local perk_voucher = require("word_game.ui.perk_voucher")
+local perk_voucher = require("word_game.ui.perks.voucher")
 
 PerkVoucherSprite = AnimNode:derive("PerkVoucherSprite")
 

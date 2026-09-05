@@ -2,7 +2,7 @@
 	word_game/ui/cardarea/discard.lua - Discard pile CardArea behaviour.
 ]]
 
-local table_discard = require("word_game.ui.table_discard")
+local table_discard = require("word_game.ui.perks.discard_bin")
 
 local M = {}
 

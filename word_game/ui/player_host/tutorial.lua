@@ -19,11 +19,11 @@ return function(ctx)
 	end
 
 	function PlayerHost.continue_after_score()
-		local alpha = state.get()
-		if alpha then
-			alpha.intro_waiting_score = nil
+		local rs = state.get()
+		if rs then
+			rs.intro_waiting_score = nil
 		end
-		if not alpha or not alpha.character_intro_active then return end
+		if not rs or not rs.character_intro_active then return end
 
 		local keys = characters.intro_step_keys()
 		if not keys then
@@ -31,13 +31,13 @@ return function(ctx)
 			return
 		end
 
-		local step = (alpha.character_intro_step or 1) + 1
+		local step = (rs.character_intro_step or 1) + 1
 		if step > #keys then
 			PlayerHost.dismiss_intro()
 			return
 		end
 
-		alpha.character_intro_step = step
+		rs.character_intro_step = step
 		PlayerHost.show_step(step)
 		if WORD_GAME and WORD_GAME.Sidebar then
 			WORD_GAME.Sidebar.sync_action_buttons()
@@ -45,9 +45,9 @@ return function(ctx)
 	end
 
 	function PlayerHost.advance_intro()
-		local alpha = state.get()
-		if not alpha or not alpha.character_intro_active then return end
-		if alpha.intro_waiting_score then return end
+		local rs = state.get()
+		if not rs or not rs.character_intro_active then return end
+		if rs.intro_waiting_score then return end
 
 		local keys = characters.intro_step_keys()
 		if not keys then
@@ -55,7 +55,7 @@ return function(ctx)
 			return
 		end
 
-		local current_key = keys[alpha.character_intro_step or 1]
+		local current_key = keys[rs.character_intro_step or 1]
 		local required = characters.intro_required_word(current_key)
 		if required then
 			local preview = WORD_GAME and WORD_GAME.Play and WORD_GAME.Play.preview()
@@ -63,7 +63,7 @@ return function(ctx)
 				PlayerHost.show_nudge(characters.intro_nudge_key(current_key) or current_key)
 				return
 			end
-			alpha.intro_waiting_score = true
+			rs.intro_waiting_score = true
 			PlayerHost.clear_spotlight()
 			local host = G.player_host
 			if host then
@@ -91,13 +91,13 @@ return function(ctx)
 			return
 		end
 
-		local step = (alpha.character_intro_step or 1) + 1
+		local step = (rs.character_intro_step or 1) + 1
 		if step > #keys then
 			PlayerHost.dismiss_intro()
 			return
 		end
 
-		alpha.character_intro_step = step
+		rs.character_intro_step = step
 		PlayerHost.show_step(step)
 	end
 
@@ -106,10 +106,10 @@ return function(ctx)
 		if characters.skip_intro() then return end
 		local char = characters.current()
 		if not char or char.key ~= "milo" then return end
-		local alpha = state.get()
-		if not alpha or alpha.milo_intro_shown then return end
-		alpha.milo_intro_shown = true
-		alpha.character_intro_step = 1
+		local rs = state.get()
+		if not rs or rs.milo_intro_shown then return end
+		rs.milo_intro_shown = true
+		rs.character_intro_step = 1
 
 		local letters = characters.intro_hand_letters()
 		if letters and WORD_GAME and WORD_GAME.Deck then

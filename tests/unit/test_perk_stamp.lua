@@ -119,7 +119,7 @@ T.describe("perk stamp visible mesh", function()
 	G.STATES = G.STATES or { TABLE_BOARD = 1 }
 	G.STATE = G.STATES.TABLE_BOARD
 
-	local Stamp = require("word_game.ui.perk_stamp")
+	local Stamp = require("word_game.ui.perks.stamp")
 	Stamp.reset()
 
 	local mesh = Stamp.debug_mesh(0, 0, 2, nil, nil, 1, nil)
@@ -307,8 +307,8 @@ T.describe("perk stamp panel layout", function()
 	G.TILESIZE = 71
 	G.TABLE_BOARD_SIDEBAR_WIDTH = 3.0
 
-	local Stamp = require("word_game.ui.perk_stamp")
-	local stamp_grid = require("word_game.ui.stamp_grid")
+	local Stamp = require("word_game.ui.perks.stamp")
+	local stamp_grid = require("word_game.ui.perks.stamp_grid")
 	local perk_cfg = require("word_game.config.perks")
 	Stamp.reset()
 
@@ -331,7 +331,7 @@ T.describe("perk stamp panel layout", function()
 	end)
 
 	T.it("uses tight atlas bounds for each of the six stamps", function()
-		local perk_voucher = require("word_game.ui.perk_voucher")
+		local perk_voucher = require("word_game.ui.perks.voucher")
 		T.assert_equal(#perk_cfg.STAMP_SPRITES, 6)
 		local expected = {
 			{ x = 8, y = 12, w = 287, h = 125 },
@@ -352,7 +352,7 @@ T.describe("perk stamp panel layout", function()
 	end)
 
 	T.it("fits a stamp inside the slot without changing aspect", function()
-		local perk_voucher = require("word_game.ui.perk_voucher")
+		local perk_voucher = require("word_game.ui.perks.voucher")
 		local entry = perk_cfg.STAMP_SPRITES[1]
 		local slot_w, slot_h = layout.cell.w, layout.cell.h
 		local region = perk_voucher.stamp_region(entry.pos)
@@ -541,7 +541,7 @@ T.describe("perk stamp click popup", function()
 	G.ROOM = { T = { x = 0, y = 0, w = 20, h = 11.5, r = 0 } }
 	G.ROOM_ATTACH = G.ROOM
 
-	local Stamp = require("word_game.ui.perk_stamp")
+	local Stamp = require("word_game.ui.perks.stamp")
 	local perk_cfg = require("word_game.config.perks")
 
 	T.it("opens a popup with the perk description when an imprint is clicked", function()
@@ -625,9 +625,9 @@ T.describe("perk stamp Perks.png sidebar imprint", function()
 	G.ROOM = G.ROOM or { T = { x = 0, y = 0, w = 20, h = 11.5, r = 0 } }
 	WORD_GAME.Sidebar = { refresh = function() end }
 
-	local Stamp = require("word_game.ui.perk_stamp")
+	local Stamp = require("word_game.ui.perks.stamp")
 	local perk_cfg = require("word_game.config.perks")
-	local perk_voucher = require("word_game.ui.perk_voucher")
+	local perk_voucher = require("word_game.ui.perks.voucher")
 
 	local function install_perk_atlas(iw, ih)
 		local image = {

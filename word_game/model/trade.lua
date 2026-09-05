@@ -70,8 +70,8 @@ function M.sync_offer_cards(offer_table)
 end
 
 function M.can_use()
-	local alpha = state.get()
-	return alpha and not alpha.trade_used_this_hand
+	local rs = state.get()
+	return rs and not rs.trade_used_this_hand
 end
 
 function M.is_showdown_market()
@@ -179,8 +179,8 @@ function M.roll_offer()
 end
 
 function M.add_letter(item, opts)
-	local alpha = state.get()
-	if not alpha then return false, "No match" end
+	local rs = state.get()
+	if not rs then return false, "No match" end
 	if not item or not item.letter then return false, "No letter selected" end
 	local cost = (opts and opts.cost) or M.ACTION_COSTS.add
 	if not state.spend_tokens(cost) then return false, "Not enough tokens" end
@@ -190,14 +190,14 @@ function M.add_letter(item, opts)
 		deck.apply_to_card(card)
 	end
 	if not (opts and opts.defer_used) then
-		alpha.trade_used_this_hand = true
+		rs.trade_used_this_hand = true
 	end
 	return true, card
 end
 
 function M.remove_card(item, opts)
-	local alpha = state.get()
-	if not alpha then return false, "No match" end
+	local rs = state.get()
+	if not rs then return false, "No match" end
 	local target = item and (item.card or item.remove_card)
 	if not target or target.REMOVED then
 		return false, "No card selected"
@@ -207,7 +207,7 @@ function M.remove_card(item, opts)
 	deck.destroy_card(target)
 	item.card = nil
 	if not (opts and opts.defer_used) then
-		alpha.trade_used_this_hand = true
+		rs.trade_used_this_hand = true
 	end
 	return true
 end
@@ -236,9 +236,9 @@ function M.apply(item, opts)
 end
 
 function M.mark_used()
-	local alpha = state.get()
-	if alpha then
-		alpha.trade_used_this_hand = true
+	local rs = state.get()
+	if rs then
+		rs.trade_used_this_hand = true
 	end
 end
 

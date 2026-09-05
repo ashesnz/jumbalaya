@@ -14,25 +14,25 @@ return function(ctx)
 	local STAGE23_GUEST_LINES = ctx.STAGE23_GUEST_LINES
 
 	function PlayerHost.begin_marco_play()
-		local alpha = state.get()
-		if not alpha then return end
-		alpha.cinematic_seen = alpha.cinematic_seen or {}
-		alpha.cinematic_seen["1-7"] = true
-		alpha.marco_cinematic_seen = true
-		alpha.stage3_cinematic = nil
-		alpha.stage3_portrait_rect = nil
-		alpha.stage3_portrait_pose = "left"
-		alpha.stage3_boss_portrait_rect = nil
-		alpha.stage3_ally_portrait_rect = nil
-		alpha.stage3_ally_visible = true
-		alpha.stage3_ally_index = 1
-		alpha.stage3_guest_portrait_rect = nil
-		alpha.stage3_guest_visible = true
-		alpha.stage3_guest_index = 2
-		alpha.stage3_guest_pose = "rest"
-		alpha.stage3_guest_line = nil
-		alpha.stage3_slide_started = nil
-		alpha.stage3_active_turn = "milo"
+		local rs = state.get()
+		if not rs then return end
+		rs.cinematic_seen = rs.cinematic_seen or {}
+		rs.cinematic_seen["1-7"] = true
+		rs.marco_cinematic_seen = true
+		rs.stage3_cinematic = nil
+		rs.stage3_portrait_rect = nil
+		rs.stage3_portrait_pose = "left"
+		rs.stage3_boss_portrait_rect = nil
+		rs.stage3_ally_portrait_rect = nil
+		rs.stage3_ally_visible = true
+		rs.stage3_ally_index = 1
+		rs.stage3_guest_portrait_rect = nil
+		rs.stage3_guest_visible = true
+		rs.stage3_guest_index = 2
+		rs.stage3_guest_pose = "rest"
+		rs.stage3_guest_line = nil
+		rs.stage3_slide_started = nil
+		rs.stage3_active_turn = "milo"
 		local host = G.player_host
 		if host then
 			host:remove_speech_bubble()
@@ -52,14 +52,14 @@ return function(ctx)
 	end
 
 	function PlayerHost.show_marco_line(index)
-		local alpha = state.get()
-		if not alpha or not alpha.stage3_cinematic then return end
+		local rs = state.get()
+		if not rs or not rs.stage3_cinematic then return end
 		local key = STAGE23_GUEST_LINES[index]
 		if not key then
 			PlayerHost.slide_marco_to_party()
 			return
 		end
-		alpha.stage3_guest_line = index
+		rs.stage3_guest_line = index
 		if WORD_GAME and WORD_GAME.GuestHost then
 			WORD_GAME.GuestHost.say(key)
 		end
@@ -70,31 +70,31 @@ return function(ctx)
 	end
 
 	function PlayerHost.slide_marco_to_party()
-		local alpha = state.get()
-		if not alpha or not alpha.stage3_cinematic then return end
+		local rs = state.get()
+		if not rs or not rs.stage3_cinematic then return end
 		if WORD_GAME and WORD_GAME.GuestHost then
 			WORD_GAME.GuestHost.clear()
 		end
-		alpha.stage3_guest_line = nil
+		rs.stage3_guest_line = nil
 		local from = Layout.guest_portrait_rect()
 		local dest = Layout.cinematic_guest_rest_rect()
-		alpha.stage3_guest_portrait_rect = {
+		rs.stage3_guest_portrait_rect = {
 			x = from.x,
 			y = from.y,
 			w = from.w,
 			h = from.h,
 		}
 		PlayerHost.sync_spotlight("milo_stage23_guest")
-		Easing.value{ref_table = alpha.stage3_guest_portrait_rect, ref_value = "x", mod = dest.x - from.x, timer = "REAL", not_blockable = true, delay = STAGE3_SLIDE_TIME, ease = "quad"}
+		Easing.value{ref_table = rs.stage3_guest_portrait_rect, ref_value = "x", mod = dest.x - from.x, timer = "REAL", not_blockable = true, delay = STAGE3_SLIDE_TIME, ease = "quad"}
 		Scheduler.add{
 			mode = "delayed",
 			delay = STAGE3_SLIDE_TIME,
 			blockable = false,
 			blocking = false,
 			func = function()
-				if alpha.stage3_cinematic then
-					alpha.stage3_guest_portrait_rect = nil
-					alpha.stage3_guest_pose = "rest"
+				if rs.stage3_cinematic then
+					rs.stage3_guest_portrait_rect = nil
+					rs.stage3_guest_pose = "rest"
 					PlayerHost.begin_marco_play()
 				end
 				return true
@@ -103,14 +103,14 @@ return function(ctx)
 	end
 
 	function PlayerHost.drop_marco()
-		local alpha = state.get()
-		if not alpha or not alpha.stage3_cinematic then return end
+		local rs = state.get()
+		if not rs or not rs.stage3_cinematic then return end
 		local dest = Layout.hud_portrait_rect()
 		local start_y = dest.y - dest.h - math.max(1.2, G.TILE_H * 0.22)
-		alpha.stage3_guest_visible = true
-		alpha.stage3_guest_index = 2
-		alpha.stage3_guest_pose = "center"
-		alpha.stage3_guest_portrait_rect = {
+		rs.stage3_guest_visible = true
+		rs.stage3_guest_index = 2
+		rs.stage3_guest_pose = "center"
+		rs.stage3_guest_portrait_rect = {
 			x = dest.x,
 			y = start_y,
 			w = dest.w,
@@ -120,15 +120,15 @@ return function(ctx)
 		if WORD_GAME and WORD_GAME.GuestHost then
 			WORD_GAME.GuestHost.ensure()
 		end
-		Easing.value{ref_table = alpha.stage3_guest_portrait_rect, ref_value = "y", mod = dest.y - start_y, timer = "REAL", not_blockable = true, delay = STAGE3_BOSS_DROP_TIME, ease = "quad"}
+		Easing.value{ref_table = rs.stage3_guest_portrait_rect, ref_value = "y", mod = dest.y - start_y, timer = "REAL", not_blockable = true, delay = STAGE3_BOSS_DROP_TIME, ease = "quad"}
 		Scheduler.add{
 			mode = "delayed",
 			delay = STAGE3_BOSS_DROP_TIME,
 			blockable = false,
 			blocking = false,
 			func = function()
-				if not alpha.stage3_cinematic then return true end
-				alpha.stage3_guest_portrait_rect = nil
+				if not rs.stage3_cinematic then return true end
+				rs.stage3_guest_portrait_rect = nil
 				PlayerHost.show_marco_line(1)
 				return true
 			end,
@@ -136,9 +136,9 @@ return function(ctx)
 	end
 
 	function PlayerHost.schedule_marco_drop()
-		local alpha = state.get()
-		if not alpha or alpha.stage3_guest_started then return end
-		alpha.stage3_guest_started = true
+		local rs = state.get()
+		if not rs or rs.stage3_guest_started then return end
+		rs.stage3_guest_started = true
 		local wait = CharacterSpeech.duration("boss_stage23_intro") + STAGE3_BOSS_BEAT
 		Scheduler.add{
 			mode = "delayed",
@@ -155,32 +155,32 @@ return function(ctx)
 	end
 
 	function PlayerHost.reset_marco_cinematic_state()
-		local alpha = state.get()
-		if not alpha then return end
+		local rs = state.get()
+		if not rs then return end
 		if WORD_GAME and WORD_GAME.Characters then
 			WORD_GAME.Characters.set_current("milo")
 		end
-		alpha.stage3_portrait_pose = "left"
-		alpha.stage3_portrait_visible = true
-		alpha.stage3_portrait_rect = nil
-		alpha.stage3_slide_started = true
-		alpha.stage3_boss_visible = nil
-		alpha.stage3_boss_portrait_rect = nil
-		alpha.stage3_boss_index = nil
-		alpha.stage3_boss_started = nil
-		alpha.stage3_ally_visible = true
-		alpha.stage3_ally_portrait_rect = nil
-		alpha.stage3_ally_index = 1
-		alpha.stage3_ally_started = true
-		alpha.stage3_ally_line = nil
-		alpha.stage3_guest_visible = nil
-		alpha.stage3_guest_portrait_rect = nil
-		alpha.stage3_guest_index = 2
-		alpha.stage3_guest_pose = "center"
-		alpha.stage3_guest_started = nil
-		alpha.stage3_guest_line = nil
-		alpha.stage3_active_turn = nil
-		alpha.stage3_scoring_turn = nil
+		rs.stage3_portrait_pose = "left"
+		rs.stage3_portrait_visible = true
+		rs.stage3_portrait_rect = nil
+		rs.stage3_slide_started = true
+		rs.stage3_boss_visible = nil
+		rs.stage3_boss_portrait_rect = nil
+		rs.stage3_boss_index = nil
+		rs.stage3_boss_started = nil
+		rs.stage3_ally_visible = true
+		rs.stage3_ally_portrait_rect = nil
+		rs.stage3_ally_index = 1
+		rs.stage3_ally_started = true
+		rs.stage3_ally_line = nil
+		rs.stage3_guest_visible = nil
+		rs.stage3_guest_portrait_rect = nil
+		rs.stage3_guest_index = 2
+		rs.stage3_guest_pose = "center"
+		rs.stage3_guest_started = nil
+		rs.stage3_guest_line = nil
+		rs.stage3_active_turn = nil
+		rs.stage3_scoring_turn = nil
 	end
 
 	function PlayerHost.maybe_marco_cinematic()
@@ -189,14 +189,14 @@ return function(ctx)
 		if not wr then return end
 		local round_config = require("word_game.config.round_config")
 		if not round_config.is_marco_cinematic_hand(wr.set, wr.hand_index) then return end
-		local alpha = state.get()
-		if not alpha then return end
-		local seen = alpha.cinematic_seen or {}
-		if seen["1-7"] or alpha.marco_cinematic_seen then return end
-		if alpha.stage3_cinematic then return end
+		local rs = state.get()
+		if not rs then return end
+		local seen = rs.cinematic_seen or {}
+		if seen["1-7"] or rs.marco_cinematic_seen then return end
+		if rs.stage3_cinematic then return end
 
 		PlayerHost.reset_marco_cinematic_state()
-		alpha.stage3_cinematic = true
+		rs.stage3_cinematic = true
 		PlayerHost.ensure()
 		local host = G.player_host
 		if host then

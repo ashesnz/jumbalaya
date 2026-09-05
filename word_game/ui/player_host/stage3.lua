@@ -11,30 +11,30 @@ return function(ctx)
 	local STAGE3_ALLY_LINES = ctx.STAGE3_ALLY_LINES
 
 	function PlayerHost.end_stage3_cinematic()
-		local alpha = state.get()
-		if alpha then
-			alpha.stage3_cinematic = nil
-			alpha.stage3_portrait_pose = nil
-			alpha.stage3_portrait_rect = nil
-			alpha.stage3_portrait_visible = nil
-			alpha.stage3_slide_started = nil
-			alpha.stage3_boss_visible = nil
-			alpha.stage3_boss_portrait_rect = nil
-			alpha.stage3_boss_index = nil
-			alpha.stage3_boss_started = nil
-			alpha.stage3_ally_visible = nil
-			alpha.stage3_ally_portrait_rect = nil
-			alpha.stage3_ally_index = nil
-			alpha.stage3_ally_started = nil
-			alpha.stage3_ally_line = nil
-			alpha.stage3_guest_visible = nil
-			alpha.stage3_guest_portrait_rect = nil
-			alpha.stage3_guest_index = nil
-			alpha.stage3_guest_pose = nil
-			alpha.stage3_guest_started = nil
-			alpha.stage3_guest_line = nil
-			alpha.stage3_active_turn = nil
-			alpha.stage3_scoring_turn = nil
+		local rs = state.get()
+		if rs then
+			rs.stage3_cinematic = nil
+			rs.stage3_portrait_pose = nil
+			rs.stage3_portrait_rect = nil
+			rs.stage3_portrait_visible = nil
+			rs.stage3_slide_started = nil
+			rs.stage3_boss_visible = nil
+			rs.stage3_boss_portrait_rect = nil
+			rs.stage3_boss_index = nil
+			rs.stage3_boss_started = nil
+			rs.stage3_ally_visible = nil
+			rs.stage3_ally_portrait_rect = nil
+			rs.stage3_ally_index = nil
+			rs.stage3_ally_started = nil
+			rs.stage3_ally_line = nil
+			rs.stage3_guest_visible = nil
+			rs.stage3_guest_portrait_rect = nil
+			rs.stage3_guest_index = nil
+			rs.stage3_guest_pose = nil
+			rs.stage3_guest_started = nil
+			rs.stage3_guest_line = nil
+			rs.stage3_active_turn = nil
+			rs.stage3_scoring_turn = nil
 		end
 		local host = G.player_host
 		if host then
@@ -60,21 +60,21 @@ return function(ctx)
 	end
 
 	function PlayerHost.begin_stage3_play()
-		local alpha = state.get()
-		if not alpha then return end
-		alpha.stage3_cinematic_seen = true
-		alpha.cinematic_seen = alpha.cinematic_seen or {}
-		alpha.cinematic_seen["1-3"] = true
-		alpha.stage3_cinematic = nil
-		alpha.stage3_portrait_rect = nil
-		alpha.stage3_portrait_pose = "left"
-		alpha.stage3_boss_portrait_rect = nil
-		alpha.stage3_ally_portrait_rect = nil
-		alpha.stage3_ally_line = nil
-		alpha.stage3_ally_visible = true
-		alpha.stage3_ally_index = 1
-		alpha.stage3_slide_started = nil
-		alpha.stage3_active_turn = "milo"
+		local rs = state.get()
+		if not rs then return end
+		rs.stage3_cinematic_seen = true
+		rs.cinematic_seen = rs.cinematic_seen or {}
+		rs.cinematic_seen["1-3"] = true
+		rs.stage3_cinematic = nil
+		rs.stage3_portrait_rect = nil
+		rs.stage3_portrait_pose = "left"
+		rs.stage3_boss_portrait_rect = nil
+		rs.stage3_ally_portrait_rect = nil
+		rs.stage3_ally_line = nil
+		rs.stage3_ally_visible = true
+		rs.stage3_ally_index = 1
+		rs.stage3_slide_started = nil
+		rs.stage3_active_turn = "milo"
 		local host = G.player_host
 		if host then
 			host:remove_speech_bubble()
@@ -91,20 +91,20 @@ return function(ctx)
 	end
 
 	function PlayerHost.stage3_ally_awaiting_click()
-		local alpha = state.get()
-		if not (alpha and alpha.stage3_cinematic) then return false end
-		return (alpha.stage3_ally_line or alpha.stage3_guest_line) and true or false
+		local rs = state.get()
+		if not (rs and rs.stage3_cinematic) then return false end
+		return (rs.stage3_ally_line or rs.stage3_guest_line) and true or false
 	end
 
 	function PlayerHost.show_stage3_ally_line(index)
-		local alpha = state.get()
-		if not alpha or not alpha.stage3_cinematic then return end
+		local rs = state.get()
+		if not rs or not rs.stage3_cinematic then return end
 		local key = STAGE3_ALLY_LINES[index]
 		if not key then
 			PlayerHost.begin_stage3_play()
 			return
 		end
-		alpha.stage3_ally_line = index
+		rs.stage3_ally_line = index
 		if WORD_GAME and WORD_GAME.AllyHost then
 			WORD_GAME.AllyHost.say(key)
 		end
@@ -115,14 +115,14 @@ return function(ctx)
 	end
 
 	function PlayerHost.advance_stage3_ally()
-		local alpha = state.get()
-		if not alpha or not alpha.stage3_cinematic then return end
-		if alpha.stage3_guest_line then
-			PlayerHost.show_marco_line(alpha.stage3_guest_line + 1)
+		local rs = state.get()
+		if not rs or not rs.stage3_cinematic then return end
+		if rs.stage3_guest_line then
+			PlayerHost.show_marco_line(rs.stage3_guest_line + 1)
 			return
 		end
-		if not alpha.stage3_ally_line then return end
-		PlayerHost.show_stage3_ally_line(alpha.stage3_ally_line + 1)
+		if not rs.stage3_ally_line then return end
+		PlayerHost.show_stage3_ally_line(rs.stage3_ally_line + 1)
 	end
 
 	function PlayerHost.consume_stage3_ally_click()
@@ -132,10 +132,10 @@ return function(ctx)
 	end
 
 	function PlayerHost.place_stage3_portrait(pose)
-		local alpha = state.get()
-		if not alpha then return end
-		alpha.stage3_portrait_rect = nil
-		alpha.stage3_portrait_pose = pose
+		local rs = state.get()
+		if not rs then return end
+		rs.stage3_portrait_rect = nil
+		rs.stage3_portrait_pose = pose
 		local host = G.player_host
 		if host then
 			host:apply_screen_position()
@@ -143,27 +143,27 @@ return function(ctx)
 	end
 
 	function PlayerHost.slide_stage3_portrait(to_pose, duration)
-		local alpha = state.get()
-		if not alpha or not alpha.stage3_cinematic then return end
+		local rs = state.get()
+		if not rs or not rs.stage3_cinematic then return end
 		duration = duration or STAGE3_SLIDE_TIME
 		local from = Layout.portrait_rect()
 		local dest = Layout.cinematic_pose_rect(to_pose)
-		alpha.stage3_portrait_rect = {
+		rs.stage3_portrait_rect = {
 			x = from.x,
 			y = from.y,
 			w = from.w,
 			h = from.h,
 		}
-		Easing.value{ref_table = alpha.stage3_portrait_rect, ref_value = "x", mod = dest.x - from.x, timer = "REAL", not_blockable = true, delay = duration, ease = "quad"}
+		Easing.value{ref_table = rs.stage3_portrait_rect, ref_value = "x", mod = dest.x - from.x, timer = "REAL", not_blockable = true, delay = duration, ease = "quad"}
 		Scheduler.add{
 			mode = "delayed",
 			delay = duration,
 			blockable = false,
 			blocking = false,
 			func = function()
-				if alpha.stage3_cinematic then
-					alpha.stage3_portrait_rect = nil
-					alpha.stage3_portrait_pose = to_pose
+				if rs.stage3_cinematic then
+					rs.stage3_portrait_rect = nil
+					rs.stage3_portrait_pose = to_pose
 					PlayerHost.reveal_stage3_portrait()
 				end
 				return true
@@ -178,8 +178,8 @@ return function(ctx)
 			blockable = false,
 			blocking = false,
 			func = function()
-				local alpha = state.get()
-				if alpha and alpha.stage3_cinematic then
+				local rs = state.get()
+				if rs and rs.stage3_cinematic then
 					PlayerHost.slide_stage3_portrait("left", STAGE3_SLIDE_TIME)
 				end
 				return true
@@ -188,9 +188,9 @@ return function(ctx)
 	end
 
 	function PlayerHost.reveal_stage3_portrait()
-		local alpha = state.get()
-		if not alpha or not alpha.stage3_cinematic then return end
-		alpha.stage3_portrait_visible = true
+		local rs = state.get()
+		if not rs or not rs.stage3_cinematic then return end
+		rs.stage3_portrait_visible = true
 		PlayerHost.ensure()
 		local host = G.player_host
 		if host then

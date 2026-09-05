@@ -2,9 +2,9 @@
 
 local Layout = require("word_game.ui.layout")
 local deck = require("word_game.model.cards.deck")
-local stamp_grid = require("word_game.ui.stamp_grid")
+local stamp_grid = require("word_game.ui.perks.stamp_grid")
 local Components = require("word_game.ui.widgets.components")
-local table_discard = require("word_game.ui.table_discard")
+local table_discard = require("word_game.ui.perks.discard_bin")
 local Odometer = require("word_game.ui.odometer")
 
 local M = {}

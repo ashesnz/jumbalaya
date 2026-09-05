@@ -255,7 +255,7 @@ T.describe("Hand shuffle/remove button", function()
 
 	T.it("keeps the play button clickable once the classic target is reached", function()
 		local HandShuffle = require("word_game.ui.hand_shuffle")
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		setup_hand_shuffle_env()
 		G.GAME.run_mode = "classic"
 		G.GAME.word_round = {

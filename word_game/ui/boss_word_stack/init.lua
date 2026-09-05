@@ -245,7 +245,7 @@ local function try_award_gutter_perk()
 	if M.is_active() then return end
 	local perk_stamp = WORD_GAME and WORD_GAME.PerkStamp
 	if not perk_stamp then return end
-	local perk_model = require("word_game.model.perk")
+	local perk_model = require("word_game.model.perks.registry")
 	local rolled = perk_model.roll_stamp_perk()
 	if not rolled then return end
 	if not perk_stamp.play(rolled) then

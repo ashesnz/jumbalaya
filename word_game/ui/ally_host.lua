@@ -115,8 +115,8 @@ function AllyHost:draw()
 end
 
 function AllyHost.ensure()
-	local alpha = state.get()
-	local want = alpha and alpha.stage3_cinematic and alpha.stage3_ally_visible
+	local rs = state.get()
+	local want = rs and rs.stage3_cinematic and rs.stage3_ally_visible
 	if G.STATE ~= G.STATES.TABLE_BOARD or not want then
 		if G.ally_host then
 			G.ally_host.states.visible = false

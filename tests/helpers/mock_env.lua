@@ -259,7 +259,7 @@ function M.setup()
 		_G.WORD_GAME.ScoreBanner = score_banner
 	end
 
-	local ok_tt, timeline_timer = pcall(require, "word_game.ui.timeline_timer")
+	local ok_tt, timeline_timer = pcall(require, "word_game.ui.perks.timeline_timer")
 	if ok_tt then
 		_G.WORD_GAME.TimelineTimer = timeline_timer
 	end

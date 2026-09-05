@@ -104,11 +104,11 @@ Perk-adjacent code is grouped under `word_game/model/perks/` and `word_game/ui/p
 | Piece | Location | Notes |
 |-------|----------|-------|
 | Effect hooks | `model/perks/effects.lua` | Scoring, combo, hand size, timeline, redraw |
-| Registry / rolls | `model/perks/registry.lua` | Stamp reward selection (`model/perk.lua` shim) |
+| Registry / rolls | `model/perks/registry.lua` | Stamp reward selection |
 | Hand timer | `model/perks/timer.lua` | Per-puzzle deadline stub (`ENABLED = false`); distinct from fuse HUD |
-| Discard bin | `ui/perks/discard_bin/` | Relocated from `ui/table_discard.lua`; `bin_enabled()` gate (off by default) |
-| Timeline fuse | `ui/perks/timeline_timer/` | Relocated from `ui/timeline_timer/`; self-registers updater |
-| Stamp animation | `ui/perks/stamp/` | Relocated from `ui/perk_stamp/` (shim remains) |
+| Discard bin | `ui/perks/discard_bin/` | `bin_enabled()` gate (off by default) |
+| Timeline fuse | `ui/perks/timeline_timer/` | Self-registers updater |
+| Stamp animation | `ui/perks/stamp/` | Rubber-stamp acquisition UI |
 | Stamp grid / voucher | `ui/perks/stamp_grid.lua`, `ui/perks/voucher.lua` | Vault layout and marketplace sprites |
 
 Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship; tie `discard_bin/bin_enabled()` to a perk or run flag.
@@ -146,7 +146,6 @@ Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship; tie 
 | `deck/jumble.lua` | Populate jumble deck, `deal_jumble_hand` |
 | `deck/dealing.lua` | Animated `deal_into_hand` (one card at a time) |
 | `perks/` | Perk registry (`registry.lua`), effect hooks (`effects.lua`), per-hand timer stub (`timer.lua`; `ENABLED = false`) |
-| `perk.lua` | Shim → `model/perks/registry` |
 | `state.lua` | Match persistence, `run_state.tokens` / `run_state.perks` |
 
 ### Cards (`word_game/model/cards/`)
@@ -164,9 +163,9 @@ Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship; tie 
 |------|---------|
 | `layout/` | TABLE_BOARD geometry split: `felt.lua` (play column, felt, metrics), `vault.lua` (vault column, deck slot), `placement.lua` (portraits, banner rects, screen positions), `request.lua` (deferred layout flag for model layer) |
 | `score_banner/` | Jumble score chips and “Points to get” (`fonts`, `jumble`, `draw`) |
-| `perks/` | Perk-adjacent UI: `discard_bin/` (`bin_enabled()` gate), `timeline_timer/` (fuse/slider), `stamp_grid.lua`, `voucher.lua`; shims at `table_discard.lua`, `timeline_timer/`, `stamp_grid.lua`, `perk_voucher.lua` |
+| `perks/` | Perk-adjacent UI: `discard_bin/`, `timeline_timer/`, `stamp/`, `stamp_grid.lua`, `voucher.lua` |
 | `trade/` | Marketplace overlay (`definition`, `draw`, `animate`, `fly`, `layout`; session/input in `init`) |
-| `perks/stamp/` | Rubber-stamp perk acquisition (`definition`, `draw`, `animate`, `layout`; facade in `init`; shim at `perk_stamp/`) |
+| `perks/stamp/` | Rubber-stamp perk acquisition (`definition`, `draw`, `animate`, `layout`; facade in `init`) |
 | `play_effects/` | Play resolution cinematics (`definition` feedback/banners, `animate` sequences; facade in `init`) |
 | `play_resolution.lua` | Drains model play result into `play_effects` (keeps `jumble_play` headless-testable) |
 | `boss_word_stack/` | Bonus gutter presentation (`layout`, `animate`, `draw`; facade in `init`; model in `bonus_stack`) |

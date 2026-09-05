@@ -3,7 +3,7 @@
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
 local Layout = require("word_game.ui.layout")
-local table_discard = require("word_game.ui.table_discard")
+local table_discard = require("word_game.ui.perks.discard_bin")
 
 local function find_node(node, id)
 	if not node then return nil end
@@ -149,7 +149,7 @@ T.describe("Vault stage button", function()
 			jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0 },
 		}
 
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		local token_reward = require("word_game.ui.token_reward")
 		local vault_btn = require("word_game.ui.vault_stage_button")
 		local Play = require("word_game.model.jumble_play")
@@ -215,7 +215,7 @@ T.describe("Vault stage button", function()
 			end,
 		}
 
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		local vault_btn = require("word_game.ui.vault_stage_button")
 		WORD_GAME.TimelineTimer = tt
 		G.GAME.word_round = {
@@ -301,7 +301,7 @@ T.describe("Vault stage button", function()
 			target = 25,
 			jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0 },
 		}
-		local tt = require("word_game.ui.timeline_timer")
+		local tt = require("word_game.ui.perks.timeline_timer")
 		local vault_btn = require("word_game.ui.vault_stage_button")
 		WORD_GAME.TimelineTimer = tt
 		WORD_GAME.VaultStageButton = vault_btn

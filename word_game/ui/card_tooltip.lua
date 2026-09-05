@@ -1,6 +1,6 @@
 --[[ word_game/ui/card_tooltip.lua - Letter-card tooltip UI generation ]]
 
-local perk = require("word_game.model.perk")
+local perk = require("word_game.model.perks.registry")
 
 function get_type_colour(_c, card)
 	if (_c.unlocked == false and not (card and card.bypass_lock)) then

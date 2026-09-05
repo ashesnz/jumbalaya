@@ -291,8 +291,8 @@ end
 
 function M.open_then_dealer()
 	standalone = false
-	local alpha = state.get()
-	if (alpha and alpha.trade_used_this_hand) or not trade.can_use() then
+	local rs = state.get()
+	if (rs and rs.trade_used_this_hand) or not trade.can_use() then
 		continue_run()
 		return
 	end

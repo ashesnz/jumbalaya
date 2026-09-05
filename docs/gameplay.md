@@ -81,7 +81,7 @@ When a new stage starts:
 
 - Jumble state resets (`puzzle_index`, `total_score`, current puzzle points/multiplier).
 - Timeline resets to **60 seconds** (`round_config.TIMELINE_SECONDS`; see `Round.reset_timeline()`).
-- Discard bin resets (`table_discard.reset()` — up to `round_config.DISCARDS_PER_HAND` fills per hand).
+- Discard bin resets (`WORD_GAME.TableDiscard.reset()` — up to `round_config.DISCARDS_PER_HAND` fills per hand).
 - After the last hand in a set: next set, hand 1. Set 1 advances through all nine hands before set 2.
 
 ### After clearing a stage
@@ -98,7 +98,7 @@ When a new stage starts:
 
 During a stage you see:
 
-- **Timeline fuse** — 60s countdown bar above the play column (`word_game/ui/timeline_timer.lua`). Stage label (e.g. `1-1`) sits above the fuse with odometer rolls on hand advance. Burns green → red from the right.
+- **Timeline fuse** — 60s countdown bar above the play column (`word_game/ui/perks/timeline_timer/`). Stage label (e.g. `1-1`) sits above the fuse with odometer rolls on hand advance. Burns green → red from the right.
 - **Pattern row** — fixed anchor letters plus slots you fill from your hand (`word_game/board/jumble_geometry.lua`, `word_game/ui/jumble_fixed_letters.lua`).
 - **Your hand** — up to 7 letter cards at the bottom.
 - **Shuffle button** (left of hand) — reshuffles cards already in your hand.
@@ -256,7 +256,7 @@ Non-release builds include a debug panel (Tab or **DBG** button):
 | Jumble deck | `word_game/config/jumble.lua`, `word_game/model/deck/jumble.lua` |
 | Pattern layout & snap | `word_game/board/jumble_geometry.lua`, `word_game/board/snap.lua` |
 | Score banner | `word_game/ui/score_banner.lua` |
-| Timeline & tokens | `word_game/ui/timeline_timer.lua`, `word_game/ui/token_reward.lua` |
+| Timeline & tokens | `word_game/ui/perks/timeline_timer/`, `word_game/ui/token_reward.lua` |
 | Perks | `word_game/config/perks.lua`, `word_game/model/perks/effects.lua`, `word_game/ui/perks/stamp/` |
 | Hand controls | `word_game/ui/hand_shuffle.lua`, `word_game/ui/play_hold_redraw.lua` |
 | Match flow | `word_game/model/round.lua`, `word_game/ui/trade.lua` |

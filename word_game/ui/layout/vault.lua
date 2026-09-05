@@ -53,7 +53,7 @@ function M.deck_slot_size()
 end
 
 function M.discard_slot_size()
-	local TableDiscard = require("word_game.ui.table_discard")
+	local TableDiscard = require("word_game.ui.perks.discard_bin")
 	return TableDiscard.footprint(G.CARD_W, G.CARD_H)
 end
 

@@ -66,9 +66,9 @@ end
 function M.start_hand(set, hand_index)
 	set = set or 1
 	hand_index = hand_index or 1
-	local alpha = state.get()
-	if alpha then
-		alpha.trade_used_this_hand = false
+	local rs = state.get()
+	if rs then
+		rs.trade_used_this_hand = false
 	end
 
 	G.GAME.word_round = G.GAME.word_round or {}
