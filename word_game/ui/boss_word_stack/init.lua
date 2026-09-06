@@ -275,10 +275,6 @@ function M.gutter_pixels(layout_arg)
 	return layout.gutter_pixels(layout_arg)
 end
 
-function M.draw_shadow()
-	draw.draw_shadow(layout)
-end
-
 function M.draw_pass()
 	draw.draw_pass(layout)
 end

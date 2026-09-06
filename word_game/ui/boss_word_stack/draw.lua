@@ -1,12 +1,8 @@
---[[ word_game/ui/boss_word_stack/draw.lua - Bonus gutter backdrop and card pass ]]
+--[[ word_game/ui/boss_word_stack/draw.lua - Bonus gutter card pass ]]
 
 local model = require("word_game.model.bonus_stack")
-local board_config = require("word_game.board.config")
 
 local M = {}
-
-local BACKDROP_FILL_ALPHA = 0.18
-local BACKDROP_LINE_ALPHA = 0.28
 
 local function stack()
 	return require("word_game.ui.boss_word_stack")
@@ -23,22 +19,6 @@ local function draw_label(layout)
 	local tw = font:getWidth(text) * scale
 	love.graphics.print(text, layout.x + (layout.card_w - tw) * 0.5, layout.label_y, 0, scale, scale)
 	love.graphics.setColor(1, 1, 1, 1)
-end
-
-function M.draw_shadow(layout_mod)
-	local cards = model.cards()
-	if not cards or #cards == 0 then return end
-	local layout = layout_mod.stack_layout()
-	local px, py, pw, ph = layout_mod.gutter_pixels(layout)
-	local radius = board_config.CORNER_RADIUS or 8
-
-	love.graphics.setColor(0, 0, 0, BACKDROP_FILL_ALPHA)
-	love.graphics.rectangle("fill", px, py, pw, ph, radius, radius)
-	love.graphics.setColor(1, 1, 1, BACKDROP_LINE_ALPHA)
-	love.graphics.setLineWidth(1.5)
-	love.graphics.rectangle("line", px, py, pw, ph, radius, radius)
-	love.graphics.setColor(1, 1, 1, 1)
-	love.graphics.setLineWidth(1)
 end
 
 function M.draw_pass(layout_mod)
