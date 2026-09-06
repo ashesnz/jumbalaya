@@ -2,13 +2,37 @@
 
 local T = require("tests.framework")
 local MockEnv = require("tests.helpers.mock_env")
+local perk_cfg = require("word_game.config.perks")
+
+local function discard_bin_entry()
+	return perk_cfg.by_id("discard_bin")
+end
+
+local function discard_bin_imprint()
+	return { perk = discard_bin_entry() }
+end
+
+local function setup_unlocked_voucher_discard()
+	G.GAME = G.GAME or {}
+	G.GAME.run_state = { perks = { "discard_bin" } }
+	G.RUN = { active = true }
+	G.STATE = G.STATES.TABLE_BOARD
+	G.STAGE = G.STAGES.RUN
+	G.TILESCALE = 1
+	G.TILESIZE = 71
+	G.ROOM = G.ROOM or { T = { x = 0, y = 0, w = 20, h = 11.5, r = 0 } }
+	G.TEXTURE_ATLASES = G.TEXTURE_ATLASES or {}
+	G.TEXTURE_ATLASES.Perk = {
+		image = { getDimensions = function() return 911, 284 end },
+	}
+end
 
 local function mock_discard_voucher(rect)
 	rect = rect or { x = 170, y = 90, w = 80, h = 40 }
 	WORD_GAME = WORD_GAME or {}
 	WORD_GAME.PerkStamp = {
 		current_imprints = function()
-			return { { perk = { id = "discard_bin" } } }
+			return { discard_bin_imprint() }
 		end,
 		imprint_cell_rects_px = function()
 			return { rect }
@@ -271,9 +295,18 @@ T.describe("table discard bin", function()
 		end
 
 		T.assert_equal(table_discard.discards_left(), 2)
+		local rolls = {}
+		local odometer = table_discard.overlay_odometer()
+		odometer.start_roll = function(self, from, to)
+			rolls[#rolls + 1] = { from = from, to = to }
+			self.display_count = from
+		end
+
 		T.assert_true(table_discard.try_discard(card), "drop on voucher should discard")
 		T.assert_true(replaced, "discard should deal a replacement")
 		T.assert_equal(table_discard.discards_left(), 1)
+		T.assert_equal(rolls[#rolls].from, 2)
+		T.assert_equal(rolls[#rolls].to, 1)
 
 		deck.draw_jumble_replacement = orig_replacement
 		MockEnv.reset_game()
@@ -343,6 +376,192 @@ T.describe("table discard bin", function()
 		deck.deal_jumble_hand()
 		T.assert_equal(table_discard.discards_left(), 2, "new hand should restore voucher discards")
 
+		MockEnv.reset_game()
+	end)
+
+	T.it("exposes voucher counter layout starting at 2 on the discard_bin imprint", function()
+		MockEnv.setup()
+		local table_discard = require("word_game.ui.perks.discard_bin")
+		setup_unlocked_voucher_discard()
+		table_discard.reset()
+		table_discard.sync_discards_left_display(true)
+
+		local layout = table_discard.voucher_counter_layout(discard_bin_imprint(), 170, 90, 80, 40)
+		T.assert_not_nil(layout, "counter layout should be available when voucher discard is unlocked")
+		T.assert_equal(layout.value, 2)
+		T.assert_true(layout.cx > layout.art_x, "counter should sit inside the voucher art")
+		T.assert_true(layout.height > 0)
+		T.assert_equal(table_discard.visible_counter_digit(), "2")
+
+		MockEnv.reset_game()
+	end)
+
+	T.it("keeps voucher counter layout visible at 0 for the rollover animation", function()
+		MockEnv.setup()
+		local table_discard = require("word_game.ui.perks.discard_bin")
+		setup_unlocked_voucher_discard()
+		table_discard.reset()
+		table_discard.record_discard()
+		table_discard.record_discard()
+		T.assert_equal(table_discard.discards_left(), 0)
+
+		local layout = table_discard.voucher_counter_layout(discard_bin_imprint(), 170, 90, 80, 40)
+		T.assert_not_nil(layout, "counter should stay visible when discards are exhausted")
+		T.assert_equal(layout.value, 0)
+		T.assert_equal(table_discard.visible_counter_digit(), "1",
+			"rollover animation shows the outgoing digit before settling on 0")
+
+		local odometer = table_discard.overlay_odometer()
+		odometer.roll = nil
+		odometer.display_count = 0
+		T.assert_equal(table_discard.visible_counter_digit(), "0")
+
+		MockEnv.reset_game()
+	end)
+
+	T.it("draw_voucher_overlay prints the counter digit on the voucher", function()
+		MockEnv.setup()
+		local table_discard = require("word_game.ui.perks.discard_bin")
+		setup_unlocked_voucher_discard()
+		table_discard.reset()
+		table_discard.sync_discards_left_display(true)
+
+		local printed = {}
+		local orig_print = love.graphics.print
+		love.graphics.print = function(text)
+			printed[#printed + 1] = text
+		end
+
+		table_discard.draw_voucher_overlay(discard_bin_imprint(), 170, 90, 80, 40)
+
+		love.graphics.print = orig_print
+
+		local saw_two = false
+		for _, text in ipairs(printed) do
+			if text == "2" then
+				saw_two = true
+				break
+			end
+		end
+		T.assert_true(saw_two, "voucher overlay should print the remaining discard count")
+
+		MockEnv.reset_game()
+	end)
+
+	T.it("draw_voucher_foreground redraws the voucher above card interaction", function()
+		MockEnv.setup()
+		local table_discard = require("word_game.ui.perks.discard_bin")
+		setup_unlocked_voucher_discard()
+		table_discard.reset()
+		table_discard.sync_discards_left_display(true)
+		mock_discard_voucher({ x = 170, y = 90, w = 80, h = 40 })
+
+		local draws = {}
+		local printed = {}
+		local orig_draw = love.graphics.draw
+		local orig_print = love.graphics.print
+		love.graphics.draw = function(...)
+			draws[#draws + 1] = true
+		end
+		love.graphics.print = function(text)
+			printed[#printed + 1] = text
+		end
+
+		table_discard.draw_voucher_foreground()
+
+		love.graphics.draw = orig_draw
+		love.graphics.print = orig_print
+
+		T.assert_true(#draws >= 1, "foreground pass should redraw the voucher art")
+		local saw_two = false
+		for _, text in ipairs(printed) do
+			if text == "2" then saw_two = true break end
+		end
+		T.assert_true(saw_two, "foreground pass should redraw the counter")
+
+		MockEnv.reset_game()
+	end)
+
+	T.it("dragging a card onto the voucher decreases the odometer counter by 1", function()
+		MockEnv.setup()
+		local table_discard = require("word_game.ui.perks.discard_bin")
+		local deck = require("word_game.model.cards.deck")
+		setup_unlocked_voucher_discard()
+		G.GAME.word_round = { mode = "jumble" }
+		G.GAME.word_score_animating = false
+		G.GAME.hand_redraw_animating = false
+		G.GAME.round_scores = { cards_discarded = { amt = 0 } }
+		G.TIMELINE = nil
+		G.CARD_W = 1
+		G.CARD_H = 1.4
+		table_discard.reset()
+		table_discard.sync_discards_left_display(true)
+		mock_discard_voucher()
+
+		G.discard = {
+			T = { x = 17.5, y = 9.2, w = 0.58, h = 0.81 },
+			cards = {},
+			relayout = function() end,
+			hard_set_cards = function() end,
+		}
+		G.deck = {
+			cards = { { id = "new" } },
+			remove_card = function(self) return table.remove(self.cards) end,
+		}
+		G.hand = {
+			cards = {},
+			emplace = function(self, card)
+				self.cards[#self.cards + 1] = card
+				card.area = self
+			end,
+			remove_card = function(self, card)
+				for i, c in ipairs(self.cards) do
+					if c == card then
+						table.remove(self.cards, i)
+						return card
+					end
+				end
+			end,
+			set_ranks = function() end,
+			relayout = function() end,
+			hard_set_cards = function() end,
+		}
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.Jumble = { is_active = function() return true end }
+		WORD_GAME.TableDiscard = table_discard
+		WORD_GAME.Deck = deck
+		WORD_GAME.HandShuffle = { sync = function() end, try_sync = function() end }
+
+		local card = card_over_voucher()
+		G.hand.cards[1] = card
+
+		T.assert_equal(table_discard.discards_left(), 2)
+		T.assert_equal(table_discard.visible_counter_digit(), "2")
+
+		local rolls = {}
+		local odometer = table_discard.overlay_odometer()
+		odometer.start_roll = function(self, from, to)
+			rolls[#rolls + 1] = { from = from, to = to }
+			self.display_count = from
+			self.roll = { from = from, to = to, t = 0, dur = 0.38 }
+		end
+
+		local orig_replacement = deck.draw_jumble_replacement
+		deck.draw_jumble_replacement = function()
+			return { id = "new" }
+		end
+
+		T.assert_true(table_discard.try_discard(card), "drop on voucher should discard")
+		T.assert_equal(table_discard.discards_left(), 1)
+		T.assert_equal(rolls[#rolls].from, 2)
+		T.assert_equal(rolls[#rolls].to, 1)
+		T.assert_equal(table_discard.visible_counter_digit(), "2", "odometer shows roll-from digit while animating")
+
+		odometer.roll = nil
+		odometer.display_count = 1
+		T.assert_equal(table_discard.visible_counter_digit(), "1", "counter should show 1 after roll completes")
+
+		deck.draw_jumble_replacement = orig_replacement
 		MockEnv.reset_game()
 	end)
 end)

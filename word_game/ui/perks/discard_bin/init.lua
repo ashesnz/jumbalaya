@@ -10,11 +10,14 @@ local round_config = require("word_game.config.round_config")
 local InputLock = require("word_game.model.input_lock")
 local Match = require("word_game.model.match")
 local Odometer = require("word_game.ui.odometer")
+local perk_voucher = require("word_game.ui.perks.voucher")
 local run_state = require("word_game.model.state")
 
 local M = {
 	END_RUN_SLOT_SCALE = 0.62,
-	COUNTER_TEXT_SCALE = 0.38,
+	COUNTER_HEIGHT_FRAC = 0.52,
+	COUNTER_X_FRAC = 0.78,
+	COUNTER_COLOUR = { 0.08, 0.10, 0.14, 1 },
 	DISCARD_PERK_ID = "discard_bin",
 }
 
@@ -56,11 +59,10 @@ local function ensure_overlay_odometer()
 	if overlay_odometer then return overlay_odometer end
 	overlay_odometer = Odometer({
 		label = "",
-		text_scale = M.COUNTER_TEXT_SCALE,
 		text_shadow = true,
 		value = M.discards_left(),
 		value_fn = function() return M.discards_left() end,
-		colour = G.C.UI.TEXT_LIGHT,
+		colour = M.COUNTER_COLOUR,
 	})
 	return overlay_odometer
 end
@@ -216,7 +218,7 @@ function M.footprint(card_w, card_h)
 	return M.end_run_slot_size(card_w, card_h)
 end
 
-local function discard_voucher_rect_px()
+local function discard_voucher_slot_px()
 	local stamp = perk_stamp()
 	if not stamp or not stamp.imprint_cell_rects_px or not stamp.current_imprints then
 		return nil
@@ -227,10 +229,15 @@ local function discard_voucher_rect_px()
 		local entry = imprints[i]
 		local perk = entry and entry.perk
 		if perk and perk.id == M.DISCARD_PERK_ID then
-			return rect
+			return entry, rect
 		end
 	end
 	return nil
+end
+
+local function discard_voucher_rect_px()
+	local _, rect = discard_voucher_slot_px()
+	return rect
 end
 
 function M.point_in_discard_voucher(tx, ty)
@@ -267,35 +274,121 @@ function M.try_discard(card)
 	return deck.discard_from_hand(card)
 end
 
-function M.draw_voucher_overlay(perk_entry, x, y, w, h)
-	if not perk_entry or perk_entry.id ~= M.DISCARD_PERK_ID then return end
-	if not M.bin_enabled() then return end
+local function voucher_art_rect(perk_entry, slot_x, slot_y, slot_w, slot_h)
+	local _, _, pw, ph = perk_voucher.stamp_quad(perk_entry)
+	if not pw or not ph then
+		return slot_x, slot_y, slot_w, slot_h
+	end
+	local ox, oy, aw, ah = perk_voucher.fit_rect(pw, ph, slot_w, slot_h)
+	return slot_x + ox, slot_y + oy, aw, ah
+end
 
+function M.resolve_voucher_perk(imprint_entry)
+	if not imprint_entry then return nil end
+	if imprint_entry.id == M.DISCARD_PERK_ID then return imprint_entry end
+	if imprint_entry.perk and imprint_entry.perk.id == M.DISCARD_PERK_ID then
+		return imprint_entry.perk
+	end
+	return nil
+end
+
+function M.voucher_counter_layout(imprint_entry, slot_x, slot_y, slot_w, slot_h)
+	local perk_entry = M.resolve_voucher_perk(imprint_entry)
+	if not perk_entry then return nil end
+	if not M.bin_enabled() or not M.uses_table_draw() then return nil end
+	local left = M.discards_left()
+
+	local art_x, art_y, art_w, art_h = voucher_art_rect(perk_entry, slot_x, slot_y, slot_w, slot_h)
+	return {
+		perk = perk_entry,
+		art_x = art_x,
+		art_y = art_y,
+		art_w = art_w,
+		art_h = art_h,
+		cx = art_x + art_w * M.COUNTER_X_FRAC,
+		cy = art_y + art_h * 0.5,
+		height = art_h * M.COUNTER_HEIGHT_FRAC,
+		value = left,
+	}
+end
+
+function M.visible_counter_digit()
+	local odometer = M.overlay_odometer()
+	if not odometer then return nil end
+	if odometer.roll then
+		return tostring(odometer.roll.from)
+	end
+	return tostring(odometer.display_count or odometer:current_value())
+end
+
+local function voucher_hover_highlight(art_x, art_y, art_w, art_h)
 	local dragging = G.INPUT and G.INPUT.dragging and G.INPUT.dragging.target
-	local highlight = dragging
-		and M.can_discard_card(dragging)
-		and M.point_in_discard_voucher(
-			dragging.T.x + dragging.T.w * 0.5,
-			dragging.T.y + dragging.T.h * 0.5
-		)
+	if not dragging or not M.can_discard_card(dragging) then return false end
+	return M.point_in_discard_voucher(
+		dragging.T.x + dragging.T.w * 0.5,
+		dragging.T.y + dragging.T.h * 0.5
+	)
+end
 
-	if highlight then
-		love.graphics.setColor(1, 1, 0.82, 0.38)
-		love.graphics.rectangle("fill", x, y, w, h, 4, 4)
+local function draw_yellow_halo(x, y, w, h)
+	local r = math.min(8, w * 0.09, h * 0.14)
+	love.graphics.setLineJoin("bevel")
+	for layer = 3, 1, -1 do
+		local spread = layer * 2.2
+		local alpha = 0.12 + (3 - layer) * 0.14
+		love.graphics.setColor(1, 0.92, 0.18, alpha)
+		love.graphics.setLineWidth(1.5 + layer * 1.8)
+		love.graphics.rectangle(
+			"line",
+			x - spread, y - spread,
+			w + spread * 2, h + spread * 2,
+			r + spread, r + spread
+		)
+	end
+	love.graphics.setColor(1, 1, 0.62, 0.95)
+	love.graphics.setLineWidth(2.2)
+	love.graphics.rectangle("line", x, y, w, h, r, r)
+	love.graphics.setLineWidth(1)
+end
+
+function M.draw_voucher_overlay(imprint_entry, x, y, w, h)
+	local layout = M.voucher_counter_layout(imprint_entry, x, y, w, h)
+	if not layout then return end
+
+	if voucher_hover_highlight(layout.art_x, layout.art_y, layout.art_w, layout.art_h) then
+		draw_yellow_halo(layout.art_x, layout.art_y, layout.art_w, layout.art_h)
 	end
 
-	local left = M.discards_left()
-	if left > 0 and M.voucher_discard_active() then
-		local odometer = M.overlay_odometer()
-		if odometer then
-			love.graphics.push()
-			love.graphics.translate(x + w + w * 0.04, y + h * 0.32)
-			odometer:draw_text_scale()
-			love.graphics.pop()
-		end
+	local odometer = M.overlay_odometer()
+	if odometer and odometer.draw_rolling_px then
+		odometer:draw_rolling_px(layout.cx, layout.cy, layout.height)
 	end
 
 	love.graphics.setColor(1, 1, 1, 1)
+end
+
+--- Redraw the discard_bin voucher and counter above dragged/dissolving cards.
+function M.draw_voucher_foreground()
+	if not M.bin_enabled() or not M.uses_table_draw() then return end
+	if G.STATE ~= G.STATES.TABLE_BOARD or not G.ROOM or not love.graphics then return end
+
+	local entry, rect = discard_voucher_slot_px()
+	if not entry or not rect then return end
+
+	local stamp_layout = require("word_game.ui.perks.stamp.layout")
+	local stamp_draw = require("word_game.ui.perks.stamp.draw")
+	local prev_shader = love.graphics.getShader()
+	local cr, cg, cb, ca = love.graphics.getColor()
+
+	love.graphics.push()
+	love.graphics.setShader()
+	stamp_layout.room_translate()
+	stamp_draw.draw_type_imprint(entry.perk or entry.sprite, rect.x, rect.y, rect.w, rect.h, 1)
+	M.draw_voucher_overlay(entry, rect.x, rect.y, rect.w, rect.h)
+	love.graphics.pop()
+
+	if prev_shader then love.graphics.setShader(prev_shader) end
+	love.graphics.setColor(cr, cg, cb, ca)
 end
 
 return M

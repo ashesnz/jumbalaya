@@ -259,6 +259,10 @@ function M.draw_card_interaction(game)
 	if WORD_GAME and WORD_GAME.CardInspect then
 		WORD_GAME.CardInspect.draw_foreground()
 	end
+	local table_discard = WORD_GAME and WORD_GAME.TableDiscard
+	if table_discard and table_discard.draw_voucher_foreground then
+		table_discard.draw_voucher_foreground()
+	end
 end
 
 function M.draw_debug_answers()

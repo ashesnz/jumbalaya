@@ -11,7 +11,6 @@ jumbalaya_end_a path=resources/textures/2x/Jumbalaya_end_A.png src=2x dpiscale=2
 title_garden path=resources/textures/2x/title_garden.png src=2x dpiscale=2 gpu=768x512 atlas_px=768x512 filter=linear,linear
 gamepad_ui path=resources/textures/2x/gamepad_ui.png src=2x dpiscale=2 gpu=640x128 atlas_px=32x32 filter=linear,linear
 icons path=resources/textures/2x/icons.png src=2x dpiscale=2 gpu=264x264 atlas_px=66x66 filter=linear,linear
-bin path=resources/textures/2x/Bin.png src=2x dpiscale=2 gpu=249x251 atlas_px=249x251 filter=nearest,nearest
 shuffle_icon path=resources/textures/2x/shuffle_icon.png src=2x dpiscale=2 gpu=56x56 atlas_px=56x56 filter=linear,linear
 remove_placement_icon path=resources/textures/2x/remove_placement_icon.png src=2x dpiscale=2 gpu=56x56 atlas_px=56x56 filter=linear,linear
 play_icon path=resources/textures/2x/play_icon.png src=2x dpiscale=2 gpu=56x56 atlas_px=56x56 filter=linear,linear
@@ -22,5 +21,4 @@ marketplace_bg path=resources/textures/2x/Marketplace.png src=2x dpiscale=2 gpu=
 os=OS X texture_scaling=2 window=1024x576
 Steam not available — running without Steam integration
 SAVING PROGRESS
-SAVING SETTINGS
 SAVING SETTINGS

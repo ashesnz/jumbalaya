@@ -238,6 +238,63 @@ function Odometer:draw_text_scale()
 	love.graphics.setColor(1, 1, 1, 1)
 end
 
+--- Draw a rolling digit centred at pixel (cx, cy), sized to height_px.
+--- For overlays on sprites drawn in room pixel space (vault vouchers, etc.).
+function Odometer:draw_rolling_px(cx, cy, height_px)
+	if not love or not love.graphics then return end
+	height_px = math.max(12, height_px or 24)
+	local num_font = meter_font(math.floor(height_px * 0.92))
+	local num_scale = height_px / num_font:getHeight()
+	local slot_w = math.max(num_font:getWidth("0"), num_font:getWidth("8")) * num_scale
+	local num_h = height_px
+	local digit_x = cx - slot_w * 0.5
+	local digit_y = cy - num_h * 0.5
+	local col = self.colour or { 0.08, 0.10, 0.14, 1 }
+
+	local function print_digit(text, y)
+		love.graphics.setFont(num_font)
+		local tw = num_font:getWidth(text) * num_scale
+		local px = digit_x + (slot_w - tw) * 0.5
+		if self.text_shadow then
+			love.graphics.setColor(1, 1, 1, 0.92)
+			for ox = -1.5, 1.5, 1.5 do
+				for oy = -1.5, 1.5, 1.5 do
+					if ox ~= 0 or oy ~= 0 then
+						love.graphics.print(text, px + ox, y + oy, 0, num_scale, num_scale)
+					end
+				end
+			end
+		end
+		love.graphics.setColor(col[1], col[2], col[3], col[4] or 1)
+		love.graphics.print(text, px, y, 0, num_scale, num_scale)
+	end
+
+	local function draw_rolling_digit(from, to, rolling, roll_t)
+		if rolling and love.graphics.intersectScissor and love.graphics.getScissor and love.graphics.setScissor then
+			local psx, psy, psw, psh = love.graphics.getScissor()
+			love.graphics.intersectScissor(digit_x, digit_y, slot_w, num_h)
+			print_digit(tostring(from), digit_y - roll_t * num_h)
+			print_digit(tostring(to), digit_y + (1 - roll_t) * num_h)
+			if psx then
+				love.graphics.setScissor(psx, psy, psw, psh)
+			else
+				love.graphics.setScissor()
+			end
+		elseif rolling then
+			print_digit(tostring(from), digit_y - roll_t * num_h)
+			print_digit(tostring(to), digit_y + (1 - roll_t) * num_h)
+		else
+			print_digit(tostring(from), digit_y)
+		end
+	end
+
+	local prev_font = love.graphics.getFont()
+	local from, to, roll_t, rolling = roll_view(self.roll, self.display_count or self:current_value())
+	draw_rolling_digit(from, to, rolling, roll_t)
+	if prev_font then love.graphics.setFont(prev_font) end
+	love.graphics.setColor(1, 1, 1, 1)
+end
+
 function Odometer:draw()
 	if not self.states.visible then return end
 
