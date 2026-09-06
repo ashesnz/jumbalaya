@@ -3,11 +3,19 @@
 local layout = require "devtools.layout"
 local state = require "word_game.model.state"
 
+local function tutorial_force_label()
+	if WORD_GAME and WORD_GAME.FirstPlayTutorial then
+		return WORD_GAME.FirstPlayTutorial.force_status_label()
+	end
+	return "OFF"
+end
+
 return {
 	id = "run",
 	order = 30,
 
 	register = function(panel)
+		panel.state.tutorial_force_status = tutorial_force_label()
 		panel:action("delete_save", function()
 			delete_saved_run()
 			if G and G.discard_run then G:discard_run() end
@@ -24,14 +32,34 @@ return {
 				ctx.game.STATE_COMPLETE = false
 			end
 		end)
+		panel:action("toggle_first_play_tutorial", function()
+			if WORD_GAME and WORD_GAME.FirstPlayTutorial then
+				WORD_GAME.FirstPlayTutorial.toggle_force()
+				panel:set_label("tutorial_force_status", tutorial_force_label())
+			end
+		end)
+		panel:action("reset_first_play_tutorial", function()
+			if WORD_GAME and WORD_GAME.FirstPlayTutorial then
+				WORD_GAME.FirstPlayTutorial.reset()
+				panel:set_label("tutorial_force_status", tutorial_force_label())
+			end
+		end)
 	end,
 
-	build = function(_panel)
-		return layout.section("Run", layout.button_columns({
+	build = function(panel)
+		local rows = {
+			layout.labeled_row("tutorial_force_status", panel.state, 0.28),
+		}
+		for _, row in ipairs(layout.button_columns({
 			{label = "Delete Save", action = "delete_save"},
 			{label = "+10 Tokens", action = "add_tokens"},
 			{label = "Background", action = "toggle_background"},
 			{label = "Lose Run", action = "lose_game"},
-		}))
+			{label = "Tutorial Force", action = "toggle_first_play_tutorial"},
+			{label = "Reset Tutorial", action = "reset_first_play_tutorial"},
+		})) do
+			rows[#rows + 1] = row
+		end
+		return layout.section("Run", rows)
 	end,
 }

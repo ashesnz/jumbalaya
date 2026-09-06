@@ -36,6 +36,7 @@ local M = {
 	StageLabel = require("word_game.ui.stage_label"),
 	TokenReward = require("word_game.ui.token_reward"),
 	HandClearFocus = require("word_game.ui.hand_clear_focus"),
+	FirstPlayTutorial = require("word_game.ui.first_play_tutorial"),
 	Confetti = require("word_game.ui.confetti"),
 	FloatUpText = require("word_game.ui.float_up_text"),
 	CardInspect = require("word_game.ui.card_inspect"),

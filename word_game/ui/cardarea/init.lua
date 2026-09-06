@@ -241,6 +241,9 @@ function CardArea:set_ranks()
 		if WORD_GAME and WORD_GAME.PlayerHost and WORD_GAME.PlayerHost.allows_card_drag
 			and not WORD_GAME.PlayerHost.allows_card_drag(self) then
 			card.states.drag.can = false
+		elseif WORD_GAME and WORD_GAME.FirstPlayTutorial and WORD_GAME.FirstPlayTutorial.is_active()
+			and WORD_GAME.FirstPlayTutorial.is_active() then
+			card.states.drag.can = false
 		elseif card.states.drag.can then
 			card.states.hover.can = true
 			card.states.collide.can = true

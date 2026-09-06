@@ -39,6 +39,8 @@ function M.settings()
             DISPLAYS = {{name = '[NONE]', screen_res = {w = 1000, h = 650}}},
         },
         GRAPHICS = {texture_scaling = 2, shadows = 'On'},
+        first_play_tutorial_complete = false,
+        first_play_tutorial_force = false,
     }
 end
 

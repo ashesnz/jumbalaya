@@ -100,6 +100,10 @@ function M.reset_globals()
 		pcall(function() G.HAND_CLEAR_OVERLAY:remove() end)
 	end
 	G.HAND_CLEAR_OVERLAY = nil
+	if G.FIRST_PLAY_TUTORIAL_OVERLAY and G.FIRST_PLAY_TUTORIAL_OVERLAY.remove then
+		pcall(function() G.FIRST_PLAY_TUTORIAL_OVERLAY:remove() end)
+	end
+	G.FIRST_PLAY_TUTORIAL_OVERLAY = nil
 end
 
 function M.teardown()
@@ -138,6 +142,7 @@ function M.begin_run(game_table, opts)
 	G.GAME.run_generation = M.generation()
 	local run = ensure_run_table()
 	run.active = true
+	run.from_save = opts.from_save or false
 	if not opts.from_save then
 		M.init_new_run_state()
 	end

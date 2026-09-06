@@ -25,6 +25,7 @@ return function(word_game)
 	call("Confetti", word_game.Confetti and word_game.Confetti.clear)
 	call("PlayHoldRedraw", word_game.PlayHoldRedraw and word_game.PlayHoldRedraw.reset)
 	call("HandClearFocus", word_game.HandClearFocus and word_game.HandClearFocus.reset)
+	call("FirstPlayTutorial", word_game.FirstPlayTutorial and word_game.FirstPlayTutorial.reset)
 	call("StageLabel", word_game.StageLabel and word_game.StageLabel.reset)
 	call("ScoreBanner", function()
 		if word_game.ScoreBanner and word_game.ScoreBanner.reset then

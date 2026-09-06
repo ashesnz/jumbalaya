@@ -142,6 +142,10 @@ end
 --- Opening-table demo: stamp the top-left discard-bin voucher on fresh runs.
 function M.try_opening_demo()
 	if M.is_active() then return false end
+	if WORD_GAME and WORD_GAME.FirstPlayTutorial and WORD_GAME.FirstPlayTutorial.is_active()
+		and WORD_GAME.FirstPlayTutorial.is_active() then
+		return false
+	end
 	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
 	if animate.imprint_count() > 0 then return false end
 	local rs = require("word_game.model.state").get()

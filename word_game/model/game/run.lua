@@ -79,6 +79,9 @@ function Game:start_gameplay_board()
                 end,
             }
         end
+        if WORD_GAME and WORD_GAME.FirstPlayTutorial and WORD_GAME.FirstPlayTutorial.try_schedule then
+            WORD_GAME.FirstPlayTutorial.try_schedule()
+        end
     end
 end
 

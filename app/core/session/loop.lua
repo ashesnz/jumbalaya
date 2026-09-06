@@ -165,6 +165,10 @@ function Game:render_board_pass()
 		G.under_overlay = true
 		self:draw_spotlight_overlay(self.HAND_CLEAR_OVERLAY)
 	end
+	if self.FIRST_PLAY_TUTORIAL_OVERLAY then
+		G.under_overlay = true
+		self:draw_spotlight_overlay(self.FIRST_PLAY_TUTORIAL_OVERLAY)
+	end
 end
 
 --- Menu pass: the active overlay menu (unless being dragged), the marketplace
@@ -246,7 +250,7 @@ end
 function Game:draw()
 	G.FRAMES.RENDER = G.FRAMES.RENDER + 1
 	reset_hit_order()
-	if (G.OVERLAY_TUTORIAL or G.INTRO_OVERLAY or G.HAND_CLEAR_OVERLAY) and not G.OVERLAY_MENU then
+	if (G.OVERLAY_TUTORIAL or G.INTRO_OVERLAY or G.HAND_CLEAR_OVERLAY or G.FIRST_PLAY_TUTORIAL_OVERLAY) and not G.OVERLAY_MENU then
 		G.under_overlay = true
 	end
 	perf_checkpoint('start->canvas', 'draw')

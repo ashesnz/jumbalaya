@@ -107,6 +107,10 @@ return {
     ["a_xmult"]="X#1# Mult",
   },
   ["tutorial"]={
+    ["first_play_welcome"]={
+[1]="Welcome to {C:attention}Jumbalaya{}!",
+[2]="A strategic game of word puzzling!",
+},
     ["sb_1"]={
 [1]="Hi I'm {C:attention}Pads{}!",
 [2]="Let's learn to play",
