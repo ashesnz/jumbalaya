@@ -13,7 +13,6 @@ local RETINA_ATLASES = {
 	jumbalaya_end_a = true,
 	ui_1 = true,
 	icons = true,
-	bin = true,
 }
 
 --- Full-bleed images (backgrounds, icons at native resolution) — no dpiscale halving.

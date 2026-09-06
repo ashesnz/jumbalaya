@@ -55,7 +55,7 @@ end
 
 function M.label_scale_for(text)
 	local Layout = require("word_game.ui.layout")
-	local dw, dh = Layout.discard_slot_size()
+	local dw, dh = Layout.end_run_slot_size()
 	return label_scale_for(text, math.min(dw, dh))
 end
 
@@ -173,7 +173,7 @@ function M.reset()
 	anim.known_next_mode = false
 	local col = button_column()
 	if col and col.config then
-		col.config.button = "end_run_from_discard_bin"
+		col.config.button = "end_run_from_vault"
 		set_display_mode(col, "end_run")
 		set_button_rotation(col, 0)
 	end
@@ -195,7 +195,7 @@ function M.sync()
 		set_display_mode(col, "next")
 		set_button_rotation(col, 0)
 	elseif not anim.transitioning then
-		col.config.button = "end_run_from_discard_bin"
+		col.config.button = "end_run_from_vault"
 		set_display_mode(col, "end_run")
 		set_button_rotation(col, 0)
 	end
@@ -235,7 +235,7 @@ function M.update(dt)
 		set_button_rotation(col, u * math.pi * 2)
 
 		if u < 0.42 then
-			col.config.button = "end_run_from_discard_bin"
+			col.config.button = "end_run_from_vault"
 			set_display_mode(col, "end_run", { panel_colour = red_colour() })
 		else
 			local morph = (u - 0.42) / 0.58

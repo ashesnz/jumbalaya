@@ -73,7 +73,7 @@ function M.wire_word_game_stubs()
 	jumble.ensure_playable_puzzle = function() return true end
 	jumble.refresh_hud = function() end
 	WORD_GAME.Play = play
-	WORD_GAME.TableDiscard = { reset = function() end }
+	WORD_GAME.VoucherDiscard = { reset = function() end }
 	WORD_GAME.HandClearFocus = {
 		end_focus = function() end,
 		is_active = function() return false end,

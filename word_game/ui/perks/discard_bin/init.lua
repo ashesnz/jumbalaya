@@ -1,8 +1,8 @@
 --[[
 	word_game/ui/perks/discard_bin/init.lua - Voucher discard in the vault stamp slot.
 
-	Discard is enabled once a perk is collected. Drag hand cards onto the
-	discard_bin perk voucher; the counter overlays the voucher (not a bin icon).
+	Discard unlocks with the first perk. Drag hand cards onto the discard_bin
+	voucher imprint; the counter overlays the voucher art.
 ]]
 
 local felt = require("word_game.ui.layout.felt")
@@ -21,7 +21,7 @@ local M = {
 	DISCARD_PERK_ID = "discard_bin",
 }
 
-local fill_count = 0
+local discards_used_count = 0
 local overlay_odometer
 
 local function tile_scale()
@@ -40,7 +40,7 @@ local function perk_stamp_imprint_count()
 	return 0
 end
 
-function M.bin_enabled()
+function M.voucher_discard_unlocked()
 	local rs = run_state.get()
 	if rs and #(rs.perks or {}) >= 1 then
 		return true
@@ -49,10 +49,7 @@ function M.bin_enabled()
 end
 
 function M.max_fills()
-	if M.bin_enabled() then
-		return round_config.BIN_DISCARDS_PER_HAND
-	end
-	return round_config.DISCARDS_PER_HAND
+	return round_config.VOUCHER_DISCARDS_PER_HAND
 end
 
 local function ensure_overlay_odometer()
@@ -68,7 +65,7 @@ local function ensure_overlay_odometer()
 end
 
 function M.overlay_odometer()
-	if not M.bin_enabled() then return nil end
+	if not M.voucher_discard_unlocked() then return nil end
 	return ensure_overlay_odometer()
 end
 
@@ -78,38 +75,40 @@ function M.on_unlock()
 	M.sync_vault_ui()
 end
 
-local function read_count()
-	if G.GAME and G.GAME.discard_bin_count ~= nil then
-		fill_count = G.GAME.discard_bin_count
+local function read_discards_used()
+	if G.GAME and G.GAME.voucher_discards_used ~= nil then
+		discards_used_count = G.GAME.voucher_discards_used
+	elseif G.GAME and G.GAME.discard_bin_count ~= nil then
+		-- Legacy save field from the old bin UI.
+		discards_used_count = G.GAME.discard_bin_count
 	end
-	return fill_count
+	return discards_used_count
 end
 
-local function write_count(count)
-	fill_count = math.max(0, count or 0)
+local function write_discards_used(count)
+	discards_used_count = math.max(0, count or 0)
 	if G.GAME then
-		G.GAME.discard_bin_count = fill_count
+		G.GAME.voucher_discards_used = discards_used_count
+		G.GAME.discard_bin_count = discards_used_count
 	end
 end
 
 function M.reset()
-	write_count(0)
+	write_discards_used(0)
 	overlay_odometer = nil
-	M.sync_discards_left_display(true)
+	M.sync_voucher_counter(true)
 end
 
-function M.fill_count()
-	return read_count()
+function M.discards_used()
+	return read_discards_used()
 end
 
 function M.discards_left()
-	return math.max(0, M.max_fills() - read_count())
+	return math.max(0, M.max_fills() - read_discards_used())
 end
 
-function M.sync_discards_left_display(force)
+function M.sync_voucher_counter(force)
 	local left = M.discards_left()
-	G.ARGS = G.ARGS or {}
-	G.ARGS.discards_left_count = left
 	local odometer = M.overlay_odometer()
 	if not odometer then return end
 	if force or not odometer.roll then
@@ -122,12 +121,12 @@ function M.roll_discards_left(from_left, to_left)
 	if odometer and odometer.start_roll then
 		odometer:start_roll(from_left, to_left)
 	else
-		M.sync_discards_left_display(true)
+		M.sync_voucher_counter(true)
 	end
 end
 
 function M.is_full()
-	return read_count() >= M.max_fills()
+	return read_discards_used() >= M.max_fills()
 end
 
 function M.uses_table_draw()
@@ -137,7 +136,7 @@ function M.uses_table_draw()
 end
 
 function M.voucher_discard_active()
-	return M.bin_enabled() and M.uses_table_draw() and M.discards_left() > 0
+	return M.voucher_discard_unlocked() and M.uses_table_draw() and M.discards_left() > 0
 end
 
 function M.end_run_button_visible()
@@ -148,60 +147,53 @@ end
 
 function M.should_show_end_run()
 	if not M.end_run_button_visible() then return false end
-	if not M.bin_enabled() then return true end
+	if not M.voucher_discard_unlocked() then return true end
 	return M.is_full()
 end
 
-function M.sync_discard_area()
+function M.sync_discard_pile_area()
 	if not G.discard or not G.discard.states then return end
 	G.discard.states.collide.can = false
 	G.discard.states.hover.can = false
 	G.discard.states.release_on.can = false
 end
 
-function M.stash_bin_card(card)
+function M.stash_discarded_card(card)
 	if not card or card.played_pool then return end
-	card.bin_stash = true
+	card.discard_stash = true
 	if card.states then
 		card.states.visible = false
 	end
 end
 
-function M.hide_bin_cards()
+function M.hide_discard_pile_cards()
 	if not G.discard or not G.discard.cards then return end
 	for _, card in ipairs(G.discard.cards) do
-		M.stash_bin_card(card)
+		M.stash_discarded_card(card)
 	end
 end
 
-function M.is_pile_card_visible(card, discard_area)
-	if not card or not discard_area then return false end
-	if card.played_pool or card.bin_stash then return false end
-	if card.states and card.states.visible == false then return false end
-	return false
-end
-
 function M.sync_vault_ui()
-	M.hide_bin_cards()
-	M.sync_discards_left_display()
-	M.sync_discard_area()
+	M.hide_discard_pile_cards()
+	M.sync_voucher_counter()
+	M.sync_discard_pile_area()
 	local hud = require("word_game.ui.sidebar.hud_definition")
-	if hud.sync_discard_row then
-		hud.sync_discard_row()
+	if hud.sync_end_run_row then
+		hud.sync_end_run_row()
 	end
 end
 
 function M.end_run()
-	if M.bin_enabled() and not M.is_full() then return false end
+	if M.voucher_discard_unlocked() and not M.is_full() then return false end
 	if InputLock.is_table_busy() then return false end
 	return Match.end_run({ won = false })
 end
 
 function M.record_discard()
-	local count = read_count()
-	if count >= M.max_fills() then return false end
+	local used = read_discards_used()
+	if used >= M.max_fills() then return false end
 	local from_left = M.discards_left()
-	write_count(count + 1)
+	write_discards_used(used + 1)
 	M.roll_discards_left(from_left, M.discards_left())
 	return true
 end
@@ -211,11 +203,6 @@ function M.end_run_slot_size(card_w, card_h)
 	card_h = card_h or G.CARD_H or 1.4
 	local side = math.min(card_w, card_h) * M.END_RUN_SLOT_SCALE
 	return side, side
-end
-
---- @deprecated use end_run_slot_size; kept for layout call sites.
-function M.footprint(card_w, card_h)
-	return M.end_run_slot_size(card_w, card_h)
 end
 
 local function discard_voucher_slot_px()
@@ -295,7 +282,7 @@ end
 function M.voucher_counter_layout(imprint_entry, slot_x, slot_y, slot_w, slot_h)
 	local perk_entry = M.resolve_voucher_perk(imprint_entry)
 	if not perk_entry then return nil end
-	if not M.bin_enabled() or not M.uses_table_draw() then return nil end
+	if not M.voucher_discard_unlocked() or not M.uses_table_draw() then return nil end
 	local left = M.discards_left()
 
 	local art_x, art_y, art_w, art_h = voucher_art_rect(perk_entry, slot_x, slot_y, slot_w, slot_h)
@@ -369,7 +356,7 @@ end
 
 --- Redraw the discard_bin voucher and counter above dragged/dissolving cards.
 function M.draw_voucher_foreground()
-	if not M.bin_enabled() or not M.uses_table_draw() then return end
+	if not M.voucher_discard_unlocked() or not M.uses_table_draw() then return end
 	if G.STATE ~= G.STATES.TABLE_BOARD or not G.ROOM or not love.graphics then return end
 
 	local entry, rect = discard_voucher_slot_px()

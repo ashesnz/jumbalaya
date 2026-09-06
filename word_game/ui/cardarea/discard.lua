@@ -1,14 +1,17 @@
 --[[
-	word_game/ui/cardarea/discard.lua - Discard pile CardArea behaviour.
+	word_game/ui/cardarea/discard.lua - Invisible recycle-pile CardArea behaviour.
+
+	G.discard holds played/discarded cards for deck recycling. Voucher discard
+	uses dissolve-on-voucher; this pile is never shown as a bin sprite.
 ]]
 
-local table_discard = require("word_game.ui.perks.discard_bin")
+local voucher_discard = require("word_game.ui.perks.discard_bin")
 
 local M = {}
 
 function M.update(self, dt)
 	if self ~= G.discard then return end
-	table_discard.sync_discard_area()
+	voucher_discard.sync_discard_pile_area()
 	for _, card in ipairs(self.cards or {}) do
 		if card.area == self then
 			card.states.drag.can = false

@@ -52,9 +52,9 @@ function M.deck_slot_size()
 	return TableDeck.footprint(G.CARD_W * scale, G.CARD_H * scale)
 end
 
-function M.discard_slot_size()
-	local TableDiscard = require("word_game.ui.perks.discard_bin")
-	return TableDiscard.footprint(G.CARD_W, G.CARD_H)
+function M.end_run_slot_size()
+	local voucher_discard = require("word_game.ui.perks.discard_bin")
+	return voucher_discard.end_run_slot_size(G.CARD_W, G.CARD_H)
 end
 
 local function slot_rect(row_id, w, h)
@@ -68,6 +68,19 @@ local function slot_rect(row_id, w, h)
 		}
 	end
 	return nil
+end
+
+function M.end_run_rect()
+	local w, h = M.end_run_slot_size()
+	local rect = slot_rect("row_end_run", w, h)
+	if rect then return rect end
+	local deck = M.deck_rect()
+	return {
+		x = deck.x + math.max(0, (deck.w - w) * 0.5),
+		y = deck.y + deck.h + 0.08,
+		w = w,
+		h = h,
+	}
 end
 
 function M.deck_rect()
@@ -86,19 +99,6 @@ function M.deck_rect()
 	return {
 		x = col_x + math.max(0, (col_w - w) * 0.5),
 		y = G.TILE_H - h - 0.22,
-		w = w,
-		h = h,
-	}
-end
-
-function M.discard_rect()
-	local w, h = M.discard_slot_size()
-	local rect = slot_rect("row_discard", w, h)
-	if rect then return rect end
-	local deck = M.deck_rect()
-	return {
-		x = deck.x + math.max(0, (deck.w - w) * 0.5),
-		y = deck.y + deck.h + 0.08,
 		w = w,
 		h = h,
 	}

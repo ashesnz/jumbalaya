@@ -81,7 +81,7 @@ When a new stage starts:
 
 - Jumble state resets (`puzzle_index`, `total_score`, current puzzle points/multiplier).
 - Timeline resets to **60 seconds** (`round_config.TIMELINE_SECONDS`; see `Round.reset_timeline()`).
-- Discard bin resets (`WORD_GAME.TableDiscard.reset()` — up to `round_config.DISCARDS_PER_HAND` fills per hand).
+- Voucher discard resets (`WORD_GAME.VoucherDiscard.reset()` — up to `round_config.VOUCHER_DISCARDS_PER_HAND` per hand).
 - After the last hand in a set: next set, hand 1. Set 1 advances through all nine hands before set 2.
 
 ### After clearing a stage
@@ -105,9 +105,9 @@ During a stage you see:
 - **Play button** (right of hand) — submit a word or bank a solved puzzle; **hold 5 seconds** for a full-hand redraw.
 - **Score banner** — current puzzle **points × multiplier** chips and **“N Points to get”** toward the stage target.
 - **Draw pile** — jumble deck stack; shows remaining cards. Token pile stacks above it after you earn tokens.
-- **Sidebar** — perk stamps, deck pile, cards-left counter, discard bin.
+- **Sidebar** — perk stamps, deck pile, cards-left counter, End Run button.
 
-Drag a hand card onto the **discard bin** (below the cards-left text) to discard it; a new card deals in from the deck pile above. The bin sprite fills up as you discard (empty → 1 → 2 → 3 cards shown); you may discard **up to 3 cards per hand**, then the bin is full until the next hand deal.
+Drag a hand card onto the **discard_bin perk voucher** (top stamp slot) to discard it; a new card deals in from the deck pile. A counter on the voucher shows **2 → 1 → 0** discards remaining per hand (odometer roll on each discard). End Run unlocks once both voucher discards are used.
 
 ---
 

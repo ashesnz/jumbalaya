@@ -56,7 +56,6 @@ function M.reset_args()
 		G.ARGS[key] = value
 	end
 	G.ARGS.pending_layout = nil
-	G.ARGS.table_discard_board_draw = nil
 	G.ARGS.run_snapshot = nil
 	G.ARGS.spin = { amount = 0, real = 0, eased = 0 }
 	if G.ARGS.score_intensity then

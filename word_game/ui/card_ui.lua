@@ -180,8 +180,8 @@ end
 function Card:stop_drag()
     SceneNode.stop_drag(self)
     if self.area == G.hand
-        and WORD_GAME and WORD_GAME.TableDiscard
-        and WORD_GAME.TableDiscard.try_discard(self) then
+        and WORD_GAME and WORD_GAME.VoucherDiscard
+        and WORD_GAME.VoucherDiscard.try_discard(self) then
         return
     end
     if G.placement_table then

@@ -49,11 +49,11 @@ end
 
 local function vault_fixed_content_height()
 	local _, deck_h = Layout.deck_slot_size()
-	local _, discard_h = Layout.discard_slot_size()
+	local _, end_run_h = Layout.end_run_slot_size()
 	local rows = stamp_slot_height()
 		+ deck_h
 		+ VAULT_COUNTER_ROW_H
-		+ discard_h
+		+ end_run_h
 		+ VAULT_BOTTOM_PAD
 	local fill_nodes = 6
 	local fill_pad = VAULT_FILL_PAD * (fill_nodes + 1)
@@ -91,11 +91,11 @@ local function set_node_visible(node, visible)
 	end
 end
 
-function M.sync_discard_row()
+function M.sync_end_run_row()
 	if not G.VAULT_HUD then return end
 	local end_btn = G.VAULT_HUD:find_node_by_id("end_run_button")
 	set_node_visible(end_btn, table_discard.end_run_button_visible())
-	table_discard.sync_discard_area()
+	table_discard.sync_discard_pile_area()
 	if WORD_GAME and WORD_GAME.VaultStageButton and WORD_GAME.VaultStageButton.sync then
 		WORD_GAME.VaultStageButton.sync()
 	end
@@ -143,12 +143,12 @@ function M.hud_definition()
 		end)(),
 		deck_count_node(box_w),
 		(function()
-			local dw, dh = Layout.discard_slot_size()
+			local dw, dh = Layout.end_run_slot_size()
 			local btn_side = math.min(dw, dh)
 			local vault_btn = require("word_game.ui.vault_stage_button")
 			return { n = G.UI.ROW, config = {
 				align = "cm",
-				id = "row_discard",
+				id = "row_end_run",
 				minw = box_w,
 				minh = btn_side,
 				maxh = btn_side,
@@ -160,7 +160,7 @@ function M.hud_definition()
 					hover = true,
 					colour = G.C.RED,
 					hover_colour = G.C.UI.BUTTON_HOVER,
-					button = "end_run_from_discard_bin",
+					button = "end_run_from_vault",
 					id = "end_run_button",
 					minw = btn_side,
 					minh = btn_side,
@@ -225,8 +225,8 @@ function M.relayout_vault()
 	if stamp_slot then
 		stamp_slot.config.minh = stamp_slot_height()
 	end
-	M.sync_discard_row()
-	table_discard.sync_discards_left_display(true)
+	M.sync_end_run_row()
+	table_discard.sync_voucher_counter(true)
 	G.VAULT_HUD:recalculate()
 	if G.VAULT_ATTACH then
 		Layout.update_vault_attach()

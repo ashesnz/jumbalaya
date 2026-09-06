@@ -1,4 +1,4 @@
---[[ word_game/ui/card_fly_off.lua - Played cards fly off-screen instead of the discard bin ]]
+--[[ word_game/ui/card_fly_off.lua - Played cards fly off-screen instead of the recycle pile ]]
 
 local boss_word_stack = require("word_game.ui.boss_word_stack")
 local deck = require("word_game.model.cards.deck")

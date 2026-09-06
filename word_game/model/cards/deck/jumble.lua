@@ -61,7 +61,7 @@ return function(context)
 					card:remove_from_area()
 				end
 				card.played_pool = nil
-				card.bin_stash = nil
+				card.discard_stash = nil
 				if card.states then
 					card.states.visible = true
 				end
@@ -259,7 +259,7 @@ return function(context)
 			local card = G.discard.cards[i]
 			G.discard:remove_card(card)
 			card.played_pool = nil
-			card.bin_stash = nil
+			card.discard_stash = nil
 			if card.states then
 				card.states.visible = true
 			end
@@ -324,8 +324,8 @@ return function(context)
 				WORD_GAME.Jumble.clear_blank_cards(j.slots)
 			end
 		end
-		if WORD_GAME and WORD_GAME.TableDiscard and WORD_GAME.TableDiscard.reset then
-			WORD_GAME.TableDiscard.reset()
+		if WORD_GAME and WORD_GAME.VoucherDiscard and WORD_GAME.VoucherDiscard.reset then
+			WORD_GAME.VoucherDiscard.reset()
 		end
 		M.clear_hand_and_placement()
 		local to_deal = math.min(hand_size_cfg.get(), #(G.deck.cards or {}))
@@ -393,14 +393,14 @@ return function(context)
 
 	function M.discard_from_hand(card)
 		if not M.is_jumble_deck() then return false end
-		local table_discard = WORD_GAME and WORD_GAME.TableDiscard
-		if not table_discard or not table_discard.can_discard_card(card) then
+		local voucher_discard = WORD_GAME and WORD_GAME.VoucherDiscard
+		if not voucher_discard or not voucher_discard.can_discard_card(card) then
 			return false
 		end
 
 		local function after_discard()
-			if table_discard and table_discard.stash_bin_card then
-				table_discard.stash_bin_card(card)
+			if voucher_discard and voucher_discard.stash_discarded_card then
+				voucher_discard.stash_discarded_card(card)
 			end
 			M.draw_jumble_replacement()
 			M.sync_deck_count_display()
@@ -421,15 +421,15 @@ return function(context)
 			end
 		end
 
-		if table_discard and table_discard.record_discard then
-			table_discard.record_discard()
+		if voucher_discard and voucher_discard.record_discard then
+			voucher_discard.record_discard()
 		end
-		local bin_now_full = table_discard and table_discard.is_full and table_discard.is_full()
-		if bin_now_full and card and card.states then
+		local allowance_full = voucher_discard and voucher_discard.is_full and voucher_discard.is_full()
+		if allowance_full and card and card.states then
 			card.states.visible = false
 		end
-		if table_discard and table_discard.sync_vault_ui then
-			table_discard.sync_vault_ui()
+		if voucher_discard and voucher_discard.sync_vault_ui then
+			voucher_discard.sync_vault_ui()
 		end
 
 		local dissolve_time = 0.7
@@ -437,7 +437,7 @@ return function(context)
 			if G.hand then
 				G.hand:remove_card(card)
 			end
-			local vx, vy = table_discard and table_discard.voucher_discard_center and table_discard.voucher_discard_center()
+			local vx, vy = voucher_discard and voucher_discard.voucher_discard_center and voucher_discard.voucher_discard_center()
 			if vx and vy and card.T then
 				local cx = vx - card.T.w * 0.5
 				local cy = vy - card.T.h * 0.5

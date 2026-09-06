@@ -107,7 +107,7 @@ local function build_vault_view()
 end
 
 local function mock_button_col()
-	local dw, dh = Layout.discard_slot_size()
+	local dw, dh = Layout.end_run_slot_size()
 	local btn_side = math.min(dw, dh)
 	local vault_btn = require("word_game.ui.vault_stage_button")
 	local label = {
@@ -348,7 +348,7 @@ T.describe("Vault stage button", function()
 		local hud_definition = require("word_game.ui.sidebar.hud_definition")
 		local vault_btn = require("word_game.ui.vault_stage_button")
 		local def = hud_definition.hud_definition()
-		local dw, dh = Layout.discard_slot_size()
+		local dw, dh = Layout.end_run_slot_size()
 		local btn_side = math.min(dw, dh)
 
 		local button = find_node(def, "end_run_button")

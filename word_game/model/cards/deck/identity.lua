@@ -143,8 +143,8 @@ return function(context)
 		if WORD_GAME and WORD_GAME.TableDeck and WORD_GAME.TableDeck.reset then
 			WORD_GAME.TableDeck.reset()
 		end
-		if WORD_GAME and WORD_GAME.TableDiscard and WORD_GAME.TableDiscard.reset then
-			WORD_GAME.TableDiscard.reset()
+		if WORD_GAME and WORD_GAME.VoucherDiscard and WORD_GAME.VoucherDiscard.reset then
+			WORD_GAME.VoucherDiscard.reset()
 		end
 		local all = {}
 		for _, area in ipairs(M.all_areas()) do

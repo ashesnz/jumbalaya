@@ -87,7 +87,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `HandSize` | `get()` — single hand-size accessor for dealing and layout |
 | `InputLock` | `is_table_busy()` — shared animation/input gate |
 | `Match` | `end_run()` — centralized discard-bin surrender / game-over transition |
-| `TableDiscard` | Discard bin state, eligibility, HUD sync |
+| `VoucherDiscard` | Voucher discard state, drag-to-voucher, counter overlay |
 | `Perks` | Perk model package (`model/perks`: registry, effects, hand timer) |
 | `TradeUI` / `PerkStamp` | Marketplace and perk stamp overlays |
 | `Sidebar` | Vault HUD (stamps, deck) |
@@ -106,12 +106,12 @@ Perk-adjacent code is grouped under `word_game/model/perks/` and `word_game/ui/p
 | Effect hooks | `model/perks/effects.lua` | Scoring, combo, hand size, timeline, redraw |
 | Registry / rolls | `model/perks/registry.lua` | Stamp reward selection |
 | Hand timer | `model/perks/timer.lua` | Per-puzzle deadline stub (`ENABLED = false`); distinct from fuse HUD |
-| Discard bin | `ui/perks/discard_bin/` | `bin_enabled()` gate (off by default) |
+| Discard voucher | `ui/perks/discard_bin/` | Unlocks with first perk; drag hand cards onto imprint |
 | Timeline fuse | `ui/perks/timeline_timer/` | Self-registers updater |
 | Stamp animation | `ui/perks/stamp/` | Rubber-stamp acquisition UI |
 | Stamp grid / voucher | `ui/perks/stamp_grid.lua`, `ui/perks/voucher.lua` | Vault layout and marketplace sprites |
 
-Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship; tie `discard_bin/bin_enabled()` to a perk or run flag.
+Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship.
 
 ---
 
@@ -121,7 +121,7 @@ Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship; tie 
 
 | File | Purpose |
 |------|---------|
-| `round_config.lua` | Hand targets, `DISCARDS_PER_HAND`, `TIMELINE_SECONDS`, showdown/cinematic flags |
+| `round_config.lua` | Hand targets, `VOUCHER_DISCARDS_PER_HAND`, `TIMELINE_SECONDS`, showdown/cinematic flags |
 | `hand_size.lua` | Authoritative jumble hand size (`hand_size.get()` → `G.TABLE_HAND_SIZE` or 7) |
 | `jumble.lua` | Letter pool (AERTNLS), deck copies, disabled 30s timer flag |
 | `jumble_puzzles.lua` | Router for the 24 stage modules |
@@ -140,7 +140,7 @@ Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship; tie 
 | `placement_word.lua` | `G.GAME.placement_word` / `placement_word_valid` from jumble slots |
 | `round.lua` | `start_hand` → `jumble.start_hand`, advance set/hand, `reset_timeline()` |
 | `input_lock.lua` | Animation-busy gate for play/discard/drag |
-| `match.lua` | Match-end / game-over transition from discard bin |
+| `match.lua` | Match-end / game-over transition from vault End Run |
 | `feedback.lua` | Model-layer attention text queue (drained by `word_feedback`) |
 | `profile_stats.lua` | Minimal card discovery persistence |
 | `deck/jumble.lua` | Populate jumble deck, `deal_jumble_hand` |

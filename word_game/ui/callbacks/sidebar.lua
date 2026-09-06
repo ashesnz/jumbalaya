@@ -21,15 +21,15 @@ return function(sidebar, hud_definition)
 			WORD_GAME.PlayerHost.advance_stage3_ally()
 		end
 	end
-	G.FUNCS.end_run_from_discard_bin = function()
+	G.FUNCS.end_run_from_vault = function()
 		local vault_btn = WORD_GAME and WORD_GAME.VaultStageButton
 		if vault_btn and vault_btn.press then
 			vault_btn.press()
 			return
 		end
-		local table_discard = WORD_GAME and WORD_GAME.TableDiscard
-		if table_discard and table_discard.end_run then
-			table_discard.end_run()
+		local voucher_discard = WORD_GAME and WORD_GAME.VoucherDiscard
+		if voucher_discard and voucher_discard.end_run then
+			voucher_discard.end_run()
 		end
 	end
 	G.FUNCS.classic_stage_next = function()

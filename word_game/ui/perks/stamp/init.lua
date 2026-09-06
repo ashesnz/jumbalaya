@@ -192,9 +192,9 @@ function M.draw_pass()
 			alpha = math.min(1, imprint_t * 2.2)
 		end
 		draw.draw_type_imprint(entry.perk or entry.sprite, x, y, w, h, alpha)
-		local table_discard = WORD_GAME and WORD_GAME.TableDiscard
-		if table_discard and table_discard.draw_voucher_overlay then
-			table_discard.draw_voucher_overlay(entry, x, y, w, h)
+		local voucher_discard = WORD_GAME and WORD_GAME.VoucherDiscard
+		if voucher_discard and voucher_discard.draw_voucher_overlay then
+			voucher_discard.draw_voucher_overlay(entry, x, y, w, h)
 		end
 	end
 

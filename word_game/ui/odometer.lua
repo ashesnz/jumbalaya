@@ -1,6 +1,4 @@
---[[
-	word_game/ui/odometer.lua - Rolling digit + label, same motion as the bin count.
-]]
+--[[ word_game/ui/odometer.lua - Rolling digit + label (vault counters, voucher discard, etc.) ]]
 
 local Odometer = EaseNode:derive("Odometer")
 

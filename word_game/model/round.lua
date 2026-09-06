@@ -22,6 +22,7 @@ function M.init_run()
 		target = round_config.hand_target(1, 1),
 		played_words = {},
 	}
+	G.GAME.voucher_discards_used = 0
 	G.GAME.discard_bin_count = 0
 	G.GAME.points = 0
 	G.GAME.round_resets = G.GAME.round_resets or {}

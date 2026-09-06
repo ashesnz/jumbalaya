@@ -510,7 +510,7 @@ T.describe("Vault deck information", function()
 	end)
 
 	T.it("keeps the discard voucher fill count when recycling into the deck", function()
-		if not require("word_game.ui.perks.discard_bin").bin_enabled() then return end
+		if not require("word_game.ui.perks.discard_bin").voucher_discard_unlocked() then return end
 		local table_discard = require("word_game.ui.perks.discard_bin")
 		G.STATE = G.STATES.MENU or 2
 		G.GAME = { run_state = { perks = { "discard_bin" } } }

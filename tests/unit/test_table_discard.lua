@@ -87,7 +87,7 @@ T.describe("table discard bin", function()
 			return nil
 		end
 
-		T.assert_not_nil(find_id(def, "row_discard"), "End Run row should exist")
+		T.assert_not_nil(find_id(def, "row_end_run"), "End Run row should exist")
 		T.assert_not_nil(find_id(def, "end_run_button"), "End Run button should occupy the discard slot")
 		T.assert_nil(find_id(def, "row_discards_left"), "discard counter overlays the voucher")
 		T.assert_nil(find_id(def, "row_perk_stamp_play"), "stamp play debug row should be removed")
@@ -219,7 +219,7 @@ T.describe("table discard bin", function()
 		G.CARD_H = 1.4
 		G.hand = { cards = {} }
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.TableDiscard = table_discard
+		WORD_GAME.VoucherDiscard = table_discard
 		WORD_GAME.Deck = deck
 		mock_discard_voucher()
 
@@ -279,7 +279,7 @@ T.describe("table discard bin", function()
 		}
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.Jumble = { is_active = function() return true end }
-		WORD_GAME.TableDiscard = table_discard
+		WORD_GAME.VoucherDiscard = table_discard
 		WORD_GAME.Deck = deck
 		WORD_GAME.HandShuffle = { sync = function() end, try_sync = function() end }
 		mock_discard_voucher()
@@ -331,7 +331,7 @@ T.describe("table discard bin", function()
 		G.CARD_H = 1.4
 		G.hand = { cards = {} }
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.TableDiscard = table_discard
+		WORD_GAME.VoucherDiscard = table_discard
 		WORD_GAME.Deck = deck
 		mock_discard_voucher()
 
@@ -370,7 +370,7 @@ T.describe("table discard bin", function()
 		}
 		G.placement_table = { area = { cards = {}, hard_set_cards = function() end } }
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.TableDiscard = table_discard
+		WORD_GAME.VoucherDiscard = table_discard
 		WORD_GAME.Jumble = { ensure_playable_puzzle = function() end }
 
 		deck.deal_jumble_hand()
@@ -384,7 +384,7 @@ T.describe("table discard bin", function()
 		local table_discard = require("word_game.ui.perks.discard_bin")
 		setup_unlocked_voucher_discard()
 		table_discard.reset()
-		table_discard.sync_discards_left_display(true)
+		table_discard.sync_voucher_counter(true)
 
 		local layout = table_discard.voucher_counter_layout(discard_bin_imprint(), 170, 90, 80, 40)
 		T.assert_not_nil(layout, "counter layout should be available when voucher discard is unlocked")
@@ -424,7 +424,7 @@ T.describe("table discard bin", function()
 		local table_discard = require("word_game.ui.perks.discard_bin")
 		setup_unlocked_voucher_discard()
 		table_discard.reset()
-		table_discard.sync_discards_left_display(true)
+		table_discard.sync_voucher_counter(true)
 
 		local printed = {}
 		local orig_print = love.graphics.print
@@ -453,7 +453,7 @@ T.describe("table discard bin", function()
 		local table_discard = require("word_game.ui.perks.discard_bin")
 		setup_unlocked_voucher_discard()
 		table_discard.reset()
-		table_discard.sync_discards_left_display(true)
+		table_discard.sync_voucher_counter(true)
 		mock_discard_voucher({ x = 170, y = 90, w = 80, h = 40 })
 
 		local draws = {}
@@ -495,7 +495,7 @@ T.describe("table discard bin", function()
 		G.CARD_W = 1
 		G.CARD_H = 1.4
 		table_discard.reset()
-		table_discard.sync_discards_left_display(true)
+		table_discard.sync_voucher_counter(true)
 		mock_discard_voucher()
 
 		G.discard = {
@@ -528,7 +528,7 @@ T.describe("table discard bin", function()
 		}
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.Jumble = { is_active = function() return true end }
-		WORD_GAME.TableDiscard = table_discard
+		WORD_GAME.VoucherDiscard = table_discard
 		WORD_GAME.Deck = deck
 		WORD_GAME.HandShuffle = { sync = function() end, try_sync = function() end }
 

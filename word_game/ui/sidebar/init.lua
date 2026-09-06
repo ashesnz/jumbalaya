@@ -38,7 +38,7 @@ local REQUIRED_VAULT_ROWS = {
 	"row_stamp_slot",
 	"row_deck",
 	"row_deck_count",
-	"row_discard",
+	"row_end_run",
 }
 
 function WordSidebar:ensure()
@@ -59,8 +59,8 @@ function WordSidebar:ensure()
 	if G.VAULT_HUD then
 		deck.sync_deck_count_display()
 		WordSidebar.sync_action_buttons()
-		hud_definition.sync_discard_row()
-		table_discard.sync_discards_left_display(true)
+		hud_definition.sync_end_run_row()
+		table_discard.sync_voucher_counter(true)
 		return G.VAULT_HUD
 	end
 
@@ -76,8 +76,8 @@ function WordSidebar:ensure()
 	})
 	G.VAULT_HUD:recalculate()
 	G.word_sidebar_uibox = G.VAULT_HUD
-	hud_definition.sync_discard_row()
-	table_discard.sync_discards_left_display(true)
+	hud_definition.sync_end_run_row()
+	table_discard.sync_voucher_counter(true)
 	WordSidebar.sync_action_buttons()
 	Layout.set_screen_positions()
 	return G.VAULT_HUD
