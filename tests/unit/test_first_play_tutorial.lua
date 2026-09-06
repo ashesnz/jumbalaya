@@ -45,6 +45,7 @@ T.describe("First play tutorial", function()
 	local function reset_env()
 		layout_instances = {}
 		G.FIRST_PLAY_TUTORIAL_OVERLAY = nil
+		G.hand = { T = { x = 2, y = 6, w = 8, h = 1.4 } }
 		G.SETTINGS = G.SETTINGS or {}
 		G.SETTINGS.first_play_tutorial_complete = false
 		G.SETTINGS.first_play_tutorial_force = false
@@ -63,12 +64,22 @@ T.describe("First play tutorial", function()
 		T.assert_true(FirstPlayTutorial.should_show())
 	end)
 
-	T.it("begin creates a dim overlay and marks active", function()
+	T.it("begin creates welcome step with bubble only", function()
 		reset_env()
 		T.assert_true(FirstPlayTutorial.begin())
 		T.assert_true(FirstPlayTutorial.is_active())
 		T.assert_not_nil(G.FIRST_PLAY_TUTORIAL_OVERLAY)
+		T.assert_equal(#G.FIRST_PLAY_TUTORIAL_OVERLAY.selections, 1)
+		T.assert_nil(G.FIRST_PLAY_TUTORIAL_OVERLAY.redraw_hand)
+	end)
+
+	T.it("advance moves to hand spotlight step", function()
+		reset_env()
+		FirstPlayTutorial.begin()
+		FirstPlayTutorial.advance()
+		T.assert_true(FirstPlayTutorial.is_active())
 		T.assert_equal(#G.FIRST_PLAY_TUTORIAL_OVERLAY.selections, 2)
+		T.assert_true(G.FIRST_PLAY_TUTORIAL_OVERLAY.redraw_hand)
 	end)
 
 	T.it("dismiss clears overlay and marks tutorial complete", function()
@@ -88,10 +99,66 @@ T.describe("First play tutorial", function()
 		T.assert_false(G.SETTINGS.first_play_tutorial_complete)
 	end)
 
-	T.it("advance dismisses on the final step", function()
+	T.it("consume_click advances the tutorial", function()
 		reset_env()
 		FirstPlayTutorial.begin()
-		G.FUNCS.first_play_tutorial_next()
+		G.INPUT = { clicked = { handled = false }, dragging = {} }
+		T.assert_true(FirstPlayTutorial.consume_click())
+		T.assert_true(FirstPlayTutorial.is_active())
+		T.assert_equal(#G.FIRST_PLAY_TUTORIAL_OVERLAY.selections, 2)
+	end)
+
+	T.it("advance moves to placement spotlight step", function()
+		reset_env()
+		FirstPlayTutorial.begin()
+		FirstPlayTutorial.advance()
+		FirstPlayTutorial.advance()
+		T.assert_true(FirstPlayTutorial.is_active())
+		T.assert_equal(#G.FIRST_PLAY_TUTORIAL_OVERLAY.selections, 1)
+		T.assert_true(G.FIRST_PLAY_TUTORIAL_OVERLAY.redraw_placement)
+		T.assert_nil(G.FIRST_PLAY_TUTORIAL_OVERLAY.redraw_hand)
+	end)
+
+	T.it("advance moves to play button spotlight step", function()
+		reset_env()
+		G.hand_action_bar = { REMOVED = false, T = { x = 12, y = 8, w = 1, h = 1 } }
+		WORD_GAME.HandShuffle = {
+			try_sync = function() end,
+			play_button_uie = function()
+				return { T = { x = 12, y = 8, w = 1, h = 1 } }
+			end,
+		}
+		FirstPlayTutorial.begin()
+		for _ = 1, 4 do
+			FirstPlayTutorial.advance()
+		end
+		T.assert_true(FirstPlayTutorial.is_active())
+		T.assert_true(G.FIRST_PLAY_TUTORIAL_OVERLAY.redraw_play)
+	end)
+
+	T.it("advance moves to timeline goal spotlight step", function()
+		reset_env()
+		G.hand_action_bar = { REMOVED = false, T = { x = 12, y = 8, w = 1, h = 1 } }
+		WORD_GAME.HandShuffle = {
+			try_sync = function() end,
+			play_button_uie = function()
+				return { T = { x = 12, y = 8, w = 1, h = 1 } }
+			end,
+		}
+		FirstPlayTutorial.begin()
+		for _ = 1, 5 do
+			FirstPlayTutorial.advance()
+		end
+		T.assert_true(FirstPlayTutorial.is_active())
+		T.assert_true(G.FIRST_PLAY_TUTORIAL_OVERLAY.redraw_timeline)
+	end)
+
+	T.it("sixth advance dismisses tutorial", function()
+		reset_env()
+		FirstPlayTutorial.begin()
+		for _ = 1, 6 do
+			FirstPlayTutorial.advance()
+		end
 		T.assert_false(FirstPlayTutorial.is_active())
 		T.assert_true(G.SETTINGS.first_play_tutorial_complete)
 	end)

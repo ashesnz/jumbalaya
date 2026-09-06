@@ -106,6 +106,35 @@ function M.draw_spotlight_overlay(game, overlay)
 		end
 	end
 
+	if overlay.redraw_hand and G.hand then
+		local bonus_stack = WORD_GAME and WORD_GAME.BossWordStack
+		for _, v in pairs(game.LIVE.CARD) do
+			if v.area == G.hand
+				and (not v.parent and v ~= game.INPUT.dragging.target and v ~= game.INPUT.focused.target)
+				and not (bonus_stack and bonus_stack.contains(v)) then
+				love.graphics.push()
+				v:translate_container()
+				v:draw()
+				love.graphics.pop()
+			end
+		end
+	end
+
+	if overlay.redraw_placement and G.placement_table and G.placement_table.draw_run_pass then
+		G.placement_table:draw_run_pass(game)
+	end
+
+	if overlay.redraw_play and G.hand_action_bar and not G.hand_action_bar.REMOVED then
+		love.graphics.push()
+		G.hand_action_bar:translate_container()
+		G.hand_action_bar:draw()
+		love.graphics.pop()
+	end
+
+	if overlay.redraw_timeline and WORD_GAME and WORD_GAME.PlayerPortrait then
+		WORD_GAME.PlayerPortrait.draw()
+	end
+
 	if not overlay.selections then return end
 	for _, v in ipairs(overlay.selections) do
 		if v and not v.REMOVED then
@@ -234,6 +263,10 @@ function M.draw_attention_passes(game)
 end
 
 function M.draw_card_interaction(game)
+	if WORD_GAME and WORD_GAME.FirstPlayTutorial and WORD_GAME.FirstPlayTutorial.is_active()
+		and WORD_GAME.FirstPlayTutorial.is_active() then
+		return
+	end
 	if not game.placement_table then return end
 	local bonus_stack = WORD_GAME and WORD_GAME.BossWordStack
 	if game.INPUT.dragging.target and game.INPUT.dragging.target ~= game.INPUT.focused.target then

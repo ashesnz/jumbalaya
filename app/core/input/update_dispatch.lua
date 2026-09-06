@@ -23,7 +23,9 @@ function InputRouter:update_dispatch(dt)
 	-- Click (word-game hook: cinematic dialogue may swallow the click).
 	if not self.clicked.handled then
 		local clicked = self.clicked.target
-		if WORD_GAME and WORD_GAME.PlayerHost and WORD_GAME.PlayerHost.consume_stage3_ally_click() then
+		if WORD_GAME and WORD_GAME.FirstPlayTutorial and WORD_GAME.FirstPlayTutorial.consume_click() then
+			self.clicked.handled = true
+		elseif WORD_GAME and WORD_GAME.PlayerHost and WORD_GAME.PlayerHost.consume_stage3_ally_click() then
 			self.clicked.handled = true
 		elseif WORD_GAME and WORD_GAME.PerkStamp and WORD_GAME.PerkStamp.consume_click() then
 			self.clicked.handled = true

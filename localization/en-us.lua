@@ -111,6 +111,27 @@ return {
 [1]="Welcome to {C:attention}Jumbalaya{}!",
 [2]="A strategic game of word puzzling!",
 },
+    ["first_play_hand"]={
+[1]="You get dealt {C:attention}7{} random cards.",
+[2]="All cards are worth {C:attention}1{} point.",
+},
+    ["first_play_placement"]={
+[1]="This is where you play your cards.",
+[2]="Every time you play on the same puzzle word your mult increases by {C:attention}0.2x{}.",
+},
+    ["first_play_positions"]={
+[1]="The numbers underneath the fixed letters show the position.",
+[2]="For example {C:attention}C{} will always be in position {C:attention}1{}.",
+[3]="{C:attention}T{} will always be in the last position.",
+},
+    ["first_play_play_button"]={
+[1]="You have to at least play {C:attention}1{} word on each puzzle word.",
+[2]="To get a different puzzle word press {C:attention}Play{} again without any letters placed on the board.",
+},
+    ["first_play_goal"]={
+[1]="Your goal is to get the target score as shown here.",
+[2]="Good luck!",
+},
     ["sb_1"]={
 [1]="Hi I'm {C:attention}Pads{}!",
 [2]="Let's learn to play",

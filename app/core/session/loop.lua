@@ -140,6 +140,7 @@ function Game:render_board_pass()
 		local is_special = panel.flop_overlay or panel.spawn_attention or panel.parent
 			or panel == self.OVERLAY_MENU or panel == self.screenwipe
 			or panel == self.OVERLAY_TUTORIAL or panel == self.INTRO_OVERLAY
+			or panel == self.FIRST_PLAY_TUTORIAL_OVERLAY
 			or panel == self.debug_tools or panel == self.online_leaderboard
 			or panel == self.achievement_notification
 		if not is_special then draw_with_container(panel) end
@@ -164,10 +165,6 @@ function Game:render_board_pass()
 	if self.HAND_CLEAR_OVERLAY then
 		G.under_overlay = true
 		self:draw_spotlight_overlay(self.HAND_CLEAR_OVERLAY)
-	end
-	if self.FIRST_PLAY_TUTORIAL_OVERLAY then
-		G.under_overlay = true
-		self:draw_spotlight_overlay(self.FIRST_PLAY_TUTORIAL_OVERLAY)
 	end
 end
 
@@ -220,6 +217,11 @@ function Game:render_chrome_pass()
 
 	if WORD_GAME and WORD_GAME.PlayHoldRedraw then
 		WORD_GAME.PlayHoldRedraw.draw()
+	end
+
+	if self.FIRST_PLAY_TUTORIAL_OVERLAY then
+		G.under_overlay = true
+		self:draw_spotlight_overlay(self.FIRST_PLAY_TUTORIAL_OVERLAY)
 	end
 end
 
