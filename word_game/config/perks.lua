@@ -77,12 +77,19 @@ M.DESCRIPTION_VARIABLES = {}
 
 -- Sprites from resources/assets/Perks.png (3×2 horizontal voucher grid).
 M.POOL = {
+	{
+		id = "discard_bin",
+		name = "Discard Bin",
+		desc = "Drag up to 2 hand cards onto this voucher each hand to discard them.",
+		token_cost = 10,
+		pos = { x = 0, y = 0 },
+	},
     {
         id = "wide_hand",
         name = "Wide Hand",
         desc = "Your hand size is increased to 8 cards.",
         token_cost = 10,
-        pos = { x = 0, y = 0 },
+        pos = { x = 1, y = 0 },
     },
 	{
         id = "combo_starter",

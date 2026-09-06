@@ -156,6 +156,12 @@ function M.apply_imprint(sprite_entry, perk_entry)
 	if ctx.refresh_sidebar then
 		ctx.refresh_sidebar()
 	end
+	if #imprints == 1 then
+		local table_discard = require("word_game.ui.perks.discard_bin")
+		if table_discard.on_unlock then
+			table_discard.on_unlock()
+		end
+	end
 	return true
 end
 

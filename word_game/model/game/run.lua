@@ -66,6 +66,19 @@ function Game:start_gameplay_board()
                 return true
             end,
         }
+        if WORD_GAME and WORD_GAME.PerkStamp and WORD_GAME.PerkStamp.try_opening_demo then
+            Scheduler.add{
+                mode = "delayed",
+                delay = 0.45,
+                blocking = false,
+                func = function()
+                    if G.STATE == G.STATES.TABLE_BOARD and G.STAGE == G.STAGES.RUN then
+                        WORD_GAME.PerkStamp.try_opening_demo()
+                    end
+                    return true
+                end,
+            }
+        end
     end
 end
 

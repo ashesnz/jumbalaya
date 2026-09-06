@@ -83,15 +83,6 @@ function M.draw_spotlight_overlay(game, overlay)
 		WORD_GAME.TableDeck.draw(G.deck)
 		love.graphics.pop()
 	end
-	if overlay.redraw_tokens and G.discard and not boss_sequence_active()
-		and WORD_GAME and WORD_GAME.TableDiscard and WORD_GAME.TableDiscard.uses_table_draw() then
-		love.graphics.push()
-		G.discard:translate_container()
-		WORD_GAME.TableDiscard.begin_board_draw()
-		G.discard:draw()
-		WORD_GAME.TableDiscard.end_board_draw()
-		love.graphics.pop()
-	end
 	if overlay.redraw_confetti and WORD_GAME and WORD_GAME.Confetti then
 		WORD_GAME.Confetti.draw_pass()
 	end
@@ -187,17 +178,6 @@ function M.draw_hand_pass(game)
 		else
 			G.deck:draw()
 		end
-		love.graphics.pop()
-	end
-
-	local table_discard = WORD_GAME and WORD_GAME.TableDiscard
-	if G.discard and not boss_sequence_active()
-		and table_discard and table_discard.uses_table_draw() then
-		love.graphics.push()
-		G.discard:translate_container()
-		table_discard.begin_board_draw()
-		G.discard:draw()
-		table_discard.end_board_draw()
 		love.graphics.pop()
 	end
 

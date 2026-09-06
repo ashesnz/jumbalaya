@@ -139,6 +139,18 @@ function M.play(perk_entry, callback)
 	return true
 end
 
+--- Opening-table demo: stamp the top-left discard-bin voucher on fresh runs.
+function M.try_opening_demo()
+	if M.is_active() then return false end
+	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
+	if animate.imprint_count() > 0 then return false end
+	local rs = require("word_game.model.state").get()
+	if not rs or #(rs.perks or {}) > 0 then return false end
+	local entry = perk_cfg.by_id("discard_bin")
+	if not entry then return false end
+	return M.play(entry)
+end
+
 function M.demo_play()
 	if G.STATE ~= G.STATES.TABLE_BOARD then return end
 	local anim = animate.get_anim()
@@ -180,6 +192,10 @@ function M.draw_pass()
 			alpha = math.min(1, imprint_t * 2.2)
 		end
 		draw.draw_type_imprint(entry.perk or entry.sprite, x, y, w, h, alpha)
+		local table_discard = WORD_GAME and WORD_GAME.TableDiscard
+		if table_discard and table_discard.draw_voucher_overlay then
+			table_discard.draw_voucher_overlay(entry.perk, x, y, w, h)
+		end
 	end
 
 	stamp_puff.draw()

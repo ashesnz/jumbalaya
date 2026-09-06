@@ -5,7 +5,6 @@ local deck = require("word_game.model.cards.deck")
 local stamp_grid = require("word_game.ui.perks.stamp_grid")
 local Components = require("word_game.ui.widgets.components")
 local table_discard = require("word_game.ui.perks.discard_bin")
-local Odometer = require("word_game.ui.odometer")
 
 local M = {}
 
@@ -56,9 +55,6 @@ local function vault_fixed_content_height()
 		+ VAULT_COUNTER_ROW_H
 		+ discard_h
 		+ VAULT_BOTTOM_PAD
-	if table_discard.bin_enabled() then
-		rows = rows + VAULT_COUNTER_ROW_H
-	end
 	local fill_nodes = 6
 	local fill_pad = VAULT_FILL_PAD * (fill_nodes + 1)
 	return VAULT_ROOT_PAD * 2 + fill_pad + rows
@@ -85,25 +81,6 @@ local function deck_count_node(box_w)
 	})
 end
 
-local function discards_left_node(box_w)
-	G.ARGS = G.ARGS or {}
-	table_discard.sync_discards_left_display(true)
-	return vault_counter_row(box_w, "row_discards_left", "Discards left: ", {
-		n = G.UI.OBJECT,
-		config = {
-			id = "discards_left_odometer",
-			object = Odometer({
-				label = "",
-				text_scale = VAULT_COUNTER_SCALE,
-				text_shadow = true,
-				value = table_discard.discards_left(),
-				value_fn = function() return table_discard.discards_left() end,
-				colour = G.C.UI.TEXT_LIGHT,
-			}),
-		},
-	})
-end
-
 local function set_node_visible(node, visible)
 	if not node then return end
 	if node.states then
@@ -118,15 +95,13 @@ function M.sync_discard_row()
 	if not G.VAULT_HUD then return end
 	local end_btn = G.VAULT_HUD:find_node_by_id("end_run_button")
 	set_node_visible(end_btn, table_discard.end_run_button_visible())
-	local discards_row = G.VAULT_HUD:find_node_by_id("row_discards_left")
-	if discards_row then
-		set_node_visible(discards_row, table_discard.bin_enabled())
-	end
 	table_discard.sync_discard_area()
 	if WORD_GAME and WORD_GAME.VaultStageButton and WORD_GAME.VaultStageButton.sync then
 		WORD_GAME.VaultStageButton.sync()
 	end
-	G.VAULT_HUD:recalculate()
+	if G.VAULT_HUD.recalculate then
+		G.VAULT_HUD:recalculate()
+	end
 end
 
 function M.sync_action_buttons()
@@ -205,9 +180,6 @@ function M.hud_definition()
 			}}
 		end)(),
 	}
-	if table_discard.bin_enabled() then
-		fill_nodes[#fill_nodes + 1] = discards_left_node(box_w)
-	end
 	fill_nodes[#fill_nodes + 1] = { n = G.UI.ROW, config = {
 		id = "row_vault_bottom_pad",
 		minh = VAULT_BOTTOM_PAD,

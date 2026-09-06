@@ -31,6 +31,11 @@ end
 function M.roll_stamp_perk()
 	local pool = cfg.POOL
 	if #pool == 0 then return nil end
+	local rs = require("word_game.model.state").get()
+	if rs and #(rs.perks or {}) == 0 then
+		local first = cfg.by_id("discard_bin") or pool[1]
+		if first then return copy_perk(first) end
+	end
 	local idx = rand_int(cfg.RANDOM_SEED_PREFIX .. "stamp", 1, #pool)
 	return copy_perk(pool[idx])
 end

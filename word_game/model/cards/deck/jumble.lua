@@ -432,34 +432,51 @@ return function(context)
 			table_discard.sync_vault_ui()
 		end
 
+		local dissolve_time = 0.7
+		local function run_dissolve_discard()
+			if G.hand then
+				G.hand:remove_card(card)
+			end
+			local vx, vy = table_discard and table_discard.voucher_discard_center and table_discard.voucher_discard_center()
+			if vx and vy and card.T then
+				local cx = vx - card.T.w * 0.5
+				local cy = vy - card.T.h * 0.5
+				card.T.x = cx
+				card.T.y = cy
+				if card.hard_set_T then
+					card:hard_set_T(cx, cy, card.T.w, card.T.h)
+				end
+				if card.snap_VT then card:snap_VT() end
+			end
+			if card.states then
+				card.states.visible = true
+			end
+			if card.start_dissolve then
+				card:start_dissolve(nil, false, 1, true)
+			end
+			if G.TIMELINE and G.TIMELINE.enqueue then
+				Scheduler.add{
+					mode = "delayed",
+					delay = dissolve_time,
+					blocking = true,
+					func = function()
+						after_discard()
+						return true
+					end,
+				}
+			else
+				after_discard()
+			end
+		end
+
 		if G.TIMELINE and G.TIMELINE.enqueue then
-			CardMotion.move{
-				from = G.hand,
-				to = G.discard,
-				percent = 50,
-				direction = "down",
-				stay_flipped = false,
-				card = card,
-				delay = 0.08,
-			}
-			Scheduler.add{
-				mode = "delayed",
-				delay = 0.22,
-				blocking = true,
-				func = function()
-					after_discard()
-					return true
-				end,
-			}
-		elseif G.hand and G.discard then
-			G.hand:remove_card(card)
-			G.discard:emplace(card)
-			after_discard()
+			run_dissolve_discard()
+		elseif G.hand then
+			run_dissolve_discard()
 		else
 			return false
 		end
 
-		play_sfx("card_slide1", 0.9, 0.65)
 		return true
 	end
 

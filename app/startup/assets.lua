@@ -81,7 +81,6 @@ function Game:set_render_settings()
 		{ name = "title_garden", filename = "title_garden.png", px = 1536, py = 1024 },
 		{ name = 'gamepad_ui', filename = "gamepad_ui.png", px = 32, py = 32 },
 		{ name = 'icons', filename = "icons.png", px = 66, py = 66 },
-		{ name = 'bin', filename = "Bin.png", px = 249, py = 251, frames = 4, cols = 2, rows = 2 },
 		{ name = 'shuffle_icon', filename = "shuffle_icon.png", px = 112, py = 112 },
 		{ name = 'remove_placement_icon', filename = "remove_placement_icon.png", px = 112, py = 112 },
 		{ name = 'play_icon', filename = "play_icon.png", px = 112, py = 112 },
@@ -124,12 +123,7 @@ function Game:set_render_settings()
 				mipmaps = not retina_atlas,
 				dpiscale = dpiscale,
 			})
-			if spec.name == 'bin' then
-				self.TEXTURE_ATLASES[spec.name].image:setFilter('nearest', 'nearest')
-				self.TEXTURE_ATLASES[spec.name].frames = spec.frames or 160
-				if spec.cols then self.TEXTURE_ATLASES[spec.name].cols = spec.cols end
-				if spec.rows then self.TEXTURE_ATLASES[spec.name].rows = spec.rows end
-			elseif AtlasDpiscale.is_letter_atlas(spec.name) then
+			if AtlasDpiscale.is_letter_atlas(spec.name) then
 				self.TEXTURE_ATLASES[spec.name].image:setFilter('linear', 'linear')
 			elseif spec.name == "jumbalaya_base" or spec.name == "jumbalaya_start_a"
 				or spec.name == "jumbalaya_end_a" or spec.name == "Jumbalaya" then

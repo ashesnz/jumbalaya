@@ -2,6 +2,8 @@
 
 local M = {
 	DISCARDS_PER_HAND = 3,
+	-- Discard bin unlocks with the first perk; two discards per hand.
+	BIN_DISCARDS_PER_HAND = 2,
 	TIMELINE_SECONDS = 60,
 	SETS_TO_WIN = 8,
 	MIN_WORD_LEN = 3,

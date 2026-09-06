@@ -6,10 +6,11 @@ local mock_env = require("tests.helpers.mock_env")
 T.describe("Perk stamp rewards", function()
 	T.it("rolls a perk from the configured pool", function()
 		mock_env.reset_game()
+		G.RUN = { active = true }
 		local perk = require("word_game.model.perks.registry")
 		local rolled = perk.roll_stamp_perk()
 		T.assert_not_nil(rolled)
-		T.assert_not_nil(rolled.id)
+		T.assert_equal(rolled.id, "discard_bin", "first stamp should be the discard bin voucher")
 		T.assert_not_nil(rolled.name)
 	end)
 

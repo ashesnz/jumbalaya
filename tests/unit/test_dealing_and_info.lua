@@ -509,14 +509,16 @@ T.describe("Vault deck information", function()
 		WORD_GAME.Jumble = orig_jumble
 	end)
 
-	T.it("keeps the discard bin fill count when recycling into the deck", function()
+	T.it("keeps the discard voucher fill count when recycling into the deck", function()
 		if not require("word_game.ui.perks.discard_bin").bin_enabled() then return end
 		local table_discard = require("word_game.ui.perks.discard_bin")
 		G.STATE = G.STATES.MENU or 2
+		G.GAME = { run_state = { perks = { "discard_bin" } } }
+		G.RUN = { active = true }
 		table_discard.reset()
 		table_discard.record_discard()
 		table_discard.record_discard()
-		T.assert_equal(table_discard.sprite_frame(), 2)
+		T.assert_equal(table_discard.fill_count(), 2)
 
 		G.GAME = G.GAME or {}
 		G.GAME.word_round = { mode = "jumble", set = 1, hand_index = 1 }
@@ -552,7 +554,7 @@ T.describe("Vault deck information", function()
 
 		deck.try_jumble_reshuffle_and_deal()
 
-		T.assert_equal(table_discard.sprite_frame(), 2, "Bin fill should persist across reshuffle")
+		T.assert_equal(table_discard.fill_count(), 2, "Discard fill should persist across reshuffle")
 		T.assert_equal(G.GAME.discard_bin_count, 2, "Bin count should stay on G.GAME")
 	end)
 
