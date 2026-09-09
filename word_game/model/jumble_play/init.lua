@@ -7,6 +7,9 @@
 
 local M = {}
 
+M.Rules = require("word_game.model.jumble_play.jumble_rules")
+M.ModifierEffects = require("word_game.model.jumble_play.letter_modifier_effects")
+
 require("word_game.model.jumble_play.hand")(M)
 require("word_game.model.jumble_play.jumble")(M)
 require("word_game.ui.play_effects.hand_clear").install(M)

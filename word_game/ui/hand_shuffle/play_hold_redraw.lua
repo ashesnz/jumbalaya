@@ -6,7 +6,7 @@
 ]]
 local Scheduler = require "app.effects.timeline_scheduler"
 local InputLock = require("word_game.model.run.input_lock")
-local hand_size_cfg = require("word_game.model.hand_size")
+local domain = require("word_game.ui.lib.domain")
 local perk_effects = require("word_game.model.perks.effects")
 
 
@@ -262,7 +262,7 @@ local function trigger_redraw()
 			finish_redraw()
 			return
 		end
-		WORD_GAME.Deck.deal_into_hand(hand_size_cfg.get(), finish_redraw)
+		WORD_GAME.Deck.deal_into_hand(domain.hand_size().get(), finish_redraw)
 	end)
 end
 

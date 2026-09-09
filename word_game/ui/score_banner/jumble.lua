@@ -3,6 +3,7 @@
 ]]
 
 local Layout = require("word_game.ui.layout")
+local domain = require("word_game.ui.lib.domain")
 local Roll = require("word_game.ui.lib.roll")
 local fonts = require("word_game.ui.score_banner.fonts")
 
@@ -246,7 +247,7 @@ function M.sync_points_to_get_preview(animate, opts)
 	if M.hide_points_to_get then return end
 	local wr = G.GAME and G.GAME.word_round
 	local j = wr and wr.jumble
-	local rules = require("word_game.model.jumble_play.jumble_rules")
+	local rules = domain.jumble_rules()
 	local target = (wr and wr.target) or rules.round_target()
 	M.apply_score_breakdown(rules.score_breakdown(j, target), animate, opts and opts.remain_dur)
 end

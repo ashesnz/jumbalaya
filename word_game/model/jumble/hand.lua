@@ -5,7 +5,6 @@ local hand_timer = require("word_game.model.perks.timer")
 local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
 local perk_effects = require("word_game.model.perks.effects")
 local bonus_return = require("word_game.model.jumble.bonus_return")
-local placement_word = require("word_game.model.jumble.placement_word")
 local round_config = require("word_game.config.gameplay.round")
 local jumble_rules = require("word_game.model.jumble_play.jumble_rules")
 
@@ -77,7 +76,7 @@ function M.apply_puzzle(wr, puzzle)
 		end
 	end
 
-	placement_word.clear()
+	M.PlacementWord.clear()
 end
 
 function M.load_puzzle(wr, index)

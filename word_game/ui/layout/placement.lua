@@ -5,7 +5,7 @@
 local felt = require("word_game.ui.layout.felt")
 local sidebar_layout = require("word_game.ui.sidebar.layout")
 local dealt_hand = require("word_game.ui.table.dealt_hand")
-local hand_size_cfg = require("word_game.model.hand_size")
+local domain = require("word_game.ui.lib.domain")
 
 local M = {}
 
@@ -33,7 +33,7 @@ function M.card_area_width()
 		local pctx = {
 			card_w = function() return G.CARD_W or 1.0 end,
 			card_h = function() return G.CARD_H or 1.4 end,
-			card_limit = function() return hand_size_cfg.get() end,
+			card_limit = function() return domain.hand_size().get() end,
 		}
 		local w = playout.area_width(pctx)
 		if w and w > 0 then return w end

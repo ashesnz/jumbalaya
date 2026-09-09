@@ -3,8 +3,12 @@
 local layout = require "word_game.board.placement.layout"
 local jumble_geometry = require "word_game.board.jumble.geometry"
 local shimmer = require "word_game.board.placement.shimmer"
-local placement_word = require "word_game.model.jumble.placement_word"
 local BonusStack = require "word_game.model.jumble.bonus_stack"
+
+local function placement_word()
+	return (WORD_GAME and WORD_GAME.PlacementWord)
+		or require("word_game.model.jumble.placement_word")
+end
 local bonus_gutter = require "word_game.board.bonus.gutter"
 
 local M = {}
@@ -72,7 +76,7 @@ function M.restore_bonus_card(session, card, origin_slot, origin_insert)
 				jumble_geometry.relayout(session)
 				session.area:hard_set_cards()
 			end
-			placement_word.refresh_from_jumble_slots(jumble.state().slots)
+			placement_word().refresh_from_jumble_slots(jumble.state().slots)
 			show_modifier_feedback(card)
 			return true
 		end
@@ -175,7 +179,7 @@ function M.place_in_row(session, card)
 	jumble_geometry.relayout(session)
 	area:hard_set_cards()
 
-	placement_word.refresh_from_jumble_slots(jumble.state().slots)
+	placement_word().refresh_from_jumble_slots(jumble.state().slots)
 	if WORD_GAME and WORD_GAME.HandShuffle then
 		WORD_GAME.HandShuffle.try_sync()
 	end
@@ -192,7 +196,7 @@ function M.return_to_hand(session, card)
 		jumble.remove_card_from_blanks(card)
 		jumble_geometry.relayout(session)
 		session.area:hard_set_cards()
-		placement_word.clear()
+		placement_word().clear()
 		return true
 	end
 	if not G.hand or not M.card_on_placement(session, card) then return false end
@@ -203,7 +207,7 @@ function M.return_to_hand(session, card)
 	G.hand:hard_set_cards()
 	jumble_geometry.relayout(session)
 	session.area:hard_set_cards()
-	placement_word.clear()
+	placement_word().clear()
 	return true
 end
 
@@ -235,7 +239,7 @@ function M.try_snap(session, card)
 		end
 
 		local function finish_bonus_return()
-			placement_word.clear()
+			placement_word().clear()
 			play_sfx("card_slide1", nil, 0.8)
 			if WORD_GAME and WORD_GAME.HandShuffle then
 				WORD_GAME.HandShuffle.try_sync()

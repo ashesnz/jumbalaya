@@ -63,7 +63,8 @@ Removed / renamed (do not reintroduce):
 
 | Export | Role |
 |--------|------|
-| `Jumble` / `Play` | Puzzle state and play orchestration |
+| `Jumble` / `Play` | Puzzle state and play orchestration (`Jumble.PlacementWord`, `Play.Rules`, …) |
+| `PlacementWord` / `JumbleRules` | Placement preview and pure scoring rules |
 | `Run` | Run lifecycle facade (`Run.State`, `Run.Mode`, `Run.Scope`, …) |
 | `Board` | `PlacementTable`, `Config`, `Snap`, `JumbleGeometry`, `BonusGutter` |
 | `Layout` | TABLE_BOARD geometry (`layout/felt`, `sidebar/layout`, `layout/placement`) |
@@ -85,7 +86,7 @@ There are **no modules at `word_game/ui/` root** — use subpackage paths only:
 
 | Package | Key modules |
 |---------|-------------|
-| `lib/` | `colour`, `localize`, `number_format`, `roll` |
+| `lib/` | `colour`, `localize`, `number_format`, `roll`, `domain` (runtime `WORD_GAME` resolver) |
 | `cards/` | `tooltip`, `popups`, `visuals`, `ui`, `letter_faces`, `inspect` |
 | `table/` | `board`, `deck`, `input`, `dealt_hand`, `placement_controls`, `stage_label`, `token_reward`, `jumble_fixed_letters` |
 | `feedback/` | `word_feedback`, `float_up_text`, `confetti`, `comic_burst`, `modifier_feedback` |

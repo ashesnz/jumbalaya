@@ -15,10 +15,8 @@ local function call(name, fn)
 end
 
 return function(word_game)
-	local placement_word = require("word_game.model.jumble.placement_word")
-
 	call("TradeUI", word_game.TradeUI and word_game.TradeUI.teardown_run)
-	call("PlacementWord", placement_word.clear)
+	call("PlacementWord", word_game.PlacementWord and word_game.PlacementWord.clear)
 	call("BonusStack", word_game.BonusStack and word_game.BonusStack.clear)
 	call("BossWordStack", word_game.BossWordStack and word_game.BossWordStack.clear)
 	call("BossWordAnnounce", word_game.BossWordAnnounce and word_game.BossWordAnnounce.clear)

@@ -1,11 +1,15 @@
 --[[ word_game/ui/boss_word_stack/layout.lua - Bonus gutter geometry ]]
 
-local gutter = require("word_game.board.bonus.gutter")
+local domain = require("word_game.ui.lib.domain")
+
+local function gutter()
+	return domain.bonus_gutter()
+end
 
 local M = {}
 
-M.LEFT_WINDOW_MARGIN = gutter.LEFT_WINDOW_MARGIN
-M.STACK_Y_LIFT_PX = gutter.STACK_Y_LIFT_PX
+M.LEFT_WINDOW_MARGIN = gutter().LEFT_WINDOW_MARGIN
+M.STACK_Y_LIFT_PX = gutter().STACK_Y_LIFT_PX
 
 local function gameplay_left_edge()
 	local edge
@@ -28,11 +32,11 @@ local function gameplay_left_edge()
 end
 
 function M.stack_y_lift()
-	return gutter.stack_y_lift()
+	return gutter().stack_y_lift()
 end
 
 function M.stack_layout()
-	return gutter.stack_layout()
+	return gutter().stack_layout()
 end
 
 function M.clears_gameplay_bounds()
@@ -42,23 +46,23 @@ function M.clears_gameplay_bounds()
 end
 
 function M.target_position(index)
-	return gutter.target_position(index)
+	return gutter().target_position(index)
 end
 
 function M.gutter_pixels(layout)
-	return gutter.gutter_pixels(layout)
+	return gutter().gutter_pixels(layout)
 end
 
 function M.return_card(card)
-	return gutter.return_card(card)
+	return gutter().return_card(card)
 end
 
 function M.point_in_stack(x, y)
-	return gutter.point_in_stack(x, y)
+	return gutter().point_in_stack(x, y)
 end
 
 function M.drop_in_gutter(session, x, y)
-	return gutter.drop_in_gutter(session, x, y)
+	return gutter().drop_in_gutter(session, x, y)
 end
 
 return M

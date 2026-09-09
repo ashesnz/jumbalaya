@@ -37,7 +37,7 @@ word_game/ui/      Presentation — may import model/config
 
 | Path | Role |
 |------|------|
-| `ui/lib/` | `colour`, `localize`, `number_format`, `roll` |
+| `ui/lib/` | `colour`, `localize`, `number_format`, `roll`, `domain` |
 | `ui/cards/` | Card tooltip, popups, visuals, inspect |
 | `ui/table/` | `board`, `deck`, `placement_controls`, `stage_label`, `token_reward` |
 | `ui/feedback/` | `word_feedback`, `float_up_text`, `confetti` |

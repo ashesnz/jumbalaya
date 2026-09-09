@@ -8,6 +8,7 @@ for k, v in pairs(topology) do
 end
 
 M.BonusStack = require("word_game.model.jumble.bonus_stack")
+M.PlacementWord = require("word_game.model.jumble.placement_word")
 M.return_bonus_card = require("word_game.model.jumble.bonus_return").return_card
 
 require("word_game.model.jumble.puzzle_spec")(M)

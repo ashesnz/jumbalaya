@@ -7,7 +7,7 @@ local word_feedback = require("word_game.ui.feedback.word_feedback")
 local boss_word_stack = require("word_game.ui.boss_word_stack")
 local card_fly_off = require("word_game.ui.play_effects.card_fly_off")
 local round_config = require("word_game.config.gameplay.round")
-local hand_size_cfg = require("word_game.model.hand_size")
+local domain = require("word_game.ui.lib.domain")
 local RunMode = require("word_game.model.run.mode")
 local Easing = require "app.effects.easing"
 local definition = require("word_game.ui.play_effects.definition")
@@ -75,7 +75,7 @@ function M.deal_and_refresh(on_complete)
 		deck.try_jumble_reshuffle_and_deal(finish)
 		return
 	end
-	deck.deal_into_hand(hand_size_cfg.get(), finish)
+	deck.deal_into_hand(domain.hand_size().get(), finish)
 end
 
 function M.present_boss_word(wr, on_complete)

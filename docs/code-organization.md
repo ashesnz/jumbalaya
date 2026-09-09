@@ -72,8 +72,10 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 
 | Export | Role |
 |--------|------|
-| `Jumble` | Puzzle state, validation, scoring, hand start |
-| `Play` | Play-button orchestration: `play_jumble_word` (model evaluation); UI `play_effects/resolution.resolve` (effects), bank/advance, hand clear, trade transition |
+| `Jumble` | Puzzle state, validation, scoring, hand start; also `Jumble.BonusStack`, `Jumble.PlacementWord`, `Jumble.return_bonus_card` |
+| `PlacementWord` | Placement-row word preview on `G.GAME` (`clear`, `refresh_from_jumble_slots`) |
+| `JumbleRules` | Pure scoring/play rules (`compute_word_score`, `score_breakdown`, `evaluate_play`, …) |
+| `Play` | Play-button orchestration (`play_jumble_word`); sub-exports `Play.Rules`, `Play.ModifierEffects` |
 | `BonusStack` / `BossWordStack` | Bonus gutter state/scoring (model) and animation/draw (UI) |
 | `Round` | Set/hand lifecycle, targets, perk-hand gating |
 | `Deck` / `Back` | Dealing; jumble branch in `model/deck/jumble.lua` |
@@ -99,7 +101,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | Caller | Rule |
 |--------|------|
 | `app/`, `tests/`, `devtools/` | Use `WORD_GAME.*` facade — no deep `word_game.model.*` requires unless testing internals |
-| `word_game/ui/` | `WORD_GAME` for model/board; local `require` for sibling UI modules only |
+| `word_game/ui/` | `word_game.ui.lib.domain` helpers (resolve `WORD_GAME.*` at runtime); local `require` for sibling UI modules only |
 | `word_game/board/` | Top-of-file `require` for model modules; no UI imports at load time |
 | `word_game/model/` | Top-of-file `require` for siblings (`model/jumble/*`, `model/run/*`, …); use `jumble/bonus_return` when model must return bonus cards to the gutter |
 | Inline `require(...)` inside functions | Avoid — hoist to module scope unless breaking a documented circular dependency |

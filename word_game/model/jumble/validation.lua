@@ -2,6 +2,10 @@
 
 return function(M)
 
+local round = require("word_game.model.round")
+local jumble_rules = require("word_game.model.jumble_play.jumble_rules")
+local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
+
 local function starting_letter_counts()
 	local counts = {}
 	local letters = (WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.STARTING_LETTERS) or {}
@@ -113,7 +117,6 @@ function M.find_playable_words(hand_counts, puzzle, limit)
 	end
 
 	Dictionary.load()
-	local round = require("word_game.model.round")
 	local found = {}
 	local min_len = puzzle.kind == "span" and puzzle.min or #puzzle.pattern
 	local max_len = puzzle.kind == "span" and puzzle.max or #puzzle.pattern
@@ -207,10 +210,8 @@ function M.validate_current()
 	if not M.all_blanks_filled(j.slots, j.puzzle) then
 		return nil, "Must play a word or skip entirely"
 	end
-	local jumble_rules = require("word_game.model.jumble_play.jumble_rules")
 	local used_cards = jumble_rules.collect_used_cards(j.slots)
 	local word = M.build_word(j.slots)
-	local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
 	word = modifier_effects.adjust_word_for_q(word, used_cards)
 	if not word or #word < 3 then
 		return nil, "Need a longer word"
@@ -225,7 +226,6 @@ function M.validate_current()
 	elseif not Dictionary or not Dictionary.is_valid(word) then
 		return nil, "Not a valid word"
 	end
-	local round = require("word_game.model.round")
 	if round.is_word_played(word) then
 		return nil, "Already played word!"
 	end
