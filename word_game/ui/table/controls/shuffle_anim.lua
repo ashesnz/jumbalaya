@@ -1,4 +1,4 @@
---[[ word_game/ui/hand_shuffle/shuffle_anim.lua - Smooth riffle shuffle animation for the hand ]]
+--[[ word_game/ui/table/controls/shuffle_anim.lua - Smooth riffle shuffle animation for the hand ]]
 
 local Scheduler = require "app.effects.timeline_scheduler"
 

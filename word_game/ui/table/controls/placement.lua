@@ -1,24 +1,19 @@
--- Jumbalaya placement controls.
+--[[ word_game/ui/table/controls/placement.lua - Play button entry (G.FUNCS.play_placement_word) ]]
 
 local facade = require("word_game.ui.facade")
-local InputLock = facade.input_lock()
-local RunMode = facade.run_mode()
+local controls = require("word_game.ui.table.controls")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 local play_resolution = require("word_game.ui.play_effects.resolution")
 
-local M = {}
+local InputLock = facade.input_lock()
+local RunMode = facade.run_mode()
 
-local function placement_has_cards()
-	local hand_shuffle = WORD_GAME and WORD_GAME.HandShuffle
-	return hand_shuffle
-		and hand_shuffle.placement_has_cards
-		and hand_shuffle.placement_has_cards()
-end
+local M = {}
 
 function M.try_play()
 	if InputLock.is_table_busy() then return end
 	if RunMode.classic_stage_complete() then
-		if not placement_has_cards() then
+		if not controls.placement_has_cards() then
 			word_feedback.show_classic_proceed({ hold = 2.2 })
 		elseif WORD_GAME and WORD_GAME.Play then
 			play_resolution.resolve(WORD_GAME.Play)

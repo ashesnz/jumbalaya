@@ -1,5 +1,5 @@
 --[[
-	word_game/ui/play_hold_redraw.lua - Hold play button to redraw the entire hand.
+	word_game/ui/table/controls/play_hold_redraw.lua - Hold play button to redraw the entire hand.
 
 	Hold for 5s: yellow ring drains clockwise from 12 o'clock, then hand cards
 	slide down off screen and 7 new cards deal in one at a time from the deck.

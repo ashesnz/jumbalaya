@@ -1,6 +1,6 @@
 --[[ word_game/ui/callbacks/hand_shuffle.lua - Hand shuffle and jumble advance G.FUNCS ]]
 
-local HandShuffle = require("word_game.ui.hand_shuffle")
+local HandShuffle = require("word_game.ui.table.controls")
 
 G.FUNCS.shuffle_hand = function()
 	HandShuffle.shuffle_hand()

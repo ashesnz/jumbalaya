@@ -1,8 +1,8 @@
---[[ word_game/ui/hand_shuffle/layout.lua - Hand shuffle/play button positioning ]]
+--[[ word_game/ui/table/controls/layout.lua - Hand shuffle/play button positioning ]]
 
 local felt_layout = require("word_game.ui.layout.felt")
 local facade = require("word_game.ui.facade")
-local definition = require("word_game.ui.hand_shuffle.definition")
+local definition = require("word_game.ui.table.controls.definition")
 
 local M = {}
 

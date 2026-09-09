@@ -284,8 +284,8 @@ T.describe("Classic run mode", function()
 			return { x = 0.8, y = 2.0, w = 15.4, h = 8.0 }
 		end
 		local RunMode = require("word_game.model.run.mode")
-		local placement_controls = require("word_game.ui.table.placement_controls")
-		local HandShuffle = require("word_game.ui.hand_shuffle")
+		local placement_controls = require("word_game.ui.table.controls.placement")
+		local HandShuffle = require("word_game.ui.table.controls")
 		local tt = require("word_game.ui.perks.timeline_timer")
 		WORD_GAME.TimelineTimer = tt
 		WORD_GAME.HandShuffle = HandShuffle

@@ -1,8 +1,8 @@
---[[ word_game/ui/hand_shuffle/animate.lua - Hand shuffle bounce, recall, and settle ]]
+--[[ word_game/ui/table/controls/animate.lua - Hand shuffle bounce, recall, and settle ]]
 
 local facade = require("word_game.ui.facade")
-local hand_shuffle_anim = require("word_game.ui.hand_shuffle.shuffle_anim")
-local hand_placement_recall_anim = require("word_game.ui.hand_shuffle.placement_recall_anim")
+local hand_shuffle_anim = require("word_game.ui.table.controls.shuffle_anim")
+local hand_placement_recall_anim = require("word_game.ui.table.controls.placement_recall_anim")
 
 local InputLock = facade.input_lock()
 

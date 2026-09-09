@@ -48,7 +48,7 @@ Callbacks are grouped by responsibility under `app/callbacks/` and `word_game/ui
 |------|--------|
 | HUD refresh / rebuild | `word_game/ui/sidebar/` via `WORD_GAME.Sidebar`; G.FUNCS in `sidebar/funcs.lua` |
 | Screen / placement layout | `word_game/ui/layout/` via `WORD_GAME.Layout` or `require "word_game.ui.layout"`; model code requests deferred layout via `Layout.request_refresh()` |
-| Play button / placement | `word_game/ui/callbacks/placement.lua` (`G.FUNCS.play_placement_word`); logic in `table/placement_controls.lua` |
+| Play button / placement | `word_game/ui/callbacks/placement.lua` (`G.FUNCS.play_placement_word`); logic in `table/controls/placement.lua` |
 | Profile load / delete | `app/profile_callbacks.lua` |
 | Settings, text input, run lifecycle | `app/callbacks/settings.lua` |
 | Overlay screens (stable `G.FUNCS` names) | `word_game/ui/callbacks/overlays.lua` (installed from `app/callbacks/overlays/init.lua`) |
@@ -180,13 +180,13 @@ Runtime hand size (`WORD_GAME.HandSize.get()`) lives in `word_game/model/hand_si
 | `util/` | Stateless helpers: `colour`, `localize`, `number_format`, `roll` |
 | `facade/` | Cross-package resolver — UI modules import model/board via `require("word_game.ui.facade")` |
 | `cards/` | Letter card presentation: `tooltip`, `popups`, `visuals`, `ui`, `letter_faces`, `inspect` |
-| `table/` | TABLE_BOARD coordinator and table chrome: `board`, `deck`, `input`, `dealt_hand`, `placement_controls`, `jumble_fixed_letters`, `token_reward` |
+| `table/` | TABLE_BOARD coordinator and table chrome: `board`, `deck`, `input`, `dealt_hand`, `jumble_fixed_letters`, `token_reward` |
+| `table/controls/` | Play/shuffle buttons (`init`, `placement`, `play_hold_redraw`, `shuffle_anim`, …) |
 | `feedback/` | Ephemeral copy and FX: `word_feedback`, `float_up_text`, `modifier_feedback`, `comic_burst`, `confetti` |
 | `tutorial/` | First-play onboarding: `first_play`, `character_speech`, `hand_clear_focus` |
 | `layout/` | TABLE_BOARD geometry: `felt`, `placement`, `request` |
 | `sidebar/` | Right-hand HUD: `init`, `hud_definition`, `layout`, `stage_button`, `funcs` |
 | `score_banner/` | Jumble score chips, “Points to get”, `stage_label`, `boss_announce` |
-| `hand_shuffle/` | Shuffle/play buttons, hold-to-redraw (`play_hold_redraw`) |
 | `play_effects/` | Play cinematics + `resolution` (model result → FX) and `card_fly_off` |
 | `perks/` | `bonus_stack/` (boss-word gutter), `discard_bin/`, `timeline_timer/`, `stamp/` (grid + animation), `shared/` (voucher atlas + sprite) |
 | `trade/` | Marketplace overlay |
@@ -219,7 +219,7 @@ Fixed-letter tile draw is installed from `ui/table/board.lua` via `placement_tab
 |------|------|
 | `app/loop.lua` | Engine frame + state dispatch; delegates TABLE_BOARD to `WORD_GAME.TableBoard` |
 | `app/startup.lua` | Thin orchestrator; `startup/profile`, `window`, `dealing` |
-| `word_game/ui/callbacks/placement.lua` | `play_placement_word` → `placement_controls.try_play` |
+| `word_game/ui/callbacks/placement.lua` | `play_placement_word` → `controls/placement.try_play` |
 
 ### Play resolution split
 
@@ -229,7 +229,7 @@ Model evaluation and UI presentation are separated for headless tests:
 |-------|--------|------|
 | Model | `jumble_play/jumble.lua` | `play_jumble_word()` → evaluation result only |
 | UI | `play_effects/resolution.lua` | `resolve(Play)` → `play_effects` banners, fly, hand clear |
-| UI | `table/placement_controls.lua` | Play button calls `play_resolution.resolve` |
+| UI | `table/controls/placement.lua` | Play button calls `play_resolution.resolve` |
 
 Tests that need full play behavior call `play_resolution.resolve(flow)`; tests that only need rules call `play_jumble_word` or `rules.evaluate_play` directly.
 

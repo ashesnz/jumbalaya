@@ -1,10 +1,10 @@
---[[ word_game/ui/hand_shuffle/init.lua - Play button beside the dealt hand (no shuffle row) ]]
+--[[ word_game/ui/table/controls/init.lua - Play/shuffle buttons beside the dealt hand ]]
 
 local facade = require("word_game.ui.facade")
 local RunMode = facade.run_mode()
-local definition = require("word_game.ui.hand_shuffle.definition")
-local layout = require("word_game.ui.hand_shuffle.layout")
-local animate = require("word_game.ui.hand_shuffle.animate")
+local definition = require("word_game.ui.table.controls.definition")
+local layout = require("word_game.ui.table.controls.layout")
+local animate = require("word_game.ui.table.controls.animate")
 
 layout.bind_animate(animate)
 animate.bind_layout(layout)

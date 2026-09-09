@@ -1,7 +1,7 @@
 --[[ word_game/ui/callbacks/placement.lua - Placement play button G.FUNCS ]]
 
-local placement_controls = require("word_game.ui.table.placement_controls")
+local placement = require("word_game.ui.table.controls.placement")
 
 G.FUNCS.play_placement_word = function()
-	placement_controls.try_play()
+	placement.try_play()
 end

@@ -7,6 +7,12 @@ local function type_handler(self, handlers)
 end
 
 function M.can_select(self, card, handlers)
+	if self.config.type == 'hand' then
+		return true
+	end
+	if self.config.type == 'placement' and not G.INPUT.HID.controller then
+		return true
+	end
 	local handler = type_handler(self, handlers)
 	if handler and handler.can_select then
 		if handler.can_select(self, card) then

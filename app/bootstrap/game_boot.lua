@@ -23,13 +23,12 @@ InputController._input_actions = InputActions
 require "app.screen_wipe"
 require "app.profile_callbacks"
 require "app.callbacks.settings"
-require "word_game.ui.table.placement_controls"
-
 require "word_game.model.cards.card"
 require "word_game.ui.cardarea.init"
 
 Dictionary = require "dictionary"
 WORD_GAME = require "word_game"
+require("word_game.ui.play_effects.hand_clear").install(WORD_GAME.Play)
 
 require "app.callbacks.registry"
 

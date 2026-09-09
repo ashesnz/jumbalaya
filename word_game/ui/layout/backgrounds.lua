@@ -13,11 +13,6 @@ local M = {}
 
 local GARDEN_STAGE_MOSS = {0.38, 0.52, 0.36, 1}
 
--- Garden (falling leaves) board for all stages.
-function M.is_garden_stage(set, hand_index)
-	return true
-end
-
 local function remove_current()
 	if G.SPLASH_BACK then
 		G.SPLASH_BACK:remove()

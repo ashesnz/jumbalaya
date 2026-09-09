@@ -4,17 +4,6 @@
 
 local M = {}
 
-function M.set_card_ranks(self, k, card)
-	card.states.drag.can = true
-end
-
-function M.can_select(self, card)
-	if G.INPUT.HID.controller then
-		return false
-	end
-	return true
-end
-
 function M.add_selection(self, card, silent)
 	if #self.selected >= self.config.selected_limit then
 		local oldest = self.selected[1]

@@ -1,4 +1,4 @@
---[[ word_game/ui/hand_shuffle/definition.lua - Shuffle/play button chrome and definitions ]]
+--[[ word_game/ui/table/controls/definition.lua - Shuffle/play button chrome and definitions ]]
 
 local M = {}
 

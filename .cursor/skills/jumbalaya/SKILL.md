@@ -40,12 +40,12 @@ word_game/ui/      Presentation — may import model/config
 | `ui/util/` | `colour`, `localize`, `number_format`, `roll` |
 | `ui/facade/` | Cross-package imports for UI (model/board/app) |
 | `ui/cards/` | Card tooltip, popups, visuals, inspect |
-| `ui/table/` | `board`, `deck`, `placement_controls`, `token_reward` |
+| `ui/table/` | `board`, `deck`, `controls/` (play/shuffle), `token_reward` |
 | `ui/feedback/` | `word_feedback`, `float_up_text`, `confetti` |
 | `ui/tutorial/` | `first_play`, `character_speech`, `hand_clear_focus` |
 | `ui/play_effects/` | `resolution`, `card_fly_off`, play FX |
 | `ui/sidebar/` | Right-hand HUD |
-| `ui/layout/`, `ui/hand_shuffle/`, `ui/score_banner/`, `ui/perks/`, etc. | As named |
+| `ui/layout/`, `ui/score_banner/`, `ui/perks/`, etc. | As named |
 
 Cross-package: `WORD_GAME` facade in `word_game/init.lua`. Tests and `app/` should use the facade, not deep `word_game.model.*` requires unless testing internals.
 
@@ -78,7 +78,7 @@ Model code calls `Layout.request_refresh()` — never sets sidebar attach positi
 
 ## Jumble play flow
 
-1. `placement_controls.try_play` → `play_resolution.resolve`
+1. `table/controls/placement.try_play` → `play_resolution.resolve`
 2. `jumble_play.play_jumble_word` — model evaluation (headless-testable)
 3. `play_effects` — banners, fly, hand clear
 4. `round.lua` / `jumble/` — hand advance, targets, boss words

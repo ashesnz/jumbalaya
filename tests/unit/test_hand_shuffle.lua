@@ -44,7 +44,7 @@ end
 
 T.describe("Hand shuffle/remove button", function()
 	T.it("detects placement cards from the placement area and jumble slots", function()
-		local HandShuffle = require("word_game.ui.hand_shuffle")
+		local HandShuffle = require("word_game.ui.table.controls")
 		setup_hand_shuffle_env()
 		G.placement_table = {
 			area = { cards = {} },

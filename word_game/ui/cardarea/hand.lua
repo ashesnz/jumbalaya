@@ -10,14 +10,6 @@ local function table_board()
 	return G.STATE == G.STATES.TABLE_BOARD
 end
 
-function M.set_card_ranks(self, k, card)
-	card.states.drag.can = true
-end
-
-function M.can_select(self, card)
-	return true
-end
-
 function M.relayout(self)
 	if self.config.type ~= 'hand' then return end
 

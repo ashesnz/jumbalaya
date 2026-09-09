@@ -1,4 +1,4 @@
---[[ word_game/ui/hand_shuffle/placement_recall_anim.lua - Slide placement-row cards back to hand ]]
+--[[ word_game/ui/table/controls/placement_recall_anim.lua - Slide placement-row cards back to hand ]]
 
 local Scheduler = require "app.effects.timeline_scheduler"
 local domain = require "word_game.ui.facade"

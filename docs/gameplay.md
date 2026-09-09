@@ -258,6 +258,6 @@ Non-release builds include a debug panel (Tab or **DBG** button):
 | Score banner | `word_game/ui/score_banner.lua` |
 | Timeline & tokens | `word_game/ui/perks/timeline_timer/`, `word_game/ui/token_reward.lua` |
 | Perks | `word_game/config/perks.lua`, `word_game/model/perks/effects.lua`, `word_game/ui/perks/stamp/` |
-| Hand controls | `word_game/ui/hand_shuffle.lua`, `word_game/ui/play_hold_redraw.lua` |
+| Hand controls | `word_game/ui/table/controls/` (play/shuffle, `play_hold_redraw`) |
 | Match flow | `word_game/model/round.lua`, `word_game/ui/trade.lua` |
 | Trade | `word_game/model/trade.lua` |

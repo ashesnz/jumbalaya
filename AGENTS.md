@@ -73,7 +73,7 @@ Removed / renamed (do not reintroduce):
 | `TableBoard` | TABLE_BOARD update/draw coordinator |
 | `VoucherDiscard` | Sidebar voucher discard |
 | `TimelineTimer` | 60s fuse / classic score slider |
-| `HandShuffle` / `PlayHoldRedraw` | Shuffle + Play buttons, hold-to-redraw |
+| `HandShuffle` / `PlayHoldRedraw` | Table controls: shuffle/play buttons, hold-to-redraw (`ui/table/controls/`) |
 | `TradeUI` / `PerkStamp` | Marketplace and perk stamp overlays |
 | `TableInput` | Card input refresh on the table board |
 | `Match` | `end_run()` — game-over from sidebar End Run |
@@ -89,11 +89,10 @@ There are **no modules at `word_game/ui/` root** — use subpackage paths only:
 | `util/` | `colour`, `localize`, `number_format`, `roll` |
 | `facade/` | Cross-package imports for UI (model/board/app) — use instead of deep `word_game.model.*` requires |
 | `cards/` | `tooltip`, `popups`, `visuals`, `ui`, `letter_faces`, `inspect` |
-| `table/` | `board`, `deck`, `input`, `dealt_hand`, `placement_controls`, `stage_label`, `token_reward`, `jumble_fixed_letters` |
+| `table/` | `board`, `deck`, `input`, `dealt_hand`, `controls/`, `token_reward`, `jumble_fixed_letters` |
 | `feedback/` | `word_feedback`, `float_up_text`, `confetti`, `comic_burst`, `modifier_feedback` |
 | `tutorial/` | `first_play`, `character_speech`, `hand_clear_focus` |
 | `play_effects/` | `resolution`, `card_fly_off`, play cinematics |
-| `hand_shuffle/` | shuffle/play buttons, `play_hold_redraw` |
 | `sidebar/` | right-hand HUD (see below) |
 | `layout/`, `score_banner/`, `perks/`, `trade/`, `menu/`, `overlays/`, `widgets/`, `callbacks/`, `cardarea/` | as named |
 
@@ -119,8 +118,8 @@ Globals: `G.SIDEBAR_HUD`, `G.SIDEBAR_ATTACH`. Layout helpers are re-exported on 
 |-------|--------|------|
 | Model | `jumble_play/jumble.lua` | `play_jumble_word()` → result only |
 | UI | `play_effects/resolution.lua` | `resolve(Play)` → effects, banners |
-| UI | `play_effects/hand_clear.lua` | Hand-clear cinematics; calls model `prepare_hand_clear` / `resolve_after_clear` |
-| UI | `table/placement_controls.lua` | Play button entry point |
+| UI | `play_effects/hand_clear.lua` | Hand-clear cinematics; wired from `app/bootstrap/game_boot.lua` |
+| UI | `table/controls/placement.lua` | Play button entry point |
 
 Tests that need rules only call `play_jumble_word`; tests that need full FX call `play_effects/resolution.resolve`.
 
