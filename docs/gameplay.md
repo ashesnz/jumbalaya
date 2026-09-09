@@ -190,7 +190,7 @@ The banner shows **points** and multiplier chips, plus centered **“N Points to
 | **Play** (▶, right, tap) | Submit word or bank puzzle |
 | **Play** (hold ~5s) | Yellow ring drains clockwise from 12 o’clock; entire hand slides off-screen; 7 new cards deal one at a time. Cards in pattern slots are recalled to hand first. |
 
-Hold-to-redraw is independent of the old discard counter. It is blocked only during score/redraw animations.
+Hold-to-redraw is blocked only during score/redraw animations.
 
 ---
 

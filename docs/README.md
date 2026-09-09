@@ -17,7 +17,7 @@ The game pivoted from an open Scrabble-like placement loop to a **pattern jumble
 - **Goal:** Bank enough score on each stage to reach the hand target before you finish the stage’s puzzles.
 - **Core loop:** Fill a **pattern puzzle** from your hand → press **Play** → earn letter-count points with a rising **multiplier** → bank solved puzzles until the target is met.
 - **Hand:** 7 cards dealt from a jumble letter pool (**A, E, R, T, N, L, S**). **Shuffle** (left) or **hold Play 5s** (right) to redraw the whole hand.
-- **Timeline:** A **60-second fuse bar** replaces the Milo portrait. On **1-1 clear**, leftover time becomes **tokens**.
+- **Timeline:** A **60-second fuse bar** anchors the top HUD. On **1-1 clear**, leftover time becomes **tokens**.
 - **Match:** 8 sets × 3 hands (Standard, Standard, Showdown). Clear set 8’s Showdown to win.
 - **Between hands:** **The Trade** (Card Marketplace). Early showdowns (sets 1–3) also offer a **voucher shop** paid with tokens.
 - **Dictionary:** Valid words must appear in the offline word list (3–7 letters unless a puzzle says otherwise).

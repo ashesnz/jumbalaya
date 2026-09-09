@@ -371,7 +371,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.play_hold_redraw)", function()
 		WORD_GAME.HandShuffle.try_sync = function() end
 
 		local refreshed = false
-		WORD_GAME.PlayerHost = {
+		WORD_GAME.TableInput = {
 			refresh_card_input = function()
 				refreshed = true
 				if G.hand then G.hand:set_ranks() end
@@ -416,7 +416,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.play_hold_redraw)", function()
 
 		T.assert_equal(PlayHoldRedraw.is_animating(), false, "Redraw should be finished")
 		T.assert_equal(G.GAME.hand_redraw_animating, false, "hand_redraw_animating flag should be false")
-		T.assert_true(refreshed, "PlayerHost.refresh_card_input should have been called")
+		T.assert_true(refreshed, "TableInput.refresh_card_input should have been called")
 
 		-- Verify all 7 new hand cards are now draggable
 		T.assert_equal(#G.hand.cards, 7, "Hand should have 7 new cards")

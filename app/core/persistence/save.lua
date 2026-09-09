@@ -119,11 +119,6 @@ function Game:discard_run()
 			self.placement_table.area = nil
 		end
 		if self.OVERLAY_MENU then self.OVERLAY_MENU:remove(); self.OVERLAY_MENU = nil end
-		if self.OVERLAY_TUTORIAL then
-			if G.OVERLAY_TUTORIAL.content then G.OVERLAY_TUTORIAL.content:remove() end
-			G.OVERLAY_TUTORIAL:remove()
-			G.OVERLAY_TUTORIAL = nil
-		end
 		for key, value in pairs(G) do
 			if (type(value) == "table") and value.is_kind and value:is_kind(CardArea) then
 				G[key] = nil

@@ -110,7 +110,7 @@
 ---@class WordGame
 ---@field Deck { reveal_in_hand: fun(card: Card), populate_jumble_deck: fun(), reset_table_deck: fun(), deal_jumble_hand: fun(), deal_into_hand: fun(n: number) }|nil
 ---@field TableDeck WordGameTableDeck|nil
----@field PlayerHost table|nil
+---@field TableInput table|nil
 ---@field CardInspect WordGameCardInspect|nil
 ---@field Layout { sidebar_frac: fun(): number, sidebar_width: fun(): number, inner_width: fun(): number, update_all: fun(), request_refresh: fun() }|nil
 ---@field TableBoard { update: fun(game: Game, dt: number), draw_board: fun(game: Game), is_active: fun(): boolean }|nil

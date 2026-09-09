@@ -1,9 +1,4 @@
---[[
-	word_game/ui/player_host.lua - Table-board input refresh hooks.
-
-	Legacy character portrait/speech hosts were removed; this module keeps the
-	small shared helper still used after layout and play-hold redraws.
-]]
+--[[ word_game/ui/table_input.lua - Refresh hand/placement drag ranks after layout changes. ]]
 
 local M = {}
 

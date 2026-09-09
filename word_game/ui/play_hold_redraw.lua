@@ -124,8 +124,8 @@ function M.reset()
 	animating = false
 	if G.GAME and G.GAME.hand_redraw_animating then
 		G.GAME.hand_redraw_animating = false
-		if WORD_GAME and WORD_GAME.PlayerHost and WORD_GAME.PlayerHost.refresh_card_input then
-			WORD_GAME.PlayerHost.refresh_card_input()
+		if WORD_GAME and WORD_GAME.TableInput and WORD_GAME.TableInput.refresh_card_input then
+			WORD_GAME.TableInput.refresh_card_input()
 		else
 			if G.hand and G.hand.set_ranks then G.hand:set_ranks() end
 			if G.placement_table and G.placement_table.area and G.placement_table.area.set_ranks then
@@ -220,8 +220,8 @@ local function finish_redraw()
 		G.GAME.hand_redraw_animating = false
 	end
 	block_click = true
-	if WORD_GAME and WORD_GAME.PlayerHost and WORD_GAME.PlayerHost.refresh_card_input then
-		WORD_GAME.PlayerHost.refresh_card_input()
+	if WORD_GAME and WORD_GAME.TableInput and WORD_GAME.TableInput.refresh_card_input then
+		WORD_GAME.TableInput.refresh_card_input()
 	else
 		if G.hand and G.hand.set_ranks then G.hand:set_ranks() end
 		if G.placement_table and G.placement_table.area and G.placement_table.area.set_ranks then

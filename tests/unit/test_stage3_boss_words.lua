@@ -326,7 +326,7 @@ T.describe("Stage 1-3 boss words", function()
 		hand_card.area = G.hand
 
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.PlayerHost = {
+		WORD_GAME.TableInput = {
 			refresh_card_input = function()
 				if G.hand then G.hand:set_ranks() end
 			end,
@@ -511,7 +511,7 @@ T.describe("Stage 1-3 boss words", function()
 		local saved = {}
 		for _, key in ipairs({
 			"Round", "ScoreBanner", "BossWordAnnounce", "Jumble", "Deck",
-			"HandShuffle", "Sidebar", "PlayHoldRedraw", "PlayerHost",
+			"HandShuffle", "Sidebar", "PlayHoldRedraw", "TableInput",
 		}) do
 			saved[key] = WORD_GAME[key]
 		end
@@ -557,7 +557,7 @@ T.describe("Stage 1-3 boss words", function()
 			sync_action_buttons = function() end,
 		}
 		WORD_GAME.PlayHoldRedraw = { is_animating = function() return false end }
-		WORD_GAME.PlayerHost = { refresh_card_input = function() end }
+		WORD_GAME.TableInput = { refresh_card_input = function() end }
 		G.hand = nil
 
 		T.assert_true(InputLock.is_table_busy(), "Staging must lock play before the intro starts")

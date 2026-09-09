@@ -83,7 +83,7 @@ T.describe("Debug stage jump (devtools.sections.stage)", function()
 				refresh_hud = function() end,
 			},
 			Sidebar = { refresh = function() end },
-			PlayerHost = {
+			TableInput = {
 				refresh_card_input = function() end,
 			},
 		}

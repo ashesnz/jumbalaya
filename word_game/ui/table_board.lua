@@ -64,8 +64,8 @@ function M.draw_spotlight_overlay(game, overlay)
 	overlay:draw()
 	love.graphics.pop()
 
-	if overlay.redraw_portrait and WORD_GAME and WORD_GAME.PlayerPortrait then
-		WORD_GAME.PlayerPortrait.draw()
+	if overlay.redraw_portrait and WORD_GAME and WORD_GAME.TimelineTimer then
+		WORD_GAME.TimelineTimer.draw()
 	end
 	if overlay.redraw_banner and WORD_GAME and WORD_GAME.ScoreBanner then
 		WORD_GAME.ScoreBanner.draw()
@@ -125,8 +125,8 @@ function M.draw_spotlight_overlay(game, overlay)
 		love.graphics.pop()
 	end
 
-	if overlay.redraw_timeline and WORD_GAME and WORD_GAME.PlayerPortrait then
-		WORD_GAME.PlayerPortrait.draw()
+	if overlay.redraw_timeline and WORD_GAME and WORD_GAME.TimelineTimer then
+		WORD_GAME.TimelineTimer.draw()
 	end
 
 	if not overlay.selections then return end
@@ -145,8 +145,8 @@ function M.draw_spotlight_overlay(game, overlay)
 end
 
 function M.draw_hud()
-	if WORD_GAME and WORD_GAME.PlayerPortrait then
-		WORD_GAME.PlayerPortrait.draw()
+	if WORD_GAME and WORD_GAME.TimelineTimer then
+		WORD_GAME.TimelineTimer.draw()
 	end
 	if WORD_GAME and WORD_GAME.ScoreBanner then
 		WORD_GAME.ScoreBanner.draw()

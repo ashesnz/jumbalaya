@@ -102,8 +102,8 @@ local function jump_to_hand(ctx, set, hand_index)
 	if WORD_GAME.Sidebar then
 		WORD_GAME.Sidebar:refresh()
 	end
-	if WORD_GAME.PlayerHost and WORD_GAME.PlayerHost.refresh_card_input then
-		WORD_GAME.PlayerHost.refresh_card_input()
+	if WORD_GAME.TableInput and WORD_GAME.TableInput.refresh_card_input then
+		WORD_GAME.TableInput.refresh_card_input()
 	end
 	play_sfx("generic1", 0.9, 0.7)
 end

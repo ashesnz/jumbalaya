@@ -132,11 +132,6 @@ return {
 [1]="Your goal is to get the target score as shown here.",
 [2]="Good luck!",
 },
-    ["sb_1"]={
-[1]="Hi I'm {C:attention}Pads{}!",
-[2]="Let's learn to play",
-[3]="{C:attention}Jumbalaya{}!",
-},
     ["invalid_word"]={
 [1]="{C:attention}#1#{} is not a valid word!",
 },

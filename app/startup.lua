@@ -26,7 +26,6 @@ function Game:launch()
 				self.SETTINGS[k] = v
 			end
 			self.SETTINGS.profile = 1
-			self.SETTINGS.tutorial_progress = nil
 		else
 			if G.VERSION < '1.0.0' then
 				settings_ver = settings_file.version

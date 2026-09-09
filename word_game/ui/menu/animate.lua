@@ -78,11 +78,6 @@ function M.open_main_menu(self, change_context)
 	self:prep_stage(G.STAGES.MAIN_MENU, G.STATES.MENU, true)
 	self.GAME.selected_back = WORD_GAME.Back.new(G.P_CENTERS.deck_alpha)
 
-	if not G.SETTINGS.tutorial_complete and G.SETTINGS.tutorial_progress
-		and G.SETTINGS.tutorial_progress.completed_parts
-		and G.SETTINGS.tutorial_progress.completed_parts.big_blind then
-		G.SETTINGS.tutorial_complete = true
-	end
 	if G.FUNCS and G.FUNCS.change_shadows and G.SETTINGS and G.SETTINGS.GRAPHICS then
 		G.FUNCS.change_shadows{to_key = G.SETTINGS.GRAPHICS.shadows == "On" and 1 or 2}
 	end

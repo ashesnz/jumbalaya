@@ -43,9 +43,9 @@ function M.setup_card_areas()
 	G.RUN = { active = true }
 end
 
-function M.wire_player_host_drag()
+function M.wire_table_input()
 	WORD_GAME = WORD_GAME or {}
-	WORD_GAME.PlayerHost = {
+	WORD_GAME.TableInput = {
 		refresh_card_input = function()
 			if G.hand and G.hand.set_ranks then
 				G.hand:set_ranks()
@@ -134,7 +134,7 @@ function M.begin(opts)
 	mock_env.reset_game()
 	M.setup_card_areas()
 	if opts.wire_drag then
-		M.wire_player_host_drag()
+		M.wire_table_input()
 	end
 	if opts.table_board then
 		G.STATES = G.STATES or {}

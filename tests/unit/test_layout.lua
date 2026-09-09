@@ -19,24 +19,12 @@ T.describe("Layout & Sidebar Geometry (word_game.ui.layout)", function()
 		T.assert_almost_equal(frac, 3.0 / 20, 0.0001, "Sidebar fraction should be 3.0 / 20 = 0.15")
 	end)
 
-	T.it("constructs sidebar HUD without plays left odometer or word list", function()
+	T.it("constructs sidebar HUD with vault fill and deck row", function()
 		local sidebar_fn = require("word_game.ui.sidebar")
 		local sidebar = sidebar_fn()
 
 		local hud = sidebar.hud_definition()
 		T.assert_not_nil(hud, "HUD definition should exist")
-
-		local function has_id(node, target_id)
-			if node.config and node.config.id == target_id then return true end
-			for _, child in pairs(node.nodes or {}) do
-				if type(child) == "table" and has_id(child, target_id) then return true end
-			end
-			return false
-		end
-
-		T.assert_false(has_id(hud, "plays_odometer"), "Plays left odometer must be completely removed")
-		T.assert_false(has_id(hud, "row_hand_progress"), "Set/hand odometer must not be in the vault sidebar")
-		T.assert_false(has_id(hud, "hand_progress_odometer"), "Hand progress odometer must not be in the vault sidebar")
 
 		local fill_node
 		local function find_fill(node)

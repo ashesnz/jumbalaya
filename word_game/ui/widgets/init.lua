@@ -14,7 +14,7 @@ function G.DEFINITIONS.speech_bubble(text_key, loc_vars)
   if loc_vars and loc_vars.quip then
     localize{type = 'quips', key = text_key or 'lq_1', vars = loc_vars or {}, nodes = text}
   else
-    localize{type = 'tutorial', key = text_key or 'sb_1', vars = loc_vars or {}, nodes = text}
+    localize{type = 'tutorial', key = text_key, vars = loc_vars or {}, nodes = text}
   end
   local row = {}
   for k, v in ipairs(text) do
