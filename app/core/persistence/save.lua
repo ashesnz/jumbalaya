@@ -56,7 +56,7 @@ function delete_saved_run()
 end
 
 --- Recollects the live letter cards spread across all areas after a load,
---- reassigning sequential ids and widening the vault to fit them.
+--- reassigning sequential ids and widening the sidebar to fit them.
 function rebuild_card_inventory()
 	G.playing_cards = {}
 	local seen = {}

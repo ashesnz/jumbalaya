@@ -77,7 +77,7 @@ function M.reset_globals()
 		end
 		G.LIVE.CARDAREA = {}
 	end
-	G.word_sidebar_uibox = nil
+	G.SIDEBAR_HUD = nil
 	if G.placement_table then
 		if G.placement_table.reset_run then
 			pcall(G.placement_table.reset_run)

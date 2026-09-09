@@ -237,7 +237,7 @@ T.describe("Hand shuffle/remove button", function()
 		HandShuffle.destroy()
 	end)
 
-	T.it("restores buttons via sidebar sync when vault sync runs before the hand is dealt", function()
+	T.it("restores buttons via sidebar sync when sidebar sync runs before the hand is dealt", function()
 		local HandShuffle = require("word_game.ui.hand_shuffle")
 		local hud_definition = require("word_game.ui.sidebar.hud_definition")
 		setup_hand_shuffle_env()

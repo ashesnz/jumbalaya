@@ -1,7 +1,7 @@
 --[[
-	word_game/ui/perks/stamp/init.lua - 3D rubber-stamp strike onto the vault.
+	word_game/ui/perks/stamp/init.lua - 3D rubber-stamp strike onto the sidebar.
 
-	Stamps the row below Set/Hand with a vault-wide wooden block, then leaves a
+	Stamps the row below Set/Hand with a sidebar-wide wooden block, then leaves a
 	horizontal perk imprint on the side panel.
 ]]
 
@@ -20,7 +20,7 @@ local M = {}
 local room_translate = stamp_layout.room_translate
 local tile_scale = stamp_layout.tile_scale
 local node_rect_px = stamp_layout.node_rect_px
-local vault_width_px = stamp_layout.vault_width_px
+local sidebar_width_px = stamp_layout.sidebar_width_px
 local mouse_to_stamp_space = stamp_layout.mouse_to_stamp_space
 local screen_top_px = stamp_layout.screen_top_px
 
@@ -44,17 +44,17 @@ end
 
 local function stamp_panel_rect_px(layout_count)
 	layout_count = layout_count or layout_stamp_count()
-	local row = G.VAULT_HUD and G.VAULT_HUD.find_node_by_id and G.VAULT_HUD:find_node_by_id("row_stamp_slot")
+	local row = G.SIDEBAR_HUD and G.SIDEBAR_HUD.find_node_by_id and G.SIDEBAR_HUD:find_node_by_id("row_stamp_slot")
 	local rx, ry, rw, rh = node_rect_px(row)
 	if not rx then
-		local vault = Layout.vault_rect()
+		local sidebar = Layout.sidebar_rect()
 		local ts = tile_scale()
-		rx = vault.x * ts
-		ry = (vault.y + 0.82) * ts
-		rw = vault.w * ts
+		rx = sidebar.x * ts
+		ry = (sidebar.y + 0.82) * ts
+		rw = sidebar.w * ts
 		rh = stamp_grid.panel_height_px(nil, layout_count)
 	end
-	local w = vault_width_px()
+	local w = sidebar_width_px()
 	local h = stamp_grid.panel_height_px(nil, layout_count)
 	local box_h = math.max(rh or h, h)
 	local x = rx + (rw - w) * 0.5
@@ -254,10 +254,10 @@ end
 
 function M.reset()
 	M.clear_runtime()
-	if G.VAULT_HUD and G.VAULT_HUD.remove then
-		pcall(function() G.VAULT_HUD:remove() end)
+	if G.SIDEBAR_HUD and G.SIDEBAR_HUD.remove then
+		pcall(function() G.SIDEBAR_HUD:remove() end)
 	end
-	G.VAULT_HUD = nil
+	G.SIDEBAR_HUD = nil
 end
 
 function M.has_imprint()

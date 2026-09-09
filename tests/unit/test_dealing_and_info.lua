@@ -145,7 +145,7 @@ T.describe("Card Dealing & Hand Capacity (word_game.model.cards.deck)", function
 	end)
 end)
 
-T.describe("Vault deck information", function()
+T.describe("Sidebar deck information", function()
 	mock_env.reset_game()
 	local deck = require("word_game.model.cards.deck")
 	local table_deck = require("word_game.ui.table_deck")
@@ -163,7 +163,7 @@ T.describe("Vault deck information", function()
 		T.assert_equal(captured.text, "Cards left: 5", "Deck info should show calculated cards left")
 	end)
 
-	T.it("includes the cards-left counter in the Vault HUD", function()
+	T.it("includes the cards-left counter in the Sidebar HUD", function()
 		G.GAME = G.GAME or {}
 		G.GAME.deck_left_count = 2
 		G.deck = { cards = { {}, {} } }
@@ -175,7 +175,7 @@ T.describe("Vault deck information", function()
 			end
 			return false
 		end
-		T.assert_true(contains(definition), "Vault HUD should contain cards-left row")
+		T.assert_true(contains(definition), "Sidebar HUD should contain cards-left row")
 	end)
 
 	T.it("updates the live deck count when cards are drawn", function()
@@ -357,7 +357,7 @@ T.describe("Vault deck information", function()
 		T.assert_equal(G.GAME.deck_left_count, 4, "G.GAME mirror should follow cards left")
 	end)
 
-	T.it("vault HUD cards-left matches the physical deck after jumble deal", function()
+	T.it("sidebar HUD cards-left matches the physical deck after jumble deal", function()
 		G.GAME.word_round = { mode = "jumble", set = 1, hand_index = 1 }
 		G.playing_cards = {}
 		G.deck = {
@@ -403,7 +403,7 @@ T.describe("Vault deck information", function()
 			"cards_left should match the physical draw pile after dealing")
 	end)
 
-	T.it("vault HUD text node reads G.ARGS even when G.GAME is replaced", function()
+	T.it("sidebar HUD text node reads G.ARGS even when G.GAME is replaced", function()
 		mock_env.ensure_engine_globals()
 		require("app.core.ui.panel")
 		G.LANG = G.LANG or {
@@ -420,7 +420,7 @@ T.describe("Vault deck information", function()
 		G.TILESCALE = G.TILESCALE or 1
 		G.TILESIZE = G.TILESIZE or 20
 		G.UI.padding = G.UI.padding or 0.1
-		G.VAULT_ATTACH = G.VAULT_ATTACH or { T = { x = 17, y = 0, w = 3, h = 10 } }
+		G.SIDEBAR_ATTACH = G.SIDEBAR_ATTACH or { T = { x = 17, y = 0, w = 3, h = 10 } }
 
 		local stale_game = { deck_left_count = 0 }
 		G.GAME = stale_game
@@ -435,13 +435,13 @@ T.describe("Vault deck information", function()
 			config = {
 				align = "tri",
 				offset = { x = 0, y = 0 },
-				major = G.VAULT_ATTACH,
+				major = G.SIDEBAR_ATTACH,
 			},
 		})
 		view:recalculate()
 
 		local text_node = view:find_node_by_id("text_deck_count")
-		T.assert_not_nil(text_node, "Vault HUD should contain the cards-left ref text node")
+		T.assert_not_nil(text_node, "Sidebar HUD should contain the cards-left ref text node")
 		text_node:update_text()
 		T.assert_equal(text_node.config.text, "5",
 			"Rendered cards-left text should match the physical draw pile")
@@ -574,7 +574,7 @@ T.describe("Vault deck information", function()
 		T.assert_false(deck.needs_jumble_reshuffle(), "Placement still has cards")
 	end)
 
-	T.it("keeps the vault deck image visible when cards left reaches zero", function()
+	T.it("keeps the sidebar deck image visible when cards left reaches zero", function()
 		mock_env.reset_game()
 		G.STATE = G.STATES.TABLE_BOARD
 		G.STAGE = G.STAGES.RUN

@@ -1,4 +1,4 @@
---[[ word_game/ui/perks/stamp_grid.lua - Vault stamp stack layout ]]
+--[[ word_game/ui/perks/stamp_grid.lua - Sidebar stamp stack layout ]]
 
 local Layout = require("word_game.ui.layout")
 local perk_cfg = require("word_game.config.perks")
@@ -22,12 +22,12 @@ function M.gap_px()
 	return math.max(3, 5 * M.tile_scale() / REF_TILE_PX)
 end
 
-function M.vault_width_px()
+function M.sidebar_width_px()
 	return Layout.sidebar_width() * M.tile_scale()
 end
 
 function M.slot_size_px(panel_w)
-	panel_w = panel_w or M.vault_width_px()
+	panel_w = panel_w or M.sidebar_width_px()
 	local w = panel_w * M.SLOT_WIDTH_FRAC
 	local h = w * M.SLOT_ASPECT
 	return w, h
@@ -35,14 +35,14 @@ end
 
 function M.stack_height_px(panel_w, count)
 	count = math.max(1, count or 1)
-	panel_w = panel_w or M.vault_width_px()
+	panel_w = panel_w or M.sidebar_width_px()
 	local _, slot_h = M.slot_size_px(panel_w)
 	local gap = M.gap_px()
 	return count * slot_h + math.max(0, count - 1) * gap
 end
 
 function M.panel_height_px(panel_w, count)
-	panel_w = panel_w or M.vault_width_px()
+	panel_w = panel_w or M.sidebar_width_px()
 	count = math.max(1, count or 1)
 	return M.stack_height_px(panel_w, count) + M.pad_px() * 2
 end
@@ -52,7 +52,7 @@ function M.panel_height_tiles(count)
 end
 
 function M.cell_rect_px(panel_x, panel_y, panel_w, panel_h, index, count)
-	panel_w = panel_w or M.vault_width_px()
+	panel_w = panel_w or M.sidebar_width_px()
 	count = math.max(1, count or index or 1)
 	index = math.max(1, math.min(index or 1, count))
 	panel_h = panel_h or M.panel_height_px(panel_w, count)
@@ -69,7 +69,7 @@ end
 function M.layout(panel_x, panel_y, panel_w, count)
 	panel_x = panel_x or 0
 	panel_y = panel_y or 0
-	panel_w = panel_w or M.vault_width_px()
+	panel_w = panel_w or M.sidebar_width_px()
 	count = math.max(1, count or 1)
 	local panel_h = M.panel_height_px(panel_w, count)
 	local cells = {}

@@ -38,6 +38,8 @@ No manual registration in `runner.lua` — naming `test_*.lua` under `tests/unit
 
 ## Jumble-related tests
 
-`test_jumble_patterns.lua`, `test_jumble_scoring.lua`, `test_jumble_play_flow.lua`, `test_letter_card_faces.lua`
+`test_jumble_patterns.lua`, `test_jumble_scoring.lua`, `test_jumble_play_flow.lua`, `test_letter_card_faces.lua`, `test_sidebar_stage_button.lua`, `test_table_discard.lua`, `test_timeline_timer.lua`
 
 Use `mock_env.ensure_engine_globals()` when tests need real `Sprite`/`Node`/`Card` classes.
+
+Sidebar HUD globals in tests: `G.SIDEBAR_HUD`, `G.SIDEBAR_ATTACH` (not `G.VAULT_*`).

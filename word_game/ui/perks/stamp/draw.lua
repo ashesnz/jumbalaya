@@ -6,7 +6,7 @@ local M = {}
 
 M.SLOT_WIDTH_FILL = 0.92
 
--- 3/4 view: long axis stays horizontal so the block matches the vault row.
+-- 3/4 view: long axis stays horizontal so the block matches the sidebar row.
 -- Roll is the slight diagonal tilt of a hand coming down from above-right.
 M.LANDING_YAW = 0.32
 M.LANDING_PITCH = 0.26

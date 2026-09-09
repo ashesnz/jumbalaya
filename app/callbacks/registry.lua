@@ -14,7 +14,7 @@
 	  word_game.ui.callbacks.placement    - play_placement_word
 
 	Instance-bound sidebar callbacks are registered via sidebar:install():
-	  word_game.ui.callbacks.sidebar      - ensure/rebuild_table_board_sidebar, intro next
+	  word_game.ui.sidebar.funcs          - ensure/rebuild_table_board_sidebar, end_run_from_sidebar
 ]]
 
 local word_game_callbacks = {

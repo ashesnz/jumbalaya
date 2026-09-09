@@ -7,10 +7,10 @@ local M = {}
 M.RANDOM_SEED_PREFIX = "perk_pick_"
 M.SLOT_COUNT = 12
 
--- Vault stamp imprint window: width as a fraction of the sidebar panel.
--- Design reference width is 190 px at the canonical 3.0-tile vault (73 px/tile).
-local ref_vault_w_px = dimensions.layout.TABLE_BOARD_SIDEBAR_WIDTH * dimensions.CANVAS_TILE_PX
-M.STAMP_SLOT_WIDTH_FRAC = 190 / ref_vault_w_px
+-- Sidebar stamp imprint window: width as a fraction of the sidebar panel.
+-- Design reference width is 190 px at the canonical 3.0-tile sidebar (73 px/tile).
+local ref_sidebar_w_px = dimensions.layout.TABLE_BOARD_SIDEBAR_WIDTH * dimensions.CANVAS_TILE_PX
+M.STAMP_SLOT_WIDTH_FRAC = 190 / ref_sidebar_w_px
 M.STAMP_SLOT_ASPECT = 90 / 190
 
 -- Perks.png: 3×2 grid of horizontal voucher tickets (measured pixel bounds).

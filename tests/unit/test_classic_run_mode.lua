@@ -111,7 +111,7 @@ T.describe("Classic run mode", function()
 		T.assert_true(token_reward.is_eligible(), "Time Run should award tokens on 1-1")
 	end)
 
-	T.it("switches the vault button to Next when the classic target is met", function()
+	T.it("switches the sidebar button to Next when the classic target is met", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"
 		G.STATE = G.STATES.TABLE_BOARD
@@ -122,12 +122,12 @@ T.describe("Classic run mode", function()
 			jumble = { total_score = 25, puzzle_points = 0, puzzle_multi = 1.0 },
 		}
 		local tt = require("word_game.ui.perks.timeline_timer")
-		local vault_btn = require("word_game.ui.vault_stage_button")
+		local stage_btn = require("word_game.ui.sidebar.stage_button")
 		WORD_GAME.TimelineTimer = tt
-		WORD_GAME.VaultStageButton = vault_btn
+		WORD_GAME.SidebarStageButton = stage_btn
 		tt.reset_progress(25)
 		tt.sync_progress()
-		T.assert_true(vault_btn.is_next_mode())
+		T.assert_true(stage_btn.is_next_mode())
 	end)
 
 	T.it("allows further play once the classic target is reached", function()

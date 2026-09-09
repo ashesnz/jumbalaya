@@ -11,8 +11,8 @@ M.META_H_FRAC = 0
 M.FELT_GAP_FRAC = 0.02
 M.BOTTOM_PAD_FRAC = 0.10
 M.PLAY_LEFT_FRAC = 0.02
-M.VAULT_EDGE_FRAC = 0.025
-M.VAULT_BOTTOM_FRAC = 0.055
+M.SIDEBAR_EDGE_FRAC = 0.025
+M.SIDEBAR_BOTTOM_FRAC = 0.055
 M.SIDEBAR_WIDTH = 3.0
 
 function M.sidebar_frac()
@@ -48,10 +48,10 @@ end
 function M.hand_play_column()
 	local pad_x = G.TILE_W * M.PLAY_LEFT_FRAC
 	local gap = M.sidebar_gap()
-	local vault_x = M.vault_right_x() - M.sidebar_width()
+	local sidebar_x = M.sidebar_right_x() - M.sidebar_width()
 	return {
 		x = pad_x,
-		w = math.max(4, vault_x - pad_x - gap),
+		w = math.max(4, sidebar_x - pad_x - gap),
 	}
 end
 
@@ -70,7 +70,7 @@ function M.hand_felt_rect()
 	return M.felt_rect()
 end
 
-function M.vault_right_x()
+function M.sidebar_right_x()
 	local room_x = (G.ROOM and G.ROOM.T and G.ROOM.T.x) or 0
 	return M.window_width_tiles() - room_x
 end
@@ -107,10 +107,10 @@ function M.play_column()
 		}
 	end
 	local gap = M.sidebar_gap()
-	local vault_x = M.vault_right_x() - M.sidebar_width()
+	local sidebar_x = M.sidebar_right_x() - M.sidebar_width()
 	return {
 		x = pad_x,
-		w = math.max(4, vault_x - pad_x - gap),
+		w = math.max(4, sidebar_x - pad_x - gap),
 	}
 end
 
@@ -138,7 +138,7 @@ function M.panel_rect()
 	local felt = M.felt_rect()
 	local sidebar_w = M.sidebar_width()
 	return {
-		x = M.vault_right_x() - sidebar_w,
+		x = M.sidebar_right_x() - sidebar_w,
 		y = felt.y,
 		w = sidebar_w,
 		h = felt.h,

@@ -1,6 +1,6 @@
 --[[ word_game/model/perks/timer.lua - Per-hand puzzle deadline (disabled until perks wire it).
 
-	Separate from the vault timeline fuse (`ui/perks/timeline_timer`). Timer perks
+	Separate from the sidebar timeline fuse (`ui/perks/timeline_timer`). Timer perks
 	(time_bank, speed_demon, etc.) will hook here when gameplay effects land.
 ]]
 

@@ -15,11 +15,14 @@ Roguelike **jumble** word game on Love2D/Lua. Active loop: fill **pattern puzzle
 |------|------|
 | `app/` | Bootstrap, lifecycle, input, persistence, engine (`app/core/`) |
 | `word_game/` | Domain: `config/`, `model/`, `board/`, `ui/` |
+| `word_game/ui/sidebar/` | Right-hand HUD package (stamps, deck, End Run) — use **sidebar** not vault |
 | `tests/` | Headless suite — `love tests` |
 | `dictionary/` | Offline word validation |
 | `_tools/` | Python asset pipelines (not runtime) |
 | `resources/` | Assets, shaders, sounds, fonts |
 | `AlphaCardsBackup/` | Legacy Balatro reference — do not edit |
+
+Agent docs: `AGENTS.md`, `.cursor/skills/jumbalaya/SKILL.md`
 
 ## Dependency rules
 
@@ -31,7 +34,7 @@ Roguelike **jumble** word game on Love2D/Lua. Active loop: fill **pattern puzzle
 
 ## Active vs legacy
 
-Jumble mode is the player experience (`word_game/model/jumble/`, `play/jumble.lua`). Legacy AP/plays/discards code may remain but is not active — do not extend it unless asked.
+Jumble mode is the player experience (`word_game/model/jumble/`, `word_game/model/jumble_play/`). Legacy AP/plays/discards code may remain but is not active — do not extend it unless asked. Right-hand HUD is `word_game/ui/sidebar/` (`WORD_GAME.Sidebar`, `G.SIDEBAR_HUD`) — not vault.
 
 ## Verification
 

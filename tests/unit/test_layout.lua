@@ -19,7 +19,7 @@ T.describe("Layout & Sidebar Geometry (word_game.ui.layout)", function()
 		T.assert_almost_equal(frac, 3.0 / 20, 0.0001, "Sidebar fraction should be 3.0 / 20 = 0.15")
 	end)
 
-	T.it("constructs sidebar HUD with vault fill and deck row", function()
+	T.it("constructs sidebar HUD with sidebar fill and deck row", function()
 		local sidebar_fn = require("word_game.ui.sidebar")
 		local sidebar = sidebar_fn()
 
@@ -28,7 +28,7 @@ T.describe("Layout & Sidebar Geometry (word_game.ui.layout)", function()
 
 		local fill_node
 		local function find_fill(node)
-			if node.config and node.config.id == "row_vault_fill" then
+			if node.config and node.config.id == "row_sidebar_fill" then
 				fill_node = node
 				return
 			end
@@ -37,16 +37,16 @@ T.describe("Layout & Sidebar Geometry (word_game.ui.layout)", function()
 			end
 		end
 		find_fill(hud)
-		T.assert_not_nil(fill_node, "row_vault_fill should exist")
+		T.assert_not_nil(fill_node, "row_sidebar_fill should exist")
 
 		local idx_spacer, idx_deck
 		for i, child in ipairs(fill_node.nodes or {}) do
 			if child.config then
-				if child.config.id == "row_vault_spacer" then idx_spacer = i end
+				if child.config.id == "row_sidebar_spacer" then idx_spacer = i end
 				if child.config.id == "row_deck" then idx_deck = i end
 			end
 		end
-		T.assert_not_nil(idx_spacer, "row_vault_spacer should exist")
+		T.assert_not_nil(idx_spacer, "row_sidebar_spacer should exist")
 		T.assert_not_nil(idx_deck, "row_deck should exist")
 		T.assert_true(idx_spacer < idx_deck, "Spacer must be before deck to pin deck to bottom")
 	end)

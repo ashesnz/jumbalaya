@@ -108,7 +108,7 @@ function M.draw(sb)
 	sb.update(dt)
 	sb.decay_pulse(dt)
 
-	-- The points x multi readout belongs to the normal HUD; when the vault
+	-- The points x multi readout belongs to the normal HUD; when the sidebar
 	-- sidebar is hidden for the boss sequence, it hides along with it. Only
 	-- an explicit boss banner ("BOSS WORD") renders during the sequence.
 	local hud_early = G.GAME and G.GAME.word_hud

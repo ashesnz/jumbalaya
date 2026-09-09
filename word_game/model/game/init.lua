@@ -32,9 +32,9 @@ function Game:prep_stage(new_stage, new_state, new_game_obj)
 	self.PANEL_ATTACH = EaseNode{T={x = self.TILE_W - sidebar_w, y = 0, w = sidebar_w, h = self.TILE_H}}
 	self.PANEL_ATTACH.states.drag.can = false
 	self.PANEL_ATTACH:set_container(self.ROOM)
-	self.VAULT_ATTACH = EaseNode{T={x = self.TILE_W - sidebar_w, y = 0, w = sidebar_w, h = self.TILE_H}}
-	self.VAULT_ATTACH.states.drag.can = false
-	self.VAULT_ATTACH:set_container(self.ROOM)
+	self.SIDEBAR_ATTACH = EaseNode{T={x = self.TILE_W - sidebar_w, y = 0, w = sidebar_w, h = self.TILE_H}}
+	self.SIDEBAR_ATTACH.states.drag.can = false
+	self.SIDEBAR_ATTACH:set_container(self.ROOM)
 	self.PLAY_ATTACH = EaseNode{T={x = 0, y = 2.0, w = self.TILE_W - sidebar_w, h = self.TILE_H - 3.5}}
 	self.PLAY_ATTACH.states.drag.can = false
 	self.PLAY_ATTACH:set_container(self.ROOM)

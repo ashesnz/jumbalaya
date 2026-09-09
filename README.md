@@ -6,6 +6,8 @@ Roguelike **jumble** word game built on Love2D — pattern puzzles, multiplier s
 
 Player and design docs: **[docs/](docs/README.md)** — jumble gameplay, scoring, progression, systems, code map.
 
+AI / agent context: **[AGENTS.md](AGENTS.md)** and **[.cursor/skills/jumbalaya/SKILL.md](.cursor/skills/jumbalaya/SKILL.md)**.
+
 ## Skip tutorial
 
 The first-play welcome tutorial can be skipped while developing.

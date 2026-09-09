@@ -428,8 +428,8 @@ return function(context)
 		if allowance_full and card and card.states then
 			card.states.visible = false
 		end
-		if voucher_discard and voucher_discard.sync_vault_ui then
-			voucher_discard.sync_vault_ui()
+		if voucher_discard and voucher_discard.sync_sidebar_ui then
+			voucher_discard.sync_sidebar_ui()
 		end
 
 		local dissolve_time = 0.7

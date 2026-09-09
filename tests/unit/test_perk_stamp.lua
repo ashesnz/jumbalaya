@@ -314,7 +314,7 @@ T.describe("perk stamp panel layout", function()
 
 	local layout = Stamp.debug_grid_layout()
 
-	T.it("sizes stamp slot proportionally to vault width", function()
+	T.it("sizes stamp slot proportionally to sidebar width", function()
 		local panel_w = layout.panel.w
 		local expected_w = panel_w * perk_cfg.STAMP_SLOT_WIDTH_FRAC
 		local expected_h = expected_w * perk_cfg.STAMP_SLOT_ASPECT
@@ -365,7 +365,7 @@ T.describe("perk stamp panel layout", function()
 	T.it("scales stamp slot when panel width changes", function()
 		local w_narrow, h_narrow = stamp_grid.slot_size_px(200)
 		local w_wide, h_wide = stamp_grid.slot_size_px(300)
-		T.assert_true(w_wide > w_narrow, "wider vault should yield wider stamp slot")
+		T.assert_true(w_wide > w_narrow, "wider sidebar should yield wider stamp slot")
 		T.assert_almost_equal(h_wide / w_wide, h_narrow / w_narrow, 0.001,
 			"aspect ratio should stay constant")
 	end)
@@ -459,9 +459,9 @@ T.describe("perk stamp panel layout", function()
 		G.TABLE_BOARD_SIDEBAR_WIDTH = 3.0
 		WORD_GAME.Sidebar = { refresh = function() end }
 
-		local vault_x, vault_y = 16.2, 0.2
+		local sidebar_x, sidebar_y = 16.2, 0.2
 		local slot_w, slot_h = 3.0, 1.4
-		local hud = { T = { x = vault_x, y = vault_y, w = slot_w, h = 11 } }
+		local hud = { T = { x = sidebar_x, y = sidebar_y, w = slot_w, h = 11 } }
 		local row = {
 			T = { x = 0.05, y = 0.08, w = slot_w, h = slot_h },
 			VT = { x = 0, y = 0, w = slot_w, h = slot_h },
@@ -474,7 +474,7 @@ T.describe("perk stamp panel layout", function()
 			if id == "row_stamp_slot" then return row end
 			return nil
 		end
-		G.VAULT_HUD = hud
+		G.SIDEBAR_HUD = hud
 
 		math.randomseed(3)
 		for _ = 1, 70 do Stamp.debug_step() end
@@ -483,14 +483,14 @@ T.describe("perk stamp panel layout", function()
 		T.assert_equal(Stamp.imprint_count(), 2)
 
 		local ts = G.TILESCALE * G.TILESIZE
-		local panel_left = (vault_x + 0.05) * ts
-		local panel_top = (vault_y + 0.08) * ts
+		local panel_left = (sidebar_x + 0.05) * ts
+		local panel_top = (sidebar_y + 0.08) * ts
 		local panel_right = panel_left + slot_w * ts
 		local rects = Stamp.imprint_cell_rects_px()
 		T.assert_equal(#rects, 2)
 		for i, rect in ipairs(rects) do
-			T.assert_true(rect.x >= panel_left - 1, "imprint " .. i .. " should sit on the vault column")
-			T.assert_true(rect.x + rect.w <= panel_right + 1, "imprint " .. i .. " should stay inside the vault")
+			T.assert_true(rect.x >= panel_left - 1, "imprint " .. i .. " should sit on the sidebar column")
+			T.assert_true(rect.x + rect.w <= panel_right + 1, "imprint " .. i .. " should stay inside the sidebar")
 			T.assert_true(rect.y >= panel_top - 1, "imprint " .. i .. " should sit on the stamp slot")
 			T.assert_true(math.abs(rect.x) > ts, "imprint must not draw at the room origin")
 		end
@@ -638,10 +638,10 @@ T.describe("perk stamp Perks.png sidebar imprint", function()
 		return image
 	end
 
-	local function install_vault_slot()
-		local vault_x, vault_y = 16.2, 0.2
+	local function install_sidebar_slot()
+		local sidebar_x, sidebar_y = 16.2, 0.2
 		local slot_w, slot_h = 3.0, 1.4
-		local hud = { T = { x = vault_x, y = vault_y, w = slot_w, h = 11 } }
+		local hud = { T = { x = sidebar_x, y = sidebar_y, w = slot_w, h = 11 } }
 		local row = {
 			T = { x = 0.05, y = 0.08, w = slot_w, h = slot_h },
 			VT = { x = 0, y = 0, w = slot_w, h = slot_h },
@@ -654,13 +654,13 @@ T.describe("perk stamp Perks.png sidebar imprint", function()
 			if id == "row_stamp_slot" then return row end
 			return nil
 		end
-		G.VAULT_HUD = hud
+		G.SIDEBAR_HUD = hud
 		local ts = G.TILESCALE * G.TILESIZE
 		return {
-			left = (vault_x + 0.05) * ts,
-			top = (vault_y + 0.08) * ts,
-			right = (vault_x + 0.05 + slot_w) * ts,
-			bottom = (vault_y + 0.08 + slot_h) * ts,
+			left = (sidebar_x + 0.05) * ts,
+			top = (sidebar_y + 0.08) * ts,
+			right = (sidebar_x + 0.05 + slot_w) * ts,
+			bottom = (sidebar_y + 0.08 + slot_h) * ts,
 		}
 	end
 
@@ -716,10 +716,10 @@ T.describe("perk stamp Perks.png sidebar imprint", function()
 		end
 	end)
 
-	T.it("blits a random Perks.png perk onto the vault stamp slot after impact", function()
+	T.it("blits a random Perks.png perk onto the sidebar stamp slot after impact", function()
 		Stamp.reset()
 		G.STATE = G.STATES.TABLE_BOARD
-		local panel = install_vault_slot()
+		local panel = install_sidebar_slot()
 		local image = install_perk_atlas(454, 137)
 		math.randomseed(11)
 
@@ -743,8 +743,8 @@ T.describe("perk stamp Perks.png sidebar imprint", function()
 				T.assert_not_nil(draw.quad)
 				T.assert_true(draw.quad.w > 1 and draw.quad.h > 1,
 					"Perks.png quad must have a visible source area")
-				T.assert_true(draw.x >= panel.left - 8, "imprint should sit on the vault column")
-				T.assert_true(draw.x < panel.right, "imprint should stay inside the vault")
+				T.assert_true(draw.x >= panel.left - 8, "imprint should sit on the sidebar column")
+				T.assert_true(draw.x < panel.right, "imprint should stay inside the sidebar")
 				T.assert_true(draw.y >= panel.top - 8, "imprint should sit on the stamp slot")
 				T.assert_true(math.abs(draw.x) > G.TILESIZE, "imprint must not draw at the room origin")
 				T.assert_true((draw.sx or 0) ~= 0 and (draw.sy or 0) ~= 0,

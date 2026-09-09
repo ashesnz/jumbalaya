@@ -214,9 +214,9 @@ Hold-to-redraw is blocked only during score/redraw animations.
 
 ## Perks
 
-Perks are acquired via the **rubber-stamp flow** on the vault (`word_game/ui/perks/stamp/`). Purchased perks are stored on `G.GAME.run_state.perks` and gameplay hooks live in `word_game/model/perks/effects.lua`.
+Perks are acquired via the **rubber-stamp flow** on the sidebar (`word_game/ui/perks/stamp/`). Purchased perks are stored on `G.GAME.run_state.perks` and gameplay hooks live in `word_game/model/perks/effects.lua`.
 
-Perks are collected as vault stamps for display. Gameplay effects are **not wired yet** — descriptions note planned scoring bonuses; `state.has_perk()` is reserved for future hooks.
+Perks are collected as sidebar stamps for display. Gameplay effects are **not wired yet** — descriptions note planned scoring bonuses; `state.has_perk()` is reserved for future hooks.
 
 ---
 

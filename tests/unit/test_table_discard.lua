@@ -1,4 +1,4 @@
---[[ tests/unit/test_table_discard.lua - Vault voucher discard ]]
+--[[ tests/unit/test_table_discard.lua - Sidebar voucher discard ]]
 
 local T = require("tests.framework")
 local MockEnv = require("tests.helpers.mock_env")
@@ -54,7 +54,7 @@ local function card_over_voucher(rect)
 end
 
 T.describe("table discard bin", function()
-	T.it("vault HUD places End Run below deck count without stamp debug buttons", function()
+	T.it("sidebar HUD places End Run below deck count without stamp debug buttons", function()
 		MockEnv.setup()
 		G.GAME = G.GAME or {}
 		G.GAME.deck_left_count = 7
@@ -67,7 +67,7 @@ T.describe("table discard bin", function()
 		G.TILE_W = 20
 		G.ROOM = { T = { x = 0, y = 0, w = G.TILE_W, h = G.TILE_H } }
 		G.ROOM_ATTACH = { T = { x = 0, y = 0, w = G.TILE_W, h = G.TILE_H } }
-		G.VAULT_ATTACH = { T = { x = 17, y = 0.22, w = 3, h = 10 } }
+		G.SIDEBAR_ATTACH = { T = { x = 17, y = 0.22, w = 3, h = 10 } }
 
 		local hud_definition = require("word_game.ui.sidebar.hud_definition")
 		local def = hud_definition.hud_definition()

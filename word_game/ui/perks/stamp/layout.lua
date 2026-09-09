@@ -42,7 +42,7 @@ function M.node_rect_px(node)
 	return x * ts, y * ts, w * ts, h * ts
 end
 
-function M.vault_width_px()
+function M.sidebar_width_px()
 	return Layout.sidebar_width() * M.tile_scale()
 end
 

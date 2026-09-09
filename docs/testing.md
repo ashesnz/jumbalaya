@@ -65,11 +65,13 @@ Prefer `mock_env.reset_game()` at the top of a `describe` block. When mocking `G
 | `test_jumble_patterns.lua` | Pattern validation, slots, geometry |
 | `test_jumble_scoring.lua` | Scoring, odometer, targets |
 | `test_jumble_play_flow.lua` | Play flow, marketplace, stage files |
-| `test_table_discard.lua` | Discard bin, `max_fills()`, game-over |
+| `test_table_discard.lua` | Sidebar discard bin, `max_fills()`, game-over |
+| `test_sidebar_stage_button.lua` | Sidebar End Run / Next button |
 | `test_timeline_timer.lua` | Fuse bar |
 | `test_voucher_tokens.lua` | Perk stamp rolls |
 | `test_hand_shuffle.lua` | Shuffle/play buttons |
 | `test_play_hold_redraw.lua` | Hold-to-redraw |
+| `test_layout.lua` | Sidebar HUD geometry and fixed width |
 
 ## Verification after refactors
 

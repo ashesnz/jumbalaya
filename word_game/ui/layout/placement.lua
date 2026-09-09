@@ -3,7 +3,7 @@
 ]]
 
 local felt = require("word_game.ui.layout.felt")
-local vault = require("word_game.ui.layout.vault")
+local sidebar_layout = require("word_game.ui.sidebar.layout")
 local dealt_hand = require("word_game.ui.dealt_hand")
 local hand_size_cfg = require("word_game.config.hand_size")
 
@@ -93,8 +93,8 @@ function M.update_play_attach()
 end
 
 function M.update_all()
-	vault.update_vault_attach()
-	vault.update_panel_attach()
+	sidebar_layout.update_sidebar_attach()
+	sidebar_layout.update_panel_attach()
 	M.update_play_attach()
 end
 

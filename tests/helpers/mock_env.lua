@@ -286,11 +286,10 @@ end
 
 function M.reset_game()
 	M.setup()
-	if G.VAULT_HUD and G.VAULT_HUD.remove then
-		pcall(function() G.VAULT_HUD:remove() end)
+	if G.SIDEBAR_HUD and G.SIDEBAR_HUD.remove then
+		pcall(function() G.SIDEBAR_HUD:remove() end)
 	end
-	G.VAULT_HUD = nil
-	G.word_sidebar_uibox = nil
+	G.SIDEBAR_HUD = nil
 	local jg = G.placement_table and G.placement_table.jumble_geometry
 	G.placement_table = {
 		relayout = function() end,

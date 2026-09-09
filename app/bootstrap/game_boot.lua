@@ -37,9 +37,9 @@ DEVTOOLS = require "devtools"
 
 -- Per-frame hook registration (keeps Game:update free of hard-coded calls).
 local Updaters = require "app.core.session.updaters"
-Updaters.register('early_board', 'vault_stage_button', function(game, dt)
-	if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME and WORD_GAME.VaultStageButton then
-		WORD_GAME.VaultStageButton.update(dt)
+Updaters.register('early_board', 'sidebar_stage_button', function(game, dt)
+	if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME and WORD_GAME.SidebarStageButton then
+		WORD_GAME.SidebarStageButton.update(dt)
 	end
 end)
 Updaters.register('early_board', 'table_board', function(game, dt)

@@ -1,4 +1,4 @@
---[[ word_game/ui/odometer.lua - Rolling digit + label (vault counters, voucher discard, etc.) ]]
+--[[ word_game/ui/odometer.lua - Rolling digit + label (sidebar counters, voucher discard, etc.) ]]
 
 local Odometer = EaseNode:derive("Odometer")
 
@@ -237,7 +237,7 @@ function Odometer:draw_text_scale()
 end
 
 --- Draw a rolling digit centred at pixel (cx, cy), sized to height_px.
---- For overlays on sprites drawn in room pixel space (vault vouchers, etc.).
+--- For overlays on sprites drawn in room pixel space (sidebar vouchers, etc.).
 function Odometer:draw_rolling_px(cx, cy, height_px)
 	if not love or not love.graphics then return end
 	height_px = math.max(12, height_px or 24)

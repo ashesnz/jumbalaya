@@ -50,7 +50,7 @@ T.describe("Run lifecycle (RunScope)", function()
 
 	T.it("teardown_run_ui destroys run-scoped layout views via registered hooks", function()
 		local game = Game()
-		G.VAULT_HUD = {
+		G.SIDEBAR_HUD = {
 			remove = function(self)
 				self.removed = true
 			end,
@@ -68,10 +68,10 @@ T.describe("Run lifecycle (RunScope)", function()
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.Sidebar = {
 			destroy = function()
-				if G.VAULT_HUD and G.VAULT_HUD.remove then
-					G.VAULT_HUD:remove()
+				if G.SIDEBAR_HUD and G.SIDEBAR_HUD.remove then
+					G.SIDEBAR_HUD:remove()
 				end
-				G.VAULT_HUD = nil
+				G.SIDEBAR_HUD = nil
 			end,
 		}
 		WORD_GAME.HandShuffle = {
@@ -91,7 +91,7 @@ T.describe("Run lifecycle (RunScope)", function()
 
 		game:teardown_run_ui()
 
-		T.assert_nil(G.VAULT_HUD, "Vault HUD should be torn down before a new run")
+		T.assert_nil(G.SIDEBAR_HUD, "Sidebar HUD should be torn down before a new run")
 		T.assert_nil(G.hand_shuffle_bar, "Hand action bar should be torn down before a new run")
 		T.assert_nil(G.hand_action_bar, "Hand shuffle bar should be torn down before a new run")
 	end)

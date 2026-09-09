@@ -340,8 +340,8 @@ function M.reset(duration)
 	M.progress_target = math.max(1, (wr and wr.target) or 1)
 	M.sync_progress()
 	StageLabel.sync()
-	if WORD_GAME and WORD_GAME.VaultStageButton and WORD_GAME.VaultStageButton.reset then
-		WORD_GAME.VaultStageButton.reset()
+	if WORD_GAME and WORD_GAME.SidebarStageButton and WORD_GAME.SidebarStageButton.reset then
+		WORD_GAME.SidebarStageButton.reset()
 	end
 end
 
@@ -365,8 +365,8 @@ function M.reset_progress(target)
 	M.display_combo = 0
 	M.sync_progress()
 	StageLabel.sync()
-	if WORD_GAME and WORD_GAME.VaultStageButton and WORD_GAME.VaultStageButton.reset then
-		WORD_GAME.VaultStageButton.reset()
+	if WORD_GAME and WORD_GAME.SidebarStageButton and WORD_GAME.SidebarStageButton.reset then
+		WORD_GAME.SidebarStageButton.reset()
 	end
 end
 

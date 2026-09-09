@@ -7,7 +7,7 @@
 	    TILESCALE = 73/20.
 	  - Card dimensions derive from the letter-atlas cell (71x95 px per face in
 	    resources/assets/JumbalayaLetters.png) times a single
-	    art-pixel-to-world-unit factor tuned so a full vault row fits its
+	    art-pixel-to-world-unit factor tuned so a full sidebar row fits its
 	    sidebar with gutters.
 ]]
 
@@ -40,7 +40,7 @@ M.COLLISION_BUFFER = 0.05
 M.layout = {
 	HAND_CARD_SPACING = 0.78,       -- gap between card centres as a fraction of card width
 	TABLE_HAND_SIZE = 7,            -- random cards dealt onto the board
-	TABLE_BOARD_SIDEBAR_WIDTH = 3.0, -- vault side-panel width
+	TABLE_BOARD_SIDEBAR_WIDTH = 3.0, -- sidebar panel width
 	SHOW_SIDE_PANEL = false,        -- HUD overlay (not split-screen panel)
 	MIN_CLICK_DIST = 0.9,
 	MIN_HOVER_TIME = 0.1,

@@ -1,4 +1,4 @@
---[[ word_game/ui/sidebar/init.lua - The Vault: right-hand match HUD panel ]]
+--[[ word_game/ui/sidebar/init.lua - Right-hand match HUD panel ]]
 
 local Layout = require("word_game.ui.layout")
 local hud_definition = require("word_game.ui.sidebar.hud_definition")
@@ -17,7 +17,7 @@ WordSidebar.roll_to_next_hand = function()
 	end
 end
 WordSidebar.hud_definition = hud_definition.hud_definition
-WordSidebar.relayout_vault = hud_definition.relayout_vault
+WordSidebar.relayout = hud_definition.relayout
 WordSidebar.sync_action_buttons = hud_definition.sync_action_buttons
 
 function WordSidebar.is_hidden()
@@ -33,8 +33,8 @@ function WordSidebar.sync_visibility()
 	end
 end
 
-local REQUIRED_VAULT_ROWS = {
-	"row_vault_spacer",
+local REQUIRED_SIDEBAR_ROWS = {
+	"row_sidebar_spacer",
 	"row_stamp_slot",
 	"row_deck",
 	"row_deck_count",
@@ -48,47 +48,45 @@ function WordSidebar:ensure()
 	end
 	if G.STAGE ~= G.STAGES.RUN then return end
 	if not G.ROOM_ATTACH then return end
-	if G.VAULT_HUD then
-		for _, row_id in ipairs(REQUIRED_VAULT_ROWS) do
-			if not G.VAULT_HUD:find_node_by_id(row_id) then
+	if G.SIDEBAR_HUD then
+		for _, row_id in ipairs(REQUIRED_SIDEBAR_ROWS) do
+			if not G.SIDEBAR_HUD:find_node_by_id(row_id) then
 				self:destroy()
 				break
 			end
 		end
 	end
-	if G.VAULT_HUD then
+	if G.SIDEBAR_HUD then
 		deck.sync_deck_count_display()
 		WordSidebar.sync_action_buttons()
 		hud_definition.sync_end_run_row()
 		table_discard.sync_voucher_counter(true)
-		return G.VAULT_HUD
+		return G.SIDEBAR_HUD
 	end
 
-	Layout.update_vault_attach()
-	G.VAULT_HUD = LayoutView({
+	Layout.update_sidebar_attach()
+	G.SIDEBAR_HUD = LayoutView({
 		definition = WordSidebar.hud_definition(),
 		config = {
 			align = "tri",
 			offset = { x = 0, y = 0 },
-			major = G.VAULT_ATTACH or G.ROOM_ATTACH,
+			major = G.SIDEBAR_ATTACH or G.ROOM_ATTACH,
 			wh_bond = "Weak",
 		},
 	})
-	G.VAULT_HUD:recalculate()
-	G.word_sidebar_uibox = G.VAULT_HUD
+	G.SIDEBAR_HUD:recalculate()
 	hud_definition.sync_end_run_row()
 	table_discard.sync_voucher_counter(true)
 	WordSidebar.sync_action_buttons()
 	Layout.set_screen_positions()
-	return G.VAULT_HUD
+	return G.SIDEBAR_HUD
 end
 
 function WordSidebar:destroy()
-	if G.VAULT_HUD then
-		G.VAULT_HUD:remove()
-		G.VAULT_HUD = nil
+	if G.SIDEBAR_HUD then
+		G.SIDEBAR_HUD:remove()
+		G.SIDEBAR_HUD = nil
 	end
-	G.word_sidebar_uibox = nil
 end
 
 function WordSidebar:refresh()
@@ -96,13 +94,13 @@ function WordSidebar:refresh()
 		self:destroy()
 		return
 	end
-	if not G.VAULT_HUD then
+	if not G.SIDEBAR_HUD then
 		if G.STATE == G.STATES.TABLE_BOARD then
 			self:ensure()
 		end
 		return
 	end
-	hud_definition.relayout_vault()
+	hud_definition.relayout()
 end
 
 function WordSidebar:clear_hand()

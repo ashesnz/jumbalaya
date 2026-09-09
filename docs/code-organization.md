@@ -46,7 +46,7 @@ Callbacks are grouped by responsibility under `app/callbacks/` and `word_game/ui
 
 | Area | Module |
 |------|--------|
-| HUD refresh / rebuild | `word_game/ui/sidebar.lua` via `WORD_GAME.Sidebar` |
+| HUD refresh / rebuild | `word_game/ui/sidebar/` via `WORD_GAME.Sidebar`; G.FUNCS in `sidebar/funcs.lua` |
 | Screen / placement layout | `word_game/ui/layout/` via `WORD_GAME.Layout` or `require "word_game.ui.layout"`; model code requests deferred layout via `Layout.request_refresh()` |
 | Play button / placement | `word_game/ui/callbacks/placement.lua` (`G.FUNCS.play_placement_word`); logic in `placement_controls.lua` |
 | Profile load / delete | `app/profile_callbacks.lua` |
@@ -79,7 +79,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `Deck` / `Back` | Dealing; jumble branch in `model/deck/jumble.lua` |
 | `Board` | Jumble pattern row (`board/placement_table`, snap, geometry) |
 | `TableBoard` | TABLE_BOARD update/draw coordinator |
-| `Layout` | TABLE_BOARD geometry (`layout/felt`, `layout/vault`, `layout/placement`) |
+| `Layout` | TABLE_BOARD geometry (`layout/felt`, `sidebar/layout`, `layout/placement`) |
 | `ScoreBanner` | Jumble chips, multiplier, points-to-get label |
 | `TimelineTimer` | 60s fuse HUD |
 | `TokenReward` | 1-1 token fly animations |
@@ -90,7 +90,8 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `VoucherDiscard` | Voucher discard state, drag-to-voucher, counter overlay |
 | `Perks` | Perk model package (`model/perks`: registry, effects, hand timer) |
 | `TradeUI` / `PerkStamp` | Marketplace and perk stamp overlays |
-| `Sidebar` | Vault HUD (stamps, deck) |
+| `Sidebar` | Right-hand HUD (stamps, deck, End Run) |
+| `SidebarStageButton` | Classic End Run / Next button in the sidebar |
 | Table input / overlays | `TableInput`, `CardInspect`, `Confetti`, `FloatUpText`, `HandClearFocus`, `EndMatch`, `TableDeck` |
 
 Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of deep requires.
@@ -109,7 +110,7 @@ Perk-adjacent code is grouped under `word_game/model/perks/` and `word_game/ui/p
 | Discard voucher | `ui/perks/discard_bin/` | Unlocks with first perk; drag hand cards onto imprint |
 | Timeline fuse | `ui/perks/timeline_timer/` | Self-registers updater |
 | Stamp animation | `ui/perks/stamp/` | Rubber-stamp acquisition UI |
-| Stamp grid / voucher | `ui/perks/stamp_grid.lua`, `ui/perks/voucher.lua` | Vault layout and marketplace sprites |
+| Stamp grid / voucher | `ui/perks/stamp_grid.lua`, `ui/perks/voucher.lua` | Sidebar stamp layout and marketplace sprites |
 
 Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship.
 
@@ -140,7 +141,7 @@ Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship.
 | `placement_word.lua` | `G.GAME.placement_word` / `placement_word_valid` from jumble slots |
 | `round.lua` | `start_hand` → `jumble.start_hand`, advance set/hand, `reset_timeline()` |
 | `input_lock.lua` | Animation-busy gate for play/discard/drag |
-| `match.lua` | Match-end / game-over transition from vault End Run |
+| `match.lua` | Match-end / game-over transition from sidebar End Run |
 | `feedback.lua` | Model-layer attention text queue (drained by `word_feedback`) |
 | `profile_stats.lua` | Minimal card discovery persistence |
 | `deck/jumble.lua` | Populate jumble deck, `deal_jumble_hand` |
@@ -161,7 +162,8 @@ Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship.
 
 | File | Purpose |
 |------|---------|
-| `layout/` | TABLE_BOARD geometry split: `felt.lua` (play column, felt, metrics), `vault.lua` (vault column, deck slot), `placement.lua` (portraits, banner rects, screen positions), `request.lua` (deferred layout flag for model layer) |
+| `layout/` | TABLE_BOARD geometry split: `felt.lua` (play column, felt, metrics), `placement.lua` (portraits, banner rects, screen positions), `request.lua` (deferred layout flag for model layer) |
+| `sidebar/` | Right-hand HUD package: `init.lua` (lifecycle), `hud_definition.lua`, `layout.lua` (column/deck geometry), `stage_button.lua`, `funcs.lua` (G.FUNCS) |
 | `score_banner/` | Jumble score chips and “Points to get” (`fonts`, `jumble`, `draw`) |
 | `perks/` | Perk-adjacent UI: `discard_bin/`, `timeline_timer/`, `stamp/`, `stamp_grid.lua`, `voucher.lua` |
 | `trade/` | Marketplace overlay (`definition`, `draw`, `animate`, `fly`, `layout`; session/input in `init`) |
@@ -177,7 +179,7 @@ Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship.
 | `jumble_fixed_letters.lua` | Fixed puzzle letter tile drawing and transition animation |
 | `table_deck.lua` | Draw pile + token pile rendering |
 | `hand_clear_focus.lua` | Spotlight during 1-1 token award |
-| `sidebar.lua` | Vault HUD (stamps, deck) |
+| `sidebar.lua` | Facade shim → `sidebar/init.lua` |
 | `widgets/` | Shared UI controls (`buttons.lua`, `sliders.lua`) and `G.DEFINITIONS` helpers |
 | `overlays/` | Options, settings, win/game-over overlays (`options.lua`, `results.lua`) |
 | `word_feedback.lua` | Gameplay attention text; owns `spawn_attention` primitive |

@@ -1,5 +1,5 @@
 --[[
-	word_game/ui/perks/discard_bin/init.lua - Voucher discard in the vault stamp slot.
+	word_game/ui/perks/discard_bin/init.lua - Voucher discard in the sidebar stamp slot.
 
 	Discard unlocks with the first perk. Drag hand cards onto the discard_bin
 	voucher imprint; the counter overlays the voucher art.
@@ -72,7 +72,7 @@ end
 function M.on_unlock()
 	M.reset()
 	ensure_overlay_odometer()
-	M.sync_vault_ui()
+	M.sync_sidebar_ui()
 end
 
 local function read_discards_used()
@@ -173,7 +173,7 @@ function M.hide_discard_pile_cards()
 	end
 end
 
-function M.sync_vault_ui()
+function M.sync_sidebar_ui()
 	M.hide_discard_pile_cards()
 	M.sync_voucher_counter()
 	M.sync_discard_pile_area()
