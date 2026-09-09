@@ -67,6 +67,7 @@ function M.is_active()
 end
 
 function M.should_show()
+	if G and G.F_SKIP_TUTORIAL then return false end
 	local s = settings()
 	if not s then return false end
 	if s.first_play_tutorial_force then return true end

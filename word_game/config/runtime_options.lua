@@ -4,6 +4,7 @@ local M = {}
 
 M.flags = {
     SKIP_TITLE_SCREEN = false,
+    SKIP_TUTORIAL = false,
     ENABLE_PERF_OVERLAY = false,
     ATLAS_DEBUG_OVERLAY = false,
     NO_SAVING = false,

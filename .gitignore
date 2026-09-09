@@ -41,8 +41,8 @@ out/
 # Secrets & environment
 # ------------------------------------------------------------------------------
 .env
-.env.*
-!.env.example
+.env
+!.env
 secrets.json
 credentials.json
 *.pem

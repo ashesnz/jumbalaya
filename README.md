@@ -6,20 +6,25 @@ Roguelike **jumble** word game built on Love2D — pattern puzzles, multiplier s
 
 Player and design docs: **[docs/](docs/README.md)** — jumble gameplay, scoring, progression, systems, code map.
 
-## Milo intro tutorial
+## Skip tutorial
 
-Milo’s table-board intro can be skipped while developing.
+The first-play welcome tutorial can be skipped while developing.
 
-In `word_game/config/characters.lua`:
+Set `SKIP_TUTORIAL` in your shell or in a local `.env` file (copy from `.env`). Shell environment variables take precedence over `.env`.
 
-```lua
--- Dev: skip Milo's table-board intro. Set to false to play it.
-M.SKIP_INTRO = true
+```bash
+SKIP_TUTORIAL=1 love .
+```
+
+Or in `.env`:
+
+```env
+SKIP_TUTORIAL=1
 ```
 
 | Value | Effect |
 |-------|--------|
-| `true` | Skip the intro and start a normal hand |
-| `false` | Play Milo’s intro on a fresh run |
+| `1`, `true`, `yes`, `on` | Skip the tutorial |
+| unset / `0` / `false` | Show the tutorial for new players |
 
 Restart the game after changing the flag.

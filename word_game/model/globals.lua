@@ -11,6 +11,7 @@
 ]]
 
 local RuntimeOptions = require("word_game.config.runtime_options")
+local Env = require("word_game.config.env")
 local Palette = require("word_game.config.palette")
 local Dimensions = require("word_game.config.dimensions")
 
@@ -26,6 +27,9 @@ function Game:define_constants()
 
     for name, value in pairs(RuntimeOptions.flags) do
         self["F_" .. name] = value
+    end
+    if Env.flag("SKIP_TUTORIAL") then
+        self.F_SKIP_TUTORIAL = true
     end
     -- Runtime feature switches are supplied by the configuration package.
     self.SEED = os.time()

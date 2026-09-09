@@ -49,11 +49,18 @@ T.describe("First play tutorial", function()
 		G.SETTINGS = G.SETTINGS or {}
 		G.SETTINGS.first_play_tutorial_complete = false
 		G.SETTINGS.first_play_tutorial_force = false
+		G.F_SKIP_TUTORIAL = false
 		G.STATE = G.STATES.TABLE_BOARD
 		G.STAGE = G.STAGES.RUN
 		G.RUN = { from_save = false, active = true }
 		FirstPlayTutorial.reset()
 	end
+
+	T.it("should_show is false when F_SKIP_TUTORIAL is set", function()
+		reset_env()
+		G.F_SKIP_TUTORIAL = true
+		T.assert_false(FirstPlayTutorial.should_show())
+	end)
 
 	T.it("should_show is false after completion unless force is on", function()
 		reset_env()
