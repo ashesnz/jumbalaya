@@ -211,22 +211,17 @@ function M.record_puzzle_word(word, opts)
 	local used_cards = opts.used_cards
 	local old_pts = j.puzzle_points or 0
 	local old_multi = j.puzzle_multi or 1.0
-
-	local effects = modifier_effects.apply_word_effects(word, used_cards, j, wr)
-	perk_effects.apply_time_bank_penalty_on_word(j)
-	local word_pts = #word + (effects.bonus_points or 0)
-	word_pts = word_pts + bonus_stack.bonus_points_for(used_cards)
-	local committed = jumble_rules.committed_before_word(j, old_pts, old_multi)
-	word_pts = jumble_rules.scale_post_target_points(j, word_pts, committed)
-	word_pts = perk_effects.apply_point_multiplier(word_pts, effects.point_multiplier)
-	local new_pts = old_pts + word_pts
 	j.puzzle_words = j.puzzle_words or {}
 	table.insert(j.puzzle_words, word)
-	local count = #j.puzzle_words
-	local new_multi = perk_effects.puzzle_multi_for_word_count(count)
-	new_multi = modifier_effects.apply_next_word_floor(new_multi, j)
-	new_multi = modifier_effects.apply_combo_bonus(new_multi, effects.combo_bonus)
-	new_multi = math.floor((new_multi + (effects.bonus_multi or 0)) * 10 + 0.5) / 10
+	local score = jumble_rules.compute_word_score(j, word, used_cards, {
+		old_pts = old_pts,
+		old_multi = old_multi,
+		word_count = #j.puzzle_words,
+		wr = wr,
+		apply_time_penalty = true,
+	})
+	local new_pts = score.new_pts
+	local new_multi = score.new_multi
 
 	j.puzzle_points = new_pts
 	j.puzzle_multi = new_multi

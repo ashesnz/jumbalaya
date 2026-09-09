@@ -73,7 +73,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | Export | Role |
 |--------|------|
 | `Jumble` | Puzzle state, validation, scoring, hand start |
-| `Play` | Play-button orchestration: `play_jumble_word` (model evaluation), `resolve_play` / UI `play_resolution.resolve` (effects), bank/advance, hand clear, trade transition |
+| `Play` | Play-button orchestration: `play_jumble_word` (model evaluation); UI `play_effects/resolution.resolve` (effects), bank/advance, hand clear, trade transition |
 | `BonusStack` / `BossWordStack` | Bonus gutter state/scoring (model) and animation/draw (UI) |
 | `Round` | Set/hand lifecycle, targets, perk-hand gating |
 | `Deck` / `Back` | Dealing; jumble branch in `model/deck/jumble.lua` |
@@ -110,7 +110,7 @@ Perk-adjacent code is grouped under `word_game/model/perks/` and `word_game/ui/p
 | Discard voucher | `ui/perks/discard_bin/` | Unlocks with first perk; drag hand cards onto imprint |
 | Timeline fuse | `ui/perks/timeline_timer/` | Self-registers updater |
 | Stamp animation | `ui/perks/stamp/` | Rubber-stamp acquisition UI |
-| Stamp grid / voucher | `ui/perks/stamp_grid.lua`, `ui/perks/voucher.lua` | Sidebar stamp layout and marketplace sprites |
+| Stamp grid / voucher | `ui/perks/stamp/grid.lua`, `ui/perks/shared/voucher.lua` | Sidebar stamp layout and marketplace sprites |
 
 Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship.
 
@@ -164,7 +164,7 @@ Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship.
 
 | Package | Purpose |
 |---------|---------|
-| `lib/` | Engine-adjacent globals: `colour`, `localize`, `number_format` |
+| `lib/` | Engine-adjacent globals: `colour`, `localize`, `number_format`, `roll` |
 | `cards/` | Letter card presentation: `tooltip`, `popups`, `visuals`, `ui`, `letter_faces`, `inspect` |
 | `table/` | TABLE_BOARD coordinator and table chrome: `board`, `deck`, `input`, `dealt_hand`, `placement_controls`, `jumble_fixed_letters`, `stage_label`, `token_reward` |
 | `feedback/` | Ephemeral copy and FX: `word_feedback`, `float_up_text`, `modifier_feedback`, `comic_burst`, `confetti` |
@@ -175,7 +175,7 @@ Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship.
 | `hand_shuffle/` | Shuffle/play buttons, hold-to-redraw (`play_hold_redraw`) |
 | `play_effects/` | Play cinematics + `resolution` (model result → FX) and `card_fly_off` |
 | `boss_word_stack/` | Bonus gutter presentation |
-| `perks/` | Discard bin, timeline fuse, stamp grid, `voucher_sprite`; `stamp/` rubber-stamp flow |
+| `perks/` | `discard_bin/`, `timeline_timer/`, `stamp/` (grid + animation), `shared/` (voucher atlas + sprite) |
 | `trade/` | Marketplace overlay |
 | `menu/` | Main menu + `title_logo` |
 | `overlays/` | Options, settings, results, `end_match` |

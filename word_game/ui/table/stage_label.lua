@@ -5,11 +5,11 @@
 ]]
 
 local round_config = require("word_game.config.round_config")
+local Roll = require("word_game.ui.lib.roll")
 
 local M = {}
 
 local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
-local ROLL_TIME = 0.38
 local font_cache = {}
 
 M.left_count = 1
@@ -17,18 +17,6 @@ M.right_count = 1
 M.left_roll = nil
 M.right_roll = nil
 local pending_roll = nil
-
-local function clamp01(t)
-	if t < 0 then return 0 end
-	if t > 1 then return 1 end
-	return t
-end
-
-local function ease_out(t)
-	t = clamp01(t)
-	local inv = 1 - t
-	return 1 - inv * inv * inv
-end
 
 local function label_font(px)
 	px = math.max(10, math.floor(px + 0.5))
@@ -46,29 +34,6 @@ local function label_font(px)
 	end
 	font_cache[px] = font
 	return font
-end
-
-local function begin_roll(from, to)
-	if from == to then
-		return nil, to
-	end
-	return { from = from, to = to, t = 0, dur = ROLL_TIME }, from
-end
-
-local function tick_roll(roll, dt)
-	if not roll then return nil, nil end
-	roll.t = roll.t + dt
-	if roll.t >= roll.dur then
-		return nil, roll.to
-	end
-	return roll, nil
-end
-
-local function roll_view(roll, fallback)
-	if not roll then
-		return fallback, fallback, 1, false
-	end
-	return roll.from, roll.to, ease_out(roll.t / roll.dur), true
 end
 
 local function game_set()
@@ -95,8 +60,8 @@ end
 local function apply_pending_roll()
 	local pending = pending_roll
 	if not pending then return end
-	local left_roll, left_count = begin_roll(pending.from_set, pending.to_set)
-	local right_roll, right_count = begin_roll(pending.from_hand, pending.to_hand)
+	local left_roll, left_count = Roll.begin(pending.from_set, pending.to_set)
+	local right_roll, right_count = Roll.begin(pending.from_hand, pending.to_hand)
 	M.left_roll = left_roll
 	M.right_roll = right_roll
 	if left_count then M.left_count = left_count end
@@ -139,10 +104,10 @@ end
 
 function M.update(dt)
 	dt = dt or 0
-	local left_roll, left_done = tick_roll(M.left_roll, dt)
+	local left_roll, left_done = Roll.tick(M.left_roll, dt)
 	M.left_roll = left_roll
 	if left_done then M.left_count = left_done end
-	local right_roll, right_done = tick_roll(M.right_roll, dt)
+	local right_roll, right_done = Roll.tick(M.right_roll, dt)
 	M.right_roll = right_roll
 	if right_done then M.right_count = right_done end
 end
@@ -220,8 +185,8 @@ function M.draw_above_timer(x, y, w, h)
 
 	local colour = (G and G.C and G.C.GOLD) or { 1, 0.85, 0.35, 1 }
 
-	local lf, lt, lrt, lroll = roll_view(M.left_roll, M.left_count or 1)
-	local rf, rt, rrt, rroll = roll_view(M.right_roll, M.right_count or 1)
+	local lf, lt, lrt, lroll = Roll.view(M.left_roll, M.left_count or 1)
+	local rf, rt, rrt, rroll = Roll.view(M.right_roll, M.right_count or 1)
 
 	draw_rolling_digit(font, cx, digit_y, slot_w, digit_h, scale, lf, lt, lroll, lrt, colour)
 	local dash_x = cx + slot_w + gap_w

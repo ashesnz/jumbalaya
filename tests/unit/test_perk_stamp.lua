@@ -284,7 +284,7 @@ T.describe("perk stamp panel layout", function()
 	G.TABLE_BOARD_SIDEBAR_WIDTH = 3.0
 
 	local Stamp = require("word_game.ui.perks.stamp")
-	local stamp_grid = require("word_game.ui.perks.stamp_grid")
+	local stamp_grid = require("word_game.ui.perks.stamp.grid")
 	local perk_cfg = require("word_game.config.perks")
 	Stamp.reset()
 
@@ -307,7 +307,7 @@ T.describe("perk stamp panel layout", function()
 	end)
 
 	T.it("uses tight atlas bounds for each of the six stamps", function()
-		local perk_voucher = require("word_game.ui.perks.voucher")
+		local perk_voucher = require("word_game.ui.perks.shared.voucher")
 		T.assert_equal(#perk_cfg.STAMP_SPRITES, 6)
 		local expected = {
 			{ x = 8, y = 12, w = 287, h = 125 },
@@ -328,7 +328,7 @@ T.describe("perk stamp panel layout", function()
 	end)
 
 	T.it("fits a stamp inside the slot without changing aspect", function()
-		local perk_voucher = require("word_game.ui.perks.voucher")
+		local perk_voucher = require("word_game.ui.perks.shared.voucher")
 		local entry = perk_cfg.STAMP_SPRITES[1]
 		local slot_w, slot_h = layout.cell.w, layout.cell.h
 		local region = perk_voucher.stamp_region(entry.pos)
@@ -554,7 +554,7 @@ T.describe("perk stamp Perks.png sidebar imprint", function()
 
 	local Stamp = require("word_game.ui.perks.stamp")
 	local perk_cfg = require("word_game.config.perks")
-	local perk_voucher = require("word_game.ui.perks.voucher")
+	local perk_voucher = require("word_game.ui.perks.shared.voucher")
 
 	local function install_perk_atlas(iw, ih)
 		local image = {

@@ -1,7 +1,7 @@
 --[[
 	word_game/ui/play_resolution.lua - Apply play effects after model evaluation.
 
-	Model (`Play.play_word`) returns an evaluation result; this module runs
+	Model (`Play.play_jumble_word`) returns an evaluation result; this module runs
 	presentation and follow-up actions (banners, card fly, hand clear).
 ]]
 

@@ -1,4 +1,4 @@
---[[ word_game/ui/perks/stamp_grid.lua - Sidebar stamp stack layout ]]
+--[[ word_game/ui/perks/stamp/grid.lua - Sidebar stamp stack layout ]]
 
 local Layout = require("word_game.ui.layout")
 local perk_cfg = require("word_game.config.perks")

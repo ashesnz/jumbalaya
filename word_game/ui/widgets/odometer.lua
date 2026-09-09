@@ -1,22 +1,10 @@
 --[[ word_game/ui/odometer.lua - Rolling digit + label (sidebar counters, voucher discard, etc.) ]]
 
 local Odometer = EaseNode:derive("Odometer")
+local Roll = require("word_game.ui.lib.roll")
 
 local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
-local ROLL_TIME = 0.38
 local font_cache = {}
-
-local function clamp01(t)
-	if t < 0 then return 0 end
-	if t > 1 then return 1 end
-	return t
-end
-
-local function ease_out(t)
-	t = clamp01(t)
-	local inv = 1 - t
-	return 1 - inv * inv * inv
-end
 
 local function meter_font(px)
 	px = math.max(10, math.floor(px + 0.5))
@@ -29,29 +17,6 @@ local function meter_font(px)
 	font:setFilter("linear", "linear")
 	font_cache[px] = font
 	return font
-end
-
-local function begin_roll(from, to)
-	if from == to then
-		return nil, to
-	end
-	return { from = from, to = to, t = 0, dur = ROLL_TIME }, from
-end
-
-local function tick_roll(roll, dt)
-	if not roll then return nil, nil end
-	roll.t = roll.t + dt
-	if roll.t >= roll.dur then
-		return nil, roll.to
-	end
-	return roll, nil
-end
-
-local function roll_view(roll, fallback)
-	if not roll then
-		return fallback, fallback, 1, false
-	end
-	return roll.from, roll.to, ease_out(roll.t / roll.dur), true
 end
 
 local function ui_text_metrics(scale, sample)
@@ -121,7 +86,7 @@ end
 function Odometer:start_roll(from, to)
 	from = from or self.display_count or 0
 	to = to or from
-	local roll, count = begin_roll(from, to)
+	local roll, count = Roll.begin(from, to)
 	self.roll = roll
 	if count then self.display_count = count end
 end
@@ -131,8 +96,8 @@ function Odometer:start_pair_roll(from_left, from_right, to_left, to_right)
 	from_right = from_right or self.right_count or 1
 	to_left = to_left or from_left
 	to_right = to_right or from_right
-	local left_roll, left_count = begin_roll(from_left, to_left)
-	local right_roll, right_count = begin_roll(from_right, to_right)
+	local left_roll, left_count = Roll.begin(from_left, to_left)
+	local right_roll, right_count = Roll.begin(from_right, to_right)
 	self.left_roll = left_roll
 	self.right_roll = right_roll
 	if left_count then self.left_count = left_count end
@@ -149,10 +114,10 @@ end
 function Odometer:update(dt)
 	dt = dt or 0
 	if self.pair then
-		local left_roll, left_done = tick_roll(self.left_roll, dt)
+		local left_roll, left_done = Roll.tick(self.left_roll, dt)
 		self.left_roll = left_roll
 		if left_done then self.left_count = left_done end
-		local right_roll, right_done = tick_roll(self.right_roll, dt)
+		local right_roll, right_done = Roll.tick(self.right_roll, dt)
 		self.right_roll = right_roll
 		if right_done then self.right_count = right_done end
 		return
@@ -160,7 +125,7 @@ function Odometer:update(dt)
 
 	local actual = self:current_value()
 	if self.roll then
-		local roll, done = tick_roll(self.roll, dt)
+		local roll, done = Roll.tick(self.roll, dt)
 		self.roll = roll
 		if done then self.display_count = done end
 	elseif self.display_count ~= actual then
@@ -230,7 +195,7 @@ function Odometer:draw_text_scale()
 
 	local prev_font = love.graphics.getFont()
 	love.graphics.setFont(font_face)
-	local from, to, roll_t, rolling = roll_view(self.roll, self.display_count or self:current_value())
+	local from, to, roll_t, rolling = Roll.view(self.roll, self.display_count or self:current_value())
 	draw_rolling_digit(from, to, rolling, roll_t)
 	if prev_font then love.graphics.setFont(prev_font) end
 	love.graphics.setColor(1, 1, 1, 1)
@@ -287,7 +252,7 @@ function Odometer:draw_rolling_px(cx, cy, height_px)
 	end
 
 	local prev_font = love.graphics.getFont()
-	local from, to, roll_t, rolling = roll_view(self.roll, self.display_count or self:current_value())
+	local from, to, roll_t, rolling = Roll.view(self.roll, self.display_count or self:current_value())
 	draw_rolling_digit(from, to, rolling, roll_t)
 	if prev_font then love.graphics.setFont(prev_font) end
 	love.graphics.setColor(1, 1, 1, 1)
@@ -387,8 +352,8 @@ function Odometer:draw()
 		local left_x = x0
 		local dash_x = x0 + slot_w + gap
 		local right_x = dash_x + dash_w + gap
-		local lf, lt, lrt, lroll = roll_view(self.left_roll, self.left_count or 1)
-		local rf, rt, rrt, rroll = roll_view(self.right_roll, self.right_count or 1)
+		local lf, lt, lrt, lroll = Roll.view(self.left_roll, self.left_count or 1)
+		local rf, rt, rrt, rroll = Roll.view(self.right_roll, self.right_count or 1)
 		draw_rolling_digit(left_x, lf, lt, lroll, lrt)
 		print_shadow(num_font, "-", dash_x, digit_y, num_scale, self.colour)
 		draw_rolling_digit(right_x, rf, rt, rroll, rrt)
@@ -410,7 +375,7 @@ function Odometer:draw()
 		end
 	else
 		local digit_x = (w - slot_w) * 0.5
-		local from, to, roll_t, rolling = roll_view(self.roll, self.display_count or self:current_value())
+		local from, to, roll_t, rolling = Roll.view(self.roll, self.display_count or self:current_value())
 		draw_rolling_digit(digit_x, from, to, rolling, roll_t)
 	end
 

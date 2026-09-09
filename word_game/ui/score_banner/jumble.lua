@@ -3,6 +3,7 @@
 ]]
 
 local Layout = require("word_game.ui.layout")
+local Roll = require("word_game.ui.lib.roll")
 local fonts = require("word_game.ui.score_banner.fonts")
 
 local M = {}
@@ -254,18 +255,10 @@ function M.roll_got_preview(from_val, to_val, dur)
 	from_val = from_val or M.points_got or 0
 	to_val = to_val or from_val
 	dur = dur or M.TO_GET_ROLL_TIME
-
-	if from_val ~= to_val then
-		M.got_roll = {
-			from = from_val,
-			to = to_val,
-			t = 0,
-			dur = dur,
-			last_val = from_val,
-		}
-	else
+	local roll = Roll.begin(from_val, to_val, dur, { integer = true })
+	M.got_roll = roll
+	if not roll then
 		M.points_got = to_val
-		M.got_roll = nil
 	end
 end
 
@@ -273,18 +266,10 @@ function M.roll_points_to_get(from_val, to_val, dur)
 	from_val = from_val or M.points_to_get or 20
 	to_val = to_val or from_val
 	dur = dur or M.TO_GET_ROLL_TIME
-
-	if from_val ~= to_val then
-		M.to_get_roll = {
-			from = from_val,
-			to = to_val,
-			t = 0,
-			dur = dur,
-			last_val = from_val,
-		}
-	else
+	local roll = Roll.begin(from_val, to_val, dur, { integer = true })
+	M.to_get_roll = roll
+	if not roll then
 		M.points_to_get = to_val
-		M.to_get_roll = nil
 	end
 end
 
@@ -296,8 +281,9 @@ function M.roll_jumble_score(from_pts, to_pts, from_multi, to_multi)
 
 	local changed = false
 
-	if from_pts ~= to_pts then
-		M.points_roll = { from = from_pts, to = to_pts, t = 0, dur = M.ROLL_TIME }
+	local points_roll = Roll.begin(from_pts, to_pts, M.ROLL_TIME)
+	if points_roll then
+		M.points_roll = points_roll
 		M.trigger_points_bounce(1.0)
 		M.trigger_points_spin()
 		changed = true
@@ -306,8 +292,9 @@ function M.roll_jumble_score(from_pts, to_pts, from_multi, to_multi)
 		M.points_roll = nil
 	end
 
-	if math.abs(from_multi - to_multi) > 0.001 then
-		M.multi_roll = { from = from_multi, to = to_multi, t = 0, dur = M.ROLL_TIME }
+	local multi_roll = Roll.begin(from_multi, to_multi, M.ROLL_TIME)
+	if multi_roll then
+		M.multi_roll = multi_roll
 		M.trigger_multi_bounce(1.0)
 		M.trigger_multi_spin()
 		changed = true
@@ -325,18 +312,14 @@ end
 function M.update(dt)
 	dt = dt or (love and love.timer and love.timer.getDelta and math.min(0.05, love.timer.getDelta()) or 0.016)
 	if M.points_roll then
-		M.points_roll.t = M.points_roll.t + dt
-		if M.points_roll.t >= M.points_roll.dur then
-			M.jumble_points = M.points_roll.to
-			M.points_roll = nil
-		end
+		local roll, done = Roll.tick(M.points_roll, dt)
+		M.points_roll = roll
+		if done then M.jumble_points = done end
 	end
 	if M.multi_roll then
-		M.multi_roll.t = M.multi_roll.t + dt
-		if M.multi_roll.t >= M.multi_roll.dur then
-			M.jumble_multi = M.multi_roll.to
-			M.multi_roll = nil
-		end
+		local roll, done = Roll.tick(M.multi_roll, dt)
+		M.multi_roll = roll
+		if done then M.jumble_multi = done end
 	end
 	if M.points_bounce then
 		M.points_bounce.t = M.points_bounce.t + dt
@@ -383,32 +366,18 @@ function M.update(dt)
 		end
 	end
 	if M.to_get_roll then
-		M.to_get_roll.t = M.to_get_roll.t + dt
-		local progress = math.min(1, M.to_get_roll.t / M.to_get_roll.dur)
-		local cur = math.floor(M.to_get_roll.from - progress * (M.to_get_roll.from - M.to_get_roll.to) + 0.5)
-		if cur ~= M.to_get_roll.last_val then
-			M.to_get_roll.last_val = cur
+		local roll, cur = Roll.tick_integer(M.to_get_roll, dt, function()
 			if play_sfx then play_sfx("card_tick", 0.7, 0.4) end
-		end
-		M.points_to_get = cur
-		if M.to_get_roll.t >= M.to_get_roll.dur then
-			M.points_to_get = M.to_get_roll.to
-			M.to_get_roll = nil
-		end
+		end)
+		M.to_get_roll = roll
+		if cur ~= nil then M.points_to_get = cur end
 	end
 	if M.got_roll then
-		M.got_roll.t = M.got_roll.t + dt
-		local progress = math.min(1, M.got_roll.t / M.got_roll.dur)
-		local cur = math.floor(M.got_roll.from + progress * (M.got_roll.to - M.got_roll.from) + 0.5)
-		if cur ~= M.got_roll.last_val then
-			M.got_roll.last_val = cur
+		local roll, cur = Roll.tick_integer(M.got_roll, dt, function()
 			if play_sfx then play_sfx("card_tick", 0.65, 0.35) end
-		end
-		M.points_got = cur
-		if M.got_roll.t >= M.got_roll.dur then
-			M.points_got = M.got_roll.to
-			M.got_roll = nil
-		end
+		end)
+		M.got_roll = roll
+		if cur ~= nil then M.points_got = cur end
 	end
 end
 

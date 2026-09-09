@@ -50,24 +50,44 @@ function M.puzzle_total(j)
 	return math.floor(pts * multi)
 end
 
-function M.preview_puzzle_total_after_word(j, word, used_cards)
-	if not j or not word then return M.puzzle_total(j) end
+--- Shared word-scoring pipeline for preview and commit paths.
+function M.compute_word_score(j, word, used_cards, opts)
+	opts = opts or {}
+	if not j or not word then return nil end
 	local bonus_stack = require("word_game.model.bonus_stack")
-	local wr = G.GAME and G.GAME.word_round
-	local old_pts = j.puzzle_points or 0
+	local wr = opts.wr or (G.GAME and G.GAME.word_round)
+	local old_pts = opts.old_pts or j.puzzle_points or 0
+	local old_multi = opts.old_multi or j.puzzle_multi or 1.0
+	local word_count = opts.word_count or (#(j.puzzle_words or {}) + 1)
+
 	local effects = modifier_effects.apply_word_effects(word, used_cards, j, wr)
+	if opts.apply_time_penalty then
+		perk_effects.apply_time_bank_penalty_on_word(j)
+	end
 	local word_pts = #word + (effects.bonus_points or 0)
 	word_pts = word_pts + bonus_stack.bonus_points_for(used_cards)
-	local committed = M.committed_earned(j)
+	local committed = M.committed_before_word(j, old_pts, old_multi)
 	word_pts = M.scale_post_target_points(j, word_pts, committed)
 	word_pts = perk_effects.apply_point_multiplier(word_pts, effects.point_multiplier)
 	local new_pts = old_pts + word_pts
-	local count = #(j.puzzle_words or {}) + 1
-	local new_multi = perk_effects.puzzle_multi_for_word_count(count)
+	local new_multi = perk_effects.puzzle_multi_for_word_count(word_count)
 	new_multi = modifier_effects.apply_next_word_floor(new_multi, j)
 	new_multi = modifier_effects.apply_combo_bonus(new_multi, effects.combo_bonus)
 	new_multi = math.floor((new_multi + (effects.bonus_multi or 0)) * 10 + 0.5) / 10
-	return math.floor(new_pts * new_multi)
+	return {
+		effects = effects,
+		old_pts = old_pts,
+		new_pts = new_pts,
+		old_multi = old_multi,
+		new_multi = new_multi,
+	}
+end
+
+function M.preview_puzzle_total_after_word(j, word, used_cards)
+	if not j or not word then return M.puzzle_total(j) end
+	local score = M.compute_word_score(j, word, used_cards)
+	if not score then return M.puzzle_total(j) end
+	return math.floor(score.new_pts * score.new_multi)
 end
 
 local function placement_preview_word(j)

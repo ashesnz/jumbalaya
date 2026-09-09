@@ -3,6 +3,7 @@
 ]]
 
 local Layout = require("word_game.ui.layout")
+local Roll = require("word_game.ui.lib.roll")
 local felt_layout = require("word_game.ui.layout.felt")
 local fonts = require("word_game.ui.score_banner.fonts")
 local boss_word_announce = require("word_game.ui.score_banner.boss_announce")
@@ -17,14 +18,8 @@ local MULT_BG = { 0.85, 0.20, 0.25, 1 }
 local MULT_BORDER = { 0.58, 0.10, 0.15, 1 }
 local BOX_SHADOW = { 0.05, 0.08, 0.15, 0.35 }
 
-local function clamp01(t)
-	if t < 0 then return 0 end
-	if t > 1 then return 1 end
-	return t
-end
-
 local function ease_inout(t)
-	t = clamp01(t)
+	t = Roll.clamp01(t)
 	return t * t * (3 - 2 * t)
 end
 
@@ -82,9 +77,7 @@ local function draw_rolling_digit(cx, cy, from_val, to_val, roll, font, scale, c
 	end
 
 	if roll and roll.dur and roll.dur > 0 then
-		local t = clamp01(roll.t / roll.dur)
-		local inv = 1 - t
-		local ease = 1 - inv * inv * inv
+		local ease = Roll.ease_out(roll.t / roll.dur)
 		print_str(from_str, -ease * slot_h)
 		print_str(to_str, (1 - ease) * slot_h)
 	else
@@ -142,7 +135,7 @@ function M.draw(sb)
 	if love.graphics.setLineStyle then love.graphics.setLineStyle("smooth") end
 	if love.graphics.setLineJoin then love.graphics.setLineJoin("bevel") end
 
-	local breathe = ease_inout(clamp01((math.sin((G.TIMERS.REAL or 0) * math.pi * 2 / 3) * 1.3 + 1) / 2))
+	local breathe = ease_inout(Roll.clamp01((math.sin((G.TIMERS.REAL or 0) * math.pi * 2 / 3) * 1.3 + 1) / 2))
 	local pulse_s = 1 + sb.pulse_value() * 0.1
 	local cx = x + w * 0.5
 	local cy = mid_y
@@ -176,7 +169,7 @@ function M.draw(sb)
 	local pts_sx, pts_sy, pts_bounce_amt = sb.calc_bounce(sb.points_bounce)
 
 	local cur_multi = sb.multi_roll
-		and (sb.multi_roll.from + clamp01(sb.multi_roll.t / sb.multi_roll.dur) * (sb.multi_roll.to - sb.multi_roll.from))
+		and (sb.multi_roll.from + Roll.clamp01(sb.multi_roll.t / sb.multi_roll.dur) * (sb.multi_roll.to - sb.multi_roll.from))
 		or (sb.jumble_multi or 1.0)
 	local multi_growth = sb.get_multi_growth(cur_multi)
 	local mult_sx, mult_sy, mult_bounce_amt = sb.calc_bounce(sb.multi_bounce)

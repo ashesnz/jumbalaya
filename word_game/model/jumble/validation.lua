@@ -207,16 +207,8 @@ function M.validate_current()
 	if not M.all_blanks_filled(j.slots, j.puzzle) then
 		return nil, "Must play a word or skip entirely"
 	end
-	local used_cards = {}
-	for _, slot in ipairs(j.slots or {}) do
-		if slot.kind == "blank" and slot.card then
-			used_cards[#used_cards + 1] = slot.card
-		elseif slot.kind == "span" then
-			for _, card in ipairs(slot.cards or {}) do
-				used_cards[#used_cards + 1] = card
-			end
-		end
-	end
+	local jumble_rules = require("word_game.model.jumble_play.jumble_rules")
+	local used_cards = jumble_rules.collect_used_cards(j.slots)
 	local word = M.build_word(j.slots)
 	local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
 	word = modifier_effects.adjust_word_for_q(word, used_cards)

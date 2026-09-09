@@ -7,8 +7,8 @@
 ]]
 
 local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
-local ROLL_TIME = 0.38
 local TOKEN_HIGHLIGHT_TIME = 0.8
+local Roll = require("word_game.ui.lib.roll")
 local state = require("word_game.model.state")
 
 local M = {
@@ -24,18 +24,6 @@ local M = {
 	token_highlight = 0,
 }
 
-local function clamp01(t)
-	if t < 0 then return 0 end
-	if t > 1 then return 1 end
-	return t
-end
-
-local function ease_out(t)
-	t = clamp01(t)
-	local inv = 1 - t
-	return 1 - inv * inv * inv
-end
-
 function M.reset()
 	M.token_display = nil
 	M.token_roll = nil
@@ -50,17 +38,13 @@ function M.reset()
 end
 
 function M.start_token_roll(from, to)
-	if from == to then
+	local roll, display = Roll.begin(from, to)
+	M.token_roll = roll
+	if roll then
+		if display then M.token_display = display end
+	else
 		M.token_display = to
-		M.token_roll = nil
-		return
 	end
-	M.token_roll = {
-		from = from,
-		to = to,
-		t = 0,
-		dur = ROLL_TIME,
-	}
 end
 
 function M.bump_token_display()
@@ -91,11 +75,7 @@ end
 
 function M.token_count()
 	if M.token_roll then
-		local roll_t = ease_out(M.token_roll.t / M.token_roll.dur)
-		if roll_t >= 0.5 then
-			return M.token_roll.to
-		end
-		return M.token_roll.from
+		return Roll.halfway(M.token_roll)
 	end
 	if M.token_display ~= nil then
 		return M.token_display
@@ -111,18 +91,18 @@ function M.update_tokens(dt)
 		M.token_display = actual
 	end
 	if M.token_roll then
-		M.token_roll.t = M.token_roll.t + dt
-		if M.token_roll.t >= M.token_roll.dur then
-			M.token_display = M.token_roll.to
-			M.token_roll = nil
+		local roll, done = Roll.tick(M.token_roll, dt)
+		M.token_roll = roll
+		if done then
+			M.token_display = done
 			if (M.token_pending or 0) > 0 then
 				M.token_pending = M.token_pending - 1
 				M.start_token_roll(M.token_display, M.token_display + 1)
 			elseif M.token_display ~= actual then
 				M.start_token_roll(M.token_display, actual)
 			end
-		elseif actual ~= M.token_roll.to then
-			M.token_roll.to = actual
+		elseif roll and actual ~= roll.to then
+			roll.to = actual
 		end
 	elseif M.token_display ~= actual then
 		M.start_token_roll(M.token_display, actual)

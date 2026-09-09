@@ -1,4 +1,4 @@
---[[ word_game/ui/perks/voucher.lua - Perk stamp and voucher atlas quads ]]
+--[[ word_game/ui/perks/shared/voucher.lua - Perk stamp and voucher atlas quads ]]
 
 local cfg = require("word_game.config.perks")
 

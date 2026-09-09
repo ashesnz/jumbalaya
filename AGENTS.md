@@ -77,10 +77,10 @@ There are **no modules at `word_game/ui/` root** — use subpackage paths only:
 
 | Package | Key modules |
 |---------|-------------|
-| `lib/` | `colour`, `localize`, `number_format` |
+| `lib/` | `colour`, `localize`, `number_format`, `roll` |
 | `cards/` | `tooltip`, `popups`, `visuals`, `ui`, `letter_faces`, `inspect` |
-| `table/` | `board`, `deck`, `input`, `placement_controls`, `stage_label`, `token_reward` |
-| `feedback/` | `word_feedback`, `float_up_text`, `confetti`, `comic_burst` |
+| `table/` | `board`, `deck`, `input`, `dealt_hand`, `placement_controls`, `stage_label`, `token_reward`, `jumble_fixed_letters` |
+| `feedback/` | `word_feedback`, `float_up_text`, `confetti`, `comic_burst`, `modifier_feedback` |
 | `tutorial/` | `first_play`, `character_speech`, `hand_clear_focus` |
 | `play_effects/` | `resolution`, `card_fly_off`, play cinematics |
 | `hand_shuffle/` | shuffle/play buttons, `play_hold_redraw` |
@@ -108,10 +108,10 @@ Globals: `G.SIDEBAR_HUD`, `G.SIDEBAR_ATTACH`. Layout helpers are re-exported on 
 | Layer | Module | Role |
 |-------|--------|------|
 | Model | `jumble_play/jumble.lua` | `play_jumble_word()` → result only |
-| UI | `play_resolution.lua` | `resolve(Play)` → effects, banners, hand clear |
-| UI | `placement_controls.lua` | Play button entry point |
+| UI | `play_effects/resolution.lua` | `resolve(Play)` → effects, banners, hand clear |
+| UI | `table/placement_controls.lua` | Play button entry point |
 
-Tests that need rules only call `play_jumble_word`; tests that need full FX call `play_resolution.resolve`.
+Tests that need rules only call `play_jumble_word`; tests that need full FX call `play_effects/resolution.resolve`.
 
 ## Lua conventions
 
