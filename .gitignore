@@ -109,3 +109,4 @@ test_results*.txt
 .luarc.json.user
 .venv-textures/
 /AlphaCardsBackup/
+/.env
