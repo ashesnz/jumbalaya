@@ -4,8 +4,8 @@
 
 local Layout = require "word_game.ui.layout"
 local Scheduler = require "app.effects.timeline_scheduler"
-local RunScope = require "word_game.model.run_scope"
-local RunMode = require "word_game.model.run_mode"
+local RunScope = require "word_game.model.run.scope"
+local RunMode = require "word_game.model.run.mode"
 
 --- Tear down run-scoped UI and caches (delegates to RunScope).
 function Game:teardown_run_ui()

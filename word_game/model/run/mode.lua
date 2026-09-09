@@ -1,0 +1,83 @@
+--[[ word_game/model/run/mode.lua - Classic vs Time Run mode helpers ]]
+
+local M = {}
+
+local DEFAULT = "time_run"
+
+local function is_valid(mode)
+	return mode == "classic" or mode == "time_run"
+end
+
+function M.preferred()
+	local mode = G.SETTINGS and G.SETTINGS.preferred_run_mode
+	if is_valid(mode) then
+		return mode
+	end
+	return DEFAULT
+end
+
+function M.set_preferred(mode)
+	if not is_valid(mode) then return end
+	G.SETTINGS = G.SETTINGS or {}
+	G.SETTINGS.preferred_run_mode = mode
+	if G.queue_settings_write then
+		G:queue_settings_write()
+	end
+end
+
+--- Mode for a fresh run: explicit menu choice wins, otherwise last preferred mode.
+function M.resolve_for_new_run(explicit)
+	if is_valid(explicit) then
+		return explicit
+	end
+	return M.preferred()
+end
+
+function M.current()
+	if G.GAME then
+		return G.GAME.run_mode or DEFAULT
+	end
+	return M.preferred()
+end
+
+function M.is_classic()
+	return M.current() == "classic"
+end
+
+function M.is_time_run()
+	return not M.is_classic()
+end
+
+--- Classic lets the player keep scoring on the same puzzle after the target is met.
+function M.ends_hand_on_target()
+	return not M.is_classic()
+end
+
+function M.classic_stage_complete()
+	if not M.is_classic() then return false end
+	local tt = WORD_GAME and WORD_GAME.TimelineTimer
+	if not tt or not tt.is_progress_mode or not tt.is_progress_mode() then return false end
+	if tt.sync_progress then tt.sync_progress() end
+	return tt.goal_reached == true
+end
+
+function M.classic_stage_target()
+	local wr = G.GAME and G.GAME.word_round
+	if wr and wr.target then
+		return math.max(1, math.floor(wr.target))
+	end
+	local tt = WORD_GAME and WORD_GAME.TimelineTimer
+	if tt and tt.progress_target then
+		return math.max(1, math.floor(tt.progress_target))
+	end
+	return 1
+end
+
+function M.classic_proceed_message()
+	return string.format(
+		"Target %d Reached! Click Next to Continue.",
+		M.classic_stage_target()
+	)
+end
+
+return M

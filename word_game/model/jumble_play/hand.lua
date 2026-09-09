@@ -5,7 +5,7 @@ local Scheduler = require "app.effects.timeline_scheduler"
 return function(M)
 local round = require("word_game.model.round")
 local round_config = require("word_game.config.round_config")
-local state = require("word_game.model.state")
+local state = require("word_game.model.run.state")
 local feedback = require("word_game.model.feedback")
 local play_effects = require("word_game.ui.play_effects")
 local CardMotion = require("app.effects.card_motion")

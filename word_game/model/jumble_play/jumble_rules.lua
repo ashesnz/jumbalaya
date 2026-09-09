@@ -1,8 +1,8 @@
 --[[ word_game/model/jumble_play/jumble_rules.lua - Pure jumble play logic (no UI) ]]
 
-local InputLock = require("word_game.model.input_lock")
-local RunMode = require("word_game.model.run_mode")
-local state = require("word_game.model.state")
+local InputLock = require("word_game.model.run.input_lock")
+local RunMode = require("word_game.model.run.mode")
+local state = require("word_game.model.run.state")
 
 local M = {}
 
@@ -54,7 +54,7 @@ end
 function M.compute_word_score(j, word, used_cards, opts)
 	opts = opts or {}
 	if not j or not word then return nil end
-	local bonus_stack = require("word_game.model.bonus_stack")
+	local bonus_stack = require("word_game.model.jumble.bonus_stack")
 	local wr = opts.wr or (G.GAME and G.GAME.word_round)
 	local old_pts = opts.old_pts or j.puzzle_points or 0
 	local old_multi = opts.old_multi or j.puzzle_multi or 1.0

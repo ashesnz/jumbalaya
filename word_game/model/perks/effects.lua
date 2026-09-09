@@ -1,6 +1,6 @@
 --[[ word_game/model/perks/effects.lua - Gameplay hooks for collected perks ]]
 
-local state = require("word_game.model.state")
+local state = require("word_game.model.run.state")
 local round_config = require("word_game.config.round_config")
 local Dictionary = require("dictionary")
 

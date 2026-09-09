@@ -3,7 +3,7 @@
 local deck = require("word_game.model.cards.deck")
 local perk_effects = require("word_game.model.perks.effects")
 local modifiers = deck
-local RunMode = require("word_game.model.run_mode")
+local RunMode = require("word_game.model.run.mode")
 
 local M = {}
 
