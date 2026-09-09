@@ -5,11 +5,11 @@
 local Layout = require("word_game.ui.layout")
 local felt_layout = require("word_game.ui.layout.felt")
 local fonts = require("word_game.ui.score_banner.fonts")
-local boss_word_announce = require("word_game.ui.boss_word_announce")
+local boss_word_announce = require("word_game.ui.score_banner.boss_announce")
 
 local M = {}
 
-local ComicBurst = require("word_game.ui.comic_burst")
+local ComicBurst = require("word_game.ui.feedback.comic_burst")
 
 local CHIP_BG = { 0.15, 0.38, 0.82, 1 }
 local CHIP_BORDER = { 0.08, 0.22, 0.55, 1 }

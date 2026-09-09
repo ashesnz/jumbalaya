@@ -7,7 +7,7 @@
 
 local Layout = require("word_game.ui.layout")
 local fonts = require("word_game.ui.score_banner.fonts")
-local word_feedback = require("word_game.ui.word_feedback")
+local word_feedback = require("word_game.ui.feedback.word_feedback")
 
 local M = {}
 

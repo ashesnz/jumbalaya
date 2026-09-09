@@ -9,9 +9,9 @@
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
 
-T.describe("Play Button Hold Redraw (word_game.ui.play_hold_redraw)", function()
+T.describe("Play Button Hold Redraw (word_game.ui.hand_shuffle.play_hold_redraw)", function()
 	mock_env.reset_game()
-	local PlayHoldRedraw = require("word_game.ui.play_hold_redraw")
+	local PlayHoldRedraw = require("word_game.ui.hand_shuffle.play_hold_redraw")
 
 	T.it("is disabled until unlocked later in the run", function()
 		T.assert_false(PlayHoldRedraw.enabled(), "hold redraw should stay off for now")

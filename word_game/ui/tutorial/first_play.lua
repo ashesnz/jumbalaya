@@ -1,11 +1,11 @@
 --[[
-	word_game/ui/first_play_tutorial.lua - One-time welcome tutorial for new players.
+	word_game/ui/tutorial/first_play.lua - One-time welcome tutorial for new players.
 
 	Full-screen dim with speech bubbles and spotlight steps for the hand,
 	placement row, play button, and score slider. Click anywhere to advance.
 ]]
 
-local CharacterSpeech = require("word_game.ui.character_speech")
+local CharacterSpeech = require("word_game.ui.tutorial.character_speech")
 local Scheduler = require("app.effects.timeline_scheduler")
 local Easing = require("app.effects.easing")
 
@@ -165,7 +165,7 @@ local function room_centered_bubble(cx, center_y)
 end
 
 local function hand_bubble_config()
-	local dealt_hand = require("word_game.ui.dealt_hand")
+	local dealt_hand = require("word_game.ui.table.dealt_hand")
 	dealt_hand.apply_screen_position()
 
 	local hand = G.hand and G.hand.T

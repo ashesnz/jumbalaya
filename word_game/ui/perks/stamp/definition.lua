@@ -6,7 +6,7 @@ local perk_model = require("word_game.model.perks.registry")
 local M = {}
 
 function M.perk_popup_definition(entry)
-	require("word_game.ui.perk_voucher_sprite")
+	require("word_game.ui.perks.voucher_sprite")
 	local w = (G.CARD_W or 1) * 0.9
 	local h = w / (perk_cfg.VOUCHER_ASPECT or 2.3)
 	local sprite = PerkVoucherSprite(0, 0, w, h, entry)

@@ -5,7 +5,7 @@
 	Classic: score progress bar toward the stage target (dice-have-no-eyes style).
 ]]
 
-local StageLabel = require("word_game.ui.stage_label")
+local StageLabel = require("word_game.ui.table.stage_label")
 local RunMode = require("word_game.model.run_mode")
 local timer_layout = require("word_game.ui.perks.timeline_timer.layout")
 local timer_draw = require("word_game.ui.perks.timeline_timer.draw")

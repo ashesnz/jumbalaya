@@ -32,7 +32,7 @@ M.multi_spin = nil
 M.points_rot = 0
 M.multi_rot = 0
 
-local ComicBurst = require("word_game.ui.comic_burst")
+local ComicBurst = require("word_game.ui.feedback.comic_burst")
 local BURST_HOLD = 0.42
 local BURST_FADE = 0.18
 local POINTS_TO_GET_RAISE = 0.35

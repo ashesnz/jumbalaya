@@ -255,7 +255,7 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 
 	T.it("forms a separated arrowhead stack with aligned ribbon edges and non-touching gap", function()
 		MockEnv.setup()
-		local announce = require("word_game.ui.boss_word_announce")
+		local announce = require("word_game.ui.score_banner.boss_announce")
 
 		_G.G.STATE = _G.G.STATES.TABLE_BOARD
 		_G.G.TILESCALE = 1
@@ -300,7 +300,7 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 
 	T.it("plays a theme banner on the countdown one mark", function()
 		MockEnv.setup()
-		local announce = require("word_game.ui.boss_word_announce")
+		local announce = require("word_game.ui.score_banner.boss_announce")
 
 		_G.G.STATE = _G.G.STATES.TABLE_BOARD
 		_G.G.hand = {
@@ -327,7 +327,7 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 
 	T.it("plays a full-width boss word ribbon sweep", function()
 		MockEnv.setup()
-		local announce = require("word_game.ui.boss_word_announce")
+		local announce = require("word_game.ui.score_banner.boss_announce")
 		local sb = require("word_game.ui.score_banner")
 
 		_G.G.STATE = _G.G.STATES.TABLE_BOARD
@@ -385,7 +385,7 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 
 	T.it("starts card bonus text below the card top", function()
 		MockEnv.setup()
-		local float_up_text = require("word_game.ui.float_up_text")
+		local float_up_text = require("word_game.ui.feedback.float_up_text")
 		local captured
 		local original_spawn = float_up_text.spawn
 		float_up_text.spawn = function(config)
@@ -404,7 +404,7 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 
 	T.it("anchors timeline float-up text on the slider's right end", function()
 		MockEnv.setup()
-		local float_up_text = require("word_game.ui.float_up_text")
+		local float_up_text = require("word_game.ui.feedback.float_up_text")
 		local rect = { x = 4, y = 2, w = 8, h = 0.8 }
 		local origin = float_up_text.timeline_right_origin(rect, { w = 1.2, h = 0.55 })
 		T.assert_almost_equal(origin.x + origin.w * 0.5, 12, 0.001,
@@ -438,7 +438,7 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 		MockEnv.ensure_engine_globals()
 		MockEnv.reset_game()
 		G.ROOM = G.ROOM or { T = { x = 0, y = 0, w = 20, h = 11 } }
-		local float_up_text = require("word_game.ui.float_up_text")
+		local float_up_text = require("word_game.ui.feedback.float_up_text")
 		float_up_text.clear()
 		local item = float_up_text.spawn({
 			x = 10,

@@ -3,7 +3,7 @@
 local T = require("tests.framework")
 
 T.describe("letter card faces", function()
-	local LetterFaces = require("word_game.ui.letter_card_faces")
+	local LetterFaces = require("word_game.ui.cards.letter_faces")
 	local Palette = require("word_game.config.letter_card_palette")
 
 	T.it("maps A–M to row 0 and N–Z to row 1", function()

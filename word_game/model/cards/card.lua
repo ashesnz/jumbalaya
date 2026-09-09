@@ -41,8 +41,8 @@
 Card = EaseNode:derive("Card")
 
 require "word_game.model.cards.card_ability"
-require "word_game.ui.card_visuals"
-require "word_game.ui.card_ui"
+require "word_game.ui.cards.visuals"
+require "word_game.ui.cards.ui"
 
 --class methods
 

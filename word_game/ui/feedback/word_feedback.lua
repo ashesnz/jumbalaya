@@ -77,7 +77,7 @@ function M.spawn_attention(args)
 				})
 			end
 			if args.comic_burst then
-				local ComicBurst = require("word_game.ui.comic_burst")
+				local ComicBurst = require("word_game.ui.feedback.comic_burst")
 				args.burst = ComicBurst(args.pos.x, args.pos.y, 0, 0, {
 					attach = args.AT,
 					radius = args.burst_radius or 0.62,

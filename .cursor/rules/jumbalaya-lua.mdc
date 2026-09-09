@@ -8,7 +8,7 @@ alwaysApply: false
 
 ## Modules
 
-- Dot paths from repo root: `require "word_game.ui.letter_card_faces"`
+- Dot paths from repo root: `require "word_game.ui.cards.letter_faces"`
 - Package folders use `init.lua`
 - Most modules: `local M = {}` … `return M`
 - Pure data configs may `return { ... }` directly (`deck_face_colors.lua`)

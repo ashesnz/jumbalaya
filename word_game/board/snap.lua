@@ -6,7 +6,7 @@ local shimmer = require "word_game.board.shimmer"
 local placement_word = require "word_game.model.placement_word"
 local bonus_model = require "word_game.model.bonus_stack"
 local bonus_gutter = require "word_game.board.bonus_gutter"
-local modifier_feedback = require "word_game.ui.modifier_feedback"
+local modifier_feedback = require "word_game.ui.feedback.modifier_feedback"
 local hand_size_cfg = require("word_game.config.hand_size")
 
 local M = {}

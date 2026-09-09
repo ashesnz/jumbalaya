@@ -7,7 +7,7 @@
 local fonts = require("word_game.ui.score_banner.fonts")
 local jumble = require("word_game.ui.score_banner.jumble")
 local draw = require("word_game.ui.score_banner.draw")
-local boss_word_announce = require("word_game.ui.boss_word_announce")
+local boss_word_announce = require("word_game.ui.score_banner.boss_announce")
 
 local M = jumble
 

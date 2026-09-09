@@ -33,6 +33,19 @@ word_game/board/   Row snap/geometry — no UI imports
 word_game/ui/      Presentation — may import model/config
 ```
 
+### `word_game/ui/` subpackages (no root-level modules — use these paths)
+
+| Path | Role |
+|------|------|
+| `ui/lib/` | `colour`, `localize`, `number_format` globals |
+| `ui/cards/` | Card tooltip, popups, visuals, inspect |
+| `ui/table/` | `board`, `deck`, `placement_controls`, `stage_label`, `token_reward` |
+| `ui/feedback/` | `word_feedback`, `float_up_text`, `confetti` |
+| `ui/tutorial/` | `first_play`, `character_speech`, `hand_clear_focus` |
+| `ui/play_effects/` | `resolution`, `card_fly_off`, play FX |
+| `ui/sidebar/` | Right-hand HUD |
+| `ui/layout/`, `ui/hand_shuffle/`, `ui/score_banner/`, `ui/perks/`, etc. | As named |
+
 Cross-package: `WORD_GAME` facade in `word_game/init.lua`. Tests and `app/` should use the facade, not deep `word_game.model.*` requires unless testing internals.
 
 ## Sidebar (right-hand HUD)
@@ -42,7 +55,7 @@ All right-column HUD code lives in `word_game/ui/sidebar/`. Use **sidebar** nami
 | Concept | Location / symbol |
 |---------|-------------------|
 | Package | `word_game/ui/sidebar/` |
-| Facade | `WORD_GAME.Sidebar` (instance from `word_game/ui/sidebar.lua`) |
+| Facade | `WORD_GAME.Sidebar` (instance from `word_game/ui/sidebar/init.lua`) |
 | HUD global | `G.SIDEBAR_HUD` |
 | Attach node | `G.SIDEBAR_ATTACH` |
 | Column geometry | `WORD_GAME.Layout.sidebar_rect`, `sidebar_height`, `update_sidebar_attach` (implemented in `sidebar/layout.lua`, re-exported via `layout/init.lua`) |

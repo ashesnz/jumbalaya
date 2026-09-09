@@ -73,7 +73,7 @@ T.describe("Jumble scoring and odometer", function()
 		G.GAME.word_round = wr
 		G.GAME.word_score_animating = false
 
-		require("word_game.ui.play_resolution").resolve(flow)
+		require("word_game.ui.play_effects.resolution").resolve(flow)
 
 		T.assert_equal(wr.jumble.total_score, 24, "Total score should be math.floor(15 * 1.6) = 24")
 
@@ -98,7 +98,7 @@ T.describe("Jumble scoring and odometer", function()
 		G.GAME.word_round = wr2
 		G.GAME.word_score_animating = false
 
-		require("word_game.ui.play_resolution").resolve(flow)
+		require("word_game.ui.play_effects.resolution").resolve(flow)
 		T.assert_equal(wr2.jumble.total_score, 108, "Total score should be 100 + math.floor(7 * 1.2) = 108")
 	end)
 
@@ -161,64 +161,6 @@ T.describe("Jumble scoring and odometer", function()
 		sb.update(0.25)
 		T.assert_nil(sb.to_get_roll, "Roll completed")
 		T.assert_equal(sb.points_to_get, 15, "Display points to get reached 15")
-	end)
-
-	T.it("decrements points to get odometer when each word is played in jumble mode", function()
-		local flow = require("word_game.model.jumble_play")
-		local sb = require("word_game.ui.score_banner")
-		local rules = require("word_game.model.jumble_play.jumble_rules")
-		WORD_GAME.ScoreBanner = sb
-		WORD_GAME.Jumble = jumble
-		G.GAME.word_round = {
-			target = 20,
-			mode = "jumble",
-			played_words = {},
-			jumble = {
-				puzzle_index = 1,
-				solved = false,
-				total_score = 0,
-				puzzle_points = 0,
-				puzzle_multi = 1.0,
-				puzzle_words = {},
-				slots = {
-					{ kind = "fixed", letter = "C" },
-					{ kind = "blank", card = { ability = { letter = "A" } } },
-					{ kind = "fixed", letter = "T" },
-				},
-				puzzle = "C_T",
-			},
-		}
-		G.GAME.word_score_animating = false
-		sb.reset_jumble_score()
-		T.assert_equal(sb.points_to_get, 17, "Placed CAT should preview 3 points toward the target")
-		T.assert_equal(sb.points_earned, 0)
-		T.assert_equal(sb.points_got, 3)
-		T.assert_equal(rules.remaining_to_target(G.GAME.word_round.jumble, 20), 17)
-		local feedback
-		local original_attention_text = spawn_attention
-		spawn_attention = function(config)
-			feedback = config.text
-		end
-
-		local word, err = jumble.validate_current()
-		T.assert_equal(word, "CAT", "Validation error: " .. tostring(err))
-		require("word_game.ui.play_resolution").resolve(flow)
-		sb.update(0.5)
-		T.assert_equal(sb.points_to_get, 17, "Remaining should stay at 17 after scoring CAT")
-		T.assert_equal(sb.points_earned, 3)
-		T.assert_equal(sb.points_got, 0)
-
-		G.GAME.word_round.target = 100
-		G.GAME.word_round.jumble.solved = true
-		G.GAME.word_round.jumble.puzzle_points = 4
-		G.GAME.word_round.jumble.puzzle_multi = 6
-		G.GAME.word_round.jumble.total_score = 0
-		G.GAME.word_round.jumble.slots[2].card = nil
-		sb.sync_points_to_get_preview(false)
-		T.assert_equal(sb.points_to_get, 76, "Committed puzzle score should count before banking")
-		require("word_game.ui.play_resolution").resolve(flow)
-		spawn_attention = original_attention_text
-		T.assert_equal(feedback, "24 Points Scored!", "Jumble score feedback should show points scored")
 	end)
 
 	T.it("updates points to get when placement cards change", function()

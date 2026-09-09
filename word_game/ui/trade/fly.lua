@@ -42,7 +42,7 @@ end
 local function draw_flyer_card(item, x, y, rot, alpha)
 	if not item then return end
 	local size = math.max(30, (G.CARD_W or 1) * (G.TILESCALE or 1) * (G.TILESIZE or 1))
-	local LetterFaces = require "word_game.ui.letter_card_faces"
+	local LetterFaces = require "word_game.ui.cards.letter_faces"
 	LetterFaces.draw_composite(x, y, rot, size, size * ((G.CARD_H or 1) / (G.CARD_W or 1)),
 		item.letter, item.color, alpha)
 end

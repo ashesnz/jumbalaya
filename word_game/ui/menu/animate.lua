@@ -5,7 +5,7 @@ local Easing = require "app.effects.easing"
 local MenuEffects = require "app.effects.menu"
 local Scheduler = require "app.effects.timeline_scheduler"
 
-require "word_game.ui.title_logo"
+require "word_game.ui.menu.title_logo"
 
 local M = {}
 

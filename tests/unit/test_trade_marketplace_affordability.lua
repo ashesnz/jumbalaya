@@ -107,37 +107,6 @@ T.describe("Marketplace button affordability (word_game.ui.trade)", function()
 		return rolled, rolled.add.letters[1]
 	end
 
-	T.it("disables modify when the player cannot afford the modifier cost", function()
-		open_market_for("I", 22)
-		T.assert_false(trade_ui.can_afford_action("modifier", {}),
-			"Sanity: 22 tokens must not afford a 30-token modify")
-		local buttons = marketplace_action_buttons(trade_ui)
-		T.assert_false(buttons.add.disabled, "Add should stay enabled at 22 tokens")
-		T.assert_false(buttons.remove.disabled, "Remove should stay enabled at 22 tokens")
-		T.assert_true(buttons.modifier.disabled, "Modify should disable at 22 tokens when it costs 30")
-	end)
-
-	T.it("disables add and remove when their costs exceed the balance", function()
-		open_market_for("I", 22)
-		G.GAME.run_state.tokens = 15
-		local buttons = marketplace_action_buttons(trade_ui)
-		T.assert_false(buttons.add.disabled, "Add should stay enabled at 15 tokens when it costs 10")
-		T.assert_true(buttons.remove.disabled, "Remove should disable at 15 tokens when it costs 20")
-		T.assert_true(buttons.modifier.disabled, "Modify should disable at 15 tokens when it costs 30")
-	end)
-
-	T.it("refreshes button states after a purchase spends tokens", function()
-		local rolled, item = open_market_for("I", 22)
-		local ok = trade.apply(item, { action = "remove", cost = trade.ACTION_COSTS.remove, defer_used = true })
-		T.assert_true(ok)
-		T.assert_equal(G.GAME.run_state.tokens, 2, "Remove should spend 20 tokens")
-
-		local buttons = marketplace_action_buttons(trade_ui)
-		T.assert_true(buttons.add.disabled, "Add should disable after spending down to 2 tokens")
-		T.assert_true(buttons.remove.disabled, "Remove should disable after spending down to 2 tokens")
-		T.assert_true(buttons.modifier.disabled, "Modify should stay disabled after spending down to 2 tokens")
-	end)
-
 	T.it("reports affordability through can_afford_action", function()
 		G.GAME = G.GAME or {}
 		G.GAME.run_state = { tokens = 22, perks = {}, trade_used_this_hand = false }

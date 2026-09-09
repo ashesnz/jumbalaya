@@ -10,12 +10,12 @@ require "app.core.persistence.save"
 require "app.core.session.loop"
 
 require "word_game.ui.widgets"
-require "word_game.ui.card_popups"
-require "word_game.ui.fx"
+require "word_game.ui.cards.popups"
+require "word_game.ui.feedback.word_feedback"
 require "word_game.ui.overlays"
 
 require "app.effects"
-require "word_game.ui.card_tooltip"
+require "word_game.ui.cards.tooltip"
 
 local InputActions = require "app.input_actions"
 InputController._input_actions = InputActions
@@ -23,10 +23,10 @@ InputController._input_actions = InputActions
 require "app.screen_wipe"
 require "app.profile_callbacks"
 require "app.callbacks.settings"
-require "word_game.ui.placement_controls"
+require "word_game.ui.table.placement_controls"
 
 require "word_game.model.cards.card"
-require "word_game.ui.cardarea"
+require "word_game.ui.cardarea.init"
 
 Dictionary = require "dictionary"
 WORD_GAME = require "word_game"
@@ -69,7 +69,7 @@ Updaters.register('post_input', 'card_inspect', function(game, dt)
 end)
 Updaters.register('post_input', 'word_feedback_queue', function()
 	if G.ARGS and G.ARGS.word_feedback_queue then
-		require("word_game.ui.word_feedback").flush_pending()
+		require("word_game.ui.feedback.word_feedback").flush_pending()
 	end
 end)
 Updaters.register('post_input', 'trade_card_fly', function(_, dt)

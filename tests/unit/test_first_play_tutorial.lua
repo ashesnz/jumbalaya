@@ -24,9 +24,9 @@ T.describe("First play tutorial", function()
 		return inst
 	end
 
-	local saved_character_speech = package.loaded["word_game.ui.character_speech"]
+	local saved_character_speech = package.loaded["word_game.ui.tutorial.character_speech"]
 	local saved_easing = package.loaded["app.effects.easing"]
-	package.loaded["word_game.ui.character_speech"] = {
+	package.loaded["word_game.ui.tutorial.character_speech"] = {
 		bubble_definition = function()
 			return { n = G.UI.ROOT, config = { align = "cm" }, nodes = {} }
 		end,
@@ -35,9 +35,9 @@ T.describe("First play tutorial", function()
 	package.loaded["app.effects.easing"] = {
 		value = function() end,
 	}
-	package.loaded["word_game.ui.first_play_tutorial"] = nil
+	package.loaded["word_game.ui.tutorial.first_play"] = nil
 
-	local FirstPlayTutorial = require("word_game.ui.first_play_tutorial")
+	local FirstPlayTutorial = require("word_game.ui.tutorial.first_play")
 	_G.WORD_GAME = _G.WORD_GAME or {}
 	WORD_GAME.FirstPlayTutorial = FirstPlayTutorial
 	WORD_GAME.PerkStamp = { try_opening_demo = function() end }
@@ -178,6 +178,6 @@ T.describe("First play tutorial", function()
 	end)
 
 	_G.LayoutView = saved_layout_view
-	package.loaded["word_game.ui.character_speech"] = saved_character_speech
+	package.loaded["word_game.ui.tutorial.character_speech"] = saved_character_speech
 	package.loaded["app.effects.easing"] = saved_easing
 end)

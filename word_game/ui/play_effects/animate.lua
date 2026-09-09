@@ -3,9 +3,9 @@
 local M = {}
 
 local deck = require("word_game.model.cards.deck")
-local word_feedback = require("word_game.ui.word_feedback")
+local word_feedback = require("word_game.ui.feedback.word_feedback")
 local boss_word_stack = require("word_game.ui.boss_word_stack")
-local card_fly_off = require("word_game.ui.card_fly_off")
+local card_fly_off = require("word_game.ui.play_effects.card_fly_off")
 local round_config = require("word_game.config.round_config")
 local hand_size_cfg = require("word_game.config.hand_size")
 local RunMode = require("word_game.model.run_mode")
@@ -357,7 +357,7 @@ function M.present_word_play_after_cards(jumble, j, result, on_hand_cleared, on_
 end
 
 function M.present_jumble_next(jumble, wr, opts)
-	local jl = require("word_game.ui.jumble_fixed_letters")
+	local jl = require("word_game.ui.table.jumble_fixed_letters")
 	definition.set_word_score_animating(true)
 	if play_sfx then play_sfx("card_slide1", 0.85, 0.7) end
 

@@ -10,7 +10,7 @@ local play = require("word_game.model.jumble_play")
 local trade = require("word_game.model.trade")
 local hand_size = require("word_game.config.hand_size")
 local jumble = require("word_game.model.jumble")
-local word_feedback = require("word_game.ui.word_feedback")
+local word_feedback = require("word_game.ui.feedback.word_feedback")
 
 local M = {}
 
@@ -27,7 +27,7 @@ end
 
 function M.setup_card_areas()
 	mock_env.ensure_engine_globals()
-	require("word_game.ui.cardarea")
+	require("word_game.ui.cardarea.init")
 	require("word_game.model.cards.card")
 
 	G.deck = CardArea(0, 0, 1, 1, { type = "deck", card_limit = 52 })

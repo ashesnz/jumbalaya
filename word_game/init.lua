@@ -11,7 +11,7 @@
 
 require "word_game.ui.menu"
 
-local WordSidebar = require("word_game.ui.sidebar")
+local WordSidebar = require("word_game.ui.sidebar.init")
 local sidebar = WordSidebar()
 local RunScope = require("word_game.model.run_scope")
 
@@ -23,9 +23,9 @@ local M = {
 	Jumble = require("word_game.model.jumble"),
 	Play = require("word_game.model.jumble_play"),
 	Board = require("word_game.board"),
-	TableBoard = require("word_game.ui.table_board"),
+	TableBoard = require("word_game.ui.table.board"),
 	Layout = require("word_game.ui.layout"),
-	TableDeck = require("word_game.ui.table_deck"),
+	TableDeck = require("word_game.ui.table.deck"),
 	Match = require("word_game.model.match"),
 	InputLock = require("word_game.model.input_lock"),
 	HandSize = require("word_game.config.hand_size"),
@@ -33,27 +33,27 @@ local M = {
 	SidebarStageButton = require("word_game.ui.sidebar.stage_button"),
 	ScoreBanner = require("word_game.ui.score_banner"),
 	TimelineTimer = require("word_game.ui.perks.timeline_timer"),
-	StageLabel = require("word_game.ui.stage_label"),
-	TokenReward = require("word_game.ui.token_reward"),
-	HandClearFocus = require("word_game.ui.hand_clear_focus"),
-	FirstPlayTutorial = require("word_game.ui.first_play_tutorial"),
-	Confetti = require("word_game.ui.confetti"),
-	FloatUpText = require("word_game.ui.float_up_text"),
-	CardInspect = require("word_game.ui.card_inspect"),
-	TableInput = require("word_game.ui.table_input"),
+	StageLabel = require("word_game.ui.table.stage_label"),
+	TokenReward = require("word_game.ui.table.token_reward"),
+	HandClearFocus = require("word_game.ui.tutorial.hand_clear_focus"),
+	FirstPlayTutorial = require("word_game.ui.tutorial.first_play"),
+	Confetti = require("word_game.ui.feedback.confetti"),
+	FloatUpText = require("word_game.ui.feedback.float_up_text"),
+	CardInspect = require("word_game.ui.cards.inspect"),
+	TableInput = require("word_game.ui.table.input"),
 	TradeUI = require("word_game.ui.trade"),
 	PerkStamp = require("word_game.ui.perks.stamp"),
 	Perks = require("word_game.model.perks"),
-	CardFlyOff = require("word_game.ui.card_fly_off"),
-	EndMatch = require("word_game.ui.end_match"),
+	CardFlyOff = require("word_game.ui.play_effects.card_fly_off"),
+	EndMatch = require("word_game.ui.overlays.end_match"),
 	HandShuffle = require("word_game.ui.hand_shuffle"),
 	HandShuffleAnim = require("word_game.ui.hand_shuffle.shuffle_anim"),
 	HandPlacementRecallAnim = require("word_game.ui.hand_shuffle.placement_recall_anim"),
-	PlayHoldRedraw = require("word_game.ui.play_hold_redraw"),
+	PlayHoldRedraw = require("word_game.ui.hand_shuffle.play_hold_redraw"),
 	PlayEffects = require("word_game.ui.play_effects"),
 	BonusStack = require("word_game.model.bonus_stack"),
 	BossWordStack = require("word_game.ui.boss_word_stack"),
-	BossWordAnnounce = require("word_game.ui.boss_word_announce"),
+	BossWordAnnounce = require("word_game.ui.score_banner.boss_announce"),
 	Sidebar = sidebar,
 }
 

@@ -148,7 +148,7 @@ end)
 T.describe("Sidebar deck information", function()
 	mock_env.reset_game()
 	local deck = require("word_game.model.cards.deck")
-	local table_deck = require("word_game.ui.table_deck")
+	local table_deck = require("word_game.ui.table.deck")
 	local hud_definition = require("word_game.ui.sidebar.hud_definition")
 
 	T.it("shows only total cards left when the deck is clicked", function()
@@ -589,11 +589,11 @@ T.describe("Sidebar deck information", function()
 		T.assert_equal(deck.cards_left(), 0)
 		T.assert_equal(G.ARGS.deck_left_count, 0)
 
-		local table_deck = require("word_game.ui.table_deck")
+		local table_deck = require("word_game.ui.table.deck")
 		T.assert_true(table_deck.pack_stack_height(0) > 0,
 			"Empty draw pile should still reserve visible pack height in the sidebar")
 
-		local table_board = require("word_game.ui.table_board")
+		local table_board = require("word_game.ui.table.board")
 		T.assert_true(table_board.should_draw_sidebar_deck(),
 			"Sidebar deck pile should still draw at zero cards left")
 	end)

@@ -1,6 +1,6 @@
 --[[ app/loop/debug_overlay.lua - Performance overlay drawing in Game:draw ]]
 
-local TableBoard = require "word_game.ui.table_board"
+local TableBoard = require "word_game.ui.table.board"
 
 local M = {}
 

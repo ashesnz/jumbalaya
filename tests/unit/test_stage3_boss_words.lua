@@ -458,7 +458,7 @@ T.describe("Stage 1-3 boss words", function()
 
 	T.it("shows large centered throbbing 3-2-1 digits", function()
 		mock_env.reset_game()
-		local word_feedback = require("word_game.ui.word_feedback")
+		local word_feedback = require("word_game.ui.feedback.word_feedback")
 		local captured
 		local orig = spawn_attention
 		spawn_attention = function(args) captured = args end
@@ -480,7 +480,7 @@ T.describe("Stage 1-3 boss words", function()
 		G.TIMELINE = nil
 		G.GAME.run_mode = "classic"
 		local play_effects = require("word_game.ui.play_effects")
-		local word_feedback = require("word_game.ui.word_feedback")
+		local word_feedback = require("word_game.ui.feedback.word_feedback")
 		local InputLock = require("word_game.model.input_lock")
 		local tt = require("word_game.ui.perks.timeline_timer")
 

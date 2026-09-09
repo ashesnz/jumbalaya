@@ -1,7 +1,7 @@
 --[[ word_game/ui/perks/timeline_timer/draw.lua - timeline HUD render pass ]]
 
 local Layout = require("word_game.ui.layout")
-local StageLabel = require("word_game.ui.stage_label")
+local StageLabel = require("word_game.ui.table.stage_label")
 
 local M = {}
 

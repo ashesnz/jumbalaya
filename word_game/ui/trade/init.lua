@@ -8,7 +8,7 @@ local trade_fly = require("word_game.ui.trade.fly")
 local trade_definition = require("word_game.ui.trade.definition")
 local trade_draw = require("word_game.ui.trade.draw")
 local trade_animate = require("word_game.ui.trade.animate")
-local word_feedback = require("word_game.ui.word_feedback")
+local word_feedback = require("word_game.ui.feedback.word_feedback")
 
 local M = {}
 

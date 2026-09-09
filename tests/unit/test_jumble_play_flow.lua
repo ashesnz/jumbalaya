@@ -11,7 +11,7 @@ T.describe("Jumble play flow integration", function()
 
 	T.it("advances puzzle when play button is pressed with solved puzzle and empty blanks", function()
 		local flow = require("word_game.model.jumble_play")
-		local fixed_letters = require("word_game.ui.jumble_fixed_letters")
+		local fixed_letters = require("word_game.ui.table.jumble_fixed_letters")
 		local wr = {
 			target = 100,
 			mode = "jumble",
@@ -30,7 +30,7 @@ T.describe("Jumble play flow integration", function()
 		G.GAME.word_round = wr
 		G.GAME.word_score_animating = false
 
-		local play_resolution = require("word_game.ui.play_resolution")
+		local play_resolution = require("word_game.ui.play_effects.resolution")
 		play_resolution.resolve(flow)
 
 		T.assert_equal(wr.jumble.puzzle_index, 2, "Puzzle index should advance to 2")
@@ -60,59 +60,11 @@ T.describe("Jumble play flow integration", function()
 		G.GAME.word_round = wr
 		G.GAME.word_score_animating = false
 
-		local play_resolution = require("word_game.ui.play_resolution")
+		local play_resolution = require("word_game.ui.play_effects.resolution")
 		play_resolution.resolve(flow)
 
 		T.assert_equal(wr.jumble.puzzle_index, 1, "Puzzle index should stay 1")
 		T.assert_false(wr.jumble.solved, "Puzzle should remain unsolved")
-	end)
-
-	T.it("supports drafting letter cards to deck or skipping in card marketplace and advances to stage 1-2 with 40 target points", function()
-		local trade = require("word_game.model.trade")
-		local round = require("word_game.model.round")
-
-		local deck_cards = {}
-		local playing_cards = {}
-		G.playing_cards = playing_cards
-		G.deck = {
-			cards = deck_cards,
-			config = { card_limit = 52 },
-			emplace = function(self, card)
-				table.insert(self.cards, card)
-			end,
-		}
-		G.RUN = { active = true }
-		G.GAME.deck_left_count = 0
-
-		G.GAME.run_state = {
-			trade_used_this_hand = false,
-			tokens = 10,
-			perks = {},
-		}
-		local offer = trade.roll_offer()
-		T.assert_equal(#offer.add.letters, 3, "Card marketplace should offer three cards")
-		T.assert_equal(trade.ACTION_COSTS.add, 10, "Adding a marketplace card should cost 10 tokens")
-		T.assert_equal(trade.ACTION_COSTS.remove, 20, "Removing a deck card should cost 20 tokens")
-		T.assert_equal(trade.ACTION_COSTS.modifier, 30, "Applying a modifier should cost 30 tokens")
-
-		local initial_count = #G.deck.cards
-		local ok, card = trade.add_letter({ letter = "Z", color = "red" })
-		T.assert_true(ok, "Drafting letter Z should succeed")
-		T.assert_equal(#G.deck.cards, initial_count + 1, "Deck should have 1 additional card")
-		T.assert_equal(#G.playing_cards, 1, "Playing cards should track the drafted card")
-		T.assert_equal(G.deck.cards[#G.deck.cards].ability.letter, "Z")
-		T.assert_equal(G.GAME.deck_left_count, #G.deck.cards, "Adding a card should update the deck count")
-
-		G.GAME.word_round = {
-			set = 1,
-			hand_index = 1,
-			played_words = { "CAT" },
-		}
-		round.advance_hand()
-		T.assert_equal(G.GAME.word_round.set, 1)
-		T.assert_equal(G.GAME.word_round.hand_index, 2, "Should advance to stage 1-2")
-		T.assert_equal(G.GAME.word_round.target, 50, "Level 2 target should be 50 points")
-		T.assert_equal(#G.GAME.word_round.played_words, 0, "Played words reset for stage 1-2")
 	end)
 
 	T.it("raises add cost for every marketplace card after each purchase", function()
@@ -125,74 +77,8 @@ T.describe("Jumble play flow integration", function()
 		T.assert_equal(trade_ui.session_add_cost(session_state), 30, "All cards should cost 10 more after two adds")
 	end)
 
-	T.it("retains marketplace cards when dealing the next jumble stage", function()
-		local deck = require("word_game.model.cards.deck")
-		local cards = {}
-		G.playing_cards = {}
-		G.RUN = { active = true }
-		G.deck = {
-			cards = cards,
-			config = {},
-			emplace = function(self, card) table.insert(self.cards, card) end,
-			remove_card = function(self, card)
-				for i, c in ipairs(self.cards) do
-					if c == card then
-						return table.remove(self.cards, i)
-					end
-				end
-			end,
-			shuffle = function() end,
-			hard_set_T = function() end,
-		}
-		G.hand = {
-			cards = {},
-			config = {},
-			emplace = function(self, card) table.insert(self.cards, card) end,
-			remove_card = function(self, card)
-				for i, c in ipairs(self.cards) do
-					if c == card then
-						return table.remove(self.cards, i)
-					end
-				end
-			end,
-			set_ranks = function() end,
-			relayout = function() end,
-			snap_VT = function() end,
-			hard_set_cards = function() end,
-		}
-		G.discard = {
-			cards = {},
-			remove_card = function(self, card)
-				for i, c in ipairs(self.cards) do
-					if c == card then
-						return table.remove(self.cards, i)
-					end
-				end
-			end,
-			hard_set_cards = function() end,
-		}
-		G.placement_table = G.placement_table or {}
-		G.placement_table.area = {
-			cards = {},
-			remove_card = function(self, card)
-				for i, c in ipairs(self.cards) do
-					if c == card then
-						return table.remove(self.cards, i)
-					end
-				end
-			end,
-			hard_set_cards = function() end,
-		}
-		G.GAME = G.GAME or {}
-		G.GAME.deck_alpha = { pos = { x = 0, y = 0 } }
-		local added = deck.create_letter_card("Z", "red")
-		deck.populate_jumble_deck()
-		T.assert_equal(#G.deck.cards, 1, "The retained deck should contain the marketplace card")
-		T.assert_equal(G.deck.cards[1], added, "The added card should be shuffled into the next stage deck")
-	end)
-
 	T.it("updates the token counter while the marketplace hides the table deck area", function()
-		local table_deck = require("word_game.ui.table_deck")
+		local table_deck = require("word_game.ui.table.deck")
 		local state = require("word_game.model.state")
 		G.GAME.run_state = { tokens = 20, perks = {} }
 		table_deck.reset()

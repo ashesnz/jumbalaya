@@ -110,7 +110,7 @@ T.describe("bonus card gold visuals", function()
 	local bonus_stack = require("word_game.ui.boss_word_stack")
 	local Palette = require("word_game.config.letter_card_palette")
 	local DeckColors = require("word_game.config.deck_face_colors")
-	local LetterFaces = require("word_game.ui.letter_card_faces")
+	local LetterFaces = require("word_game.ui.cards.letter_faces")
 
 	T.it("defines a yellow-gold face colour for bonus cards", function()
 		T.assert_equal(Palette.BONUS_FACE_COLOR, "gold")

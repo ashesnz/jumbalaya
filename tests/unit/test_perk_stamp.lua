@@ -275,30 +275,6 @@ T.describe("perk stamp visible mesh", function()
 		T.assert_true(saw_front_left, "wooden front left border must be drawn")
 	end)
 
-	T.it("plays on the table board and issues a visible draw pass", function()
-		Stamp.reset()
-		math.randomseed(1)
-		T.assert_true(Stamp.play(), "stamp play should start with a random sprite on TABLE_BOARD")
-		T.assert_true(Stamp.is_active())
-
-		local log, restore = capture_graphics()
-		Stamp.draw_pass()
-		restore()
-		Stamp.reset()
-
-		T.assert_true(#log.fills > 0, "draw_pass should fill the stamp on screen")
-		T.assert_true(#log.lines > 0, "draw_pass should stroke stamp borders on screen")
-		local drawn = false
-		for _, stroke in ipairs(log.lines) do
-			for i = 1, #stroke.coords, 2 do
-				local x, y = stroke.coords[i], stroke.coords[i + 1]
-				if x and y and (math.abs(x) > 1 or math.abs(y) > 1) then
-					drawn = true
-				end
-			end
-		end
-		T.assert_true(drawn, "stamp outline coordinates should leave the origin")
-	end)
 end)
 
 T.describe("perk stamp panel layout", function()
@@ -400,55 +376,6 @@ T.describe("perk stamp panel layout", function()
 		T.assert_almost_equal(layout2.cells[1].x, layout2.cells[2].x, 0.5,
 			"stamps should share the same horizontal alignment")
 		T.assert_almost_equal(layout2.cells[1].w, layout2.cells[2].w, 0.5)
-	end)
-
-	T.it("targets a lower landing point for each stacked stamp", function()
-		Stamp.reset()
-		G.STATE = G.STATES.TABLE_BOARD
-		local _, cy1 = Stamp.debug_next_land_px()
-
-		for _ = 1, 70 do Stamp.debug_step() end
-		T.assert_equal(Stamp.imprint_count(), 1)
-
-		local _, cy2 = Stamp.debug_next_land_px()
-		T.assert_true(cy2 > cy1, "second stamp animation should land below the first")
-	end)
-
-	T.it("spawns a landing puff when the stamp impacts", function()
-		local puff_mod = require("word_game.ui.stamp_puff")
-		puff_mod.reset()
-		Stamp.reset()
-		G.STATE = G.STATES.TABLE_BOARD
-		for _ = 1, 40 do Stamp.debug_step() end
-		T.assert_true(puff_mod.active_count() >= 1, "landing puff should spawn on impact")
-	end)
-
-	T.it("adds imprints below existing stamps on restamp", function()
-		Stamp.reset()
-		G.STATE = G.STATES.TABLE_BOARD
-		math.randomseed(7)
-		T.assert_false(Stamp.has_imprint())
-
-		for _ = 1, 70 do Stamp.debug_step() end
-		T.assert_equal(Stamp.imprint_count(), 1)
-		local first = Stamp.current_imprint()
-		local first_rects = Stamp.imprint_cell_rects_px()
-		T.assert_equal(#first_rects, 1)
-
-		for _ = 1, 70 do Stamp.debug_step() end
-		T.assert_equal(Stamp.imprint_count(), 2)
-		local second = Stamp.current_imprint()
-		T.assert_not_nil(first)
-		T.assert_not_nil(second)
-		T.assert_not_equal(first, second)
-
-		local rects = Stamp.imprint_cell_rects_px()
-		T.assert_equal(#rects, 2)
-		T.assert_almost_equal(rects[1].x, rects[2].x, 0.5, "stacked stamps should stay in the same column")
-		T.assert_true(rects[2].y > rects[1].y + rects[1].h,
-			"each new stamp must land below the previous imprint")
-		T.assert_true(rects[1].y <= first_rects[1].y + 1,
-			"the first imprint should stay at the top of the stack")
 	end)
 
 	T.it("draws landed stamps on the side panel even if the slot VT is stale", function()

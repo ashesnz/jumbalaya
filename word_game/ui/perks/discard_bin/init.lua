@@ -9,7 +9,7 @@ local felt = require("word_game.ui.layout.felt")
 local round_config = require("word_game.config.round_config")
 local InputLock = require("word_game.model.input_lock")
 local Match = require("word_game.model.match")
-local Odometer = require("word_game.ui.odometer")
+local Odometer = require("word_game.ui.widgets.odometer")
 local perk_voucher = require("word_game.ui.perks.voucher")
 local run_state = require("word_game.model.state")
 

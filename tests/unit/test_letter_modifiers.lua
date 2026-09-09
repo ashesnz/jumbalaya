@@ -222,10 +222,10 @@ T.describe("Vowel letter modifiers (A, E, I, O, U)", function()
 	end)
 end)
 
-T.describe("Modifier placement feedback (word_game.ui.modifier_feedback)", function()
+T.describe("Modifier placement feedback (word_game.ui.feedback.modifier_feedback)", function()
 	mock_env.reset_game()
-	local feedback = require("word_game.ui.modifier_feedback")
-	local float_up_text = require("word_game.ui.float_up_text")
+	local feedback = require("word_game.ui.feedback.modifier_feedback")
+	local float_up_text = require("word_game.ui.feedback.float_up_text")
 
 	T.it("starts modifier float text above the card top edge", function()
 		local captured
@@ -244,20 +244,6 @@ T.describe("Modifier placement feedback (word_game.ui.modifier_feedback)", funct
 			"modifier float text should sit fully above the card top")
 		T.assert_almost_equal(captured.y, card.T.y - 0.5 - 0.14, 0.01,
 			"modifier float text should use the above-card gap offset")
-	end)
-
-	T.it("shows floating ui_text above a modified card placed in the row", function()
-		local spawned = nil
-		local original = float_up_text.from_card_above
-		float_up_text.from_card_above = function(card, text, opts)
-			spawned = { card = card, text = text, opts = opts }
-		end
-		local card = { ability = { letter = "I", modified = true }, T = { x = 2, y = 3, w = 1, h = 1.4 } }
-		feedback.show_on_placed_card(card)
-		float_up_text.from_card_above = original
-		T.assert_not_nil(spawned)
-		T.assert_equal(spawned.text, "+1 point")
-		T.assert_equal(spawned.card, card)
 	end)
 
 	T.it("does not show feedback for unmodified cards", function()

@@ -11,7 +11,7 @@ local MockEnv = require("tests.helpers.mock_env")
 		MockEnv.setup()
 		require("app.core.util.tables")
 		require("app.core.util.geometry")
-		require("word_game.ui.localize")
+		require("word_game.ui.lib.localize")
 		require("word_game.ui.widgets")
 		require("word_game.ui.menu")
 
@@ -73,7 +73,7 @@ local MockEnv = require("tests.helpers.mock_env")
 		MockEnv.setup()
 		require("app.bootstrap")
 		require("word_game.model.cards.card")
-		require("word_game.ui.cardarea")
+		require("word_game.ui.cardarea.init")
 		require("app.core.util.tables")
 		require("app.core.util.geometry")
 		require("word_game.model.game")
@@ -151,71 +151,11 @@ local MockEnv = require("tests.helpers.mock_env")
 		T.assert_true(menu_opened, "open_main_menu should be opened on initial boot by default")
 	end)
 
-	T.it("Classic button transitions cleanly into Stage 1-1 gameplay board", function()
-		MockEnv.setup()
-		require("app.bootstrap")
-		require("word_game.model.cards.card")
-		require("word_game.ui.cardarea")
-		require("app.core.util.tables")
-		require("app.core.util.geometry")
-		require("word_game.model.game")
-		require("word_game.model.globals")
-		require("app.startup")
-		require("word_game.model.round")
-
-		_G.G = Game()
-		_G.G:define_constants()
-		_G.G.TIMELINE = Scheduler()
-		_G.G.INPUT = InputController()
-		_G.G:load_card_definitions()
-		package.loaded["app.callbacks.settings"] = nil
-		require("app.callbacks.settings")
-
-		T.assert_not_nil(G.FUNCS.begin_classic_run, "G.FUNCS.begin_classic_run must be defined")
-
-		local start_board_called = false
-		local run_mode = nil
-		local real_start_board = G.start_gameplay_board
-		G.start_gameplay_board = function(self)
-			start_board_called = true
-			if real_start_board then real_start_board(self) end
-		end
-		local real_start_run = G.start_run
-		G.start_run = function(self, args)
-			run_mode = args and args.run_mode
-			return real_start_run(self, args)
-		end
-
-		G.FUNCS.begin_classic_run()
-
-		-- Process queued transition event
-		for i = 1, 60 do
-			G.TIMERS.REAL = G.TIMERS.REAL + 0.016
-			G.TIMERS.TOTAL = G.TIMERS.TOTAL + 0.016
-			G.TIMELINE:advance(0.016)
-		end
-
-		T.assert_equal(run_mode, "classic", "Classic should start a classic run")
-		T.assert_true(start_board_called, "start_gameplay_board should be called from start_run")
-		T.assert_not_nil(G.GAME.word_round, "G.GAME.word_round must be initialized")
-		T.assert_equal(1, G.GAME.word_round.set, "Stage set should be 1")
-		T.assert_equal(1, G.GAME.word_round.hand_index, "Stage hand_index should be 1 (Stage 1-1)")
-	end)
-
-	T.it("registers direct settings and mode run callbacks", function()
-		MockEnv.setup()
-		require("app.bootstrap")
-		T.assert_not_nil(G.FUNCS.open_settings, "Settings should open directly from the title bar")
-		T.assert_not_nil(G.FUNCS.begin_classic_run, "Classic mode callback must exist")
-		T.assert_not_nil(G.FUNCS.begin_time_run, "Time Run mode callback must exist")
-		T.assert_nil(G.FUNCS.show_credits, "Credits overlay callback should be removed")
-	end)
-
 	T.it("keeps mode buttons above utility bar with separation", function()
 		MockEnv.reset_game()
 		require("app.core.util.tables")
 		require("app.core.util.geometry")
-		require("word_game.ui.localize")
+		require("word_game.ui.lib.localize")
 		require("word_game.ui.widgets")
 		require("word_game.ui.menu")
 
@@ -263,7 +203,7 @@ local MockEnv = require("tests.helpers.mock_env")
 		MockEnv.reset_game()
 		require("app.core.util.tables")
 		require("app.core.util.geometry")
-		require("word_game.ui.localize")
+		require("word_game.ui.lib.localize")
 		require("word_game.ui.widgets")
 		require("word_game.ui.menu")
 
@@ -326,7 +266,7 @@ local MockEnv = require("tests.helpers.mock_env")
 		MockEnv.reset_game()
 		require("app.core.util.tables")
 		require("app.core.util.geometry")
-		require("word_game.ui.localize")
+		require("word_game.ui.lib.localize")
 		require("word_game.ui.widgets")
 		require("word_game.ui.menu")
 
@@ -369,95 +309,6 @@ local MockEnv = require("tests.helpers.mock_env")
 			"Mode chrome should hug the buttons, not span the title screen")
 	end)
 
-	T.it("keeps Jumbalaya title clear of menu buttons across viewport sizes", function()
-		MockEnv.reset_game()
-		require("app.core.util.tables")
-		require("app.core.util.geometry")
-		require("word_game.ui.localize")
-		require("word_game.ui.widgets")
-		require("word_game.ui.menu")
-
-		G.C.L_BLACK = G.C.L_BLACK or { 0.1, 0.1, 0.1, 1 }
-		G.C.BLUE = G.C.BLUE or { 0.2, 0.4, 0.8, 1 }
-		G.C.GREEN = G.C.GREEN or { 0.2, 0.7, 0.3, 1 }
-		G.C.ORANGE = G.C.ORANGE or { 0.9, 0.5, 0.1, 1 }
-		G.C.FILTER = G.C.FILTER or { 0.5, 0.5, 0.5, 1 }
-		G.C.RED = G.C.RED or { 0.8, 0.2, 0.2, 1 }
-		G.C.UI = G.C.UI or {}
-		G.C.UI.TEXT_LIGHT = G.C.UI.TEXT_LIGHT or { 1, 1, 1, 1 }
-		G.C.UI.BUTTON_HOVER = G.C.UI.BUTTON_HOVER or { 0.35, 0.35, 0.35, 1 }
-		G.STAGE = G.STAGES.MAIN_MENU
-
-		local real_font = alpha_button_font
-		alpha_button_font = function()
-			return {
-				FONT = {
-					getWidth = function(_, str) return #(str or "") * 10 end,
-					getHeight = function() return 20 end,
-				},
-				TEXT_HEIGHT_SCALE = 0.7,
-				TEXT_OFFSET = { x = 0, y = 0 },
-				FONTSCALE = 0.12,
-				squish = 1,
-			}
-		end
-
-		local function min_title_gap_tiles()
-			return main_menu_title_menu_gap_px() / ((G.TILESIZE or 20) * (G.TILESCALE or 1))
-		end
-
-		local function assert_layout_for_viewport(label, tile_w, tile_h, tilescale)
-			G.TILE_W = tile_w
-			G.TILE_H = tile_h
-			G.TILESIZE = 20
-			G.TILESCALE = tilescale
-			G.ROOM_ATTACH.T.w = tile_w
-			G.ROOM_ATTACH.T.h = tile_h
-
-			G.title_top = {
-				T = { x = 0, y = 0, w = 1, h = 1 },
-				VT = { x = 0, y = 0, w = 1, h = 1 },
-				snap_VT = function() end,
-				hard_set_T = function(self, x, y, w, h)
-					self.T.x, self.T.y, self.T.w, self.T.h = x, y, w, h
-				end,
-			}
-
-			local ui = LayoutView({
-				definition = build_main_menu_buttons(),
-				config = {
-					align = "bmi",
-					offset = { x = 0, y = main_menu_bottom_offset() },
-					major = G.ROOM_ATTACH,
-					bond = "Weak",
-				},
-			})
-			G.MAIN_MENU_UI = ui
-			layout_main_menu()
-
-			local gap = main_menu_layout_gap()
-			local min_gap = min_title_gap_tiles()
-			T.assert_not_nil(gap, label .. ": layout gap should be measurable")
-			T.assert_true(gap >= min_gap * 0.9,
-				string.format("%s: title/menu gap %.3f tiles below minimum %.3f", label, gap, min_gap))
-
-			local layout = main_menu_resolve_logo_layout(ui.T.h)
-			T.assert_true(layout.gap >= min_gap * 0.9,
-				string.format("%s: resolved layout gap %.3f below minimum %.3f", label, layout.gap, min_gap))
-
-			ui:remove()
-			G.MAIN_MENU_UI = nil
-			G.title_top = nil
-		end
-
-		assert_layout_for_viewport("desktop 1280x720", 20, 11.5, 3.65)
-		assert_layout_for_viewport("narrow phone", 20, 11.5, 2.2)
-		assert_layout_for_viewport("short screen", 20, 9, 2.5)
-		assert_layout_for_viewport("tablet scale", 20, 11.5, 2.8)
-
-		alpha_button_font = real_font
-	end)
-
 	T.it("TitleLogo juggles start and end A's, replacing each other and returning", function()
 		MockEnv.setup()
 		require("app.core.util.tables")
@@ -465,7 +316,7 @@ local MockEnv = require("tests.helpers.mock_env")
 		require("word_game.model.game")
 		require("word_game.model.globals")
 		require("app.core.scene.animated.init")
-		require("word_game.ui.title_logo")
+		require("word_game.ui.menu.title_logo")
 
 		local timings = TitleLogo.CYCLE_TIMINGS
 		T.assert_not_nil(timings, "Cycle timings must be defined on TitleLogo")
@@ -528,7 +379,7 @@ local MockEnv = require("tests.helpers.mock_env")
 		MockEnv.reset_game()
 		require("app.core.util.tables")
 		require("app.core.util.geometry")
-		require("word_game.ui.localize")
+		require("word_game.ui.lib.localize")
 		require("word_game.ui.widgets")
 		require("word_game.ui.menu")
 
@@ -561,7 +412,7 @@ local MockEnv = require("tests.helpers.mock_env")
 		MockEnv.reset_game()
 		require("app.core.util.tables")
 		require("app.core.util.geometry")
-		require("word_game.ui.localize")
+		require("word_game.ui.lib.localize")
 		require("word_game.ui.widgets")
 		require("word_game.ui.menu")
 

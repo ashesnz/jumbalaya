@@ -8,7 +8,7 @@ local mock_env = require("tests.helpers.mock_env")
 T.describe("Match jumble stats", function()
 	mock_env.reset_game()
 	local state = require("word_game.model.state")
-	local end_match = require("word_game.ui.end_match")
+	local end_match = require("word_game.ui.overlays.end_match")
 
 	local function stats()
 		local rs = state.get()
@@ -80,7 +80,7 @@ T.describe("Match jumble stats", function()
 		}
 		G.GAME.word_score_animating = false
 
-		require("word_game.ui.play_resolution").resolve(flow)
+		require("word_game.ui.play_effects.resolution").resolve(flow)
 
 		T.assert_equal(stats().best_puzzle, "C_T")
 		T.assert_equal(stats().best_puzzle_score, 24, "Best jumble should be floor(15 * 1.6) = 24")

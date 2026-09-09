@@ -4,7 +4,7 @@
 
 local felt = require("word_game.ui.layout.felt")
 local sidebar_layout = require("word_game.ui.sidebar.layout")
-local dealt_hand = require("word_game.ui.dealt_hand")
+local dealt_hand = require("word_game.ui.table.dealt_hand")
 local hand_size_cfg = require("word_game.config.hand_size")
 
 local M = {}

@@ -71,6 +71,22 @@ Removed / renamed (do not reintroduce):
 
 Prefer `WORD_GAME.*` across packages instead of deep requires.
 
+### UI package layout (`word_game/ui/`)
+
+There are **no modules at `word_game/ui/` root** — use subpackage paths only:
+
+| Package | Key modules |
+|---------|-------------|
+| `lib/` | `colour`, `localize`, `number_format` |
+| `cards/` | `tooltip`, `popups`, `visuals`, `ui`, `letter_faces`, `inspect` |
+| `table/` | `board`, `deck`, `input`, `placement_controls`, `stage_label`, `token_reward` |
+| `feedback/` | `word_feedback`, `float_up_text`, `confetti`, `comic_burst` |
+| `tutorial/` | `first_play`, `character_speech`, `hand_clear_focus` |
+| `play_effects/` | `resolution`, `card_fly_off`, play cinematics |
+| `hand_shuffle/` | shuffle/play buttons, `play_hold_redraw` |
+| `sidebar/` | right-hand HUD (see below) |
+| `layout/`, `score_banner/`, `perks/`, `trade/`, `menu/`, `overlays/`, `widgets/`, `callbacks/`, `cardarea/` | as named |
+
 ### Sidebar package (`word_game/ui/sidebar/`)
 
 Canonical name for the right-hand HUD column. Do not use "vault" in new code.
@@ -99,7 +115,7 @@ Tests that need rules only call `play_jumble_word`; tests that need full FX call
 
 ## Lua conventions
 
-- Dot paths from repo root: `require "word_game.ui.sidebar"`
+- Dot paths from repo root: `require "word_game.ui.sidebar.init"`
 - Package folders use `init.lua`; most modules `local M = {}` … `return M`
 - Files/dirs/locals: `snake_case`; classes/globals: `PascalCase`
 - UI binds `G.FUNCS.*` by string — move implementations, not registration names when refactoring

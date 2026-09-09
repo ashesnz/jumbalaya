@@ -47,7 +47,7 @@ function M.sidebar_left()
 end
 
 function M.deck_slot_size()
-	local TableDeck = require("word_game.ui.table_deck")
+	local TableDeck = require("word_game.ui.table.deck")
 	local scale = TableDeck.SIZE or 0.78
 	return TableDeck.footprint(G.CARD_W * scale, G.CARD_H * scale)
 end

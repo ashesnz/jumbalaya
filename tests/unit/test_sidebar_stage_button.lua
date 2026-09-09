@@ -150,7 +150,7 @@ T.describe("Sidebar stage button", function()
 		}
 
 		local tt = require("word_game.ui.perks.timeline_timer")
-		local token_reward = require("word_game.ui.token_reward")
+		local token_reward = require("word_game.ui.table.token_reward")
 		local stage_btn = require("word_game.ui.sidebar.stage_button")
 		local Play = require("word_game.model.jumble_play")
 		WORD_GAME.TimelineTimer = tt

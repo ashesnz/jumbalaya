@@ -21,7 +21,7 @@ local draw = require "word_game.board.draw"
 local snap = require "word_game.board.snap"
 local shimmer = require "word_game.board.shimmer"
 local jumble_geometry = require "word_game.board.jumble_geometry"
-local jumble_fixed_letters = require "word_game.ui.jumble_fixed_letters"
+local jumble_fixed_letters = require "word_game.ui.table.jumble_fixed_letters"
 
 --- @class PlacementTable
 --- @field game Game

@@ -2,7 +2,7 @@
 	word_game/model/jumble_play/init.lua - Jumble play-button orchestration.
 
 	`play_jumble_word` / `play_word` evaluate rules and return a result table.
-	UI calls `word_game.ui.play_resolution.resolve` to run presentation effects.
+	UI calls `word_game.ui.play_effects.resolution.resolve` to run presentation effects.
 ]]
 
 local M = {}
@@ -16,7 +16,7 @@ function M.play_word(opts)
 end
 
 function M.resolve_play(opts)
-	return require("word_game.ui.play_resolution").resolve(M, opts)
+	return require("word_game.ui.play_effects.resolution").resolve(M, opts)
 end
 
 return M

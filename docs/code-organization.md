@@ -48,12 +48,12 @@ Callbacks are grouped by responsibility under `app/callbacks/` and `word_game/ui
 |------|--------|
 | HUD refresh / rebuild | `word_game/ui/sidebar/` via `WORD_GAME.Sidebar`; G.FUNCS in `sidebar/funcs.lua` |
 | Screen / placement layout | `word_game/ui/layout/` via `WORD_GAME.Layout` or `require "word_game.ui.layout"`; model code requests deferred layout via `Layout.request_refresh()` |
-| Play button / placement | `word_game/ui/callbacks/placement.lua` (`G.FUNCS.play_placement_word`); logic in `placement_controls.lua` |
+| Play button / placement | `word_game/ui/callbacks/placement.lua` (`G.FUNCS.play_placement_word`); logic in `table/placement_controls.lua` |
 | Profile load / delete | `app/profile_callbacks.lua` |
 | Settings, text input, run lifecycle | `app/callbacks/settings.lua` |
 | Overlay screens (stable `G.FUNCS` names) | `word_game/ui/callbacks/overlays.lua` (installed from `app/callbacks/overlays/init.lua`) |
 | Shared timed effects | `app/callbacks/effects.lua` |
-| Card tooltips | `word_game/ui/card_tooltip.lua` |
+| Card tooltips | `word_game/ui/cards/tooltip.lua` |
 | Screen wipe transitions | `app/screen_wipe.lua` (`G:queue_during_wipe`, `G:queue_wipe_transition`) |
 
 `app/bootstrap.lua` loads callbacks in dependency order and wires `Controller._input_actions` from `app/input_actions.lua` so `app/runtime/controller.lua` does not require application code.
@@ -160,33 +160,29 @@ Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship.
 
 ### UI (`word_game/ui/`)
 
-| File | Purpose |
-|------|---------|
-| `layout/` | TABLE_BOARD geometry split: `felt.lua` (play column, felt, metrics), `placement.lua` (portraits, banner rects, screen positions), `request.lua` (deferred layout flag for model layer) |
-| `sidebar/` | Right-hand HUD package: `init.lua` (lifecycle), `hud_definition.lua`, `layout.lua` (column/deck geometry), `stage_button.lua`, `funcs.lua` (G.FUNCS) |
-| `score_banner/` | Jumble score chips and “Points to get” (`fonts`, `jumble`, `draw`) |
-| `perks/` | Perk-adjacent UI: `discard_bin/`, `timeline_timer/`, `stamp/`, `stamp_grid.lua`, `voucher.lua` |
-| `trade/` | Marketplace overlay (`definition`, `draw`, `animate`, `fly`, `layout`; session/input in `init`) |
-| `perks/stamp/` | Rubber-stamp perk acquisition (`definition`, `draw`, `animate`, `layout`; facade in `init`) |
-| `play_effects/` | Play resolution cinematics (`definition` feedback/banners, `animate` sequences; facade in `init`) |
-| `play_resolution.lua` | Drains model play result into `play_effects` (keeps `jumble_play` headless-testable) |
-| `boss_word_stack/` | Bonus gutter presentation (`layout`, `animate`, `draw`; facade in `init`; model in `bonus_stack`) |
-| `token_reward.lua` | Timer snapshot, sticker fly, spend reverse animation |
-| `word_feedback.lua` | Ephemeral word-level attention text when a play resolves (single API; drains `model/feedback`) |
-| `float_up_text.lua` | Per-card bonus popups (+2, +mult) rising from played cards |
-| `hand_shuffle/` | Circular shuffle/play buttons (`definition`, `layout`, `animate`, `shuffle_anim`, `placement_recall_anim`; facade in `init`) |
-| `play_hold_redraw.lua` | Hold Play 5s ring, recall slots, discard hand, redeal |
-| `jumble_fixed_letters.lua` | Fixed puzzle letter tile drawing and transition animation |
-| `table_deck.lua` | Draw pile + token pile rendering |
-| `hand_clear_focus.lua` | Spotlight during 1-1 token award |
-| `sidebar.lua` | Facade shim → `sidebar/init.lua` |
-| `widgets/` | Shared UI controls (`buttons.lua`, `sliders.lua`) and `G.DEFINITIONS` helpers |
-| `overlays/` | Options, settings, win/game-over overlays (`options.lua`, `results.lua`) |
-| `word_feedback.lua` | Gameplay attention text; owns `spawn_attention` primitive |
-| `fx.lua` | Boot shim that loads `word_feedback` (installs global `spawn_attention`) |
-| `menu/` | Main menu (`definition`, `layout`, `animate`; facade in `init`) |
-| `card_ui.lua`, `card_visuals.lua` | Card presentation and visual helpers |
-| `cardarea/` | `CardArea` class (`hand`, `deck`, `discard`, `placement` type handlers; `selection`, `relayout`, `chrome`; facade in `init`) |
+`word_game/ui/` has **no root-level modules** — everything lives in subpackages below. Always require the package path (e.g. `word_game.ui.table.board`, not `word_game.ui.table_board`).
+
+| Package | Purpose |
+|---------|---------|
+| `lib/` | Engine-adjacent globals: `colour`, `localize`, `number_format` |
+| `cards/` | Letter card presentation: `tooltip`, `popups`, `visuals`, `ui`, `letter_faces`, `inspect` |
+| `table/` | TABLE_BOARD coordinator and table chrome: `board`, `deck`, `input`, `dealt_hand`, `placement_controls`, `jumble_fixed_letters`, `stage_label`, `token_reward` |
+| `feedback/` | Ephemeral copy and FX: `word_feedback`, `float_up_text`, `modifier_feedback`, `comic_burst`, `confetti` |
+| `tutorial/` | First-play onboarding: `first_play`, `character_speech`, `hand_clear_focus` |
+| `layout/` | TABLE_BOARD geometry: `felt`, `placement`, `request` |
+| `sidebar/` | Right-hand HUD: `init`, `hud_definition`, `layout`, `stage_button`, `funcs` |
+| `score_banner/` | Jumble score chips, “Points to get”, `boss_announce` |
+| `hand_shuffle/` | Shuffle/play buttons, hold-to-redraw (`play_hold_redraw`) |
+| `play_effects/` | Play cinematics + `resolution` (model result → FX) and `card_fly_off` |
+| `boss_word_stack/` | Bonus gutter presentation |
+| `perks/` | Discard bin, timeline fuse, stamp grid, `voucher_sprite`; `stamp/` rubber-stamp flow |
+| `trade/` | Marketplace overlay |
+| `menu/` | Main menu + `title_logo` |
+| `overlays/` | Options, settings, results, `end_match` |
+| `widgets/` | Shared controls + `odometer` |
+| `callbacks/` | `G.FUNCS` bindings (`hand_shuffle`, `trade`, `placement`, `overlays`) |
+| `cardarea/` | `CardArea` class — boot via `require "word_game.ui.cardarea.init"` |
+| `sidebar/` | Right-hand HUD — boot via `require "word_game.ui.sidebar.init"` |
 
 ### Board (`word_game/board/`)
 
@@ -212,8 +208,8 @@ Model evaluation and UI presentation are separated for headless tests:
 | Layer | Module | Role |
 |-------|--------|------|
 | Model | `jumble_play/jumble.lua` | `play_jumble_word()` → evaluation result only |
-| UI | `play_resolution.lua` | `resolve(Play)` → `play_effects` banners, fly, hand clear |
-| UI | `placement_controls.lua` | Play button calls `play_resolution.resolve` |
+| UI | `play_effects/resolution.lua` | `resolve(Play)` → `play_effects` banners, fly, hand clear |
+| UI | `table/placement_controls.lua` | Play button calls `play_resolution.resolve` |
 
 Tests that need full play behavior call `play_resolution.resolve(flow)`; tests that only need rules call `play_jumble_word` or `rules.evaluate_play` directly.
 

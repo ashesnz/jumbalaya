@@ -13,7 +13,7 @@ T.describe("Classic run mode", function()
 			target = 50,
 			jumble = { total_score = 50 },
 		}
-		local token_reward = require("word_game.ui.token_reward")
+		local token_reward = require("word_game.ui.table.token_reward")
 		WORD_GAME.TokenReward = token_reward
 		token_reward.reset()
 
@@ -77,7 +77,7 @@ T.describe("Classic run mode", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"
 		local RunMode = require("word_game.model.run_mode")
-		local token_reward = require("word_game.ui.token_reward")
+		local token_reward = require("word_game.ui.table.token_reward")
 		local effects = require("word_game.ui.play_effects")
 		T.assert_false(RunMode.ends_hand_on_target())
 
@@ -103,7 +103,7 @@ T.describe("Classic run mode", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "time_run"
 		G.GAME.word_round = { set = 1, hand_index = 2, target = 2 }
-		local token_reward = require("word_game.ui.token_reward")
+		local token_reward = require("word_game.ui.table.token_reward")
 		token_reward.reset()
 		T.assert_false(token_reward.is_eligible(), "Time Run should not award tokens after 1-1")
 
@@ -232,7 +232,7 @@ T.describe("Classic run mode", function()
 		G.GAME.run_mode = "classic"
 		G.C.GOLD = G.C.GOLD or { 1, 0.8, 0, 1 }
 		local play_effects = require("word_game.ui.play_effects")
-		local float_up_text = require("word_game.ui.float_up_text")
+		local float_up_text = require("word_game.ui.feedback.float_up_text")
 		local captured
 		local original_spawn = float_up_text.spawn
 		float_up_text.spawn = function(config)
@@ -284,7 +284,7 @@ T.describe("Classic run mode", function()
 			return { x = 0.8, y = 2.0, w = 15.4, h = 8.0 }
 		end
 		local RunMode = require("word_game.model.run_mode")
-		local placement_controls = require("word_game.ui.placement_controls")
+		local placement_controls = require("word_game.ui.table.placement_controls")
 		local HandShuffle = require("word_game.ui.hand_shuffle")
 		local tt = require("word_game.ui.perks.timeline_timer")
 		WORD_GAME.TimelineTimer = tt
@@ -323,7 +323,7 @@ T.describe("Classic run mode", function()
 	T.it("styles the proceed hint like Hand Cleared in red", function()
 		mock_env.reset_game()
 		local RunMode = require("word_game.model.run_mode")
-		local word_feedback = require("word_game.ui.word_feedback")
+		local word_feedback = require("word_game.ui.feedback.word_feedback")
 
 		local captured = nil
 		local original_attention = spawn_attention
@@ -349,7 +349,7 @@ T.describe("Classic run mode", function()
 			jumble = { total_score = 30 },
 		}
 		local tt = require("word_game.ui.perks.timeline_timer")
-		local token_reward = require("word_game.ui.token_reward")
+		local token_reward = require("word_game.ui.table.token_reward")
 		WORD_GAME.TimelineTimer = tt
 		WORD_GAME.TokenReward = token_reward
 		tt.reset_progress(25)
