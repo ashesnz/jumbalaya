@@ -5,10 +5,12 @@
 	Classic: banked stage score becomes tokens (1 point = 1 token).
 ]]
 
+local facade = require("word_game.ui.facade")
 local Layout = require("word_game.ui.layout")
-local state = require("word_game.model.run.state")
 local round_config = require("word_game.config.gameplay.round")
-local RunMode = require("word_game.model.run.mode")
+
+local state = facade.run_state()
+local RunMode = facade.run_mode()
 
 local M = {}
 

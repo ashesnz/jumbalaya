@@ -1,11 +1,14 @@
 --[[ word_game/ui/perks/stamp/animate.lua - stamp strike animation and imprint state ]]
 
+local facade = require("word_game.ui.facade")
 local definition = require("word_game.ui.perks.stamp.definition")
 local draw = require("word_game.ui.perks.stamp.draw")
 local stamp_puff = require("word_game.ui.perks.stamp.puff")
-local state = require("word_game.model.run.state")
+local table_discard = require("word_game.ui.perks.discard_bin")
 local perk_cfg = require("word_game.config.perks")
-local perk_model = require("word_game.model.perks.registry")
+
+local state = facade.run_state()
+local perk_model = facade.perks_registry()
 
 local M = {}
 
@@ -157,7 +160,6 @@ function M.apply_imprint(sprite_entry, perk_entry)
 		ctx.refresh_sidebar()
 	end
 	if #imprints == 1 then
-		local table_discard = require("word_game.ui.perks.discard_bin")
 		if table_discard.on_unlock then
 			table_discard.on_unlock()
 		end

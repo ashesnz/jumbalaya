@@ -8,6 +8,8 @@
 local CharacterSpeech = require("word_game.ui.tutorial.character_speech")
 local Scheduler = require("app.effects.timeline_scheduler")
 local Easing = require("app.effects.easing")
+local dealt_hand = require("word_game.ui.table.dealt_hand")
+local Layout = require("word_game.ui.layout")
 
 local M = {}
 
@@ -165,7 +167,6 @@ local function room_centered_bubble(cx, center_y)
 end
 
 local function hand_bubble_config()
-	local dealt_hand = require("word_game.ui.table.dealt_hand")
 	dealt_hand.apply_screen_position()
 
 	local hand = G.hand and G.hand.T
@@ -224,7 +225,6 @@ local function play_bubble_config()
 end
 
 local function timeline_bubble_config()
-	local Layout = require("word_game.ui.layout")
 	local rect = Layout.timeline_rect and Layout.timeline_rect() or Layout.portrait_rect()
 	local room = G.ROOM_ATTACH and G.ROOM_ATTACH.T
 	if not rect or not room then

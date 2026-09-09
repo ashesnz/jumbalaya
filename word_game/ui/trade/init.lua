@@ -1,8 +1,18 @@
 --[[ word_game/ui/trade/init.lua - The Card Marketplace overlay ]]
 
-local trade = require("word_game.model.trade")
-local state = require("word_game.model.run.state")
-local deck = require("word_game.model.cards.deck")
+local facade = require("word_game.ui.facade")
+
+local function trade_model()
+	return facade.trade()
+end
+
+local function run_state()
+	return facade.run_state()
+end
+
+local function deck_model()
+	return facade.deck()
+end
 local trade_layout = require("word_game.ui.trade.layout")
 local trade_fly = require("word_game.ui.trade.fly")
 local trade_definition = require("word_game.ui.trade.definition")
@@ -43,19 +53,19 @@ local function reset_session(rolled)
 end
 
 function M.session_add_cost(session_state)
-	return trade.ACTION_COSTS.add + (session_state and session_state.add_cost_bonus or 0)
+	return trade_model().ACTION_COSTS.add + (session_state and session_state.add_cost_bonus or 0)
 end
 
 function M.can_afford_action(action, session_state)
-	local balance = state.tokens()
+	local balance = run_state().tokens()
 	if action == "add" then
 		return balance >= M.session_add_cost(session_state)
 	end
 	if action == "remove" then
-		return balance >= trade.ACTION_COSTS.remove
+		return balance >= trade_model().ACTION_COSTS.remove
 	end
 	if action == "modifier" then
-		return balance >= trade.ACTION_COSTS.modifier
+		return balance >= trade_model().ACTION_COSTS.modifier
 	end
 	return false
 end
@@ -65,14 +75,14 @@ function M.is_action_disabled(action, item, session_state)
 		return not M.can_afford_action("add", session_state)
 	end
 	if action == "remove" then
-		return not trade.item_in_deck(item) or not M.can_afford_action("remove", session_state)
+		return not trade_model().item_in_deck(item) or not M.can_afford_action("remove", session_state)
 	end
 	if action == "modifier" then
-		local already_modified = item.card and deck.is_modified(item.card)
+		local already_modified = item.card and deck_model().is_modified(item.card)
 		local modified_this_session = session_state
 			and session_state.modified
 			and session_state.modified[item]
-		return not trade.item_in_deck(item)
+		return not trade_model().item_in_deck(item)
 			or modified_this_session
 			or already_modified
 			or not M.can_afford_action("modifier", session_state)
@@ -103,15 +113,15 @@ end
 -- so project the next add price when deciding whether to auto-close.
 function M.cannot_afford_anything(opts)
 	if not session or not offer then return false end
-	local balance = state.tokens()
+	local balance = run_state().tokens()
 	local letters = (offer.add or offer).letters or {}
 	local any_in_deck = false
 	local modify_available = false
 	for _, item in ipairs(letters) do
-		if trade.item_in_deck(item) then
+		if trade_model().item_in_deck(item) then
 			any_in_deck = true
 			if not session.modified[item]
-				and not (item.card and deck.is_modified(item.card)) then
+				and not (item.card and deck_model().is_modified(item.card)) then
 				modify_available = true
 			end
 		end
@@ -121,9 +131,9 @@ function M.cannot_afford_anything(opts)
 		min_cost = min_cost + ADD_COST_STEP
 	end
 	if any_in_deck then
-		min_cost = math.min(min_cost, trade.ACTION_COSTS.remove)
+		min_cost = math.min(min_cost, trade_model().ACTION_COSTS.remove)
 		if modify_available then
-			min_cost = math.min(min_cost, trade.ACTION_COSTS.modifier)
+			min_cost = math.min(min_cost, trade_model().ACTION_COSTS.modifier)
 		end
 	end
 	return balance < min_cost
@@ -184,7 +194,7 @@ end
 
 function M.definition()
 	if not offer then
-		reset_session(trade.roll_offer())
+		reset_session(trade_model().roll_offer())
 	elseif not session then
 		reset_session(offer)
 	end
@@ -216,7 +226,7 @@ local function continue_run()
 end
 
 finish_trade = function()
-	trade.mark_used()
+	trade_model().mark_used()
 	if standalone then
 		standalone = false
 		close_menu()
@@ -281,7 +291,7 @@ end
 
 function M.open()
 	standalone = true
-	reset_session(trade.roll_offer())
+	reset_session(trade_model().roll_offer())
 	if cannot_afford_anything() then
 		finish_trade()
 		return
@@ -291,12 +301,12 @@ end
 
 function M.open_then_dealer()
 	standalone = false
-	local rs = state.get()
-	if (rs and rs.trade_used_this_hand) or not trade.can_use() then
+	local rs = run_state().get()
+	if (rs and rs.trade_used_this_hand) or not trade_model().can_use() then
 		continue_run()
 		return
 	end
-	reset_session(trade.roll_offer())
+	reset_session(trade_model().roll_offer())
 	if cannot_afford_anything() then
 		finish_trade()
 		return
@@ -318,7 +328,7 @@ function M.on_pick(e)
 	end
 
 	local cost = action == "add" and M.session_add_cost(session) or nil
-	local ok, result = trade.apply(item, { action = action, cost = cost, defer_used = true })
+	local ok, result = trade_model().apply(item, { action = action, cost = cost, defer_used = true })
 	if not ok then
 		fail(result)
 		return

@@ -73,8 +73,8 @@ local function mock_hand()
 end
 
 T.describe("bonus gutter input", function()
-	local bonus_stack = require("word_game.ui.boss_word_stack")
-	local draw = require("word_game.ui.boss_word_stack.draw")
+	local bonus_stack = require("word_game.ui.perks.bonus_stack")
+	local draw = require("word_game.ui.perks.bonus_stack.draw")
 	local jumble = require("word_game.model.jumble")
 
 	T.it("does not draw a filled gutter backdrop behind bonus cards", function()

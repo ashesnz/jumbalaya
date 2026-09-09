@@ -101,7 +101,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | Caller | Rule |
 |--------|------|
 | `app/`, `tests/`, `devtools/` | Use `WORD_GAME.*` facade — no deep `word_game.model.*` requires unless testing internals |
-| `word_game/ui/` | `word_game.ui.lib.domain` helpers (resolve `WORD_GAME.*` at runtime); local `require` for sibling UI modules only |
+| `word_game/ui/` | `word_game.ui.facade` for cross-package imports (model/board/app); top-of-file `require` for sibling UI modules only |
 | `word_game/board/` | Top-of-file `require` for model modules; no UI imports at load time |
 | `word_game/model/` | Top-of-file `require` for siblings (`model/jumble/*`, `model/run/*`, …); use `jumble/bonus_return` when model must return bonus cards to the gutter |
 | Inline `require(...)` inside functions | Avoid — hoist to module scope unless breaking a documented circular dependency |
@@ -177,18 +177,18 @@ Runtime hand size (`WORD_GAME.HandSize.get()`) lives in `word_game/model/hand_si
 
 | Package | Purpose |
 |---------|---------|
-| `lib/` | Engine-adjacent globals: `colour`, `localize`, `number_format`, `roll` |
+| `util/` | Stateless helpers: `colour`, `localize`, `number_format`, `roll` |
+| `facade/` | Cross-package resolver — UI modules import model/board via `require("word_game.ui.facade")` |
 | `cards/` | Letter card presentation: `tooltip`, `popups`, `visuals`, `ui`, `letter_faces`, `inspect` |
-| `table/` | TABLE_BOARD coordinator and table chrome: `board`, `deck`, `input`, `dealt_hand`, `placement_controls`, `jumble_fixed_letters`, `stage_label`, `token_reward` |
+| `table/` | TABLE_BOARD coordinator and table chrome: `board`, `deck`, `input`, `dealt_hand`, `placement_controls`, `jumble_fixed_letters`, `token_reward` |
 | `feedback/` | Ephemeral copy and FX: `word_feedback`, `float_up_text`, `modifier_feedback`, `comic_burst`, `confetti` |
 | `tutorial/` | First-play onboarding: `first_play`, `character_speech`, `hand_clear_focus` |
 | `layout/` | TABLE_BOARD geometry: `felt`, `placement`, `request` |
 | `sidebar/` | Right-hand HUD: `init`, `hud_definition`, `layout`, `stage_button`, `funcs` |
-| `score_banner/` | Jumble score chips, “Points to get”, `boss_announce` |
+| `score_banner/` | Jumble score chips, “Points to get”, `stage_label`, `boss_announce` |
 | `hand_shuffle/` | Shuffle/play buttons, hold-to-redraw (`play_hold_redraw`) |
 | `play_effects/` | Play cinematics + `resolution` (model result → FX) and `card_fly_off` |
-| `boss_word_stack/` | Bonus gutter presentation |
-| `perks/` | `discard_bin/`, `timeline_timer/`, `stamp/` (grid + animation), `shared/` (voucher atlas + sprite) |
+| `perks/` | `bonus_stack/` (boss-word gutter), `discard_bin/`, `timeline_timer/`, `stamp/` (grid + animation), `shared/` (voucher atlas + sprite) |
 | `trade/` | Marketplace overlay |
 | `menu/` | Main menu + `title_logo` |
 | `overlays/` | Options, settings, results, `end_match` |

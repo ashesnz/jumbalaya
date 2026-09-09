@@ -4,21 +4,20 @@
 
 local M = {}
 
-local jumble_fixed_letters
+local jumble_fixed_letters = require("word_game.ui.table.jumble_fixed_letters")
+local felt = require("word_game.ui.layout.felt")
+local Layout = require("word_game.ui.layout")
+local play_effects = require("word_game.ui.play_effects")
 
 local function ensure_placement_pattern_overlay(pt)
 	if not pt or pt.draw_pattern_overlay then return end
 	pt.draw_pattern_overlay = function(session)
 		if not (WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active()) then return end
-		if not jumble_fixed_letters then
-			jumble_fixed_letters = require("word_game.ui.table.jumble_fixed_letters")
-		end
 		jumble_fixed_letters.draw(session)
 	end
 end
 
 local function boss_sequence_active()
-	local felt = require("word_game.ui.layout.felt")
 	return felt.is_boss_sequence()
 end
 
@@ -33,7 +32,6 @@ end
 function M.update(game, dt)
 	if G.ARGS and G.ARGS.pending_layout then
 		G.ARGS.pending_layout = false
-		local Layout = require("word_game.ui.layout")
 		Layout.refresh_placement_layout()
 	end
 	if DEVTOOLS and DEVTOOLS.DebugButton then
@@ -49,7 +47,6 @@ function M.update(game, dt)
 		if WORD_GAME.Jumble.update_timer() then
 			if WORD_GAME.Play and WORD_GAME.Play.end_jumble_hand then
 				WORD_GAME.Play.end_jumble_hand()
-				local play_effects = require("word_game.ui.play_effects")
 				if play_effects.present_end_jumble_sidebar then
 					play_effects.present_end_jumble_sidebar()
 				end

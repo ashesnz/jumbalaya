@@ -264,7 +264,7 @@ function M.setup()
 		_G.WORD_GAME.TimelineTimer = timeline_timer
 	end
 
-	local ok_sl, stage_label = pcall(require, "word_game.ui.table.stage_label")
+	local ok_sl, stage_label = pcall(require, "word_game.ui.score_banner.stage_label")
 	if ok_sl then
 		_G.WORD_GAME.StageLabel = stage_label
 	end
@@ -286,6 +286,9 @@ end
 
 function M.reset_game()
 	M.setup()
+	if _G.WORD_GAME then
+		_G.WORD_GAME.Deck = require("word_game.model.cards.deck")
+	end
 	if G.SIDEBAR_HUD and G.SIDEBAR_HUD.remove then
 		pcall(function() G.SIDEBAR_HUD:remove() end)
 	end

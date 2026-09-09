@@ -5,10 +5,13 @@
 	Classic: score progress bar toward the stage target (dice-have-no-eyes style).
 ]]
 
-local StageLabel = require("word_game.ui.table.stage_label")
-local RunMode = require("word_game.model.run.mode")
+local facade = require("word_game.ui.facade")
+local StageLabel = require("word_game.ui.score_banner.stage_label")
 local timer_layout = require("word_game.ui.perks.timeline_timer.layout")
 local timer_draw = require("word_game.ui.perks.timeline_timer.draw")
+local Updaters = facade.updaters()
+
+local RunMode = facade.run_mode()
 
 local clamp01 = timer_layout.clamp01
 
@@ -511,7 +514,6 @@ function M.draw()
 end
 
 local function register_updater()
-	local Updaters = require("app.core.session.updaters")
 	Updaters.register("early_board", "timeline_timer", function(game, dt)
 		if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME and WORD_GAME.TimelineTimer then
 			WORD_GAME.TimelineTimer.update(dt)

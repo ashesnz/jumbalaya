@@ -1,6 +1,7 @@
 --[[ word_game/ui/jumble_fixed_letters.lua - Fixed puzzle letter tiles on the placement row ]]
 
-local topology = require("word_game.model.jumble.slot_topology")
+local facade = require("word_game.ui.facade")
+local topology = facade.slot_topology()
 
 local M = {}
 

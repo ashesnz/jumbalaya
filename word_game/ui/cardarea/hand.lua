@@ -2,7 +2,7 @@
 	word_game/ui/cardarea/hand.lua - Hand CardArea type behaviour.
 ]]
 
-local domain = require("word_game.ui.lib.domain")
+local facade = require("word_game.ui.facade")
 
 local M = {}
 
@@ -27,7 +27,7 @@ function M.relayout(self)
 		local card_w = self.card_w or G.CARD_W
 		local group_w = card_w + math.max(n - 1, 0) * card_w * spacing
 		local start_x = self.T.x + (self.T.w - group_w) / 2
-		local fan_n = domain.hand_size().get()
+		local fan_n = facade.hand_size().get()
 		for k, card in ipairs(self.cards) do
 			if not card.states.drag.is and not card.shuffle_hop and not card.placement_recall_slide then
 				local slot = k + (fan_n - n) * 0.5

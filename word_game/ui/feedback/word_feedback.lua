@@ -9,7 +9,11 @@
 	  float_up_text       — per-card +points / +mult popups (not full sentences)
 ]]
 
+local facade = require("word_game.ui.facade")
+local ComicBurst = require("word_game.ui.feedback.comic_burst")
 local Scheduler = require("app.effects.timeline_scheduler")
+
+local RunMode = facade.run_mode()
 
 local M = {}
 
@@ -77,7 +81,6 @@ function M.spawn_attention(args)
 				})
 			end
 			if args.comic_burst then
-				local ComicBurst = require("word_game.ui.feedback.comic_burst")
 				args.burst = ComicBurst(args.pos.x, args.pos.y, 0, 0, {
 					attach = args.AT,
 					radius = args.burst_radius or 0.62,
@@ -313,7 +316,6 @@ end
 
 function M.show_classic_proceed(opts)
 	opts = opts or {}
-	local RunMode = require("word_game.model.run.mode")
 	M.show(RunMode.classic_proceed_message(), G.C.RED, opts.hold or 2.8, opts.offset_y or 0.15)
 	local major = (G.placement_table and G.placement_table.area)
 		or G.PLAY_ATTACH

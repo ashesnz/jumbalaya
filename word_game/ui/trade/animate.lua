@@ -1,32 +1,39 @@
 --[[ word_game/ui/trade/animate.lua - Marketplace card transform/remove FX ]]
 
-local trade = require("word_game.model.trade")
-local deck = require("word_game.model.cards.deck")
+local facade = require("word_game.ui.facade")
 local LetterPalette = require("word_game.config.visuals.letter_card_palette")
+
+local function trade_model()
+	return facade.trade()
+end
+
+local function deck_model()
+	return facade.deck()
+end
+
+local function dissolve_fx()
+	return facade.dissolve_fx()
+end
 
 local M = {}
 
 local ctx
 local transform_item
 
-local function fx()
-	return require("app.effects.dissolve_fx")
-end
-
 local function transform_dissolve_time()
-	return fx().CARD_TRANSFORM_DISSOLVE_TIME
+	return dissolve_fx().CARD_TRANSFORM_DISSOLVE_TIME
 end
 
 local function transform_materialize_time()
-	return fx().CARD_TRANSFORM_MATERIALIZE_TIME
+	return dissolve_fx().CARD_TRANSFORM_MATERIALIZE_TIME
 end
 
 local function burn_dissolve_colours()
-	return fx().card_transform_dissolve_colours()
+	return dissolve_fx().card_transform_dissolve_colours()
 end
 
 local function burn_materialize_colours()
-	return fx().card_transform_materialize_colours()
+	return dissolve_fx().card_transform_materialize_colours()
 end
 
 function M.init(context)
@@ -43,9 +50,9 @@ end
 
 local function apply_modified_market_face(card, item)
 	local color = LetterPalette.MODIFIED_FACE_COLOR
-	local front = deck.front(item.letter, color)
+	local front = deck_model().front(item.letter, color)
 	if front and card.apply_face then
-		deck.tag_card(card, item.letter, color)
+		deck_model().tag_card(card, item.letter, color)
 		card:apply_face(front, false)
 	end
 	item.color = color
@@ -90,7 +97,7 @@ function M.start_transform_fx(item)
 
 	-- Phase 1: red card burns away like crumpling paper (fibrous noise dissolve).
 	local dissolve_time = transform_dissolve_time()
-	fx().run(card, {
+	dissolve_fx().run(card, {
 		mode = "out",
 		duration = dissolve_time,
 		wipe = 0,
@@ -103,7 +110,7 @@ function M.start_transform_fx(item)
 			card.dissolve_wipe = 0
 			card.dissolve_colours = burn_materialize_colours()
 			-- Phase 2: modified card re-forms from the same burnt-paper dissolve, reversed.
-			fx().run(card, {
+			dissolve_fx().run(card, {
 				mode = "in",
 				duration = transform_materialize_time(),
 				wipe = 0,
@@ -119,7 +126,7 @@ end
 function M.start_remove_dissolve(item)
 	local card = item.market_card
 	if not card then
-		trade.sync_offer_cards(ctx.get_offer())
+		trade_model().sync_offer_cards(ctx.get_offer())
 		ctx.refresh_overlay()
 		return
 	end
@@ -128,7 +135,7 @@ function M.start_remove_dissolve(item)
 	item.removed = true
 	play_sfx("whoosh2", math.random() * 0.2 + 0.9, 0.5)
 	play_sfx("crumple" .. math.random(1, 5), math.random() * 0.2 + 0.9, 0.5)
-	fx().run(card, {
+	dissolve_fx().run(card, {
 		duration = 0.7,
 		colours = { G.C.BLACK, G.C.ORANGE, G.C.RED, G.C.GOLD },
 		pulse = true,
@@ -142,12 +149,12 @@ function M.start_remove_dissolve(item)
 			-- Another copy of this letter is still in the pack: clear the
 			-- removed flag so sync rebinds the slot to it and it shows
 			-- in place of the dissolved copy.
-			if deck.find_deck_card(item.letter) then
+			if deck_model().find_deck_card(item.letter) then
 				item.removed = false
 			end
-			trade.sync_offer_cards(ctx.get_offer())
+			trade_model().sync_offer_cards(ctx.get_offer())
 			if item.card then
-				item.color = deck.color_from_card(item.card)
+				item.color = deck_model().color_from_card(item.card)
 			end
 			if ctx.broke_after_last_action() then
 				ctx.finish_trade()

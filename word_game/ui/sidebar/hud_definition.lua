@@ -1,10 +1,15 @@
 --[[ word_game/ui/sidebar/hud_definition.lua - Sidebar HUD layout ]]
 
+local facade = require("word_game.ui.facade")
 local Layout = require("word_game.ui.layout")
-local deck = require("word_game.model.cards.deck")
 local stamp_grid = require("word_game.ui.perks.stamp.grid")
 local Components = require("word_game.ui.widgets.components")
 local table_discard = require("word_game.ui.perks.discard_bin")
+local stage_button = require("word_game.ui.sidebar.stage_button")
+
+local function deck_mod()
+	return facade.deck()
+end
 
 local M = {}
 
@@ -70,7 +75,7 @@ end
 
 local function deck_count_node(box_w)
 	G.ARGS = G.ARGS or {}
-	deck.sync_deck_count_display()
+	deck_mod().sync_deck_count_display()
 	return sidebar_counter_row(box_w, "row_deck_count", "Cards left: ", {
 		n = G.UI.TEXT,
 		config = sidebar_counter_text_config({
@@ -145,7 +150,6 @@ function M.hud_definition()
 		(function()
 			local dw, dh = Layout.end_run_slot_size()
 			local btn_side = math.min(dw, dh)
-			local stage_btn = require("word_game.ui.sidebar.stage_button")
 			return { n = G.UI.ROW, config = {
 				align = "cm",
 				id = "row_end_run",
@@ -172,7 +176,7 @@ function M.hud_definition()
 					{ n = G.UI.TEXT, config = {
 						id = "end_run_label",
 						text = "End Run",
-						scale = stage_btn.label_scale_for("End Run"),
+						scale = stage_button.label_scale_for("End Run"),
 						colour = G.C.UI.TEXT_LIGHT,
 						shadow = true,
 					}},
@@ -206,7 +210,7 @@ end
 
 function M.relayout()
 	if not G.SIDEBAR_HUD then return end
-	deck.sync_deck_count_display()
+	deck_mod().sync_deck_count_display()
 	local sidebar_h = Layout.sidebar_height()
 	local inner_h = math.max(4, sidebar_h - SIDEBAR_ROOT_PAD * 2)
 	local root = G.SIDEBAR_HUD.root_node
@@ -232,6 +236,10 @@ function M.relayout()
 		Layout.update_sidebar_attach()
 	end
 	Layout.set_screen_positions()
+end
+
+if table_discard.bind_hud_definition then
+	table_discard.bind_hud_definition(M)
 end
 
 return M

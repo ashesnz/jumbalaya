@@ -5,6 +5,8 @@
 	Here it emits from a played card (or the play row) and wobbles like steam.
 ]]
 
+local Layout = require("word_game.ui.layout")
+
 local FloatUpText = EaseNode:derive("FloatUpText")
 
 local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
@@ -146,7 +148,6 @@ end
 
 function FloatUpText.from_timeline(text, opts)
 	opts = opts or {}
-	local Layout = require("word_game.ui.layout")
 	local rect = Layout.timeline_rect and Layout.timeline_rect() or { x = 0, y = 0, w = 4, h = 0.7 }
 	local origin = FloatUpText.timeline_right_origin(rect, opts)
 	return FloatUpText.spawn({

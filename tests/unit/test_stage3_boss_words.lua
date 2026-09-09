@@ -193,7 +193,7 @@ T.describe("Stage 1-3 boss words", function()
 
 	T.it("stacks boss word cards below the timer with half-card overlap", function()
 		local layout = require("word_game.ui.layout.placement")
-		local boss_word_stack = require("word_game.ui.boss_word_stack")
+		local boss_word_stack = require("word_game.ui.perks.bonus_stack")
 		G.GAME = {
 			word_round = {
 				jumble = { boss_word_active = true },

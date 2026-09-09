@@ -8,8 +8,14 @@
 
 local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
 local TOKEN_HIGHLIGHT_TIME = 0.8
-local Roll = require("word_game.ui.lib.roll")
-local state = require("word_game.model.run.state")
+local facade = require("word_game.ui.facade")
+local felt = require("word_game.ui.layout.felt")
+local Roll = require("word_game.ui.util.roll")
+local state = facade.run_state()
+
+local function deck_mod()
+	return facade.deck()
+end
 
 local M = {
 	SIZE = 0.68,
@@ -130,7 +136,6 @@ local mesh_n
 
 function M.uses_table_draw()
 	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
-	local felt = require("word_game.ui.layout.felt")
 	if felt.is_boss_sequence() then return false end
 	return true
 end
@@ -502,10 +507,9 @@ end
 
 function M.show_info()
 	if not M.uses_table_draw() or not G.deck then return end
-	local deck = require("word_game.model.cards.deck")
 	spawn_attention({
 		scale = 0.58,
-		text = "Cards left: " .. tostring(deck.cards_left()),
+		text = "Cards left: " .. tostring(deck_mod().cards_left()),
 		hold = 2.0,
 		align = "cm",
 		major = G.deck,

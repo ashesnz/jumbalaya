@@ -4,7 +4,7 @@
 	Points × multiplier points and "Points to get" label under the portrait.
 ]]
 
-local domain = require("word_game.ui.lib.domain")
+local facade = require("word_game.ui.facade")
 local fonts = require("word_game.ui.score_banner.fonts")
 local jumble = require("word_game.ui.score_banner.jumble")
 local draw = require("word_game.ui.score_banner.draw")
@@ -34,7 +34,7 @@ function M.actual_remaining()
 	local target = wr and wr.target or 0
 	local j = wr and wr.jumble
 	if j then
-		return domain.jumble_rules().remaining_to_target(j, target)
+		return facade.jumble_rules().remaining_to_target(j, target)
 	end
 	return target
 end

@@ -5,7 +5,9 @@
 	horizontal perk imprint on the side panel.
 ]]
 
+local facade = require("word_game.ui.facade")
 local Layout = require("word_game.ui.layout")
+local run_state = facade.run_state()
 local stamp_layout = require("word_game.ui.perks.stamp.layout")
 local perk_cfg = require("word_game.config.perks")
 local stamp_grid = require("word_game.ui.perks.stamp.grid")
@@ -148,7 +150,7 @@ function M.try_opening_demo()
 	end
 	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
 	if animate.imprint_count() > 0 then return false end
-	local rs = require("word_game.model.run.state").get()
+	local rs = run_state.get()
 	if not rs or #(rs.perks or {}) > 0 then return false end
 	local entry = perk_cfg.by_id("discard_bin")
 	if not entry then return false end

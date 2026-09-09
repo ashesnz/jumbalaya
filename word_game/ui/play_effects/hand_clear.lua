@@ -1,9 +1,11 @@
 --[[ word_game/ui/play_effects/hand_clear.lua - Hand-clear presentation and flow wiring ]]
 
+local facade = require("word_game.ui.facade")
 local Scheduler = require("app.effects.timeline_scheduler")
 local CardMotion = require("app.effects.card_motion")
-local feedback = require("word_game.model.feedback")
 local play_effects = require("word_game.ui.play_effects")
+
+local feedback = facade.feedback()
 
 local M = {}
 

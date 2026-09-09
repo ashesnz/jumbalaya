@@ -36,7 +36,7 @@ local M = {
 	SidebarStageButton = require("word_game.ui.sidebar.stage_button"),
 	ScoreBanner = require("word_game.ui.score_banner"),
 	TimelineTimer = require("word_game.ui.perks.timeline_timer"),
-	StageLabel = require("word_game.ui.table.stage_label"),
+	StageLabel = require("word_game.ui.score_banner.stage_label"),
 	TokenReward = require("word_game.ui.table.token_reward"),
 	HandClearFocus = require("word_game.ui.tutorial.hand_clear_focus"),
 	FirstPlayTutorial = require("word_game.ui.tutorial.first_play"),
@@ -55,7 +55,7 @@ local M = {
 	PlayHoldRedraw = require("word_game.ui.hand_shuffle.play_hold_redraw"),
 	PlayEffects = require("word_game.ui.play_effects"),
 	BonusStack = require("word_game.model.jumble.bonus_stack"),
-	BossWordStack = require("word_game.ui.boss_word_stack"),
+	BossWordStack = require("word_game.ui.perks.bonus_stack"),
 	BossWordAnnounce = require("word_game.ui.score_banner.boss_announce"),
 	Sidebar = sidebar,
 }

@@ -2,18 +2,29 @@
 
 local M = {}
 
-local deck = require("word_game.model.cards.deck")
+local facade = require("word_game.ui.facade")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
-local boss_word_stack = require("word_game.ui.boss_word_stack")
+local boss_word_stack = require("word_game.ui.perks.bonus_stack")
 local card_fly_off = require("word_game.ui.play_effects.card_fly_off")
+local jumble_fixed_letters = require("word_game.ui.table.jumble_fixed_letters")
 local round_config = require("word_game.config.gameplay.round")
-local domain = require("word_game.ui.lib.domain")
-local RunMode = require("word_game.model.run.mode")
 local Easing = require "app.effects.easing"
 local definition = require("word_game.ui.play_effects.definition")
 
+local RunMode = facade.run_mode()
+
+local function deck_api()
+	return facade.deck()
+end
+
+local host
+
+function M.bind_host(mod)
+	host = mod
+end
+
 local function effects()
-	return require("word_game.ui.play_effects")
+	return host
 end
 
 local function has_event_manager()
@@ -35,7 +46,7 @@ local function finish_used_card(card, return_to_deck)
 		if card.area then
 			card.area:remove_card(card)
 		end
-		deck.destroy_card(card)
+		deck_api().destroy_card(card)
 	end
 end
 
@@ -49,7 +60,7 @@ local function finish_used_cards(used_cards, return_to_deck)
 		finish_used_card(card, return_to_deck)
 	end
 	if returned then
-		deck.sync_deck_count_display()
+		deck_api().sync_deck_count_display()
 	end
 end
 
@@ -58,7 +69,7 @@ function M.run_card_return_sequence(used_cards, on_after, return_to_deck)
 	card_fly_off.fly_cards_off(used_cards, effects().queue_event, {
 		return_to_deck = return_to_deck,
 		on_complete = function()
-			deck.sync_deck_count_display()
+			deck_api().sync_deck_count_display()
 			if on_after then on_after() end
 		end,
 	})
@@ -70,18 +81,18 @@ function M.deal_and_refresh(on_complete)
 		definition.sync_hand_after_deal()
 		if on_complete then on_complete() end
 	end
-	if deck.is_jumble_deck and deck.is_jumble_deck()
-		and deck.needs_jumble_reshuffle and deck.needs_jumble_reshuffle() then
-		deck.try_jumble_reshuffle_and_deal(finish)
+	if deck_api().is_jumble_deck and deck_api().is_jumble_deck()
+		and deck_api().needs_jumble_reshuffle and deck_api().needs_jumble_reshuffle() then
+		deck_api().try_jumble_reshuffle_and_deal(finish)
 		return
 	end
-	deck.deal_into_hand(domain.hand_size().get(), finish)
+	deck_api().deal_into_hand(facade.hand_size().get(), finish)
 end
 
 function M.present_boss_word(wr, on_complete)
 	local jumble = WORD_GAME and WORD_GAME.Jumble
-	local deck_mod = WORD_GAME and WORD_GAME.Deck
-	if not wr or not jumble or not deck_mod then
+	local deck = WORD_GAME and WORD_GAME.Deck
+	if not wr or not jumble or not deck then
 		if on_complete then on_complete() end
 		return
 	end
@@ -228,7 +239,7 @@ function M.present_boss_word(wr, on_complete)
 		end
 		local puzzle = wr.jumble.pending_boss
 		local letters = jumble.boss_hand_letters(puzzle.boss_word, puzzle.pattern)
-		deck_mod.deal_boss_hand(letters, function()
+		deck.deal_boss_hand(letters, function()
 			definition.sync_hand_after_deal()
 			word_feedback.lock_hand_layout(wr)
 			after_boss_deal()
@@ -247,7 +258,7 @@ function M.present_boss_word(wr, on_complete)
 		WORD_GAME.Sidebar.sync_visibility()
 	end
 
-	deck_mod.return_hand_to_deck(function()
+	deck.return_hand_to_deck(function()
 		deal_boss_hand()
 	end, { instant = true })
 end
@@ -352,12 +363,12 @@ function M.present_word_play_after_cards(jumble, j, result, on_hand_cleared, on_
 	end
 
 	-- Jumble word plays always return used cards to the deck (gameplay.md §Playing a puzzle).
-	-- Stage target reached is handled separately via on_hand_cleared → populate_jumble_deck.
+	-- Stage target reached is handled separately via on_hand_cleared → populate_jumble_deck_api().
 	M.run_card_return_sequence(result.used_cards, after_cards_cleared, true)
 end
 
 function M.present_jumble_next(jumble, wr, opts)
-	local jl = require("word_game.ui.table.jumble_fixed_letters")
+	local jl = jumble_fixed_letters
 	definition.set_word_score_animating(true)
 	if play_sfx then play_sfx("card_slide1", 0.85, 0.7) end
 

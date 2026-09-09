@@ -1,8 +1,8 @@
 --[[
-	word_game/ui/widgets/ - Reusable UI controls: buttons, tabs, sliders, overlay chrome.
+	word_game/ui/widgets/ - Reusable UIBox controls and chrome.
 
-	These stay globals (`build_*`, `G.DEFINITIONS.*`) so existing call sites
-	do not change. Loaded from app/bootstrap/game_boot.lua.
+	`util/` holds stateless helpers (colour, roll math, localize). This package
+	builds `G.DEFINITIONS.*` and shared control nodes loaded from game boot.
 ]]
 
 local M = {}

@@ -1,12 +1,15 @@
 --[[ word_game/ui/perks/stamp/definition.lua - perk/stamp data copies and resolution ]]
 
+local facade = require("word_game.ui.facade")
 local perk_cfg = require("word_game.config.perks")
-local perk_model = require("word_game.model.perks.registry")
+require("word_game.ui.perks.shared.voucher_sprite")
+
+local perk_model = facade.perks_registry()
+local run_state = facade.run_state()
 
 local M = {}
 
 function M.perk_popup_definition(entry)
-	require("word_game.ui.perks.shared.voucher_sprite")
 	local w = (G.CARD_W or 1) * 0.9
 	local h = w / (perk_cfg.VOUCHER_ASPECT or 2.3)
 	local sprite = PerkVoucherSprite(0, 0, w, h, entry)
@@ -62,7 +65,7 @@ function M.resolve_stamp_sprite(sprite_entry)
 	if sprite_entry then return M.copy_stamp(sprite_entry) end
 	local sprites = perk_cfg.STAMP_SPRITES
 	if sprites and #sprites > 0 then
-		local rs = require("word_game.model.run.state").get()
+		local rs = run_state.get()
 		if rs and #(rs.perks or {}) == 0 then
 			return M.copy_stamp(sprites[1])
 		end

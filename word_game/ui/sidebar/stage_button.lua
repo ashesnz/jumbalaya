@@ -6,10 +6,21 @@
 	rolls the timeline score down to zero, then advances the hand.
 ]]
 
-local RunMode = require("word_game.model.run.mode")
-local InputLock = require("word_game.model.run.input_lock")
+local facade = require("word_game.ui.facade")
+local Layout = require("word_game.ui.layout")
 local table_discard = require("word_game.ui.perks.discard_bin")
-local Play = require("word_game.model.jumble_play")
+
+local function run_mode()
+	return facade.run_mode()
+end
+
+local function input_lock()
+	return facade.input_lock()
+end
+
+local function play()
+	return facade.jumble_play()
+end
 
 local M = {}
 
@@ -54,7 +65,6 @@ local function label_scale_for(text, btn_side)
 end
 
 function M.label_scale_for(text)
-	local Layout = require("word_game.ui.layout")
 	local dw, dh = Layout.end_run_slot_size()
 	return label_scale_for(text, math.min(dw, dh))
 end
@@ -159,7 +169,7 @@ end
 
 function M.is_next_mode()
 	if not table_discard.end_run_button_visible() then return false end
-	if not RunMode.is_classic() then return false end
+	if not run_mode().is_classic() then return false end
 	local tt = WORD_GAME and WORD_GAME.TimelineTimer
 	if not tt or not tt.is_progress_mode or not tt.is_progress_mode() then return false end
 	if tt.sync_progress then tt.sync_progress() end
@@ -279,7 +289,7 @@ end
 
 function M.collect_and_advance()
 	if not M.is_next_mode() and anim.mode ~= "next" then return false end
-	if InputLock.is_table_busy() then return false end
+	if input_lock().is_table_busy() then return false end
 	local token_reward = WORD_GAME and WORD_GAME.TokenReward
 	if token_reward and token_reward.is_active and token_reward.is_active() then
 		return false
@@ -288,8 +298,8 @@ function M.collect_and_advance()
 	local amount = commit_pending_score()
 	if amount <= 0 then return false end
 
-	if Play.on_hand_cleared then
-		Play.on_hand_cleared()
+	if play().on_hand_cleared then
+		play().on_hand_cleared()
 	end
 	return true
 end

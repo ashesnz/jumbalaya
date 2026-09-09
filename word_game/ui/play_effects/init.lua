@@ -6,6 +6,8 @@ local animate = require("word_game.ui.play_effects.animate")
 
 local M = {}
 
+animate.bind_host(M)
+
 local function has_event_manager()
 	return G.TIMELINE and G.TIMELINE.enqueue
 end

@@ -1,7 +1,7 @@
 --[[ word_game/ui/odometer.lua - Rolling digit + label (sidebar counters, voucher discard, etc.) ]]
 
 local Odometer = EaseNode:derive("Odometer")
-local Roll = require("word_game.ui.lib.roll")
+local Roll = require("word_game.ui.util.roll")
 
 local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
 local font_cache = {}

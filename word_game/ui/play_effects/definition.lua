@@ -2,10 +2,12 @@
 
 local M = {}
 
+local facade = require("word_game.ui.facade")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
-local boss_word_stack = require("word_game.ui.boss_word_stack")
-local RunMode = require("word_game.model.run.mode")
+local boss_word_stack = require("word_game.ui.perks.bonus_stack")
 local round_config = require("word_game.config.gameplay.round")
+
+local RunMode = facade.run_mode()
 
 M.BOSS_INTRO = {
 	hide_duration = 0.42,
@@ -187,7 +189,8 @@ function M.restore_boss_layout(opts)
 	if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.sync_visibility then
 		WORD_GAME.Sidebar.sync_visibility()
 	end
-	require("word_game.ui.play_effects").request_layout_refresh()
+	G.ARGS = G.ARGS or {}
+	G.ARGS.pending_layout = true
 	M.align_placement_table()
 	if G.hand then
 		G.hand:relayout()

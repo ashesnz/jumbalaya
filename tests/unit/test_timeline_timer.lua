@@ -353,7 +353,7 @@ T.describe("Timeline Timer & Shape Math", function()
 			clear_hand = function() end,
 			sync_visibility = function() end,
 		}
-		local stage_label = require("word_game.ui.table.stage_label")
+		local stage_label = require("word_game.ui.score_banner.stage_label")
 		local round = require("word_game.model.round")
 		stage_label.force_sync()
 		stage_label.left_count = 1
@@ -365,7 +365,7 @@ T.describe("Timeline Timer & Shape Math", function()
 	end)
 
 	T.it("rolls stage label digits when advancing to the next hand", function()
-		local stage_label = require("word_game.ui.table.stage_label")
+		local stage_label = require("word_game.ui.score_banner.stage_label")
 		G.GAME = G.GAME or {}
 		G.GAME.word_round = { set = 1, hand_index = 1 }
 		stage_label.force_sync()

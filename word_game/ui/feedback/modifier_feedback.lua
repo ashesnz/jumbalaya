@@ -1,6 +1,10 @@
 --[[ word_game/ui/modifier_feedback.lua - Floating modifier hint above a placed card ]]
 
-local deck = require("word_game.model.cards.deck")
+local facade = require("word_game.ui.facade")
+
+local function deck_api()
+	return facade.deck()
+end
 
 local M = {}
 
@@ -8,8 +12,8 @@ local DEFAULT_COLOUR = { 1, 0.85, 0.2, 1 }
 
 function M.show_on_placed_card(card)
 	if not card then return end
-	if not deck.is_modified(card) then return end
-	local text = deck.modifier_ui_text(deck.card_letter(card))
+	if not deck_api().is_modified(card) then return end
+	local text = deck_api().modifier_ui_text(deck_api().card_letter(card))
 	if not text then return end
 	local FloatUp = WORD_GAME and WORD_GAME.FloatUpText
 	if not FloatUp or not FloatUp.from_card_above then return end

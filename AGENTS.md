@@ -86,7 +86,8 @@ There are **no modules at `word_game/ui/` root** — use subpackage paths only:
 
 | Package | Key modules |
 |---------|-------------|
-| `lib/` | `colour`, `localize`, `number_format`, `roll`, `domain` (runtime `WORD_GAME` resolver) |
+| `util/` | `colour`, `localize`, `number_format`, `roll` |
+| `facade/` | Cross-package imports for UI (model/board/app) — use instead of deep `word_game.model.*` requires |
 | `cards/` | `tooltip`, `popups`, `visuals`, `ui`, `letter_faces`, `inspect` |
 | `table/` | `board`, `deck`, `input`, `dealt_hand`, `placement_controls`, `stage_label`, `token_reward`, `jumble_fixed_letters` |
 | `feedback/` | `word_feedback`, `float_up_text`, `confetti`, `comic_burst`, `modifier_feedback` |

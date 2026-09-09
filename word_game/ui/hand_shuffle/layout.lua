@@ -1,17 +1,18 @@
 --[[ word_game/ui/hand_shuffle/layout.lua - Hand shuffle/play button positioning ]]
 
 local felt_layout = require("word_game.ui.layout.felt")
-local domain = require("word_game.ui.lib.domain")
+local facade = require("word_game.ui.facade")
 local definition = require("word_game.ui.hand_shuffle.definition")
 
 local M = {}
 
 local animate_mod
 
+function M.bind_animate(mod)
+	animate_mod = mod
+end
+
 local function animate()
-	if not animate_mod then
-		animate_mod = require("word_game.ui.hand_shuffle.animate")
-	end
 	return animate_mod
 end
 
@@ -34,7 +35,7 @@ function M.layout_pos_sig()
 		G.CARD_H or 0,
 		felt.x,
 		felt.w,
-		domain.hand_size().get()
+		facade.hand_size().get()
 	)
 end
 
@@ -44,7 +45,7 @@ function M.button_anchors()
 	end
 	local size = definition.button_size()
 	local gap = definition.play_gap()
-	local hand_size = domain.hand_size().get()
+	local hand_size = facade.hand_size().get()
 	local hand_w = get_hand_area_width(hand_size)
 	local hand_h = (G.CARD_H or 1.4) * 0.95
 	local felt = felt_layout.hand_felt_rect()

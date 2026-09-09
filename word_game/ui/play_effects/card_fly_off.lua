@@ -1,7 +1,11 @@
 --[[ word_game/ui/card_fly_off.lua - Played cards fly off-screen instead of the recycle pile ]]
 
-local boss_word_stack = require("word_game.ui.boss_word_stack")
-local deck = require("word_game.model.cards.deck")
+local facade = require("word_game.ui.facade")
+local boss_word_stack = require("word_game.ui.perks.bonus_stack")
+
+local function deck_mod()
+	return facade.deck()
+end
 
 local M = {}
 
@@ -76,7 +80,7 @@ local function fly_one_card(queue_event, card, index, count, return_to_deck, on_
 	end
 
 	if not return_to_deck then
-		deck.destroy_card(card)
+		deck_mod().destroy_card(card)
 		if on_card_done then on_card_done() end
 		return
 	end

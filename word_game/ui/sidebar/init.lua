@@ -1,11 +1,16 @@
 --[[ word_game/ui/sidebar/init.lua - Right-hand match HUD panel ]]
 
+local facade = require("word_game.ui.facade")
 local Layout = require("word_game.ui.layout")
+local felt = require("word_game.ui.layout.felt")
 local hud_definition = require("word_game.ui.sidebar.hud_definition")
-local StageLabel = require("word_game.ui.table.stage_label")
+local StageLabel = require("word_game.ui.score_banner.stage_label")
 local sidebar_callbacks = require("word_game.ui.sidebar.callbacks")
-local deck = require("word_game.model.cards.deck")
 local table_discard = require("word_game.ui.perks.discard_bin")
+
+local function deck_mod()
+	return facade.deck()
+end
 
 local WordSidebar = {}
 
@@ -21,7 +26,6 @@ WordSidebar.relayout = hud_definition.relayout
 WordSidebar.sync_action_buttons = hud_definition.sync_action_buttons
 
 function WordSidebar.is_hidden()
-	local felt = require("word_game.ui.layout.felt")
 	return felt.is_boss_sequence()
 end
 
@@ -57,7 +61,7 @@ function WordSidebar:ensure()
 		end
 	end
 	if G.SIDEBAR_HUD then
-		deck.sync_deck_count_display()
+		deck_mod().sync_deck_count_display()
 		WordSidebar.sync_action_buttons()
 		hud_definition.sync_end_run_row()
 		table_discard.sync_voucher_counter(true)

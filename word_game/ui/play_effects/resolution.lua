@@ -5,8 +5,10 @@
 	presentation and follow-up actions (banners, card fly, hand clear).
 ]]
 
-local RunMode = require("word_game.model.run.mode")
+local facade = require("word_game.ui.facade")
 local effects = require("word_game.ui.play_effects")
+
+local RunMode = facade.run_mode()
 
 local M = {}
 

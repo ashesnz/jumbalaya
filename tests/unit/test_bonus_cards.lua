@@ -5,7 +5,7 @@ local mock_env = require("tests.helpers.mock_env")
 
 T.describe("Bonus cards", function()
 	mock_env.reset_game()
-	local bonus_stack = require("word_game.ui.boss_word_stack")
+	local bonus_stack = require("word_game.ui.perks.bonus_stack")
 	local jumble = require("word_game.model.jumble")
 
 	local function layout_globals()
@@ -349,20 +349,29 @@ T.describe("Bonus cards", function()
 		bonus_stack.promote_to_bonus({ kept })
 		local destroyed = {}
 		local orig_deck = package.loaded["word_game.model.cards.deck"]
-		package.loaded["word_game.model.cards.deck"] = {
+		local orig_word_game_deck = WORD_GAME and WORD_GAME.Deck
+		local stub = {
 			destroy_card = function(card)
 				destroyed[#destroyed + 1] = card
 				card.REMOVED = true
 			end,
+			front = function() end,
+			tag_card = function() end,
 		}
-		bonus_stack.finalize_for_bonus_hand({
-			jumble = { boss_cards = { kept, leftover } },
-		})
-		T.assert_equal(#destroyed, 1)
-		T.assert_true(destroyed[1] == leftover)
-		T.assert_true(bonus_stack.is_active())
-		T.assert_true(kept.bonus_card)
+		package.loaded["word_game.model.cards.deck"] = stub
+		if WORD_GAME then WORD_GAME.Deck = stub end
+		local ok, err = pcall(function()
+			bonus_stack.finalize_for_bonus_hand({
+				jumble = { boss_cards = { kept, leftover } },
+			})
+			T.assert_equal(#destroyed, 1)
+			T.assert_true(destroyed[1] == leftover)
+			T.assert_true(bonus_stack.is_active())
+			T.assert_true(kept.bonus_card)
+		end)
 		package.loaded["word_game.model.cards.deck"] = orig_deck
+		if WORD_GAME then WORD_GAME.Deck = orig_word_game_deck end
+		if not ok then error(err) end
 	end)
 
 	T.it("keeps bonus cards on the left through stages 1-4, 1-5, and 1-6", function()

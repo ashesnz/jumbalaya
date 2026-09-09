@@ -5,9 +5,9 @@
 	slide down off screen and 7 new cards deal in one at a time from the deck.
 ]]
 local Scheduler = require "app.effects.timeline_scheduler"
-local InputLock = require("word_game.model.run.input_lock")
-local domain = require("word_game.ui.lib.domain")
-local perk_effects = require("word_game.model.perks.effects")
+local facade = require("word_game.ui.facade")
+local InputLock = facade.input_lock()
+local perk_effects = facade.perks_effects()
 
 
 local M = {}
@@ -262,7 +262,7 @@ local function trigger_redraw()
 			finish_redraw()
 			return
 		end
-		WORD_GAME.Deck.deal_into_hand(domain.hand_size().get(), finish_redraw)
+		WORD_GAME.Deck.deal_into_hand(facade.hand_size().get(), finish_redraw)
 	end)
 end
 

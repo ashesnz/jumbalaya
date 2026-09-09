@@ -3,7 +3,7 @@
 ]]
 
 local Layout = require("word_game.ui.layout")
-local Roll = require("word_game.ui.lib.roll")
+local Roll = require("word_game.ui.util.roll")
 local felt_layout = require("word_game.ui.layout.felt")
 local fonts = require("word_game.ui.score_banner.fonts")
 local boss_word_announce = require("word_game.ui.score_banner.boss_announce")

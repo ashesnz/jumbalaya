@@ -18,7 +18,7 @@ local placement = require("word_game.ui.cardarea.placement")
 local selection = require("word_game.ui.cardarea.selection")
 local relayout_mod = require("word_game.ui.cardarea.relayout")
 local chrome = require("word_game.ui.cardarea.chrome")
-local domain = require("word_game.ui.lib.domain")
+local facade = require("word_game.ui.facade")
 
 local TYPE_HANDLERS = {
 	hand = hand,
@@ -120,7 +120,7 @@ function CardArea:emplace(card, location, stay_flipped)
 		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.slot_for_card then
 			origin_slot, origin_insert = WORD_GAME.Jumble.slot_for_card(card)
 		end
-		domain.board_snap().restore_bonus_card(G.placement_table, card, origin_slot, origin_insert)
+		facade.board_snap().restore_bonus_card(G.placement_table, card, origin_slot, origin_insert)
 		return
 	end
 	if location == 'front' or self.config.type == 'deck' then

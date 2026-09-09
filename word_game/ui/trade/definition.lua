@@ -1,7 +1,14 @@
 --[[ word_game/ui/trade/definition.lua - Marketplace UIBox node builders ]]
 
-local trade = require("word_game.model.trade")
-local deck = require("word_game.model.cards.deck")
+local facade = require("word_game.ui.facade")
+
+local function trade_model()
+	return facade.trade()
+end
+
+local function deck_model()
+	return facade.deck()
+end
 
 local M = {}
 
@@ -15,13 +22,13 @@ local MODIFIER_LINE_CHARS = 38
 local TOKEN_COIN_W = 0.24
 
 local function make_face_card(item, w, h)
-	if not G.GAME or not G.P_CARDS or not deck.letter_center() then
+	if not G.GAME or not G.P_CARDS or not deck_model().letter_center() then
 		return nil
 	end
 	if not item or not item.letter then return nil end
-	local front = deck.front(item.letter, item.color)
+	local front = deck_model().front(item.letter, item.color)
 	if not front then return nil end
-	local card = Card(0, 0, w, h, front, deck.letter_center(), {
+	local card = Card(0, 0, w, h, front, deck_model().letter_center(), {
 		bypass_discovery_center = true,
 		bypass_discovery_ui = true,
 		bypass_lock = true,
@@ -31,7 +38,7 @@ local function make_face_card(item, w, h)
 	card.states.collide.can = false
 	card.states.hover.can = false
 	card.states.click.can = false
-	deck.tag_card(card, item.letter, item.color)
+	deck_model().tag_card(card, item.letter, item.color)
 	card.T.r = 0
 	return card
 end
@@ -41,7 +48,7 @@ local function face_node(item)
 		return { n = G.UI.ROW, config = { align = "cm", minw = G.CARD_W * M.MARKET_CARD_SCALE, minh = G.CARD_H * M.MARKET_CARD_SCALE }, nodes = {} }
 	end
 	-- A card whose deck copy was removed this session stays gone: empty slot.
-	if item.removed or (item.mode == "remove" and not trade.item_in_deck(item)) then
+	if item.removed or (item.mode == "remove" and not trade_model().item_in_deck(item)) then
 		return { n = G.UI.ROW, config = { align = "cm", minw = G.CARD_W * M.MARKET_CARD_SCALE, minh = G.CARD_H * M.MARKET_CARD_SCALE }, nodes = {} }
 	end
 	local w, h = G.CARD_W * M.MARKET_CARD_SCALE, G.CARD_H * M.MARKET_CARD_SCALE
@@ -139,7 +146,7 @@ local function action_button(item, action, cost, colour, disabled)
 end
 
 local function modifier_description_node(item, placeholder)
-	local text = deck.modifier_description(item and item.letter)
+	local text = deck_model().modifier_description(item and item.letter)
 	if not text then return nil end
 	local lines = wrap_description(text)
 	local line_nodes = {}
@@ -173,7 +180,7 @@ end
 
 local function deck_count_node(item, placeholder)
 	if not item or not item.letter then return nil end
-	local count = deck.count_letters_in_deck(item.letter)
+	local count = deck_model().count_letters_in_deck(item.letter)
 	local text = tostring(count) .. " in deck"
 	return { n = G.UI.COLUMN, config = {
 		align = "cm",
@@ -212,7 +219,7 @@ local function action_column(item, mode, done, session_state, host)
 	-- No card left to describe: keep an invisible placeholder so the modal
 	-- window keeps its size.
 	local desc = nil
-	if not item.removed and (item.mode ~= "remove" or trade.item_in_deck(item)) then
+	if not item.removed and (item.mode ~= "remove" or trade_model().item_in_deck(item)) then
 		desc = modifier_description_node(item)
 	elseif item.letter then
 		desc = modifier_description_node(item, true)
@@ -284,7 +291,7 @@ end
 function M.marketplace_content_nodes(ctx)
 	local offer = ctx.get_offer()
 	local session = ctx.get_session()
-	trade.sync_offer_cards(offer)
+	trade_model().sync_offer_cards(offer)
 	local add = offer.add or offer
 	local nodes = {
 		-- Red cross close button, top right of the modal.

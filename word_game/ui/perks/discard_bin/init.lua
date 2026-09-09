@@ -5,13 +5,27 @@
 	voucher imprint; the counter overlays the voucher art.
 ]]
 
+local facade = require("word_game.ui.facade")
 local felt = require("word_game.ui.layout.felt")
 local round_config = require("word_game.config.gameplay.round")
-local InputLock = require("word_game.model.run.input_lock")
-local Match = require("word_game.model.run.match")
 local Odometer = require("word_game.ui.widgets.odometer")
 local perk_voucher = require("word_game.ui.perks.shared.voucher")
-local run_state = require("word_game.model.run.state")
+
+local InputLock = facade.input_lock()
+local Match = facade.match()
+local run_state = facade.run_state()
+
+local hud_definition
+local stamp_layout
+local stamp_draw
+
+local function stamp_modules()
+	if not stamp_layout then
+		stamp_layout = require("word_game.ui.perks.stamp.layout")
+		stamp_draw = require("word_game.ui.perks.stamp.draw")
+	end
+	return stamp_layout, stamp_draw
+end
 
 local M = {
 	END_RUN_SLOT_SCALE = 0.62,
@@ -173,13 +187,16 @@ function M.hide_discard_pile_cards()
 	end
 end
 
+function M.bind_hud_definition(hud)
+	hud_definition = hud
+end
+
 function M.sync_sidebar_ui()
 	M.hide_discard_pile_cards()
 	M.sync_voucher_counter()
 	M.sync_discard_pile_area()
-	local hud = require("word_game.ui.sidebar.hud_definition")
-	if hud.sync_end_run_row then
-		hud.sync_end_run_row()
+	if hud_definition.sync_end_run_row then
+		hud_definition.sync_end_run_row()
 	end
 end
 
@@ -362,15 +379,14 @@ function M.draw_voucher_foreground()
 	local entry, rect = discard_voucher_slot_px()
 	if not entry or not rect then return end
 
-	local stamp_layout = require("word_game.ui.perks.stamp.layout")
-	local stamp_draw = require("word_game.ui.perks.stamp.draw")
+	local layout_mod, draw_mod = stamp_modules()
 	local prev_shader = love.graphics.getShader()
 	local cr, cg, cb, ca = love.graphics.getColor()
 
 	love.graphics.push()
 	love.graphics.setShader()
-	stamp_layout.room_translate()
-	stamp_draw.draw_type_imprint(entry.perk or entry.sprite, rect.x, rect.y, rect.w, rect.h, 1)
+	layout_mod.room_translate()
+	draw_mod.draw_type_imprint(entry.perk or entry.sprite, rect.x, rect.y, rect.w, rect.h, 1)
 	M.draw_voucher_overlay(entry, rect.x, rect.y, rect.w, rect.h)
 	love.graphics.pop()
 
