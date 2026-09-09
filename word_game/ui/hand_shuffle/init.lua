@@ -1,6 +1,6 @@
 --[[ word_game/ui/hand_shuffle/init.lua - Play button beside the dealt hand (no shuffle row) ]]
 
-local RunMode = require("word_game.model.run_mode")
+local RunMode = require("word_game.model.run.mode")
 local definition = require("word_game.ui.hand_shuffle.definition")
 local layout = require("word_game.ui.hand_shuffle.layout")
 local animate = require("word_game.ui.hand_shuffle.animate")

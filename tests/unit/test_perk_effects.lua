@@ -3,7 +3,7 @@
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
 local perk_effects = require("word_game.model.perks.effects")
-local state = require("word_game.model.state")
+local state = require("word_game.model.run.state")
 local jumble = require("word_game.model.jumble")
 
 T.describe("perk effects", function()

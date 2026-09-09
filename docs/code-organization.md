@@ -132,22 +132,20 @@ Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship.
 
 ### Model (`word_game/model/`)
 
-| File | Purpose |
-|------|---------|
-| `jumble/` | Puzzle spec, slot topology, validation, slots, and hand lifecycle |
-| `jumble_play/` | Jumble play evaluation (`play_jumble_word` returns result; no UI imports) |
-| `bonus_stack.lua` | Bonus gutter card stack state, scoring, hand-start staging |
-| `board/bonus_gutter.lua` | Bonus stack layout geometry and drag/snap helpers (no UI imports from model) |
-| `placement_word.lua` | `G.GAME.placement_word` / `placement_word_valid` from jumble slots |
-| `round.lua` | `start_hand` → `jumble.start_hand`, advance set/hand, `reset_timeline()` |
-| `input_lock.lua` | Animation-busy gate for play/discard/drag |
-| `match.lua` | Match-end / game-over transition from sidebar End Run |
-| `feedback.lua` | Model-layer attention text queue (drained by `word_feedback`) |
-| `profile_stats.lua` | Minimal card discovery persistence |
-| `deck/jumble.lua` | Populate jumble deck, `deal_jumble_hand` |
-| `deck/dealing.lua` | Animated `deal_into_hand` (one card at a time) |
-| `perks/` | Perk registry (`registry.lua`), effect hooks (`effects.lua`), per-hand timer stub (`timer.lua`; `ENABLED = false`) |
-| `state.lua` | Match persistence, `run_state.tokens` / `run_state.perks` |
+`word_game/model/` has **no root-level modules** — use subpackage paths only.
+
+| Package | Purpose |
+|---------|---------|
+| `game/` | `Game` class (`init.lua`, `run.lua`, `loop.lua`), `globals.lua` (`G = Game()`) |
+| `run/` | Run lifecycle: `state`, `scope`, `register`, `mode`, `match`, `input_lock` |
+| `round/` | Set/hand controller: `start_hand`, advance, timeline reset |
+| `trade/` | The Trade marketplace offers and actions |
+| `jumble/` | Puzzle spec, slots, validation, hand lifecycle, `bonus_stack`, `placement_word` |
+| `jumble_play/` | Play evaluation (`play_jumble_word`); hand-clear orchestration |
+| `cards/` | Letter-card definitions, `Card` class, `deck/` dealing |
+| `perks/` | Registry, effect hooks, per-hand timer stub |
+| `feedback/` | Model-layer attention text queue (drained by `word_feedback`) |
+| `meta/` | `profile_stats` — card discovery persistence |
 
 ### Cards (`word_game/model/cards/`)
 

@@ -76,7 +76,7 @@ T.describe("Classic run mode", function()
 	T.it("does not end the hand when the classic target is met", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"
-		local RunMode = require("word_game.model.run_mode")
+		local RunMode = require("word_game.model.run.mode")
 		local token_reward = require("word_game.ui.table.token_reward")
 		local effects = require("word_game.ui.play_effects")
 		T.assert_false(RunMode.ends_hand_on_target())
@@ -140,7 +140,7 @@ T.describe("Classic run mode", function()
 			target = 25,
 			jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0, slots = {} },
 		}
-		local RunMode = require("word_game.model.run_mode")
+		local RunMode = require("word_game.model.run.mode")
 		local rules = require("word_game.model.jumble_play.jumble_rules")
 		local tt = require("word_game.ui.perks.timeline_timer")
 		WORD_GAME.TimelineTimer = tt
@@ -283,7 +283,7 @@ T.describe("Classic run mode", function()
 		_G.get_table_felt_rect = _G.get_table_felt_rect or function()
 			return { x = 0.8, y = 2.0, w = 15.4, h = 8.0 }
 		end
-		local RunMode = require("word_game.model.run_mode")
+		local RunMode = require("word_game.model.run.mode")
 		local placement_controls = require("word_game.ui.table.placement_controls")
 		local HandShuffle = require("word_game.ui.hand_shuffle")
 		local tt = require("word_game.ui.perks.timeline_timer")
@@ -322,7 +322,7 @@ T.describe("Classic run mode", function()
 
 	T.it("styles the proceed hint like Hand Cleared in red", function()
 		mock_env.reset_game()
-		local RunMode = require("word_game.model.run_mode")
+		local RunMode = require("word_game.model.run.mode")
 		local word_feedback = require("word_game.ui.feedback.word_feedback")
 
 		local captured = nil

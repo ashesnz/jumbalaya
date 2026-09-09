@@ -1,7 +1,7 @@
 --[[ word_game/ui/trade/init.lua - The Card Marketplace overlay ]]
 
 local trade = require("word_game.model.trade")
-local state = require("word_game.model.state")
+local state = require("word_game.model.run.state")
 local deck = require("word_game.model.cards.deck")
 local trade_layout = require("word_game.ui.trade.layout")
 local trade_fly = require("word_game.ui.trade.fly")

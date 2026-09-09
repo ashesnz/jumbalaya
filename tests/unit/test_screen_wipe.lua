@@ -17,7 +17,7 @@ local function boot_for_wipe()
 	require("word_game.model.cards.card")
 	require("word_game.ui.cardarea.init")
 	require("word_game.model.game")
-	require("word_game.model.globals")
+	require("word_game.model.game.globals")
 	require("app.effects")
 	G:define_constants()
 	G.TIMELINE = Scheduler()
@@ -80,7 +80,7 @@ T.describe("Screen wipe loading bubble", function()
 		package.loaded["app.callbacks.settings"] = nil
 		require("app.callbacks.settings")
 		G.discard_run = function()
-			require("word_game.model.run_scope").teardown()
+			require("word_game.model.run.scope").teardown()
 		end
 		G.start_run = function() end
 		G.start_gameplay_board = function() end

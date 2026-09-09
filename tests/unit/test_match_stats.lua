@@ -7,7 +7,7 @@ local mock_env = require("tests.helpers.mock_env")
 
 T.describe("Match jumble stats", function()
 	mock_env.reset_game()
-	local state = require("word_game.model.state")
+	local state = require("word_game.model.run.state")
 	local end_match = require("word_game.ui.overlays.end_match")
 
 	local function stats()
@@ -135,7 +135,7 @@ T.describe("Match jumble stats", function()
 				puzzle_multi = 2.0,
 			},
 		}
-		local Match = require("word_game.model.match")
+		local Match = require("word_game.model.run.match")
 		Match.end_run({ won = false })
 		T.assert_equal(stats().best_puzzle, "C_T")
 		T.assert_equal(stats().best_puzzle_score, 50)

@@ -103,7 +103,7 @@ end
 --- Tears down all session UI/state (used when discarding a run or switching
 --- profiles) and resets the stage machine.
 function Game:discard_run()
-	local RunScope = require("word_game.model.run_scope")
+	local RunScope = require("word_game.model.run.scope")
 	RunScope.teardown()
 
 	if self.ROOM then

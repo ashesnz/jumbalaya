@@ -262,7 +262,7 @@ T.describe("Trade modifier application (word_game.model.trade)", function()
 	mock_env.reset_game()
 	local trade = require("word_game.model.trade")
 	local deck = require("word_game.model.cards.deck")
-	local state = require("word_game.model.state")
+	local state = require("word_game.model.run.state")
 
 	T.it("applies the letter modifier to an in-deck card for 30 tokens", function()
 		G.playing_cards = {}

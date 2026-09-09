@@ -3,7 +3,7 @@
 local definition = require("word_game.ui.perks.stamp.definition")
 local draw = require("word_game.ui.perks.stamp.draw")
 local stamp_puff = require("word_game.ui.perks.stamp.puff")
-local state = require("word_game.model.state")
+local state = require("word_game.model.run.state")
 local perk_cfg = require("word_game.config.perks")
 local perk_model = require("word_game.model.perks.registry")
 

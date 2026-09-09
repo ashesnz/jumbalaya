@@ -9,7 +9,7 @@
 local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
 local TOKEN_HIGHLIGHT_TIME = 0.8
 local Roll = require("word_game.ui.lib.roll")
-local state = require("word_game.model.state")
+local state = require("word_game.model.run.state")
 
 local M = {
 	SIZE = 0.68,

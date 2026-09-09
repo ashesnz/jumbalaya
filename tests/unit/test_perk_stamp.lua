@@ -530,7 +530,7 @@ T.describe("perk stamp click popup", function()
 	T.it("persists earned perks on match state", function()
 		Stamp.reset()
 		G.GAME = G.GAME or {}
-		local state = require("word_game.model.state")
+		local state = require("word_game.model.run.state")
 		state.get().perks = {}
 
 		for _ = 1, 70 do Stamp.debug_step() end

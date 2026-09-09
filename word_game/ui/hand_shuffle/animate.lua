@@ -1,8 +1,8 @@
 --[[ word_game/ui/hand_shuffle/animate.lua - Hand shuffle bounce, recall, and settle ]]
 
-local bonus_model = require("word_game.model.bonus_stack")
+local bonus_model = require("word_game.model.jumble.bonus_stack")
 local bonus_gutter = require("word_game.board.bonus_gutter")
-local InputLock = require("word_game.model.input_lock")
+local InputLock = require("word_game.model.run.input_lock")
 local hand_shuffle_anim = require("word_game.ui.hand_shuffle.shuffle_anim")
 local hand_placement_recall_anim = require("word_game.ui.hand_shuffle.placement_recall_anim")
 
@@ -69,7 +69,7 @@ function M.recall_placement_cards(opts)
 			G.placement_table.jumble_geometry.relayout(G.placement_table)
 		end
 	end
-	local placement_word = require("word_game.model.placement_word")
+	local placement_word = require("word_game.model.jumble.placement_word")
 	placement_word.clear()
 	if G.hand then
 		if G.hand.clear_selection then G.hand:clear_selection() end

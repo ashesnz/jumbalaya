@@ -6,7 +6,7 @@
 ]]
 
 local StageLabel = require("word_game.ui.table.stage_label")
-local RunMode = require("word_game.model.run_mode")
+local RunMode = require("word_game.model.run.mode")
 local timer_layout = require("word_game.ui.perks.timeline_timer.layout")
 local timer_draw = require("word_game.ui.perks.timeline_timer.draw")
 

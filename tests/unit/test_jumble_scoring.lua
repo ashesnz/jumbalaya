@@ -165,7 +165,7 @@ T.describe("Jumble scoring and odometer", function()
 
 	T.it("updates points to get when placement cards change", function()
 		local sb = require("word_game.ui.score_banner")
-		local placement_word = require("word_game.model.placement_word")
+		local placement_word = require("word_game.model.jumble.placement_word")
 		WORD_GAME.ScoreBanner = sb
 		WORD_GAME.Jumble = jumble
 		G.GAME.word_round = {
@@ -201,7 +201,7 @@ T.describe("Jumble scoring and odometer", function()
 
 	T.it("previews remaining from placed letters even when the word is invalid", function()
 		local sb = require("word_game.ui.score_banner")
-		local placement_word = require("word_game.model.placement_word")
+		local placement_word = require("word_game.model.jumble.placement_word")
 		local rules = require("word_game.model.jumble_play.jumble_rules")
 		WORD_GAME.ScoreBanner = sb
 		WORD_GAME.Jumble = jumble

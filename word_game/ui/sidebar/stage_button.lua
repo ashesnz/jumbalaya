@@ -6,8 +6,8 @@
 	rolls the timeline score down to zero, then advances the hand.
 ]]
 
-local RunMode = require("word_game.model.run_mode")
-local InputLock = require("word_game.model.input_lock")
+local RunMode = require("word_game.model.run.mode")
+local InputLock = require("word_game.model.run.input_lock")
 local table_discard = require("word_game.ui.perks.discard_bin")
 local Play = require("word_game.model.jumble_play")
 

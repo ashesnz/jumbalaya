@@ -1,6 +1,6 @@
 --[[ word_game/ui/boss_word_stack/layout.lua - Bonus gutter geometry ]]
 
-local model = require("word_game.model.bonus_stack")
+local model = require("word_game.model.jumble.bonus_stack")
 local gutter = require("word_game.board.bonus_gutter")
 
 local M = {}

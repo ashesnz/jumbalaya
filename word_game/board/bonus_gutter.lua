@@ -1,6 +1,6 @@
 --[[ word_game/board/bonus_gutter.lua - Bonus stack layout and drag/snap geometry ]]
 
-local model = require("word_game.model.bonus_stack")
+local model = require("word_game.model.jumble.bonus_stack")
 local placement_layout = require("word_game.ui.layout.placement")
 
 local M = {}

@@ -1,7 +1,7 @@
 --[[ devtools/sections/run.lua - Run progression cheats. ]]
 
 local layout = require "devtools.layout"
-local state = require "word_game.model.state"
+local state = require "word_game.model.run.state"
 
 local function tutorial_force_label()
 	if WORD_GAME and WORD_GAME.FirstPlayTutorial then

@@ -8,7 +8,7 @@ local boss_word_stack = require("word_game.ui.boss_word_stack")
 local card_fly_off = require("word_game.ui.play_effects.card_fly_off")
 local round_config = require("word_game.config.round_config")
 local hand_size_cfg = require("word_game.config.hand_size")
-local RunMode = require("word_game.model.run_mode")
+local RunMode = require("word_game.model.run.mode")
 local Easing = require "app.effects.easing"
 local definition = require("word_game.ui.play_effects.definition")
 

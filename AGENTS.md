@@ -17,10 +17,17 @@ app/                     Bootstrap, lifecycle, input, persistence, engine (app/c
   callbacks/             App-level G.FUNCS (settings, window, run lifecycle)
 word_game/
   config/                Static tuning: round targets, puzzles, perks, runtime options
-  model/                 Gameplay state, card domain, deck, flow, round rules
-    game/                Game class: init, prep_stage, start_run, loop hooks
-    jumble/              Active puzzle mode (pattern slots, validation, scoring)
-    jumble_play/         Headless play evaluation (no UI imports)
+  model/                 Gameplay rules and state (no root-level modules)
+    game/                Game class + globals.lua (G singleton)
+    run/                 Run state, scope, mode, match end, input lock
+    round/               Set/hand progression
+    trade/               Marketplace model
+    jumble/              Puzzle mode (slots, validation, bonus_stack, placement_word)
+    jumble_play/         Play evaluation and hand-clear orchestration
+    cards/               Card domain and deck/
+    perks/               Perk registry and effects
+    feedback/            Model→UI attention text queue
+    meta/                Profile/card discovery side effects
   board/                 Jumble pattern row (placement_table, snap, geometry)
   ui/                    TABLE_BOARD presentation, layouts, controls, overlays
 devtools/                Development-only tools (stage jump, word hints)

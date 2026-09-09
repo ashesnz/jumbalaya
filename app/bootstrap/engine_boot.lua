@@ -20,7 +20,7 @@ require "app.core.graphics.draw"
 require "app.core.platform.display"
 require "app.core.audio.sound"
 require "word_game.ui.lib.number_format"
-require "word_game.model.profile_stats"
+require "word_game.model.meta.profile_stats"
 require "word_game.ui.lib.colour"
 require "word_game.ui.lib.localize"
 

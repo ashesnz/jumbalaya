@@ -1,6 +1,6 @@
 --[[ word_game/ui/boss_word_stack/animate.lua - Gold transform and fly-to-gutter choreography ]]
 
-local model = require("word_game.model.bonus_stack")
+local model = require("word_game.model.jumble.bonus_stack")
 local layout = require("word_game.ui.boss_word_stack.layout")
 
 local M = {}

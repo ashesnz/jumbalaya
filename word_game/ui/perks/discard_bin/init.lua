@@ -7,11 +7,11 @@
 
 local felt = require("word_game.ui.layout.felt")
 local round_config = require("word_game.config.round_config")
-local InputLock = require("word_game.model.input_lock")
-local Match = require("word_game.model.match")
+local InputLock = require("word_game.model.run.input_lock")
+local Match = require("word_game.model.run.match")
 local Odometer = require("word_game.ui.widgets.odometer")
 local perk_voucher = require("word_game.ui.perks.shared.voucher")
-local run_state = require("word_game.model.state")
+local run_state = require("word_game.model.run.state")
 
 local M = {
 	END_RUN_SLOT_SCALE = 0.62,

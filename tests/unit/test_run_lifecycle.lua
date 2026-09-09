@@ -2,7 +2,7 @@
 
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
-local RunScope = require("word_game.model.run_scope")
+local RunScope = require("word_game.model.run.scope")
 
 T.describe("Run lifecycle (RunScope)", function()
 	mock_env.ensure_engine_globals()
@@ -97,7 +97,7 @@ T.describe("Run lifecycle (RunScope)", function()
 	end)
 
 	T.it("state.get returns nil while run is inactive", function()
-		local state = require("word_game.model.state")
+		local state = require("word_game.model.run.state")
 		G.GAME = { alpha = state.new() }
 		G.RUN = { active = false }
 		T.assert_nil(state.get(), "Alpha accessor should not serve stale run data during teardown")

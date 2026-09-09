@@ -269,7 +269,7 @@ T.describe("Stage 1-3 boss words", function()
 
 	T.it("re-enables hand drag after boss deal set_ranks during word_score_animating", function()
 		mock_env.reset_game()
-		local InputLock = require("word_game.model.input_lock")
+		local InputLock = require("word_game.model.run.input_lock")
 		local play_effects = require("word_game.ui.play_effects")
 
 		G.GAME = {
@@ -441,7 +441,7 @@ T.describe("Stage 1-3 boss words", function()
 
 	T.it("blocks play while the boss word is staging", function()
 		mock_env.reset_game()
-		local InputLock = require("word_game.model.input_lock")
+		local InputLock = require("word_game.model.run.input_lock")
 		local rules = require("word_game.model.jumble_play.jumble_rules")
 		G.GAME.word_score_animating = false
 		G.GAME.word_round = {
@@ -481,7 +481,7 @@ T.describe("Stage 1-3 boss words", function()
 		G.GAME.run_mode = "classic"
 		local play_effects = require("word_game.ui.play_effects")
 		local word_feedback = require("word_game.ui.feedback.word_feedback")
-		local InputLock = require("word_game.model.input_lock")
+		local InputLock = require("word_game.model.run.input_lock")
 		local tt = require("word_game.ui.perks.timeline_timer")
 
 		T.assert_equal(#play_effects.BOSS_INTRO.steps, 3)

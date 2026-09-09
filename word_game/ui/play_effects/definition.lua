@@ -4,7 +4,7 @@ local M = {}
 
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 local boss_word_stack = require("word_game.ui.boss_word_stack")
-local RunMode = require("word_game.model.run_mode")
+local RunMode = require("word_game.model.run.mode")
 local round_config = require("word_game.config.round_config")
 
 M.BOSS_INTRO = {

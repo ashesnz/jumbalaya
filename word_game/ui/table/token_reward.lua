@@ -6,9 +6,9 @@
 ]]
 
 local Layout = require("word_game.ui.layout")
-local state = require("word_game.model.state")
+local state = require("word_game.model.run.state")
 local round_config = require("word_game.config.round_config")
-local RunMode = require("word_game.model.run_mode")
+local RunMode = require("word_game.model.run.mode")
 
 local M = {}
 

@@ -313,7 +313,7 @@ end
 
 function M.show_classic_proceed(opts)
 	opts = opts or {}
-	local RunMode = require("word_game.model.run_mode")
+	local RunMode = require("word_game.model.run.mode")
 	M.show(RunMode.classic_proceed_message(), G.C.RED, opts.hold or 2.8, opts.offset_y or 0.15)
 	local major = (G.placement_table and G.placement_table.area)
 		or G.PLAY_ATTACH

@@ -4,7 +4,7 @@
 
 require "word_game.model.game"
 require "word_game.model.cards"
-require "word_game.model.globals"
+require "word_game.model.game.globals"
 require "app.startup"
 require "app.core.persistence.save"
 require "app.core.session.loop"

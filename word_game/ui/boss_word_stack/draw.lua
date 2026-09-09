@@ -1,6 +1,6 @@
 --[[ word_game/ui/boss_word_stack/draw.lua - Bonus gutter card pass ]]
 
-local model = require("word_game.model.bonus_stack")
+local model = require("word_game.model.jumble.bonus_stack")
 
 local M = {}
 

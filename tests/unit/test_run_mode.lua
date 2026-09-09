@@ -2,7 +2,7 @@
 
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
-local RunMode = require("word_game.model.run_mode")
+local RunMode = require("word_game.model.run.mode")
 
 T.describe("run mode preference", function()
 	T.it("defaults to time run when no preference is saved", function()

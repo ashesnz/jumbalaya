@@ -1,6 +1,6 @@
 --[[ word_game/ui/boss_word_stack/init.lua - Bonus card stack (boss word rewards) ]]
 
-local model = require("word_game.model.bonus_stack")
+local model = require("word_game.model.jumble.bonus_stack")
 local layout = require("word_game.ui.boss_word_stack.layout")
 local draw = require("word_game.ui.boss_word_stack.draw")
 local animate = require("word_game.ui.boss_word_stack.animate")

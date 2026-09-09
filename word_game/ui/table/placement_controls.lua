@@ -1,7 +1,7 @@
 -- Jumbalaya placement controls.
 
-local InputLock = require("word_game.model.input_lock")
-local RunMode = require("word_game.model.run_mode")
+local InputLock = require("word_game.model.run.input_lock")
+local RunMode = require("word_game.model.run.mode")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 local play_resolution = require("word_game.ui.play_effects.resolution")
 

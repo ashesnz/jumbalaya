@@ -62,7 +62,7 @@ function M.resolve_stamp_sprite(sprite_entry)
 	if sprite_entry then return M.copy_stamp(sprite_entry) end
 	local sprites = perk_cfg.STAMP_SPRITES
 	if sprites and #sprites > 0 then
-		local rs = require("word_game.model.state").get()
+		local rs = require("word_game.model.run.state").get()
 		if rs and #(rs.perks or {}) == 0 then
 			return M.copy_stamp(sprites[1])
 		end

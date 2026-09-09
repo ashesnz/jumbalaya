@@ -1,7 +1,7 @@
 --[[ word_game/ui/hand_shuffle/placement_recall_anim.lua - Slide placement-row cards back to hand ]]
 
 local Scheduler = require "app.effects.timeline_scheduler"
-local bonus_model = require "word_game.model.bonus_stack"
+local bonus_model = require "word_game.model.jumble.bonus_stack"
 local bonus_gutter = require "word_game.board.bonus_gutter"
 
 local M = {}
@@ -217,7 +217,7 @@ local function finish_recall()
 		end
 	end
 
-	local placement_word = require("word_game.model.placement_word")
+	local placement_word = require("word_game.model.jumble.placement_word")
 	placement_word.clear()
 
 	local area = placement_area()

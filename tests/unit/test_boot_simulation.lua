@@ -19,7 +19,7 @@ T.describe("Full Game Boot & Run Simulation", function()
 			return { 1, 1, 1, 1 }
 		end
 		require("word_game.model.game")
-		require("word_game.model.globals")
+		require("word_game.model.game.globals")
 		require("app.callbacks.settings")
 		require("app.bootstrap")
 		require("app.core.session.lifecycle")

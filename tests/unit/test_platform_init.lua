@@ -22,7 +22,7 @@ T.describe("Platform and Globals Initialization", function()
 	require("word_game.model.game")
 
 	-- Load globals definition
-	local ok, err = pcall(require, "word_game.model.globals")
+	local ok, err = pcall(require, "word_game.model.game.globals")
 
 	local function setup_game_for_os(os_name)
 		love.system = love.system or {}

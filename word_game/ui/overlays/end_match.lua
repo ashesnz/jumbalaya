@@ -1,7 +1,7 @@
 --[[ word_game/ui/end_match.lua - End-of-Match results overlay ]]
 
 local widgets = require("word_game.ui.widgets")
-local state = require("word_game.model.state")
+local state = require("word_game.model.run.state")
 local Easing = require("app.effects.easing")
 
 local M = {}
