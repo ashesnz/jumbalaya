@@ -132,12 +132,6 @@ function G.DEFINITIONS.card_h_popup(card)
     if tip.badges.card_type or tip.badges.force_rarity then
       badges[#badges + 1] = make_badge(card_type, card_type_colour, nil, 1.2)
     end
-    if tip.badges then
-      for k, v in ipairs(tip.badges) do
-        if v == 'negative_consumable' then v = 'negative' end
-        badges[#badges + 1] = make_badge(localize(v, "labels"), get_badge_colour(v))
-      end
-    end
 
     if tip.info then
       for k, v in ipairs(tip.info) do
@@ -162,23 +156,6 @@ function G.DEFINITIONS.card_h_popup(card)
       }},
     }}
   end
-end
-
-
-function get_badge_colour(key)
-  G.BADGE_COL = G.BADGE_COL or {
-
-    foil = G.C.DARK_FINISH,
-    holographic = G.C.DARK_FINISH,
-    polychrome = G.C.DARK_FINISH,
-    negative = G.C.DARK_FINISH,
-    gold_seal = G.C.GOLD,
-    red_seal = G.C.RED,
-    blue_seal = G.C.BLUE,
-    purple_seal = G.C.PURPLE,
-    pinned_left = G.C.ORANGE,
-  }
-  return G.BADGE_COL[key] or {1, 0, 0, 1}
 end
 
 

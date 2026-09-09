@@ -7,13 +7,6 @@ local DissolveFX = require "app.effects.dissolve_fx"
 local LetterFaces = require "word_game.ui.letter_card_faces"
 local LetterPalette = require "word_game.config.letter_card_palette"
 
--- Finish editions rendered as shader overlays, keyed by edition flag.
-local FINISH_SHADERS = {
-	foil = "foil",
-	holo = "holo",
-	polychrome = "polychrome",
-}
-
 -- Sets whose body sprite doubles as the letter-tile face. Letter cards render
 -- as a tinted frame (center) plus a shared glyph layer (front).
 local FLAT_LETTER_SETS = { Default = true, Enhanced = true }
@@ -494,12 +487,7 @@ end
 --- Front art: letter face first (unless a negative edition replaces it), then
 --- the undiscovered veil, then every finish/seal/sticker/state overlay.
 function Card:draw_front()
-	if self.edition and self.edition.negative then
-		self.children.center:apply_shader_effect('negative', nil, self.ARGS.send_to_shader)
-		if self.children.front then
-			self.children.front:apply_shader_effect('negative', nil, self.ARGS.send_to_shader)
-		end
-	elseif not self.greyed then
+	if not self.greyed then
 		if LetterFaces.is_letter_card(self) then
 			local tint = letter_card_tint(self)
 			self.children.center:apply_shader_effect('dissolve', nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, tint)
@@ -528,8 +516,7 @@ function Card:draw_front()
 		shared_sprite:apply_shader_effect('dissolve', nil, nil, nil, self.children.center, scale_mod, rotate_mod)
 	end
 
-	local has_overlays = self.edition or self.seal
-		or self.debuff or self.greyed
+	local has_overlays = self.debuff or self.greyed
 		or self.ability.set == 'Perk'
 		or self.config.center.demo
 	if has_overlays then
@@ -537,26 +524,6 @@ function Card:draw_front()
 			self.children.center:apply_shader_effect('perk', nil, self.ARGS.send_to_shader)
 		end
 
-		-- Each finished edition layers its signature shine on centre and front.
-		for finish_flag, shader in pairs(FINISH_SHADERS) do
-			if self.edition and self.edition[finish_flag] then
-				self.children.center:apply_shader_effect(shader, nil, self.ARGS.send_to_shader)
-				if self.children.front then
-					self.children.front:apply_shader_effect(shader, nil, self.ARGS.send_to_shader)
-				end
-			end
-		end
-		if self.edition and self.edition.negative then
-			self.children.center:apply_shader_effect('negative_shine', nil, self.ARGS.send_to_shader)
-		end
-
-		if self.seal then
-			G.shared_seals[self.seal].role.draw_major = self
-			G.shared_seals[self.seal]:apply_shader_effect('dissolve', nil, nil, nil, self.children.center)
-			if self.seal == 'Gold' then
-				G.shared_seals[self.seal]:apply_shader_effect('perk', nil, self.ARGS.send_to_shader, nil, self.children.center)
-			end
-		end
 		if self.debuff then
 			self.children.center:apply_shader_effect('debuff', nil, self.ARGS.send_to_shader)
 			if self.children.front then

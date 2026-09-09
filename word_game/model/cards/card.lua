@@ -2,7 +2,7 @@
 	 word_game/model/cards/card.lua - Card class: a letter on the table.
 
 	Extends EaseNode. Extra methods are mixed in from:
-	  card_ability.lua  apply_center / edition / seal / deck membership
+	  card_ability.lua  apply_center / deck membership
 	  card_visuals.lua  sprites, dissolve, draw
 	  card_ui.lua       hover tooltips, click, per-frame update
 ]]
@@ -33,7 +33,6 @@
 ---@field remove_from_area fun(self: Card)
 ---@field align fun(self: Card)
 ---@field load fun(self: Card, cardTable: table)
----@field set_edition fun(self: Card, edition: table|nil, immediate: boolean|nil, silent: boolean|nil)
 
 
 ---@field set_debuff fun(self: Card, should_debuff: boolean)

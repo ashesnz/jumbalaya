@@ -94,26 +94,10 @@ function generate_card_ui(_c, full_UI_table, specific_vars, card_type, badges, h
 	elseif _c.set == "Perk" then
 		local loc_vars = perk.description_vars(_c, G.PROFILES and G.PROFILES[G.SETTINGS.profile]) or {}
 		localize { type = "descriptions", key = _c.key, set = _c.set, nodes = desc_nodes, vars = loc_vars }
-	elseif _c.set == "Finish" then
-		localize { type = "descriptions", key = _c.key, set = _c.set, nodes = desc_nodes, vars = { _c.config.extra } }
 	end
 
 	if main_end then
 		desc_nodes[#desc_nodes + 1] = main_end
-	end
-
-	if first_pass and not (_c.set == "Finish") and badges then
-		for _, v in ipairs(badges) do
-			if v == "foil" then
-				full_UI_table.info[#full_UI_table.info + 1] = { name = localize { type = "name_text", set = "Finish", key = "finish_foil" } }
-			elseif v == "holographic" then
-				full_UI_table.info[#full_UI_table.info + 1] = { name = localize { type = "name_text", set = "Finish", key = "finish_holo" } }
-			elseif v == "polychrome" then
-				full_UI_table.info[#full_UI_table.info + 1] = { name = localize { type = "name_text", set = "Finish", key = "finish_polychrome" } }
-			elseif v == "negative" then
-				full_UI_table.info[#full_UI_table.info + 1] = { name = localize { type = "name_text", set = "Finish", key = "finish_negative" } }
-			end
-		end
 	end
 
 	return full_UI_table

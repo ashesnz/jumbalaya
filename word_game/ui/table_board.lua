@@ -85,7 +85,7 @@ function M.draw_spotlight_overlay(game, overlay)
 	end
 	if overlay.redraw_attention then
 		for k, v in pairs(game.LIVE.UIBOX) do
-			if v.spawn_attention and v ~= game.debug_tools and v ~= game.online_leaderboard and v ~= game.achievement_notification then
+			if v.spawn_attention and v ~= game.debug_tools and v ~= game.online_leaderboard then
 				love.graphics.push()
 				v:translate_container()
 				v:draw()
@@ -226,7 +226,7 @@ end
 function M.draw_attention_passes(game)
 	if hand_clear_focus_active() then return end
 	for k, v in pairs(game.LIVE.UIBOX) do
-		if v.spawn_attention and v ~= game.debug_tools and v ~= game.online_leaderboard and v ~= game.achievement_notification then
+		if v.spawn_attention and v ~= game.debug_tools and v ~= game.online_leaderboard then
 			love.graphics.push()
 			v:translate_container()
 			v:draw()

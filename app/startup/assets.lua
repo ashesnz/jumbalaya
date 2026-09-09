@@ -41,13 +41,6 @@ function M.init_shared_sprites(game)
 		game.shared_undiscovered_companion = Sprite(0, 0, game.CARD_W, game.CARD_H, atlas, { x = 0, y = 0 })
 	end
 
-	local seal_atlas = game.TEXTURE_ATLASES.letter_frame or game.TEXTURE_ATLASES.playing_back
-	game.shared_seals = seal_atlas and {
-		Gold = Sprite(0, 0, game.CARD_W, game.CARD_H, seal_atlas, { x = 0, y = 0 }),
-		Purple = Sprite(0, 0, game.CARD_W, game.CARD_H, seal_atlas, { x = 0, y = 0 }),
-		Red = Sprite(0, 0, game.CARD_W, game.CARD_H, seal_atlas, { x = 0, y = 0 }),
-		Blue = Sprite(0, 0, game.CARD_W, game.CARD_H, seal_atlas, { x = 0, y = 0 }),
-	} or {}
 end
 
 function Game:set_render_settings()

@@ -173,8 +173,6 @@
 ---@field F_ENGLISH_ONLY boolean
 ---@field F_DISP_USERNAME any
 ---@field F_DISCORD boolean
----@field F_NO_ACHIEVEMENTS boolean
----@field F_TROPHIES boolean
 ---@field F_PS4_PLAYSTATION_GLYPHS boolean
 ---@field F_SWAP_AB_PIPS boolean
 ---@field focused_profile number
@@ -226,8 +224,6 @@
 ---@field ANIMATIONS table
 ---@field SPEEDFACTOR number
 ---@field shared_debuff Sprite
----@field shared_sticker_eternal Sprite
----@field shared_seals table<string, Sprite>
 ---@field ROOM_PADDING_H number
 ---@field ROOM_PADDING_W number
 ---@field WINDOWTRANS table

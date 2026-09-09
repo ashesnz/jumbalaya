@@ -141,7 +141,6 @@ function Game:render_board_pass()
 			or panel == self.OVERLAY_MENU or panel == self.screenwipe
 			or panel == self.FIRST_PLAY_TUTORIAL_OVERLAY
 			or panel == self.debug_tools or panel == self.online_leaderboard
-			or panel == self.achievement_notification
 		if not is_special then draw_with_container(panel) end
 	end
 	perf_checkpoint('panels', 'draw')
@@ -186,7 +185,7 @@ function Game:render_menu_pass()
 	end
 end
 
---- Chrome pass: alerts, card interaction effects, popups, achievement toast,
+--- Chrome pass: alerts, card interaction effects, popups,
 --- the screen wipe, the custom pointer, and the hold-to-redraw ring.
 function Game:render_chrome_pass()
 	G.ALERT_ON_SCREEN = nil
@@ -201,7 +200,6 @@ function Game:render_chrome_pass()
 
 	for _, popup in pairs(self.LIVE.POPUP) do draw_with_container(popup) end
 
-	if self.achievement_notification then draw_with_container(self.achievement_notification) end
 	if self.screenwipe then draw_with_container(self.screenwipe) end
 
 	love.graphics.push()

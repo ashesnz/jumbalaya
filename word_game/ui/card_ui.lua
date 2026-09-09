@@ -57,15 +57,6 @@ function Card:build_card_tooltip()
     if self.ability.set == 'Companion' and self.bypass_discovery_ui then
         badges.force_rarity = true
     end
-    if self.edition then
-        if self.edition.type == 'negative' and self.ability.usable then
-            badges[#badges + 1] = 'negative_consumable'
-        else
-            badges[#badges + 1] = (self.edition.type == 'holo' and 'holographic' or self.edition.type)
-        end
-    end
-    if self.seal then badges[#badges + 1] = string.lower(self.seal)..'_seal' end
-    if self.pinned then badges[#badges + 1] = 'pinned_left' end
 
     return generate_card_ui(self.config.center, nil, loc_vars, card_type, badges, hide_desc, main_start, main_end)
 end

@@ -69,19 +69,12 @@ function Game:load_card_definitions()
         --Backs
         deck_alpha=              {name = "Alpha Deck",         stake = 1, unlocked = true,order = 1, pos =   {x=0,y=0}, set = "Back", config = {}, discovered = true},
 
-        --editions
-        finish_base =       {order = 1,  unlocked = true, discovered = false, name = "Base", pos = {x=0,y=0}, atlas = 'letter_frame', set = "Finish", config = {}},
-        finish_foil =       {order = 2,  unlocked = true, discovered = false, name = "Foil", pos = {x=0,y=0}, atlas = 'letter_frame', set = "Finish", config = {extra = 50}},
-        finish_holo =       {order = 3,  unlocked = true, discovered = false, name = "Holographic", pos = {x=0,y=0}, atlas = 'letter_frame', set = "Finish", config = {extra = 10}},
-        finish_polychrome = {order = 4,  unlocked = true, discovered = false, name = "Polychrome", pos = {x=0,y=0}, atlas = 'letter_frame', set = "Finish", config = {extra = 1.5}},
-        finish_negative =   {order = 5,  unlocked = true, discovered = false, name = "Negative", pos = {x=0,y=0}, atlas = 'letter_frame', set = "Finish", config = {extra = 1}},
     }
 
     -- Pools actually consumed by the game: Back (deck select/collection/stats),
-    -- Finish (card popups), Companion (kept for the tutorial center's set routing).
+    -- Companion (kept for the tutorial center's set routing).
     self.P_CENTER_POOLS = {
         Default = {},
-        Finish = {},
         Companion = {},
         Back = {},
     }
@@ -105,7 +98,7 @@ function Game:load_card_definitions()
     
     -- Centre id prefixes eligible for persistent unlock/discovery badges.
     local UNLOCKABLE_PREFIXES = { '^companion_', '^perk_', '^deck_' }
-    local DISCOVERABLE_PREFIXES = { '^companion_', '^deck_', '^finish_', '^letter_', '^perk_' }
+    local DISCOVERABLE_PREFIXES = { '^companion_', '^deck_', '^letter_', '^perk_' }
 
     for k, v in pairs(self.P_CENTERS) do
         if not v.wip and not v.demo then
@@ -137,5 +130,4 @@ function Game:load_card_definitions()
 
     table.sort(self.P_CENTER_POOLS["Companion"], function (a, b) return a.order < b.order end)
     table.sort(self.P_CENTER_POOLS["Back"], function (a, b) return (a.order - (a.unlocked and 100 or 0)) < (b.order - (b.unlocked and 100 or 0)) end)
-    table.sort(self.P_CENTER_POOLS["Finish"], function (a, b) return a.order < b.order end)
 end

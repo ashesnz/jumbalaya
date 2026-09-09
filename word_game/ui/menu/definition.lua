@@ -112,14 +112,6 @@ function G.DEFINITIONS.profile_option(_profile)
               {n=G.UI.TEXT, config={text = _profile == G.SETTINGS.profile and localize('ui_reset_profile') or localize('ui_delete_profile'), scale = 0.3, colour = G.C.UI.TEXT_LIGHT}}
             }}
           }},
-          (_profile == G.SETTINGS.profile and not G.PROFILES[G.SETTINGS.profile].all_unlocked) and {n=G.UI.ROW, config={align = "cm", padding = 0, minh = 0.7}, nodes={
-            {n=G.UI.ROW, config={align = "cm", minw = 3, maxw = 4, minh = 0.6, padding = 0.2, r = 0.1, hover = true, colour = G.C.ORANGE,func = 'can_unlock_all', button = "unlock_all", shadow = true, focus_args = {nav = 'wide'}}, nodes={
-              {n=G.UI.TEXT, config={text = localize('ui_unlock_all'), scale = 0.3, colour = G.C.UI.TEXT_LIGHT}}
-            }}
-          }} or {n=G.UI.ROW, config={align = "cm", minw = 3, maxw = 4, minh = 0.7}, nodes={
-            G.PROFILES[_profile].all_unlocked and ((not G.F_NO_ACHIEVEMENTS) and {n=G.UI.TEXT, config={text = localize(G.F_TROPHIES and 'term_trophies_disabled' or 'term_achievements_disabled'), scale = 0.3, colour = G.C.UI.TEXT_LIGHT}} or 
-              nil) or nil
-          }},
         }},
     }},
     }},
