@@ -1,7 +1,7 @@
 -- Per-letter marketplace modifiers for deck cards (A–Z).
 return function(context)
 	local M = context.module
-	local LetterPalette = require "word_game.config.letter_card_palette"
+	local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 
 	local function modifier_entry(description, ui_text)
 		return { description = description, ui_text = ui_text }

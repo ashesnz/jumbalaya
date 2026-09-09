@@ -3,7 +3,7 @@
 local config = require "word_game.board.config"
 local topology = require "word_game.model.jumble.slot_topology"
 
-local hand_size_cfg = require("word_game.config.hand_size")
+local hand_size_cfg = require("word_game.model.hand_size")
 
 local M = {}
 

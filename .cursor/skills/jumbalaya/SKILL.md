@@ -27,7 +27,7 @@ description: >-
 
 ```text
 app/core/          Engine: G, Card, LayoutView, input, audio, persistence
-word_game/config/  Data tables only
+word_game/config/  Static tuning — boot/, layout/, visuals/, gameplay/, perks/, jumble/
 word_game/model/   Rules and state — no root modules; use run/, round/, jumble/, etc.
 word_game/board/   Row snap/geometry — no UI imports
 word_game/ui/      Presentation — may import model/config

@@ -2,11 +2,11 @@
 
 local Scheduler = require "app.effects.timeline_scheduler"
 local CardMotion = require "app.effects.card_motion"
-local hand_size_cfg = require("word_game.config.hand_size")
+local hand_size_cfg = require("word_game.model.hand_size")
 
 return function(context)
 	local M = context.module
-	local LetterPalette = require "word_game.config.letter_card_palette"
+	local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 
 	function M.is_jumble_deck()
 		local wr = G.GAME and G.GAME.word_round

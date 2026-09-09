@@ -5,7 +5,7 @@ local hand_timer = require("word_game.model.perks.timer")
 local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
 local perk_effects = require("word_game.model.perks.effects")
 local bonus_stack = require("word_game.model.jumble.bonus_stack")
-local round_config = require("word_game.config.round_config")
+local round_config = require("word_game.config.gameplay.round")
 local jumble_rules = require("word_game.model.jumble_play.jumble_rules")
 
 function M.is_active_hand(set, hand_index)

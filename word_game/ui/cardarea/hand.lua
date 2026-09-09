@@ -2,7 +2,7 @@
 	word_game/ui/cardarea/hand.lua - Hand CardArea type behaviour.
 ]]
 
-local hand_size_cfg = require("word_game.config.hand_size")
+local hand_size_cfg = require("word_game.model.hand_size")
 
 local M = {}
 

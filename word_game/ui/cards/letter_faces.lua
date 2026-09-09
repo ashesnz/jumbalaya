@@ -1,6 +1,6 @@
 --[[ letter_card_faces.lua - Shared letter-card atlas + runtime tint helpers ]]
 
-local Palette = require "word_game.config.letter_card_palette"
+local Palette = require "word_game.config.visuals.letter_card_palette"
 
 local M = {}
 

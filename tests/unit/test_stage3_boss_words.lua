@@ -5,7 +5,7 @@ local mock_env = require("tests.helpers.mock_env")
 
 T.describe("Stage 1-3 boss words", function()
 	T.it("defines nine-letter boss words", function()
-		local config = require("word_game.config.jumble_puzzles.1_3")
+		local config = require("word_game.config.jumble.puzzles.1_3")
 		T.assert_equal(#config.BOSS_WORDS, 9)
 		for _, word in ipairs(config.BOSS_WORDS) do
 			T.assert_equal(#word, 9, "Every boss word should have nine letters")

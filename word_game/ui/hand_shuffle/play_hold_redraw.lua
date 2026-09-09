@@ -6,7 +6,7 @@
 ]]
 local Scheduler = require "app.effects.timeline_scheduler"
 local InputLock = require("word_game.model.run.input_lock")
-local hand_size_cfg = require("word_game.config.hand_size")
+local hand_size_cfg = require("word_game.model.hand_size")
 local perk_effects = require("word_game.model.perks.effects")
 
 

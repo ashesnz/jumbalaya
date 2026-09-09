@@ -40,7 +40,7 @@ return function(context)
 
 	function M.color_from_card(card)
 		if card and card.ability and card.ability.modified == true then
-			local LetterPalette = require "word_game.config.letter_card_palette"
+			local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 			return LetterPalette.MODIFIED_FACE_COLOR
 		end
 		if card and card.ability and card.ability.letter_color then
@@ -178,7 +178,7 @@ return function(context)
 	end
 
 	function M.create_letter_card(letter, color)
-		local LetterPalette = require "word_game.config.letter_card_palette"
+		local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 		color = color or LetterPalette.DEFAULT_FACE_COLOR
 		local front = M.front(letter, color)
 		G.playing_card = (G.playing_card or 0) + 1

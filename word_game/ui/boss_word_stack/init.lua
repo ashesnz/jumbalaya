@@ -5,8 +5,8 @@ local layout = require("word_game.ui.boss_word_stack.layout")
 local draw = require("word_game.ui.boss_word_stack.draw")
 local animate = require("word_game.ui.boss_word_stack.animate")
 local deck = require("word_game.model.cards.deck")
-local LetterPalette = require("word_game.config.letter_card_palette")
-local round_config = require("word_game.config.round_config")
+local LetterPalette = require("word_game.config.visuals.letter_card_palette")
+local round_config = require("word_game.config.gameplay.round")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 
 local M = {}

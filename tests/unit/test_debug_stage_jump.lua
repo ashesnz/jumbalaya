@@ -7,7 +7,7 @@ T.describe("Debug stage jump (devtools.sections.stage)", function()
 	mock_env.reset_game()
 
 	local stage_section = require("devtools.sections.stage")
-	local hand_size_cfg = require("word_game.config.hand_size")
+	local hand_size_cfg = require("word_game.model.hand_size")
 
 	T.it("seeds seven bonus cards in the left gutter when jumping to stage 1-4", function()
 		local created_letters = {}

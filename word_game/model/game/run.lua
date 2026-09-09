@@ -85,7 +85,7 @@ function Game:init_game_object()
         },
         tile_usage = {},
         modifiers = {},
-        starting_params = require("word_game.config.run_params").get(),
+        starting_params = require("word_game.config.gameplay.run_params").get(),
         round = 0,
         seed_streams = {},
         starting_deck_size = 12,
@@ -208,7 +208,7 @@ function Game:start_run(args)
         end
       }
 
-    local hand_size_cfg = require("word_game.config.hand_size")
+    local hand_size_cfg = require("word_game.model.hand_size")
     local hand_size = hand_size_cfg.get()
 
     if not self.placement_table then

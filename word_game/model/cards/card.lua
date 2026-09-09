@@ -179,7 +179,7 @@ function Card:apply_face(card, initial)
         self:set_sprites(nil, card)
     end
 
-    local Palette = require "word_game.config.letter_card_palette"
+    local Palette = require "word_game.config.visuals.letter_card_palette"
     local card_color = self.config.card.color or Palette.DEFAULT_FACE_COLOR
     local card_colour = Palette.ui_color(card_color) or Palette.default_fill()
     local letter = self.config.card.letter

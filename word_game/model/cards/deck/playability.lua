@@ -1,7 +1,7 @@
 -- Held-card accounting and playable-hand rerolls.
 return function(context)
 	local M = context.module
-	local hand_size_cfg = require("word_game.config.hand_size")
+	local hand_size_cfg = require("word_game.model.hand_size")
 
 	local function deck_owns(card)
 		return card and (not card.area or card.area == G.deck)

@@ -2,7 +2,7 @@
 
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
-local LetterPalette = require("word_game.config.letter_card_palette")
+local LetterPalette = require("word_game.config.visuals.letter_card_palette")
 
 T.describe("Letter modifiers (word_game.model.cards.deck.letter_modifiers)", function()
 	mock_env.reset_game()

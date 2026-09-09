@@ -4,7 +4,7 @@ local Scheduler = require "app.effects.timeline_scheduler"
 return function(context)
 	local M = context.module
 	local Layout = require "word_game.ui.layout"
-	local hand_size_cfg = require("word_game.config.hand_size")
+	local hand_size_cfg = require("word_game.model.hand_size")
 	local needs_vowel = context.needs_vowel
 	local take_letter_from_deck = context.take_letter_from_deck
 

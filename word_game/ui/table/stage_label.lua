@@ -4,7 +4,7 @@
 	Displays "1-1" style stage markers with odometer digit rolls on hand advance.
 ]]
 
-local round_config = require("word_game.config.round_config")
+local round_config = require("word_game.config.gameplay.round")
 local Roll = require("word_game.ui.lib.roll")
 
 local M = {}

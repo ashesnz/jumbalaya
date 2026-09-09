@@ -5,7 +5,7 @@
 local Scheduler = require "app.effects.timeline_scheduler"
 local DissolveFX = require "app.effects.dissolve_fx"
 local LetterFaces = require "word_game.ui.cards.letter_faces"
-local LetterPalette = require "word_game.config.letter_card_palette"
+local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 
 -- Sets whose body sprite doubles as the letter-tile face. Letter cards render
 -- as a tinted frame (center) plus a shared glyph layer (front).

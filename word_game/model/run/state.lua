@@ -1,6 +1,6 @@
 --[[ word_game/model/run/state.lua - Match-long run state on G.GAME.run_state ]]
 
-local economy = require("word_game.config.economy")
+local economy = require("word_game.config.gameplay.economy")
 local perks_cfg = require("word_game.config.perks")
 
 local M = {}

@@ -1,7 +1,7 @@
 -- Vowel guarantees and requested-letter hand adjustments.
 return function(context)
 	local M = context.module
-	local hand_size_cfg = require("word_game.config.hand_size")
+	local hand_size_cfg = require("word_game.model.hand_size")
 	local card_letter = context.card_letter
 	local deck_owns = context.deck_owns
 	local fly_from_deck_to_hand = context.fly_from_deck_to_hand

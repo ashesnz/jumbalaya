@@ -2,7 +2,7 @@
 
 local trade = require("word_game.model.trade")
 local deck = require("word_game.model.cards.deck")
-local LetterPalette = require("word_game.config.letter_card_palette")
+local LetterPalette = require("word_game.config.visuals.letter_card_palette")
 
 local M = {}
 

@@ -11,7 +11,7 @@
 
 io.stdout:setvbuf("no")
 
-local runtime_config = require "word_game.config.runtime"
+local runtime_config = require "word_game.config.boot.runtime"
 _RELEASE_MODE = runtime_config.RELEASE_MODE
 _DEMO = runtime_config.DEMO
 

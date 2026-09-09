@@ -1,7 +1,7 @@
 -- Drafting, cutting, weighted selection, and deck listing.
 return function(context)
 	local M = context.module
-	local LetterPalette = require "word_game.config.letter_card_palette"
+	local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 	local common_letters = { A = true, E = true, I = true, O = true, U = true, L = true, N = true, S = true, T = true, R = true }
 
 	M.STARTING_LETTERS = { "E", "E", "A", "A", "I", "O", "T", "S", "R", "Y", "N", "C" }

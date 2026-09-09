@@ -13,7 +13,7 @@ local function window_left_x()
 end
 
 function M.stack_y_lift()
-	local dim_ok, dim = pcall(require, "word_game.config.dimensions")
+	local dim_ok, dim = pcall(require, "word_game.config.layout.dimensions")
 	local tile = G.TILESIZE or (dim_ok and dim.TILESIZE) or 20
 	local scale = G.TILESCALE or (dim_ok and dim.TILESCALE) or 1
 	local px_per_tile = tile * scale

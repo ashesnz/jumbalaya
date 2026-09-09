@@ -8,7 +8,7 @@ local InputLock = require("word_game.model.run.input_lock")
 local deck = require("word_game.model.cards.deck")
 local play = require("word_game.model.jumble_play")
 local trade = require("word_game.model.trade")
-local hand_size = require("word_game.config.hand_size")
+local hand_size = require("word_game.model.hand_size")
 local jumble = require("word_game.model.jumble")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 

@@ -1,8 +1,8 @@
 --[[ word_game/model/jumble/puzzle_spec.lua - Pattern parsing and puzzle definitions ]]
 
 return function(M)
-local puzzles_cfg = require("word_game.config.jumble_puzzles")
-local round_config = require("word_game.config.round_config")
+local puzzles_cfg = require("word_game.config.jumble")
+local round_config = require("word_game.config.gameplay.round")
 
 local stage_validated_puzzles = {}
 

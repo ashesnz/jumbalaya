@@ -108,8 +108,8 @@ T.describe("bonus card gold visuals", function()
 	mock_env.reset_game()
 
 	local bonus_stack = require("word_game.ui.boss_word_stack")
-	local Palette = require("word_game.config.letter_card_palette")
-	local DeckColors = require("word_game.config.deck_face_colors")
+	local Palette = require("word_game.config.visuals.letter_card_palette")
+	local DeckColors = require("word_game.config.visuals.deck_face_colors")
 	local LetterFaces = require("word_game.ui.cards.letter_faces")
 
 	T.it("defines a yellow-gold face colour for bonus cards", function()

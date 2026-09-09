@@ -10,10 +10,10 @@
 
 ]]
 
-local RuntimeOptions = require("word_game.config.runtime_options")
-local Env = require("word_game.config.env")
-local Palette = require("word_game.config.palette")
-local Dimensions = require("word_game.config.dimensions")
+local RuntimeOptions = require("word_game.config.boot.runtime_options")
+local Env = require("word_game.config.boot.env")
+local Palette = require("word_game.config.visuals.palette")
+local Dimensions = require("word_game.config.layout.dimensions")
 
 VERSION = '1.0.0i'
 VERSION = VERSION..'-FULL'

@@ -102,7 +102,7 @@ T.describe("Jumble play flow integration", function()
 			local hands = (s == 1) and 9 or 3
 			for h = 1, hands do
 				total_stages = total_stages + 1
-				local mod_name = string.format("word_game.config.jumble_puzzles.%d_%d", s, h)
+				local mod_name = string.format("word_game.config.jumble.puzzles.%d_%d", s, h)
 				local ok, stage_mod = pcall(require, mod_name)
 				T.assert_true(ok, "Module " .. mod_name .. " should load successfully")
 				T.assert_not_nil(stage_mod and stage_mod.PATTERNS, mod_name .. " should define PATTERNS")
@@ -143,7 +143,7 @@ T.describe("Jumble play flow integration", function()
 		T.assert_equal(total_stages, 30, "Should have 30 stage puzzle files total (1_1..1_9 plus 2_1..8_3)")
 		T.assert_equal(duplicate_count, 0, "No duplicate patterns should exist across sets 2-6")
 
-		local s1_1 = require("word_game.config.jumble_puzzles.1_1")
+		local s1_1 = require("word_game.config.jumble.puzzles.1_1")
 		T.assert_equal(s1_1.PATTERNS[1].span and s1_1.PATTERNS[1].span[1], "C")
 		T.assert_equal(s1_1.PATTERNS[1].span and s1_1.PATTERNS[1].span[2], "T")
 		T.assert_equal(s1_1.PATTERNS[2].suffix, "AR")

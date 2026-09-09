@@ -1,10 +1,10 @@
 --[[ word_game/model/trade/init.lua - The Card Marketplace: add or remove a card ]]
 
-local economy = require("word_game.config.economy")
-local round_config = require("word_game.config.round_config")
+local economy = require("word_game.config.gameplay.economy")
+local round_config = require("word_game.config.gameplay.round")
 local state = require("word_game.model.run.state")
 local deck = require("word_game.model.cards.deck")
-local LetterPalette = require("word_game.config.letter_card_palette")
+local LetterPalette = require("word_game.config.visuals.letter_card_palette")
 
 local M = {}
 
