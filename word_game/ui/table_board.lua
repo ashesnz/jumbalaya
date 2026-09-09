@@ -67,12 +67,6 @@ function M.draw_spotlight_overlay(game, overlay)
 	if overlay.redraw_portrait and WORD_GAME and WORD_GAME.PlayerPortrait then
 		WORD_GAME.PlayerPortrait.draw()
 	end
-	if overlay.redraw_ally and WORD_GAME and WORD_GAME.PlayerPortrait and WORD_GAME.PlayerPortrait.draw_ally then
-		WORD_GAME.PlayerPortrait.draw_ally()
-	end
-	if overlay.redraw_guest and WORD_GAME and WORD_GAME.PlayerPortrait and WORD_GAME.PlayerPortrait.draw_guest then
-		WORD_GAME.PlayerPortrait.draw_guest()
-	end
 	if overlay.redraw_banner and WORD_GAME and WORD_GAME.ScoreBanner then
 		WORD_GAME.ScoreBanner.draw()
 	end
@@ -153,21 +147,6 @@ end
 function M.draw_hud()
 	if WORD_GAME and WORD_GAME.PlayerPortrait then
 		WORD_GAME.PlayerPortrait.draw()
-		if WORD_GAME.PlayerPortrait.draw_ally then
-			WORD_GAME.PlayerPortrait.draw_ally()
-		end
-		if WORD_GAME.PlayerPortrait.draw_guest then
-			WORD_GAME.PlayerPortrait.draw_guest()
-		end
-	end
-	if WORD_GAME and WORD_GAME.AllyHost then
-		WORD_GAME.AllyHost.draw_pass()
-	end
-	if WORD_GAME and WORD_GAME.GuestHost then
-		WORD_GAME.GuestHost.draw_pass()
-	end
-	if WORD_GAME and WORD_GAME.PlayerHost then
-		WORD_GAME.PlayerHost.draw_pass()
 	end
 	if WORD_GAME and WORD_GAME.ScoreBanner then
 		WORD_GAME.ScoreBanner.draw()

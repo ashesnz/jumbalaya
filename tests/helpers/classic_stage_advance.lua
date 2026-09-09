@@ -46,16 +46,6 @@ end
 function M.wire_player_host_drag()
 	WORD_GAME = WORD_GAME or {}
 	WORD_GAME.PlayerHost = {
-		allows_card_drag = function(area)
-			if InputLock.is_table_busy() then
-				return false
-			end
-			if WORD_GAME and WORD_GAME.HandClearFocus and WORD_GAME.HandClearFocus.is_active
-				and WORD_GAME.HandClearFocus.is_active() then
-				return false
-			end
-			return true
-		end,
 		refresh_card_input = function()
 			if G.hand and G.hand.set_ranks then
 				G.hand:set_ranks()

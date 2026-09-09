@@ -26,13 +26,9 @@ local M = {
 		[8] = { 25600, 35840, 44800 },
 	},
 
-	-- Stage odometer hand that plays the Milo / Aleisha boss intro (1-3).
-	STAGE3_CINEMATIC = { set = 1, hand = 3 },
 	-- Set 1 hands where boss-word gold cards sit in the left gutter (1-4 … 1-6).
 	BONUS_STACK_HAND_FIRST = 4,
 	BONUS_STACK_HAND_LAST = 6,
-	-- Set 1 hand 7: Milo + Aleisha stay left, boss drops, Marco joins.
-	MARCO_CINEMATIC = { set = 1, hand = 7 },
 }
 
 function M.hands_in_set(set)
@@ -94,44 +90,8 @@ function M.is_final_hand(set, hand_index)
 	return set >= M.SETS_TO_WIN and hand_index >= M.hands_in_set(set)
 end
 
-function M.is_stage3_cinematic_hand(set, hand_index)
-	local row = M.STAGE3_CINEMATIC
-	return row and set == row.set and hand_index == row.hand
-end
-
-function M.is_marco_cinematic_hand(set, hand_index)
-	local row = M.MARCO_CINEMATIC
-	return row and set == row.set and hand_index == row.hand
-end
-
-function M.is_cinematic_hand(set, hand_index)
-	return M.is_stage3_cinematic_hand(set, hand_index) or M.is_marco_cinematic_hand(set, hand_index)
-end
-
-function M.cinematic_id(set, hand_index)
-	if M.is_stage3_cinematic_hand(set, hand_index) then return "1-3" end
-	if M.is_marco_cinematic_hand(set, hand_index) then return "1-7" end
-	return nil
-end
-
 function M.stage_label(set, hand_index)
 	return string.format("%d-%d", set or 1, hand_index or 1)
-end
-
--- Aleisha is in the party from 1-3 onward.
-function M.aleisha_has_joined(set, hand_index)
-	set = set or 1
-	hand_index = hand_index or 1
-	if set > 1 then return true end
-	return hand_index >= 3
-end
-
--- Marco is in the party from 1-7 onward.
-function M.marco_has_joined(set, hand_index)
-	set = set or 1
-	hand_index = hand_index or 1
-	if set > 1 then return true end
-	return hand_index >= 7
 end
 
 return M

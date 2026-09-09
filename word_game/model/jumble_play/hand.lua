@@ -41,10 +41,6 @@ local function open_after_hand(opts)
 		WORD_GAME.HandClearFocus.end_focus()
 	end
 	set_score_animating(false)
-	local host = G.player_host
-	if host then
-		host:remove_speech_bubble()
-	end
 	local wr = G.GAME.word_round
 	local j = wr and wr.jumble
 	if opts.boss_cleared or (j and j.boss_word_active) then

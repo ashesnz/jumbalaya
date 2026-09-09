@@ -12,7 +12,7 @@ A **match** (run) is a sequence of **sets**. **Set 1** is a nine-hand tutorial a
 
 | Set | Hands | Notes |
 |----:|------:|-------|
-| 1 | 9 | Tutorial arc: token reward, boss intro, bonus-stack gutter, Marco cinematic |
+| 1 | 9 | Tutorial arc: token reward, boss words, bonus-stack gutter |
 | 2–8 | 3 each | Standard → Standard → Showdown |
 
 - **Win** by clearing the Showdown on **set 8** (`1-9` in set 1 is the final Showdown there).

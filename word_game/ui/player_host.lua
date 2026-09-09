@@ -1,19 +1,17 @@
 --[[
-	word_game/ui/player_host.lua - Player portrait speech host compatibility facade.
+	word_game/ui/player_host.lua - Table-board input refresh hooks.
 
-	The implementation lives in focused modules under word_game/ui/player_host/.
-	This module retains the original require path and PlayerHost public API.
+	Legacy character portrait/speech hosts were removed; this module keeps the
+	small shared helper still used after layout and play-hold redraws.
 ]]
 
-local Context = require("word_game.ui.player_host.context")
-local PlayerHost = EaseNode:derive("PlayerHost")
-local context = Context.new(PlayerHost)
+local M = {}
 
-require("word_game.ui.player_host.core")(context)
-require("word_game.ui.player_host.spotlight")(context)
-require("word_game.ui.player_host.stage3")(context)
-require("word_game.ui.player_host.stage3_party")(context)
-require("word_game.ui.player_host.marco")(context)
-require("word_game.ui.player_host.tutorial")(context)
+function M.refresh_card_input()
+	if G.hand and G.hand.set_ranks then G.hand:set_ranks() end
+	if G.placement_table and G.placement_table.area and G.placement_table.area.set_ranks then
+		G.placement_table.area:set_ranks()
+	end
+end
 
-return PlayerHost
+return M

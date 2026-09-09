@@ -59,132 +59,8 @@ function M.hud_portrait_rect()
 	return M.timeline_rect()
 end
 
-function M.cinematic_portrait_active()
-	local rs = G.GAME and G.GAME.run_state
-	return rs and rs.stage3_cinematic and true or false
-end
-
-function M.cinematic_portrait_hidden()
-	local rs = G.GAME and G.GAME.run_state
-	return rs and rs.stage3_cinematic and not rs.stage3_portrait_visible
-end
-
-function M.cinematic_pose_rect(pose)
-	local hud = M.hud_portrait_rect()
-	if pose == "left" then
-		return {
-			x = math.max(0.35, G.TILE_W * 0.06),
-			y = hud.y,
-			w = hud.w,
-			h = hud.h,
-		}
-	end
-	return hud
-end
-
 function M.portrait_rect()
-	local rs = G.GAME and G.GAME.run_state
-	if rs and rs.stage3_portrait_rect then
-		return rs.stage3_portrait_rect
-	end
-	local pose = rs and rs.stage3_portrait_pose
-	if pose == "center" or pose == "left" then
-		return M.cinematic_pose_rect(pose)
-	end
 	return M.hud_portrait_rect()
-end
-
-function M.cinematic_boss_rest_rect()
-	local hud = M.hud_portrait_rect()
-	local x = vault.vault_left() - felt.sidebar_gap() - hud.w
-	local min_x = hud.w + math.max(0.4, G.TILE_W * 0.08)
-	return {
-		x = math.max(min_x, x),
-		y = hud.y,
-		w = hud.w,
-		h = hud.h,
-	}
-end
-
-function M.cinematic_ally_rest_rect()
-	local milo = M.cinematic_pose_rect("left")
-	local gap = math.max(0.12, milo.w * 0.1)
-	return {
-		x = milo.x + milo.w + gap,
-		y = milo.y,
-		w = milo.w,
-		h = milo.h,
-	}
-end
-
-function M.cinematic_guest_rest_rect()
-	local ally = M.cinematic_ally_rest_rect()
-	local gap = math.max(0.12, ally.w * 0.1)
-	return {
-		x = ally.x + ally.w + gap,
-		y = ally.y,
-		w = ally.w,
-		h = ally.h,
-	}
-end
-
-function M.ally_portrait_rect()
-	local rs = G.GAME and G.GAME.run_state
-	if rs and rs.stage3_ally_portrait_rect then
-		return rs.stage3_ally_portrait_rect
-	end
-	return M.cinematic_ally_rest_rect()
-end
-
-function M.guest_portrait_rect()
-	local rs = G.GAME and G.GAME.run_state
-	if rs and rs.stage3_guest_portrait_rect then
-		return rs.stage3_guest_portrait_rect
-	end
-	if rs and rs.stage3_guest_pose == "center" then
-		return M.hud_portrait_rect()
-	end
-	return M.cinematic_guest_rest_rect()
-end
-
-function M.guest_portrait_name_rect()
-	local photo = M.guest_portrait_rect()
-	local h = felt.portrait_name_h()
-	local w = math.max(photo.w * 1.35, 2.4)
-	return {
-		x = photo.x + (photo.w - w) * 0.5,
-		y = photo.y - h * 0.92,
-		w = w,
-		h = h * 0.88,
-	}
-end
-
-function M.ally_portrait_name_rect()
-	local photo = M.ally_portrait_rect()
-	local h = felt.portrait_name_h()
-	local w = math.max(photo.w * 1.35, 2.4)
-	return {
-		x = photo.x + (photo.w - w) * 0.5,
-		y = photo.y - h * 0.92,
-		w = w,
-		h = h * 0.88,
-	}
-end
-
-
-function M.portrait_name_rect()
-	local photo = M.portrait_rect()
-	local h = felt.portrait_name_h()
-	local w = math.max(photo.w * 1.35, 2.4)
-	local y = M.cinematic_portrait_active()
-		and (photo.y - h * 0.92)
-		or (felt.hud_top() + (h - h * 0.88) * 0.35)
-	return {
-		x = photo.x + (photo.w - w) * 0.5,
-		y = y,
-		w = w,
-		h = h * 0.88,
-	}
 end
 
 function M.banner_rect()
@@ -272,10 +148,6 @@ function M.set_screen_positions(opts)
 		if G.deck and G.deck.cards and G.deck.cards[1] then
 			if G.deck.relayout then G.deck:relayout() end
 			if G.deck.hard_set_cards then G.deck:hard_set_cards() end
-		end
-
-		if G.player_host and G.player_host.states.visible then
-			G.player_host:apply_screen_position()
 		end
 
 		if WORD_GAME and WORD_GAME.HandShuffle and not opts.skip_hand_shuffle then

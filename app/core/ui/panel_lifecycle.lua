@@ -14,7 +14,6 @@ function LayoutView:draw()
 	-- One draw per frame unless a tutorial/intro overlay forces a redraw.
 	if self.FRAME.RENDER >= G.FRAMES.RENDER
 		and not G.OVERLAY_TUTORIAL
-		and not G.INTRO_OVERLAY
 		and not G.FIRST_PLAY_TUTORIAL_OVERLAY then return end
 	self.FRAME.RENDER = G.FRAMES.RENDER
 

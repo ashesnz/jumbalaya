@@ -11,16 +11,6 @@ return function(sidebar, hud_definition)
 			sidebar:ensure()
 		end
 	end
-	G.FUNCS.character_intro_next = function()
-		if WORD_GAME and WORD_GAME.PlayerHost then
-			WORD_GAME.PlayerHost.advance_intro()
-		end
-	end
-	G.FUNCS.stage3_ally_next = function()
-		if WORD_GAME and WORD_GAME.PlayerHost then
-			WORD_GAME.PlayerHost.advance_stage3_ally()
-		end
-	end
 	G.FUNCS.end_run_from_vault = function()
 		local vault_btn = WORD_GAME and WORD_GAME.VaultStageButton
 		if vault_btn and vault_btn.press then

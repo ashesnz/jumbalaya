@@ -79,7 +79,6 @@ function M.start_hand(set, hand_index)
 	wr.target = round_config.hand_target(set, hand_index)
 	wr.hand_name = round_config.hand_name(hand_index, set)
 	wr.played_words = {}
-	wr.boss_character = nil
 
 	if WORD_GAME and WORD_GAME.BossWordStack and WORD_GAME.BossWordStack.on_hand_start then
 		WORD_GAME.BossWordStack.on_hand_start(set, hand_index)

@@ -84,8 +84,6 @@ T.describe("Debug stage jump (devtools.sections.stage)", function()
 			},
 			Sidebar = { refresh = function() end },
 			PlayerHost = {
-				dismiss_intro = function() end,
-				end_stage3_cinematic = function() end,
 				refresh_card_input = function() end,
 			},
 		}

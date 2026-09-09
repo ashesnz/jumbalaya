@@ -49,15 +49,4 @@ return function(word_game)
 	call("HandShuffle", word_game.HandShuffle and word_game.HandShuffle.destroy)
 	call("PerkStamp", word_game.PerkStamp and word_game.PerkStamp.clear_runtime)
 	call("Sidebar", word_game.Sidebar and word_game.Sidebar.destroy)
-	call("PlayerHost", function()
-		if word_game.PlayerHost and word_game.PlayerHost.clear_spotlight then
-			word_game.PlayerHost.clear_spotlight()
-		end
-		if word_game.PlayerHost and word_game.PlayerHost.reset_stage3_cinematic_state then
-			word_game.PlayerHost.reset_stage3_cinematic_state()
-		end
-		if word_game.PlayerHost and word_game.PlayerHost.reset_marco_cinematic_state then
-			word_game.PlayerHost.reset_marco_cinematic_state()
-		end
-	end)
 end

@@ -343,14 +343,9 @@ T.describe("Play Button Hold Redraw (word_game.ui.play_hold_redraw)", function()
 			hard_set_cards = function() end,
 			set_ranks = function(self)
 				for _, card in ipairs(self.cards) do
-					if WORD_GAME and WORD_GAME.PlayerHost and WORD_GAME.PlayerHost.allows_card_drag
-						and not WORD_GAME.PlayerHost.allows_card_drag(self) then
-						card.states.drag.can = false
-					else
-						card.states.drag.can = true
-						card.states.hover.can = true
-						card.states.collide.can = true
-					end
+					card.states.drag.can = true
+					card.states.hover.can = true
+					card.states.collide.can = true
 				end
 			end,
 		}
@@ -377,12 +372,6 @@ T.describe("Play Button Hold Redraw (word_game.ui.play_hold_redraw)", function()
 
 		local refreshed = false
 		WORD_GAME.PlayerHost = {
-			allows_card_drag = function(area)
-				if G.GAME and G.GAME.hand_redraw_animating then
-					return false
-				end
-				return true
-			end,
 			refresh_card_input = function()
 				refreshed = true
 				if G.hand then G.hand:set_ranks() end

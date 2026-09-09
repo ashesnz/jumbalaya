@@ -41,17 +41,7 @@ function Game:start_gameplay_board()
     if WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.sync_deck_count_display then
         WORD_GAME.Deck.sync_deck_count_display()
     end
-   	if WORD_GAME and WORD_GAME.PlayerHost and WORD_GAME.PlayerHost.ensure then
-        WORD_GAME.PlayerHost.ensure()
-    end
-   	if WORD_GAME and WORD_GAME.AllyHost and WORD_GAME.AllyHost.ensure then
-        WORD_GAME.AllyHost.ensure()
-    end
-   	if WORD_GAME and WORD_GAME.GuestHost and WORD_GAME.GuestHost.ensure then
-        WORD_GAME.GuestHost.ensure()
-    end
-
-    -- Layout after HUD / hand controls / hosts exist so hand + placement anchors match.
+    -- Layout after HUD / hand controls exist so hand + placement anchors match.
     Layout.request_refresh()
 
     if G.TIMELINE then
@@ -298,15 +288,6 @@ function Game:start_run(args)
         Layout.request_refresh()
         if G.FUNCS.ensure_table_board_sidebar then
             G.FUNCS.ensure_table_board_sidebar()
-        end
-        if WORD_GAME and WORD_GAME.PlayerHost then
-            WORD_GAME.PlayerHost.ensure()
-        end
-        if WORD_GAME and WORD_GAME.AllyHost then
-            WORD_GAME.AllyHost.ensure()
-        end
-        if WORD_GAME and WORD_GAME.GuestHost then
-            WORD_GAME.GuestHost.ensure()
         end
         if WORD_GAME and WORD_GAME.Round then
             WORD_GAME.Round.restore_from_save()

@@ -52,15 +52,6 @@
 ---@field trade_used_this_hand boolean
 ---@field match_over boolean
 ---@field match_won boolean
----@field character_intro_active boolean|nil
----@field intro_waiting_score boolean|nil
----@field stage3_cinematic boolean|nil
----@field stage3_portrait_visible boolean|nil
----@field stage3_portrait_rect table|nil
----@field stage3_portrait_pose string|nil
----@field stage3_ally_portrait_rect table|nil
----@field stage3_guest_portrait_rect table|nil
----@field stage3_guest_pose string|nil
 ---@field [string] any
 
 ---@class JumbleState

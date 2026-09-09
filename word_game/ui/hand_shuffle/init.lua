@@ -1,12 +1,9 @@
 --[[ word_game/ui/hand_shuffle/init.lua - Play button beside the dealt hand (no shuffle row) ]]
 
-local state = require("word_game.model.state")
 local RunMode = require("word_game.model.run_mode")
 local definition = require("word_game.ui.hand_shuffle.definition")
 local layout = require("word_game.ui.hand_shuffle.layout")
 local animate = require("word_game.ui.hand_shuffle.animate")
-
-local characters = { intro_step_keys = function() return nil end, intro_uses_play_button = function() return true end }
 
 local M = {}
 
@@ -69,14 +66,7 @@ function M.visible()
 end
 
 local function action_visible()
-	if not M.visible() then return false end
-	if jumble_active() then return true end
-	local rs = state.get()
-	local waiting = rs and rs.intro_waiting_score
-	local cinematic = rs and rs.stage3_cinematic
-	local ally_talk = cinematic and (rs.stage3_ally_line or rs.stage3_guest_line)
-	if waiting or (cinematic and not ally_talk) then return false end
-	return true
+	return M.visible()
 end
 
 local function sync_shuffle_button(shuffle_btn, show)
@@ -127,27 +117,9 @@ local function sync_play_button(play_btn, show)
 		return
 	end
 
-	local rs = state.get()
-	local intro = rs and rs.character_intro_active
-	local cinematic = rs and rs.stage3_cinematic
-	local ally_talk = cinematic and (rs.stage3_ally_line or rs.stage3_guest_line)
-	local keys = characters.intro_step_keys()
-	local current_key = keys and rs and keys[rs.character_intro_step or 1]
-	local use_play = (not intro) or characters.intro_uses_play_button(current_key)
-
-	if ally_talk then
-		play_btn.config.button = "stage3_ally_next"
-		play_btn.config.colour = G.C.BLUE
-		definition.set_play_display(play_btn, "text", definition.ICON_NEXT)
-	elseif intro and not use_play then
-		play_btn.config.button = "character_intro_next"
-		play_btn.config.colour = G.C.BLUE
-		definition.set_play_display(play_btn, "text", definition.ICON_NEXT)
-	else
-		play_btn.config.button = "play_placement_word"
-		play_btn.config.colour = definition.play_button_colour()
-		definition.set_play_display(play_btn, "sprite")
-	end
+	play_btn.config.button = "play_placement_word"
+	play_btn.config.colour = definition.play_button_colour()
+	definition.set_play_display(play_btn, "sprite")
 
 	play_btn.config.force_collision = true
 	play_btn.states.collide.can = true

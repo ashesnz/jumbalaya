@@ -91,7 +91,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `Perks` | Perk model package (`model/perks`: registry, effects, hand timer) |
 | `TradeUI` / `PerkStamp` | Marketplace and perk stamp overlays |
 | `Sidebar` | Vault HUD (stamps, deck) |
-| Hosts / portraits / overlays | `PlayerHost`, `AllyHost`, `GuestHost`, `PlayerPortrait`, `CardInspect`, `CardHover`, `Confetti`, `FloatUpText`, `HandClearFocus`, `EndMatch`, `TableDeck` |
+| Hosts / portraits / overlays | `PlayerHost`, `PlayerPortrait`, `CardInspect`, `Confetti`, `FloatUpText`, `HandClearFocus`, `EndMatch`, `TableDeck` |
 
 Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of deep requires.
 

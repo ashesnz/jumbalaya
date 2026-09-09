@@ -66,14 +66,6 @@ function M.reset_args()
 	run.generation = G.ARGS.run_generation
 end
 
-local function destroy_host(global_key)
-	local host = G[global_key]
-	if host and host.remove then
-		pcall(function() host:remove() end)
-	end
-	G[global_key] = nil
-end
-
 function M.reset_globals()
 	G.playing_cards = {}
 	G.playing_card = 0
@@ -93,9 +85,6 @@ function M.reset_globals()
 			G.placement_table.area = nil
 		end
 	end
-	destroy_host("player_host")
-	destroy_host("ally_host")
-	destroy_host("guest_host")
 	if G.HAND_CLEAR_OVERLAY and G.HAND_CLEAR_OVERLAY.remove then
 		pcall(function() G.HAND_CLEAR_OVERLAY:remove() end)
 	end

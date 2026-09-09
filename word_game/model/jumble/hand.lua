@@ -94,12 +94,6 @@ function M.start_hand(wr)
 	wr.mode = "jumble"
 	wr.target = wr.target or 20
 	modifier_effects.reset_stage_state(wr)
-	local rs = G.GAME and G.GAME.run_state
-	if rs then
-		rs.character_intro_active = false
-		rs.intro_waiting_score = false
-	end
-
 	local timer_state = hand_timer.initial_state()
 	wr.jumble = {
 		total_score = 0,

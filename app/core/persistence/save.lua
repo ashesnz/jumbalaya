@@ -124,10 +124,6 @@ function Game:discard_run()
 			G.OVERLAY_TUTORIAL:remove()
 			G.OVERLAY_TUTORIAL = nil
 		end
-		if self.INTRO_OVERLAY then
-			self.INTRO_OVERLAY:remove()
-			self.INTRO_OVERLAY = nil
-		end
 		for key, value in pairs(G) do
 			if (type(value) == "table") and value.is_kind and value:is_kind(CardArea) then
 				G[key] = nil

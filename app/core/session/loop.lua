@@ -139,7 +139,7 @@ function Game:render_board_pass()
 	for _, panel in pairs(self.LIVE.UIBOX) do
 		local is_special = panel.flop_overlay or panel.spawn_attention or panel.parent
 			or panel == self.OVERLAY_MENU or panel == self.screenwipe
-			or panel == self.OVERLAY_TUTORIAL or panel == self.INTRO_OVERLAY
+			or panel == self.OVERLAY_TUTORIAL
 			or panel == self.FIRST_PLAY_TUTORIAL_OVERLAY
 			or panel == self.debug_tools or panel == self.online_leaderboard
 			or panel == self.achievement_notification
@@ -161,7 +161,6 @@ function Game:render_board_pass()
 
 	G.under_overlay = false
 	if self.OVERLAY_TUTORIAL then self:draw_spotlight_overlay(self.OVERLAY_TUTORIAL) end
-	if self.INTRO_OVERLAY then self:draw_spotlight_overlay(self.INTRO_OVERLAY) end
 	if self.HAND_CLEAR_OVERLAY then
 		G.under_overlay = true
 		self:draw_spotlight_overlay(self.HAND_CLEAR_OVERLAY)
@@ -252,7 +251,7 @@ end
 function Game:draw()
 	G.FRAMES.RENDER = G.FRAMES.RENDER + 1
 	reset_hit_order()
-	if (G.OVERLAY_TUTORIAL or G.INTRO_OVERLAY or G.HAND_CLEAR_OVERLAY or G.FIRST_PLAY_TUTORIAL_OVERLAY) and not G.OVERLAY_MENU then
+	if (G.OVERLAY_TUTORIAL or G.HAND_CLEAR_OVERLAY or G.FIRST_PLAY_TUTORIAL_OVERLAY) and not G.OVERLAY_MENU then
 		G.under_overlay = true
 	end
 	perf_checkpoint('start->canvas', 'draw')
