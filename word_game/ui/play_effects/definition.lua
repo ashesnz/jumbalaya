@@ -5,7 +5,7 @@ local M = {}
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 local boss_word_stack = require("word_game.ui.boss_word_stack")
 local RunMode = require("word_game.model.run.mode")
-local round_config = require("word_game.config.round_config")
+local round_config = require("word_game.config.gameplay.round")
 
 M.BOSS_INTRO = {
 	hide_duration = 0.42,
@@ -123,10 +123,8 @@ function M.set_word_score_animating(active)
 	end
 end
 
-function M.add_points(amount)
-	if G.GAME then
-		G.GAME.points = (G.GAME.points or 0) + amount
-	end
+function M.add_points(_amount)
+	-- Score is tracked on wr.jumble.total_score by the model; banner syncs via jumble rules.
 end
 
 function M.sync_hand_after_deal()

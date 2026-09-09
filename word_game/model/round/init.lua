@@ -2,7 +2,7 @@
 local Scheduler = require "app.effects.timeline_scheduler"
 
 
-local round_config = require("word_game.config.round_config")
+local round_config = require("word_game.config.gameplay.round")
 local RunMode = require("word_game.model.run.mode")
 local state = require("word_game.model.run.state")
 
@@ -24,7 +24,6 @@ function M.init_run()
 	}
 	G.GAME.voucher_discards_used = 0
 	G.GAME.discard_bin_count = 0
-	G.GAME.points = 0
 	G.GAME.round_resets = G.GAME.round_resets or {}
 	G.GAME.round_resets.ante = 1
 	M.start_hand(1, 1)
@@ -44,7 +43,6 @@ function M.restore_from_save()
 	wr.hand_name = wr.hand_name or round_config.hand_name(wr.hand_index, wr.set)
 	G.GAME.round_resets = G.GAME.round_resets or {}
 	G.GAME.round_resets.ante = wr.set
-	G.GAME.points = G.GAME.points or 0
 	if WORD_GAME and WORD_GAME.ScoreBanner then
 		WORD_GAME.ScoreBanner.reset(wr.target)
 		WORD_GAME.ScoreBanner.snap_to_actual()
@@ -94,7 +92,6 @@ function M.start_hand(set, hand_index)
 
 	G.GAME.round_resets = G.GAME.round_resets or {}
 	G.GAME.round_resets.ante = set
-	G.GAME.points = 0
 
 	if WORD_GAME and WORD_GAME.ScoreBanner then
 		WORD_GAME.ScoreBanner.reset(wr.target)

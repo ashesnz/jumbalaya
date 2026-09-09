@@ -31,8 +31,12 @@ end
 function M.actual_remaining()
 	local wr = G.GAME and G.GAME.word_round
 	local target = wr and wr.target or 0
-	local scored = G.GAME and G.GAME.points or 0
-	return math.max(0, target - scored)
+	local j = wr and wr.jumble
+	if j then
+		local rules = require("word_game.model.jumble_play.jumble_rules")
+		return rules.remaining_to_target(j, target)
+	end
+	return target
 end
 
 function M.sync_label(hud)

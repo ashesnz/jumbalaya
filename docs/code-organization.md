@@ -120,15 +120,18 @@ Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship.
 
 ### Config (`word_game/config/`)
 
-| File | Purpose |
-|------|---------|
-| `round_config.lua` | Hand targets, `VOUCHER_DISCARDS_PER_HAND`, `TIMELINE_SECONDS`, showdown/cinematic flags |
-| `hand_size.lua` | Authoritative jumble hand size (`hand_size.get()` → `G.TABLE_HAND_SIZE` or 7) |
-| `jumble.lua` | Letter pool (AERTNLS), deck copies, disabled 30s timer flag |
-| `jumble_puzzles.lua` | Router for the 24 stage modules |
-| `jumble_puzzles/*.lua` | Individual stage pattern tables such as `1_1.lua` |
-| `perks.lua` | Perk pool definitions (`config/perks.lua`; effects in `model/perks/effects.lua`) |
-| `economy.lua` | Starting tokens/chips, trade pricing |
+`word_game/config/` has **no root-level modules** — use subpackage paths or `require("word_game.config")`.
+
+| Package | Purpose |
+|---------|---------|
+| `boot/` | `runtime` (LÖVE `love.conf`), `runtime_options` (feature flags), `env` (`.env` overrides) |
+| `layout/` | `dimensions` — tile scale, card size, TABLE_BOARD layout constants |
+| `visuals/` | `palette`, `letter_card_palette`, `deck_face_colors` (generated) |
+| `gameplay/` | `round` (hand targets, timeline), `economy` (tokens/trade), `run_params` |
+| `perks/` | Perk pool definitions (effects in `model/perks/effects.lua`) |
+| `jumble/` | Puzzle router (`init.lua`) + `puzzles/{set}_{hand}.lua` stage tables |
+
+Runtime hand size (`WORD_GAME.HandSize.get()`) lives in `word_game/model/hand_size.lua` (base from `layout.dimensions` + perk bonus).
 
 ### Model (`word_game/model/`)
 
@@ -137,7 +140,7 @@ Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship.
 | Package | Purpose |
 |---------|---------|
 | `game/` | `Game` class (`init.lua`, `run.lua`, `loop.lua`), `globals.lua` (`G = Game()`) |
-| `run/` | Run lifecycle: `state`, `scope`, `register`, `mode`, `match`, `input_lock` |
+| `run/` | Run lifecycle facade (`init.lua` → `.State`, `.Scope`, `.Mode`, `.Match`, `.InputLock`, `.Register`) |
 | `round/` | Set/hand controller: `start_hand`, advance, timeline reset |
 | `trade/` | The Trade marketplace offers and actions |
 | `jumble/` | Puzzle spec, slots, validation, hand lifecycle, `bonus_stack`, `placement_word` |

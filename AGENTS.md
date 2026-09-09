@@ -16,7 +16,7 @@ app/                     Bootstrap, lifecycle, input, persistence, engine (app/c
   startup/               profile, window, dealing, assets, menu_boot
   callbacks/             App-level G.FUNCS (settings, window, run lifecycle)
 word_game/
-  config/                Static tuning: round targets, puzzles, perks, runtime options
+  config/                Static tuning (boot/, layout/, visuals/, gameplay/, perks/, jumble/)
   model/                 Gameplay rules and state (no root-level modules)
     game/                Game class + globals.lua (G singleton)
     run/                 Run state, scope, mode, match end, input lock
@@ -64,6 +64,7 @@ Removed / renamed (do not reintroduce):
 | Export | Role |
 |--------|------|
 | `Jumble` / `Play` | Puzzle state and play orchestration |
+| `Run` | Run lifecycle facade (`Run.State`, `Run.Mode`, `Run.Scope`, …) |
 | `Board` | Pattern row geometry and snap |
 | `Layout` | TABLE_BOARD geometry (`layout/felt`, `sidebar/layout`, `layout/placement`) |
 | `Sidebar` | Right-hand HUD (stamps, deck, cards-left, End Run) |
@@ -115,7 +116,8 @@ Globals: `G.SIDEBAR_HUD`, `G.SIDEBAR_ATTACH`. Layout helpers are re-exported on 
 | Layer | Module | Role |
 |-------|--------|------|
 | Model | `jumble_play/jumble.lua` | `play_jumble_word()` → result only |
-| UI | `play_effects/resolution.lua` | `resolve(Play)` → effects, banners, hand clear |
+| UI | `play_effects/resolution.lua` | `resolve(Play)` → effects, banners |
+| UI | `play_effects/hand_clear.lua` | Hand-clear cinematics; calls model `prepare_hand_clear` / `resolve_after_clear` |
 | UI | `table/placement_controls.lua` | Play button entry point |
 
 Tests that need rules only call `play_jumble_word`; tests that need full FX call `play_effects/resolution.resolve`.

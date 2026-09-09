@@ -9,5 +9,6 @@ local M = {}
 
 require("word_game.model.jumble_play.hand")(M)
 require("word_game.model.jumble_play.jumble")(M)
+require("word_game.ui.play_effects.hand_clear").install(M)
 
 return M

@@ -7,7 +7,7 @@
 
 local Layout = require("word_game.ui.layout")
 local state = require("word_game.model.run.state")
-local round_config = require("word_game.config.round_config")
+local round_config = require("word_game.config.gameplay.round")
 local RunMode = require("word_game.model.run.mode")
 
 local M = {}
@@ -67,7 +67,7 @@ end
 
 local function banked_score()
 	local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
-	return (j and j.total_score) or (G.GAME and G.GAME.points) or 0
+	return (j and j.total_score) or 0
 end
 
 function M.earned_amount()
