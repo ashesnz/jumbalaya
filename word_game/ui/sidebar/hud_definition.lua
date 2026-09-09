@@ -109,12 +109,6 @@ function M.sync_end_run_row()
 	end
 end
 
-function M.sync_action_buttons()
-	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.try_sync()
-	end
-end
-
 function M.hud_definition()
 	local box_w = box_width()
 	local sidebar_h = Layout.sidebar_height()

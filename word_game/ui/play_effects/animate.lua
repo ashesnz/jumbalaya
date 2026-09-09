@@ -4,7 +4,7 @@ local M = {}
 
 local facade = require("word_game.ui.facade")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
-local boss_word_stack = require("word_game.ui.perks.bonus_stack")
+local bonus_stack_ui = require("word_game.ui.perks.bonus_stack")
 local card_fly_off = require("word_game.ui.play_effects.card_fly_off")
 local jumble_fixed_letters = require("word_game.ui.table.jumble_fixed_letters")
 local round_config = require("word_game.config.gameplay.round")
@@ -32,11 +32,11 @@ local function has_event_manager()
 end
 
 local function finish_used_card(card, return_to_deck)
-	if boss_word_stack.is_bonus_card(card) then
+	if bonus_stack_ui.is_bonus_card(card) then
 		if card.area then
 			card.area:remove_card(card)
 		end
-		boss_word_stack.consume_card(card)
+		bonus_stack_ui.consume_card(card)
 	elseif return_to_deck then
 		if card.area then
 			card.area:remove_card(card)
@@ -54,7 +54,7 @@ local function finish_used_cards(used_cards, return_to_deck)
 	definition.show_bonus_flyovers(used_cards)
 	local returned = false
 	for _, card in ipairs(used_cards or {}) do
-		if not boss_word_stack.is_bonus_card(card) and return_to_deck then
+		if not bonus_stack_ui.is_bonus_card(card) and return_to_deck then
 			returned = true
 		end
 		finish_used_card(card, return_to_deck)
@@ -151,7 +151,7 @@ function M.present_boss_word(wr, on_complete)
 		end
 		effects().request_layout_refresh()
 		definition.set_word_score_animating(false)
-		definition.sync_sidebar_actions()
+		definition.sync_hand_controls()
 		if play_sfx then
 			play_sfx("coin2", 0.95, 0.85)
 		end
@@ -264,7 +264,7 @@ function M.present_boss_word(wr, on_complete)
 end
 
 local function detach_card_for_stack(card)
-	boss_word_stack.detach(card)
+	bonus_stack_ui.detach(card)
 end
 
 function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_complete)
@@ -285,10 +285,10 @@ function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_
 	end
 	jumble.clear_blank_cards(j.slots)
 	jumble.sync_placement_cards(j.slots)
-	boss_word_stack.stage_cards(cards)
+	bonus_stack_ui.stage_cards(cards)
 
 	local function finish_success()
-		boss_word_stack.promote_to_bonus(cards)
+		bonus_stack_ui.promote_to_bonus(cards)
 		if on_hand_cleared then
 			on_hand_cleared({ boss_cleared = true })
 		end
@@ -310,7 +310,7 @@ function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_
 		end,
 	}))
 
-	boss_word_stack.animate_cards_to_stack(effects().queue_event, nil, {
+	bonus_stack_ui.animate_cards_to_stack(effects().queue_event, nil, {
 		initial_delay = 0,
 		card_delay = CARD_DELAY,
 		stagger = CARD_STAGGER,
@@ -339,7 +339,7 @@ function M.present_word_play_after_cards(jumble, j, result, on_hand_cleared, on_
 		else
 			M.deal_and_refresh(function()
 				definition.show_word_success(result.word)
-				definition.sync_sidebar_actions()
+				definition.sync_hand_controls()
 				if on_complete then
 					on_complete({ word = result.word, points = result.new_pts, multi = result.new_multi })
 				end
@@ -399,10 +399,7 @@ function M.present_jumble_next(jumble, wr, opts)
 			func = function()
 				jl.reset_anim()
 				definition.set_word_score_animating(false)
-				definition.sync_sidebar_actions()
-				if WORD_GAME and WORD_GAME.HandShuffle then
-					WORD_GAME.HandShuffle.try_sync()
-				end
+				definition.sync_hand_controls()
 				if opts and opts.on_complete then
 					opts.on_complete()
 				end
@@ -420,8 +417,8 @@ function M.present_jumble_next(jumble, wr, opts)
 end
 
 function M.present_end_jumble_sidebar()
+	definition.sync_hand_controls()
 	if WORD_GAME and WORD_GAME.Sidebar then
-		WORD_GAME.Sidebar.sync_action_buttons()
 		WORD_GAME.Sidebar:refresh()
 	end
 end

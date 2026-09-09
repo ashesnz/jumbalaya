@@ -76,7 +76,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `PlacementWord` | Placement-row word preview on `G.GAME` (`clear`, `refresh_from_jumble_slots`) |
 | `JumbleRules` | Pure scoring/play rules (`compute_word_score`, `score_breakdown`, `evaluate_play`, …) |
 | `Play` | Play-button orchestration (`play_jumble_word`); sub-exports `Play.Rules`, `Play.ModifierEffects` |
-| `BonusStack` / `BossWordStack` | Bonus gutter state/scoring (model) and animation/draw (UI) |
+| `BonusStack` / `BonusStackUI` | Bonus gutter state/scoring (model) and animation/draw (UI) |
 | `Round` | Set/hand lifecycle, targets, perk-hand gating |
 | `Deck` / `Back` | Dealing; jumble branch in `model/deck/jumble.lua` |
 | `Board` | Jumble pattern row (`placement/table`, `placement/snap`, `jumble/geometry`, `bonus/gutter`) |
@@ -106,7 +106,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `word_game/model/` | Top-of-file `require` for siblings (`model/jumble/*`, `model/run/*`, …); use `jumble/bonus_return` when model must return bonus cards to the gutter |
 | Inline `require(...)` inside functions | Avoid — hoist to module scope unless breaking a documented circular dependency |
 
-Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, `WORD_GAME.BonusStack`, `WORD_GAME.BossWordStack`, etc. across package boundaries instead of deep requires.
+Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, `WORD_GAME.BonusStack`, `WORD_GAME.BonusStackUI`, etc. across package boundaries instead of deep requires.
 
 ---
 

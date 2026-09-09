@@ -78,8 +78,8 @@ function M.start_hand(set, hand_index)
 	wr.hand_name = round_config.hand_name(hand_index, set)
 	wr.played_words = {}
 
-	if WORD_GAME and WORD_GAME.BossWordStack and WORD_GAME.BossWordStack.on_hand_start then
-		WORD_GAME.BossWordStack.on_hand_start(set, hand_index)
+	if WORD_GAME and WORD_GAME.BonusStackUI and WORD_GAME.BonusStackUI.on_hand_start then
+		WORD_GAME.BonusStackUI.on_hand_start(set, hand_index)
 	end
 
 	local jumble = require("word_game.model.jumble")

@@ -31,8 +31,8 @@ local function placement_area()
 	return G.placement_table and G.placement_table.area
 end
 
-local function boss_word_stack()
-	return WORD_GAME and WORD_GAME.BossWordStack
+local function bonus_stack_ui()
+	return WORD_GAME and WORD_GAME.BonusStackUI
 end
 
 local function sync_placement_from_jumble()
@@ -107,7 +107,7 @@ local function slide_card_to_bonus_stack(card, p_area, delay)
 			if card.area == p_area then
 				p_area:remove_card(card)
 			end
-			local stack = boss_word_stack()
+			local stack = bonus_stack_ui()
 			if stack and stack.return_card then
 				stack.return_card(card)
 			end
@@ -260,7 +260,7 @@ function M.animate(on_complete)
 
 	local p_area = placement_area()
 	for i, card in ipairs(cards) do
-		local stack = boss_word_stack()
+		local stack = bonus_stack_ui()
 		if stack and stack.is_bonus_card(card) then
 			slide_card_to_bonus_stack(card, p_area, (i - 1) * STAGGER)
 		else

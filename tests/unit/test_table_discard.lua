@@ -281,7 +281,7 @@ T.describe("table discard bin", function()
 		WORD_GAME.Jumble = { is_active = function() return true end }
 		WORD_GAME.VoucherDiscard = table_discard
 		WORD_GAME.Deck = deck
-		WORD_GAME.HandShuffle = { sync = function() end, try_sync = function() end }
+		WORD_GAME.HandShuffle = { sync = function() end }
 		mock_discard_voucher()
 
 		local card = card_over_voucher()
@@ -530,7 +530,7 @@ T.describe("table discard bin", function()
 		WORD_GAME.Jumble = { is_active = function() return true end }
 		WORD_GAME.VoucherDiscard = table_discard
 		WORD_GAME.Deck = deck
-		WORD_GAME.HandShuffle = { sync = function() end, try_sync = function() end }
+		WORD_GAME.HandShuffle = { sync = function() end }
 
 		local card = card_over_voucher()
 		G.hand.cards[1] = card

@@ -412,8 +412,8 @@ return function(context)
 				G.discard:hard_set_cards()
 			end
 			local hs = WORD_GAME and WORD_GAME.HandShuffle
-			if hs and (hs.try_sync or hs.sync) then
-				(hs.try_sync or hs.sync)()
+			if hs and hs.sync then
+				hs.sync()
 			end
 			if G.GAME and G.GAME.round_scores then
 				G.GAME.round_scores.cards_discarded = G.GAME.round_scores.cards_discarded or { amt = 0 }

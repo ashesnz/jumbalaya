@@ -40,8 +40,8 @@ local function jumble_active()
 	return WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active()
 end
 
-local function boss_word_stack()
-	return facade.boss_word_stack()
+local function bonus_stack_ui()
+	return facade.bonus_stack_ui()
 end
 
 function M.recall_placement_cards(opts)
@@ -54,7 +54,7 @@ function M.recall_placement_cards(opts)
 				G.placement_table:on_remove_card(card)
 			end
 			p_area:remove_card(card)
-			local stack = boss_word_stack()
+			local stack = bonus_stack_ui()
 			if stack and stack.is_bonus_card(card) then
 				stack.return_card(card)
 			elseif G.hand then

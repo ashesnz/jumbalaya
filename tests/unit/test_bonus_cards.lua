@@ -138,7 +138,7 @@ T.describe("Bonus cards", function()
 		layout_globals()
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.TimelineTimer = WORD_GAME.TimelineTimer or { pause = function() end }
-		WORD_GAME.BossWordStack = bonus_stack
+		WORD_GAME.BonusStackUI = bonus_stack
 
 		local play_effects = require("word_game.ui.play_effects")
 		local queued = 0
@@ -225,7 +225,7 @@ T.describe("Bonus cards", function()
 		bonus_stack.clear()
 		layout_globals()
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.BossWordStack = bonus_stack
+		WORD_GAME.BonusStackUI = bonus_stack
 		local felt = require("word_game.ui.layout.felt")
 		local before = felt.play_column()
 		local hand_col = felt.hand_play_column()
@@ -247,7 +247,7 @@ T.describe("Bonus cards", function()
 		layout_globals()
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.TimelineTimer = WORD_GAME.TimelineTimer or { pause = function() end }
-		WORD_GAME.BossWordStack = bonus_stack
+		WORD_GAME.BonusStackUI = bonus_stack
 		local felt = require("word_game.ui.layout.felt")
 		local play_effects = require("word_game.ui.play_effects")
 

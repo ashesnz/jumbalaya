@@ -73,6 +73,7 @@ Removed / renamed (do not reintroduce):
 | `TableBoard` | TABLE_BOARD update/draw coordinator |
 | `VoucherDiscard` | Sidebar voucher discard |
 | `TimelineTimer` | 60s fuse / classic score slider |
+| `BonusStack` / `BonusStackUI` | Bonus gutter model state and UI presentation (`perks/bonus_stack/`) |
 | `HandShuffle` / `PlayHoldRedraw` | Table controls: shuffle/play buttons, hold-to-redraw (`ui/table/controls/`) |
 | `TradeUI` / `PerkStamp` | Marketplace and perk stamp overlays |
 | `TableInput` | Card input refresh on the table board |
@@ -110,7 +111,7 @@ sidebar/
   callbacks.lua      Thin install wrapper
 ```
 
-Globals: `G.SIDEBAR_HUD`, `G.SIDEBAR_ATTACH`. Layout helpers are re-exported on `WORD_GAME.Layout` (`sidebar_rect`, `sidebar_height`, etc.).
+Globals: `G.SIDEBAR_HUD`, `G.SIDEBAR_ATTACH`. Layout helpers are re-exported on `WORD_GAME.Layout` (`sidebar_rect`, `sidebar_height`, etc.). `Sidebar.sync_visibility()` shows/hides the HUD column; play/shuffle buttons sync via `WORD_GAME.HandShuffle.sync()` (not the sidebar API).
 
 ### Play resolution split
 

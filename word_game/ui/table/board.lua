@@ -38,7 +38,7 @@ function M.update(game, dt)
 		DEVTOOLS.DebugButton.sync()
 	end
 		if WORD_GAME and WORD_GAME.HandShuffle then
-			WORD_GAME.HandShuffle.try_sync()
+			WORD_GAME.HandShuffle.sync()
 		end
 		if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.sync_visibility then
 			WORD_GAME.Sidebar.sync_visibility()
@@ -108,7 +108,7 @@ function M.draw_spotlight_overlay(game, overlay)
 	end
 
 	if overlay.redraw_hand and G.hand then
-		local bonus_stack = WORD_GAME and WORD_GAME.BossWordStack
+		local bonus_stack = WORD_GAME and WORD_GAME.BonusStackUI
 		for _, v in pairs(game.LIVE.CARD) do
 			if v.area == G.hand
 				and (not v.parent and v ~= game.INPUT.dragging.target and v ~= game.INPUT.focused.target)
@@ -167,9 +167,9 @@ function M.draw_board(game)
 		game.placement_table:draw_run_pass(game)
 		M.draw_hand_pass(game)
 	end
-	local boss_word_stack = WORD_GAME and WORD_GAME.BossWordStack
-	if boss_word_stack and boss_word_stack.draw_pass then
-		boss_word_stack.draw_pass()
+	local bonus_stack_ui = WORD_GAME and WORD_GAME.BonusStackUI
+	if bonus_stack_ui and bonus_stack_ui.draw_pass then
+		bonus_stack_ui.draw_pass()
 	end
 end
 
@@ -203,7 +203,7 @@ function M.draw_hand_pass(game)
 		love.graphics.pop()
 	end
 
-	local bonus_stack = WORD_GAME and WORD_GAME.BossWordStack
+	local bonus_stack = WORD_GAME and WORD_GAME.BonusStackUI
 	local controller = game.INPUT
 	for _, v in pairs(game.LIVE.CARD) do
 		local from_hand = v.area == G.hand
@@ -256,7 +256,7 @@ function M.draw_card_interaction(game)
 		return
 	end
 	if not game.placement_table then return end
-	local bonus_stack = WORD_GAME and WORD_GAME.BossWordStack
+	local bonus_stack = WORD_GAME and WORD_GAME.BonusStackUI
 	if game.INPUT.dragging.target and game.INPUT.dragging.target ~= game.INPUT.focused.target then
 		love.graphics.push()
 		game.INPUT.dragging.target:translate_container()

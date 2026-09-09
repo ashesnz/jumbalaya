@@ -193,7 +193,7 @@ T.describe("Stage 1-3 boss words", function()
 
 	T.it("stacks boss word cards below the timer with half-card overlap", function()
 		local layout = require("word_game.ui.layout.placement")
-		local boss_word_stack = require("word_game.ui.perks.bonus_stack")
+		local bonus_stack_ui = require("word_game.ui.perks.bonus_stack")
 		G.GAME = {
 			word_round = {
 				jumble = { boss_word_active = true },
@@ -206,20 +206,20 @@ T.describe("Stage 1-3 boss words", function()
 		G.ROOM = { T = { x = 1, y = 0, w = 20, h = 11.5 } }
 		G.hand = { T = { x = 3.2, y = 8.0, w = 10.5, h = 2.8 } }
 		G.placement_table = { area = { T = { x = 4.0, y = 2.0, w = 10.0, h = 2.8 } } }
-		local stack = boss_word_stack.stack_layout()
+		local stack = bonus_stack_ui.stack_layout()
 		local timer = layout.timeline_rect()
 		local window_left = -(G.ROOM.T.x or 0)
-		T.assert_true(stack.y >= timer.y + timer.h - boss_word_stack.stack_y_lift() - 0.02,
+		T.assert_true(stack.y >= timer.y + timer.h - bonus_stack_ui.stack_y_lift() - 0.02,
 			"Stack should sit just below the timer, lifted slightly")
-		T.assert_almost_equal(stack.x, window_left + boss_word_stack.LEFT_WINDOW_MARGIN, 0.02)
+		T.assert_almost_equal(stack.x, window_left + bonus_stack_ui.LEFT_WINDOW_MARGIN, 0.02)
 		T.assert_true(stack.x > window_left, "Small margin should keep cards off the hard left")
 		T.assert_true(
 			stack.x + stack.card_w < G.hand.T.x,
 			"Stack should not overlap the dealt hand"
 		)
 		T.assert_almost_equal(stack.step_y, stack.card_h * 0.5, 0.001)
-		local x1, y1 = boss_word_stack.target_position(1)
-		local x2, y2 = boss_word_stack.target_position(2)
+		local x1, y1 = bonus_stack_ui.target_position(1)
+		local x2, y2 = bonus_stack_ui.target_position(2)
 		T.assert_almost_equal(x1, stack.x, 0.001)
 		T.assert_almost_equal(y1, stack.y, 0.001)
 		T.assert_almost_equal(x2, stack.x, 0.001)
@@ -431,7 +431,7 @@ T.describe("Stage 1-3 boss words", function()
 
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.Jumble = jumble
-		WORD_GAME.HandShuffle = { try_sync = function() end }
+		WORD_GAME.HandShuffle = { sync = function() end }
 
 		local placed = snap.place_in_row(session, card)
 		T.assert_true(placed, "Boss hand card should snap into a blank slot")
@@ -550,11 +550,10 @@ T.describe("Stage 1-3 boss words", function()
 		}
 		WORD_GAME.HandShuffle = {
 			sync_position = function() end,
-			try_sync = function() end,
+			sync = function() end,
 		}
 		WORD_GAME.Sidebar = {
 			sync_visibility = function() end,
-			sync_action_buttons = function() end,
 		}
 		WORD_GAME.PlayHoldRedraw = { is_animating = function() return false end }
 		WORD_GAME.TableInput = { refresh_card_input = function() end }

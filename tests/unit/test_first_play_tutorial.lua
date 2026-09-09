@@ -130,7 +130,7 @@ T.describe("First play tutorial", function()
 		reset_env()
 		G.hand_action_bar = { REMOVED = false, T = { x = 12, y = 8, w = 1, h = 1 } }
 		WORD_GAME.HandShuffle = {
-			try_sync = function() end,
+			sync = function() end,
 			play_button_uie = function()
 				return { T = { x = 12, y = 8, w = 1, h = 1 } }
 			end,
@@ -147,7 +147,7 @@ T.describe("First play tutorial", function()
 		reset_env()
 		G.hand_action_bar = { REMOVED = false, T = { x = 12, y = 8, w = 1, h = 1 } }
 		WORD_GAME.HandShuffle = {
-			try_sync = function() end,
+			sync = function() end,
 			play_button_uie = function()
 				return { T = { x = 12, y = 8, w = 1, h = 1 } }
 			end,

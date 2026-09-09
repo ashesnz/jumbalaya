@@ -1,7 +1,6 @@
 --[[ word_game/ui/table/controls/placement.lua - Play button entry (G.FUNCS.play_placement_word) ]]
 
 local facade = require("word_game.ui.facade")
-local controls = require("word_game.ui.table.controls")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 local play_resolution = require("word_game.ui.play_effects.resolution")
 
@@ -13,7 +12,8 @@ local M = {}
 function M.try_play()
 	if InputLock.is_table_busy() then return end
 	if RunMode.classic_stage_complete() then
-		if not controls.placement_has_cards() then
+		local hand_shuffle = WORD_GAME and WORD_GAME.HandShuffle
+		if not (hand_shuffle and hand_shuffle.placement_has_cards()) then
 			word_feedback.show_classic_proceed({ hold = 2.2 })
 		elseif WORD_GAME and WORD_GAME.Play then
 			play_resolution.resolve(WORD_GAME.Play)

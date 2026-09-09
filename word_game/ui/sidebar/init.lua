@@ -23,7 +23,11 @@ WordSidebar.roll_to_next_hand = function()
 end
 WordSidebar.hud_definition = hud_definition.hud_definition
 WordSidebar.relayout = hud_definition.relayout
-WordSidebar.sync_action_buttons = hud_definition.sync_action_buttons
+local function sync_hand_controls()
+	if WORD_GAME and WORD_GAME.HandShuffle then
+		WORD_GAME.HandShuffle.sync()
+	end
+end
 
 function WordSidebar.is_hidden()
 	return felt.is_boss_sequence()
@@ -62,7 +66,7 @@ function WordSidebar:ensure()
 	end
 	if G.SIDEBAR_HUD then
 		deck_mod().sync_deck_count_display()
-		WordSidebar.sync_action_buttons()
+		sync_hand_controls()
 		hud_definition.sync_end_run_row()
 		table_discard.sync_voucher_counter(true)
 		return G.SIDEBAR_HUD
@@ -81,7 +85,7 @@ function WordSidebar:ensure()
 	G.SIDEBAR_HUD:recalculate()
 	hud_definition.sync_end_run_row()
 	table_discard.sync_voucher_counter(true)
-	WordSidebar.sync_action_buttons()
+	sync_hand_controls()
 	Layout.set_screen_positions()
 	return G.SIDEBAR_HUD
 end

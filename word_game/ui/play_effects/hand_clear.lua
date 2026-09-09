@@ -79,7 +79,7 @@ local function handle_after_clear(play_module, opts, outcome)
 	end
 	if outcome == "boss_bonus_hand" then
 		local wr = G.GAME.word_round
-		local bonus_stack = WORD_GAME and WORD_GAME.BossWordStack
+		local bonus_stack = WORD_GAME and WORD_GAME.BonusStackUI
 		if bonus_stack and bonus_stack.finalize_for_bonus_hand then
 			bonus_stack.finalize_for_bonus_hand(wr)
 		end

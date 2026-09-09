@@ -55,7 +55,7 @@ local M = {
 	PlayHoldRedraw = require("word_game.ui.table.controls.play_hold_redraw"),
 	PlayEffects = require("word_game.ui.play_effects"),
 	BonusStack = require("word_game.model.jumble.bonus_stack"),
-	BossWordStack = require("word_game.ui.perks.bonus_stack"),
+	BonusStackUI = require("word_game.ui.perks.bonus_stack"),
 	BossWordAnnounce = require("word_game.ui.score_banner.boss_announce"),
 	Sidebar = sidebar,
 }

@@ -88,10 +88,7 @@ local function refresh_board_input()
 		G.placement_table.area:set_ranks()
 	end
 	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.try_sync()
-	end
-	if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.sync_action_buttons then
-		WORD_GAME.Sidebar.sync_action_buttons()
+		WORD_GAME.HandShuffle.sync()
 	end
 end
 
@@ -205,7 +202,7 @@ end
 
 local function play_bubble_config()
 	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.try_sync()
+		WORD_GAME.HandShuffle.sync()
 	end
 
 	local bar = G.hand_action_bar

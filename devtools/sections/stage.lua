@@ -19,7 +19,7 @@ local function debug_bonus_letters()
 end
 
 local function destroy_bonus_stack_cards()
-	local bonus_stack = WORD_GAME and WORD_GAME.BossWordStack
+	local bonus_stack = WORD_GAME and WORD_GAME.BonusStackUI
 	local deck = WORD_GAME and WORD_GAME.Deck
 	if not bonus_stack or not deck or not deck.destroy_card then return end
 	for _, card in ipairs(bonus_stack.cards() or {}) do
@@ -30,7 +30,7 @@ end
 
 local function seed_bonus_gutter()
 	if not (WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.create_letter_card) then return end
-	if not (WORD_GAME and WORD_GAME.BossWordStack and WORD_GAME.BossWordStack.promote_to_bonus) then
+	if not (WORD_GAME and WORD_GAME.BonusStackUI and WORD_GAME.BonusStackUI.promote_to_bonus) then
 		return
 	end
 
@@ -40,7 +40,7 @@ local function seed_bonus_gutter()
 	for _, letter in ipairs(debug_bonus_letters()) do
 		cards[#cards + 1] = WORD_GAME.Deck.create_letter_card(letter, "red")
 	end
-	WORD_GAME.BossWordStack.promote_to_bonus(cards)
+	WORD_GAME.BonusStackUI.promote_to_bonus(cards)
 end
 
 local function jump_to_hand(ctx, set, hand_index)
@@ -94,7 +94,7 @@ local function jump_to_hand(ctx, set, hand_index)
 		seed_bonus_gutter()
 	end
 	if WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.try_sync()
+		WORD_GAME.HandShuffle.sync()
 	end
 	if WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync_position then
 		WORD_GAME.HandShuffle.sync_position()

@@ -181,7 +181,7 @@ function M.place_in_row(session, card)
 
 	placement_word().refresh_from_jumble_slots(jumble.state().slots)
 	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.try_sync()
+		WORD_GAME.HandShuffle.sync()
 	end
 	show_modifier_feedback(card)
 	return true
@@ -242,7 +242,7 @@ function M.try_snap(session, card)
 			placement_word().clear()
 			play_sfx("card_slide1", nil, 0.8)
 			if WORD_GAME and WORD_GAME.HandShuffle then
-				WORD_GAME.HandShuffle.try_sync()
+				WORD_GAME.HandShuffle.sync()
 			end
 		end
 
@@ -286,7 +286,7 @@ function M.try_snap(session, card)
 		if M.return_to_hand(session, card) then
 			play_sfx("card_slide1", nil, 0.8)
 			if WORD_GAME and WORD_GAME.HandShuffle then
-				WORD_GAME.HandShuffle.try_sync()
+				WORD_GAME.HandShuffle.sync()
 			end
 			return
 		end

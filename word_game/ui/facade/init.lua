@@ -85,8 +85,8 @@ function M.bonus_stack()
 	return (WORD_GAME and WORD_GAME.BonusStack) or load("word_game.model.jumble.bonus_stack")
 end
 
-function M.boss_word_stack()
-	return WORD_GAME and WORD_GAME.BossWordStack
+function M.bonus_stack_ui()
+	return WORD_GAME and WORD_GAME.BonusStackUI
 end
 
 function M.dissolve_fx()

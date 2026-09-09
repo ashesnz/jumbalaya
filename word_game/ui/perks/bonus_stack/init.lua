@@ -22,12 +22,42 @@ M.BONUS_POINTS = bonus_stack_model().BONUS_POINTS
 M.LEFT_WINDOW_MARGIN = layout.LEFT_WINDOW_MARGIN
 M.STACK_Y_LIFT_PX = layout.STACK_Y_LIFT_PX
 
-function M.is_animating()
-	return bonus_stack_model().is_animating()
+local function forward_model(name)
+	return function(...)
+		return bonus_stack_model()[name](...)
+	end
 end
 
-function M.is_bonus_card(card)
-	return bonus_stack_model().is_bonus_card(card)
+local function forward_layout(name)
+	return function(...)
+		return layout[name](...)
+	end
+end
+
+for _, name in ipairs({
+	"is_animating",
+	"is_bonus_card",
+	"is_active",
+	"cards",
+	"clear",
+	"stack_index",
+	"contains",
+	"bonus_points_for",
+}) do
+	M[name] = forward_model(name)
+end
+
+for _, name in ipairs({
+	"stack_y_lift",
+	"stack_layout",
+	"clears_gameplay_bounds",
+	"target_position",
+	"point_in_stack",
+	"drop_in_gutter",
+	"gutter_pixels",
+	"return_card",
+}) do
+	M[name] = forward_layout(name)
 end
 
 function M.detach(card)
@@ -62,20 +92,8 @@ function M.detach(card)
 	end
 end
 
-function M.is_active()
-	return bonus_stack_model().is_active()
-end
-
-function M.cards()
-	return bonus_stack_model().cards()
-end
-
 function M.set_cards(cards)
 	M.stage_cards(cards)
-end
-
-function M.clear()
-	bonus_stack_model().clear()
 end
 
 function M.stage_cards(cards)
@@ -92,7 +110,7 @@ end
 
 function M.on_hand_start(set, hand_index)
 	bonus_stack_model().on_hand_start(set, hand_index)
-	if round_config.is_bonus_stack_hand(set, hand_index) and not bonus_stack_model().is_animating() then
+	if round_config.is_bonus_stack_hand(set, hand_index) and not M.is_animating() then
 		M.sync_positions()
 	end
 end
@@ -125,41 +143,17 @@ function M.become_bonus_card(card)
 end
 
 local function reconcile_bonus_faces()
-	for _, card in ipairs(bonus_stack_model().cards() or {}) do
+	for _, card in ipairs(M.cards() or {}) do
 		if card and card.bonus_card and not card.REMOVED then
 			M.apply_gold_bonus_face(card)
 		end
 	end
 end
 
-function M.stack_y_lift()
-	return layout.stack_y_lift()
-end
-
-function M.stack_layout()
-	return layout.stack_layout()
-end
-
-function M.clears_gameplay_bounds()
-	return layout.clears_gameplay_bounds()
-end
-
-function M.target_position(index)
-	return layout.target_position(index)
-end
-
-function M.stack_index(card)
-	return bonus_stack_model().stack_index(card)
-end
-
-function M.contains(card)
-	return bonus_stack_model().contains(card)
-end
-
 function M.sync_positions()
-	if not bonus_stack_model().cards() or bonus_stack_model().is_animating() then return end
+	if not M.cards() or M.is_animating() then return end
 	local placement = G.placement_table and G.placement_table.area
-	for i, card in ipairs(bonus_stack_model().cards() or {}) do
+	for i, card in ipairs(M.cards() or {}) do
 		if card and not card.REMOVED then
 			if card.area == G.hand and M.is_bonus_card(card) then
 				M.return_card(card)
@@ -212,40 +206,24 @@ end
 function M.finalize_for_bonus_hand(wr)
 	local j = wr and wr.jumble
 	if j and j.boss_cards then
-		local deck_api = facade.deck()
+		local deck = deck_api()
 		for _, card in ipairs(j.boss_cards) do
 			if card and not card.REMOVED and not card.bonus_card then
-				deck_api.destroy_card(card)
+				deck.destroy_card(card)
 			end
 		end
 		j.boss_cards = nil
 	end
-	if not bonus_stack_model().is_animating() then
+	if not M.is_animating() then
 		M.sync_positions()
 	end
 end
 
 function M.remove_card(card)
 	bonus_stack_model().remove_card(card)
-	if bonus_stack_model().is_active() then
+	if M.is_active() then
 		M.sync_positions()
 	end
-end
-
-function M.return_card(card)
-	return layout.return_card(card)
-end
-
-function M.point_in_stack(x, y)
-	return layout.point_in_stack(x, y)
-end
-
-function M.drop_in_gutter(session, x, y)
-	return layout.drop_in_gutter(session, x, y)
-end
-
-function M.bonus_points_for(used_cards)
-	return bonus_stack_model().bonus_points_for(used_cards)
 end
 
 local function try_award_gutter_perk()
@@ -274,10 +252,6 @@ function M.consume_card(card)
 	end
 	deck_api().destroy_card(card)
 	try_award_gutter_perk()
-end
-
-function M.gutter_pixels(layout_arg)
-	return layout.gutter_pixels(layout_arg)
 end
 
 function M.draw_pass()

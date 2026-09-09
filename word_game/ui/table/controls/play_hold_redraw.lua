@@ -232,7 +232,7 @@ local function finish_redraw()
 		G.hand:relayout()
 	end
 	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.try_sync()
+		WORD_GAME.HandShuffle.sync()
 	end
 end
 

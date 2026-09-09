@@ -13,7 +13,7 @@ function M.return_card(card)
 	if not card or not card.bonus_card then
 		return false
 	end
-	local boss = WORD_GAME and WORD_GAME.BossWordStack
+	local boss = WORD_GAME and WORD_GAME.BonusStackUI
 	if boss and boss.return_card then
 		return boss.return_card(card)
 	end

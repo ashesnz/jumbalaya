@@ -154,8 +154,6 @@ function M.snap()
 	layout.snap()
 end
 
-M.sync_action_buttons = M.sync_visibility
-
 function M.invalidate_layout()
 	layout.invalidate_layout()
 end
@@ -185,10 +183,6 @@ function M.sync()
 	M.sync_position()
 	M.sync_visibility()
 	return M.buttons_present()
-end
-
-function M.try_sync()
-	return M.sync()
 end
 
 return M
