@@ -28,7 +28,7 @@ function M.card_area_width()
 	if placement_area and placement_area.T and (placement_area.T.w or 0) > 0 then
 		return placement_area.T.w
 	end
-	local ok, playout = pcall(require, "word_game.board.layout")
+	local ok, playout = pcall(require, "word_game.board.placement.layout")
 	if ok and playout and playout.area_width then
 		local pctx = {
 			card_w = function() return G.CARD_W or 1.0 end,

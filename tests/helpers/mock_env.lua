@@ -274,7 +274,7 @@ function M.setup()
 		_G.WORD_GAME.Play = flow
 	end
 
-	local ok_geo, jg = pcall(require, "word_game.board.jumble_geometry")
+	local ok_geo, jg = pcall(require, "word_game.board.jumble.geometry")
 	if ok_geo then
 		G.placement_table = G.placement_table or {}
 		G.placement_table.jumble_geometry = jg

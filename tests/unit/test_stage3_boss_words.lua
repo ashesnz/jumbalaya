@@ -53,8 +53,8 @@ T.describe("Stage 1-3 boss words", function()
 
 	T.it("keeps normal spacing for seven-letter and shorter rigid puzzles", function()
 		local jumble = require("word_game.model.jumble")
-		local geo = require("word_game.board.jumble_geometry")
-		local config = require("word_game.board.config")
+		local geo = require("word_game.board.jumble.geometry")
+		local config = require("word_game.board.placement.config")
 		local puzzle = { kind = "rigid", pattern = "_______" }
 		local slots = jumble.parse_slots(puzzle)
 		G.GAME = G.GAME or {}
@@ -80,8 +80,8 @@ T.describe("Stage 1-3 boss words", function()
 
 	T.it("uses a narrower placement boundary for three-letter rigid puzzles", function()
 		local jumble = require("word_game.model.jumble")
-		local geo = require("word_game.board.jumble_geometry")
-		local config = require("word_game.board.config")
+		local geo = require("word_game.board.jumble.geometry")
+		local config = require("word_game.board.placement.config")
 		local puzzle = { kind = "rigid", pattern = "C_T" }
 		local slots = jumble.parse_slots(puzzle)
 		G.GAME = G.GAME or {}
@@ -108,8 +108,8 @@ T.describe("Stage 1-3 boss words", function()
 
 	T.it("spaces nine boss slots without overlapping card widths", function()
 		local jumble = require("word_game.model.jumble")
-		local geo = require("word_game.board.jumble_geometry")
-		local board_config = require("word_game.board.config")
+		local geo = require("word_game.board.jumble.geometry")
+		local board_config = require("word_game.board.placement.config")
 		local puzzle = jumble.boss_puzzle(1, 3)
 		local slots = jumble.parse_slots(puzzle)
 		G.GAME = G.GAME or {}
@@ -344,8 +344,8 @@ T.describe("Stage 1-3 boss words", function()
 	T.it("places a hand card into a boss word blank slot", function()
 		mock_env.reset_game()
 		local jumble = require("word_game.model.jumble")
-		local snap = require("word_game.board.snap")
-		local geo = require("word_game.board.jumble_geometry")
+		local snap = require("word_game.board.placement.snap")
+		local geo = require("word_game.board.jumble.geometry")
 		local puzzle = jumble.boss_puzzle(1, 3)
 		local slots = jumble.parse_slots(puzzle)
 

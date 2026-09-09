@@ -1,8 +1,7 @@
 --[[ word_game/ui/hand_shuffle/placement_recall_anim.lua - Slide placement-row cards back to hand ]]
 
 local Scheduler = require "app.effects.timeline_scheduler"
-local bonus_model = require "word_game.model.jumble.bonus_stack"
-local bonus_gutter = require "word_game.board.bonus_gutter"
+local placement_word = require "word_game.model.jumble.placement_word"
 
 local M = {}
 
@@ -30,6 +29,10 @@ end
 
 local function placement_area()
 	return G.placement_table and G.placement_table.area
+end
+
+local function boss_word_stack()
+	return WORD_GAME and WORD_GAME.BossWordStack
 end
 
 local function sync_placement_from_jumble()
@@ -104,7 +107,10 @@ local function slide_card_to_bonus_stack(card, p_area, delay)
 			if card.area == p_area then
 				p_area:remove_card(card)
 			end
-			bonus_gutter.return_card(card)
+			local stack = boss_word_stack()
+			if stack and stack.return_card then
+				stack.return_card(card)
+			end
 			local tx, ty = card.T.x, card.T.y
 			local tr = card.T.r or 0
 			local arc = (G.CARD_H or 1.4) * ARC_FRAC
@@ -217,7 +223,6 @@ local function finish_recall()
 		end
 	end
 
-	local placement_word = require("word_game.model.jumble.placement_word")
 	placement_word.clear()
 
 	local area = placement_area()
@@ -255,7 +260,8 @@ function M.animate(on_complete)
 
 	local p_area = placement_area()
 	for i, card in ipairs(cards) do
-		if bonus_model.is_bonus_card(card) then
+		local stack = boss_word_stack()
+		if stack and stack.is_bonus_card(card) then
 			slide_card_to_bonus_stack(card, p_area, (i - 1) * STAGGER)
 		else
 			slide_card_to_hand(card, p_area, (i - 1) * STAGGER)

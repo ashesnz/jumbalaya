@@ -1,8 +1,7 @@
 --[[ word_game/ui/hand_shuffle/animate.lua - Hand shuffle bounce, recall, and settle ]]
 
-local bonus_model = require("word_game.model.jumble.bonus_stack")
-local bonus_gutter = require("word_game.board.bonus_gutter")
 local InputLock = require("word_game.model.run.input_lock")
+local placement_word = require("word_game.model.jumble.placement_word")
 local hand_shuffle_anim = require("word_game.ui.hand_shuffle.shuffle_anim")
 local hand_placement_recall_anim = require("word_game.ui.hand_shuffle.placement_recall_anim")
 
@@ -39,6 +38,10 @@ local function jumble_active()
 	return WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active()
 end
 
+local function boss_word_stack()
+	return WORD_GAME and WORD_GAME.BossWordStack
+end
+
 function M.recall_placement_cards(opts)
 	opts = opts or {}
 	if placement_area() and placement_area().cards then
@@ -49,8 +52,9 @@ function M.recall_placement_cards(opts)
 				G.placement_table:on_remove_card(card)
 			end
 			p_area:remove_card(card)
-			if bonus_model.is_bonus_card(card) then
-				bonus_gutter.return_card(card)
+			local stack = boss_word_stack()
+			if stack and stack.is_bonus_card(card) then
+				stack.return_card(card)
 			elseif G.hand then
 				G.hand:emplace(card)
 			end
@@ -69,7 +73,6 @@ function M.recall_placement_cards(opts)
 			G.placement_table.jumble_geometry.relayout(G.placement_table)
 		end
 	end
-	local placement_word = require("word_game.model.jumble.placement_word")
 	placement_word.clear()
 	if G.hand then
 		if G.hand.clear_selection then G.hand:clear_selection() end

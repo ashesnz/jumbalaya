@@ -1,6 +1,6 @@
 --[[ word_game/ui/boss_word_stack/draw.lua - Bonus gutter card pass ]]
 
-local model = require("word_game.model.jumble.bonus_stack")
+local BonusStack = require("word_game.model.jumble.bonus_stack")
 
 local M = {}
 
@@ -22,10 +22,10 @@ local function draw_label(layout)
 end
 
 function M.draw_pass(layout_mod)
-	local cards = model.cards()
+	local cards = BonusStack.cards()
 	if not cards then return end
 	local layout = layout_mod.stack_layout()
-	if stack().is_active() and not model.is_animating() then
+	if stack().is_active() and not BonusStack.is_animating() then
 		draw_label(layout)
 	end
 	local dragging = G.INPUT and G.INPUT.dragging and G.INPUT.dragging.target

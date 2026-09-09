@@ -128,7 +128,7 @@ T.describe("Jumble scoring and odometer", function()
 	end)
 
 	T.it("initializes round target to 25 points for stage 1-1 and 50 points for stage 1-2", function()
-		local pcfg = require("word_game.board.config")
+		local pcfg = require("word_game.board.placement.config")
 		T.assert_equal(pcfg.ANCHOR_PAD_Y_FRAC, 0.078, "Anchor pad frac lowered to 0.078")
 
 		local round_cfg = require("word_game.config.gameplay.round")

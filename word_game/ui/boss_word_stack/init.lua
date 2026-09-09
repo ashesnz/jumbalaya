@@ -1,6 +1,6 @@
 --[[ word_game/ui/boss_word_stack/init.lua - Bonus card stack (boss word rewards) ]]
 
-local model = require("word_game.model.jumble.bonus_stack")
+local BonusStack = require("word_game.model.jumble.bonus_stack")
 local layout = require("word_game.ui.boss_word_stack.layout")
 local draw = require("word_game.ui.boss_word_stack.draw")
 local animate = require("word_game.ui.boss_word_stack.animate")
@@ -11,16 +11,16 @@ local word_feedback = require("word_game.ui.feedback.word_feedback")
 
 local M = {}
 
-M.BONUS_POINTS = model.BONUS_POINTS
+M.BONUS_POINTS = BonusStack.BONUS_POINTS
 M.LEFT_WINDOW_MARGIN = layout.LEFT_WINDOW_MARGIN
 M.STACK_Y_LIFT_PX = layout.STACK_Y_LIFT_PX
 
 function M.is_animating()
-	return model.is_animating()
+	return BonusStack.is_animating()
 end
 
 function M.is_bonus_card(card)
-	return model.is_bonus_card(card)
+	return BonusStack.is_bonus_card(card)
 end
 
 function M.detach(card)
@@ -56,11 +56,11 @@ function M.detach(card)
 end
 
 function M.is_active()
-	return model.is_active()
+	return BonusStack.is_active()
 end
 
 function M.cards()
-	return model.cards()
+	return BonusStack.cards()
 end
 
 function M.set_cards(cards)
@@ -68,7 +68,7 @@ function M.set_cards(cards)
 end
 
 function M.clear()
-	model.clear()
+	BonusStack.clear()
 end
 
 function M.stage_cards(cards)
@@ -79,13 +79,13 @@ function M.stage_cards(cards)
 			staged[#staged + 1] = card
 		end
 	end
-	model.set_cards(staged)
-	model.set_animating(#staged > 0)
+	BonusStack.set_cards(staged)
+	BonusStack.set_animating(#staged > 0)
 end
 
 function M.on_hand_start(set, hand_index)
-	model.on_hand_start(set, hand_index)
-	if round_config.is_bonus_stack_hand(set, hand_index) and not model.is_animating() then
+	BonusStack.on_hand_start(set, hand_index)
+	if round_config.is_bonus_stack_hand(set, hand_index) and not BonusStack.is_animating() then
 		M.sync_positions()
 	end
 end
@@ -113,12 +113,12 @@ end
 
 function M.become_bonus_card(card)
 	if not card or card.REMOVED then return end
-	model.mark_bonus_card(card)
+	BonusStack.mark_bonus_card(card)
 	M.apply_gold_bonus_face(card)
 end
 
 local function reconcile_bonus_faces()
-	for _, card in ipairs(model.cards() or {}) do
+	for _, card in ipairs(BonusStack.cards() or {}) do
 		if card and card.bonus_card and not card.REMOVED then
 			M.apply_gold_bonus_face(card)
 		end
@@ -142,17 +142,17 @@ function M.target_position(index)
 end
 
 function M.stack_index(card)
-	return model.stack_index(card)
+	return BonusStack.stack_index(card)
 end
 
 function M.contains(card)
-	return model.contains(card)
+	return BonusStack.contains(card)
 end
 
 function M.sync_positions()
-	if not model.cards() or model.is_animating() then return end
+	if not BonusStack.cards() or BonusStack.is_animating() then return end
 	local placement = G.placement_table and G.placement_table.area
-	for i, card in ipairs(model.cards() or {}) do
+	for i, card in ipairs(BonusStack.cards() or {}) do
 		if card and not card.REMOVED then
 			if card.area == G.hand and M.is_bonus_card(card) then
 				M.return_card(card)
@@ -184,7 +184,7 @@ function M.sync_positions()
 end
 
 function M.promote_to_bonus(cards)
-	model.set_animating(false)
+	BonusStack.set_animating(false)
 	local promoted = {}
 	for _, card in ipairs(cards or {}) do
 		if card and not card.REMOVED then
@@ -193,8 +193,8 @@ function M.promote_to_bonus(cards)
 			promoted[#promoted + 1] = card
 		end
 	end
-	model.set_cards(promoted)
-	model.set_animating(false)
+	BonusStack.set_cards(promoted)
+	BonusStack.set_animating(false)
 	M.sync_positions()
 end
 
@@ -205,22 +205,22 @@ end
 function M.finalize_for_bonus_hand(wr)
 	local j = wr and wr.jumble
 	if j and j.boss_cards then
-		local deck_mod = require("word_game.model.cards.deck")
+		local deck_api = require("word_game.model.cards.deck")
 		for _, card in ipairs(j.boss_cards) do
 			if card and not card.REMOVED and not card.bonus_card then
-				deck_mod.destroy_card(card)
+				deck_api.destroy_card(card)
 			end
 		end
 		j.boss_cards = nil
 	end
-	if not model.is_animating() then
+	if not BonusStack.is_animating() then
 		M.sync_positions()
 	end
 end
 
 function M.remove_card(card)
-	model.remove_card(card)
-	if model.is_active() then
+	BonusStack.remove_card(card)
+	if BonusStack.is_active() then
 		M.sync_positions()
 	end
 end
@@ -238,7 +238,7 @@ function M.drop_in_gutter(session, x, y)
 end
 
 function M.bonus_points_for(used_cards)
-	return model.bonus_points_for(used_cards)
+	return BonusStack.bonus_points_for(used_cards)
 end
 
 local function try_award_gutter_perk()
@@ -255,7 +255,7 @@ local function try_award_gutter_perk()
 end
 
 function M.consume_card(card)
-	model.remove_card(card)
+	BonusStack.remove_card(card)
 	if card.area and card.area.remove_card then
 		card.area:remove_card(card)
 	elseif card.remove_from_area then
@@ -266,8 +266,7 @@ function M.consume_card(card)
 		try_award_gutter_perk()
 		return
 	end
-	local deck_mod = require("word_game.model.cards.deck")
-	deck_mod.destroy_card(card)
+	require("word_game.model.cards.deck").destroy_card(card)
 	try_award_gutter_perk()
 end
 

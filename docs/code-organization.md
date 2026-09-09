@@ -17,7 +17,7 @@ app/                     Application bootstrap, startup, lifecycle, persistence,
   startup/               profile, window, dealing, assets, menu_boot
 app/runtime/             Rendering, input, scene graph, UI classes, and shared runtime helpers
 word_game/
-  board/                 jumble pattern row (placement_table, snap, geometry)
+  board/                 jumble pattern row — placement/, jumble/, bonus/
   config/                static tuning: round targets, puzzles, perks, and runtime options
   model/                 gameplay state, card domain, deck, flow, and round rules
     game/                Game class: init, prep_stage, start_run, loop hooks
@@ -77,7 +77,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `BonusStack` / `BossWordStack` | Bonus gutter state/scoring (model) and animation/draw (UI) |
 | `Round` | Set/hand lifecycle, targets, perk-hand gating |
 | `Deck` / `Back` | Dealing; jumble branch in `model/deck/jumble.lua` |
-| `Board` | Jumble pattern row (`board/placement_table`, snap, geometry) |
+| `Board` | Jumble pattern row (`placement/table`, `placement/snap`, `jumble/geometry`, `bonus/gutter`) |
 | `TableBoard` | TABLE_BOARD update/draw coordinator |
 | `Layout` | TABLE_BOARD geometry (`layout/felt`, `sidebar/layout`, `layout/placement`) |
 | `ScoreBanner` | Jumble chips, multiplier, points-to-get label |
@@ -94,7 +94,17 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `SidebarStageButton` | Classic End Run / Next button in the sidebar |
 | Table input / overlays | `TableInput`, `CardInspect`, `Confetti`, `FloatUpText`, `HandClearFocus`, `EndMatch`, `TableDeck` |
 
-Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, etc. across packages instead of deep requires.
+### Require conventions
+
+| Caller | Rule |
+|--------|------|
+| `app/`, `tests/`, `devtools/` | Use `WORD_GAME.*` facade — no deep `word_game.model.*` requires unless testing internals |
+| `word_game/ui/` | `WORD_GAME` for model/board; local `require` for sibling UI modules only |
+| `word_game/board/` | Top-of-file `require` for model modules; no UI imports at load time |
+| `word_game/model/` | Top-of-file `require` for siblings (`model/jumble/*`, `model/run/*`, …); use `jumble/bonus_return` when model must return bonus cards to the gutter |
+| Inline `require(...)` inside functions | Avoid — hoist to module scope unless breaking a documented circular dependency |
+
+Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, `WORD_GAME.BonusStack`, `WORD_GAME.BossWordStack`, etc. across package boundaries instead of deep requires.
 
 ---
 
@@ -187,12 +197,19 @@ Runtime hand size (`WORD_GAME.HandSize.get()`) lives in `word_game/model/hand_si
 
 ### Board (`word_game/board/`)
 
-| File | Purpose |
+Only `init.lua` at package root — subpackages:
+
+| Path | Purpose |
 |------|---------|
-| `placement_table.lua` | Row host; wires geometry, snap, shimmer, fixed-letter draw |
-| `layout.lua` | Row width/height, screen position, alignment dispatch |
-| `jumble_geometry.lua` | Span/fixed screen geometry, puzzle row width, card alignment |
-| `snap.lua` | Shared drag helpers and jumble slot snap |
+| `placement/table.lua` | Row host (`PlacementTable`); wires geometry, snap, shimmer |
+| `placement/layout.lua` | Row width/height, screen position, alignment dispatch |
+| `placement/snap.lua` | Shared drag helpers and jumble slot snap |
+| `placement/shimmer.lua` | Lock-in outline FX around placed cards |
+| `placement/config.lua` | Row tunables (spacing, boss gap, shimmer duration) |
+| `jumble/geometry.lua` | Span/fixed screen geometry, puzzle row width, card alignment |
+| `bonus/gutter.lua` | Bonus stack layout and drag/snap hit tests |
+
+Fixed-letter tile draw is installed from `ui/table/board.lua` via `placement_table.draw_pattern_overlay`.
 
 ### Integration hooks
 

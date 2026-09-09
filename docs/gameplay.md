@@ -99,7 +99,7 @@ When a new stage starts:
 During a stage you see:
 
 - **Timeline fuse** — 60s countdown bar above the play column (`word_game/ui/perks/timeline_timer/`). Stage label (e.g. `1-1`) sits above the fuse with odometer rolls on hand advance. Burns green → red from the right.
-- **Pattern row** — fixed anchor letters plus slots you fill from your hand (`word_game/board/jumble_geometry.lua`, `word_game/ui/jumble_fixed_letters.lua`).
+- **Pattern row** — fixed anchor letters plus slots you fill from your hand (`word_game/board/jumble/geometry.lua`, `word_game/ui/table/jumble_fixed_letters.lua`).
 - **Your hand** — up to 7 letter cards at the bottom.
 - **Shuffle button** (left of hand) — reshuffles cards already in your hand.
 - **Play button** (right of hand) — submit a word or bank a solved puzzle; **hold 5 seconds** for a full-hand redraw.
@@ -125,7 +125,7 @@ Each stage loads one or more **patterns** from `word_game/config/jumble_puzzle_{
 | **Center** | `{ center = "T", min=3, max=7 }` | Word contains pinned center block |
 | **Rigid** | `"C_T"` | Fixed letters at `_` blanks you fill |
 
-**Fixed** letters render as non-draggable tiles. **Span/blank** slots accept cards from your hand. Snap and layout live under `word_game/board/snap.lua` and `word_game/board/jumble_geometry.lua`.
+**Fixed** letters render as non-draggable tiles. **Span/blank** slots accept cards from your hand. Snap and layout live under `word_game/board/placement/snap.lua` and `word_game/board/jumble/geometry.lua`.
 
 On hand deal, `ensure_playable_puzzle()` picks a solvable opening pattern when possible.
 
@@ -254,7 +254,7 @@ Non-release builds include a debug panel (Tab or **DBG** button):
 | Play / bank flow | `word_game/model/jumble_play/` |
 | Hand limits & targets | `word_game/config/round_config.lua` |
 | Jumble deck | `word_game/config/jumble.lua`, `word_game/model/deck/jumble.lua` |
-| Pattern layout & snap | `word_game/board/jumble_geometry.lua`, `word_game/board/snap.lua` |
+| Pattern layout & snap | `word_game/board/jumble/geometry.lua`, `word_game/board/placement/snap.lua` |
 | Score banner | `word_game/ui/score_banner.lua` |
 | Timeline & tokens | `word_game/ui/perks/timeline_timer/`, `word_game/ui/token_reward.lua` |
 | Perks | `word_game/config/perks.lua`, `word_game/model/perks/effects.lua`, `word_game/ui/perks/stamp/` |

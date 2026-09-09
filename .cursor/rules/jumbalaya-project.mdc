@@ -27,7 +27,7 @@ Agent docs: `AGENTS.md`, `.cursor/skills/jumbalaya/SKILL.md`
 ## Dependency rules
 
 - `word_game/ui/` → `app/core/` — never reverse
-- `word_game/board/` — snap/geometry only; no UI imports
+- `word_game/board/` — snap/geometry only (`placement/`, `jumble/`, `bonus/`); no UI imports at require time
 - Cross-package: use `WORD_GAME` facade (`word_game/init.lua`), not deep `require` from `app/` or `tests/`
 - Config = data; model = rules/state; ui = presentation — keep separated
 - Bootstrap load order lives in `app/bootstrap.lua` only; globals (`G`, `Card`, `LayoutView`) exist after boot

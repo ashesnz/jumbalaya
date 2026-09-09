@@ -28,7 +28,7 @@ word_game/
     perks/               Perk registry and effects
     feedback/            Model→UI attention text queue
     meta/                Profile/card discovery side effects
-  board/                 Jumble pattern row (placement_table, snap, geometry)
+  board/                 Jumble pattern row — placement/, jumble/, bonus/ subpackages
   ui/                    TABLE_BOARD presentation, layouts, controls, overlays
 devtools/                Development-only tools (stage jump, word hints)
 dictionary/              Offline word validation
@@ -41,8 +41,8 @@ AlphaCardsBackup/        Legacy Balatro reference — do not edit
 ## Dependency rules
 
 - `word_game/ui/` → `app/core/` — **never** reverse
-- `word_game/board/` — snap/geometry only; no UI imports
-- Cross-package access: use `WORD_GAME` facade (`word_game/init.lua`), not deep `require` from `app/` or `tests/`
+- `word_game/board/` — snap/geometry only; no UI imports at require time (fixed-letter overlay wired from `ui/table/board.lua`)
+- Cross-package access: use `WORD_GAME` facade (`word_game/init.lua`), not deep `require` from `app/` or `tests/`. Inside `word_game/model/`, hoist sibling requires to module scope; use `jumble/bonus_return` when model code must return bonus cards to the gutter.
 - Config = data; model = rules/state; ui = presentation — keep separated
 - Bootstrap load order lives in `app/bootstrap.lua` only; globals (`G`, `Card`, `LayoutView`) exist after boot
 - Model requests layout via `WORD_GAME.Layout.request_refresh()` — not direct geometry from model code
@@ -65,7 +65,7 @@ Removed / renamed (do not reintroduce):
 |--------|------|
 | `Jumble` / `Play` | Puzzle state and play orchestration |
 | `Run` | Run lifecycle facade (`Run.State`, `Run.Mode`, `Run.Scope`, …) |
-| `Board` | Pattern row geometry and snap |
+| `Board` | `PlacementTable`, `Config`, `Snap`, `JumbleGeometry`, `BonusGutter` |
 | `Layout` | TABLE_BOARD geometry (`layout/felt`, `sidebar/layout`, `layout/placement`) |
 | `Sidebar` | Right-hand HUD (stamps, deck, cards-left, End Run) |
 | `SidebarStageButton` | Classic End Run / Next button |

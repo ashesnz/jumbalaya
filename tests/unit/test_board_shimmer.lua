@@ -10,9 +10,9 @@ T.describe("placement row lock-in shimmer", function()
 	G.TILESCALE = G.TILESCALE or 4
 	G.TILESIZE = G.TILESIZE or 20
 
-	local config = require("word_game.board.config")
-	local shimmer = require("word_game.board.shimmer")
-	local snap = require("word_game.board.snap")
+	local config = require("word_game.board.placement.config")
+	local shimmer = require("word_game.board.placement.shimmer")
+	local snap = require("word_game.board.placement.snap")
 
 	local function make_session()
 		return {

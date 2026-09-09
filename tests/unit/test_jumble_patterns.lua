@@ -76,7 +76,7 @@ T.describe("Jumble pattern validation and geometry", function()
 
 	T.it("places cards around pinned center letter without overlapping fixed card", function()
 		local jumble_model = require("word_game.model.jumble")
-		local geo = require("word_game.board.jumble_geometry")
+		local geo = require("word_game.board.jumble.geometry")
 		local p = jumble_model.resolve_puzzle({ center = "L", pin_index = 2, min = 3, max = 7 })
 		local wr = { mode = "jumble", jumble = {} }
 		jumble_model.apply_puzzle(wr, p)
@@ -149,7 +149,7 @@ T.describe("Jumble pattern validation and geometry", function()
 	end)
 
 	T.it("calculates active length and bounds correctly for multi-letter suffix like _ A R", function()
-		local geo = require("word_game.board.jumble_geometry")
+		local geo = require("word_game.board.jumble.geometry")
 		local p_ar = jumble.resolve_puzzle({ suffix = "AR", min = 3, max = 7 })
 		local wr = {
 			mode = "jumble",
@@ -299,8 +299,8 @@ T.describe("Jumble pattern validation and geometry", function()
 	end)
 
 	T.it("anchors card area vertically consistently on initial load regardless of hand position state", function()
-		local geo = require("word_game.board.jumble_geometry")
-		local pcfg = require("word_game.board.config")
+		local geo = require("word_game.board.jumble.geometry")
+		local pcfg = require("word_game.board.placement.config")
 		local felt = { x = 0.8, y = 2.0, w = 15.4, h = 8.0 }
 		local area_h = 1.33
 		local pad_y = felt.h * pcfg.ANCHOR_PAD_Y_FRAC

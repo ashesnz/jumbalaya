@@ -1,6 +1,6 @@
 --[[ word_game/ui/boss_word_stack/animate.lua - Gold transform and fly-to-gutter choreography ]]
 
-local model = require("word_game.model.jumble.bonus_stack")
+local BonusStack = require("word_game.model.jumble.bonus_stack")
 local layout = require("word_game.ui.boss_word_stack.layout")
 
 local M = {}
@@ -139,7 +139,7 @@ end
 function M.animate_cards_to_stack(queue_event, _easing_mod, opts)
 	opts = opts or {}
 	local S = stack()
-	local cards = model.cards() or {}
+	local cards = BonusStack.cards() or {}
 	local card_delay = opts.card_delay or 0.45
 	local stagger = opts.stagger or 0.07
 	local hold = opts.hold or 0.3
@@ -150,10 +150,10 @@ function M.animate_cards_to_stack(queue_event, _easing_mod, opts)
 		return
 	end
 
-	model.set_animating(true)
+	BonusStack.set_animating(true)
 
 	local function reconcile_bonus_faces()
-		for _, card in ipairs(model.cards() or {}) do
+		for _, card in ipairs(BonusStack.cards() or {}) do
 			if card and card.bonus_card and not card.REMOVED then
 				S.apply_gold_bonus_face(card)
 			end
@@ -161,7 +161,7 @@ function M.animate_cards_to_stack(queue_event, _easing_mod, opts)
 	end
 
 	local function finish()
-		model.set_animating(false)
+		BonusStack.set_animating(false)
 		reconcile_bonus_faces()
 		if opts.on_complete then opts.on_complete() end
 	end

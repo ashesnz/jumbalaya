@@ -4,6 +4,19 @@
 
 local M = {}
 
+local jumble_fixed_letters
+
+local function ensure_placement_pattern_overlay(pt)
+	if not pt or pt.draw_pattern_overlay then return end
+	pt.draw_pattern_overlay = function(session)
+		if not (WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active()) then return end
+		if not jumble_fixed_letters then
+			jumble_fixed_letters = require("word_game.ui.table.jumble_fixed_letters")
+		end
+		jumble_fixed_letters.draw(session)
+	end
+end
+
 local function boss_sequence_active()
 	local felt = require("word_game.ui.layout.felt")
 	return felt.is_boss_sequence()
@@ -49,6 +62,7 @@ function M.update(game, dt)
 		WORD_GAME.BossWordAnnounce.update(dt)
 	end
 	if game.placement_table then
+		ensure_placement_pattern_overlay(game.placement_table)
 		game.placement_table:update(dt)
 	end
 end
@@ -111,6 +125,7 @@ function M.draw_spotlight_overlay(game, overlay)
 	end
 
 	if overlay.redraw_placement and G.placement_table and G.placement_table.draw_run_pass then
+		ensure_placement_pattern_overlay(G.placement_table)
 		G.placement_table:draw_run_pass(game)
 	end
 
@@ -151,6 +166,7 @@ end
 
 function M.draw_board(game)
 	if game.placement_table then
+		ensure_placement_pattern_overlay(game.placement_table)
 		game.placement_table:draw_run_pass(game)
 		M.draw_hand_pass(game)
 	end

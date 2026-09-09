@@ -7,6 +7,7 @@ local state = require("word_game.model.run.state")
 local M = {}
 
 local round = require("word_game.model.round")
+local bonus_stack = require("word_game.model.jumble.bonus_stack")
 local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
 local perk_effects = require("word_game.model.perks.effects")
 
@@ -54,7 +55,6 @@ end
 function M.compute_word_score(j, word, used_cards, opts)
 	opts = opts or {}
 	if not j or not word then return nil end
-	local bonus_stack = require("word_game.model.jumble.bonus_stack")
 	local wr = opts.wr or (G.GAME and G.GAME.word_round)
 	local old_pts = opts.old_pts or j.puzzle_points or 0
 	local old_multi = opts.old_multi or j.puzzle_multi or 1.0

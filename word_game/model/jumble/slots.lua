@@ -2,6 +2,8 @@
 
 return function(M)
 
+local bonus_return = require("word_game.model.jumble.bonus_return")
+
 local function geometry(session)
 	if session and session.jumble_geometry then
 		return session.jumble_geometry
@@ -403,8 +405,7 @@ function M.assign_card_to_blank(slot_index, card, insert_pos)
 		if slot.card and slot.card ~= card then
 			local displaced = slot.card
 			if displaced.bonus_card then
-				local bonus_stack = require("word_game.model.jumble.bonus_stack")
-				bonus_stack.return_card(displaced)
+				bonus_return.return_card(displaced)
 			elseif G.hand and displaced.area ~= G.hand then
 				G.hand:emplace(displaced)
 			end

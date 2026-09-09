@@ -122,7 +122,7 @@ T.describe("bonus gutter input", function()
 		bonus_stack.clear()
 		layout_globals()
 		G.hand = mock_hand()
-		local snap = require("word_game.board.snap")
+		local snap = require("word_game.board.placement.snap")
 		local card = {
 			ability = { letter = "B", bonus = 10 },
 			T = { x = 0.2, y = 4.5, w = 2, h = 2.8, r = 0 },

@@ -7,6 +7,7 @@ local hand_size_cfg = require("word_game.model.hand_size")
 return function(context)
 	local M = context.module
 	local LetterPalette = require "word_game.config.visuals.letter_card_palette"
+	local bonus_return = require("word_game.model.jumble.bonus_return")
 
 	function M.is_jumble_deck()
 		local wr = G.GAME and G.GAME.word_round
@@ -81,7 +82,6 @@ return function(context)
 	end
 
 	function M.clear_hand_and_placement()
-		local bonus_stack = require("word_game.model.jumble.bonus_stack")
 		local area = G.placement_table and G.placement_table.area
 		if area and area.cards then
 			for i = #area.cards, 1, -1 do
@@ -91,7 +91,7 @@ return function(context)
 				end
 				area:remove_card(card)
 				if card.bonus_card then
-					bonus_stack.return_card(card)
+					bonus_return.return_card(card)
 				elseif card.boss_temp then
 					M.destroy_card(card)
 				end
@@ -103,7 +103,7 @@ return function(context)
 				local card = G.hand.cards[i]
 				G.hand:remove_card(card)
 				if card.bonus_card then
-					bonus_stack.return_card(card)
+					bonus_return.return_card(card)
 				elseif card.boss_temp then
 					M.destroy_card(card)
 				end
