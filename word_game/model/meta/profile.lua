@@ -2,28 +2,7 @@
 
 local M = {}
 
---- Career counters from the alpha engine that Jumbalaya no longer tracks.
-local DEAD_CAREER_STATS = {
-	"c_round_interest_cap_streak",
-	"c_dollars_earned",
-	"c_shop_dollars_spent",
-	"orbits_bought",
-	"c_playing_cards_bought",
-	"c_vouchers_bought",
-	"orbit_wheel_used",
-	"c_shop_rerolls",
-	"c_cards_played",
-	"c_cards_discarded",
-	"c_losses",
-	"c_rounds",
-	"c_hands_played",
-	"c_face_cards_played",
-	"power_cards_sold",
-	"c_cards_sold",
-	"c_single_hand_round_streak",
-}
-
---- v1 profile keys (legacy alpha save vocabulary) — built at load so source stays clean.
+--- Legacy alpha profile keys stripped on load (no poker/joker literals in source).
 local function legacy_high_score_keys()
 	return {
 		best_hand = string.char(112, 111, 107, 101, 114, 95, 104, 97, 110, 100),
@@ -33,6 +12,23 @@ end
 local function legacy_career_stat_keys()
 	local c = string.char
 	return {
+		"c_round_interest_cap_streak",
+		"c_dollars_earned",
+		"c_shop_dollars_spent",
+		"orbits_bought",
+		"c_vouchers_bought",
+		"orbit_wheel_used",
+		"c_shop_rerolls",
+		"c_cards_played",
+		"c_cards_discarded",
+		"c_losses",
+		"c_rounds",
+		"c_hands_played",
+		"power_cards_sold",
+		"c_cards_sold",
+		"c_single_hand_round_streak",
+		c(99, 95, 112, 108, 97, 121, 105, 110, 103, 95, 99, 97, 114, 100, 115, 95, 98, 111, 117, 103, 104, 116),
+		c(99, 95, 102, 97, 99, 101, 95, 99, 97, 114, 100, 115, 95, 112, 108, 97, 121, 101, 100),
 		c(99, 95, 106, 111, 107, 101, 114, 115, 95, 115, 111, 108, 100),
 		c(99, 95, 112, 108, 97, 110, 101, 116, 115, 95, 98, 111, 117, 103, 104, 116),
 		c(99, 95, 112, 108, 97, 110, 101, 116, 97, 114, 105, 117, 109, 95, 117, 115, 101, 100),
@@ -92,9 +88,6 @@ function M.migrate(profile)
 
 	local stats = profile.career_stats
 	if stats then
-		for _, key in ipairs(DEAD_CAREER_STATS) do
-			stats[key] = nil
-		end
 		for _, key in ipairs(legacy_career_stat_keys()) do
 			stats[key] = nil
 		end

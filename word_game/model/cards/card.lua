@@ -13,7 +13,7 @@
 ---@field config table
 ---@field area CardArea|nil
 ---@field selected boolean
----@field playing_card any
+---@field letter_card_id number|nil
 ---@field children table
 ---@field added_to_deck boolean
 ---@field edition table|nil
@@ -61,9 +61,9 @@ local CARD_SCHEMA = {
 --- @param Y number initial y position (room units)
 --- @param W number width
 --- @param H number height
---- @param card table|nil base playing-card data, see `apply_face`
+--- @param card table|nil base letter-face data, see `apply_face`
 --- @param center table|nil center definition (companion/perk/etc.), see `apply_center`
---- @param params table|nil extra flags: `playing_card`, `viewed_back`,
+--- @param params table|nil extra flags: `letter_card_id`, `viewed_back`,
 ---   `bypass_discovery_center`, `bypass_discovery_ui`, `bypass_lock`, etc.
 function Card:construct(X, Y, W, H, card, center, params)
     local p = (type(params) == "table") and params or {}
@@ -88,7 +88,7 @@ function Card:construct(X, Y, W, H, card, center, params)
     self.children.shadow = EaseNode(0, 0, 0, 0)
 
     -- Flags forwarded from params.
-    self.playing_card = p.playing_card
+    self.letter_card_id = p.letter_card_id or p.playing_card
     self.back = p.viewed_back and "viewed_back" or "selected_back"
     self.bypass_discovery_center = p.bypass_discovery_center
     self.bypass_discovery_ui = p.bypass_discovery_ui
@@ -255,14 +255,22 @@ end
 -- here is rebuilt by construct()/apply_* on load instead of restored.
 local SAVED_FIELDS = {
     "no_ui", "facing", "sprite_facing", "selected", "debuff",
-    "slot", "added_to_deck", "label", "playing_card", "base", "sort_id",
+    "slot", "added_to_deck", "label", "letter_card_id", "base", "sort_id",
     "bypass_discovery_center", "bypass_discovery_ui", "bypass_lock",
     "ability", "pinned", "edition", "seal",
 }
 
 --- Current save-format version. Bump whenever the layout produced by
 --- `Card:save()` changes; loaders migrate older payloads via `migrate_*`.
-Card.SAVE_VERSION = 2
+Card.SAVE_VERSION = 3
+
+local function migrate_letter_card_id(state)
+    if state.playing_card ~= nil and state.letter_card_id == nil then
+        state.letter_card_id = state.playing_card
+    end
+    state.playing_card = nil
+    return state
+end
 
 --- Converts a v1 payload (flat SAVED_FIELDS plus a nested `save_fields` ref
 --- table) into the current versioned format.
@@ -271,14 +279,27 @@ local function migrate_v1_save(old)
     for _, field in ipairs(SAVED_FIELDS) do
         state[field] = old[field]
     end
+    if old.playing_card ~= nil and state.letter_card_id == nil then
+        state.letter_card_id = old.playing_card
+    end
+    migrate_letter_card_id(state)
     return {
-        version = 2,
+        version = Card.SAVE_VERSION,
         refs = {
             center = old.save_fields and old.save_fields.center,
             card = old.save_fields and old.save_fields.card,
         },
         params = old.params,
         state = state,
+    }
+end
+
+local function migrate_v2_save(saved)
+    return {
+        version = Card.SAVE_VERSION,
+        refs = saved.refs,
+        params = saved.params,
+        state = migrate_letter_card_id(saved.state or {}),
     }
 end
 
@@ -302,6 +323,8 @@ end
 function Card:load(saved)
     if type(saved) ~= "table" or not saved.version then
         saved = migrate_v1_save(saved or {})
+    elseif saved.version == 2 then
+        saved = migrate_v2_save(saved)
     end
 
     self.config = {
@@ -349,7 +372,7 @@ function Card:remove()
             end
         end
         for k, v in ipairs(G.letter_inventory) do
-            v.playing_card = k
+            v.letter_card_id = k
         end
     end
 

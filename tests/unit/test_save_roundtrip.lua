@@ -34,10 +34,10 @@ T.describe("save round-trip", function()
 	G.load_card_definitions = Game.load_card_definitions
 	G:load_card_definitions()
 
-	local function make_letter(letter, playing_card)
+	local function make_letter(letter, letter_card_id)
 		local front = G.LETTERS.faces["red_" .. letter]
 		local card = Card(0, 0, G.CARD_W, G.CARD_H, front, G.LETTERS.centers.letter_base, {
-			playing_card = playing_card,
+			letter_card_id = letter_card_id,
 			bypass_discovery_center = true,
 			bypass_discovery_ui = true,
 			bypass_lock = true,
@@ -45,7 +45,7 @@ T.describe("save round-trip", function()
 		card.ability.letter = letter
 		card.config.center_key = "letter_base"
 		card.config.card_key = "red_" .. letter
-		card.selected = playing_card == 2
+		card.selected = letter_card_id == 2
 		return card
 	end
 
@@ -56,7 +56,7 @@ T.describe("save round-trip", function()
 		T.assert_equal(payload.refs.center, "letter_base")
 		T.assert_equal(payload.refs.card, "red_Q")
 		T.assert_equal(payload.state.ability.letter, "Q")
-		T.assert_equal(payload.state.playing_card, 7)
+		T.assert_equal(payload.state.letter_card_id, 7)
 
 		local packed = pack_to_source({ card = payload })
 		local unpacked = unpack_source(packed)
@@ -69,7 +69,7 @@ T.describe("save round-trip", function()
 		T.assert_equal(restored.config.center_key, "letter_base")
 		T.assert_equal(restored.config.card_key, "red_Q")
 		T.assert_equal(restored.ability.letter, "Q")
-		T.assert_equal(restored.playing_card, 7)
+		T.assert_equal(restored.letter_card_id, 7)
 	end)
 
 	T.it("CardArea:save / load and restore_card_areas rebuild the hand", function()
@@ -96,11 +96,11 @@ T.describe("save round-trip", function()
 		T.assert_equal(#G.dealt_letters.cards, 2)
 		T.assert_equal(G.dealt_letters.cards[1].ability.letter, "C")
 		T.assert_equal(G.dealt_letters.cards[2].ability.letter, "A")
-		T.assert_equal(G.dealt_letters.cards[1].playing_card, 1)
-		T.assert_equal(G.dealt_letters.cards[2].playing_card, 2)
+		T.assert_equal(G.dealt_letters.cards[1].letter_card_id, 1)
+		T.assert_equal(G.dealt_letters.cards[2].letter_card_id, 2)
 		local indexed = 0
 		for _, card in ipairs(G.dealt_letters.cards) do
-			if card.playing_card then
+			if card.letter_card_id then
 				indexed = indexed + 1
 			end
 		end
@@ -149,7 +149,7 @@ T.describe("save round-trip", function()
 		T.assert_equal(restored.GAME.chips, 99)
 		T.assert_equal(restored.GAME.seed_streams.seed, "ABCD1234")
 		T.assert_equal(restored.cardAreas.dealt_letters.cards[1].state.ability.letter, "T")
-		T.assert_equal(restored.cardAreas.dealt_letters.cards[1].state.playing_card, 4)
+		T.assert_equal(restored.cardAreas.dealt_letters.cards[1].state.letter_card_id, 4)
 		love.filesystem.remove(path)
 	end)
 

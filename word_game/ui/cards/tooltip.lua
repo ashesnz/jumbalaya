@@ -45,11 +45,11 @@ function generate_card_ui(_c, full_UI_table, specific_vars, card_type, badges, h
 				name_nodes = {},
 			}
 		elseif specific_vars and (card_type == "Default" or card_type == "Enhanced") then
-			if specific_vars.playing_card then
+			if specific_vars.has_letter_face then
 				full_UI_table.name = {}
 				localize {
 					type = "other",
-					key = "playing_card",
+					key = "letter_face",
 					set = "Other",
 					nodes = full_UI_table.name,
 					vars = {
@@ -77,7 +77,7 @@ function generate_card_ui(_c, full_UI_table, specific_vars, card_type, badges, h
 	elseif specific_vars and specific_vars.debuffed then
 		localize {
 			type = "other",
-			key = specific_vars.playing_card and "playing_card" or "default",
+			key = specific_vars.has_letter_face and "letter_face" or "default",
 			nodes = desc_nodes,
 		}
 	elseif _c.set == "Default" and specific_vars then

@@ -69,18 +69,7 @@ steam_appid.txt
 # Save data & player profiles (written to project dir during dev by mistake)
 # LÖVE normally stores these in ~/Library/Application Support/LOVE/Jumbalaya/
 # ------------------------------------------------------------------------------
-*.jkr
-!version.jkr
-
-settings.jkr
-save.jkr
-profile.jkr
-meta.jkr
-metrics.jkr
-unlock_notify.jkr
-unlocked_jokers.jkr
-discovered_jokers.jkr
-alerted_jokers.jkr
+*.acs
 
 # Profile subdirectories (1/, 2/, 3/ save slots)
 [0-9]/

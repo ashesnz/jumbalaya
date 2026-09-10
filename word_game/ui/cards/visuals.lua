@@ -102,7 +102,7 @@ function Card:set_sprites(_center, _front)
 			local back_atlas = G.TEXTURE_ATLASES["playing_back"] or G.TEXTURE_ATLASES["centers"]
 			local default_back = G.LETTERS.centers and G.LETTERS.centers['deck_alpha']
 			local back_pos = G.TEXTURE_ATLASES["playing_back"] and {x = 0, y = 0}
-				or (self.params.bypass_back or (self.playing_card and G.GAME and G.GAME[self.back] and G.GAME[self.back].pos)
+				or (self.params.bypass_back or (self.letter_card_id and G.GAME and G.GAME[self.back] and G.GAME[self.back].pos)
 				or (default_back and default_back.pos) or {x = 0, y = 0})
 			self.children.back = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, back_atlas, back_pos)
 			self.children.back.states.hover = self.states.hover

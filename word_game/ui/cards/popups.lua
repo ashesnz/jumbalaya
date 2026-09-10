@@ -10,9 +10,9 @@ local Easing = require "app.effects.easing"
 function G.DEFINITIONS.card_focus_ui(card)
   local card_width = card.T.w
 
-  local playing_card_colour = deep_clone(G.C.WHITE)
-  playing_card_colour[4] = 1.5
-  if G.dealt_letters and card.area == G.dealt_letters then Easing.value{ref_table = playing_card_colour, ref_value = 4, mod = -1.5, timer = 'REAL', delay = 0.2, ease = 'quad'} end
+  local face_highlight_colour = deep_clone(G.C.WHITE)
+  face_highlight_colour[4] = 1.5
+  if G.dealt_letters and card.area == G.dealt_letters then Easing.value{ref_table = face_highlight_colour, ref_value = 4, mod = -1.5, timer = 'REAL', delay = 0.2, ease = 'quad'} end
 
   local t_card_norm = {x = card.T.x + card.T.w/2 - G.ROOM.T.w/2, y = card.T.y + card.T.h/2 - G.ROOM.T.h/2}
 
@@ -22,7 +22,7 @@ function G.DEFINITIONS.card_focus_ui(card)
       (not G.dealt_letters or card.area ~= G.dealt_letters) and {n=G.UI.ROOT, config = {align = 'cm', minw = card_width + 0.3, minh = card.T.h + 0.3, r = 0.1, colour = with_alpha(G.C.BLACK, 0.7), outline_colour = tint(G.C.MUTED_GREY, 0.5), outline = 1.5, line_emboss = 0.8}, nodes={
         {n=G.UI.ROW, config={id = 'ATTACH_TO_ME'}, nodes={}}
       }} or 
-      {n=G.UI.ROOT, config = {align = 'cm', minw = card_width, minh = card.T.h, r = 0.1, colour = playing_card_colour}, nodes={
+      {n=G.UI.ROOT, config = {align = 'cm', minw = card_width, minh = card.T.h, r = 0.1, colour = face_highlight_colour}, nodes={
         {n=G.UI.ROW, config={id = 'ATTACH_TO_ME'}, nodes={}}
       }},
     config = {
@@ -122,7 +122,7 @@ function G.DEFINITIONS.card_h_popup(card)
     if tip.card_type == 'Enhanced' then card_type = localize{type = 'name_text', key = card.config.center.key, set = 'Enhanced'} end
     card_type = (debuffed and tip.card_type ~= 'Enhanced') and localize('term_debuffed') or card_type
 
-    local disp_type, is_playing_card = 
+    local disp_type, is_letter_face = 
               (tip.card_type ~= 'Locked' and tip.card_type ~= 'Undiscovered' and tip.card_type ~= 'Default') or debuffed,
               tip.card_type == 'Enhanced' or tip.card_type == 'Default'
 
@@ -148,7 +148,7 @@ function G.DEFINITIONS.card_h_popup(card)
       {n=G.UI.COLUMN, config={align = "cm", func = 'show_infotip',object = EaseNode(),ref_table = next(info_boxes) and info_boxes or nil}, nodes={
         {n=G.UI.ROW, config={padding = outer_padding, r = 0.12, colour = tint(G.C.MUTED_GREY, 0.5), emboss = 0.07}, nodes={
           {n=G.UI.ROW, config={align = "cm", padding = 0.07, r = 0.1, colour = with_alpha(card_type_background, 0.8)}, nodes={
-            name_from_rows(tip.name, is_playing_card and G.C.WHITE or nil),
+            name_from_rows(tip.name, is_letter_face and G.C.WHITE or nil),
             desc_from_rows(tip.main),
             badges[1] and {n=G.UI.ROW, config={align = "cm", padding = 0.03}, nodes=badges} or nil,
           }}

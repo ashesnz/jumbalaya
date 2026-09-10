@@ -20,7 +20,7 @@ function M.rebuild_card_inventory()
 	for _, area in ipairs(inventory_areas()) do
 		if area and area.cards then
 			for _, card in ipairs(area.cards) do
-				local id = card.playing_card
+				local id = card.letter_card_id
 				if id and not seen[id] then
 					seen[id] = true
 					G.letter_inventory[#G.letter_inventory + 1] = card

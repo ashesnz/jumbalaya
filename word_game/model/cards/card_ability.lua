@@ -45,7 +45,7 @@ function Card:apply_center(center, initial, delay_sprites)
     if self.ability.set == "Companion" then
         self.label = self.ability.name
     end
-    if self.playing_card and not initial then
+    if self.letter_card_id and not initial then
     end
 end
 

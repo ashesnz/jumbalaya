@@ -40,10 +40,10 @@ function Card:build_card_tooltip()
         hide_desc = true
         hide_desc = true
     elseif self.debuff then
-        loc_vars = { no_name = self.ability.set == 'Default' or self.ability.set == 'Enhanced', debuffed = true, playing_card = not not self.base.colour, value = self.base.value, color_name = (self.base.color == 'red') and 'Red' or 'Black', colour = self.base.colour }
+        loc_vars = { no_name = self.ability.set == 'Default' or self.ability.set == 'Enhanced', debuffed = true, has_letter_face = not not self.base.colour, value = self.base.value, color_name = (self.base.color == 'red') and 'Red' or 'Black', colour = self.base.colour }
     elseif card_type == 'Default' or card_type == 'Enhanced' then
         local points = self.base.letter_index
-        loc_vars = { no_name = true, playing_card = not not self.base.colour, value = self.base.value, color_name = (self.base.color == 'red') and 'Red' or 'Black', colour = self.base.colour,
+        loc_vars = { no_name = true, has_letter_face = not not self.base.colour, value = self.base.value, color_name = (self.base.color == 'red') and 'Red' or 'Black', colour = self.base.colour,
                     letter_points = points and points > 0 and points or nil,
                     letter_bonus = (self.ability.bonus + (self.ability.perma_bonus or 0)) > 0 and (self.ability.bonus + (self.ability.perma_bonus or 0)) or nil,
                 }

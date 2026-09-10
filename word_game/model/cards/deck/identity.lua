@@ -185,7 +185,7 @@ return function(context)
 			deck_x, deck_y, G.CARD_W or 1, G.CARD_H or 1.4,
 			front,
 			M.letter_center(),
-			{ playing_card = G.letter_card_id }
+			{ letter_card_id = G.letter_card_id }
 		)
 		M.tag_card(card, letter, color)
 		G.letter_inventory = G.letter_inventory or {}
