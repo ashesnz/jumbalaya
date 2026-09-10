@@ -31,7 +31,12 @@ G.FUNCS.wipe_in = function(message, no_card, timefac, alt_colour)
     white = {1, 1, 1, 1}
   }
   if not no_card then
-    G.screenwipecard = Card(0, 0, G.CARD_W, G.CARD_H, pick_random(G.LETTERS.faces), G.LETTERS.centers.letter_base)
+    local face, center = nil, nil
+    local deck = rawget(_G, "WORD_GAME") and WORD_GAME.Deck
+    if deck and deck.random_wipe_card then
+      face, center = deck.random_wipe_card()
+    end
+    G.screenwipecard = Card(0, 0, G.CARD_W, G.CARD_H, face, center)
     G.screenwipecard.sprite_facing = 'back'
     G.screenwipecard.facing = 'back'
     G.screenwipecard.states.hover.can = false

@@ -71,7 +71,11 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 
 `word_game/init.lua` registers the domain facade as `WORD_GAME`. Presentation is `WORD_GAME_UI` from `word_game/ui/facade/exports.lua`. `app/`, `tests/`, and `devtools/` should use those tables instead of deep requires.
 
-**Runtime bus (unchanged):** live state stays on `G` — `G.GAME` for run snapshot, `G.FUNCS` for UIBox input by string. Facades are the supported cross-package API. New `G.GAME` keys need a owning module and a field in `types/game.lua`; new UI callbacks stay as `G.FUNCS` string names in `types/g_funcs.lua`. Model→UI uses `Presentation` (`types/presentation.lua`), not `G.FUNCS`.
+**Runtime bus (unchanged):** live state stays on `G` — `G.GAME` for run snapshot, `G.FUNCS` for UIBox input by string. Facades are the supported cross-package API.
+
+**Stop growing G:** every new feature ships with a **facade method + owned `G.GAME` field** (declared in `types/game.lua`) or it does not land. `G.FUNCS` names are UIBox registration only; logic lives on `WORD_GAME_UI` / app modules. Model→UI uses `Presentation`, not `G.FUNCS`.
+
+**Engine vs game:** `app/core/` is the Love scene graph (Card, CardArea, UIBox, input, loop). It must not reference jumble, letter faces, or card rules. Letter identity lives in `word_game/model/cards/` (`G.LETTERS`, `Deck.Registry`). Run save/restore lives in `word_game/model/persistence/` (`WORD_GAME.Persistence`); `app/core/persistence/save.lua` only snapshots CardAreas and delegates.
 
 ### Domain (`WORD_GAME`)
 

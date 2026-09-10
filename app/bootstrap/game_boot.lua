@@ -66,7 +66,7 @@ Updaters.register('early_board', 'sidebar_stage_button', function(game, dt)
 	end
 end)
 Updaters.register('early_board', 'table_board', function(game, dt)
-	if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME_UI.TableBoard then
+	if game.STAGE == game.STAGES.RUN and game.STATE == game.STATES.TABLE_BOARD and WORD_GAME_UI and WORD_GAME_UI.TableBoard then
 		WORD_GAME_UI.TableBoard.update(game, dt)
 	end
 end)

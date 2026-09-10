@@ -14,6 +14,21 @@ function M.install(ui, domain)
 	local Layout = ui.Layout
 	local Scheduler = require("app.effects.timeline_scheduler")
 	local backgrounds = require("word_game.ui.layout.backgrounds")
+	local CardFocus = require("app.core.input.card_focus")
+	local TableAreas = require("word_game.model.table_areas")
+
+	CardFocus.install({
+		hand_area = TableAreas.dealt_letters,
+		bonus_stack_contains = function(node)
+			return ui.BonusStackUI and ui.BonusStackUI.contains(node)
+		end,
+	})
+
+	G.notify_display_changed = function()
+		if G.STAGE == G.STAGES.RUN and ui.Sidebar then
+			ui.Sidebar.rebuild()
+		end
+	end
 
 	Presentation.on("layout_refresh", function()
 		LayoutRequest.refresh()

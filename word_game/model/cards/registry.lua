@@ -31,4 +31,12 @@ function M.locked()
 	return G and G.LETTERS and G.LETTERS.locked
 end
 
+--- Random letter face + base center for loading wipe card art.
+function M.random_wipe_card()
+	local faces = M.faces()
+	local centers = M.centers()
+	if not faces or not centers then return nil, nil end
+	return pick_random(faces), centers.letter_base
+end
+
 return M

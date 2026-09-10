@@ -1,4 +1,6 @@
 return function(InputRouter)
+local CardFocus = require("app.core.input.card_focus")
+
 function InputRouter:is_node_focusable(node)
 	local focusable = false
 	if node.T.y > G.ROOM.T.h + 3 then return false end
@@ -11,21 +13,14 @@ function InputRouter:is_node_focusable(node)
 		if self.screen_keyboard then
 			focusable = node.LayoutView == self.screen_keyboard and not not node.config.button
 		else
-			if node:is_kind(Card)
-				and (node.facing == 'front'
-					or node.area == G.dealt_letters
-					or node.area == (G.pattern_row and G.pattern_row.area)
-					or node == G.draw_pile
-					or node.bonus_card
-					or (WORD_GAME_UI.BonusStackUI and WORD_GAME_UI.BonusStackUI.contains(node)))
-				and node.states.hover.can
-				and not node.is_mascot then
-				focusable = true
+			if CardFocus.is_table_card(node) or CardFocus.bonus_stack_contains(node) then
+				if node.states.hover.can and not node.is_mascot then
+					focusable = true
+				end
 			end
 			if node.config and node.config.force_focus then focusable = true end
 			if node.config and node.config.button then focusable = true end
 			if node.config and node.config.focus_args then
-				-- Opt-out markers: 'none' type and funnel sources aren't directly focusable.
 				focusable = not (node.config.focus_args.type == 'none' or node.config.focus_args.funnel_from)
 			end
 		end

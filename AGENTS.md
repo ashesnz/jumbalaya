@@ -43,7 +43,7 @@ AlphaCardsBackup/        Legacy card-engine reference — do not edit
 - `word_game/ui/` → `app/core/` — **never** reverse
 - `word_game/board/` — snap/geometry only; no UI imports at require time (fixed-letter overlay wired from `ui/table/board.lua`)
 - Cross-package access: use `WORD_GAME` (domain, `word_game/init.lua`) and `WORD_GAME_UI` (presentation, `word_game/ui/facade/exports.lua`). Inside `word_game/model/`, hoist sibling requires to module scope; use `jumble/bonus_return` when model code must return bonus cards to the gutter.
-- **Live state stays on `G`:** `G.GAME` (run snapshot) and `G.FUNCS` (UI callbacks by string) are the runtime bus. Facades are the cross-package API — do not add unowned `G.GAME` fields; declare owners in `types/game.lua`. `G.FUNCS` names stay in `types/g_funcs.lua`.
+- **Live state stays on `G`:** `G.GAME` (run snapshot) and `G.FUNCS` (UIBox strings) are the runtime bus. **Every new feature:** facade method + owned `G.GAME` field in `types/game.lua`, or it does not ship. `G.FUNCS` = registration only; logic on `WORD_GAME_UI` / app modules. `app/core/` must not know jumble or letter faces — see `word_game/model/cards/` and `word_game/model/persistence/`.
 - Config = data; model = rules/state; ui = presentation — keep separated
 - Bootstrap load order lives in `app/bootstrap.lua` only; globals (`G`, `Card`, `LayoutView`) exist after boot
 - Model requests layout via `Layout.request_refresh()` / `Presentation.emit` — not UI modules or `G.FUNCS`. Presentation contract: `types/presentation.lua` (one handler per event, `on` overwrites, emit is notify-not-query).

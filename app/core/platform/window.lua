@@ -150,7 +150,7 @@ function love.resize(width, height)
 	if G.buttons then
 		G.buttons:recalculate()
 	end
-	if G.STAGE == G.STAGES.RUN and G.dealt_letters then
+	if G.STAGE == G.STAGES.RUN and G.STATE == G.STATES.TABLE_BOARD then
 		apply_run_layout()
 	elseif G.STAGE == G.STAGES.MAIN_MENU and layout_main_menu then
 		layout_main_menu()

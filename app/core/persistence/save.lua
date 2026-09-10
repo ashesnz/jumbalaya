@@ -1,7 +1,15 @@
 --[[
 	app/core/persistence/save.lua - run snapshots, progress/settings writes,
 	and session teardown.
+
+	Game-specific restore/inventory logic lives in word_game/model/persistence/
+	(WORD_GAME.Persistence). This module only orchestrates the engine snapshot
+	format and delegates domain work through the facade.
 ]]
+
+local function persistence()
+	return rawget(_G, "WORD_GAME") and WORD_GAME.Persistence
+end
 
 function snapshot_for_action(action)
 	G.action = action
@@ -13,7 +21,6 @@ end
 --- pending run write.
 function queue_run_snapshot()
 	if G.F_NO_SAVING == true then return end
-	local TableAreas = require("word_game.model.table_areas")
 	local card_areas = {}
 	for name, value in pairs(G) do
 		if type(value) == "table" and value.is_kind and value:is_kind(CardArea) then
@@ -30,11 +37,9 @@ function queue_run_snapshot()
 		BACK = G.GAME.selected_back:save(),
 		VERSION = G.VERSION,
 	}
-	if G.pattern_row and G.pattern_row.area then
-		local serialized = G.pattern_row.area:save()
-		if serialized then
-			G.ARGS.run_snapshot.cardAreas.pattern_row = serialized
-		end
+	local persist = persistence()
+	if persist and persist.RunSave then
+		persist.RunSave.append_pattern_row_snapshot(G.ARGS.run_snapshot)
 	end
 
 	G.WRITE_FLAGS = G.WRITE_FLAGS or {}
@@ -56,51 +61,20 @@ function delete_saved_run()
 	end
 end
 
---- Recollects the live letter cards spread across all areas after a load,
---- reassigning sequential ids and widening the sidebar to fit them.
+--- Recollects live letter cards after load (delegates to WORD_GAME.Persistence).
 function rebuild_card_inventory()
-	G.letter_inventory = {}
-	local seen = {}
-	local max_id = 0
-	local areas = {
-		G.draw_pile, G.dealt_letters, G.recycle_stash,
-		G.pattern_row and G.pattern_row.area,
-	}
-	for _, area in ipairs(areas) do
-		if area and area.cards then
-			for _, card in ipairs(area.cards) do
-				local id = card.playing_card
-				if id and not seen[id] then
-					seen[id] = true
-					G.letter_inventory[#G.letter_inventory + 1] = card
-					if id > max_id then max_id = id end
-				end
-			end
-		end
+	local persist = persistence()
+	if persist and persist.RunSave then
+		persist.RunSave.rebuild_card_inventory()
 	end
-	G.letter_card_id = max_id
-	if G.draw_pile and G.draw_pile.config and #G.letter_inventory > 0 then
-		G.draw_pile.config.card_limit = math.max(G.draw_pile.config.card_limit or 52, #G.letter_inventory)
-	end
-	if G.GAME then G.GAME.starting_deck_size = #G.letter_inventory end
 end
 
 --- Feeds each stored area blob back into its live counterpart.
 function restore_card_areas(save_table)
-	if not save_table or not save_table.cardAreas then return end
-	local TableAreas = require("word_game.model.table_areas")
-	for name, data in pairs(save_table.cardAreas) do
-		local key = TableAreas.resolve_save_key(name)
-		if key == "pattern_row" then
-			if G.pattern_row and G.pattern_row.area then
-				G.pattern_row.area:load(data)
-			end
-		else
-			local area = G[key]
-			if area and area.load then area:load(data) end
-		end
+	local persist = persistence()
+	if persist and persist.RunSave then
+		persist.RunSave.restore_card_areas(save_table)
 	end
-	rebuild_card_inventory()
 end
 
 --- Tears down all session UI/state (used when discarding a run or switching
@@ -142,24 +116,12 @@ function Game:discard_run()
 	G.STATE = -1
 end
 
---- Flags a progress write: unlock/discovery/alert badges per card definition,
---- plus the settings and profile payloads.
+--- Flags a progress write (delegates UDA assembly to WORD_GAME.Persistence).
 function Game:queue_progress_write()
-	G.ARGS.progress_payload = G.ARGS.progress_payload or {}
-	G.ARGS.progress_payload.UDA = clear_table(G.ARGS.progress_payload.UDA)
-	G.ARGS.progress_payload.SETTINGS = G.SETTINGS
-	G.ARGS.progress_payload.PROFILE = G.PROFILES[G.SETTINGS.profile]
-
-	for key, definition in pairs(G.LETTERS and G.LETTERS.centers or {}) do
-		G.ARGS.progress_payload.UDA[key] =
-			(definition.unlocked and 'u' or '')..
-			(definition.discovered and 'd' or '')..
-			(definition.alerted and 'a' or '')
+	local persist = persistence()
+	if persist and persist.Progress then
+		persist.Progress.queue_progress_write()
 	end
-
-	G.WRITE_FLAGS = G.WRITE_FLAGS or {}
-	G.WRITE_FLAGS.progress = true
-	G.WRITE_FLAGS.update_queued = true
 end
 
 function Game:queue_settings_write()

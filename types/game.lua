@@ -24,11 +24,14 @@
 	- `G.recycle_stash` — recycle / fly-off stash (was `G.discard`)
 	- `G.pattern_row` — pattern row controller; `.area` is the placement CardArea
 
-	Adding G.GAME fields:
-	- Assign an owning module below and declare the field on GameRunState here.
-	- Do not add ad-hoc keys from UI, tests, or one-off call sites without an owner.
-	- UI animation gates either write a documented flag (see InputLock) or go through
-	  run/busy.lua sync_from_ui for mirrored *_busy flags.
+	Adding fields — **do not grow G ad hoc**:
+	- **Run state** → `G.GAME` only. New feature needs a facade method + owned field on
+	  `GameRunState` (declare owner here) or it does not ship.
+	- **Live scene nodes** (CardArea, UIBox, overlays) may stay on `G` as engine/runtime
+	  wiring; prefer `WORD_GAME.Deck` / `Board` accessors over new top-level names.
+	- **Letter definitions** → `G.LETTERS` via `word_game/model/cards/registry.lua`, not
+	  ad-hoc globals. `app/core/` must not reference jumble, letters, or card faces.
+	- After `GameRunState` is fully closed, re-enable `inject-field` in `.emmyrc.json`.
 ]]
 
 ---@meta
@@ -55,7 +58,6 @@
 ---@field order any
 ---@field cost number
 ---@field label string|nil
----@field consumeable any
 ---@field discovered boolean|nil
 ---@field eternal_compat boolean|nil
 
@@ -65,7 +67,6 @@
 ---@field set string
 ---@field extra table|nil
 ---@field extra_value number
----@field consumeable any
 ---@field bonus number
 ---@field h_size number
 ---@field d_size number

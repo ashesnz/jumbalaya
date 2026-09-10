@@ -104,7 +104,7 @@ function Game:update(dt)
 end
 
 function Game:draw_spotlight_overlay(overlay)
-	if WORD_GAME_UI.TableBoard then
+	if G.STAGE == G.STAGES.RUN and G.STATE == G.STATES.TABLE_BOARD and WORD_GAME_UI and WORD_GAME_UI.TableBoard then
 		WORD_GAME_UI.TableBoard.draw_spotlight_overlay(self, overlay)
 	end
 end
@@ -145,12 +145,12 @@ function Game:render_board_pass()
 	end
 	perf_checkpoint('panels', 'draw')
 
-	if self.pattern_row and WORD_GAME_UI.TableBoard then
+	if G.STAGE == G.STAGES.RUN and G.STATE == G.STATES.TABLE_BOARD and WORD_GAME_UI and WORD_GAME_UI.TableBoard then
 		WORD_GAME_UI.TableBoard.draw_hud()
 		WORD_GAME_UI.TableBoard.draw_board(self)
 	end
 
-	if WORD_GAME_UI.TableBoard then
+	if WORD_GAME_UI and WORD_GAME_UI.TableBoard then
 		WORD_GAME_UI.TableBoard.draw_reward_passes()
 		WORD_GAME_UI.TableBoard.draw_attention_passes(self)
 	end
@@ -194,7 +194,7 @@ function Game:render_chrome_pass()
 		G.ALERT_ON_SCREEN = true
 	end
 
-	if self.pattern_row and WORD_GAME_UI.TableBoard then
+	if G.STAGE == G.STAGES.RUN and G.STATE == G.STATES.TABLE_BOARD and WORD_GAME_UI and WORD_GAME_UI.TableBoard then
 		WORD_GAME_UI.TableBoard.draw_card_interaction(self)
 	end
 

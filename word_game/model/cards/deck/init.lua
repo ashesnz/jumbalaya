@@ -30,5 +30,6 @@ local TableAreas = require("word_game.model.table_areas")
 Deck.dealt_letters = TableAreas.dealt_letters
 Deck.draw_pile = TableAreas.draw_pile
 Deck.recycle_stash = TableAreas.recycle_stash
+Deck.random_wipe_card = (require("word_game.model.cards.registry")).random_wipe_card
 
 return Deck
