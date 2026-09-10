@@ -54,12 +54,10 @@ function Game:define_constants()
         self.SETTINGS.GRAPHICS.texture_scaling = 1
         self.SETTINGS.WINDOW.screenmode = 'Borderless'
         self.SETTINGS.WINDOW.selected_display = 1
-    elseif os_name == 'Windows' then
+    elseif os_name == 'Windows' or os_name == 'OS X' or os_name == 'Linux' then
         self.F_DISCORD = true
+        -- Setting is visible; sending still requires the player opt-in toggle.
         self.F_CRASH_REPORTS = true
-    elseif os_name == 'OS X' then
-        self.F_DISCORD = true
-        self.F_CRASH_REPORTS = false
     end
 
     self.METRICS = {}

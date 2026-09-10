@@ -1,14 +1,25 @@
--- Crash reporting and the minimal fallback UI shown after an unhandled error.
+--[[
+	Crash fallback UI and opt-in mail to support@jumbalaya.co.
 
-local function encode_url(value)
-	local function char_to_hex(character)
-		return string.format("%%%02X", string.byte(character))
-	end
+	Unhandled errors always write error.log. If the player opted in to crash
+	reports in Game settings, the handler opens a mailto: draft — nothing is
+	POSTed to a remote collector.
+]]
 
-	return value
+local SUPPORT_EMAIL = "support@jumbalaya.co"
+local MAILTO_BODY_LIMIT = 1600
+
+local M = {
+	SUPPORT_EMAIL = SUPPORT_EMAIL,
+}
+
+local function encode_mailto(value)
+	return tostring(value or "")
+		:gsub("\r\n", "\n")
 		:gsub("\n", "\r\n")
-		:gsub("([^%w _%%%-%.~])", char_to_hex)
-		:gsub(" ", "+")
+		:gsub("([^%w%-_%.~])", function(character)
+			return string.format("%%%02X", string.byte(character))
+		end)
 end
 
 local function relevant_trace(message)
@@ -39,29 +50,73 @@ local function relevant_trace(message)
 	return file, function_line, trace
 end
 
-local function send_crash_report(message)
-	local http_thread = love.thread.newThread([[
-		local https = require("https")
-		CHANNEL = love.thread.getChannel("http_channel")
-
-		while true do
-			local request = CHANNEL:demand()
-			if request then
-				https.request(request)
-			end
-		end
-	]])
-	local http_channel = love.thread.getChannel("http_channel")
-	http_thread:start()
-
+local function report_body(message)
 	local file, function_line, trace = relevant_trace(message)
-	local endpoint = "https://958ha8ong3.execute-api.us-east-2.amazonaws.com/"
-	local query = "?error=" .. encode_url(message)
-		.. "&file=" .. encode_url(file)
-		.. "&function_line=" .. encode_url(function_line)
-		.. "&trace=" .. encode_url(trace)
-		.. "&version=" .. G.VERSION
-	http_channel:push(endpoint .. query)
+	local version = (G and G.VERSION) or VERSION or "?"
+	local body = "Jumbalaya crash report\n"
+		.. "version: " .. tostring(version) .. "\n"
+		.. "file: " .. tostring(file) .. "\n"
+		.. "where: " .. tostring(function_line) .. "\n\n"
+		.. tostring(message) .. "\n\n"
+		.. tostring(trace)
+	if #body > MAILTO_BODY_LIMIT then
+		body = string.sub(body, 1, MAILTO_BODY_LIMIT) .. "\n…(truncated; full log is error.log in the LÖVE save folder)"
+	end
+	return body
+end
+
+function M.crash_mailto_url(message)
+	local subject = "Jumbalaya crash (" .. tostring((G and G.VERSION) or VERSION or "?") .. ")"
+	return "mailto:" .. SUPPORT_EMAIL
+		.. "?subject=" .. encode_mailto(subject)
+		.. "&body=" .. encode_mailto(report_body(message))
+end
+
+function M.crash_reports_opted_in()
+	return G
+		and G.SETTINGS
+		and G.SETTINGS.crashreports
+		and _RELEASE_MODE
+		and G.F_CRASH_REPORTS
+		and true
+		or false
+end
+
+function M.open_crash_mail(message)
+	local url = M.crash_mailto_url(message)
+	if love.system and love.system.openURL then
+		pcall(love.system.openURL, url)
+	end
+	return url
+end
+
+function M.player_error_message(message, trace)
+	if not _RELEASE_MODE then
+		return "Oops! Something went wrong:\n"
+			.. message
+			.. "\n\n"
+			.. trace
+			.. "\n\n---\nFull error also printed in Terminal and saved to error.log"
+			.. "\nin your LÖVE save folder (see Terminal output for path)."
+			.. "\nEmail " .. SUPPORT_EMAIL .. " if you want help."
+	end
+
+	if M.crash_reports_opted_in() then
+		return "Oops! Something went wrong:\n"
+			.. message
+			.. "\n\nYour email app should open a draft to "
+			.. SUPPORT_EMAIL
+			.. " with useful info about what happened."
+			.. "\nYou still choose whether to send it. A full log is in error.log"
+			.. "\nin your LÖVE save folder. Turn Crash Reports Off in Game settings"
+			.. " to stop opening a draft."
+	end
+
+	return "Oops! Something went wrong:\n"
+		.. message
+		.. "\n\nPlease email " .. SUPPORT_EMAIL
+		.. " with error.log from your LÖVE save folder."
+		.. "\nOr turn Crash Reports On in Game settings to open a mail draft next time."
 end
 
 local function ensure_error_window()
@@ -71,35 +126,6 @@ local function ensure_error_window()
 
 	local success, status = pcall(love.window.setMode, 800, 600)
 	return success and status
-end
-
-local function error_message(message, trace)
-	if not _RELEASE_MODE then
-		return "Oops! Something went wrong:\n"
-			.. message
-			.. "\n\n"
-			.. trace
-			.. "\n\n---\nFull error also printed in Terminal and saved to error.log"
-			.. "\nin your LÖVE save folder (see Terminal output for path)."
-	end
-
-	local crash_reports_enabled = G
-		and G.SETTINGS
-		and G.SETTINGS.crashreports
-	if crash_reports_enabled then
-		return "Oops! Something went wrong:\n"
-			.. message
-			.. "\n\nSince you are opted in to sending crash reports, a crash report was sent"
-			.. " with useful info about what happened.\nDon't worry! There is no identifying"
-			.. " or personal information. If you would like\nto opt out, change the"
-			.. " 'Crash Report' setting to Off"
-	end
-
-	return "Oops! Something went wrong:\n"
-		.. message
-		.. "\n\nCrash Reports are set to Off. If you would like to send crash reports,"
-		.. " please opt in in the Game settings.\nThese crash reports help us avoid"
-		.. " issues like this in the future"
 end
 
 local function await_error_exit(message)
@@ -149,8 +175,8 @@ function love.errhand(message)
 		io.stderr:flush()
 	end
 
-	if G and G.SETTINGS and G.SETTINGS.crashreports and _RELEASE_MODE and G.F_CRASH_REPORTS then
-		send_crash_report(message)
+	if M.crash_reports_opted_in() then
+		M.open_crash_mail(message)
 	end
 
 	if not ensure_error_window() then
@@ -171,7 +197,7 @@ function love.errhand(message)
 	love.graphics.clear(love.graphics.getBackgroundColor())
 	love.graphics.origin()
 
-	await_error_exit(error_message(message, trace))
+	await_error_exit(M.player_error_message(message, trace))
 end
 
-return true
+return M

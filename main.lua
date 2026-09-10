@@ -5,7 +5,7 @@
 	  bootstrap.lua     dependency-ordered legacy module loading
 	  lifecycle.lua     frame loop and load/update/draw/quit callbacks
 	  input.lua         keyboard, pointer, and gamepad callbacks
-	  error_handler.lua crash reporting and fallback error UI
+	  error_handler.lua fallback error UI and opt-in mail to support
 	  window.lua        resize and viewport reconstruction
 ]]
 

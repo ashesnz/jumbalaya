@@ -158,8 +158,10 @@ end
 local face_keys = setmetatable({}, {__mode = "k"})
 local function face_key(definition)
 	if type(definition) ~= "table" then return nil end
-	if not next(face_keys) then
-		for key, def in pairs(G.P_CARDS) do face_keys[def] = key end
+	local cached = face_keys[definition]
+	if cached then return cached end
+	for key, def in pairs(G.P_CARDS or {}) do
+		face_keys[def] = key
 	end
 	return face_keys[definition]
 end

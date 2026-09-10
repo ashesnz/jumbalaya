@@ -28,9 +28,9 @@ return {
     ["ui_high_contrast_cards"]="High Contrast Cards",
     ["ui_set_crash_reports"]="Crash Reports",
     ["opt_crash_report_info"]={
-[1]="Crash reports will be sent to the developer",
-[2]="to help reduce issues in the future. No",
-[3]="identifying or personal info will be sent.",
+[1]="Opens a mail draft to support@jumbalaya.co",
+[2]="with the crash log. You still choose whether",
+[3]="to send it. Nothing is uploaded automatically.",
 },
     ["ui_set_monitor"]="Display Monitor",
     ["ui_set_windowmode"]="Window Mode",
