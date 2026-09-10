@@ -180,7 +180,7 @@ Runtime hand size (`WORD_GAME.HandSize.get()`) lives in `word_game/model/hand_si
 | `cards/` | Letter-card definitions, `Card` class, `deck/` dealing |
 | `perks/` | Registry, effect hooks, per-hand timer stub |
 | `feedback/` | Model-layer attention text queue (drained by `word_feedback`) |
-| `meta/` | `profile_stats` — card discovery persistence |
+| `persistence/` | Run save/restore (`run_save`), profile progress writes and card discovery (`progress`) |
 
 ### Cards (`word_game/model/cards/`)
 

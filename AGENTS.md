@@ -27,7 +27,7 @@ word_game/
     cards/               Card domain and deck/
     perks/               Perk registry and effects
     feedback/            Model→UI attention text queue
-    meta/                Profile/card discovery side effects
+    persistence/         Run save/restore and profile progress writes
   board/                 Jumble pattern row — placement/, jumble/, bonus/ subpackages
   ui/                    TABLE_BOARD presentation, layouts, controls, overlays
 devtools/                Development-only tools (stage jump, word hints)

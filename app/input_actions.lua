@@ -43,9 +43,6 @@ end
 
 function M.key_hold(controller, key, dt)
     if key == 'r' and not G.SETTINGS.paused and controller.held_key_times[key] > 0.7 then
-        if not G.GAME.won then
-            G.PROFILES[G.SETTINGS.profile].high_scores.current_streak.amt = 0
-        end
         G:queue_settings_write()
         controller.held_key_times[key] = nil
         G.SETTINGS.current_setup = 'New Run'
