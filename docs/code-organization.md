@@ -59,7 +59,7 @@ Callbacks are grouped by responsibility under `app/callbacks/` and `word_game/ui
 
 `app/bootstrap.lua` loads callbacks in dependency order and wires input actions from `app/input_actions.lua` so `app/core/input/router.lua` does not require application code.
 
-Obsolete collection, challenge, tutorial, promotional, social, and poker-only callbacks are removed with their active UI bindings rather than relocated into Jumbalaya packages.
+Obsolete collection, challenge, and legacy alpha callbacks are removed with their active UI bindings rather than relocated into Jumbalaya packages.
 
 ### Pivot note
 

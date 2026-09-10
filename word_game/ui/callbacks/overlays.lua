@@ -55,12 +55,12 @@ function M.install()
 			_infotip_object.config.set = e.config.ref_table.label
 			e.config.disable_button = true
 			Scheduler.add{mode = 'delayed', delay = 0.06, blockable = false, blocking = false, func = function()
-				play_sfx('tarot2', 0.76, 0.4);return true end}
+				play_sfx('generic1', 0.76, 0.4);return true end}
 
 			Scheduler.add{mode = 'delayed', delay = 0.35, blockable = false, blocking = false, func = function()
 				e.config.disable_button = nil;return true end}
 				e.config.button = 'change_lang'
-			play_sfx('tarot2', 1, 0.4)
+			play_sfx('generic1', 1, 0.4)
 		end
 	end
 

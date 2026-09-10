@@ -27,4 +27,5 @@ return {
 	BonusStack = require("word_game.model.jumble.bonus_stack"),
 	VoucherDiscard = require("word_game.model.perks.voucher_discard"),
 	Persistence = require("word_game.model.persistence"),
+	Meta = require("word_game.model.meta"),
 }

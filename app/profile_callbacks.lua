@@ -88,12 +88,12 @@ G.FUNCS.delete_profile = function(e)
     warning_text.config.shadow = true
     e.config.disable_button = true
     Scheduler.add{mode = 'delayed', delay = 0.06, blockable = false, blocking = false, func = function()
-      play_sfx('tarot2', 0.76, 0.4);return true end}
+      play_sfx('generic1', 0.76, 0.4);return true end}
 
     Scheduler.add{mode = 'delayed', delay = 0.35, blockable = false, blocking = false, func = function()
       e.config.disable_button = nil;return true end}
 
-    play_sfx('tarot2', 1, 0.4)
+    play_sfx('generic1', 1, 0.4)
   else
     love.filesystem.remove(G.focused_profile..'/'..'profile.acs')
     love.filesystem.remove(G.focused_profile..'/'..'save.acs')

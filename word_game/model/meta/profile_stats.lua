@@ -2,7 +2,9 @@
 
 local Scheduler = require "app.effects.timeline_scheduler"
 
-function discover_card(card)
+local M = {}
+
+function M.discover_card(card)
 	if not card or card.discovered or card.wip then return end
 	if G.GAME and (G.GAME.seeded or G.GAME.challenge) then return end
 	card.discovered = true
@@ -13,3 +15,8 @@ function discover_card(card)
 		end,
 	}
 end
+
+-- Card model loads before WORD_GAME; keep global for card_ability.lua.
+discover_card = M.discover_card
+
+return M
