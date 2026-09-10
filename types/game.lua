@@ -70,8 +70,6 @@
 ---@field puzzle_points number
 ---@field puzzle_multi number
 ---@field puzzle_words string[]
----@field deadline number|nil
----@field time_left number|nil
 ---@field puzzle table|nil
 ---@field pattern string|nil
 ---@field slots JumbleSlot[]|nil
@@ -106,6 +104,10 @@
 ---@field starting_params { hand_size: number, usable_slots: number }|nil
 ---@field word_round WordRound|nil
 ---@field timeline_seconds number|nil
+---@field timeline_duration number|nil
+---@field timeline_active boolean|nil
+---@field timeline_frozen boolean|nil
+---@field timeline_boss_override boolean|nil
 ---@field timeline_goal_reached boolean|nil
 ---@field timeline_progress_target number|nil
 ---@field trade_ui_busy boolean|nil

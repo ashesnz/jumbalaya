@@ -4,6 +4,21 @@
 
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
+local Timeline = require("word_game.model.run.timeline")
+
+local function ensure_time_run_fuse()
+	mock_env.reset_game()
+	G.GAME.run_mode = "time_run"
+	WORD_GAME = WORD_GAME or {}
+	WORD_GAME.Timeline = Timeline
+end
+
+local function tick_fuse(tt, dt)
+	Timeline.update(dt)
+	if tt.sync_from_model then
+		tt.sync_from_model()
+	end
+end
 
 T.describe("Timeline Timer & Shape Math", function()
 	T.it("generates mathematical polygon vertices with rounded corners and slanted right edge", function()
@@ -41,26 +56,24 @@ T.describe("Timeline Timer & Shape Math", function()
 	end)
 
 	T.it("initializes to 60s duration and decrements over 60 seconds", function()
+		ensure_time_run_fuse()
 		local tt = require("word_game.ui.perks.timeline_timer")
 		tt.reset()
 		T.assert_equal(tt.TOTAL_DURATION, 60.0)
 		T.assert_equal(tt.time_remaining, 60.0)
 
-		-- Update 15s
-		tt.update(15.0)
+		tick_fuse(tt, 15.0)
 		T.assert_almost_equal(tt.time_remaining, 45.0, 0.01)
 
-		-- Update another 40s (total 55s)
-		tt.update(40.0)
+		tick_fuse(tt, 40.0)
 		T.assert_almost_equal(tt.time_remaining, 5.0, 0.01)
 
-		-- Update 10s (reaches 0 and clamps)
-		tt.update(10.0)
+		tick_fuse(tt, 10.0)
 		T.assert_equal(tt.time_remaining, 0.0, "Timer must clamp at 0")
 	end)
 
 	T.it("resets back to 60s when a new hand is started", function()
-		mock_env.reset_game()
+		ensure_time_run_fuse()
 		WORD_GAME_UI.Sidebar = {
 			refresh = function() end,
 			clear_hand = function() end,
@@ -81,7 +94,7 @@ T.describe("Timeline Timer & Shape Math", function()
 		})
 
 		tt.reset()
-		tt.update(30.0)
+		tick_fuse(tt, 30.0)
 		T.assert_almost_equal(tt.time_remaining, 30.0, 0.01)
 
 		-- Start new hand
@@ -126,10 +139,11 @@ T.describe("Timeline Timer & Shape Math", function()
 	end)
 
 	T.it("freezes reward display to whole seconds matching token count", function()
+		ensure_time_run_fuse()
 		local tt = require("word_game.ui.perks.timeline_timer")
 		tt.reset()
-		tt.update(49.2)
-		tt.freeze_reward_display(math.floor(49.2))
+		tick_fuse(tt, 10.8)
+		tt.freeze_reward_display(math.floor(G.GAME.timeline_seconds))
 		T.assert_equal(tt.time_remaining, 49)
 		T.assert_false(tt.is_active)
 		T.assert_true(tt.frozen_for_reward)
@@ -352,14 +366,13 @@ T.describe("Timeline Timer & Shape Math", function()
 	end)
 
 	T.it("pauses countdown until resumed or reset", function()
-		mock_env.reset_game()
-		G.GAME.run_mode = "time_run"
+		ensure_time_run_fuse()
 		local tt = require("word_game.ui.perks.timeline_timer")
 		tt.reset()
-		tt.update(10.0)
+		tick_fuse(tt, 10.0)
 		T.assert_almost_equal(tt.time_remaining, 50.0, 0.01)
 		tt.pause()
-		tt.update(5.0)
+		tick_fuse(tt, 5.0)
 		T.assert_almost_equal(tt.time_remaining, 50.0, 0.01, "Paused timer must not decrement")
 		tt.reset(60.0)
 		T.assert_equal(tt.time_remaining, 60.0)
@@ -411,7 +424,7 @@ T.describe("Timeline Timer & Shape Math", function()
 	end)
 
 	T.it("hides the slider then arms a 60s countdown that scales back in", function()
-		mock_env.reset_game()
+		ensure_time_run_fuse()
 		G.GAME.run_mode = "classic"
 		local tt = require("word_game.ui.perks.timeline_timer")
 		G.GAME.word_round = {
@@ -443,6 +456,7 @@ T.describe("Timeline Timer & Shape Math", function()
 		tt.reveal_countdown_timer(0.4, function() shown = true end)
 		T.assert_true(tt.is_active, "Timer should start when the fuse appears")
 		tt.update(0.5)
+		tick_fuse(tt, 0.5)
 		T.assert_true(shown)
 		T.assert_almost_equal(tt.intro_visible, 1, 0.01)
 		T.assert_true(tt.time_remaining < 60, "Armed fuse should tick once revealed")
@@ -450,7 +464,7 @@ T.describe("Timeline Timer & Shape Math", function()
 	end)
 
 	T.it("clears the boss countdown override when a new classic hand starts", function()
-		mock_env.reset_game()
+		ensure_time_run_fuse()
 		G.GAME.run_mode = "classic"
 		local tt = require("word_game.ui.perks.timeline_timer")
 		tt.arm_boss_countdown(60)

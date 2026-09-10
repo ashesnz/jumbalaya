@@ -59,6 +59,11 @@ local Busy = require "word_game.model.run.busy"
 Updaters.register('early_board', 'busy_flags', function()
 	Busy.sync_from_ui(WORD_GAME_UI)
 end)
+Updaters.register('early_board', 'timeline_fuse', function(game, dt)
+	if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME and WORD_GAME.Timeline then
+		WORD_GAME.Timeline.update(dt)
+	end
+end)
 Updaters.register('early_board', 'sidebar_stage_button', function(game, dt)
 	if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME_UI and WORD_GAME_UI.SidebarStageButton then
 		WORD_GAME_UI.SidebarStageButton.update(dt)

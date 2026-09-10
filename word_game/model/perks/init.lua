@@ -2,7 +2,6 @@
 
 return {
 	Registry = require("word_game.model.perks.registry"),
-	Timer = require("word_game.model.perks.timer"),
 	Effects = require("word_game.model.perks.effects"),
 	VoucherDiscard = require("word_game.model.perks.voucher_discard"),
 }

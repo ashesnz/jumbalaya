@@ -82,9 +82,10 @@ function M.earned_amount()
 	if RunMode.is_classic() then
 		return math.floor(banked_score())
 	end
-	local tt = WORD_GAME and WORD_GAME_UI.TimelineTimer
-	if not tt then return 0 end
-	return math.floor(tt.time_remaining or 0)
+	if WORD_GAME and WORD_GAME.Timeline then
+		return math.floor(WORD_GAME.Timeline.seconds_remaining())
+	end
+	return 0
 end
 
 function M.capture_timer()
@@ -104,10 +105,17 @@ function M.capture_reward()
 		return
 	end
 	if captured_time ~= nil then return end
-	local tt = WORD_GAME and WORD_GAME_UI.TimelineTimer
-	if not tt then return end
-	captured_time = tt.time_remaining or 0
-	tt.is_active = false
+	if WORD_GAME and WORD_GAME.Timeline then
+		captured_time = WORD_GAME.Timeline.seconds_remaining()
+		if captured_time == math.huge then
+			captured_time = 0
+		end
+		WORD_GAME.Timeline.freeze(captured_time)
+	elseif WORD_GAME_UI.TimelineTimer then
+		local tt = WORD_GAME_UI.TimelineTimer
+		captured_time = tt.time_remaining or 0
+		tt.is_active = false
+	end
 end
 
 function M.is_active()

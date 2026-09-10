@@ -9,7 +9,6 @@ local facade = require("word_game.ui.facade")
 local StageLabel = require("word_game.ui.score_banner.stage_label")
 local timer_layout = require("word_game.ui.perks.timeline_timer.layout")
 local timer_draw = require("word_game.ui.perks.timeline_timer.draw")
-local Updaters = facade.updaters()
 
 local RunMode = facade.run_mode()
 
@@ -145,17 +144,33 @@ function M.is_progress_mode()
 	return RunMode.is_classic()
 end
 
-local function mirror_to_game()
+local function mirror_classic_to_game()
 	if not G or not G.GAME then return end
-	if M.is_progress_mode() then
-		G.GAME.timeline_goal_reached = M.goal_reached == true
-		G.GAME.timeline_progress_target = M.progress_target
-		G.GAME.timeline_seconds = nil
-	else
-		G.GAME.timeline_seconds = M.time_remaining
-		G.GAME.timeline_goal_reached = nil
-		G.GAME.timeline_progress_target = nil
+	if not M.is_progress_mode() then return end
+	G.GAME.timeline_goal_reached = M.goal_reached == true
+	G.GAME.timeline_progress_target = M.progress_target
+end
+
+function M.sync_from_model()
+	if not G or not G.GAME then return end
+	local g = G.GAME
+	if g.timeline_duration then
+		M.TOTAL_DURATION = g.timeline_duration
 	end
+	if g.timeline_seconds ~= nil then
+		M.time_remaining = g.timeline_seconds
+	end
+	if g.timeline_active ~= nil then
+		M.is_active = g.timeline_active
+	end
+	if g.timeline_frozen ~= nil then
+		M.frozen_for_reward = g.timeline_frozen
+	end
+	M.countdown_override = g.timeline_boss_override == true
+end
+
+local function sync_from_model()
+	M.sync_from_model()
 end
 
 local function reset_intro_visibility()
@@ -196,11 +211,10 @@ end
 
 --- Switch the HUD to a paused 60s fuse, hidden until `reveal_countdown_timer`.
 function M.arm_boss_countdown(duration)
-	M.countdown_override = true
-	M.TOTAL_DURATION = duration or 60.0
-	M.time_remaining = M.TOTAL_DURATION
-	M.is_active = false
-	M.frozen_for_reward = false
+	if WORD_GAME and WORD_GAME.Timeline then
+		WORD_GAME.Timeline.arm_boss(duration or 60.0)
+	end
+	sync_from_model()
 	M.sparks = {}
 	M.progress_score = 0
 	M.progress_pending = 0
@@ -256,7 +270,7 @@ function M.sync_progress()
 	M.smoke_active = M.puzzle_word_count >= SMOKE_WORD_THRESHOLD
 	M.goal_reached = (banked + pending) >= target
 	M.post_target_scoring = M.goal_reached
-	mirror_to_game()
+	mirror_classic_to_game()
 end
 
 function M.pulse_post_target()
@@ -336,10 +350,16 @@ end
 
 function M.reset(duration)
 	reset_intro_visibility()
-	M.TOTAL_DURATION = duration or 60.0
-	M.time_remaining = M.TOTAL_DURATION
-	M.is_active = not M.is_progress_mode()
-	M.frozen_for_reward = false
+	duration = duration or 60.0
+	if WORD_GAME and WORD_GAME.Timeline and not M.is_progress_mode() then
+		WORD_GAME.Timeline.reset(duration)
+		sync_from_model()
+	else
+		M.TOTAL_DURATION = duration
+		M.time_remaining = duration
+		M.is_active = not M.is_progress_mode()
+		M.frozen_for_reward = false
+	end
 	M.sparks = {}
 	M.progress_score = 0
 	M.progress_pending = 0
@@ -356,7 +376,7 @@ function M.reset(duration)
 	local wr = G.GAME and G.GAME.word_round
 	M.progress_target = math.max(1, (wr and wr.target) or 1)
 	M.sync_progress()
-	mirror_to_game()
+	mirror_classic_to_game()
 	StageLabel.sync()
 	if WORD_GAME and WORD_GAME_UI.SidebarStageButton and WORD_GAME_UI.SidebarStageButton.reset then
 		WORD_GAME_UI.SidebarStageButton.reset()
@@ -365,6 +385,9 @@ end
 
 function M.reset_progress(target)
 	reset_intro_visibility()
+	if WORD_GAME and WORD_GAME.Timeline then
+		WORD_GAME.Timeline.clear_boss_override()
+	end
 	M.is_active = false
 	M.frozen_for_reward = false
 	M.score_roll = nil
@@ -382,7 +405,7 @@ function M.reset_progress(target)
 	M.slide_boost_t = 0
 	M.display_combo = 0
 	M.sync_progress()
-	mirror_to_game()
+	mirror_classic_to_game()
 	StageLabel.sync()
 	if WORD_GAME and WORD_GAME_UI.SidebarStageButton and WORD_GAME_UI.SidebarStageButton.reset then
 		WORD_GAME_UI.SidebarStageButton.reset()
@@ -404,13 +427,17 @@ function M.start_score_roll(from, to, duration)
 end
 
 function M.pause()
-	M.is_active = false
-	M.frozen_for_reward = false
+	if WORD_GAME and WORD_GAME.Timeline then
+		WORD_GAME.Timeline.pause()
+	end
+	sync_from_model()
 end
 
 function M.resume()
-	M.is_active = true
-	M.frozen_for_reward = false
+	if WORD_GAME and WORD_GAME.Timeline then
+		WORD_GAME.Timeline.resume()
+	end
+	sync_from_model()
 end
 
 function M.freeze_reward_display(token_amount)
@@ -421,27 +448,41 @@ function M.freeze_reward_display(token_amount)
 		M.display_frac = clamp01(token_amount / math.max(1, M.progress_target or 1))
 		M.display_goal_frac = M.progress_goal_marker_fraction() or 1
 		M.goal_reached = token_amount >= (M.progress_target or 1)
+		M.is_active = false
+		M.frozen_for_reward = true
+		mirror_classic_to_game()
 	else
-		M.time_remaining = token_amount
+		if WORD_GAME and WORD_GAME.Timeline then
+			WORD_GAME.Timeline.freeze(token_amount)
+		end
+		sync_from_model()
 	end
-	M.is_active = false
-	M.frozen_for_reward = true
-	mirror_to_game()
 end
 
 function M.set_time(time_seconds)
-	M.time_remaining = math.max(0, math.min(M.TOTAL_DURATION, time_seconds or M.TOTAL_DURATION))
+	if WORD_GAME and WORD_GAME.Timeline and G and G.GAME then
+		local cap = G.GAME.timeline_duration or M.TOTAL_DURATION
+		G.GAME.timeline_seconds = math.max(0, math.min(cap, time_seconds or cap))
+		sync_from_model()
+	else
+		M.time_remaining = math.max(0, math.min(M.TOTAL_DURATION, time_seconds or M.TOTAL_DURATION))
+	end
 end
 
 function M.add_time(seconds)
-	seconds = seconds or 0
-	if seconds == 0 then return end
-	M.time_remaining = math.max(0, math.min(M.TOTAL_DURATION, M.time_remaining + seconds))
-	mirror_to_game()
+	if WORD_GAME and WORD_GAME.Timeline then
+		WORD_GAME.Timeline.add_seconds(seconds)
+		sync_from_model()
+	else
+		seconds = seconds or 0
+		if seconds == 0 then return end
+		M.time_remaining = math.max(0, math.min(M.TOTAL_DURATION, M.time_remaining + seconds))
+	end
 end
 
 function M.update(dt)
 	dt = dt or 0
+	sync_from_model()
 	update_intro_anim(dt)
 	if M.is_progress_mode() then
 		if M.score_roll then
@@ -477,9 +518,7 @@ function M.update(dt)
 		M.display_goal_frac = M.display_goal_frac + (goal_frac - M.display_goal_frac) * math.min(1, dt * lerp_speed)
 		M.update_display_intensity(dt)
 	else
-		if M.is_active and M.time_remaining > 0 then
-			M.time_remaining = math.max(0, M.time_remaining - dt)
-		end
+		sync_from_model()
 	end
 
 	-- Update spark particles
@@ -494,7 +533,7 @@ function M.update(dt)
 		end
 	end
 
-	mirror_to_game()
+	mirror_classic_to_game()
 
 	StageLabel.update(dt)
 
@@ -532,15 +571,5 @@ end
 function M.draw()
 	timer_draw.draw(M, timer_layout)
 end
-
-local function register_updater()
-	Updaters.register("early_board", "timeline_timer", function(game, dt)
-		if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME and WORD_GAME_UI.TimelineTimer then
-			WORD_GAME_UI.TimelineTimer.update(dt)
-		end
-	end)
-end
-
-register_updater()
 
 return M

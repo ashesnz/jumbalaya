@@ -68,6 +68,9 @@ function M.update(game, dt)
 		ensure_placement_pattern_overlay(game.placement_table)
 		game.placement_table:update(dt)
 	end
+	if WORD_GAME and WORD_GAME_UI.TimelineTimer and WORD_GAME_UI.TimelineTimer.update then
+		WORD_GAME_UI.TimelineTimer.update(dt)
+	end
 end
 
 function M.draw_spotlight_overlay(game, overlay)

@@ -85,7 +85,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `Board` | Jumble pattern row (`placement/table`, `placement/snap`, `jumble/geometry`, `bonus/gutter`) |
 | `HandSize` | `get()` — single hand-size accessor for dealing and layout |
 | `Busy` / `InputLock` | Table-busy flags on `G.GAME` and `is_table_busy()` |
-| `Timeline` | Domain reads of fuse seconds / classic goal (`G.GAME` mirror from `TimelineTimer`) |
+| `Timeline` | Authoritative fuse seconds on `G.GAME`; classic goal/target reads |
 | `Match` | `end_run()` — centralized discard-bin surrender / game-over transition |
 | `VoucherDiscard` | Discard-bin allowance rules (`model/perks/voucher_discard`) |
 | `Perks` | Perk model package (`model/perks`: registry, effects, hand timer) |
@@ -118,7 +118,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | Inline `require(...)` inside functions | Avoid — hoist to module scope unless breaking a documented circular dependency |
 | `Card` presentation | Model class in `model/cards/card.lua`; draw/tooltip mixins install from `ui/cards/bind.lua` at boot (not from model) |
 | Layout refresh | `word_game/model/layout/request.lua` sets `G.ARGS.pending_layout`; model code must not `require` `word_game.ui.layout` |
-| Timeline reads | `word_game/model/run/timeline.lua` reads `G.GAME.timeline_*` mirrored by `TimelineTimer`; model emits `timeline_apply_seconds` (never queries UI via `Presentation.emit`) |
+| Timeline reads | `word_game/model/run/timeline.lua` owns `G.GAME.timeline_*` and ticks on TABLE_BOARD `dt`; HUD syncs via `timeline_sync_from_model` |
 | UI reactions | `word_game/model/presentation.lua` emits events; `word_game/ui/presentation/install.lua` registers handlers at boot |
 
 Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, `WORD_GAME_UI.BonusStackUI`, etc. across package boundaries instead of deep requires.
@@ -133,13 +133,10 @@ Perk-adjacent code is grouped under `word_game/model/perks/` and `word_game/ui/p
 |-------|----------|-------|
 | Effect hooks | `model/perks/effects.lua` | Scoring, combo, hand size, timeline, redraw |
 | Registry / rolls | `model/perks/registry.lua` | Stamp reward selection |
-| Hand timer | `model/perks/timer.lua` | Per-puzzle deadline stub (`ENABLED = false`); distinct from fuse HUD |
 | Discard voucher | `ui/perks/discard_bin/` | Unlocks with first perk; drag hand cards onto imprint |
-| Timeline fuse | `ui/perks/timeline_timer/` | Self-registers updater |
+| Timeline fuse | `model/run/timeline.lua` + `ui/perks/timeline_timer/` | Authoritative fuse on `G.GAME.timeline_*`; HUD draw/sync only |
 | Stamp animation | `ui/perks/stamp/` | Rubber-stamp acquisition UI |
 | Stamp grid / voucher | `ui/perks/stamp/grid.lua`, `ui/perks/shared/voucher.lua` | Sidebar stamp layout and marketplace sprites |
-
-Future wiring targets: flip `timer.lua` `ENABLED` when hand deadlines ship.
 
 ---
 

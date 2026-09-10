@@ -1,7 +1,7 @@
 --[[ word_game/model/jumble/hand.lua - Jumble hand lifecycle, timer, and puzzle progression ]]
 
 return function(M)
-local hand_timer = require("word_game.model.perks.timer")
+local Timeline = require("word_game.model.run.timeline")
 local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
 local perk_effects = require("word_game.model.perks.effects")
 local bonus_return = require("word_game.model.jumble.bonus_return")
@@ -85,7 +85,6 @@ function M.start_hand(wr)
 	wr.mode = "jumble"
 	wr.target = wr.target or 20
 	modifier_effects.reset_stage_state(wr)
-	local timer_state = hand_timer.initial_state()
 	wr.jumble = {
 		total_score = 0,
 		puzzle_index = 1,
@@ -96,8 +95,6 @@ function M.start_hand(wr)
 		puzzle_multi = 1.0,
 		puzzle_words = {},
 		boss_word_active = false,
-		deadline = timer_state.deadline,
-		time_left = timer_state.time_left,
 	}
 
 	Presentation.emit("score_banner_jumble_hand_start")
@@ -196,11 +193,14 @@ function M.record_puzzle_word(word, opts)
 end
 
 function M.time_left()
-	return hand_timer.time_left(M.state())
+	return Timeline.seconds_remaining()
 end
 
+--- Returns true when the run fuse has expired (Time Run / boss countdown).
 function M.update_timer()
-	return hand_timer.update(M.state())
+	local remaining = Timeline.seconds_remaining()
+	if remaining == math.huge then return false end
+	return remaining <= 0
 end
 
 function M.refresh_hud()
