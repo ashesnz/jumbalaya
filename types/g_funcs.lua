@@ -1,16 +1,16 @@
 --[[
-	types/g_funcs.lua - G.FUNCS string catalog and UI-input bus contract (analyzer-only).
+	types/g_funcs.lua - G.FUNCS string catalog (analyzer-only).
 
-	UI definitions bind these by string. Implementations live in app/callbacks
-	and word_game/ui; model code must not call G.FUNCS.
+	UIBox binds these names on buttons and widgets. Implementations are
+	**registration only**:
 
-	Runtime bus:
-	- **G.FUNCS** — UIBox/button input dispatch by string name (this catalog).
-	- **G.GAME** — live run state (field owners: types/game.lua).
-	- **Presentation** — model→UI notify (types/presentation.lua).
+	  G.FUNCS.play_placement_word = WORD_GAME_UI.TableControls.play
 
-	Cross-package callers use WORD_GAME / WORD_GAME_UI facades; keep adding new
-	callback names here when wiring UIBox definitions — do not replace with ad-hoc globals.
+	Logic lives on WORD_GAME_UI / app callback modules. Model code must not
+	call G.FUNCS (use Presentation or facades).
+
+	Runtime bus: G.FUNCS (this catalog), G.GAME (types/game.lua),
+	Presentation (types/presentation.lua).
 ]]
 
 ---@meta
@@ -41,6 +41,9 @@
 ---| "can_apply_window_changes"
 ---| "apply_window_changes"
 ---| "cycle_option"
+---| "drag_slider"
+---| "slider_step"
+---| "flip_switch"
 ---| "set_button_pip"
 ---| "pulse_node"
 ---| "setup_run"
@@ -62,19 +65,19 @@
 ---| "wipe_out"
 ---| "shuffle_hand"
 ---| "return_placement_cards"
+---| "play_placement_word"
 ---| "jumble_next"
 ---| "trade_pick"
 ---| "trade_skip_add"
 ---| "trade_skip_remove"
 ---| "trade_skip"
----| "play_placement_word"
 ---| "ensure_table_board_sidebar"
 ---| "rebuild_table_board_sidebar"
 ---| "end_run_from_sidebar"
 ---| "classic_stage_next"
 ---| "first_play_tutorial_next"
 
---- UI input callback table on the live Game instance. String keys only — see GameFuncName.
+--- UIBox input dispatch on G. String keys only — see GameFuncName.
 ---@class GameFuncs
 ---@field [GameFuncName] fun(...: any)
 ---@field [string] fun(...: any)

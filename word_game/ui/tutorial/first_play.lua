@@ -418,8 +418,4 @@ function M.force_status_label()
 	return (s and s.first_play_tutorial_force) and "ON" or "OFF"
 end
 
-G.FUNCS.first_play_tutorial_next = function()
-	M.advance()
-end
-
 return M

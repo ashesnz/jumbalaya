@@ -8,19 +8,19 @@
 	  app.callbacks.run_lifecycle - start_run, go_to_menu, wipe transitions
 	  app.effects                - shared runtime effects (loaded separately in game_boot)
 
-	Word game callbacks (loaded eagerly after WORD_GAME facade):
-	  word_game.ui.callbacks.table_controls - shuffle_hand, jumble_next
-	  word_game.ui.callbacks.trade        - trade_*
-	  word_game.ui.callbacks.placement    - play_placement_word
+	Word game callbacks (registration only — logic on WORD_GAME_UI modules):
+	  word_game.ui.callbacks.table_controls - shuffle, play, recall, jumble_next
+	  word_game.ui.callbacks.trade            - trade_*
+	  word_game.ui.callbacks.tutorial         - first_play_tutorial_next
 
-	Instance-bound sidebar callbacks are registered via sidebar:install():
-	  word_game.ui.sidebar.funcs          - ensure/rebuild_table_board_sidebar, end_run_from_sidebar
+	Instance-bound sidebar callbacks (registration via sidebar:install()):
+	  word_game.ui.sidebar.funcs            - ensure/rebuild/end_run/classic_stage_next
 ]]
 
 local word_game_callbacks = {
 	"word_game.ui.callbacks.table_controls",
 	"word_game.ui.callbacks.trade",
-	"word_game.ui.callbacks.placement",
+	"word_game.ui.callbacks.tutorial",
 }
 
 for _, name in ipairs(word_game_callbacks) do

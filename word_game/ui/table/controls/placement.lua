@@ -1,4 +1,4 @@
---[[ word_game/ui/table/controls/placement.lua - Play button entry (G.FUNCS.play_placement_word) ]]
+--[[ word_game/ui/table/controls/placement.lua - Play button logic (registered as play_placement_word) ]]
 
 local facade = require("word_game.ui.facade")
 local word_feedback = require("word_game.ui.feedback.word_feedback")

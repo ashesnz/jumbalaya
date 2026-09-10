@@ -4,6 +4,7 @@
 	Runtime bus (live state stays on G):
 	- **G.GAME** — authoritative run snapshot; domain modules read/write through their owner.
 	- **G.FUNCS** — UI input callbacks by string name (catalog: types/g_funcs.lua).
+	  Logic lives on WORD_GAME_UI / app modules; G.FUNCS names are registration only.
 	- **Presentation** — model→UI notify (contract: types/presentation.lua).
 
 	Cross-package API:

@@ -158,7 +158,7 @@ function refit_viewport(w, h)
 
 	update_table_board_panel_attach()
 	apply_run_layout()
-	if G.STAGE == G.STAGES.RUN and G.FUNCS and G.FUNCS.rebuild_table_board_sidebar then
-		G.FUNCS.rebuild_table_board_sidebar()
+	if G.STAGE == G.STAGES.RUN and WORD_GAME_UI and WORD_GAME_UI.Sidebar then
+		WORD_GAME_UI.Sidebar.rebuild()
 	end
 end

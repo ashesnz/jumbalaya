@@ -117,6 +117,40 @@ function WordSidebar:clear_hand()
 	end
 end
 
+--- UIBox registration target (`ensure_table_board_sidebar`).
+function WordSidebar.ensure_table_board()
+	WordSidebar:ensure()
+end
+
+--- Relayout or recreate the sidebar HUD (display resize, etc.).
+function WordSidebar.rebuild()
+	if G.SIDEBAR_HUD then
+		hud_definition.relayout()
+	else
+		WordSidebar:ensure()
+	end
+end
+
+--- End Run / Next sidebar button press.
+function WordSidebar.end_run()
+	local stage_btn = WORD_GAME_UI.SidebarStageButton
+	if stage_btn and stage_btn.press then
+		stage_btn.press()
+		return
+	end
+	if WORD_GAME_UI.VoucherDiscard and WORD_GAME_UI.VoucherDiscard.end_run then
+		WORD_GAME_UI.VoucherDiscard.end_run()
+	end
+end
+
+--- Classic stage Next after target is met.
+function WordSidebar.classic_stage_next()
+	local stage_btn = WORD_GAME_UI.SidebarStageButton
+	if stage_btn and stage_btn.collect_and_advance then
+		stage_btn.collect_and_advance()
+	end
+end
+
 function WordSidebar:install()
 	sidebar_callbacks.install(self)
 end

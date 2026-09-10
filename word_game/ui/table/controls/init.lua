@@ -166,6 +166,19 @@ function M.shuffle_hand()
 	animate.shuffle_hand(M.placement_has_cards)
 end
 
+--- Play button: validate placement and resolve the word.
+function M.play()
+	require("word_game.ui.table.controls.placement").try_play()
+end
+
+--- Advance after a cleared jumble hand (Time Run proceed).
+function M.jumble_next()
+	if WORD_GAME and WORD_GAME.Play then
+		WORD_GAME.Play.jumble_next()
+	end
+	M.sync()
+end
+
 function M.ensure()
 	layout.ensure(M.visible, M.sync_visibility)
 end
