@@ -21,9 +21,7 @@
   },
   "diagnostics": {
     "disable": [
-      "undefined-field",
       "inject-field",
-      "need-check-nil",
       "param-type-mismatch",
       "assign-type-mismatch",
       "missing-parameter",

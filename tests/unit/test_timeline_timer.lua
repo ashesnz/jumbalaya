@@ -68,7 +68,17 @@ T.describe("Timeline Timer & Shape Math", function()
 		}
 		local tt = require("word_game.ui.perks.timeline_timer")
 		local round = require("word_game.model.round")
-		WORD_GAME.TimelineTimer = tt
+		mock_env.install_presentation({
+			TimelineTimer = tt,
+			Sidebar = WORD_GAME.Sidebar,
+			ScoreBanner = {
+				reset = function() end,
+				state = function() return { to_go_label = "SCORE", target = 0, remaining = 0 } end,
+				reset_jumble_score = function() end,
+			},
+			StageLabel = { sync = function() end },
+			BonusStackUI = { on_hand_start = function() end },
+		})
 
 		tt.reset()
 		tt.update(30.0)
@@ -321,7 +331,17 @@ T.describe("Timeline Timer & Shape Math", function()
 		}
 		local tt = require("word_game.ui.perks.timeline_timer")
 		local round = require("word_game.model.round")
-		WORD_GAME.TimelineTimer = tt
+		mock_env.install_presentation({
+			TimelineTimer = tt,
+			Sidebar = WORD_GAME.Sidebar,
+			ScoreBanner = {
+				reset = function() end,
+				state = function() return { to_go_label = "SCORE", target = 0, remaining = 0 } end,
+				reset_jumble_score = function() end,
+			},
+			StageLabel = { sync = function() end },
+			BonusStackUI = { on_hand_start = function() end },
+		})
 		G.GAME.word_round = { set = 1, hand_index = 1, target = 25, played_words = {} }
 
 		round.start_hand(1, 1)
@@ -355,6 +375,16 @@ T.describe("Timeline Timer & Shape Math", function()
 		}
 		local stage_label = require("word_game.ui.score_banner.stage_label")
 		local round = require("word_game.model.round")
+		mock_env.install_presentation({
+			Sidebar = WORD_GAME.Sidebar,
+			ScoreBanner = {
+				reset = function() end,
+				state = function() return { to_go_label = "SCORE", target = 0, remaining = 0 } end,
+				reset_jumble_score = function() end,
+			},
+			StageLabel = stage_label,
+			BonusStackUI = { on_hand_start = function() end },
+		})
 		stage_label.force_sync()
 		stage_label.left_count = 1
 		stage_label.right_count = 1

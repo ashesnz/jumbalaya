@@ -80,4 +80,4 @@ love tests
 emmylua_check . --severity warn
 ```
 
-Startup success alone does not verify jumble puzzle transitions, hold-to-redraw, token fly, or marketplace purchase — smoke-test those manually when touching UI flow.
+Headless coverage also includes `test_token_reward_fly.lua`, `test_marketplace_purchase_deal.lua`, and an end-to-end hold-redraw case in `test_play_hold_redraw.lua`. Smoke-test full animated flows in-game when touching UI flow.

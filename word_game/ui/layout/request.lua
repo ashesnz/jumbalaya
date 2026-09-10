@@ -1,8 +1,3 @@
-local M = {}
+local model_request = require("word_game.model.layout.request")
 
-function M.refresh()
-	G.ARGS = G.ARGS or {}
-	G.ARGS.pending_layout = true
-end
-
-return M
+return model_request

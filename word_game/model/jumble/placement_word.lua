@@ -1,35 +1,33 @@
 --[[ word_game/model/jumble/placement_word.lua - Placement row word preview on G.GAME ]]
 
 local round = require("word_game.model.round")
+local Presentation = require("word_game.model.presentation")
 
 local M = {}
+
+local function build_word(slots)
+	local jumble = package.loaded["word_game.model.jumble"]
+	if not jumble or not jumble.build_word then return "" end
+	return jumble.build_word(slots or {})
+end
 
 function M.clear()
 	if not G.GAME then return end
 	G.GAME.placement_word = ""
 	G.GAME.placement_word_valid = false
-	if WORD_GAME and WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.sync_points_to_get_preview then
-		WORD_GAME.ScoreBanner.sync_points_to_get_preview(true)
-	end
+	Presentation.emit("score_banner_sync_preview", true)
 end
 
 function M.refresh_from_jumble_slots(slots)
 	if not G.GAME then return end
-	local jumble = WORD_GAME and WORD_GAME.Jumble
-	if not jumble then
-		M.clear()
-		return
-	end
-	local word = jumble.build_word(slots or {})
+	local word = build_word(slots)
 	G.GAME.placement_word = word
 	if Dictionary and word ~= "" then
 		G.GAME.placement_word_valid = Dictionary.is_valid(word) and not round.is_word_played(word)
 	else
 		G.GAME.placement_word_valid = false
 	end
-	if WORD_GAME and WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.sync_points_to_get_preview then
-		WORD_GAME.ScoreBanner.sync_points_to_get_preview(true)
-	end
+	Presentation.emit("score_banner_sync_preview", true)
 end
 
 return M

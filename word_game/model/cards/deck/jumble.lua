@@ -489,6 +489,6 @@ return function(context)
 			G.hand:set_ranks()
 			G.hand:relayout()
 		end
-		require("word_game.ui.layout").request_refresh()
+		require("word_game.model.layout.request").refresh()
 	end
 end

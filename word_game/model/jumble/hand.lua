@@ -7,6 +7,7 @@ local perk_effects = require("word_game.model.perks.effects")
 local bonus_return = require("word_game.model.jumble.bonus_return")
 local round_config = require("word_game.config.gameplay.round")
 local jumble_rules = require("word_game.model.jumble_play.jumble_rules")
+local Presentation = require("word_game.model.presentation")
 
 function M.is_active_hand(set, hand_index)
 	set = set or (G.GAME and G.GAME.word_round and G.GAME.word_round.set) or 1
@@ -40,16 +41,7 @@ function M.apply_puzzle(wr, puzzle)
 	modifier_effects.reset_puzzle_state(j)
 	perk_effects.on_puzzle_start(j, wr)
 
-	if WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.reset_puzzle_smoke then
-		WORD_GAME.TimelineTimer.reset_puzzle_smoke()
-	end
-	if WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.sync_progress then
-		WORD_GAME.TimelineTimer.sync_progress()
-	end
-
-	if WORD_GAME and WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.reset_jumble_score then
-		WORD_GAME.ScoreBanner.reset_jumble_score()
-	end
+	Presentation.emit("puzzle_applied")
 
 	local area = G.placement_table and G.placement_table.area
 	if area and area.cards then
@@ -108,15 +100,7 @@ function M.start_hand(wr)
 		time_left = timer_state.time_left,
 	}
 
-	if WORD_GAME and WORD_GAME.ScoreBanner then
-		local hud = WORD_GAME.ScoreBanner.state()
-		hud.to_go_label = "SCORE"
-		hud.target = 0
-		hud.remaining = 0
-		if WORD_GAME.ScoreBanner.reset_jumble_score then
-			WORD_GAME.ScoreBanner.reset_jumble_score()
-		end
-	end
+	Presentation.emit("score_banner_jumble_hand_start")
 
 	M.load_puzzle(wr, 1)
 end
@@ -154,31 +138,14 @@ function M.reveal_boss_puzzle(wr)
 	wr.jumble.puzzle_multi = 1.0
 	wr.jumble.puzzle_words = {}
 	M.apply_puzzle(wr, boss)
-	if WORD_GAME and WORD_GAME.Layout and WORD_GAME.Layout.refresh_placement_layout then
-		WORD_GAME.Layout.refresh_placement_layout()
-	elseif G.placement_table and G.placement_table.apply_screen_position then
-		G.placement_table:apply_screen_position()
-	end
-	if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.sync_visibility then
-		WORD_GAME.Sidebar.sync_visibility()
-	end
-	if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync_position then
-		WORD_GAME.HandShuffle.sync_position()
-	end
-	if WORD_GAME and WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.set_banner_mode then
-		WORD_GAME.ScoreBanner.set_banner_mode("boss_word", "BOSS WORD")
-	end
-	if WORD_GAME and WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.hide_points_to_get_display then
-		WORD_GAME.ScoreBanner.hide_points_to_get_display()
-	end
+	Presentation.emit("boss_puzzle_revealed")
 	return true
 end
 
 function M.begin_boss_word(wr, on_complete)
 	if not wr or not wr.jumble or wr.jumble.boss_word_active then return false end
 	wr.jumble.boss_word_staging = true
-	if WORD_GAME and WORD_GAME.PlayEffects and WORD_GAME.PlayEffects.present_boss_word then
-		WORD_GAME.PlayEffects.present_boss_word(wr, on_complete)
+	if Presentation.emit("boss_word_begin", wr, on_complete) then
 		return true
 	end
 	if M.prepare_boss_word(wr) and WORD_GAME and WORD_GAME.Deck then
@@ -238,18 +205,7 @@ end
 
 function M.refresh_hud()
 	if not M.is_active() then return end
-	local j = M.state()
-	if WORD_GAME and WORD_GAME.ScoreBanner then
-		local hud = WORD_GAME.ScoreBanner.state()
-		hud.to_go_label = "SCORE"
-		hud.remaining = j.total_score or 0
-		if WORD_GAME.ScoreBanner.sync_points_to_get_preview then
-			WORD_GAME.ScoreBanner.sync_points_to_get_preview(false)
-		end
-	end
-	if WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.sync_progress then
-		WORD_GAME.TimelineTimer.sync_progress()
-	end
+	Presentation.emit("jumble_hud_refresh")
 end
 
 function M.advance_puzzle(wr)

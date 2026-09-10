@@ -67,7 +67,11 @@ function M.wire_word_game_stubs()
 		end_focus = function() end,
 		is_active = function() return false end,
 	}
-	WORD_GAME.TradeUI = { open_then_dealer = function() end }
+	WORD_GAME.TradeUI = {
+		open_then_dealer = function()
+			WORD_GAME._trade_continue_pending = true
+		end,
+	}
 	WORD_GAME.TokenReward = {
 		try_award = function(callback)
 			if callback then callback() end
@@ -81,6 +85,8 @@ end
 function M.configure_round(opts)
 	opts = opts or {}
 	G.GAME.run_mode = "classic"
+	G.RUN = G.RUN or { active = true }
+	G.RUN.active = true
 	G.GAME.run_state = { tokens = 100, perks = {}, trade_used_this_hand = false }
 	G.GAME.word_round = {
 		set = opts.set or 1,
@@ -164,16 +170,22 @@ function M.begin(opts)
 			drain()
 		end,
 		continue = function()
-			play.continue_after_dealer()
+			if WORD_GAME._trade_continue_pending then
+				play.continue_after_dealer()
+				WORD_GAME._trade_continue_pending = false
+			end
 			drain()
 		end,
 		advance = function(purchase_letters)
-			play.on_hand_cleared()
-			drain()
 			if purchase_letters then
 				M.add_letters(purchase_letters)
 			end
-			play.continue_after_dealer()
+			play.on_hand_cleared()
+			drain()
+			if WORD_GAME._trade_continue_pending then
+				play.continue_after_dealer()
+				WORD_GAME._trade_continue_pending = false
+			end
 			drain()
 		end,
 	}

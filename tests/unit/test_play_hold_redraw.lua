@@ -71,6 +71,86 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 		G.GAME.word_score_animating = false
 	end)
 
+	T.it("end-to-end hold redraw discards the hand and deals seven replacements", function()
+		G.STATE = G.STATES.TABLE_BOARD
+		G.GAME = {
+			word_score_animating = false,
+			hand_redraw_animating = false,
+			seed_streams = { seed = "TEST", hashed_seed = 0 },
+			word_round = { jumble = { redraws_remaining = 1 } },
+		}
+
+		local mock_btn = {
+			states = { visible = true, collide = { is = true }, hover = { is = true } },
+			config = { button = "play_word", id = "hand_play_button" },
+			VT = { x = 10, y = 8, w = 1.25, h = 1.25 },
+		}
+
+		local dealt_count = 0
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.HandShuffle = {
+			play_button_uie = function() return mock_btn end,
+			sync = function() end,
+		}
+		WORD_GAME.Deck = {
+			deal_into_hand = function(target_size, on_complete)
+				dealt_count = target_size
+				if on_complete then on_complete() end
+			end,
+		}
+		WORD_GAME.TradeUI = { is_open = function() return false end }
+
+		local queued_events = {}
+		G.TIMELINE = { enqueue = function(_, ev) queued_events[#queued_events + 1] = ev end }
+
+		local hand_cards = {}
+		for i = 1, 7 do
+			hand_cards[i] = {
+				T = { x = i, y = 7, r = 0 },
+				area = nil,
+				remove_from_area = function(self) end,
+			}
+		end
+		G.hand = {
+			cards = hand_cards,
+			unhighlight_all = function() end,
+			set_ranks = function() end,
+			relayout = function() end,
+			hard_set_cards = function() end,
+			remove_card = function(self, card)
+				for idx, c in ipairs(self.cards) do
+					if c == card then table.remove(self.cards, idx) break end
+				end
+			end,
+		}
+		for _, c in ipairs(hand_cards) do c.area = G.hand end
+
+		local deck_cards = {}
+		G.deck = {
+			cards = deck_cards,
+			emplace = function(self, card)
+				deck_cards[#deck_cards + 1] = card
+				card.area = self
+			end,
+			shuffle = function() end,
+			hard_set_T = function() end,
+		}
+		G.INPUT = {
+			pointer_held = true,
+			collision_list = { mock_btn },
+			nodes_at_cursor = { mock_btn },
+		}
+
+		PlayHoldRedraw.update(5.0)
+		for _, ev in ipairs(queued_events) do
+			if ev.func then ev.func() end
+		end
+
+		T.assert_equal(#G.deck.cards, 7, "Held cards should return to the deck")
+		T.assert_equal(dealt_count, 7, "Hold redraw should deal a full replacement hand")
+		T.assert_equal(G.GAME.word_round.jumble.redraws_remaining, 0, "Redraw allowance should be consumed")
+	end)
+
 	T.it("tracks hold state and triggers redraw at 5 seconds", function()
 		G.STATE = G.STATES.TABLE_BOARD
 		G.GAME = {

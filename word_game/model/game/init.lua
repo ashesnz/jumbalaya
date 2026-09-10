@@ -26,9 +26,9 @@ function Game:prep_stage(new_stage, new_state, new_game_obj)
 	self.ROOM_ATTACH = EaseNode{T={x = 0, y = 0, w = self.TILE_W, h = self.TILE_H}}
 	self.ROOM_ATTACH.states.drag.can = false
 	self.ROOM_ATTACH:set_container(self.ROOM)
-	local sidebar_w = (WORD_GAME and WORD_GAME.Layout and WORD_GAME.Layout.sidebar_width())
-		or self.TABLE_BOARD_SIDEBAR_WIDTH
-		or (self.TABLE_BOARD_SIDEBAR_FRAC and self.TILE_W * self.TABLE_BOARD_SIDEBAR_FRAC) or 3.0
+	local sidebar_w = self.TABLE_BOARD_SIDEBAR_WIDTH
+		or (self.TABLE_BOARD_SIDEBAR_FRAC and self.TILE_W * self.TABLE_BOARD_SIDEBAR_FRAC)
+		or 3.0
 	self.PANEL_ATTACH = EaseNode{T={x = self.TILE_W - sidebar_w, y = 0, w = sidebar_w, h = self.TILE_H}}
 	self.PANEL_ATTACH.states.drag.can = false
 	self.PANEL_ATTACH:set_container(self.ROOM)

@@ -29,6 +29,7 @@ require "word_game.ui.cardarea.init"
 
 Dictionary = require "dictionary"
 WORD_GAME = require "word_game"
+require("word_game.ui.presentation.install").install(WORD_GAME)
 require("word_game.ui.play_effects.hand_clear").install(WORD_GAME.Play)
 
 require "app.callbacks.registry"

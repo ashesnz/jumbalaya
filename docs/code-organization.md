@@ -106,6 +106,8 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `word_game/model/` | Top-of-file `require` for siblings (`model/jumble/*`, `model/run/*`, …); use `jumble/bonus_return` when model must return bonus cards to the gutter |
 | Inline `require(...)` inside functions | Avoid — hoist to module scope unless breaking a documented circular dependency |
 | `Card` presentation | Model class in `model/cards/card.lua`; draw/tooltip mixins install from `ui/cards/bind.lua` at boot (not from model) |
+| Layout refresh | `word_game/model/layout/request.lua` sets `G.ARGS.pending_layout`; model code must not `require` `word_game.ui.layout` |
+| UI reactions | `word_game/model/presentation.lua` emits events; `word_game/ui/presentation/install.lua` registers handlers at boot |
 
 Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, `WORD_GAME.BonusStack`, `WORD_GAME.BonusStackUI`, etc. across package boundaries instead of deep requires.
 

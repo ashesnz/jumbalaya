@@ -1,5 +1,7 @@
 --[[ word_game/model/run/mode.lua - Classic vs Time Run mode helpers ]]
 
+local Presentation = require("word_game.model.presentation")
+
 local M = {}
 
 local DEFAULT = "time_run"
@@ -55,10 +57,7 @@ end
 
 function M.classic_stage_complete()
 	if not M.is_classic() then return false end
-	local tt = WORD_GAME and WORD_GAME.TimelineTimer
-	if not tt or not tt.is_progress_mode or not tt.is_progress_mode() then return false end
-	if tt.sync_progress then tt.sync_progress() end
-	return tt.goal_reached == true
+	return Presentation.emit("timeline_classic_sync_progress") == true
 end
 
 function M.classic_stage_target()
@@ -66,9 +65,9 @@ function M.classic_stage_target()
 	if wr and wr.target then
 		return math.max(1, math.floor(wr.target))
 	end
-	local tt = WORD_GAME and WORD_GAME.TimelineTimer
-	if tt and tt.progress_target then
-		return math.max(1, math.floor(tt.progress_target))
+	local target = Presentation.emit("timeline_classic_progress_target")
+	if target then
+		return math.max(1, math.floor(target))
 	end
 	return 1
 end

@@ -6,6 +6,7 @@ local round_config = require("word_game.config.gameplay.round")
 local opening_deal = require("word_game.model.jumble_play.opening_deal")
 local perk_effects = require("word_game.model.perks.effects")
 local state = require("word_game.model.run.state")
+local trade = require("word_game.model.trade")
 
 local function wr_jumble()
 	local wr = G.GAME and G.GAME.word_round
@@ -68,7 +69,7 @@ function M.resolve_after_clear(opts)
 	if round.is_final_hand() then
 		return "win"
 	end
-	if WORD_GAME and WORD_GAME.TradeUI then
+	if trade.can_use() and WORD_GAME and WORD_GAME.TradeUI then
 		return "trade"
 	end
 	return "dealer"

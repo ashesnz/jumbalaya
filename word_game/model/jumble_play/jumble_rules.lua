@@ -3,6 +3,7 @@
 local InputLock = require("word_game.model.run.input_lock")
 local RunMode = require("word_game.model.run.mode")
 local state = require("word_game.model.run.state")
+local invariant = require("word_game.model.invariant")
 
 local M = {}
 
@@ -203,6 +204,8 @@ function M.can_jumble_next(jumble)
 end
 
 function M.evaluate_play(jumble, j)
+	invariant.check(jumble ~= nil, "evaluate_play requires jumble module")
+	invariant.check(j ~= nil, "evaluate_play requires jumble state")
 	if M.play_blocked(j) then return nil end
 
 	local placed = M.placed_count(j.slots)

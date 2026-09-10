@@ -3,7 +3,7 @@
 local Scheduler = require "app.effects.timeline_scheduler"
 return function(context)
 	local M = context.module
-	local Layout = require "word_game.ui.layout"
+	local LayoutRequest = require("word_game.model.layout.request")
 	local hand_size_cfg = require("word_game.model.hand_size")
 	local needs_vowel = context.needs_vowel
 	local take_letter_from_deck = context.take_letter_from_deck
@@ -93,7 +93,7 @@ return function(context)
 			G.hand.config.card_limit = hand_size_n
 			G.hand.config.selected_limit = hand_size_n
 		end
-		Layout.request_refresh()
+		LayoutRequest.refresh()
 		return M.deal_into_hand(hand_size_n, on_complete)
 	end
 

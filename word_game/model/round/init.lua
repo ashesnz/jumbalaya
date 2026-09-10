@@ -5,14 +5,9 @@ local Scheduler = require "app.effects.timeline_scheduler"
 local round_config = require("word_game.config.gameplay.round")
 local RunMode = require("word_game.model.run.mode")
 local state = require("word_game.model.run.state")
+local Presentation = require("word_game.model.presentation")
 
 local M = {}
-
-local function refresh()
-	if WORD_GAME and WORD_GAME.Sidebar then
-		WORD_GAME.Sidebar:refresh()
-	end
-end
 
 function M.init_run()
 	state.get()
@@ -43,23 +38,7 @@ function M.restore_from_save()
 	wr.hand_name = wr.hand_name or round_config.hand_name(wr.hand_index, wr.set)
 	G.GAME.round_resets = G.GAME.round_resets or {}
 	G.GAME.round_resets.ante = wr.set
-	if WORD_GAME and WORD_GAME.ScoreBanner then
-		WORD_GAME.ScoreBanner.reset(wr.target)
-		WORD_GAME.ScoreBanner.snap_to_actual()
-	end
-	if WORD_GAME and WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.reset then
-		M.reset_timeline()
-	end
-	if WORD_GAME and WORD_GAME.StageLabel and WORD_GAME.StageLabel.force_sync then
-		WORD_GAME.StageLabel.force_sync()
-	end
-	if WORD_GAME and WORD_GAME.Sidebar then
-		WORD_GAME.Sidebar:ensure()
-		WORD_GAME.Sidebar:refresh()
-	end
-	refresh()
-	local backgrounds = require "word_game.ui.layout.backgrounds"
-	backgrounds.stage(wr.set, wr.hand_index)
+	Presentation.emit("round_restore_from_save", wr)
 end
 
 function M.start_hand(set, hand_index)
@@ -78,10 +57,6 @@ function M.start_hand(set, hand_index)
 	wr.hand_name = round_config.hand_name(hand_index, set)
 	wr.played_words = {}
 
-	if WORD_GAME and WORD_GAME.BonusStackUI and WORD_GAME.BonusStackUI.on_hand_start then
-		WORD_GAME.BonusStackUI.on_hand_start(set, hand_index)
-	end
-
 	local jumble = require("word_game.model.jumble")
 	if jumble.is_active_hand(set, hand_index) then
 		jumble.start_hand(wr)
@@ -93,27 +68,7 @@ function M.start_hand(set, hand_index)
 	G.GAME.round_resets = G.GAME.round_resets or {}
 	G.GAME.round_resets.ante = set
 
-	if WORD_GAME and WORD_GAME.ScoreBanner then
-		WORD_GAME.ScoreBanner.reset(wr.target)
-	end
-
-	local jumble = require("word_game.model.jumble")
-	if jumble.is_active_hand(set, hand_index) then
-		M.reset_timeline()
-	end
-
-	if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.clear_hand then
-		WORD_GAME.Sidebar:clear_hand()
-	end
-
-	if WORD_GAME and WORD_GAME.StageLabel and WORD_GAME.StageLabel.sync then
-		WORD_GAME.StageLabel.sync()
-	end
-
-	refresh()
-
-	local backgrounds = require "word_game.ui.layout.backgrounds"
-	backgrounds.stage(set, hand_index)
+	Presentation.emit("hand_started", set, hand_index)
 end
 
 function M.is_word_played(word)
@@ -133,25 +88,21 @@ function M.record_word_play(word)
 	end
 end
 
-function M.refresh_hud()
-	refresh()
-end
-
 function M.is_final_hand()
-	local wr = G.GAME.word_round
-	return wr and round_config.is_final_hand(wr.set, wr.hand_index)
+	local wr = G.GAME and G.GAME.word_round
+	if not wr then return false end
+	return wr.set >= round_config.SETS_TO_WIN
+		and wr.hand_index >= round_config.hands_in_set(wr.set)
 end
 
 function M.advance_hand()
-	local wr = G.GAME.word_round
-	if not wr then return "next" end
+	local wr = G.GAME and G.GAME.word_round
+	if not wr then return "none" end
 
-	if round_config.is_final_hand(wr.set, wr.hand_index) then
-		return "win"
-	end
-
-	local hands = round_config.hands_in_set(wr.set)
-	if wr.hand_index >= hands then
+	if wr.hand_index >= round_config.hands_in_set(wr.set) then
+		if wr.set >= round_config.SETS_TO_WIN then
+			return "win"
+		end
 		M.start_hand(wr.set + 1, 1)
 		return "next_set"
 	end
@@ -161,18 +112,7 @@ function M.advance_hand()
 end
 
 function M.reset_timeline()
-	if not WORD_GAME or not WORD_GAME.TimelineTimer then return end
-	local wr = G.GAME and G.GAME.word_round
-	if RunMode.is_classic() then
-		local target = (wr and wr.target) or round_config.hand_target(1, 1)
-		if WORD_GAME.TimelineTimer.reset_progress then
-			WORD_GAME.TimelineTimer.reset_progress(target)
-		end
-		return
-	end
-	if WORD_GAME.TimelineTimer.reset then
-		WORD_GAME.TimelineTimer.reset(round_config.TIMELINE_SECONDS)
-	end
+	Presentation.emit("timeline_reset")
 end
 
 return M

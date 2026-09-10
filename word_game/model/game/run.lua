@@ -2,7 +2,8 @@
 	model/run.lua - Starting a match (init_game_object, start_run, board).
 ]]
 
-local Layout = require "word_game.ui.layout"
+local LayoutRequest = require("word_game.model.layout.request")
+local Presentation = require("word_game.model.presentation")
 local Scheduler = require "app.effects.timeline_scheduler"
 local RunScope = require "word_game.model.run.scope"
 local RunMode = require "word_game.model.run.mode"
@@ -42,7 +43,7 @@ function Game:start_gameplay_board()
         WORD_GAME.Deck.sync_deck_count_display()
     end
     -- Layout after HUD / hand controls exist so hand + placement anchors match.
-    Layout.request_refresh()
+    LayoutRequest.refresh()
 
     if G.TIMELINE then
         Scheduler.add{
@@ -51,7 +52,7 @@ function Game:start_gameplay_board()
             blocking = false,
             func = function()
                 if G.STATE == G.STATES.TABLE_BOARD and G.STAGE == G.STAGES.RUN then
-                    Layout.request_refresh()
+                    LayoutRequest.refresh()
                 end
                 return true
             end,
@@ -259,9 +260,7 @@ function Game:start_run(args)
 		WORD_GAME.Deck.populate_starting_deck()
 	end
 
-    local backgrounds = require "word_game.ui.layout.backgrounds"
-    backgrounds.run()
-    Layout.request_refresh()
+    Presentation.emit("run_backgrounds")
 
     Scheduler.delayed{delay = 0.5}
 
@@ -273,9 +272,7 @@ function Game:start_run(args)
     self.deck:relayout()
     self.deck:hard_set_cards()
 
-    if WORD_GAME and WORD_GAME.Sidebar then
-        WORD_GAME.Sidebar:ensure()
-    end
+    Presentation.emit("sidebar_ensure")
     apply_run_layout()
     if self.usables then
         self.usables.states.visible = false
@@ -285,7 +282,7 @@ function Game:start_run(args)
         restore_card_areas(saveTable)
         G.STATE = saveTable.STATE or G.STATES.TABLE_BOARD
         G.STATE_COMPLETE = true
-        Layout.request_refresh()
+        LayoutRequest.refresh()
         if G.FUNCS.ensure_table_board_sidebar then
             G.FUNCS.ensure_table_board_sidebar()
         end

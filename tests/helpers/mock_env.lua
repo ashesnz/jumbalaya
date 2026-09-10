@@ -88,6 +88,21 @@ function M.ensure_card_class()
 	require("word_game.ui.cards.bind").install()
 end
 
+function M.install_presentation(overrides)
+	_G.WORD_GAME = _G.WORD_GAME or {}
+	_G.WORD_GAME.ScoreBanner = _G.WORD_GAME.ScoreBanner or {
+		reset = function() end,
+		state = function() return { to_go_label = "SCORE", target = 0, remaining = 0 } end,
+		reset_jumble_score = function() end,
+	}
+	if overrides then
+		for key, value in pairs(overrides) do
+			_G.WORD_GAME[key] = value
+		end
+	end
+	require("word_game.ui.presentation.install").install(_G.WORD_GAME)
+end
+
 function M.setup()
 	M.ensure_engine_globals()
 		G.C = G.C or {
