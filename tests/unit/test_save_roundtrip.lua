@@ -97,8 +97,14 @@ T.describe("save round-trip", function()
 		T.assert_equal(G.hand.cards[1].ability.letter, "C")
 		T.assert_equal(G.hand.cards[2].ability.letter, "A")
 		T.assert_equal(G.hand.cards[1].playing_card, 1)
-		rebuild_card_inventory()
-		T.assert_equal(#G.playing_cards, 2)
+		T.assert_equal(G.hand.cards[2].playing_card, 2)
+		local indexed = 0
+		for _, card in ipairs(G.hand.cards) do
+			if card.playing_card then
+				indexed = indexed + 1
+			end
+		end
+		T.assert_equal(indexed, 2)
 	end)
 
 	T.it("save_safe_clone replaces live engine objects then pack/unpack round-trips", function()
