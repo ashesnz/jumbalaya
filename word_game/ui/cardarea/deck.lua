@@ -83,7 +83,7 @@ function M.update(self, dt)
 			WORD_GAME_UI.TableDeck.update(dt, self)
 		end
 	end
-	if self.config.card_limit > #G.playing_cards then self.config.card_limit = #G.playing_cards end
+	if self.config.card_limit > #G.letter_inventory then self.config.card_limit = #G.letter_inventory end
 end
 
 return M

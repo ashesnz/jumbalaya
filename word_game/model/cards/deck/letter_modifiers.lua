@@ -103,7 +103,7 @@ return function(context)
 
 	function M.deck_has_modified_letter(letter)
 		letter = letter and letter:upper()
-		for _, card in ipairs(G.playing_cards or {}) do
+		for _, card in ipairs(G.letter_inventory or {}) do
 			if not card.REMOVED and M.is_modified(card) and M.card_letter(card) == letter then
 				return true
 			end

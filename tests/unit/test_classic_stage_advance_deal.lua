@@ -31,7 +31,7 @@ T.describe("Classic stage advance deal", function()
 
 		fixture.add_letters(ZQ_PURCHASES)
 		local expected = ctx.starter + 2
-		T.assert_equal(#G.playing_cards, expected, "Purchases should grow the run deck")
+		T.assert_equal(#G.letter_inventory, expected, "Purchases should grow the run deck")
 
 		ctx.continue()
 
@@ -57,7 +57,7 @@ T.describe("Classic stage advance deal", function()
 		T.assert_equal(G.GAME.word_round.hand_index, 2)
 		T.assert_equal(G.GAME.word_round.target, 50)
 		T.assert_equal(#G.hand.cards, ctx.hand_size.get())
-		T.assert_equal(#G.playing_cards, expected)
+		T.assert_equal(#G.letter_inventory, expected)
 		T.assert_equal(ctx.deck.cards_left() + ctx.deck.held_count(), expected)
 
 		ctx.restore()

@@ -140,8 +140,8 @@ T.describe("bonus card gold visuals", function()
 			end,
 		}
 
-		G.P_CARDS = G.P_CARDS or {}
-		G.P_CARDS.gold_G = {
+		G.LETTERS.faces = G.LETTERS.faces or {}
+		G.LETTERS.faces.gold_G = {
 			letter = "G",
 			color = "gold",
 			pos = LetterFaces.glyph_pos("G"),
@@ -163,8 +163,8 @@ T.describe("bonus card gold visuals", function()
 			apply_face = function() end,
 		}
 
-		G.P_CARDS = G.P_CARDS or {}
-		G.P_CARDS.gold_G = { letter = "G", color = "gold", pos = LetterFaces.glyph_pos("G") }
+		G.LETTERS.faces = G.LETTERS.faces or {}
+		G.LETTERS.faces.gold_G = { letter = "G", color = "gold", pos = LetterFaces.glyph_pos("G") }
 
 		bonus_stack.apply_gold_bonus_face(card)
 
@@ -183,8 +183,8 @@ T.describe("bonus card gold visuals", function()
 				applied_color = front and front.color
 			end,
 		}
-		G.P_CARDS = G.P_CARDS or {}
-		G.P_CARDS.gold_V = { letter = "V", color = "gold", pos = LetterFaces.glyph_pos("V") }
+		G.LETTERS.faces = G.LETTERS.faces or {}
+		G.LETTERS.faces.gold_V = { letter = "V", color = "gold", pos = LetterFaces.glyph_pos("V") }
 
 		bonus_stack.become_bonus_card(card)
 
@@ -223,8 +223,8 @@ T.describe("bonus card gold visuals", function()
 				self.T.x, self.T.y, self.T.w, self.T.h = nx, ny, nw, nh
 			end,
 		}
-		G.P_CARDS = G.P_CARDS or {}
-		G.P_CARDS.gold_E = { letter = "E", color = "gold", pos = LetterFaces.glyph_pos("E") }
+		G.LETTERS.faces = G.LETTERS.faces or {}
+		G.LETTERS.faces.gold_E = { letter = "E", color = "gold", pos = LetterFaces.glyph_pos("E") }
 
 		G.TIMELINE = { enqueue = function() end }
 		G.TIMERS = G.TIMERS or { REAL = 0 }

@@ -24,4 +24,6 @@ for _, initialize in ipairs(initializers) do
 	initialize(context)
 end
 
+Deck.Registry = require("word_game.model.cards.registry")
+
 return Deck

@@ -307,7 +307,7 @@ function localize(args, misc_cat)
           }}
         else
           final_line[#final_line+1] = {n=G.UI.TEXT, config={
-          detailed_tooltip = part.control.T and G.P_CENTERS[part.control.T] or nil,
+          detailed_tooltip = part.control.T and G.LETTERS.centers[part.control.T] or nil,
           text = assembled_string,
           shadow = args.shadow,
           colour = part.control.V and args.vars.colours[tonumber(part.control.V)] or loc_colour(part.control.C or nil, args.default_col),

@@ -31,7 +31,7 @@ G.FUNCS.wipe_in = function(message, no_card, timefac, alt_colour)
     white = {1, 1, 1, 1}
   }
   if not no_card then
-    G.screenwipecard = Card(0, 0, G.CARD_W, G.CARD_H, pick_random(G.P_CARDS), G.P_CENTERS.letter_base)
+    G.screenwipecard = Card(0, 0, G.CARD_W, G.CARD_H, pick_random(G.LETTERS.faces), G.LETTERS.centers.letter_base)
     G.screenwipecard.sprite_facing = 'back'
     G.screenwipecard.facing = 'back'
     G.screenwipecard.states.hover.can = false

@@ -9,7 +9,7 @@ local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
 
 local function stub_areas()
-	G.playing_cards = {}
+	G.letter_inventory = {}
 	G.deck = {
 		cards = {},
 		config = {},
@@ -42,14 +42,14 @@ local function build_deck(letter, copies)
 		}
 		cards[#cards + 1] = card
 		G.deck:emplace(card)
-		G.playing_cards[#G.playing_cards + 1] = card
+		G.letter_inventory[#G.letter_inventory + 1] = card
 	end
 	return cards
 end
 
 local function live_letter_count(letter)
 	local n = 0
-	for _, card in ipairs(G.playing_cards or {}) do
+	for _, card in ipairs(G.letter_inventory or {}) do
 		if not card.REMOVED and card.ability.letter == letter then
 			n = n + 1
 		end

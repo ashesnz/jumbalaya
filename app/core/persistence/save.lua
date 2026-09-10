@@ -27,7 +27,7 @@ function queue_run_snapshot()
 		STATE = G.STATE,
 		ACTION = G.action,
 		BACK = G.GAME.selected_back:save(),
-		VERSION = G.VERSION
+		VERSION = G.VERSION,
 	}
 	if G.placement_table and G.placement_table.area then
 		local serialized = G.placement_table.area:save()
@@ -58,7 +58,7 @@ end
 --- Recollects the live letter cards spread across all areas after a load,
 --- reassigning sequential ids and widening the sidebar to fit them.
 function rebuild_card_inventory()
-	G.playing_cards = {}
+	G.letter_inventory = {}
 	local seen = {}
 	local max_id = 0
 	local areas = {
@@ -71,17 +71,17 @@ function rebuild_card_inventory()
 				local id = card.playing_card
 				if id and not seen[id] then
 					seen[id] = true
-					G.playing_cards[#G.playing_cards + 1] = card
+					G.letter_inventory[#G.letter_inventory + 1] = card
 					if id > max_id then max_id = id end
 				end
 			end
 		end
 	end
-	G.playing_card = max_id
-	if G.deck and G.deck.config and #G.playing_cards > 0 then
-		G.deck.config.card_limit = math.max(G.deck.config.card_limit or 52, #G.playing_cards)
+	G.letter_card_id = max_id
+	if G.deck and G.deck.config and #G.letter_inventory > 0 then
+		G.deck.config.card_limit = math.max(G.deck.config.card_limit or 52, #G.letter_inventory)
 	end
-	if G.GAME then G.GAME.starting_deck_size = #G.playing_cards end
+	if G.GAME then G.GAME.starting_deck_size = #G.letter_inventory end
 end
 
 --- Feeds each stored area blob back into its live counterpart.
@@ -147,7 +147,7 @@ function Game:queue_progress_write()
 	G.ARGS.progress_payload.SETTINGS = G.SETTINGS
 	G.ARGS.progress_payload.PROFILE = G.PROFILES[G.SETTINGS.profile]
 
-	for key, definition in pairs(self.P_CENTERS) do
+	for key, definition in pairs(G.LETTERS and G.LETTERS.centers or {}) do
 		G.ARGS.progress_payload.UDA[key] =
 			(definition.unlocked and 'u' or '')..
 			(definition.discovered and 'd' or '')..

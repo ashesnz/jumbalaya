@@ -33,7 +33,7 @@ T.describe("Marketplace modal size stability on card removal", function()
 
 		local rolled = trade.roll_offer()
 		local item = rolled.add.letters[1]
-		G.playing_cards = {}
+		G.letter_inventory = {}
 		G.deck = {
 			cards = {},
 			config = {},
@@ -51,7 +51,7 @@ T.describe("Marketplace modal size stability on card removal", function()
 		local card = deck.create_letter_card(item.letter, "red")
 		card.ability.letter = item.letter
 		G.deck:emplace(card)
-		G.playing_cards[1] = card
+		G.letter_inventory[1] = card
 		trade.sync_offer_cards(rolled)
 
 		-- Make the marketplace session adopt OUR offer so we hold the items.

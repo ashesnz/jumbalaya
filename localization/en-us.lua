@@ -147,7 +147,6 @@ return {
     ["most_points"]="Most Points",
     ["win_streak"]="Best Win Streak",
     ["current_streak"]="",
-    ["furthest_ante"]="Highest Ante",
     ["boss_streak"]="Most Bosses in a Row",
     ["most_money"]="Most Money",
   },

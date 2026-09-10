@@ -4,7 +4,7 @@ local T = require("tests.framework")
 local classic = require("tests.helpers.classic_stage_advance")
 
 local function deck_find(letter)
-	for _, card in ipairs(G.playing_cards or {}) do
+	for _, card in ipairs(G.letter_inventory or {}) do
 		if card.ability and card.ability.letter == letter and not card.REMOVED then
 			return card
 		end
@@ -23,7 +23,7 @@ T.describe("Marketplace purchase then deal", function()
 		local ok, err = trade.apply(item, { action = "add", cost = 10, defer_used = true })
 		T.assert_true(ok, err or "purchase should succeed")
 		T.assert_not_nil(deck_find(item.letter), "Purchased letter should exist in the deck")
-		T.assert_equal(#G.playing_cards, starter + 1, "Deck should grow by one purchased card")
+		T.assert_equal(#G.letter_inventory, starter + 1, "Deck should grow by one purchased card")
 
 		ctx.restore()
 	end)

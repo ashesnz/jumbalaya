@@ -142,7 +142,7 @@ function build_round_scores_row(score, text_colour)
     check_high_score = true
     label = 'Set'
     score_tab = {
-      {n=G.UI.OBJECT, config={object = FlowText({string = {number_format(G.GAME.round_resets.ante)}, colours = {text_colour or G.C.FILTER},shadow = true, float = true, scale = 0.45})}},
+      {n=G.UI.OBJECT, config={object = FlowText({string = {number_format((G.GAME.word_round and G.GAME.word_round.set) or 0)}, colours = {text_colour or G.C.FILTER},shadow = true, float = true, scale = 0.45})}},
     }
   end
   if score == 'furthest_round' then 

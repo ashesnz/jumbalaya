@@ -5,7 +5,7 @@
 function Card:apply_center(center, initial, delay_sprites)
     local old_center = self.config.center
     self.config.center = center
-    for key, prototype in pairs(G.P_CENTERS) do
+    for key, prototype in pairs(G.LETTERS.centers) do
         if center == prototype then self.config.center_key = key end
     end
 

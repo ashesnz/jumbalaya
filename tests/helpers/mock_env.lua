@@ -133,8 +133,13 @@ function M.setup()
 	G.GAME = G.GAME or {}
 	G.TIMERS = G.TIMERS or { REAL = 0, TOTAL = 0, UPTIME = 0, BACKGROUND = 0 }
 	G.ROOM = G.ROOM or { T = { x = 0, y = 0, w = 20, h = 11 }, jiggle = 0 }
-	G.P_CENTERS = G.P_CENTERS or { letter_base = { key = "letter_base" } }
-	G.P_CARDS = G.P_CARDS or { letter_base = { key = "letter_base" } }
+	G.LETTERS = G.LETTERS or {
+		faces = { letter_base = { key = "letter_base" }, empty = {} },
+		centers = { letter_base = { key = "letter_base" } },
+		center_pools = {},
+		locked = {},
+	}
+	G.letter_inventory = G.letter_inventory or {}
 	G.ROOM_ATTACH = G.ROOM_ATTACH or {
 		T = { x = 0, y = 0, w = 20, h = 11 },
 		alignment = { offset = { x = 0, y = 0 } },

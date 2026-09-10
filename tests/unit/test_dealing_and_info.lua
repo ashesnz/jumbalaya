@@ -225,7 +225,7 @@ T.describe("Sidebar deck information", function()
 		local jumble = require("word_game.model.jumble")
 
 		local cards = {}
-		G.playing_cards = {}
+		G.letter_inventory = {}
 		G.deck = {
 			cards = cards,
 			config = { card_limit = 52 },
@@ -304,7 +304,7 @@ T.describe("Sidebar deck information", function()
 			deck.populate_jumble_deck()
 			deck.deal_jumble_hand()
 
-			T.assert_equal(#G.playing_cards, expected,
+			T.assert_equal(#G.letter_inventory, expected,
 				"Stage 1-" .. hand_index .. " should retain every deck card")
 			T.assert_equal(deck.cards_left() + deck.held_count(), expected,
 				"Stage 1-" .. hand_index .. " deck plus held cards should equal the full deck")
@@ -326,7 +326,7 @@ T.describe("Sidebar deck information", function()
 		end
 
 		jumble.ensure_playable_puzzle = orig_ensure
-		T.assert_equal(#G.playing_cards, expected,
+		T.assert_equal(#G.letter_inventory, expected,
 			"Advancing to stage 1-5 should leave the full starter deck intact")
 		T.assert_equal(deck.cards_left(), expected,
 			"Stage 1-5 should start with the full deck count after repopulation")
@@ -334,17 +334,17 @@ T.describe("Sidebar deck information", function()
 
 	T.it("reports jumble cards left as the physical draw pile count", function()
 		G.GAME.word_round = { mode = "jumble", set = 1, hand_index = 1 }
-		G.playing_cards = {}
+		G.letter_inventory = {}
 		for i = 1, 12 do
-			G.playing_cards[#G.playing_cards + 1] = { ability = { letter = "E" } }
+			G.letter_inventory[#G.letter_inventory + 1] = { ability = { letter = "E" } }
 		end
 		G.hand = { cards = {} }
 		for i = 1, 7 do
-			G.hand.cards[#G.hand.cards + 1] = G.playing_cards[i]
+			G.hand.cards[#G.hand.cards + 1] = G.letter_inventory[i]
 		end
 		G.deck = { cards = {} }
 		for i = 8, 12 do
-			G.deck.cards[#G.deck.cards + 1] = G.playing_cards[i]
+			G.deck.cards[#G.deck.cards + 1] = G.letter_inventory[i]
 		end
 		G.placement_table = { area = { cards = {} } }
 		T.assert_equal(deck.cards_left(), 5, "Cards left should match cards still in the draw pile")
@@ -359,7 +359,7 @@ T.describe("Sidebar deck information", function()
 
 	T.it("sidebar HUD cards-left matches the physical deck after jumble deal", function()
 		G.GAME.word_round = { mode = "jumble", set = 1, hand_index = 1 }
-		G.playing_cards = {}
+		G.letter_inventory = {}
 		G.deck = {
 			cards = {},
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
@@ -490,10 +490,10 @@ T.describe("Sidebar deck information", function()
 			hard_set_cards = function() end,
 		}
 		G.placement_table = { area = { cards = {} } }
-		G.playing_cards = {}
+		G.letter_inventory = {}
 		for i = 1, 12 do
 			local card = { ability = { letter = "E", letter_color = "red" } }
-			G.playing_cards[#G.playing_cards + 1] = card
+			G.letter_inventory[#G.letter_inventory + 1] = card
 			G.discard:emplace(card)
 		end
 		local orig_jumble = WORD_GAME and WORD_GAME.Jumble
@@ -550,7 +550,7 @@ T.describe("Sidebar deck information", function()
 			hard_set_cards = function() end,
 		}
 		G.placement_table = { area = { cards = {} } }
-		G.playing_cards = G.discard.cards
+		G.letter_inventory = G.discard.cards
 
 		deck.try_jumble_reshuffle_and_deal()
 

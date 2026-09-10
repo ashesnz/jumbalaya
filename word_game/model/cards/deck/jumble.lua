@@ -54,12 +54,12 @@ return function(context)
 
 	function M.populate_jumble_deck()
 		purge_table_cards()
-		if #(G.playing_cards or {}) == 0 then
+		if #(G.letter_inventory or {}) == 0 then
 			M.populate_starting_deck()
 			return
 		end
 		reset_deck_pile()
-		for _, card in ipairs(G.playing_cards) do
+		for _, card in ipairs(G.letter_inventory) do
 			if card and not card.REMOVED and not card.boss_temp and not card.bonus_card then
 				if card.remove_from_area then
 					card:remove_from_area()

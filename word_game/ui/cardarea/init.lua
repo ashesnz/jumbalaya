@@ -454,7 +454,7 @@ function CardArea:load(cardAreaTable)
 	self.config = cardAreaTable.config
 
 	for i = 1, #cardAreaTable.cards do
-		local card = Card(0, 0, G.CARD_W, G.CARD_H, G.P_CARDS.empty, G.P_CENTERS.letter_base, nil)
+		local card = Card(0, 0, G.CARD_W, G.CARD_H, G.LETTERS.faces.empty, G.LETTERS.centers.letter_base, nil)
 		card:load(cardAreaTable.cards[i])
 		self.cards[#self.cards + 1] = card
 		if card.selected then

@@ -17,8 +17,8 @@ return function(context)
 
  function M.populate_starting_deck()
  	G.deck.config = G.deck.config or {}
-		G.playing_cards = {}
-		G.playing_card = 0
+		G.letter_inventory = {}
+		G.letter_card_id = 0
 		G.deck.cards = {}
 		for _, letter in ipairs(M.STARTING_LETTERS) do
 			G.deck:emplace(M.create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR))
@@ -50,16 +50,16 @@ return function(context)
 				break
 			end
 		end
-		for i = #(G.playing_cards or {}), 1, -1 do
-			if G.playing_cards[i] == card then
-				table.remove(G.playing_cards, i)
+		for i = #(G.letter_inventory or {}), 1, -1 do
+			if G.letter_inventory[i] == card then
+				table.remove(G.letter_inventory, i)
 				break
 			end
 		end
 		card.REMOVED = true
 		if G.deck then
 			G.deck.config = G.deck.config or {}
-			local total = #(G.playing_cards or {})
+			local total = #(G.letter_inventory or {})
 			G.deck.config.card_limit = math.max(total, (G.deck.config.card_limit or 1) - 1)
 		end
 		if card.remove then

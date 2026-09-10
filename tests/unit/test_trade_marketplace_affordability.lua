@@ -6,7 +6,7 @@ local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
 
 local function stub_market_env()
-	G.playing_cards = {}
+	G.letter_inventory = {}
 	G.deck = {
 		cards = {},
 		config = {},
@@ -82,7 +82,7 @@ local function bind_offer_with_letter(trade, deck, letter)
 	local card = deck.create_letter_card(letter, "red")
 	card.ability.letter = letter
 	G.deck:emplace(card)
-	G.playing_cards[1] = card
+	G.letter_inventory[1] = card
 	trade.sync_offer_cards(rolled)
 	return rolled, rolled.add.letters[1]
 end

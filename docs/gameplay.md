@@ -16,7 +16,7 @@ A **match** (run) is a sequence of **sets**. **Set 1** is a nine-hand tutorial a
 | 2–8 | 3 each | Standard → Standard → Showdown |
 
 - **Win** by clearing the Showdown on **set 8** (`1-9` in set 1 is the final Showdown there).
-- Progress is shown as **set-hand** (e.g. `1-3` = set 1, hand 3). Legacy save/UI code may still refer to the set index as `ante` (`G.GAME.round_resets.ante` mirrors `word_round.set`).
+- Progress is shown as **set-hand** (e.g. `1-3` = set 1, hand 3). The set index is `G.GAME.word_round.set`.
 
 Every stage in sets 1–8 runs in **jumble mode** (`word_game/model/jumble.lua` → `is_active_hand`).
 

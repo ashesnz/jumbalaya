@@ -18,7 +18,7 @@ return function(context)
 
 	function M.front(letter, color)
 		local key = M.front_key(letter, color)
-		return key and G.P_CARDS and G.P_CARDS[key] or nil
+		return key and G.LETTERS.faces and G.LETTERS.faces[key] or nil
 	end
 
 	local function control_for_letter(letter, color)
@@ -68,8 +68,8 @@ return function(context)
 	function M.restore_letter_face(card)
 		if not card then return end
 		local front = card.config and card.config.card
-		if (not front or not front.pos) and card.config and card.config.card_key and G.P_CARDS then
-			front = G.P_CARDS[card.config.card_key]
+		if (not front or not front.pos) and card.config and card.config.card_key and G.LETTERS.faces then
+			front = G.LETTERS.faces[card.config.card_key]
 		end
 		if not front or not front.pos then
 			local letter = card.ability and card.ability.letter
@@ -132,7 +132,7 @@ return function(context)
 	end
 
 	function M.iter_cards(fn)
-		for _, card in ipairs(G.playing_cards or {}) do
+		for _, card in ipairs(G.letter_inventory or {}) do
 			if card and not card.REMOVED then
 				fn(card)
 			end
@@ -166,7 +166,7 @@ return function(context)
 	end
 
 	function M.letter_center()
-		local center = G.P_CENTERS and G.P_CENTERS.letter_base
+		local center = G.LETTERS.centers and G.LETTERS.centers.letter_base
 		if center then
 			center.atlas = "letter_frame"
 			center.pos = { x = 0, y = 0 }
@@ -178,18 +178,18 @@ return function(context)
 		local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 		color = color or LetterPalette.DEFAULT_FACE_COLOR
 		local front = M.front(letter, color)
-		G.playing_card = (G.playing_card or 0) + 1
+		G.letter_card_id = (G.letter_card_id or 0) + 1
 		local deck_x = (G.deck and G.deck.T and G.deck.T.x) or 0
 		local deck_y = (G.deck and G.deck.T and G.deck.T.y) or 0
 		local card = Card(
 			deck_x, deck_y, G.CARD_W or 1, G.CARD_H or 1.4,
 			front,
 			M.letter_center(),
-			{ playing_card = G.playing_card }
+			{ playing_card = G.letter_card_id }
 		)
 		M.tag_card(card, letter, color)
-		G.playing_cards = G.playing_cards or {}
-		G.playing_cards[#G.playing_cards + 1] = card
+		G.letter_inventory = G.letter_inventory or {}
+		G.letter_inventory[#G.letter_inventory + 1] = card
 		return card
 	end
 end

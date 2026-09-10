@@ -26,7 +26,6 @@ function Game:start_gameplay_board()
     end
 
     G.GAME.round = 1
-    G.GAME.round_resets.ante = G.GAME.round_resets.ante or 1
 
     G.STATE = G.STATES.TABLE_BOARD
     G.STATE_COMPLETE = true
@@ -80,9 +79,6 @@ function Game:init_game_object()
                 mult = 0,
             },
         },
-        round_resets = {
-            ante = 1,
-        },
     }
 end
 
@@ -128,10 +124,10 @@ function Game:start_run(args)
     G.STATE_COMPLETE = false
 
     local function deck_center_from_name(name)
-        for _, v in pairs(G.P_CENTERS) do
+        for _, v in pairs(G.LETTERS.centers) do
             if v.name == name then return v end
         end
-        return G.P_CENTERS.deck_alpha
+        return G.LETTERS.centers.deck_alpha
     end
 
     local selected_back = saveTable and saveTable.BACK.name
@@ -156,8 +152,6 @@ function Game:start_run(args)
     if not saveTable then 
         self.GAME.selected_back:apply_to_run()
     end
-
-    G.GAME.chips_text = ''
 
     if not saveTable then
         if args.seed then self.GAME.seeded = true end
@@ -237,7 +231,7 @@ function Game:start_run(args)
         CAI.hand_W,CAI.hand_H,
         {card_limit = self.GAME.starting_params.hand_size, type = 'hand', selection_limit = 1})
 
-    G.playing_cards = {}
+    G.letter_inventory = {}
 
 	if not saveTable and WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.populate_starting_deck then
 		WORD_GAME.Deck.populate_starting_deck()

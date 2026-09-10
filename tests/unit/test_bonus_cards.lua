@@ -412,7 +412,7 @@ T.describe("Bonus cards", function()
 	T.it("excludes bonus cards from jumble deck population", function()
 		mock_env.reset_game()
 		local deck_mod = require("word_game.model.cards.deck")
-		G.playing_cards = {
+		G.letter_inventory = {
 			{ REMOVED = false, boss_temp = false, bonus_card = false },
 			{ REMOVED = false, bonus_card = true },
 		}

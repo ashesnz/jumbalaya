@@ -19,9 +19,9 @@ return function(deck_module, context)
 		for i, letter in ipairs(letters) do
 			local card = deck_module.create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR)
 			card.boss_temp = true
-			for pi = #(G.playing_cards or {}), 1, -1 do
-				if G.playing_cards[pi] == card then
-					table.remove(G.playing_cards, pi)
+			for pi = #(G.letter_inventory or {}), 1, -1 do
+				if G.letter_inventory[pi] == card then
+					table.remove(G.letter_inventory, pi)
 					break
 				end
 			end

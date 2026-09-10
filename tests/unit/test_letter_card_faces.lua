@@ -17,12 +17,12 @@ T.describe("letter card faces", function()
 	end)
 
 	T.it("shares glyph positions across red and black faces", function()
-		G.P_CARDS = G.P_CARDS or {}
+		G.LETTERS.faces = G.LETTERS.faces or {}
 		local pos = LetterFaces.glyph_pos("Q")
-		G.P_CARDS.red_Q = { letter = "Q", color = "red", atlas = "letters", pos = pos }
-		G.P_CARDS.black_Q = { letter = "Q", color = "black", atlas = "letters", pos = pos }
-		local red = G.P_CARDS.red_Q
-		local black = G.P_CARDS.black_Q
+		G.LETTERS.faces.red_Q = { letter = "Q", color = "red", atlas = "letters", pos = pos }
+		G.LETTERS.faces.black_Q = { letter = "Q", color = "black", atlas = "letters", pos = pos }
+		local red = G.LETTERS.faces.red_Q
+		local black = G.LETTERS.faces.black_Q
 		T.assert_equal(red.pos.x, black.pos.x)
 		T.assert_equal(red.pos.y, black.pos.y)
 		T.assert_equal(red.atlas, "letters")

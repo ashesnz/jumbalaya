@@ -11,7 +11,6 @@ function M.game_snapshot()
 			perks = {},
 			trade_used_this_hand = false,
 		},
-		round_resets = { ante = 2 },
 		timeline_seconds = 42,
 		timeline_duration = 60,
 		timeline_active = true,

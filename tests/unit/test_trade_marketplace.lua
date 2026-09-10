@@ -47,7 +47,7 @@ T.describe("Card marketplace offers (word_game.model.trade)", function()
 	end)
 
 	T.it("greys out remove and modify when the offered letter is not in the deck", function()
-		G.playing_cards = {}
+		G.letter_inventory = {}
 		G.deck = {
 			cards = {},
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
@@ -63,7 +63,7 @@ T.describe("Card marketplace offers (word_game.model.trade)", function()
 	end)
 
 	T.it("enables deck actions after the offered letter is added to the deck", function()
-		G.playing_cards = {}
+		G.letter_inventory = {}
 		local cards = {}
 		G.deck = {
 			cards = cards,
@@ -73,7 +73,7 @@ T.describe("Card marketplace offers (word_game.model.trade)", function()
 		local create_letter_card = deck.create_letter_card
 		deck.create_letter_card = function(letter, color)
 			local card = { ability = { letter = letter, letter_color = color }, REMOVED = false }
-			G.playing_cards[#G.playing_cards + 1] = card
+			G.letter_inventory[#G.letter_inventory + 1] = card
 			return card
 		end
 
@@ -89,7 +89,7 @@ T.describe("Card marketplace offers (word_game.model.trade)", function()
 	end)
 
 	T.it("counts every live copy of a letter in the deck", function()
-		G.playing_cards = {}
+		G.letter_inventory = {}
 		local cards = {}
 		G.deck = {
 			cards = cards,
@@ -99,7 +99,7 @@ T.describe("Card marketplace offers (word_game.model.trade)", function()
 		local create_letter_card = deck.create_letter_card
 		deck.create_letter_card = function(letter, color)
 			local card = { ability = { letter = letter, letter_color = color }, REMOVED = false }
-			G.playing_cards[#G.playing_cards + 1] = card
+			G.letter_inventory[#G.letter_inventory + 1] = card
 			return card
 		end
 		G.deck:emplace(deck.create_letter_card("E", "red"))

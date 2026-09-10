@@ -19,8 +19,6 @@ function M.init_run()
 	}
 	G.GAME.voucher_discards_used = 0
 	G.GAME.discard_bin_count = 0
-	G.GAME.round_resets = G.GAME.round_resets or {}
-	G.GAME.round_resets.ante = 1
 	M.start_hand(1, 1)
 end
 
@@ -36,8 +34,6 @@ function M.restore_from_save()
 	wr.hand_index = wr.hand_index or 1
 	wr.target = wr.target or round_config.hand_target(wr.set, wr.hand_index)
 	wr.hand_name = wr.hand_name or round_config.hand_name(wr.hand_index, wr.set)
-	G.GAME.round_resets = G.GAME.round_resets or {}
-	G.GAME.round_resets.ante = wr.set
 	Presentation.emit("round_restore_from_save", wr)
 end
 
@@ -64,9 +60,6 @@ function M.start_hand(set, hand_index)
 		wr.mode = nil
 		wr.jumble = nil
 	end
-
-	G.GAME.round_resets = G.GAME.round_resets or {}
-	G.GAME.round_resets.ante = set
 
 	Presentation.emit("hand_started", set, hand_index)
 end

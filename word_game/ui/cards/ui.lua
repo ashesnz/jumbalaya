@@ -48,7 +48,7 @@ function Card:build_card_tooltip()
                     letter_bonus = (self.ability.bonus + (self.ability.perma_bonus or 0)) > 0 and (self.ability.bonus + (self.ability.perma_bonus or 0)) or nil,
                 }
     elseif self.ability.set == 'Companion' then
-        -- Shop/collection companions were removed from P_CENTERS.
+        -- Shop/collection companions were removed from G.LETTERS.centers.
     end
     local badges = {}
     if (card_type ~= 'Locked' and card_type ~= 'Undiscovered' and card_type ~= 'Default') or self.debuff then

@@ -32,8 +32,8 @@ T.describe("Letter modifiers (word_game.model.cards.deck.letter_modifiers)", fun
 	end)
 
 	T.it("updates the deck card face color when a modifier is applied", function()
-		G.P_CARDS = G.P_CARDS or {}
-		G.P_CARDS.modified_E = { letter = "E", color = LetterPalette.MODIFIED_FACE_COLOR, pos = { x = 0, y = 0 } }
+		G.LETTERS.faces = G.LETTERS.faces or {}
+		G.LETTERS.faces.modified_E = { letter = "E", color = LetterPalette.MODIFIED_FACE_COLOR, pos = { x = 0, y = 0 } }
 		local applied_front = nil
 		local card = {
 			ability = { letter = "E", letter_color = "red" },
@@ -56,8 +56,8 @@ T.describe("Letter modifiers (word_game.model.cards.deck.letter_modifiers)", fun
 	end)
 
 	T.it("restore_letter_face keeps modified cards on the modified face", function()
-		G.P_CARDS = G.P_CARDS or {}
-		G.P_CARDS.modified_K = { letter = "K", color = LetterPalette.MODIFIED_FACE_COLOR, pos = { x = 4, y = 0 } }
+		G.LETTERS.faces = G.LETTERS.faces or {}
+		G.LETTERS.faces.modified_K = { letter = "K", color = LetterPalette.MODIFIED_FACE_COLOR, pos = { x = 4, y = 0 } }
 		local applied_front = nil
 		local card = {
 			ability = { letter = "K", letter_color = "red", modified = true },
@@ -265,9 +265,9 @@ T.describe("Trade modifier application (word_game.model.trade)", function()
 	local state = require("word_game.model.run.state")
 
 	T.it("applies the letter modifier to an in-deck card for 30 tokens", function()
-		G.playing_cards = {}
+		G.letter_inventory = {}
 		local card = { ability = { letter = "K", letter_color = "red" }, REMOVED = false }
-		G.playing_cards[1] = card
+		G.letter_inventory[1] = card
 		G.deck = { cards = { card }, config = {} }
 		state.get().tokens = 100
 
@@ -281,18 +281,18 @@ T.describe("Trade modifier application (word_game.model.trade)", function()
 	end)
 
 	T.it("keeps the modified card in the deck inventory after purchase", function()
-		G.playing_cards = {}
+		G.letter_inventory = {}
 		local card = { ability = { letter = "T", letter_color = "black" }, REMOVED = false }
-		G.playing_cards[1] = card
+		G.letter_inventory[1] = card
 		G.deck = { cards = { card }, config = {} }
 		state.get().tokens = 100
 
 		local item = { letter = "T", card = card, mode = "market" }
 		local ok = trade.apply(item, { action = "modifier" })
 		T.assert_true(ok)
-		T.assert_equal(G.playing_cards[1], card, "Modified card should stay in deck inventory")
+		T.assert_equal(G.letter_inventory[1], card, "Modified card should stay in deck inventory")
 		T.assert_false(card.REMOVED, "Modified card should not be removed from the deck")
-		T.assert_true(deck.is_modified(G.playing_cards[1]))
-		T.assert_equal(deck.color_from_card(G.playing_cards[1]), LetterPalette.MODIFIED_FACE_COLOR)
+		T.assert_true(deck.is_modified(G.letter_inventory[1]))
+		T.assert_equal(deck.color_from_card(G.letter_inventory[1]), LetterPalette.MODIFIED_FACE_COLOR)
 	end)
 end)

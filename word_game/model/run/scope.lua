@@ -67,8 +67,8 @@ function M.reset_args()
 end
 
 function M.reset_globals()
-	G.playing_cards = {}
-	G.playing_card = 0
+	G.letter_inventory = {}
+	G.letter_card_id = 0
 	if G.LIVE then
 		local wipe_card = G.screenwipecard
 		G.LIVE.CARD = {}

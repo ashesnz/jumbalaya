@@ -35,8 +35,8 @@ T.describe("save round-trip", function()
 	G:load_card_definitions()
 
 	local function make_letter(letter, playing_card)
-		local front = G.P_CARDS["red_" .. letter]
-		local card = Card(0, 0, G.CARD_W, G.CARD_H, front, G.P_CENTERS.letter_base, {
+		local front = G.LETTERS.faces["red_" .. letter]
+		local card = Card(0, 0, G.CARD_W, G.CARD_H, front, G.LETTERS.centers.letter_base, {
 			playing_card = playing_card,
 			bypass_discovery_center = true,
 			bypass_discovery_ui = true,
@@ -60,7 +60,7 @@ T.describe("save round-trip", function()
 
 		local packed = pack_to_source({ card = payload })
 		local unpacked = unpack_source(packed)
-		local restored = Card(0, 0, G.CARD_W, G.CARD_H, G.P_CARDS.empty, G.P_CENTERS.letter_base, {
+		local restored = Card(0, 0, G.CARD_W, G.CARD_H, G.LETTERS.faces.empty, G.LETTERS.centers.letter_base, {
 			bypass_discovery_center = true,
 			bypass_discovery_ui = true,
 			bypass_lock = true,
@@ -182,7 +182,6 @@ T.describe("save round-trip", function()
 		T.assert_equal(wr.mode, "jumble")
 		T.assert_equal(wr.set, 2)
 		T.assert_equal(wr.jumble.total_score, 18)
-		T.assert_equal(G.GAME.round_resets.ante, 2, "ante mirrors set index")
 		T.assert_equal(G.GAME.timeline_seconds, 60, "restore_from_save resets fuse via timeline_reset")
 		T.assert_equal(#G.hand.cards, 1)
 		T.assert_equal(G.hand.cards[1].ability.letter, "R")

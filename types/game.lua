@@ -12,9 +12,10 @@
 	- Do not guard UI with `WORD_GAME and WORD_GAME_UI.X` — after boot `WORD_GAME` is always
 	  set; test the export: `if WORD_GAME_UI.X then …`. Use `WORD_GAME.Jumble` etc. for domain.
 
-	Legacy naming (keep until save format bump):
-	- `G.P_CENTERS` / `G.playing_cards` — inherited letter-card registry from the alpha engine.
-	- `round_resets.ante` — set index (`word_round.set`); see `docs/gameplay.md`.
+	Letter registry and run inventory:
+	- `G.LETTERS` — face/center definitions (`faces`, `centers`, `center_pools`, `locked`).
+	- `G.letter_inventory` — live letter cards for the run; `G.letter_card_id` — next instance id.
+	- Set progress: `G.GAME.word_round.set` only.
 
 	Adding G.GAME fields:
 	- Assign an owning module below and declare the field on GameRunState here.
@@ -126,13 +127,10 @@
 ---@field points number|nil
 ---@field round number|nil
 ---@field round_scores table<string, { amt: number }>|nil
---- Legacy save/results: `round_resets.ante` == `word_round.set` (set index; label kept for saves).
----@field round_resets { ante?: number, [string]: any }|nil
 ---@field modifiers table<string, boolean>|nil
 ---@field current_round table|nil
 ---@field deck_alpha { pos: { x: number, y: number } }|nil
 ---@field deck_left_count number|nil
----@field chips_text string|nil
 ---
 --- Owner: model/round/init.lua (+ jumble/hand.lua for wr.jumble)
 ---@field word_round WordRound|nil
@@ -300,7 +298,6 @@
 ---@field TIMELINE table|nil
 ---@field OVERLAY_MENU UIPanel|nil
 ---@field RUN { active: boolean }|nil
----@field consumeables CardArea|nil
 ---@field view_deck CardArea[]|nil
 ---@field VIEWING_DECK any
 ---@field deck_preview any
@@ -315,8 +312,14 @@
 ---@field DRAW_HASH SceneNode[]
 ---@field debug_panel DebugPanel|nil
 ---@field VIBRATION number
----@field P_CARDS table
----@field P_CENTERS table Legacy letter-card center registry (rename deferred until save bump)
+---@class LettersRegistry
+---@field faces table<string, table>
+---@field centers table<string, CardCenter>
+---@field center_pools table<string, CardCenter[]>
+---@field locked CardCenter[]
+---@field LETTERS LettersRegistry|nil
+---@field letter_inventory Card[]|nil
+---@field letter_card_id number|nil
 ---@field CARD_W number
 ---@field CARD_H number
 ---@field TILESIZE number
@@ -342,7 +345,6 @@
 ---@field BRUTE_OVERLAY table|nil
 ---@field HAND_CARD_SPACING number|nil
 ---@field TABLE_HAND_SIZE integer
----@field playing_cards Card[]|nil Legacy live deck inventory (rename deferred until save bump)
 ---@field OVERLAY_MENU UIPanel|nil
 ---@field SHOW_SIDE_PANEL boolean
 ---@field check any
@@ -356,7 +358,7 @@
 ---@field action any
 ---@field culled_table any
 ---@field ROOM_ORIG any
----@field playing_card number
+---@field screenwipecard Card|nil
 ---@field muted boolean
 ---@field F_MUTE boolean
 ---@field F_ENABLE_PERF_OVERLAY boolean
