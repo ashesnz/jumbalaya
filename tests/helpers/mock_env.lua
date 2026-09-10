@@ -103,6 +103,7 @@ function M.install_presentation(overrides)
 	require("word_game.ui.presentation.install").install(_G.WORD_GAME)
 end
 
+--- Low-level globals and stubs. Prefer `reset_game()` for per-suite isolation.
 function M.setup()
 	M.ensure_engine_globals()
 		G.C = G.C or {
@@ -304,6 +305,15 @@ function M.setup()
 			G.placement_table.relayout = function() end
 		end
 	end
+end
+
+--- Mirrors boot wiring for hand-clear presentation on the shared Play module.
+function M.install_hand_clear(play_module)
+	play_module = play_module or require("word_game.model.jumble_play")
+	require("word_game.ui.play_effects.hand_clear").install(play_module)
+	_G.WORD_GAME = _G.WORD_GAME or {}
+	_G.WORD_GAME.Play = play_module
+	return play_module
 end
 
 function M.reset_game()

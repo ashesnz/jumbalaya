@@ -4,7 +4,7 @@ local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
 
 T.describe("First play tutorial", function()
-	mock_env.setup()
+	mock_env.reset_game()
 	G.queue_settings_write = function() end
 	_G.play_sfx = function() end
 

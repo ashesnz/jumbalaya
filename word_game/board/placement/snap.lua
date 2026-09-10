@@ -13,11 +13,15 @@ local bonus_gutter = require "word_game.board.bonus.gutter"
 
 local M = {}
 
+local modifier_feedback_hook
+
+function M.bind_modifier_feedback(hook)
+	modifier_feedback_hook = hook
+end
+
 local function show_modifier_feedback(card)
-	if not card then return end
-	local ok, modifier_feedback = pcall(require, "word_game.ui.feedback.modifier_feedback")
-	if ok and modifier_feedback and modifier_feedback.show_on_placed_card then
-		modifier_feedback.show_on_placed_card(card)
+	if card and modifier_feedback_hook then
+		modifier_feedback_hook(card)
 	end
 end
 

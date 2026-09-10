@@ -15,7 +15,7 @@ New code should use the package style. Existing global APIs should only be chang
 app/                     Application bootstrap, startup, lifecycle, persistence, and callbacks
   bootstrap/             engine_boot.lua + game_boot.lua (loaded by bootstrap.lua)
   startup/               profile, window, dealing, assets, menu_boot
-app/runtime/             Rendering, input, scene graph, UI classes, and shared runtime helpers
+app/core/                Rendering, input, scene graph, UI classes, and shared engine helpers
 word_game/
   board/                 jumble pattern row — placement/, jumble/, bonus/
   config/                static tuning: round targets, puzzles, perks, and runtime options
@@ -33,12 +33,12 @@ docs/                    player and design documentation (this folder)
 
 These two UI locations serve different layers and should not be merged:
 
-- `app/runtime/ui.lua` defines the reusable `UIBox` and `UIElement` scene graph. It owns layout measurement, alignment, hit testing, focus, animation hooks, and drawing; it must remain independent of Jumbalaya screens and gameplay.
-- `word_game/ui/` defines Jumbalaya presentation such as the HUD, cards, menus, overlays, controls, and board layouts. These modules build `UIBox` definitions and connect them to word-game state.
+- `app/core/ui/` defines the reusable panel/node scene graph (`panel.lua`, `node.lua`, …). It owns layout measurement, alignment, hit testing, focus, animation hooks, and drawing; it must remain independent of Jumbalaya screens and gameplay.
+- `word_game/ui/` defines Jumbalaya presentation such as the HUD, cards, menus, overlays, controls, and board layouts. These modules build UI definitions and connect them to word-game state.
 
-The dependency direction is `word_game/ui/` → `app/runtime/ui.lua`. Moving the engine classes into `word_game/ui/` would couple the reusable engine layer to the game and would not remove duplicated functionality. New generic UI primitives belong in `app/runtime/`; game-specific UI belongs in `word_game/ui/`.
+The dependency direction is `word_game/ui/` → `app/core/`. Moving the engine classes into `word_game/ui/` would couple the reusable engine layer to the game and would not remove duplicated functionality. New generic UI primitives belong in `app/core/`; game-specific UI belongs in `word_game/ui/`.
 
-`app/runtime/text.lua` follows the same boundary. `DynaText` owns measurement, animated letter rendering, scaling, and alignment. Its reads from `G.LANG`, `G.C`, `G.TIMERS`, and `G.I.MOVEABLE` are engine runtime contracts supplied during bootstrap; localization choices, number formatting, and presentation copy remain in `word_game/ui/`.
+`app/core/graphics/flow_text.lua` follows the same boundary. `DynaText` owns measurement, animated letter rendering, scaling, and alignment. Its reads from `G.LANG`, `G.C`, `G.TIMERS`, and `G.I.MOVEABLE` are engine runtime contracts supplied during bootstrap; localization choices, number formatting, and presentation copy remain in `word_game/ui/`.
 
 ### Callback ownership
 
@@ -56,7 +56,7 @@ Callbacks are grouped by responsibility under `app/callbacks/` and `word_game/ui
 | Card tooltips | `word_game/ui/cards/tooltip.lua` |
 | Screen wipe transitions | `app/screen_wipe.lua` (`G:queue_during_wipe`, `G:queue_wipe_transition`) |
 
-`app/bootstrap.lua` loads callbacks in dependency order and wires `Controller._input_actions` from `app/input_actions.lua` so `app/runtime/controller.lua` does not require application code.
+`app/bootstrap.lua` loads callbacks in dependency order and wires input actions from `app/input_actions.lua` so `app/core/input/router.lua` does not require application code.
 
 Obsolete collection, challenge, tutorial, promotional, social, and poker-only callbacks are removed with their active UI bindings rather than relocated into Jumbalaya packages.
 
@@ -312,7 +312,9 @@ Large Jumbalaya-owned files should be split before inherited runtime classes.
 
 `app/bootstrap.lua` is the single authoritative load order. Do not add a second bootstrap list.
 
-Bootstrap loads the `Game` class, `G` singleton, and application shell (`app/startup.lua`, `app/save.lua`, `app/loop.lua`) before the `word_game` facade. The facade (`word_game/init.lua`) exports domain modules only.
+Bootstrap is split into `app/bootstrap/engine_boot.lua` (engine classes, `G`, schedulers) and `app/bootstrap/game_boot.lua` (word-game facade, presentation wiring, `G.FUNCS`). Any new package in the layout or presentation chain must be checked for circular `require` with model code — model must not import `word_game/ui/` at module top level.
+
+Bootstrap loads the `Game` class, `G` singleton, and application shell (`app/startup.lua`, `app/core/persistence/save.lua`, `app/core/session/loop.lua`) before the `word_game` facade. The facade (`word_game/init.lua`) exports domain modules only. Presentation callbacks (`hand_clear.install`, `ui/cards/bind`, `ui/presentation/install`) are wired in `game_boot.lua`, not in model modules.
 
 The inheritance order is contractual:
 

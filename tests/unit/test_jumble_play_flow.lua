@@ -8,6 +8,18 @@ local mock_env = require("tests.helpers.mock_env")
 T.describe("Jumble play flow integration", function()
 	mock_env.reset_game()
 	local jumble = require("word_game.model.jumble")
+	local play = require("word_game.model.jumble_play")
+
+	T.it("resolve_after_clear returns trade when eligible without TradeUI loaded", function()
+		G.GAME.word_round = {
+			set = 1,
+			hand_index = 1,
+			jumble = { total_score = 30 },
+		}
+		G.GAME.run_state = { tokens = 10, perks = {}, trade_used_this_hand = false }
+		WORD_GAME.TradeUI = nil
+		T.assert_equal(play.resolve_after_clear({}), "trade")
+	end)
 
 	T.it("advances puzzle when play button is pressed with solved puzzle and empty blanks", function()
 		local flow = require("word_game.model.jumble_play")

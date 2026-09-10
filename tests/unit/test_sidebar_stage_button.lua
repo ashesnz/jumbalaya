@@ -332,7 +332,7 @@ T.describe("Sidebar stage button", function()
 	end)
 
 	T.it("defines a square sidebar button with a direct centered label child", function()
-		mock_env.setup()
+		mock_env.reset_game()
 		G.GAME = G.GAME or {}
 		G.GAME.word_round = { mode = "jumble" }
 		G.STATE = G.STATES.TABLE_BOARD

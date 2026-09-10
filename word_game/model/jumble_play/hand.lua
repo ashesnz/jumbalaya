@@ -69,7 +69,7 @@ function M.resolve_after_clear(opts)
 	if round.is_final_hand() then
 		return "win"
 	end
-	if trade.can_use() and WORD_GAME and WORD_GAME.TradeUI then
+	if trade.can_use() then
 		return "trade"
 	end
 	return "dealer"

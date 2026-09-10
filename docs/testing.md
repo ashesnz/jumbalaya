@@ -26,15 +26,17 @@ tests/
     └── test_*.lua            # One file per feature area (auto-discovered)
 ```
 
-`tests/runner.lua` discovers every `tests/unit/test_*.lua` file alphabetically — no manual registration list.
+`tests/runner.lua` discovers every `tests/unit/test_*.lua` file via `love.filesystem.getDirectoryItems("unit")` (portable; no shell `ls`) — no manual registration list.
 
 ## Shared test helpers
 
 `tests/helpers/mock_env.lua` provides:
 
 - `ensure_engine_globals()` — loads real `Card`, `Sprite`, `AnimNode`, etc.
-- `setup()` / `reset_game()` — minimal `G.GAME`, `G.placement_table`, and layout stubs
-- `teardown_boot_pollution()` — resets globals between suites that boot the full app
+- `reset_game()` — preferred per-suite reset: `G.GAME`, `G.placement_table`, layout stubs, bonus-stack/fly-off state
+- `setup()` — low-level globals only; called by `reset_game()`, avoid at describe level unless booting a custom shell (e.g. screen-wipe tests)
+- `install_hand_clear(play_module)` — mirrors `game_boot` wiring for `Play.on_hand_cleared` / `continue_after_dealer`
+- `teardown_boot_pollution()` — alias for `reset_game()`
 
 Prefer `mock_env.reset_game()` at the top of a `describe` block. When mocking `G.deck`, keep `G.playing_cards` and `G.deck.cards` as **separate tables** (production does not alias them).
 

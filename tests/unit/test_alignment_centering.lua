@@ -8,7 +8,7 @@ local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
 
 T.describe("AnimNode align_to_major re-alignment", function()
-	mock_env.setup()
+	mock_env.reset_game()
 
 	local function make_node(x, y, w, h)
 		return AnimNode { T = { x = x, y = y, w = w, h = h } }

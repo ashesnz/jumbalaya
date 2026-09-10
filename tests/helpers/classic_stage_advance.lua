@@ -61,7 +61,7 @@ function M.wire_word_game_stubs()
 	WORD_GAME.Jumble = jumble
 	jumble.ensure_playable_puzzle = function() return true end
 	jumble.refresh_hud = function() end
-	WORD_GAME.Play = play
+	WORD_GAME.Play = mock_env.install_hand_clear(play)
 	WORD_GAME.VoucherDiscard = { reset = function() end }
 	WORD_GAME.HandClearFocus = {
 		end_focus = function() end,

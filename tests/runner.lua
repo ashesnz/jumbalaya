@@ -6,15 +6,19 @@ local M = {}
 
 local function discover_test_modules()
 	local modules = {}
-	local handle = io.popen('ls -1 tests/unit/test_*.lua 2>/dev/null')
-	if handle then
-		for line in handle:lines() do
-			local name = line:match('([^/]+)%.lua$')
-			if name then
-				modules[#modules + 1] = 'tests.unit.' .. name
-			end
+	local files
+	for _, dir in ipairs({ "unit", "tests/unit" }) do
+		local listing = love.filesystem.getDirectoryItems(dir)
+		if listing and #listing > 0 then
+			files = listing
+			break
 		end
-		handle:close()
+	end
+	files = files or {}
+	for _, name in ipairs(files) do
+		if name:match("^test_.*%.lua$") then
+			modules[#modules + 1] = "tests.unit." .. name:sub(1, -5)
+		end
 	end
 	table.sort(modules)
 	return modules

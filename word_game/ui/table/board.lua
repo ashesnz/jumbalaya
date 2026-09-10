@@ -4,6 +4,12 @@
 
 local M = {}
 
+local placement_snap = require("word_game.board.placement.snap")
+local modifier_feedback = require("word_game.ui.feedback.modifier_feedback")
+placement_snap.bind_modifier_feedback(function(card)
+	modifier_feedback.show_on_placed_card(card)
+end)
+
 local jumble_fixed_letters = require("word_game.ui.table.jumble_fixed_letters")
 local felt = require("word_game.ui.layout.felt")
 local Layout = require("word_game.ui.layout")
