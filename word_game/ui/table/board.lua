@@ -43,10 +43,10 @@ function M.update(game, dt)
 	if DEVTOOLS and DEVTOOLS.DebugButton then
 		DEVTOOLS.DebugButton.sync()
 	end
-		if WORD_GAME and WORD_GAME_UI.TableControls then
+		if WORD_GAME_UI.TableControls then
 			WORD_GAME_UI.TableControls.sync()
 		end
-		if WORD_GAME and WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
+		if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
 			WORD_GAME_UI.Sidebar.sync_visibility()
 		end
 		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active() then
@@ -61,14 +61,14 @@ function M.update(game, dt)
 				WORD_GAME.Jumble.refresh_hud()
 			end
 		end
-	if WORD_GAME and WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.update then
+	if WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.update then
 		WORD_GAME_UI.BossWordAnnounce.update(dt)
 	end
 	if game.placement_table then
 		ensure_placement_pattern_overlay(game.placement_table)
 		game.placement_table:update(dt)
 	end
-	if WORD_GAME and WORD_GAME_UI.TimelineTimer and WORD_GAME_UI.TimelineTimer.update then
+	if WORD_GAME_UI.TimelineTimer and WORD_GAME_UI.TimelineTimer.update then
 		WORD_GAME_UI.TimelineTimer.update(dt)
 	end
 end
@@ -80,23 +80,23 @@ function M.draw_spotlight_overlay(game, overlay)
 	overlay:draw()
 	love.graphics.pop()
 
-	if overlay.redraw_portrait and WORD_GAME and WORD_GAME_UI.TimelineTimer then
+	if overlay.redraw_portrait and WORD_GAME_UI.TimelineTimer then
 		WORD_GAME_UI.TimelineTimer.draw()
 	end
-	if overlay.redraw_banner and WORD_GAME and WORD_GAME_UI.ScoreBanner then
+	if overlay.redraw_banner and WORD_GAME_UI.ScoreBanner then
 		WORD_GAME_UI.ScoreBanner.draw()
 	end
 	if overlay.redraw_tokens and G.deck and not boss_sequence_active()
-		and WORD_GAME and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.draw then
+		and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.draw then
 		love.graphics.push()
 		G.deck:translate_container()
 		WORD_GAME_UI.TableDeck.draw(G.deck)
 		love.graphics.pop()
 	end
-	if overlay.redraw_confetti and WORD_GAME and WORD_GAME_UI.Confetti then
+	if overlay.redraw_confetti and WORD_GAME_UI.Confetti then
 		WORD_GAME_UI.Confetti.draw_pass()
 	end
-	if overlay.redraw_token_reward and WORD_GAME and WORD_GAME_UI.TokenReward then
+	if overlay.redraw_token_reward and WORD_GAME_UI.TokenReward then
 		WORD_GAME_UI.TokenReward.draw_pass()
 	end
 	if overlay.redraw_attention then
@@ -108,16 +108,16 @@ function M.draw_spotlight_overlay(game, overlay)
 				love.graphics.pop()
 			end
 		end
-		if WORD_GAME and WORD_GAME_UI.FloatUpText then
+		if WORD_GAME_UI.FloatUpText then
 			WORD_GAME_UI.FloatUpText.draw_pass()
 		end
-		if WORD_GAME and WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.draw_pass then
+		if WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.draw_pass then
 			WORD_GAME_UI.BossWordAnnounce.draw_pass()
 		end
 	end
 
 	if overlay.redraw_hand and G.hand then
-		local bonus_stack = WORD_GAME and WORD_GAME_UI.BonusStackUI
+		local bonus_stack = WORD_GAME_UI.BonusStackUI
 		for _, v in pairs(game.LIVE.CARD) do
 			if v.area == G.hand
 				and (not v.parent and v ~= game.INPUT.dragging.target and v ~= game.INPUT.focused.target)
@@ -142,7 +142,7 @@ function M.draw_spotlight_overlay(game, overlay)
 		love.graphics.pop()
 	end
 
-	if overlay.redraw_timeline and WORD_GAME and WORD_GAME_UI.TimelineTimer then
+	if overlay.redraw_timeline and WORD_GAME_UI.TimelineTimer then
 		WORD_GAME_UI.TimelineTimer.draw()
 	end
 
@@ -162,10 +162,10 @@ function M.draw_spotlight_overlay(game, overlay)
 end
 
 function M.draw_hud()
-	if WORD_GAME and WORD_GAME_UI.TimelineTimer then
+	if WORD_GAME_UI.TimelineTimer then
 		WORD_GAME_UI.TimelineTimer.draw()
 	end
-	if WORD_GAME and WORD_GAME_UI.ScoreBanner then
+	if WORD_GAME_UI.ScoreBanner then
 		WORD_GAME_UI.ScoreBanner.draw()
 	end
 	if M.is_active() then
@@ -179,7 +179,7 @@ function M.draw_board(game)
 		game.placement_table:draw_run_pass(game)
 		M.draw_hand_pass(game)
 	end
-	local bonus_stack_ui = WORD_GAME and WORD_GAME_UI.BonusStackUI
+	local bonus_stack_ui = WORD_GAME_UI.BonusStackUI
 	if bonus_stack_ui and bonus_stack_ui.draw_pass then
 		bonus_stack_ui.draw_pass()
 	end
@@ -188,7 +188,7 @@ end
 function M.should_draw_sidebar_deck()
 	if not G.deck then return false end
 	if boss_sequence_active() then return false end
-	if WORD_GAME and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
+	if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
 		return true
 	end
 	return #G.deck.cards > 0
@@ -198,7 +198,7 @@ function M.draw_hand_pass(game)
 	if M.should_draw_sidebar_deck() then
 		love.graphics.push()
 		G.deck:translate_container()
-		if WORD_GAME and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
+		if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
 			WORD_GAME_UI.TableDeck.draw(G.deck)
 		else
 			G.deck:draw()
@@ -215,14 +215,14 @@ function M.draw_hand_pass(game)
 		love.graphics.pop()
 	end
 
-	local bonus_stack = WORD_GAME and WORD_GAME_UI.BonusStackUI
+	local bonus_stack = WORD_GAME_UI.BonusStackUI
 	local controller = game.INPUT
 	for _, v in pairs(game.LIVE.CARD) do
 		local from_hand = v.area == G.hand
 		local from_bonus = bonus_stack and bonus_stack.contains(v) and not v.area
 		if (from_hand or from_bonus)
 			and (not v.parent and v ~= controller.dragging.target and v ~= controller.focused.target)
-			and not (WORD_GAME and WORD_GAME_UI.CardInspect and WORD_GAME_UI.CardInspect.is(v)) then
+			and not (WORD_GAME_UI.CardInspect and WORD_GAME_UI.CardInspect.is(v)) then
 			love.graphics.push()
 			v:translate_container()
 			v:draw()
@@ -233,13 +233,13 @@ end
 
 function M.draw_reward_passes()
 	if hand_clear_focus_active() then return end
-	if WORD_GAME and WORD_GAME_UI.Confetti then
+	if WORD_GAME_UI.Confetti then
 		WORD_GAME_UI.Confetti.draw_pass()
 	end
-	if WORD_GAME and WORD_GAME_UI.TokenReward then
+	if WORD_GAME_UI.TokenReward then
 		WORD_GAME_UI.TokenReward.draw_pass()
 	end
-	if WORD_GAME and WORD_GAME_UI.PerkStamp then
+	if WORD_GAME_UI.PerkStamp then
 		WORD_GAME_UI.PerkStamp.draw_pass()
 	end
 end
@@ -254,21 +254,21 @@ function M.draw_attention_passes(game)
 			love.graphics.pop()
 		end
 	end
-	if WORD_GAME and WORD_GAME_UI.FloatUpText then
+	if WORD_GAME_UI.FloatUpText then
 		WORD_GAME_UI.FloatUpText.draw_pass()
 	end
-	if WORD_GAME and WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.draw_pass then
+	if WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.draw_pass then
 		WORD_GAME_UI.BossWordAnnounce.draw_pass()
 	end
 end
 
 function M.draw_card_interaction(game)
-	if WORD_GAME and WORD_GAME_UI.FirstPlayTutorial and WORD_GAME_UI.FirstPlayTutorial.is_active()
+	if WORD_GAME_UI.FirstPlayTutorial and WORD_GAME_UI.FirstPlayTutorial.is_active()
 		and WORD_GAME_UI.FirstPlayTutorial.is_active() then
 		return
 	end
 	if not game.placement_table then return end
-	local bonus_stack = WORD_GAME and WORD_GAME_UI.BonusStackUI
+	local bonus_stack = WORD_GAME_UI.BonusStackUI
 	if game.INPUT.dragging.target and game.INPUT.dragging.target ~= game.INPUT.focused.target then
 		love.graphics.push()
 		game.INPUT.dragging.target:translate_container()
@@ -285,10 +285,10 @@ function M.draw_card_interaction(game)
 		game.INPUT.focused.target:draw()
 		love.graphics.pop()
 	end
-	if WORD_GAME and WORD_GAME_UI.CardInspect then
+	if WORD_GAME_UI.CardInspect then
 		WORD_GAME_UI.CardInspect.draw_foreground()
 	end
-	local voucher_discard = WORD_GAME and WORD_GAME_UI.VoucherDiscard
+	local voucher_discard = WORD_GAME_UI.VoucherDiscard
 	if voucher_discard and voucher_discard.draw_voucher_foreground then
 		voucher_discard.draw_voucher_foreground()
 	end

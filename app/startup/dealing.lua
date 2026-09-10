@@ -19,34 +19,34 @@ function get_play_area_rect()
 end
 
 function get_table_board_sidebar_frac()
-	if WORD_GAME and WORD_GAME_UI.Layout then
+	if WORD_GAME_UI.Layout then
 		return WORD_GAME_UI.Layout.sidebar_frac()
 	end
 	return (G.TABLE_BOARD_SIDEBAR_WIDTH or 3.0) / (G.TILE_W or 20)
 end
 
 function get_table_board_sidebar_width()
-	if WORD_GAME and WORD_GAME_UI.Layout then
+	if WORD_GAME_UI.Layout then
 		return WORD_GAME_UI.Layout.sidebar_width()
 	end
 	return G.TABLE_BOARD_SIDEBAR_WIDTH or 3.0
 end
 
 function get_side_panel_inner_width()
-	if WORD_GAME and WORD_GAME_UI.Layout then
+	if WORD_GAME_UI.Layout then
 		return WORD_GAME_UI.Layout.inner_width()
 	end
 	return get_table_board_sidebar_width() * 0.92
 end
 
 function update_table_board_panel_attach()
-	if WORD_GAME and WORD_GAME_UI.Layout then
+	if WORD_GAME_UI.Layout then
 		WORD_GAME_UI.Layout.update_all()
 	end
 end
 
 function get_table_felt_rect()
-	if WORD_GAME and WORD_GAME_UI.Layout then
+	if WORD_GAME_UI.Layout then
 		return WORD_GAME_UI.Layout.felt_rect()
 	end
 	return {

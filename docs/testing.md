@@ -70,6 +70,7 @@ Prefer `mock_env.reset_game()` at the top of a `describe` block. When mocking `G
 | `test_table_discard.lua` | Sidebar discard bin, `max_fills()`, game-over |
 | `test_sidebar_stage_button.lua` | Sidebar End Run / Next button |
 | `test_timeline_timer.lua` | Fuse bar |
+| `test_save_roundtrip.lua` | Card/area save, disk round-trip, jumble hand restore fixture |
 | `test_voucher_tokens.lua` | Perk stamp rolls |
 | `test_hand_shuffle.lua` | Shuffle/play buttons |
 | `test_play_hold_redraw.lua` | Hold-to-redraw |

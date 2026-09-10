@@ -67,7 +67,7 @@ steam_appid.txt
 
 # ------------------------------------------------------------------------------
 # Save data & player profiles (written to project dir during dev by mistake)
-# LÖVE normally stores these in ~/Library/Application Support/LOVE/CricCards/
+# LÖVE normally stores these in ~/Library/Application Support/LOVE/Jumbalaya/
 # ------------------------------------------------------------------------------
 *.jkr
 !version.jkr

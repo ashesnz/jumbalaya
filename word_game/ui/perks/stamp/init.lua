@@ -27,7 +27,7 @@ local mouse_to_stamp_space = stamp_layout.mouse_to_stamp_space
 local screen_top_px = stamp_layout.screen_top_px
 
 local function refresh_sidebar()
-	if WORD_GAME and WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.refresh then
+	if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.refresh then
 		WORD_GAME_UI.Sidebar:refresh()
 	end
 end
@@ -144,7 +144,7 @@ end
 --- Opening-table demo: stamp the top-left discard-bin voucher on fresh runs.
 function M.try_opening_demo()
 	if M.is_active() then return false end
-	if WORD_GAME and WORD_GAME_UI.FirstPlayTutorial and WORD_GAME_UI.FirstPlayTutorial.is_active()
+	if WORD_GAME_UI.FirstPlayTutorial and WORD_GAME_UI.FirstPlayTutorial.is_active()
 		and WORD_GAME_UI.FirstPlayTutorial.is_active() then
 		return false
 	end
@@ -198,7 +198,7 @@ function M.draw_pass()
 			alpha = math.min(1, imprint_t * 2.2)
 		end
 		draw.draw_type_imprint(entry.perk or entry.sprite, x, y, w, h, alpha)
-		local voucher_discard = WORD_GAME and WORD_GAME_UI.VoucherDiscard
+		local voucher_discard = WORD_GAME_UI.VoucherDiscard
 		if voucher_discard and voucher_discard.draw_voucher_overlay then
 			voucher_discard.draw_voucher_overlay(entry, x, y, w, h)
 		end

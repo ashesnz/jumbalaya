@@ -9,6 +9,12 @@
 	Cross-package API:
 	- **WORD_GAME** / **WORD_GAME_UI** facades are the supported entry points for app/, tests/,
 	  and devtools. Prefer facade methods over new top-level G.GAME keys.
+	- Do not guard UI with `WORD_GAME and WORD_GAME_UI.X` — after boot `WORD_GAME` is always
+	  set; test the export: `if WORD_GAME_UI.X then …`. Use `WORD_GAME.Jumble` etc. for domain.
+
+	Legacy naming (keep until save format bump):
+	- `G.P_CENTERS` / `G.playing_cards` — inherited letter-card registry from the alpha engine.
+	- `round_resets.ante` — set index (`word_round.set`); see `docs/gameplay.md`.
 
 	Adding G.GAME fields:
 	- Assign an owning module below and declare the field on GameRunState here.
@@ -120,7 +126,8 @@
 ---@field points number|nil
 ---@field round number|nil
 ---@field round_scores table<string, { amt: number }>|nil
----@field round_resets table|nil
+--- Legacy save/results: `round_resets.ante` == `word_round.set` (set index; label kept for saves).
+---@field round_resets { ante?: number, [string]: any }|nil
 ---@field modifiers table<string, boolean>|nil
 ---@field current_round table|nil
 ---@field deck_alpha { pos: { x: number, y: number } }|nil
@@ -157,7 +164,7 @@
 ---@field hand_redraw_animating boolean|nil
 ---@field placement_recall_animating boolean|nil
 ---
---- Owner: model/run/busy.lua (mirrored from UI each frame in game_boot)
+--- Owner: model/run/busy.lua (FX modules push on animation start/end)
 ---@field trade_ui_busy boolean|nil
 ---@field token_reward_busy boolean|nil
 ---@field card_fly_off_busy boolean|nil
@@ -309,7 +316,7 @@
 ---@field debug_panel DebugPanel|nil
 ---@field VIBRATION number
 ---@field P_CARDS table
----@field P_CENTERS table
+---@field P_CENTERS table Legacy letter-card center registry (rename deferred until save bump)
 ---@field CARD_W number
 ---@field CARD_H number
 ---@field TILESIZE number
@@ -335,7 +342,7 @@
 ---@field BRUTE_OVERLAY table|nil
 ---@field HAND_CARD_SPACING number|nil
 ---@field TABLE_HAND_SIZE integer
----@field playing_cards Card[]|nil
+---@field playing_cards Card[]|nil Legacy live deck inventory (rename deferred until save bump)
 ---@field OVERLAY_MENU UIPanel|nil
 ---@field SHOW_SIDE_PANEL boolean
 ---@field check any

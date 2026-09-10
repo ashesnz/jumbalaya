@@ -86,7 +86,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `Deck` / `Back` | Dealing; jumble branch in `model/cards/deck/jumble.lua` |
 | `Board` | Jumble pattern row (`placement/table`, `placement/snap`, `jumble/geometry`, `bonus/gutter`) |
 | `HandSize` | `get()` — single hand-size accessor for dealing and layout |
-| `Busy` / `InputLock` | Table-busy flags on `G.GAME` and `is_table_busy()` |
+| `Busy` / `InputLock` | Table-busy flags on `G.GAME` (FX modules push); `is_table_busy()` |
 | `Timeline` | Authoritative fuse seconds on `G.GAME`; classic goal/target reads |
 | `Match` | `end_run()` — centralized discard-bin surrender / game-over transition |
 | `VoucherDiscard` | Discard-bin allowance rules (`model/perks/voucher_discard`) |
@@ -357,7 +357,7 @@ emmylua_check . --severity warn   # deeper pass; CI blocks on errors only
 git diff --check
 ```
 
-CI (`.github/workflows/tests.yml`): LÖVE **11.5** AppImage (not `apt`) + pinned `emmylua_check` **0.25.1** at `--severity error`. Details in [testing.md](testing.md).
+Analyzer policy (disabled diagnostics on `G`): `types/emmyrc.lua`. CI runs error severity only — see [testing.md](testing.md).
 
 For package splits, compare public API names before and after. Startup success alone does not verify jumble puzzle transitions, hold-to-redraw, token fly, or perk purchase — smoke-test those manually.
 

@@ -2,7 +2,7 @@
 	word_game/ui/perks/timeline_timer/init.lua - Timeline HUD (timer fuse or classic score slider).
 
 	Time Run: burning fuse countdown (60s → 0).
-	Classic: score progress bar toward the stage target (dice-have-no-eyes style).
+	Classic: score progress bar toward the stage target.
 ]]
 
 local facade = require("word_game.ui.facade")
@@ -378,7 +378,7 @@ function M.reset(duration)
 	M.sync_progress()
 	mirror_classic_to_game()
 	StageLabel.sync()
-	if WORD_GAME and WORD_GAME_UI.SidebarStageButton and WORD_GAME_UI.SidebarStageButton.reset then
+	if WORD_GAME_UI.SidebarStageButton and WORD_GAME_UI.SidebarStageButton.reset then
 		WORD_GAME_UI.SidebarStageButton.reset()
 	end
 end
@@ -407,7 +407,7 @@ function M.reset_progress(target)
 	M.sync_progress()
 	mirror_classic_to_game()
 	StageLabel.sync()
-	if WORD_GAME and WORD_GAME_UI.SidebarStageButton and WORD_GAME_UI.SidebarStageButton.reset then
+	if WORD_GAME_UI.SidebarStageButton and WORD_GAME_UI.SidebarStageButton.reset then
 		WORD_GAME_UI.SidebarStageButton.reset()
 	end
 end

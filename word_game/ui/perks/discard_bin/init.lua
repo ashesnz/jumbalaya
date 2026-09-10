@@ -43,7 +43,7 @@ local function tile_scale()
 end
 
 local function perk_stamp()
-	return WORD_GAME and WORD_GAME_UI.PerkStamp
+	return WORD_GAME_UI.PerkStamp
 end
 
 local function perk_stamp_imprint_count()

@@ -43,7 +43,7 @@ function M.present_boss_word(wr, on_complete)
 	end
 
 	local function finish_intro()
-		local tt = WORD_GAME and WORD_GAME_UI.TimelineTimer
+		local tt = WORD_GAME_UI.TimelineTimer
 		if tt and tt.arm_boss_countdown then
 			tt.arm_boss_countdown(round_config.TIMELINE_SECONDS)
 		end
@@ -51,10 +51,10 @@ function M.present_boss_word(wr, on_complete)
 			local reveal_dur = has_event_manager() and definition.BOSS_INTRO.timer_reveal_duration or 0
 			tt.reveal_countdown_timer(reveal_dur)
 		end
-		if WORD_GAME and WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.set_banner_mode then
+		if WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.set_banner_mode then
 			WORD_GAME_UI.ScoreBanner.set_banner_mode("boss_word", "BOSS WORD")
 		end
-		if WORD_GAME and WORD_GAME_UI.BossWordAnnounce then
+		if WORD_GAME_UI.BossWordAnnounce then
 			if WORD_GAME_UI.BossWordAnnounce.play_boss then
 				WORD_GAME_UI.BossWordAnnounce.play_boss("BOSS WORD")
 			end
@@ -71,15 +71,15 @@ function M.present_boss_word(wr, on_complete)
 			if on_complete then on_complete() end
 			return
 		end
-		if WORD_GAME and WORD_GAME_UI.Layout and WORD_GAME_UI.Layout.refresh_placement_layout then
+		if WORD_GAME_UI.Layout and WORD_GAME_UI.Layout.refresh_placement_layout then
 			WORD_GAME_UI.Layout.refresh_placement_layout()
 		elseif G.placement_table and G.placement_table.apply_screen_position then
 			G.placement_table:apply_screen_position()
 		end
-		if WORD_GAME and WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
+		if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
 			WORD_GAME_UI.Sidebar.sync_visibility()
 		end
-		if WORD_GAME and WORD_GAME_UI.TableControls then
+		if WORD_GAME_UI.TableControls then
 			WORD_GAME_UI.TableControls.sync_position()
 		end
 		local fx = effects()
@@ -199,7 +199,7 @@ function M.present_boss_word(wr, on_complete)
 		if on_complete then on_complete() end
 		return
 	end
-	if WORD_GAME and WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
+	if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
 		WORD_GAME_UI.Sidebar.sync_visibility()
 	end
 

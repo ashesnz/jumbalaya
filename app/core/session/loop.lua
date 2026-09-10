@@ -104,7 +104,7 @@ function Game:update(dt)
 end
 
 function Game:draw_spotlight_overlay(overlay)
-	if WORD_GAME and WORD_GAME_UI.TableBoard then
+	if WORD_GAME_UI.TableBoard then
 		WORD_GAME_UI.TableBoard.draw_spotlight_overlay(self, overlay)
 	end
 end
@@ -145,12 +145,12 @@ function Game:render_board_pass()
 	end
 	perf_checkpoint('panels', 'draw')
 
-	if self.placement_table and WORD_GAME and WORD_GAME_UI.TableBoard then
+	if self.placement_table and WORD_GAME_UI.TableBoard then
 		WORD_GAME_UI.TableBoard.draw_hud()
 		WORD_GAME_UI.TableBoard.draw_board(self)
 	end
 
-	if WORD_GAME and WORD_GAME_UI.TableBoard then
+	if WORD_GAME_UI.TableBoard then
 		WORD_GAME_UI.TableBoard.draw_reward_passes()
 		WORD_GAME_UI.TableBoard.draw_attention_passes(self)
 	end
@@ -170,13 +170,13 @@ function Game:render_menu_pass()
 	local show_background = (not self.OVERLAY_MENU) or (not self.F_HIDE_BG)
 
 	if self.OVERLAY_MENU and self.OVERLAY_MENU ~= self.INPUT.dragging.target then
-		if WORD_GAME and WORD_GAME_UI.TradeUI and WORD_GAME_UI.TradeUI.backdrop_pass then
+		if WORD_GAME_UI.TradeUI and WORD_GAME_UI.TradeUI.backdrop_pass then
 			WORD_GAME_UI.TradeUI.backdrop_pass()
 		end
 		draw_with_container(self.OVERLAY_MENU)
 	end
 	if (show_background or self.OVERLAY_MENU)
-		and WORD_GAME and WORD_GAME_UI.TradeUI and WORD_GAME_UI.TradeUI.draw_pass then
+		and WORD_GAME_UI.TradeUI and WORD_GAME_UI.TradeUI.draw_pass then
 		WORD_GAME_UI.TradeUI.draw_pass()
 	end
 
@@ -194,7 +194,7 @@ function Game:render_chrome_pass()
 		G.ALERT_ON_SCREEN = true
 	end
 
-	if self.placement_table and WORD_GAME and WORD_GAME_UI.TableBoard then
+	if self.placement_table and WORD_GAME_UI.TableBoard then
 		WORD_GAME_UI.TableBoard.draw_card_interaction(self)
 	end
 
@@ -210,7 +210,7 @@ function Game:render_chrome_pass()
 	self.POINTER:draw()
 	love.graphics.pop()
 
-	if WORD_GAME and WORD_GAME_UI.PlayHoldRedraw then
+	if WORD_GAME_UI.PlayHoldRedraw then
 		WORD_GAME_UI.PlayHoldRedraw.draw()
 	end
 

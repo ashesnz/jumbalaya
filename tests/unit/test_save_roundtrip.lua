@@ -152,4 +152,40 @@ T.describe("save round-trip", function()
 		T.assert_equal(restored.cardAreas.hand.cards[1].state.playing_card, 4)
 		love.filesystem.remove(path)
 	end)
+
+	T.it("restores a jumble hand snapshot from disk via round.restore_from_save", function()
+		local jumble_fixture = require("tests.helpers.jumble_save_fixture")
+		local round = require("word_game.model.round")
+		mock_env.install_presentation({
+			ScoreBanner = {
+				reset = function() end,
+				state = function() return { to_go_label = "SCORE", target = 0, remaining = 0 } end,
+				reset_jumble_score = function() end,
+				snap_to_actual = function() end,
+				set_banner_mode = function() end,
+				hide_points_to_get_display = function() end,
+				sync_points_to_get_preview = function() end,
+			},
+			TimelineTimer = { reset_progress = function() end, reset = function() end },
+			StageLabel = { force_sync = function() end },
+			Sidebar = { ensure = function() end, refresh = function() end },
+			BonusStackUI = { on_hand_start = function() end },
+		})
+
+		G.hand = CardArea(0, 0, 8, 2, { type = "hand", card_limit = 7, selection_limit = 1 })
+		local path = jumble_fixture.write_temp("test_jumble_hand_save.acs", write_save_file, make_letter("R", 9):save())
+		local loaded = jumble_fixture.read_temp(path, read_save_payload, unpack_source)
+		T.assert_not_nil(loaded)
+		jumble_fixture.apply_loaded(loaded, restore_card_areas, round.restore_from_save)
+
+		local wr = G.GAME.word_round
+		T.assert_equal(wr.mode, "jumble")
+		T.assert_equal(wr.set, 2)
+		T.assert_equal(wr.jumble.total_score, 18)
+		T.assert_equal(G.GAME.round_resets.ante, 2, "ante mirrors set index")
+		T.assert_equal(G.GAME.timeline_seconds, 60, "restore_from_save resets fuse via timeline_reset")
+		T.assert_equal(#G.hand.cards, 1)
+		T.assert_equal(G.hand.cards[1].ability.letter, "R")
+		love.filesystem.remove(path)
+	end)
 end)

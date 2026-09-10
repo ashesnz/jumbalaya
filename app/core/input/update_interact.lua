@@ -16,7 +16,7 @@ function InputRouter:update_interact(dt)
 	-- New press: begin hold-to-inspect when eligible, else start a drag.
 	if not self.press_state.handled then
 		local down_target = self.press_state.target
-		local inspect = WORD_GAME and WORD_GAME_UI.CardInspect
+		local inspect = WORD_GAME_UI.CardInspect
 		if down_target and down_target.states.drag.can and inspect and inspect.can_inspect and inspect.can_inspect(down_target) then
 			inspect.begin_hold(down_target)
 		elseif down_target and down_target.states.drag.can then

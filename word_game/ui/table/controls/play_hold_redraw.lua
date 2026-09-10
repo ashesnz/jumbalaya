@@ -8,6 +8,7 @@ local Scheduler = require "app.effects.timeline_scheduler"
 local facade = require("word_game.ui.facade")
 local InputLock = facade.input_lock()
 local perk_effects = facade.perks_effects()
+local Busy = facade.busy()
 
 
 local M = {}
@@ -41,14 +42,14 @@ local function safe_random(seed_key)
 end
 
 local function gameplay_overlays_active()
-	if WORD_GAME and WORD_GAME_UI.TradeUI and WORD_GAME_UI.TradeUI.is_open and WORD_GAME_UI.TradeUI.is_open() then
+	if WORD_GAME_UI.TradeUI and WORD_GAME_UI.TradeUI.is_open and WORD_GAME_UI.TradeUI.is_open() then
 		return true
 	end
 	return false
 end
 
 local function play_button_uie()
-	return WORD_GAME and WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.play_button_uie()
+	return WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.play_button_uie()
 end
 
 local function belongs_to_play_button(node)
@@ -117,26 +118,31 @@ local function reset_hold()
 	hold_t = 0
 end
 
+local function set_animating(on)
+	animating = on
+	Busy.set("play_hold_redraw_busy", on)
+	if G.GAME then
+		G.GAME.hand_redraw_animating = on and true or false
+	end
+end
+
 function M.reset()
 	reset_hold()
 	block_click = false
 	peak_hold_t = 0
-	animating = false
-	if G.GAME and G.GAME.hand_redraw_animating then
-		G.GAME.hand_redraw_animating = false
-		if WORD_GAME and WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
-			WORD_GAME_UI.TableInput.refresh_card_input()
-		else
-			if G.hand and G.hand.set_ranks then G.hand:set_ranks() end
-			if G.placement_table and G.placement_table.area and G.placement_table.area.set_ranks then
-				G.placement_table.area:set_ranks()
-			end
+	set_animating(false)
+	if WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
+		WORD_GAME_UI.TableInput.refresh_card_input()
+	else
+		if G.hand and G.hand.set_ranks then G.hand:set_ranks() end
+		if G.placement_table and G.placement_table.area and G.placement_table.area.set_ranks then
+			G.placement_table.area:set_ranks()
 		end
 	end
 end
 
 local function recall_placement_cards()
-	if WORD_GAME and WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.recall_placement_cards then
+	if WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.recall_placement_cards then
 		WORD_GAME_UI.TableControls.recall_placement_cards()
 	end
 end
@@ -215,12 +221,9 @@ local function discard_hand_down(on_complete)
 end
 
 local function finish_redraw()
-	animating = false
-	if G.GAME then
-		G.GAME.hand_redraw_animating = false
-	end
+	set_animating(false)
 	block_click = true
-	if WORD_GAME and WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
+	if WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
 		WORD_GAME_UI.TableInput.refresh_card_input()
 	else
 		if G.hand and G.hand.set_ranks then G.hand:set_ranks() end
@@ -231,7 +234,7 @@ local function finish_redraw()
 	if G.hand and G.hand.relayout then
 		G.hand:relayout()
 	end
-	if WORD_GAME and WORD_GAME_UI.TableControls then
+	if WORD_GAME_UI.TableControls then
 		WORD_GAME_UI.TableControls.sync()
 	end
 end
@@ -247,13 +250,10 @@ local function trigger_redraw()
 		return
 	end
 
-	animating = true
+	set_animating(true)
 	block_click = true
 	peak_hold_t = M.HOLD_DURATION
 	reset_hold()
-	if G.GAME then
-		G.GAME.hand_redraw_animating = true
-	end
 
 	safe_sound("whoosh1", 0.9, 0.75)
 

@@ -94,6 +94,10 @@ function M.dissolve_fx()
 	return load("app.effects.dissolve_fx")
 end
 
+function M.busy()
+	return (WORD_GAME and WORD_GAME.Busy) or load("word_game.model.run.busy")
+end
+
 function M.updaters()
 	return load("app.core.session.updaters")
 end

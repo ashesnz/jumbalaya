@@ -35,10 +35,10 @@ function M.reset()
 	M.token_roll = nil
 	M.token_pending = 0
 	M.token_highlight = 0
-	if WORD_GAME and WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.reset then
+	if WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.reset then
 		WORD_GAME_UI.TokenReward.reset()
 	end
-	if WORD_GAME and WORD_GAME_UI.HandClearFocus and WORD_GAME_UI.HandClearFocus.reset then
+	if WORD_GAME_UI.HandClearFocus and WORD_GAME_UI.HandClearFocus.reset then
 		WORD_GAME_UI.HandClearFocus.reset()
 	end
 end

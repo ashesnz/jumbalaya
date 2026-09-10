@@ -12,7 +12,7 @@ local M = {}
 function M.try_play()
 	if InputLock.is_table_busy() then return end
 	if RunMode.classic_stage_complete() then
-		local hand_shuffle = WORD_GAME and WORD_GAME_UI.TableControls
+		local hand_shuffle = WORD_GAME_UI.TableControls
 		if not (hand_shuffle and hand_shuffle.placement_has_cards()) then
 			word_feedback.show_classic_proceed({ hold = 2.2 })
 		elseif WORD_GAME and WORD_GAME.Play then
@@ -20,7 +20,7 @@ function M.try_play()
 		end
 		return
 	end
-	if WORD_GAME and WORD_GAME_UI.PlayHoldRedraw and WORD_GAME_UI.PlayHoldRedraw.consume_click() then return end
+	if WORD_GAME_UI.PlayHoldRedraw and WORD_GAME_UI.PlayHoldRedraw.consume_click() then return end
 	if WORD_GAME and WORD_GAME.Play then
 		play_resolution.resolve(WORD_GAME.Play)
 	end

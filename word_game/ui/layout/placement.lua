@@ -104,14 +104,14 @@ end
 function M.set_screen_positions(opts)
 	opts = opts or {}
 	if G.STAGE == G.STAGES.RUN and G.hand then
-		if WORD_GAME and WORD_GAME_UI.Layout then
+		if WORD_GAME_UI.Layout then
 			WORD_GAME_UI.Layout.update_all()
 		end
 		local rect = get_table_felt_rect()
 		local pad_x = rect.w * 0.04
 		local pad_y = rect.h * 0.06
 		if G.STATE == G.STATES.TABLE_BOARD
-			and WORD_GAME and WORD_GAME_UI.Layout and WORD_GAME_UI.Layout.deck_rect then
+			and WORD_GAME_UI.Layout and WORD_GAME_UI.Layout.deck_rect then
 			local deck = WORD_GAME_UI.Layout.deck_rect()
 			if G.deck and G.deck.T then
 			G.deck.T.x = deck.x
@@ -153,7 +153,7 @@ function M.set_screen_positions(opts)
 			if G.deck.hard_set_cards then G.deck:hard_set_cards() end
 		end
 
-		if WORD_GAME and WORD_GAME_UI.TableControls and not opts.skip_hand_shuffle then
+		if WORD_GAME_UI.TableControls and not opts.skip_hand_shuffle then
 			WORD_GAME_UI.TableControls.sync()
 		end
 		local placement = G.placement_table and G.placement_table.area
@@ -167,7 +167,7 @@ function M.set_screen_positions(opts)
 			placement:hard_set_cards()
 		end
 
-		if WORD_GAME and WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.mark_layout_settle then
+		if WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.mark_layout_settle then
 			WORD_GAME_UI.TableControls.mark_layout_settle(4)
 		end
 	end
@@ -192,7 +192,7 @@ function M.refresh_placement_layout()
 		end
 		placement:hard_set_cards()
 	end
-	if WORD_GAME and WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.mark_layout_settle then
+	if WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.mark_layout_settle then
 		WORD_GAME_UI.TableControls.mark_layout_settle(4)
 	end
 end

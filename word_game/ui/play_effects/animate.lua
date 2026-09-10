@@ -112,7 +112,7 @@ function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_
 	local STACK_HOLD = 0.3
 
 	definition.set_word_score_animating(true)
-	if WORD_GAME and WORD_GAME_UI.TimelineTimer and WORD_GAME_UI.TimelineTimer.pause then
+	if WORD_GAME_UI.TimelineTimer and WORD_GAME_UI.TimelineTimer.pause then
 		WORD_GAME_UI.TimelineTimer.pause()
 	end
 
@@ -256,7 +256,7 @@ end
 
 function M.present_end_jumble_sidebar()
 	definition.sync_hand_controls()
-	if WORD_GAME and WORD_GAME_UI.Sidebar then
+	if WORD_GAME_UI.Sidebar then
 		WORD_GAME_UI.Sidebar:refresh()
 	end
 end

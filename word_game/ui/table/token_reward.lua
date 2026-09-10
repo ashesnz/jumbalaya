@@ -11,6 +11,7 @@ local round_config = require("word_game.config.gameplay.round")
 
 local state = facade.run_state()
 local RunMode = facade.run_mode()
+local Busy = facade.busy()
 
 local M = {}
 
@@ -97,7 +98,7 @@ function M.capture_reward()
 	if RunMode.is_classic() then
 		if captured_score ~= nil then return end
 		captured_score = banked_score()
-		local tt = WORD_GAME and WORD_GAME_UI.TimelineTimer
+		local tt = WORD_GAME_UI.TimelineTimer
 		if tt then
 			tt.is_active = false
 			if tt.sync_progress then tt.sync_progress() end
@@ -134,7 +135,7 @@ local function timeline_center_px()
 end
 
 local function resolve_target_px()
-	if G.deck and WORD_GAME and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.token_center_px then
+	if G.deck and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.token_center_px then
 		local cx, cy = WORD_GAME_UI.TableDeck.token_center_px(G.deck)
 		if cx and cy then return cx, cy end
 	end
@@ -184,7 +185,7 @@ local function on_flyer_landed()
 		tokens_left = tokens_left - grant
 		if grant > 0 then
 			state.add_tokens(grant)
-			if WORD_GAME and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.bump_token_display then
+			if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.bump_token_display then
 				for _ = 1, grant do
 					WORD_GAME_UI.TableDeck.bump_token_display()
 				end
@@ -203,6 +204,7 @@ local function finish()
 		tokens_left = 0
 	end
 	active = false
+	Busy.set("token_reward_busy", false)
 	flyers = {}
 	spawned = 0
 	landed = 0
@@ -224,7 +226,7 @@ function M.try_award(callback)
 		return false
 	end
 
-	local tt = WORD_GAME and WORD_GAME_UI.TimelineTimer
+	local tt = WORD_GAME_UI.TimelineTimer
 	local flyer_count = math.min(amount, MAX_REWARD_FLYERS)
 	local fly_duration = FLY_DUR + STAGGER * math.max(0, flyer_count - 1)
 	if RunMode.is_classic() and tt and tt.start_score_roll then
@@ -250,6 +252,7 @@ function M.try_award(callback)
 	flyers = {}
 	on_done = callback
 	active = true
+	Busy.set("token_reward_busy", true)
 	grant_on_land = true
 	end_x, end_y = resolve_target_px()
 	fly_from_x, fly_from_y = timeline_center_px()
@@ -274,7 +277,7 @@ function M.spend_fly(amount, callback)
 
 	-- Update the sidebar display even when another token animation is active.
 	-- The marketplace can be interacted with while the reward animation is running.
-	if WORD_GAME and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.spend_tokens_display then
+	if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.spend_tokens_display then
 		WORD_GAME_UI.TableDeck.spend_tokens_display(amount)
 	end
 
@@ -290,6 +293,7 @@ function M.spend_fly(amount, callback)
 	flyers = {}
 	on_done = callback
 	active = true
+	Busy.set("token_reward_busy", true)
 	grant_on_land = false
 	-- Tokens leave the pile and continue beyond the playfield.
 	-- Keep the pile as the source so the animation agrees with the balance roll.
@@ -381,6 +385,7 @@ end
 
 function M.reset()
 	active = false
+	Busy.set("token_reward_busy", false)
 	flyers = {}
 	on_done = nil
 	total = 0

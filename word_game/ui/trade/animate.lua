@@ -2,6 +2,7 @@
 
 local facade = require("word_game.ui.facade")
 local LetterPalette = require("word_game.config.visuals.letter_card_palette")
+local trade_busy = require("word_game.ui.trade.busy")
 
 local function trade_model()
 	return facade.trade()
@@ -42,6 +43,7 @@ end
 
 function M.clear()
 	transform_item = nil
+	trade_busy.sync()
 end
 
 function M.is_transforming()
@@ -61,6 +63,7 @@ end
 local function finish_transform_fx()
 	local item = transform_item
 	transform_item = nil
+	trade_busy.sync()
 	if not item then return end
 	local card = item.market_card
 	if card then
@@ -87,6 +90,7 @@ function M.start_transform_fx(item)
 	end
 
 	transform_item = item
+	trade_busy.sync()
 	card.states.visible = true
 	card.dissolve = 0
 	card.dissolve_wipe = 0

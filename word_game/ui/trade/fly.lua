@@ -1,6 +1,7 @@
 --[[ word_game/ui/trade/fly.lua - marketplace card fly-to-deck animation ]]
 
 local Layout = require("word_game.ui.layout")
+local trade_busy = require("word_game.ui.trade.busy")
 
 local M = {}
 
@@ -15,6 +16,7 @@ end
 function M.clear()
 	flyer = nil
 	flyer_callback = nil
+	trade_busy.sync()
 end
 
 local function deck_target_px()
@@ -73,6 +75,7 @@ function M.start_card_fly(item, callback, start_x, start_y)
 		landed = false,
 	}
 	flyer_callback = callback
+	trade_busy.sync()
 end
 
 local function fly_delta(dt)
@@ -94,6 +97,7 @@ function M.step_card_fly(dt)
 		flyer_callback = nil
 		flyer = nil
 		if done then done() end
+		trade_busy.sync()
 		return true
 	end
 	return false

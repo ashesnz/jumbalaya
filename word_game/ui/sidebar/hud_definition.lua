@@ -46,7 +46,7 @@ end
 
 local function stamp_slot_height()
 	local count = 1
-	if WORD_GAME and WORD_GAME_UI.PerkStamp and WORD_GAME_UI.PerkStamp.stack_count then
+	if WORD_GAME_UI.PerkStamp and WORD_GAME_UI.PerkStamp.stack_count then
 		count = WORD_GAME_UI.PerkStamp.stack_count()
 	end
 	return stamp_grid.panel_height_tiles(count)
@@ -101,7 +101,7 @@ function M.sync_end_run_row()
 	local end_btn = G.SIDEBAR_HUD:find_node_by_id("end_run_button")
 	set_node_visible(end_btn, table_discard.end_run_button_visible())
 	table_discard.sync_discard_pile_area()
-	if WORD_GAME and WORD_GAME_UI.SidebarStageButton and WORD_GAME_UI.SidebarStageButton.sync then
+	if WORD_GAME_UI.SidebarStageButton and WORD_GAME_UI.SidebarStageButton.sync then
 		WORD_GAME_UI.SidebarStageButton.sync()
 	end
 	if G.SIDEBAR_HUD.recalculate then

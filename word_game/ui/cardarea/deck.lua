@@ -45,7 +45,7 @@ end
 
 function M.draw_layer(self, v, draw_card_layer)
 	if self.config.type ~= 'deck' then return end
-	if self == G.deck and WORD_GAME and WORD_GAME_UI.TableDeck
+	if self == G.deck and WORD_GAME_UI.TableDeck
 		and WORD_GAME_UI.TableDeck.uses_table_draw() then
 		if v == 'card' then
 			WORD_GAME_UI.TableDeck.draw(self)
@@ -63,7 +63,7 @@ end
 
 function M.update(self, dt)
 	if self ~= G.deck then return end
-	local table_deck = self == G.deck and WORD_GAME and WORD_GAME_UI.TableDeck
+	local table_deck = self == G.deck and WORD_GAME_UI.TableDeck
 		and WORD_GAME_UI.TableDeck.uses_table_draw()
 	self.states.collide.can = not table_deck
 	self.states.hover.can = not table_deck
@@ -79,7 +79,7 @@ function M.update(self, dt)
 				card.states.click.can = false
 			end
 		end
-		if WORD_GAME and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.update then
+		if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.update then
 			WORD_GAME_UI.TableDeck.update(dt, self)
 		end
 	end

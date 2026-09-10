@@ -143,7 +143,7 @@ local cannot_afford_anything = M.cannot_afford_anything
 
 open_overlay = function()
 	G.SETTINGS.paused = true
-	if WORD_GAME and WORD_GAME_UI.PlayHoldRedraw and WORD_GAME_UI.PlayHoldRedraw.reset then
+	if WORD_GAME_UI.PlayHoldRedraw and WORD_GAME_UI.PlayHoldRedraw.reset then
 		WORD_GAME_UI.PlayHoldRedraw.reset()
 	end
 	G.FUNCS.show_overlay({
@@ -342,9 +342,9 @@ function M.on_pick(e)
 	session.broke_after_action = cannot_afford_anything(broke_opts)
 
 	if action == "add" then
-		if WORD_GAME and WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.spend_fly then
+		if WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.spend_fly then
 			WORD_GAME_UI.TokenReward.spend_fly(cost)
-		elseif WORD_GAME and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.spend_tokens_display then
+		elseif WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.spend_tokens_display then
 			WORD_GAME_UI.TableDeck.spend_tokens_display(cost)
 		end
 		local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
