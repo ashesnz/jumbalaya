@@ -42,7 +42,7 @@ return function(domain, ui)
 	call("PlacementRecallAnim", ui.HandPlacementRecallAnim and ui.HandPlacementRecallAnim.reset)
 	call("VoucherDiscard", domain.VoucherDiscard and domain.VoucherDiscard.reset)
 	call("TableDeck", ui.TableDeck and ui.TableDeck.reset)
-	call("HandShuffle", ui.HandShuffle and ui.HandShuffle.destroy)
+	call("TableControls", ui.TableControls and ui.TableControls.destroy)
 	call("PerkStamp", ui.PerkStamp and ui.PerkStamp.clear_runtime)
 	call("Sidebar", ui.Sidebar and ui.Sidebar.destroy)
 end

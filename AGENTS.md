@@ -79,7 +79,7 @@ Removed / renamed (do not reintroduce):
 | `Sidebar` / `SidebarStageButton` | Right-hand HUD and End Run / Next button |
 | `TableBoard` | TABLE_BOARD update/draw coordinator |
 | `TimelineTimer` / `ScoreBanner` | Fuse bar and score HUD |
-| `HandShuffle` / `PlayHoldRedraw` | Table controls |
+| `TableControls` / `PlayHoldRedraw` | Play + shuffle/remove buttons, hold-to-redraw |
 | `TradeUI` / `PerkStamp` / `EndMatch` | Overlays |
 | `TableInput` / `TableDeck` | Card input refresh and sidebar deck art |
 | `BonusStackUI` | Bonus gutter presentation |
@@ -116,7 +116,7 @@ sidebar/
   callbacks.lua      Thin install wrapper
 ```
 
-Globals: `G.SIDEBAR_HUD`, `G.SIDEBAR_ATTACH`. Layout helpers are re-exported on `WORD_GAME_UI.Layout` (`sidebar_rect`, `sidebar_height`, etc.). `Sidebar.sync_visibility()` shows/hides the HUD column; play/shuffle buttons sync via `WORD_GAME_UI.HandShuffle.sync()` (not the sidebar API).
+Globals: `G.SIDEBAR_HUD`, `G.SIDEBAR_ATTACH`. Layout helpers are re-exported on `WORD_GAME_UI.Layout` (`sidebar_rect`, `sidebar_height`, etc.). `Sidebar.sync_visibility()` shows/hides the HUD column; play/shuffle buttons sync via `WORD_GAME_UI.TableControls.sync()` (not the sidebar API).
 
 ### Play resolution split
 

@@ -1,4 +1,4 @@
---[[ word_game/config/economy.lua - Token income and trade pricing ]]
+--[[ word_game/config/gameplay/economy.lua - Token income and trade pricing ]]
 
 local M = {
 	STARTING_TOKENS = 0,

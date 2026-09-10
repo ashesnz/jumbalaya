@@ -74,7 +74,7 @@ T.describe("Run lifecycle (RunScope)", function()
 				G.SIDEBAR_HUD = nil
 			end,
 		}
-		WORD_GAME_UI.HandShuffle = {
+		WORD_GAME_UI.TableControls = {
 			destroy = function()
 				if G.table_shuffle_bar then G.table_shuffle_bar:remove() end
 				if G.hand_action_bar then G.hand_action_bar:remove() end
@@ -86,7 +86,7 @@ T.describe("Run lifecycle (RunScope)", function()
 		WORD_GAME_UI.PerkStamp = { clear_runtime = function() end }
 
 		RunScope.on_teardown("Sidebar", WORD_GAME_UI.Sidebar.destroy)
-		RunScope.on_teardown("HandShuffle", WORD_GAME_UI.HandShuffle.destroy)
+		RunScope.on_teardown("TableControls", WORD_GAME_UI.TableControls.destroy)
 		RunScope.on_teardown("PerkStamp", WORD_GAME_UI.PerkStamp.clear_runtime)
 
 		game:teardown_run_ui()

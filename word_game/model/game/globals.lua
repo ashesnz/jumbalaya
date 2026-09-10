@@ -31,6 +31,9 @@ function Game:define_constants()
     if Env.flag("SKIP_TUTORIAL") then
         self.F_SKIP_TUTORIAL = true
     end
+    if Env.flag("VERBOSE") then
+        self.F_VERBOSE = true
+    end
     -- Runtime feature switches are supplied by the configuration package.
     self.SEED = os.time()
     self.TIMERS = {

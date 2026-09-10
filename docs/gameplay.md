@@ -16,13 +16,13 @@ A **match** (run) is a sequence of **sets**. **Set 1** is a nine-hand tutorial a
 | 2–8 | 3 each | Standard → Standard → Showdown |
 
 - **Win** by clearing the Showdown on **set 8** (`1-9` in set 1 is the final Showdown there).
-- Progress is shown as **set-hand** (e.g. `1-3` = set 1, hand 3).
+- Progress is shown as **set-hand** (e.g. `1-3` = set 1, hand 3). Legacy save/UI code may still refer to the set index as `ante` (`G.GAME.round_resets.ante` mirrors `word_round.set`).
 
 Every stage in sets 1–8 runs in **jumble mode** (`word_game/model/jumble.lua` → `is_active_hand`).
 
 ### Hand targets
 
-Each stage has a score **target**. Banked puzzle totals must reach or exceed it. Values live in `word_game/config/round_config.lua` → `HAND_TARGETS` and are read through `round_config.hand_target(set, hand)`.
+Each stage has a score **target**. Banked puzzle totals must reach or exceed it. Values live in `word_game/config/gameplay/round.lua` → `HAND_TARGETS` and are read through `round_config.hand_target(set, hand)`.
 
 **Set 1** (tutorial):
 
@@ -80,8 +80,8 @@ Continue puzzles / redraw hand
 When a new stage starts:
 
 - Jumble state resets (`puzzle_index`, `total_score`, current puzzle points/multiplier).
-- Timeline resets to **60 seconds** (`round_config.TIMELINE_SECONDS`; see `Round.reset_timeline()`).
-- Voucher discard resets (`WORD_GAME.VoucherDiscard.reset()` — up to `round_config.VOUCHER_DISCARDS_PER_HAND` per hand).
+- Timeline resets to **60 seconds** (`round_config.TIMELINE_SECONDS` in `word_game/config/gameplay/round.lua`; see `Round.reset_timeline()`).
+- Voucher discard allowance resets on each jumble hand deal (`word_game/model/perks/voucher_discard.lua` — up to `round_config.VOUCHER_DISCARDS_PER_HAND` per hand).
 - After the last hand in a set: next set, hand 1. Set 1 advances through all nine hands before set 2.
 
 ### After clearing a stage
@@ -252,7 +252,7 @@ Non-release builds include a debug panel (Tab or **DBG** button):
 |-------|----------------|
 | Jumble rules & puzzles | `word_game/model/jumble.lua`, `word_game/config/jumble_puzzle_*_*.lua` |
 | Play / bank flow | `word_game/model/jumble_play/` |
-| Hand limits & targets | `word_game/config/round_config.lua` |
+| Hand limits & targets | `word_game/config/gameplay/round.lua` |
 | Jumble deck | `word_game/config/jumble.lua`, `word_game/model/deck/jumble.lua` |
 | Pattern layout & snap | `word_game/board/jumble/geometry.lua`, `word_game/board/placement/snap.lua` |
 | Score banner | `word_game/ui/score_banner.lua` |

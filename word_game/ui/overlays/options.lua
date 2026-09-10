@@ -87,7 +87,6 @@ function G.DEFINITIONS.settings_tab(tab)
   if tab == 'Game' then
     return {n=G.UI.ROOT, config={align = "cm", padding = 0.05, colour = G.C.CLEAR}, nodes={
       Components.cycler({label = localize('ui_set_gamespeed'),scale = 0.8, options = {0.5, 1, 2, 4}, onChange = 'change_gamespeed', current_option = (G.SETTINGS.GAMESPEED == 0.5 and 1 or G.SETTINGS.GAMESPEED == 4 and 4 or G.SETTINGS.GAMESPEED + 1)}),
-      Components.cycler({width = 5, label = localize('ui_set_play_discard_pos'),scale = 0.8, options = localize('opt_play_discard_pos_opt'), onChange = 'change_play_discard_position', current_option = (G.SETTINGS.play_button_pos)}),
       G.F_RUMBLE and Components.toggle({label = localize('ui_set_rumble'), ref_table = G.SETTINGS, ref_value = 'rumble'}) or nil,
       Components.slider({label = localize('ui_set_screenshake'),width = 4, height = 0.4, ref_table = G.SETTINGS, ref_value = 'screenshake', min = 0, max = 100}),
       G.F_CRASH_REPORTS and Components.toggle({label = localize('ui_set_crash_reports'), ref_table = G.SETTINGS, ref_value = 'crashreports', info = localize('opt_crash_report_info')}) or nil,

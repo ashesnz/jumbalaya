@@ -1,4 +1,4 @@
---[[ word_game/ui/table_input.lua - Refresh hand/placement drag ranks after layout changes. ]]
+--[[ word_game/ui/table/input.lua - Refresh hand/placement drag ranks after layout changes ]]
 
 local M = {}
 

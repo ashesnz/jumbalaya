@@ -285,10 +285,10 @@ T.describe("Classic run mode", function()
 		end
 		local RunMode = require("word_game.model.run.mode")
 		local placement_controls = require("word_game.ui.table.controls.placement")
-		local HandShuffle = require("word_game.ui.table.controls")
+		local TableControls = require("word_game.ui.table.controls")
 		local tt = require("word_game.ui.perks.timeline_timer")
 		WORD_GAME_UI.TimelineTimer = tt
-		WORD_GAME_UI.HandShuffle = HandShuffle
+		WORD_GAME_UI.TableControls = TableControls
 		WORD_GAME.Jumble = {
 			is_active = function() return true end,
 			state = function() return G.GAME.word_round.jumble end,
@@ -322,7 +322,8 @@ T.describe("Classic run mode", function()
 
 	T.it("styles the proceed hint like Hand Cleared in red", function()
 		mock_env.reset_game()
-		local RunMode = require("word_game.model.run.mode")
+		G.GAME.run_mode = "classic"
+		G.GAME.word_round = { target = 25 }
 		local word_feedback = require("word_game.ui.feedback.word_feedback")
 
 		local captured = nil

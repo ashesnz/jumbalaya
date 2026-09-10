@@ -1,4 +1,4 @@
---[[ word_game/ui/modifier_feedback.lua - Floating modifier hint above a placed card ]]
+--[[ word_game/ui/feedback/modifier_feedback.lua - Floating modifier hint above a placed card ]]
 
 local facade = require("word_game.ui.facade")
 

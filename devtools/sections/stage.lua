@@ -93,11 +93,11 @@ local function jump_to_hand(ctx, set, hand_index)
 	if set == 1 and hand_index == round_config.BONUS_STACK_HAND_FIRST then
 		seed_bonus_gutter()
 	end
-	if WORD_GAME_UI.HandShuffle then
-		WORD_GAME_UI.HandShuffle.sync()
+	if WORD_GAME_UI.TableControls then
+		WORD_GAME_UI.TableControls.sync()
 	end
-	if WORD_GAME_UI.HandShuffle and WORD_GAME_UI.HandShuffle.sync_position then
-		WORD_GAME_UI.HandShuffle.sync_position()
+	if WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.sync_position then
+		WORD_GAME_UI.TableControls.sync_position()
 	end
 	if WORD_GAME_UI.Sidebar then
 		WORD_GAME_UI.Sidebar:refresh()

@@ -12,7 +12,7 @@ AI / agent context: **[AGENTS.md](AGENTS.md)** and **[.cursor/skills/jumbalaya/S
 
 The first-play welcome tutorial can be skipped while developing.
 
-Set `SKIP_TUTORIAL` in your shell or in a local `.env` file (copy from `.env`). Shell environment variables take precedence over `.env`.
+Set `SKIP_TUTORIAL` in your shell or in a local `.env` file (copy from [`.env.example`](.env.example)). Shell environment variables take precedence over `.env`.
 
 ```bash
 SKIP_TUTORIAL=1 love .

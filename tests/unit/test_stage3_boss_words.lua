@@ -431,7 +431,7 @@ T.describe("Stage 1-3 boss words", function()
 
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.Jumble = jumble
-		WORD_GAME_UI.HandShuffle = { sync = function() end }
+		WORD_GAME_UI.TableControls = { sync = function() end }
 
 		local placed = snap.place_in_row(session, card)
 		T.assert_true(placed, "Boss hand card should snap into a blank slot")
@@ -511,7 +511,7 @@ T.describe("Stage 1-3 boss words", function()
 		local saved = {}
 		for _, key in ipairs({
 			"Round", "ScoreBanner", "BossWordAnnounce", "Jumble", "Deck",
-			"HandShuffle", "Sidebar", "PlayHoldRedraw", "TableInput",
+			"TableControls", "Sidebar", "PlayHoldRedraw", "TableInput",
 		}) do
 			saved[key] = WORD_GAME[key]
 		end
@@ -548,7 +548,7 @@ T.describe("Stage 1-3 boss words", function()
 			return_hand_to_deck = function(cb) cb() end,
 			deal_boss_hand = function(letters, cb) cb() end,
 		}
-		WORD_GAME_UI.HandShuffle = {
+		WORD_GAME_UI.TableControls = {
 			sync_position = function() end,
 			sync = function() end,
 		}

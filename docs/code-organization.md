@@ -22,7 +22,8 @@ word_game/
   model/                 gameplay state, card domain, deck, flow, and round rules
     game/                Game class: init, prep_stage, start_run, loop hooks
   ui/                    gameplay presentation, layouts, controls, and UI definitions
-    table_board.lua      TABLE_BOARD update/draw coordinator (used from app/loop.lua)
+    table/               TABLE_BOARD coordinator, deck, input, controls
+      board.lua          update/draw coordinator (used from app/core/session/loop.lua)
 devtools/                development-only tools (stage jump, word hints)
 dictionary/              offline word list and playability checks
 types/                   analyzer-only EmmyLua declarations
@@ -84,6 +85,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `Board` | Jumble pattern row (`placement/table`, `placement/snap`, `jumble/geometry`, `bonus/gutter`) |
 | `HandSize` | `get()` — single hand-size accessor for dealing and layout |
 | `Busy` / `InputLock` | Table-busy flags on `G.GAME` and `is_table_busy()` |
+| `Timeline` | Domain reads of fuse seconds / classic goal (`G.GAME` mirror from `TimelineTimer`) |
 | `Match` | `end_run()` — centralized discard-bin surrender / game-over transition |
 | `VoucherDiscard` | Discard-bin allowance rules (`model/perks/voucher_discard`) |
 | `Perks` | Perk model package (`model/perks`: registry, effects, hand timer) |
@@ -97,7 +99,8 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `ScoreBanner` | Jumble chips, multiplier, points-to-get label |
 | `TimelineTimer` | 60s fuse HUD |
 | `TokenReward` | 1-1 token fly animations |
-| `HandShuffle` / `PlayHoldRedraw` | Shuffle + Play buttons, hold-to-redraw |
+| `HandShuffleAnim` / `PlayHoldRedraw` | Shuffle animation + hold-to-redraw (under `table/controls/`) |
+| `TableControls` | Play + shuffle/remove buttons beside the dealt hand |
 | `TradeUI` / `PerkStamp` | Marketplace and perk stamp overlays |
 | `Sidebar` | Right-hand HUD (stamps, deck, End Run) |
 | `SidebarStageButton` | Classic End Run / Next button in the sidebar |
@@ -115,6 +118,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | Inline `require(...)` inside functions | Avoid — hoist to module scope unless breaking a documented circular dependency |
 | `Card` presentation | Model class in `model/cards/card.lua`; draw/tooltip mixins install from `ui/cards/bind.lua` at boot (not from model) |
 | Layout refresh | `word_game/model/layout/request.lua` sets `G.ARGS.pending_layout`; model code must not `require` `word_game.ui.layout` |
+| Timeline reads | `word_game/model/run/timeline.lua` reads `G.GAME.timeline_*` mirrored by `TimelineTimer`; model emits `timeline_apply_seconds` (never queries UI via `Presentation.emit`) |
 | UI reactions | `word_game/model/presentation.lua` emits events; `word_game/ui/presentation/install.lua` registers handlers at boot |
 
 Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, `WORD_GAME_UI.BonusStackUI`, etc. across package boundaries instead of deep requires.
@@ -228,7 +232,7 @@ Fixed-letter tile draw is installed from `ui/table/board.lua` via `placement_tab
 
 | File | Hook |
 |------|------|
-| `app/loop.lua` | Engine frame + state dispatch; delegates TABLE_BOARD to `WORD_GAME.TableBoard` |
+| `app/core/session/loop.lua` | Engine frame + state dispatch; delegates TABLE_BOARD to `WORD_GAME_UI.TableBoard` |
 | `app/startup.lua` | Thin orchestrator; `startup/profile`, `window`, `dealing` |
 | `word_game/ui/callbacks/placement.lua` | `play_placement_word` → `controls/placement.try_play` |
 
@@ -240,7 +244,7 @@ Model evaluation and UI presentation are separated for headless tests:
 |-------|--------|------|
 | Model | `jumble_play/jumble.lua` | `play_jumble_word()` → evaluation result only |
 | UI | `play_effects/resolution.lua` | `resolve(Play)` → `play_effects` banners, fly, hand clear |
-| UI | `table/controls/placement.lua` | Play button calls `play_resolution.resolve` |
+| UI | `table/controls/placement.lua` | Play button calls `play_effects/resolution.resolve` |
 
 Tests that need full play behavior call `play_resolution.resolve(flow)`; tests that only need rules call `play_jumble_word` or `rules.evaluate_play` directly.
 

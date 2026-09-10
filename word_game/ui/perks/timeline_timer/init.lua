@@ -145,6 +145,19 @@ function M.is_progress_mode()
 	return RunMode.is_classic()
 end
 
+local function mirror_to_game()
+	if not G or not G.GAME then return end
+	if M.is_progress_mode() then
+		G.GAME.timeline_goal_reached = M.goal_reached == true
+		G.GAME.timeline_progress_target = M.progress_target
+		G.GAME.timeline_seconds = nil
+	else
+		G.GAME.timeline_seconds = M.time_remaining
+		G.GAME.timeline_goal_reached = nil
+		G.GAME.timeline_progress_target = nil
+	end
+end
+
 local function reset_intro_visibility()
 	M.intro_visible = 1
 	M.intro_anim = nil
@@ -243,6 +256,7 @@ function M.sync_progress()
 	M.smoke_active = M.puzzle_word_count >= SMOKE_WORD_THRESHOLD
 	M.goal_reached = (banked + pending) >= target
 	M.post_target_scoring = M.goal_reached
+	mirror_to_game()
 end
 
 function M.pulse_post_target()
@@ -342,6 +356,7 @@ function M.reset(duration)
 	local wr = G.GAME and G.GAME.word_round
 	M.progress_target = math.max(1, (wr and wr.target) or 1)
 	M.sync_progress()
+	mirror_to_game()
 	StageLabel.sync()
 	if WORD_GAME and WORD_GAME_UI.SidebarStageButton and WORD_GAME_UI.SidebarStageButton.reset then
 		WORD_GAME_UI.SidebarStageButton.reset()
@@ -367,6 +382,7 @@ function M.reset_progress(target)
 	M.slide_boost_t = 0
 	M.display_combo = 0
 	M.sync_progress()
+	mirror_to_game()
 	StageLabel.sync()
 	if WORD_GAME and WORD_GAME_UI.SidebarStageButton and WORD_GAME_UI.SidebarStageButton.reset then
 		WORD_GAME_UI.SidebarStageButton.reset()
@@ -410,6 +426,7 @@ function M.freeze_reward_display(token_amount)
 	end
 	M.is_active = false
 	M.frozen_for_reward = true
+	mirror_to_game()
 end
 
 function M.set_time(time_seconds)
@@ -418,8 +435,9 @@ end
 
 function M.add_time(seconds)
 	seconds = seconds or 0
-	if seconds <= 0 then return end
-	M.time_remaining = math.min(M.TOTAL_DURATION, M.time_remaining + seconds)
+	if seconds == 0 then return end
+	M.time_remaining = math.max(0, math.min(M.TOTAL_DURATION, M.time_remaining + seconds))
+	mirror_to_game()
 end
 
 function M.update(dt)
@@ -475,6 +493,8 @@ function M.update(dt)
 			table.remove(M.sparks, i)
 		end
 	end
+
+	mirror_to_game()
 
 	StageLabel.update(dt)
 

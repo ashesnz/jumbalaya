@@ -13,7 +13,8 @@
     ],
     "ignoreDir": [
       "dice-have-no-eyes",
-      "_tools"
+      "_tools",
+      "AlphaCardsBackup"
     ],
     "ignoreGlobs": [
       "dictionary/words_set.lua"
@@ -22,14 +23,7 @@
   "diagnostics": {
     "disable": [
       "inject-field",
-      "param-type-mismatch",
-      "assign-type-mismatch",
-      "missing-parameter",
-      "redundant-parameter",
-      "call-non-callable",
-      "unnecessary-if",
       "missing-fields",
-      "unresolved-require",
       "access-invisible"
     ]
   },

@@ -61,7 +61,7 @@ All right-column HUD code lives in `word_game/ui/sidebar/`. Use **sidebar** nami
 | Attach node | `G.SIDEBAR_ATTACH` |
 | Column geometry | `WORD_GAME_UI.Layout.sidebar_rect`, `sidebar_height`, `update_sidebar_attach` (implemented in `sidebar/layout.lua`, re-exported via `layout/init.lua`) |
 | End Run button | `WORD_GAME_UI.SidebarStageButton` in `sidebar/stage_button.lua` |
-| G.FUNCS | `end_run_from_sidebar`, `ensure_table_board_sidebar` in `sidebar/funcs.lua` |
+| Table controls | `WORD_GAME_UI.TableControls` in `table/controls/`; G.FUNCS in `callbacks/table_controls.lua` |
 
 Do **not** use vault naming (`G.VAULT_HUD`, `VaultStageButton`, `layout/vault.lua`, etc.).
 

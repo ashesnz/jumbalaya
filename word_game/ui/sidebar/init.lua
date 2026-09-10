@@ -24,8 +24,8 @@ end
 WordSidebar.hud_definition = hud_definition.hud_definition
 WordSidebar.relayout = hud_definition.relayout
 local function sync_hand_controls()
-	if WORD_GAME and WORD_GAME_UI.HandShuffle then
-		WORD_GAME_UI.HandShuffle.sync()
+	if WORD_GAME and WORD_GAME_UI.TableControls then
+		WORD_GAME_UI.TableControls.sync()
 	end
 end
 

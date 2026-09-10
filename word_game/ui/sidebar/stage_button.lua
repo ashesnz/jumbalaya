@@ -225,8 +225,8 @@ function M.update(dt)
 
 	if next_mode ~= anim.known_next_mode then
 		anim.known_next_mode = next_mode
-		if WORD_GAME and WORD_GAME_UI.HandShuffle and WORD_GAME_UI.HandShuffle.sync_visibility then
-			WORD_GAME_UI.HandShuffle.sync_visibility()
+		if WORD_GAME and WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.sync_visibility then
+			WORD_GAME_UI.TableControls.sync_visibility()
 		end
 	end
 

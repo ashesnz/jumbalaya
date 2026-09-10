@@ -21,6 +21,7 @@ return {
 	Board = require("word_game.board"),
 	Match = Run.Match,
 	InputLock = Run.InputLock,
+	Timeline = require("word_game.model.run.timeline"),
 	HandSize = require("word_game.model.hand_size"),
 	Perks = require("word_game.model.perks"),
 	BonusStack = require("word_game.model.jumble.bonus_stack"),

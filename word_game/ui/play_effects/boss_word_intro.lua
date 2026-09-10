@@ -79,8 +79,8 @@ function M.present_boss_word(wr, on_complete)
 		if WORD_GAME and WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
 			WORD_GAME_UI.Sidebar.sync_visibility()
 		end
-		if WORD_GAME and WORD_GAME_UI.HandShuffle then
-			WORD_GAME_UI.HandShuffle.sync_position()
+		if WORD_GAME and WORD_GAME_UI.TableControls then
+			WORD_GAME_UI.TableControls.sync_position()
 		end
 		local fx = effects()
 		if fx and fx.request_layout_refresh then

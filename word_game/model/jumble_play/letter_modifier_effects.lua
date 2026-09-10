@@ -4,7 +4,7 @@ local deck = require("word_game.model.cards.deck")
 local perk_effects = require("word_game.model.perks.effects")
 local modifiers = deck
 local RunMode = require("word_game.model.run.mode")
-local Presentation = require("word_game.model.presentation")
+local Timeline = require("word_game.model.run.timeline")
 
 local M = {}
 
@@ -17,27 +17,13 @@ local function now()
 end
 
 local function timeline_seconds()
-	local remaining = Presentation.emit("timeline_time_remaining")
-	if remaining ~= nil then
-		return remaining
-	end
-	local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
-	return j and j.time_left or math.huge
+	return Timeline.seconds_remaining()
 end
 
 local function add_timeline_seconds(seconds)
 	if RunMode.is_classic() then return end
 	if not seconds or seconds <= 0 then return end
-	if Presentation.emit("timeline_add_time", seconds) then
-		return
-	end
-	local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
-	if j then
-		j.time_left = (j.time_left or 0) + seconds
-		if j.deadline then
-			j.deadline = j.deadline + seconds
-		end
-	end
+	Timeline.add_seconds(seconds)
 end
 
 local function active_modified(cards, letter)

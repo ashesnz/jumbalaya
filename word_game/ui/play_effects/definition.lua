@@ -147,8 +147,8 @@ function M.sync_hand_after_deal()
 		end
 		G.hand:snap_VT()
 	end
-	if WORD_GAME and WORD_GAME_UI.HandShuffle then
-		WORD_GAME_UI.HandShuffle.sync_position()
+	if WORD_GAME and WORD_GAME_UI.TableControls then
+		WORD_GAME_UI.TableControls.sync_position()
 	end
 end
 
@@ -170,8 +170,8 @@ function M.show_puzzle_bank_feedback(puzzle_total)
 end
 
 function M.sync_hand_controls()
-	if WORD_GAME and WORD_GAME_UI.HandShuffle then
-		WORD_GAME_UI.HandShuffle.sync()
+	if WORD_GAME and WORD_GAME_UI.TableControls then
+		WORD_GAME_UI.TableControls.sync()
 	end
 end
 
@@ -199,8 +199,8 @@ function M.restore_boss_layout(opts)
 		G.hand:snap_VT()
 		G.hand:hard_set_cards()
 	end
-	if WORD_GAME and WORD_GAME_UI.HandShuffle then
-		WORD_GAME_UI.HandShuffle.sync_position()
+	if WORD_GAME and WORD_GAME_UI.TableControls then
+		WORD_GAME_UI.TableControls.sync_position()
 	end
 	local stack_ui = bonus_stack_ui()
 	if opts.keep_bonus_stack and stack_ui.sync_positions

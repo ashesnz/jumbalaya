@@ -42,17 +42,17 @@ local function setup_hand_shuffle_env()
 	stub_icon_atlas("remove_placement_icon")
 end
 
-T.describe("Hand shuffle/remove button", function()
+T.describe("Table controls", function()
 	T.it("detects placement cards from the placement area and jumble slots", function()
-		local HandShuffle = require("word_game.ui.table.controls")
+		local TableControls = require("word_game.ui.table.controls")
 		setup_hand_shuffle_env()
 		G.placement_table = {
 			area = { cards = {} },
 		}
-		T.assert_equal(false, HandShuffle.placement_has_cards())
+		T.assert_equal(false, TableControls.placement_has_cards())
 
 		G.placement_table.area.cards = { { ability = { letter = "A" } } }
-		T.assert_equal(true, HandShuffle.placement_has_cards())
+		T.assert_equal(true, TableControls.placement_has_cards())
 
 		G.placement_table.area.cards = {}
 		G.GAME = {
@@ -75,6 +75,6 @@ T.describe("Hand shuffle/remove button", function()
 				return G.GAME.word_round.jumble
 			end,
 		}
-		T.assert_equal(true, HandShuffle.placement_has_cards())
+		T.assert_equal(true, TableControls.placement_has_cards())
 	end)
 end)

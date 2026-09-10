@@ -75,8 +75,8 @@ Updaters.register('early_board', 'title_garden_pan', function(game, dt)
 	end
 end)
 Updaters.register('late_board', 'table_controls_stabilize', function(game, dt)
-	if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME_UI and WORD_GAME_UI.HandShuffle then
-		WORD_GAME_UI.HandShuffle.stabilize_table_board()
+	if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME_UI and WORD_GAME_UI.TableControls then
+		WORD_GAME_UI.TableControls.stabilize_table_board()
 	end
 end)
 Updaters.register('post_input', 'play_hold_redraw', function(game, dt)

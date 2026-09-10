@@ -43,8 +43,8 @@ function M.update(game, dt)
 	if DEVTOOLS and DEVTOOLS.DebugButton then
 		DEVTOOLS.DebugButton.sync()
 	end
-		if WORD_GAME and WORD_GAME_UI.HandShuffle then
-			WORD_GAME_UI.HandShuffle.sync()
+		if WORD_GAME and WORD_GAME_UI.TableControls then
+			WORD_GAME_UI.TableControls.sync()
 		end
 		if WORD_GAME and WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
 			WORD_GAME_UI.Sidebar.sync_visibility()

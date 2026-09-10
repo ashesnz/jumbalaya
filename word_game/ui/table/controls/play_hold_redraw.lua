@@ -48,7 +48,7 @@ local function gameplay_overlays_active()
 end
 
 local function play_button_uie()
-	return WORD_GAME and WORD_GAME_UI.HandShuffle and WORD_GAME_UI.HandShuffle.play_button_uie()
+	return WORD_GAME and WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.play_button_uie()
 end
 
 local function belongs_to_play_button(node)
@@ -136,8 +136,8 @@ function M.reset()
 end
 
 local function recall_placement_cards()
-	if WORD_GAME and WORD_GAME_UI.HandShuffle and WORD_GAME_UI.HandShuffle.recall_placement_cards then
-		WORD_GAME_UI.HandShuffle.recall_placement_cards()
+	if WORD_GAME and WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.recall_placement_cards then
+		WORD_GAME_UI.TableControls.recall_placement_cards()
 	end
 end
 
@@ -231,8 +231,8 @@ local function finish_redraw()
 	if G.hand and G.hand.relayout then
 		G.hand:relayout()
 	end
-	if WORD_GAME and WORD_GAME_UI.HandShuffle then
-		WORD_GAME_UI.HandShuffle.sync()
+	if WORD_GAME and WORD_GAME_UI.TableControls then
+		WORD_GAME_UI.TableControls.sync()
 	end
 end
 

@@ -153,8 +153,8 @@ function M.set_screen_positions(opts)
 			if G.deck.hard_set_cards then G.deck:hard_set_cards() end
 		end
 
-		if WORD_GAME and WORD_GAME_UI.HandShuffle and not opts.skip_hand_shuffle then
-			WORD_GAME_UI.HandShuffle.sync()
+		if WORD_GAME and WORD_GAME_UI.TableControls and not opts.skip_hand_shuffle then
+			WORD_GAME_UI.TableControls.sync()
 		end
 		local placement = G.placement_table and G.placement_table.area
 		if G.placement_table and G.placement_table.apply_screen_position then
@@ -167,8 +167,8 @@ function M.set_screen_positions(opts)
 			placement:hard_set_cards()
 		end
 
-		if WORD_GAME and WORD_GAME_UI.HandShuffle and WORD_GAME_UI.HandShuffle.mark_layout_settle then
-			WORD_GAME_UI.HandShuffle.mark_layout_settle(4)
+		if WORD_GAME and WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.mark_layout_settle then
+			WORD_GAME_UI.TableControls.mark_layout_settle(4)
 		end
 	end
 	if G.STAGE == G.STAGES.MAIN_MENU and layout_main_menu then
@@ -192,8 +192,8 @@ function M.refresh_placement_layout()
 		end
 		placement:hard_set_cards()
 	end
-	if WORD_GAME and WORD_GAME_UI.HandShuffle and WORD_GAME_UI.HandShuffle.mark_layout_settle then
-		WORD_GAME_UI.HandShuffle.mark_layout_settle(4)
+	if WORD_GAME and WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.mark_layout_settle then
+		WORD_GAME_UI.TableControls.mark_layout_settle(4)
 	end
 end
 

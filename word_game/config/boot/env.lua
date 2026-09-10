@@ -1,9 +1,4 @@
---[[
-	word_game/config/env.lua - Environment variable and .env overrides.
-
-	Shell env takes precedence over values from a project-root `.env` file.
-	Truthy: 1, true, yes, on (case-insensitive). Falsy: 0, false, no, off.
-]]
+--[[ word_game/config/boot/env.lua - Environment variable and .env overrides ]]
 
 local M = {}
 

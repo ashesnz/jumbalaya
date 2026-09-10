@@ -105,6 +105,10 @@
 ---@field starting_deck_size number|nil
 ---@field starting_params { hand_size: number, usable_slots: number }|nil
 ---@field word_round WordRound|nil
+---@field timeline_seconds number|nil
+---@field timeline_goal_reached boolean|nil
+---@field timeline_progress_target number|nil
+---@field trade_ui_busy boolean|nil
 ---@field placement_word string|nil
 ---@field placement_word_valid boolean|nil
 ---@field word_score_animating boolean|nil
@@ -123,12 +127,13 @@
 ---@field can_inspect fun(card: SceneNode): boolean
 ---@field begin_hold fun(card: SceneNode)
 
----@class WordGameHandShuffle
+---@class WordGameTableControls
 ---@field sync fun()
 ---@field sync_position fun()
 ---@field stabilize_table_board fun()
 ---@field shuffle_hand fun()
 ---@field placement_has_cards fun(): boolean
+---@field destroy fun()|nil
 
 ---@class WordGamePlay
 ---@field on_hand_cleared fun(opts: table|nil)|nil
@@ -140,7 +145,7 @@
 ---@field Deck table|nil
 ---@field Jumble table|nil
 ---@field Play WordGamePlay|nil
----@field HandShuffle WordGameHandShuffle|nil
+---@field TableControls WordGameTableControls|nil
 ---@field BonusStack table|nil
 ---@field BonusStackUI table|nil
 ---@field TableDeck WordGameTableDeck|nil

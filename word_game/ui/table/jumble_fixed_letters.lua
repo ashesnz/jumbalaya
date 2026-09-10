@@ -1,4 +1,4 @@
---[[ word_game/ui/jumble_fixed_letters.lua - Fixed puzzle letter tiles on the placement row ]]
+--[[ word_game/ui/table/jumble_fixed_letters.lua - Fixed puzzle letter tiles on the placement row ]]
 
 local facade = require("word_game.ui.facade")
 local topology = facade.slot_topology()

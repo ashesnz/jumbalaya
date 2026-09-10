@@ -3,7 +3,7 @@
 local state = require("word_game.model.run.state")
 local round_config = require("word_game.config.gameplay.round")
 local Dictionary = require("dictionary")
-local Presentation = require("word_game.model.presentation")
+local Timeline = require("word_game.model.run.timeline")
 
 local M = {}
 
@@ -59,40 +59,17 @@ function M.hand_size_bonus()
 end
 
 function M.timeline_seconds()
-	local remaining = Presentation.emit("timeline_time_remaining")
-	if remaining ~= nil then
-		return remaining
-	end
-	local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
-	return j and j.time_left or math.huge
+	return Timeline.seconds_remaining()
 end
 
 function M.add_timeline_seconds(seconds)
 	if not seconds or seconds <= 0 then return end
-	if Presentation.emit("timeline_add_time", seconds) then
-		return
-	end
-	local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
-	if j then
-		j.time_left = (j.time_left or 0) + seconds
-		if j.deadline then
-			j.deadline = j.deadline + seconds
-		end
-	end
+	Timeline.add_seconds(seconds)
 end
 
 function M.subtract_timeline_seconds(seconds)
 	if not seconds or seconds <= 0 then return end
-	if Presentation.emit("timeline_add_time", -seconds) then
-		return
-	end
-	local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
-	if j then
-		j.time_left = math.max(0, (j.time_left or 0) - seconds)
-		if j.deadline then
-			j.deadline = j.deadline - seconds
-		end
-	end
+	Timeline.add_seconds(-seconds)
 end
 
 function M.on_puzzle_start(j, wr)

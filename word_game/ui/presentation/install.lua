@@ -53,8 +53,8 @@ function M.install(ui, domain)
 	end)
 
 	Presentation.on("hand_shuffle_sync_position", function()
-		if ui.HandShuffle and ui.HandShuffle.sync_position then
-			ui.HandShuffle.sync_position()
+		if ui.TableControls and ui.TableControls.sync_position then
+			ui.TableControls.sync_position()
 		end
 	end)
 
@@ -153,39 +153,13 @@ function M.install(ui, domain)
 		end
 	end)
 
-	Presentation.on("timeline_time_remaining", function()
-		local timer = ui.TimelineTimer
-		if timer and timer.time_remaining then
-			return timer.time_remaining
-		end
-	end)
-
-	Presentation.on("timeline_add_time", function(seconds)
-		if not seconds or seconds == 0 then return false end
+	Presentation.on("timeline_apply_seconds", function(seconds)
 		local timer = ui.TimelineTimer
 		if timer and timer.add_time then
 			timer.add_time(seconds)
 			return true
 		end
 		return false
-	end)
-
-	Presentation.on("timeline_classic_sync_progress", function()
-		local timer = ui.TimelineTimer
-		if not timer or not timer.is_progress_mode or not timer.is_progress_mode() then
-			return false
-		end
-		if timer.sync_progress then
-			timer.sync_progress()
-		end
-		return timer.goal_reached == true
-	end)
-
-	Presentation.on("timeline_classic_progress_target", function()
-		local timer = ui.TimelineTimer
-		if timer and timer.progress_target then
-			return timer.progress_target
-		end
 	end)
 
 	Presentation.on("bonus_stack_on_hand_start", function(set, hand_index)
@@ -255,8 +229,8 @@ function M.install(ui, domain)
 	end)
 
 	Presentation.on("hand_shuffle_sync", function()
-		if ui.HandShuffle and ui.HandShuffle.sync then
-			ui.HandShuffle.sync()
+		if ui.TableControls and ui.TableControls.sync then
+			ui.TableControls.sync()
 		end
 	end)
 

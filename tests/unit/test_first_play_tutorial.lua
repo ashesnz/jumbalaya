@@ -129,7 +129,7 @@ T.describe("First play tutorial", function()
 	T.it("advance moves to play button spotlight step", function()
 		reset_env()
 		G.hand_action_bar = { REMOVED = false, T = { x = 12, y = 8, w = 1, h = 1 } }
-		WORD_GAME_UI.HandShuffle = {
+		WORD_GAME_UI.TableControls = {
 			sync = function() end,
 			play_button_uie = function()
 				return { T = { x = 12, y = 8, w = 1, h = 1 } }
@@ -146,7 +146,7 @@ T.describe("First play tutorial", function()
 	T.it("advance moves to timeline goal spotlight step", function()
 		reset_env()
 		G.hand_action_bar = { REMOVED = false, T = { x = 12, y = 8, w = 1, h = 1 } }
-		WORD_GAME_UI.HandShuffle = {
+		WORD_GAME_UI.TableControls = {
 			sync = function() end,
 			play_button_uie = function()
 				return { T = { x = 12, y = 8, w = 1, h = 1 } }
