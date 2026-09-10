@@ -9,8 +9,18 @@ end
 
 local M = {}
 
+local active_batches = 0
+
 local FLY_DURATION = 0.38
 local STAGGER = 0.09
+
+function M.is_active()
+	return active_batches > 0
+end
+
+function M.reset()
+	active_batches = 0
+end
 
 local function smoothstep(u)
 	return u * u * (3 - 2 * u)
@@ -139,11 +149,13 @@ function M.fly_cards_off(cards, queue_event, opts)
 		return
 	end
 
+	active_batches = active_batches + 1
 	local finished = 0
 	local function card_done()
 		finished = finished + 1
-		if finished >= count and on_complete then
-			on_complete()
+		if finished >= count then
+			active_batches = math.max(0, active_batches - 1)
+			if on_complete then on_complete() end
 		end
 	end
 

@@ -26,9 +26,8 @@ local function default_jumble(opts)
 end
 
 function M.setup_card_areas()
-	mock_env.ensure_engine_globals()
+	mock_env.ensure_card_class()
 	require("word_game.ui.cardarea.init")
-	require("word_game.model.cards.card")
 
 	G.deck = CardArea(0, 0, 1, 1, { type = "deck", card_limit = 52 })
 	G.hand = CardArea(0, 0, 7, 1, { type = "hand", card_limit = 7 })

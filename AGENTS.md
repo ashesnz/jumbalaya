@@ -131,6 +131,7 @@ Tests that need rules only call `play_jumble_word`; tests that need full FX call
 - Files/dirs/locals: `snake_case`; classes/globals: `PascalCase`
 - UI binds `G.FUNCS.*` by string — move implementations, not registration names when refactoring
 - Class chain: `Object → Node → EaseNode/Moveable → Sprite, LayoutView, Card, CardArea`
+- `Card` model class loads in `app/bootstrap/game_boot.lua`; presentation mixins install via `word_game/ui/cards/bind.lua` (tests: `mock_env.ensure_card_class()`)
 
 ## Dev flags
 

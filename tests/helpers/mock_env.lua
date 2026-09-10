@@ -81,6 +81,13 @@ function M.ensure_engine_globals()
 	require("app.core.input.router")
 end
 
+--- Load the real Card class plus presentation mixins (sprites, draw, tooltips).
+function M.ensure_card_class()
+	M.ensure_engine_globals()
+	require("word_game.model.cards.card")
+	require("word_game.ui.cards.bind").install()
+end
+
 function M.setup()
 	M.ensure_engine_globals()
 		G.C = G.C or {
@@ -286,8 +293,16 @@ end
 
 function M.reset_game()
 	M.setup()
+	require("word_game.model.jumble.bonus_stack").clear()
+	local ok_fly, card_fly_off = pcall(require, "word_game.ui.play_effects.card_fly_off")
+	if ok_fly and card_fly_off.reset then
+		card_fly_off.reset()
+	end
 	if _G.WORD_GAME then
 		_G.WORD_GAME.Deck = require("word_game.model.cards.deck")
+		_G.WORD_GAME.TradeUI = nil
+		_G.WORD_GAME.TokenReward = nil
+		_G.WORD_GAME.CardFlyOff = nil
 	end
 	if G.SIDEBAR_HUD and G.SIDEBAR_HUD.remove then
 		pcall(function() G.SIDEBAR_HUD:remove() end)

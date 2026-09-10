@@ -24,6 +24,7 @@ require "app.screen_wipe"
 require "app.profile_callbacks"
 require "app.callbacks.settings"
 require "word_game.model.cards.card"
+require("word_game.ui.cards.bind").install()
 require "word_game.ui.cardarea.init"
 
 Dictionary = require "dictionary"

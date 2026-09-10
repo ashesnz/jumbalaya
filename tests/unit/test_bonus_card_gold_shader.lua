@@ -262,8 +262,7 @@ T.describe("bonus card gold visuals", function()
 	end)
 
 	T.it("draw_front tints the frame yellow, overlays gold shimmer, then draws white glyphs", function()
-		mock_env.ensure_engine_globals()
-		require("word_game.model.cards.card")
+		mock_env.ensure_card_class()
 
 		local shader_calls = {}
 		local center_dissolve_tint

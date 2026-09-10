@@ -2,9 +2,9 @@
 	 word_game/model/cards/card.lua - Card class: a letter on the table.
 
 	Extends EaseNode. Extra methods are mixed in from:
-	  card_ability.lua  apply_center / deck membership
-	  card_visuals.lua  sprites, dissolve, draw
-	  card_ui.lua       hover tooltips, click, per-frame update
+	  card_ability.lua       apply_center / deck membership
+	  ui/cards/visuals.lua   sprites, dissolve, draw (via ui/cards/bind.lua at boot)
+	  ui/cards/ui.lua        hover tooltips, click, per-frame update
 ]]
 
 ---@class (partial) Card : EaseNode
@@ -41,8 +41,6 @@
 Card = EaseNode:derive("Card")
 
 require "word_game.model.cards.card_ability"
-require "word_game.ui.cards.visuals"
-require "word_game.ui.cards.ui"
 
 --class methods
 
