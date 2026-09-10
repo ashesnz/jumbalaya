@@ -166,7 +166,7 @@ T.describe("Jumble scoring and odometer", function()
 	T.it("updates points to get when placement cards change", function()
 		local sb = require("word_game.ui.score_banner")
 		local placement_word = require("word_game.model.jumble.placement_word")
-		WORD_GAME.ScoreBanner = sb
+		WORD_GAME_UI.ScoreBanner = sb
 		WORD_GAME.Jumble = jumble
 		G.GAME.word_round = {
 			target = 25,
@@ -203,7 +203,7 @@ T.describe("Jumble scoring and odometer", function()
 		local sb = require("word_game.ui.score_banner")
 		local placement_word = require("word_game.model.jumble.placement_word")
 		local rules = require("word_game.model.jumble_play.jumble_rules")
-		WORD_GAME.ScoreBanner = sb
+		WORD_GAME_UI.ScoreBanner = sb
 		WORD_GAME.Jumble = jumble
 		G.GAME.word_round = {
 			target = 25,

@@ -17,6 +17,8 @@ function M.ensure_engine_globals()
 	package.path = "./?.lua;./?/init.lua;" .. package.path
 
 	_G.G = _G.G or {}
+	_G.WORD_GAME = _G.WORD_GAME or {}
+	_G.WORD_GAME_UI = _G.WORD_GAME_UI or {}
 	G.SETTINGS = G.SETTINGS or {
 		paused = false,
 		GRAPHICS = { shadows = "Off", texture_scaling = 1 },
@@ -90,17 +92,18 @@ end
 
 function M.install_presentation(overrides)
 	_G.WORD_GAME = _G.WORD_GAME or {}
-	_G.WORD_GAME.ScoreBanner = _G.WORD_GAME.ScoreBanner or {
+	_G.WORD_GAME_UI = _G.WORD_GAME_UI or {}
+	_G.WORD_GAME_UI.ScoreBanner = _G.WORD_GAME_UI.ScoreBanner or {
 		reset = function() end,
 		state = function() return { to_go_label = "SCORE", target = 0, remaining = 0 } end,
 		reset_jumble_score = function() end,
 	}
 	if overrides then
 		for key, value in pairs(overrides) do
-			_G.WORD_GAME[key] = value
+			_G.WORD_GAME_UI[key] = value
 		end
 	end
-	require("word_game.ui.presentation.install").install(_G.WORD_GAME)
+	require("word_game.ui.presentation.install").install(_G.WORD_GAME_UI, _G.WORD_GAME)
 end
 
 --- Low-level globals and stubs. Prefer `reset_game()` for per-suite isolation.
@@ -236,6 +239,7 @@ function M.setup()
 	love.graphics.setLineWidth = love.graphics.setLineWidth or function() end
 
 	_G.WORD_GAME = _G.WORD_GAME or {}
+	_G.WORD_GAME_UI = _G.WORD_GAME_UI or {}
 	_G.Tween = _G.Tween or function(def) return def end
 	_G.read_save_payload = _G.read_save_payload or function() return nil end
 	_G.unpack_source = _G.unpack_source or function(str) return {} end
@@ -279,17 +283,17 @@ function M.setup()
 
 	local ok_sb, score_banner = pcall(require, "word_game.ui.score_banner")
 	if ok_sb then
-		_G.WORD_GAME.ScoreBanner = score_banner
+		_G.WORD_GAME_UI.ScoreBanner = score_banner
 	end
 
 	local ok_tt, timeline_timer = pcall(require, "word_game.ui.perks.timeline_timer")
 	if ok_tt then
-		_G.WORD_GAME.TimelineTimer = timeline_timer
+		_G.WORD_GAME_UI.TimelineTimer = timeline_timer
 	end
 
 	local ok_sl, stage_label = pcall(require, "word_game.ui.score_banner.stage_label")
 	if ok_sl then
-		_G.WORD_GAME.StageLabel = stage_label
+		_G.WORD_GAME_UI.StageLabel = stage_label
 	end
 
 	local ok_flow, flow = pcall(require, "word_game.model.jumble_play")
@@ -325,9 +329,9 @@ function M.reset_game()
 	end
 	if _G.WORD_GAME then
 		_G.WORD_GAME.Deck = require("word_game.model.cards.deck")
-		_G.WORD_GAME.TradeUI = nil
-		_G.WORD_GAME.TokenReward = nil
-		_G.WORD_GAME.CardFlyOff = nil
+		_G.WORD_GAME_UI.TradeUI = nil
+		_G.WORD_GAME_UI.TokenReward = nil
+		_G.WORD_GAME_UI.CardFlyOff = nil
 	end
 	if G.SIDEBAR_HUD and G.SIDEBAR_HUD.remove then
 		pcall(function() G.SIDEBAR_HUD:remove() end)

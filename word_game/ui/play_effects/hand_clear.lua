@@ -46,8 +46,8 @@ local function play_hand_clear()
 	local major = (G.placement_table and G.placement_table.area)
 		or G.PLAY_ATTACH
 		or G.ROOM_ATTACH
-	if WORD_GAME and WORD_GAME.Confetti then
-		WORD_GAME.Confetti.burst()
+	if WORD_GAME and WORD_GAME_UI.Confetti then
+		WORD_GAME_UI.Confetti.burst()
 	end
 	feedback.show("Hand Cleared", G.C.GOLD, 1.8, 0.15)
 	play_sfx("applause", 1, 0.9)
@@ -59,8 +59,8 @@ local function play_hand_clear()
 end
 
 local function play_boss_clear()
-	if WORD_GAME and WORD_GAME.Confetti then
-		WORD_GAME.Confetti.burst()
+	if WORD_GAME and WORD_GAME_UI.Confetti then
+		WORD_GAME_UI.Confetti.burst()
 	end
 	feedback.show("Boss Defeated!", G.C.GOLD, 1.8, 0.15)
 	play_sfx("applause", 1, 0.9)
@@ -68,8 +68,8 @@ local function play_boss_clear()
 end
 
 local function handle_after_clear(play_module, opts, outcome)
-	if WORD_GAME and WORD_GAME.HandClearFocus and WORD_GAME.HandClearFocus.end_focus then
-		WORD_GAME.HandClearFocus.end_focus()
+	if WORD_GAME and WORD_GAME_UI.HandClearFocus and WORD_GAME_UI.HandClearFocus.end_focus then
+		WORD_GAME_UI.HandClearFocus.end_focus()
 	end
 	set_score_animating(false)
 
@@ -79,15 +79,15 @@ local function handle_after_clear(play_module, opts, outcome)
 	end
 	if outcome == "boss_bonus_hand" then
 		local wr = G.GAME.word_round
-		local bonus_stack = WORD_GAME and WORD_GAME.BonusStackUI
+		local bonus_stack = WORD_GAME and WORD_GAME_UI.BonusStackUI
 		if bonus_stack and bonus_stack.finalize_for_bonus_hand then
 			bonus_stack.finalize_for_bonus_hand(wr)
 		end
-		if WORD_GAME and WORD_GAME.PlayEffects and WORD_GAME.PlayEffects.restore_boss_layout then
-			WORD_GAME.PlayEffects.restore_boss_layout({ keep_bonus_stack = true })
+		if WORD_GAME and WORD_GAME_UI.PlayEffects and WORD_GAME_UI.PlayEffects.restore_boss_layout then
+			WORD_GAME_UI.PlayEffects.restore_boss_layout({ keep_bonus_stack = true })
 		end
-		if WORD_GAME and WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.set_banner_mode then
-			WORD_GAME.ScoreBanner.set_banner_mode("normal")
+		if WORD_GAME and WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.set_banner_mode then
+			WORD_GAME_UI.ScoreBanner.set_banner_mode("normal")
 		end
 		play_module.begin_next_hand_after_boss()
 		return
@@ -96,11 +96,11 @@ local function handle_after_clear(play_module, opts, outcome)
 		if WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.destroy_boss_cards then
 			WORD_GAME.Deck.destroy_boss_cards()
 		end
-		if WORD_GAME and WORD_GAME.PlayEffects and WORD_GAME.PlayEffects.restore_boss_layout then
-			WORD_GAME.PlayEffects.restore_boss_layout()
+		if WORD_GAME and WORD_GAME_UI.PlayEffects and WORD_GAME_UI.PlayEffects.restore_boss_layout then
+			WORD_GAME_UI.PlayEffects.restore_boss_layout()
 		end
-		if WORD_GAME and WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.set_banner_mode then
-			WORD_GAME.ScoreBanner.set_banner_mode("normal")
+		if WORD_GAME and WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.set_banner_mode then
+			WORD_GAME_UI.ScoreBanner.set_banner_mode("normal")
 		end
 		play_module.begin_next_hand_after_boss()
 		return
@@ -115,7 +115,7 @@ local function handle_after_clear(play_module, opts, outcome)
 		return
 	end
 	if outcome == "trade" then
-		WORD_GAME.TradeUI.open_then_dealer()
+		WORD_GAME_UI.TradeUI.open_then_dealer()
 		return
 	end
 	if outcome == "dealer" then
@@ -131,11 +131,11 @@ function M.install(play_module)
 			set_score_animating(true)
 		end
 
-		if WORD_GAME.Sidebar and WORD_GAME.Sidebar.roll_to_next_hand then
-			WORD_GAME.Sidebar.roll_to_next_hand()
+		if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.roll_to_next_hand then
+			WORD_GAME_UI.Sidebar.roll_to_next_hand()
 		end
-		if WORD_GAME and WORD_GAME.Confetti and not opts.boss_cleared then
-			WORD_GAME.Confetti.burst()
+		if WORD_GAME and WORD_GAME_UI.Confetti and not opts.boss_cleared then
+			WORD_GAME_UI.Confetti.burst()
 		end
 		discard_remaining_hand()
 
@@ -173,8 +173,8 @@ function M.install(play_module)
 
 		if not opts.boss_cleared
 			and WORD_GAME
-			and WORD_GAME.TokenReward
-			and WORD_GAME.TokenReward.try_award(play_clear_sequence) then
+			and WORD_GAME_UI.TokenReward
+			and WORD_GAME_UI.TokenReward.try_award(play_clear_sequence) then
 			return
 		end
 		play_clear_sequence()
@@ -189,8 +189,8 @@ function M.install(play_module)
 		end
 		set_score_animating(true)
 		local function finish_deal()
-			if WORD_GAME and WORD_GAME.Sidebar then
-				WORD_GAME.Sidebar:refresh()
+			if WORD_GAME and WORD_GAME_UI.Sidebar then
+				WORD_GAME_UI.Sidebar:refresh()
 			end
 			set_score_animating(false)
 		end
@@ -218,8 +218,8 @@ function M.install(play_module)
 
 	function play_module.end_match(won)
 		play_module.finalize_match(won)
-		if WORD_GAME.EndMatch then
-			WORD_GAME.EndMatch.open(won)
+		if WORD_GAME_UI.EndMatch then
+			WORD_GAME_UI.EndMatch.open(won)
 		end
 	end
 
@@ -237,8 +237,8 @@ function M.install(play_module)
 		if score == nil then return end
 		feedback.show("Time!  " .. score .. " points", G.C.GOLD, 2.2, 0.35)
 		play_sfx("timpani", 0.9, 0.85)
-		if WORD_GAME and WORD_GAME.ScoreBanner then
-			local hud = WORD_GAME.ScoreBanner.state()
+		if WORD_GAME and WORD_GAME_UI.ScoreBanner then
+			local hud = WORD_GAME_UI.ScoreBanner.state()
 			hud.to_go_label = "TO CLEAR"
 		end
 		play_module.deal_after_jumble_timeout()

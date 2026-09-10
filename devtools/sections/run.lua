@@ -4,8 +4,8 @@ local layout = require "devtools.layout"
 local state = require "word_game.model.run.state"
 
 local function tutorial_force_label()
-	if WORD_GAME and WORD_GAME.FirstPlayTutorial then
-		return WORD_GAME.FirstPlayTutorial.force_status_label()
+	if WORD_GAME and WORD_GAME_UI.FirstPlayTutorial then
+		return WORD_GAME_UI.FirstPlayTutorial.force_status_label()
 	end
 	return "OFF"
 end
@@ -33,14 +33,14 @@ return {
 			end
 		end)
 		panel:action("toggle_first_play_tutorial", function()
-			if WORD_GAME and WORD_GAME.FirstPlayTutorial then
-				WORD_GAME.FirstPlayTutorial.toggle_force()
+			if WORD_GAME and WORD_GAME_UI.FirstPlayTutorial then
+				WORD_GAME_UI.FirstPlayTutorial.toggle_force()
 				panel:set_label("tutorial_force_status", tutorial_force_label())
 			end
 		end)
 		panel:action("reset_first_play_tutorial", function()
-			if WORD_GAME and WORD_GAME.FirstPlayTutorial then
-				WORD_GAME.FirstPlayTutorial.reset()
+			if WORD_GAME and WORD_GAME_UI.FirstPlayTutorial then
+				WORD_GAME_UI.FirstPlayTutorial.reset()
 				panel:set_label("tutorial_force_status", tutorial_force_label())
 			end
 		end)

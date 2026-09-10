@@ -17,7 +17,7 @@ T.describe("Jumble play flow integration", function()
 			jumble = { total_score = 30 },
 		}
 		G.GAME.run_state = { tokens = 10, perks = {}, trade_used_this_hand = false }
-		WORD_GAME.TradeUI = nil
+		WORD_GAME_UI.TradeUI = nil
 		T.assert_equal(play.resolve_after_clear({}), "trade")
 	end)
 

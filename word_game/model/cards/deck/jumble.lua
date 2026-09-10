@@ -8,6 +8,8 @@ return function(context)
 	local M = context.module
 	local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 	local bonus_return = require("word_game.model.jumble.bonus_return")
+	local voucher_discard = require("word_game.model.perks.voucher_discard")
+	local Presentation = require("word_game.model.presentation")
 	local deal_boss_hand = require("word_game.model.cards.deck.boss_hand")(M, context)
 
 	function M.is_jumble_deck()
@@ -258,9 +260,7 @@ return function(context)
 				WORD_GAME.Jumble.clear_blank_cards(j.slots)
 			end
 		end
-		if WORD_GAME and WORD_GAME.VoucherDiscard and WORD_GAME.VoucherDiscard.reset then
-			WORD_GAME.VoucherDiscard.reset()
-		end
+		voucher_discard.reset()
 		M.clear_hand_and_placement()
 		local to_deal = math.min(hand_size_cfg.get(), #(G.deck.cards or {}))
 		for _ = 1, to_deal do
@@ -327,15 +327,12 @@ return function(context)
 
 	function M.discard_from_hand(card)
 		if not M.is_jumble_deck() then return false end
-		local voucher_discard = WORD_GAME and WORD_GAME.VoucherDiscard
-		if not voucher_discard or not voucher_discard.can_discard_card(card) then
+		if not voucher_discard.can_discard_card(card) then
 			return false
 		end
 
 		local function after_discard()
-			if voucher_discard and voucher_discard.stash_discarded_card then
-				voucher_discard.stash_discarded_card(card)
-			end
+			voucher_discard.stash_discarded_card(card)
 			M.draw_jumble_replacement()
 			M.sync_deck_count_display()
 			if G.hand then
@@ -345,25 +342,17 @@ return function(context)
 				G.discard:relayout()
 				G.discard:hard_set_cards()
 			end
-			local hs = WORD_GAME and WORD_GAME.HandShuffle
-			if hs and hs.sync then
-				hs.sync()
-			end
+			Presentation.emit("hand_shuffle_sync")
 			if G.GAME and G.GAME.round_scores then
 				G.GAME.round_scores.cards_discarded = G.GAME.round_scores.cards_discarded or { amt = 0 }
 				G.GAME.round_scores.cards_discarded.amt = (G.GAME.round_scores.cards_discarded.amt or 0) + 1
 			end
 		end
 
-		if voucher_discard and voucher_discard.record_discard then
-			voucher_discard.record_discard()
-		end
-		local allowance_full = voucher_discard and voucher_discard.is_full and voucher_discard.is_full()
+		voucher_discard.record_discard()
+		local allowance_full = voucher_discard.is_full()
 		if allowance_full and card and card.states then
 			card.states.visible = false
-		end
-		if voucher_discard and voucher_discard.sync_sidebar_ui then
-			voucher_discard.sync_sidebar_ui()
 		end
 
 		local dissolve_time = 0.7

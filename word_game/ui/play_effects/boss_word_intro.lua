@@ -35,15 +35,15 @@ function M.present_boss_word(wr, on_complete)
 	end
 
 	definition.set_word_score_animating(true)
-	if WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.hide_points_to_get_display then
-		WORD_GAME.ScoreBanner.hide_points_to_get_display()
+	if WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.hide_points_to_get_display then
+		WORD_GAME_UI.ScoreBanner.hide_points_to_get_display()
 	end
-	if WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.pause then
-		WORD_GAME.TimelineTimer.pause()
+	if WORD_GAME_UI.TimelineTimer and WORD_GAME_UI.TimelineTimer.pause then
+		WORD_GAME_UI.TimelineTimer.pause()
 	end
 
 	local function finish_intro()
-		local tt = WORD_GAME and WORD_GAME.TimelineTimer
+		local tt = WORD_GAME and WORD_GAME_UI.TimelineTimer
 		if tt and tt.arm_boss_countdown then
 			tt.arm_boss_countdown(round_config.TIMELINE_SECONDS)
 		end
@@ -51,15 +51,15 @@ function M.present_boss_word(wr, on_complete)
 			local reveal_dur = has_event_manager() and definition.BOSS_INTRO.timer_reveal_duration or 0
 			tt.reveal_countdown_timer(reveal_dur)
 		end
-		if WORD_GAME and WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.set_banner_mode then
-			WORD_GAME.ScoreBanner.set_banner_mode("boss_word", "BOSS WORD")
+		if WORD_GAME and WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.set_banner_mode then
+			WORD_GAME_UI.ScoreBanner.set_banner_mode("boss_word", "BOSS WORD")
 		end
-		if WORD_GAME and WORD_GAME.BossWordAnnounce then
-			if WORD_GAME.BossWordAnnounce.play_boss then
-				WORD_GAME.BossWordAnnounce.play_boss("BOSS WORD")
+		if WORD_GAME and WORD_GAME_UI.BossWordAnnounce then
+			if WORD_GAME_UI.BossWordAnnounce.play_boss then
+				WORD_GAME_UI.BossWordAnnounce.play_boss("BOSS WORD")
 			end
-			if WORD_GAME.BossWordAnnounce.play_theme then
-				WORD_GAME.BossWordAnnounce.play_theme("Garden Theme")
+			if WORD_GAME_UI.BossWordAnnounce.play_theme then
+				WORD_GAME_UI.BossWordAnnounce.play_theme("Garden Theme")
 			end
 		end
 		local revealed = jumble.reveal_boss_puzzle(wr)
@@ -71,16 +71,16 @@ function M.present_boss_word(wr, on_complete)
 			if on_complete then on_complete() end
 			return
 		end
-		if WORD_GAME and WORD_GAME.Layout and WORD_GAME.Layout.refresh_placement_layout then
-			WORD_GAME.Layout.refresh_placement_layout()
+		if WORD_GAME and WORD_GAME_UI.Layout and WORD_GAME_UI.Layout.refresh_placement_layout then
+			WORD_GAME_UI.Layout.refresh_placement_layout()
 		elseif G.placement_table and G.placement_table.apply_screen_position then
 			G.placement_table:apply_screen_position()
 		end
-		if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.sync_visibility then
-			WORD_GAME.Sidebar.sync_visibility()
+		if WORD_GAME and WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
+			WORD_GAME_UI.Sidebar.sync_visibility()
 		end
-		if WORD_GAME and WORD_GAME.HandShuffle then
-			WORD_GAME.HandShuffle.sync_position()
+		if WORD_GAME and WORD_GAME_UI.HandShuffle then
+			WORD_GAME_UI.HandShuffle.sync_position()
 		end
 		local fx = effects()
 		if fx and fx.request_layout_refresh then
@@ -159,8 +159,8 @@ function M.present_boss_word(wr, on_complete)
 	end
 
 	local hide_dur = has_event_manager() and definition.BOSS_INTRO.hide_duration or 0
-	if WORD_GAME.TimelineTimer and WORD_GAME.TimelineTimer.hide_slider then
-		WORD_GAME.TimelineTimer.hide_slider(hide_dur, function()
+	if WORD_GAME_UI.TimelineTimer and WORD_GAME_UI.TimelineTimer.hide_slider then
+		WORD_GAME_UI.TimelineTimer.hide_slider(hide_dur, function()
 			hide_done = true
 			start_if_ready()
 		end)
@@ -199,8 +199,8 @@ function M.present_boss_word(wr, on_complete)
 		if on_complete then on_complete() end
 		return
 	end
-	if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.sync_visibility then
-		WORD_GAME.Sidebar.sync_visibility()
+	if WORD_GAME and WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
+		WORD_GAME_UI.Sidebar.sync_visibility()
 	end
 
 	deck.return_hand_to_deck(function()

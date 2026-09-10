@@ -44,14 +44,14 @@ end
 
 function M.wire_table_input()
 	WORD_GAME = WORD_GAME or {}
-	WORD_GAME.TableInput = {
+	WORD_GAME_UI.TableInput = {
 		refresh_card_input = function()
 			if G.hand and G.hand.set_ranks then
 				G.hand:set_ranks()
 			end
 		end,
 	}
-	WORD_GAME.PlayHoldRedraw = WORD_GAME.PlayHoldRedraw or {
+	WORD_GAME_UI.PlayHoldRedraw = WORD_GAME_UI.PlayHoldRedraw or {
 		is_animating = function() return false end,
 	}
 end
@@ -62,24 +62,24 @@ function M.wire_word_game_stubs()
 	jumble.ensure_playable_puzzle = function() return true end
 	jumble.refresh_hud = function() end
 	WORD_GAME.Play = mock_env.install_hand_clear(play)
-	WORD_GAME.VoucherDiscard = { reset = function() end }
-	WORD_GAME.HandClearFocus = {
+	WORD_GAME_UI.VoucherDiscard = { reset = function() end }
+	WORD_GAME_UI.HandClearFocus = {
 		end_focus = function() end,
 		is_active = function() return false end,
 	}
-	WORD_GAME.TradeUI = {
+	WORD_GAME_UI.TradeUI = {
 		open_then_dealer = function()
 			WORD_GAME._trade_continue_pending = true
 		end,
 	}
-	WORD_GAME.TokenReward = {
+	WORD_GAME_UI.TokenReward = {
 		try_award = function(callback)
 			if callback then callback() end
 			return true
 		end,
 		is_active = function() return false end,
 	}
-	WORD_GAME.Confetti = { burst = function() end }
+	WORD_GAME_UI.Confetti = { burst = function() end }
 end
 
 function M.configure_round(opts)

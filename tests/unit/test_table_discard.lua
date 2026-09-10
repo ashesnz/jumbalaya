@@ -30,7 +30,7 @@ end
 local function mock_discard_voucher(rect)
 	rect = rect or { x = 170, y = 90, w = 80, h = 40 }
 	WORD_GAME = WORD_GAME or {}
-	WORD_GAME.PerkStamp = {
+	WORD_GAME_UI.PerkStamp = {
 		current_imprints = function()
 			return { discard_bin_imprint() }
 		end,
@@ -171,7 +171,7 @@ T.describe("table discard bin", function()
 		G.GAME.placement_recall_animating = false
 		G.RUN = { active = true }
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.PlayHoldRedraw = { is_animating = function() return false end }
+		WORD_GAME_UI.PlayHoldRedraw = { is_animating = function() return false end }
 		G.STATE = G.STATES.TABLE_BOARD
 		G.STATE_COMPLETE = true
 		T.assert_true(table_discard.end_run())
@@ -219,7 +219,7 @@ T.describe("table discard bin", function()
 		G.CARD_H = 1.4
 		G.hand = { cards = {} }
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.VoucherDiscard = table_discard
+		WORD_GAME_UI.VoucherDiscard = table_discard
 		WORD_GAME.Deck = deck
 		mock_discard_voucher()
 
@@ -279,9 +279,10 @@ T.describe("table discard bin", function()
 		}
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.Jumble = { is_active = function() return true end }
-		WORD_GAME.VoucherDiscard = table_discard
 		WORD_GAME.Deck = deck
-		WORD_GAME.HandShuffle = { sync = function() end }
+		WORD_GAME_UI.VoucherDiscard = table_discard
+		WORD_GAME_UI.HandShuffle = { sync = function() end }
+		MockEnv.install_presentation()
 		mock_discard_voucher()
 
 		local card = card_over_voucher()
@@ -331,7 +332,7 @@ T.describe("table discard bin", function()
 		G.CARD_H = 1.4
 		G.hand = { cards = {} }
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.VoucherDiscard = table_discard
+		WORD_GAME_UI.VoucherDiscard = table_discard
 		WORD_GAME.Deck = deck
 		mock_discard_voucher()
 
@@ -370,7 +371,7 @@ T.describe("table discard bin", function()
 		}
 		G.placement_table = { area = { cards = {}, hard_set_cards = function() end } }
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.VoucherDiscard = table_discard
+		WORD_GAME_UI.VoucherDiscard = table_discard
 		WORD_GAME.Jumble = { ensure_playable_puzzle = function() end }
 
 		deck.deal_jumble_hand()
@@ -528,9 +529,10 @@ T.describe("table discard bin", function()
 		}
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.Jumble = { is_active = function() return true end }
-		WORD_GAME.VoucherDiscard = table_discard
 		WORD_GAME.Deck = deck
-		WORD_GAME.HandShuffle = { sync = function() end }
+		WORD_GAME_UI.VoucherDiscard = table_discard
+		WORD_GAME_UI.HandShuffle = { sync = function() end }
+		MockEnv.install_presentation()
 
 		local card = card_over_voucher()
 		G.hand.cards[1] = card

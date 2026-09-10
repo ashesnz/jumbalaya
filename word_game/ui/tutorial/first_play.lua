@@ -87,8 +87,8 @@ local function refresh_board_input()
 	if G.placement_table and G.placement_table.area and G.placement_table.area.set_ranks then
 		G.placement_table.area:set_ranks()
 	end
-	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.sync()
+	if WORD_GAME and WORD_GAME_UI.HandShuffle then
+		WORD_GAME_UI.HandShuffle.sync()
 	end
 end
 
@@ -122,8 +122,8 @@ local function mark_complete()
 end
 
 local function try_opening_perk_demo()
-	if WORD_GAME and WORD_GAME.PerkStamp and WORD_GAME.PerkStamp.try_opening_demo then
-		WORD_GAME.PerkStamp.try_opening_demo()
+	if WORD_GAME and WORD_GAME_UI.PerkStamp and WORD_GAME_UI.PerkStamp.try_opening_demo then
+		WORD_GAME_UI.PerkStamp.try_opening_demo()
 	end
 end
 
@@ -201,12 +201,12 @@ local function placement_bubble_config()
 end
 
 local function play_bubble_config()
-	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.sync()
+	if WORD_GAME and WORD_GAME_UI.HandShuffle then
+		WORD_GAME_UI.HandShuffle.sync()
 	end
 
 	local bar = G.hand_action_bar
-	local btn = WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.play_button_uie()
+	local btn = WORD_GAME and WORD_GAME_UI.HandShuffle and WORD_GAME_UI.HandShuffle.play_button_uie()
 	local target = (bar and not bar.REMOVED and bar.T) or (btn and btn.T)
 	local room = G.ROOM_ATTACH and G.ROOM_ATTACH.T
 	if not target or not room then

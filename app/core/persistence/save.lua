@@ -103,8 +103,11 @@ end
 --- Tears down all session UI/state (used when discarding a run or switching
 --- profiles) and resets the stage machine.
 function Game:discard_run()
-	local RunScope = require("word_game.model.run.scope")
-	RunScope.teardown()
+	local domain = rawget(_G, "WORD_GAME")
+	local scope = domain and (domain.RunScope or (domain.Run and domain.Run.Scope))
+	if scope and scope.teardown then
+		scope.teardown()
+	end
 
 	if self.ROOM then
 		teardown_tree(G.STAGE_OBJECTS[G.STAGE])

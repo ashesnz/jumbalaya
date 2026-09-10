@@ -8,8 +8,8 @@ return {
 
 	register = function(panel)
 		panel:action("show_trade", function(_ctx)
-			if WORD_GAME and WORD_GAME.TradeUI then
-				WORD_GAME.TradeUI.open()
+			if WORD_GAME and WORD_GAME_UI.TradeUI then
+				WORD_GAME_UI.TradeUI.open()
 			end
 		end)
 	end,

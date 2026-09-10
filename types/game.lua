@@ -220,7 +220,7 @@
 ---@field save_settings fun(self: Game)
 ---@field C table
 ---@field UIT table
----@field FUNCS table
+---@field FUNCS GameFuncs
 ---@field ARGS table
 ---@field I GameInstanceTables
 ---@field TIMERS GameTimers

@@ -28,13 +28,13 @@ Agent docs: `AGENTS.md`, `.cursor/skills/jumbalaya/SKILL.md`
 
 - `word_game/ui/` → `app/core/` — never reverse
 - `word_game/board/` — snap/geometry only (`placement/`, `jumble/`, `bonus/`); no UI imports at require time
-- Cross-package: use `WORD_GAME` facade (`word_game/init.lua`), not deep `require` from `app/` or `tests/`
+- Cross-package: use `WORD_GAME` (domain) and `WORD_GAME_UI` (presentation); model/board emit via `Presentation`, never `G.FUNCS` or UI modules
 - Config = data; model = rules/state; ui = presentation — keep separated
 - Bootstrap load order lives in `app/bootstrap.lua` only; globals (`G`, `Card`, `LayoutView`) exist after boot
 
 ## Active vs legacy
 
-Jumble mode is the player experience (`word_game/model/jumble/`, `word_game/model/jumble_play/`). Legacy AP/plays/discards code may remain but is not active — do not extend it unless asked. Right-hand HUD is `word_game/ui/sidebar/` (`WORD_GAME.Sidebar`, `G.SIDEBAR_HUD`) — not vault.
+Jumble mode is the player experience (`word_game/model/jumble/`, `word_game/model/jumble_play/`). Legacy AP/plays/discards code may remain but is not active — do not extend it unless asked. Right-hand HUD is `word_game/ui/sidebar/` (`WORD_GAME_UI.Sidebar`, `G.SIDEBAR_HUD`) — not vault.
 
 ## Verification
 

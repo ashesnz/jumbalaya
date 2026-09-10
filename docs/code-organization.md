@@ -46,8 +46,8 @@ Callbacks are grouped by responsibility under `app/callbacks/` and `word_game/ui
 
 | Area | Module |
 |------|--------|
-| HUD refresh / rebuild | `word_game/ui/sidebar/` via `WORD_GAME.Sidebar`; G.FUNCS in `sidebar/funcs.lua` |
-| Screen / placement layout | `word_game/ui/layout/` via `WORD_GAME.Layout` or `require "word_game.ui.layout"`; model code requests deferred layout via `Layout.request_refresh()` |
+| HUD refresh / rebuild | `word_game/ui/sidebar/` via `WORD_GAME_UI.Sidebar`; G.FUNCS in `sidebar/funcs.lua` |
+| Screen / placement layout | `word_game/ui/layout/` via `WORD_GAME_UI.Layout` or `require "word_game.ui.layout"`; model code requests deferred layout via `word_game.model.layout.request` |
 | Play button / placement | `word_game/ui/callbacks/placement.lua` (`G.FUNCS.play_placement_word`); logic in `table/controls/placement.lua` |
 | Profile load / delete | `app/profile_callbacks.lua` |
 | Settings, text input, run lifecycle | `app/callbacks/settings.lua` |
@@ -68,7 +68,9 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 
 ## Package entry point
 
-`word_game/init.lua` registers the public facade as `WORD_GAME` and loads the domain packages. The facade exports only modules used across packages (`app/`, `tests/`, `devtools/`). Package-internal modules (config tables, card definitions, trade rules, etc.) are loaded via direct `require` inside `word_game/`.
+`word_game/init.lua` registers the domain facade as `WORD_GAME`. Presentation is `WORD_GAME_UI` from `word_game/ui/facade/exports.lua`. `app/`, `tests/`, and `devtools/` should use those tables instead of deep requires. Model/board code emits `word_game.model.presentation` events; it must not call `WORD_GAME_UI` or `G.FUNCS`. Named `G.FUNCS` strings are catalogued in `types/g_funcs.lua`.
+
+### Domain (`WORD_GAME`)
 
 | Export | Role |
 |--------|------|
@@ -76,31 +78,37 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `PlacementWord` | Placement-row word preview on `G.GAME` (`clear`, `refresh_from_jumble_slots`) |
 | `JumbleRules` | Pure scoring/play rules (`compute_word_score`, `score_breakdown`, `evaluate_play`, …) |
 | `Play` | Play-button orchestration (`play_jumble_word`); sub-exports `Play.Rules`, `Play.ModifierEffects` |
-| `BonusStack` / `BonusStackUI` | Bonus gutter state/scoring (model) and animation/draw (UI) |
+| `BonusStack` | Bonus gutter state/scoring |
 | `Round` | Set/hand lifecycle, targets, perk-hand gating |
-| `Deck` / `Back` | Dealing; jumble branch in `model/deck/jumble.lua` |
+| `Deck` / `Back` | Dealing; jumble branch in `model/cards/deck/jumble.lua` |
 | `Board` | Jumble pattern row (`placement/table`, `placement/snap`, `jumble/geometry`, `bonus/gutter`) |
+| `HandSize` | `get()` — single hand-size accessor for dealing and layout |
+| `Busy` / `InputLock` | Table-busy flags on `G.GAME` and `is_table_busy()` |
+| `Match` | `end_run()` — centralized discard-bin surrender / game-over transition |
+| `VoucherDiscard` | Discard-bin allowance rules (`model/perks/voucher_discard`) |
+| `Perks` | Perk model package (`model/perks`: registry, effects, hand timer) |
+
+### Presentation (`WORD_GAME_UI`)
+
+| Export | Role |
+|--------|------|
 | `TableBoard` | TABLE_BOARD update/draw coordinator |
 | `Layout` | TABLE_BOARD geometry (`layout/felt`, `sidebar/layout`, `layout/placement`) |
 | `ScoreBanner` | Jumble chips, multiplier, points-to-get label |
 | `TimelineTimer` | 60s fuse HUD |
 | `TokenReward` | 1-1 token fly animations |
 | `HandShuffle` / `PlayHoldRedraw` | Shuffle + Play buttons, hold-to-redraw |
-| `HandSize` | `get()` — single hand-size accessor for dealing and layout |
-| `InputLock` | `is_table_busy()` — shared animation/input gate |
-| `Match` | `end_run()` — centralized discard-bin surrender / game-over transition |
-| `VoucherDiscard` | Voucher discard state, drag-to-voucher, counter overlay |
-| `Perks` | Perk model package (`model/perks`: registry, effects, hand timer) |
 | `TradeUI` / `PerkStamp` | Marketplace and perk stamp overlays |
 | `Sidebar` | Right-hand HUD (stamps, deck, End Run) |
 | `SidebarStageButton` | Classic End Run / Next button in the sidebar |
+| `BonusStackUI` | Bonus gutter animation/draw |
 | Table input / overlays | `TableInput`, `CardInspect`, `Confetti`, `FloatUpText`, `HandClearFocus`, `EndMatch`, `TableDeck` |
 
 ### Require conventions
 
 | Caller | Rule |
 |--------|------|
-| `app/`, `tests/`, `devtools/` | Use `WORD_GAME.*` facade — no deep `word_game.model.*` requires unless testing internals |
+| `app/`, `tests/`, `devtools/` | Use `WORD_GAME` / `WORD_GAME_UI` — no deep `word_game.model.*` requires unless testing internals |
 | `word_game/ui/` | `word_game.ui.facade` for cross-package imports (model/board/app); top-of-file `require` for sibling UI modules only |
 | `word_game/board/` | Top-of-file `require` for model modules; no UI imports at load time |
 | `word_game/model/` | Top-of-file `require` for siblings (`model/jumble/*`, `model/run/*`, …); use `jumble/bonus_return` when model must return bonus cards to the gutter |
@@ -109,7 +117,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | Layout refresh | `word_game/model/layout/request.lua` sets `G.ARGS.pending_layout`; model code must not `require` `word_game.ui.layout` |
 | UI reactions | `word_game/model/presentation.lua` emits events; `word_game/ui/presentation/install.lua` registers handlers at boot |
 
-Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, `WORD_GAME.BonusStack`, `WORD_GAME.BonusStackUI`, etc. across package boundaries instead of deep requires.
+Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, `WORD_GAME_UI.BonusStackUI`, etc. across package boundaries instead of deep requires.
 
 ---
 

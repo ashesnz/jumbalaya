@@ -42,10 +42,10 @@ AlphaCardsBackup/        Legacy card-engine reference — do not edit
 
 - `word_game/ui/` → `app/core/` — **never** reverse
 - `word_game/board/` — snap/geometry only; no UI imports at require time (fixed-letter overlay wired from `ui/table/board.lua`)
-- Cross-package access: use `WORD_GAME` facade (`word_game/init.lua`), not deep `require` from `app/` or `tests/`. Inside `word_game/model/`, hoist sibling requires to module scope; use `jumble/bonus_return` when model code must return bonus cards to the gutter.
+- Cross-package access: use `WORD_GAME` (domain, `word_game/init.lua`) and `WORD_GAME_UI` (presentation, `word_game/ui/facade/exports.lua`). Inside `word_game/model/`, hoist sibling requires to module scope; use `jumble/bonus_return` when model code must return bonus cards to the gutter.
 - Config = data; model = rules/state; ui = presentation — keep separated
 - Bootstrap load order lives in `app/bootstrap.lua` only; globals (`G`, `Card`, `LayoutView`) exist after boot
-- Model requests layout via `WORD_GAME.Layout.request_refresh()` — not direct geometry from model code
+- Model requests layout via `Layout.request_refresh()` / `Presentation.emit` — not UI modules or `G.FUNCS`
 
 ## Active vs legacy
 
@@ -54,32 +54,37 @@ AlphaCardsBackup/        Legacy card-engine reference — do not edit
 Removed / renamed (do not reintroduce):
 
 - **Vault** terminology → use **sidebar** (`word_game/ui/sidebar/`)
-- Character portraits / `player_host` → removed; table input is `WORD_GAME.TableInput`
+- Character portraits / `player_host` → removed; table input is `WORD_GAME_UI.TableInput`
 - Edition/seal/achievement UI → removed (gold seal shader kept for boss-word bonus cards)
 
 ## Key packages
 
-### `WORD_GAME` facade exports (`word_game/init.lua`)
+### `WORD_GAME` domain facade (`word_game/init.lua`)
 
 | Export | Role |
 |--------|------|
 | `Jumble` / `Play` | Puzzle state and play orchestration (`Jumble.PlacementWord`, `Play.Rules`, …) |
 | `PlacementWord` / `JumbleRules` | Placement preview and pure scoring rules |
-| `Run` | Run lifecycle facade (`Run.State`, `Run.Mode`, `Run.Scope`, …) |
+| `Run` / `Busy` / `InputLock` | Run lifecycle and table-busy flags |
 | `Board` | `PlacementTable`, `Config`, `Snap`, `JumbleGeometry`, `BonusGutter` |
-| `Layout` | TABLE_BOARD geometry (`layout/felt`, `sidebar/layout`, `layout/placement`) |
-| `Sidebar` | Right-hand HUD (stamps, deck, cards-left, End Run) |
-| `SidebarStageButton` | Classic End Run / Next button |
-| `TableBoard` | TABLE_BOARD update/draw coordinator |
-| `VoucherDiscard` | Sidebar voucher discard |
-| `TimelineTimer` | 60s fuse / classic score slider |
-| `BonusStack` / `BonusStackUI` | Bonus gutter model state and UI presentation (`perks/bonus_stack/`) |
-| `HandShuffle` / `PlayHoldRedraw` | Table controls: shuffle/play buttons, hold-to-redraw (`ui/table/controls/`) |
-| `TradeUI` / `PerkStamp` | Marketplace and perk stamp overlays |
-| `TableInput` | Card input refresh on the table board |
+| `BonusStack` | Bonus gutter model state |
+| `VoucherDiscard` | Discard-bin allowance rules (`model/perks/voucher_discard`) |
 | `Match` | `end_run()` — game-over from sidebar End Run |
 
-Prefer `WORD_GAME.*` across packages instead of deep requires.
+### `WORD_GAME_UI` presentation facade (`word_game/ui/facade/exports.lua`)
+
+| Export | Role |
+|--------|------|
+| `Layout` | TABLE_BOARD geometry (`layout/felt`, `sidebar/layout`, `layout/placement`) |
+| `Sidebar` / `SidebarStageButton` | Right-hand HUD and End Run / Next button |
+| `TableBoard` | TABLE_BOARD update/draw coordinator |
+| `TimelineTimer` / `ScoreBanner` | Fuse bar and score HUD |
+| `HandShuffle` / `PlayHoldRedraw` | Table controls |
+| `TradeUI` / `PerkStamp` / `EndMatch` | Overlays |
+| `TableInput` / `TableDeck` | Card input refresh and sidebar deck art |
+| `BonusStackUI` | Bonus gutter presentation |
+
+Prefer `WORD_GAME.*` / `WORD_GAME_UI.*` across packages instead of deep requires.
 
 ### UI package layout (`word_game/ui/`)
 
@@ -111,7 +116,7 @@ sidebar/
   callbacks.lua      Thin install wrapper
 ```
 
-Globals: `G.SIDEBAR_HUD`, `G.SIDEBAR_ATTACH`. Layout helpers are re-exported on `WORD_GAME.Layout` (`sidebar_rect`, `sidebar_height`, etc.). `Sidebar.sync_visibility()` shows/hides the HUD column; play/shuffle buttons sync via `WORD_GAME.HandShuffle.sync()` (not the sidebar API).
+Globals: `G.SIDEBAR_HUD`, `G.SIDEBAR_ATTACH`. Layout helpers are re-exported on `WORD_GAME_UI.Layout` (`sidebar_rect`, `sidebar_height`, etc.). `Sidebar.sync_visibility()` shows/hides the HUD column; play/shuffle buttons sync via `WORD_GAME_UI.HandShuffle.sync()` (not the sidebar API).
 
 ### Play resolution split
 

@@ -62,7 +62,7 @@ end
 
 local function draw_card_layer(card, layer)
 	if not card then return end
-	if G.INPUT.dragging.target ~= card and not (WORD_GAME and WORD_GAME.CardInspect and WORD_GAME.CardInspect.is(card)) then
+	if G.INPUT.dragging.target ~= card and not (WORD_GAME and WORD_GAME_UI.CardInspect and WORD_GAME_UI.CardInspect.is(card)) then
 		card:draw(layer)
 	end
 end
@@ -238,8 +238,8 @@ function CardArea:set_ranks()
 		else
 			card.states.drag.can = true
 		end
-		if WORD_GAME and WORD_GAME.FirstPlayTutorial and WORD_GAME.FirstPlayTutorial.is_active()
-			and WORD_GAME.FirstPlayTutorial.is_active() then
+		if WORD_GAME and WORD_GAME_UI.FirstPlayTutorial and WORD_GAME_UI.FirstPlayTutorial.is_active()
+			and WORD_GAME_UI.FirstPlayTutorial.is_active() then
 			card.states.drag.can = false
 		elseif card.states.drag.can then
 			card.states.hover.can = true
@@ -411,8 +411,8 @@ end
 --- (triggers opponent draw).
 function CardArea:click()
 	if self == G.deck then
-		if WORD_GAME and WORD_GAME.TableDeck and WORD_GAME.TableDeck.uses_table_draw() then
-			WORD_GAME.TableDeck.show_info()
+		if WORD_GAME and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
+			WORD_GAME_UI.TableDeck.show_info()
 		end
 	end
 end

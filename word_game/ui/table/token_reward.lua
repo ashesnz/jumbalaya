@@ -82,7 +82,7 @@ function M.earned_amount()
 	if RunMode.is_classic() then
 		return math.floor(banked_score())
 	end
-	local tt = WORD_GAME and WORD_GAME.TimelineTimer
+	local tt = WORD_GAME and WORD_GAME_UI.TimelineTimer
 	if not tt then return 0 end
 	return math.floor(tt.time_remaining or 0)
 end
@@ -96,7 +96,7 @@ function M.capture_reward()
 	if RunMode.is_classic() then
 		if captured_score ~= nil then return end
 		captured_score = banked_score()
-		local tt = WORD_GAME and WORD_GAME.TimelineTimer
+		local tt = WORD_GAME and WORD_GAME_UI.TimelineTimer
 		if tt then
 			tt.is_active = false
 			if tt.sync_progress then tt.sync_progress() end
@@ -104,7 +104,7 @@ function M.capture_reward()
 		return
 	end
 	if captured_time ~= nil then return end
-	local tt = WORD_GAME and WORD_GAME.TimelineTimer
+	local tt = WORD_GAME and WORD_GAME_UI.TimelineTimer
 	if not tt then return end
 	captured_time = tt.time_remaining or 0
 	tt.is_active = false
@@ -126,8 +126,8 @@ local function timeline_center_px()
 end
 
 local function resolve_target_px()
-	if G.deck and WORD_GAME and WORD_GAME.TableDeck and WORD_GAME.TableDeck.token_center_px then
-		local cx, cy = WORD_GAME.TableDeck.token_center_px(G.deck)
+	if G.deck and WORD_GAME and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.token_center_px then
+		local cx, cy = WORD_GAME_UI.TableDeck.token_center_px(G.deck)
 		if cx and cy then return cx, cy end
 	end
 	local deck = Layout.deck_rect()
@@ -176,9 +176,9 @@ local function on_flyer_landed()
 		tokens_left = tokens_left - grant
 		if grant > 0 then
 			state.add_tokens(grant)
-			if WORD_GAME and WORD_GAME.TableDeck and WORD_GAME.TableDeck.bump_token_display then
+			if WORD_GAME and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.bump_token_display then
 				for _ = 1, grant do
-					WORD_GAME.TableDeck.bump_token_display()
+					WORD_GAME_UI.TableDeck.bump_token_display()
 				end
 			end
 			if play_sfx then
@@ -216,7 +216,7 @@ function M.try_award(callback)
 		return false
 	end
 
-	local tt = WORD_GAME and WORD_GAME.TimelineTimer
+	local tt = WORD_GAME and WORD_GAME_UI.TimelineTimer
 	local flyer_count = math.min(amount, MAX_REWARD_FLYERS)
 	local fly_duration = FLY_DUR + STAGGER * math.max(0, flyer_count - 1)
 	if RunMode.is_classic() and tt and tt.start_score_roll then
@@ -266,8 +266,8 @@ function M.spend_fly(amount, callback)
 
 	-- Update the sidebar display even when another token animation is active.
 	-- The marketplace can be interacted with while the reward animation is running.
-	if WORD_GAME and WORD_GAME.TableDeck and WORD_GAME.TableDeck.spend_tokens_display then
-		WORD_GAME.TableDeck.spend_tokens_display(amount)
+	if WORD_GAME and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.spend_tokens_display then
+		WORD_GAME_UI.TableDeck.spend_tokens_display(amount)
 	end
 
 	if active then

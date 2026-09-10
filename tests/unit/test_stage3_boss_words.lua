@@ -206,8 +206,8 @@ T.describe("Stage 1-3 boss words", function()
 		G.ROOM = { T = { x = 1, y = 0, w = 20, h = 11.5 } }
 		G.hand = { T = { x = 3.2, y = 8.0, w = 10.5, h = 2.8 } }
 		G.placement_table = { area = { T = { x = 4.0, y = 2.0, w = 10.0, h = 2.8 } } }
-		local stack = bonus_stack_ui.stack_layout()
 		local timer = layout.timeline_rect()
+		local stack = bonus_stack_ui.stack_layout()
 		local window_left = -(G.ROOM.T.x or 0)
 		T.assert_true(stack.y >= timer.y + timer.h - bonus_stack_ui.stack_y_lift() - 0.02,
 			"Stack should sit just below the timer, lifted slightly")
@@ -326,12 +326,12 @@ T.describe("Stage 1-3 boss words", function()
 		hand_card.area = G.hand
 
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.TableInput = {
+		WORD_GAME_UI.TableInput = {
 			refresh_card_input = function()
 				if G.hand then G.hand:set_ranks() end
 			end,
 		}
-		WORD_GAME.PlayHoldRedraw = WORD_GAME.PlayHoldRedraw or { is_animating = function() return false end }
+		WORD_GAME_UI.PlayHoldRedraw = WORD_GAME_UI.PlayHoldRedraw or { is_animating = function() return false end }
 
 		-- Mirrors deal_boss_hand finish while countdown animation is still running.
 		G.hand:set_ranks()
@@ -431,7 +431,7 @@ T.describe("Stage 1-3 boss words", function()
 
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.Jumble = jumble
-		WORD_GAME.HandShuffle = { sync = function() end }
+		WORD_GAME_UI.HandShuffle = { sync = function() end }
 
 		local placed = snap.place_in_row(session, card)
 		T.assert_true(placed, "Boss hand card should snap into a blank slot")
@@ -448,7 +448,7 @@ T.describe("Stage 1-3 boss words", function()
 			mode = "jumble",
 			jumble = { boss_word_staging = true },
 		}
-		WORD_GAME.PlayHoldRedraw = { is_animating = function() return false end }
+		WORD_GAME_UI.PlayHoldRedraw = { is_animating = function() return false end }
 		T.assert_true(InputLock.is_table_busy())
 		T.assert_true(rules.play_blocked(G.GAME.word_round.jumble))
 		G.GAME.word_round.jumble.boss_word_staging = false
@@ -516,16 +516,16 @@ T.describe("Stage 1-3 boss words", function()
 			saved[key] = WORD_GAME[key]
 		end
 
-		WORD_GAME.TimelineTimer = tt
+		WORD_GAME_UI.TimelineTimer = tt
 		tt.reset_progress(25)
 		WORD_GAME.Round = {
 			reset_timeline = function() reset_called = true end,
 		}
-		WORD_GAME.ScoreBanner = {
+		WORD_GAME_UI.ScoreBanner = {
 			hide_points_to_get_display = function() end,
 			set_banner_mode = function() end,
 		}
-		WORD_GAME.BossWordAnnounce = {
+		WORD_GAME_UI.BossWordAnnounce = {
 			play_boss = function() boss_played = true end,
 			play_theme = function() theme_played = true end,
 		}
@@ -548,15 +548,15 @@ T.describe("Stage 1-3 boss words", function()
 			return_hand_to_deck = function(cb) cb() end,
 			deal_boss_hand = function(letters, cb) cb() end,
 		}
-		WORD_GAME.HandShuffle = {
+		WORD_GAME_UI.HandShuffle = {
 			sync_position = function() end,
 			sync = function() end,
 		}
-		WORD_GAME.Sidebar = {
+		WORD_GAME_UI.Sidebar = {
 			sync_visibility = function() end,
 		}
-		WORD_GAME.PlayHoldRedraw = { is_animating = function() return false end }
-		WORD_GAME.TableInput = { refresh_card_input = function() end }
+		WORD_GAME_UI.PlayHoldRedraw = { is_animating = function() return false end }
+		WORD_GAME_UI.TableInput = { refresh_card_input = function() end }
 		G.hand = nil
 
 		T.assert_true(InputLock.is_table_busy(), "Staging must lock play before the intro starts")

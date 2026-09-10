@@ -153,9 +153,9 @@ T.describe("Sidebar stage button", function()
 		local token_reward = require("word_game.ui.table.token_reward")
 		local stage_btn = require("word_game.ui.sidebar.stage_button")
 		local Play = require("word_game.model.jumble_play")
-		WORD_GAME.TimelineTimer = tt
-		WORD_GAME.TokenReward = token_reward
-		WORD_GAME.SidebarStageButton = stage_btn
+		WORD_GAME_UI.TimelineTimer = tt
+		WORD_GAME_UI.TokenReward = token_reward
+		WORD_GAME_UI.SidebarStageButton = stage_btn
 		WORD_GAME.Play = Play
 		token_reward.reset()
 		G.GAME.word_score_animating = false
@@ -217,7 +217,7 @@ T.describe("Sidebar stage button", function()
 
 		local tt = require("word_game.ui.perks.timeline_timer")
 		local stage_btn = require("word_game.ui.sidebar.stage_button")
-		WORD_GAME.TimelineTimer = tt
+		WORD_GAME_UI.TimelineTimer = tt
 		G.GAME.word_round = {
 			target = 25,
 			jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0 },
@@ -303,8 +303,8 @@ T.describe("Sidebar stage button", function()
 		}
 		local tt = require("word_game.ui.perks.timeline_timer")
 		local stage_btn = require("word_game.ui.sidebar.stage_button")
-		WORD_GAME.TimelineTimer = tt
-		WORD_GAME.SidebarStageButton = stage_btn
+		WORD_GAME_UI.TimelineTimer = tt
+		WORD_GAME_UI.SidebarStageButton = stage_btn
 		tt.reset_progress(25)
 		tt.sync_progress()
 

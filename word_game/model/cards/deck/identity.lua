@@ -140,12 +140,9 @@ return function(context)
 	end
 
 	function M.reset_table_deck()
-		if WORD_GAME and WORD_GAME.TableDeck and WORD_GAME.TableDeck.reset then
-			WORD_GAME.TableDeck.reset()
-		end
-		if WORD_GAME and WORD_GAME.VoucherDiscard and WORD_GAME.VoucherDiscard.reset then
-			WORD_GAME.VoucherDiscard.reset()
-		end
+		local Presentation = require("word_game.model.presentation")
+		Presentation.emit("table_deck_reset")
+		require("word_game.model.perks.voucher_discard").reset()
 		local all = {}
 		for _, area in ipairs(M.all_areas()) do
 			if area and area.cards then

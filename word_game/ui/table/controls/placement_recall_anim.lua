@@ -32,7 +32,7 @@ local function placement_area()
 end
 
 local function bonus_stack_ui()
-	return WORD_GAME and WORD_GAME.BonusStackUI
+	return WORD_GAME and WORD_GAME_UI.BonusStackUI
 end
 
 local function sync_placement_from_jumble()

@@ -41,14 +41,14 @@ local function safe_random(seed_key)
 end
 
 local function gameplay_overlays_active()
-	if WORD_GAME and WORD_GAME.TradeUI and WORD_GAME.TradeUI.is_open and WORD_GAME.TradeUI.is_open() then
+	if WORD_GAME and WORD_GAME_UI.TradeUI and WORD_GAME_UI.TradeUI.is_open and WORD_GAME_UI.TradeUI.is_open() then
 		return true
 	end
 	return false
 end
 
 local function play_button_uie()
-	return WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.play_button_uie()
+	return WORD_GAME and WORD_GAME_UI.HandShuffle and WORD_GAME_UI.HandShuffle.play_button_uie()
 end
 
 local function belongs_to_play_button(node)
@@ -124,8 +124,8 @@ function M.reset()
 	animating = false
 	if G.GAME and G.GAME.hand_redraw_animating then
 		G.GAME.hand_redraw_animating = false
-		if WORD_GAME and WORD_GAME.TableInput and WORD_GAME.TableInput.refresh_card_input then
-			WORD_GAME.TableInput.refresh_card_input()
+		if WORD_GAME and WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
+			WORD_GAME_UI.TableInput.refresh_card_input()
 		else
 			if G.hand and G.hand.set_ranks then G.hand:set_ranks() end
 			if G.placement_table and G.placement_table.area and G.placement_table.area.set_ranks then
@@ -136,8 +136,8 @@ function M.reset()
 end
 
 local function recall_placement_cards()
-	if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.recall_placement_cards then
-		WORD_GAME.HandShuffle.recall_placement_cards()
+	if WORD_GAME and WORD_GAME_UI.HandShuffle and WORD_GAME_UI.HandShuffle.recall_placement_cards then
+		WORD_GAME_UI.HandShuffle.recall_placement_cards()
 	end
 end
 
@@ -220,8 +220,8 @@ local function finish_redraw()
 		G.GAME.hand_redraw_animating = false
 	end
 	block_click = true
-	if WORD_GAME and WORD_GAME.TableInput and WORD_GAME.TableInput.refresh_card_input then
-		WORD_GAME.TableInput.refresh_card_input()
+	if WORD_GAME and WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
+		WORD_GAME_UI.TableInput.refresh_card_input()
 	else
 		if G.hand and G.hand.set_ranks then G.hand:set_ranks() end
 		if G.placement_table and G.placement_table.area and G.placement_table.area.set_ranks then
@@ -231,8 +231,8 @@ local function finish_redraw()
 	if G.hand and G.hand.relayout then
 		G.hand:relayout()
 	end
-	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.sync()
+	if WORD_GAME and WORD_GAME_UI.HandShuffle then
+		WORD_GAME_UI.HandShuffle.sync()
 	end
 end
 

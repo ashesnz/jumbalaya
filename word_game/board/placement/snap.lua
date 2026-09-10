@@ -4,6 +4,7 @@ local layout = require "word_game.board.placement.layout"
 local jumble_geometry = require "word_game.board.jumble.geometry"
 local shimmer = require "word_game.board.placement.shimmer"
 local BonusStack = require "word_game.model.jumble.bonus_stack"
+local Presentation = require "word_game.model.presentation"
 
 local function placement_word()
 	return (WORD_GAME and WORD_GAME.PlacementWord)
@@ -184,9 +185,7 @@ function M.place_in_row(session, card)
 	area:hard_set_cards()
 
 	placement_word().refresh_from_jumble_slots(jumble.state().slots)
-	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.sync()
-	end
+	Presentation.emit("hand_shuffle_sync")
 	show_modifier_feedback(card)
 	return true
 end
@@ -245,9 +244,7 @@ function M.try_snap(session, card)
 		local function finish_bonus_return()
 			placement_word().clear()
 			play_sfx("card_slide1", nil, 0.8)
-			if WORD_GAME and WORD_GAME.HandShuffle then
-				WORD_GAME.HandShuffle.sync()
-			end
+			Presentation.emit("hand_shuffle_sync")
 		end
 
 		local function leave_placement_slot()
@@ -289,9 +286,7 @@ function M.try_snap(session, card)
 		and M.point_in_return_zone(session, cx, cy) then
 		if M.return_to_hand(session, card) then
 			play_sfx("card_slide1", nil, 0.8)
-			if WORD_GAME and WORD_GAME.HandShuffle then
-				WORD_GAME.HandShuffle.sync()
-			end
+			Presentation.emit("hand_shuffle_sync")
 			return
 		end
 	elseif in_row then

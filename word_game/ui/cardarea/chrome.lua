@@ -34,8 +34,8 @@ function M.draw_chrome(area)
 		area.config.hide_card_count = true
 	end
 	M.ensure_area_uibox(area)
-	local skip_pad = area == G.deck and WORD_GAME and WORD_GAME.TableDeck
-		and WORD_GAME.TableDeck.uses_table_draw()
+	local skip_pad = area == G.deck and WORD_GAME and WORD_GAME_UI.TableDeck
+		and WORD_GAME_UI.TableDeck.uses_table_draw()
 	if not skip_pad then
 		area.children.area_uibox:draw()
 	end

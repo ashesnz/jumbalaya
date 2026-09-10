@@ -1,6 +1,4 @@
---[[ app/loop/debug_overlay.lua - Performance overlay drawing in Game:draw ]]
-
-local TableBoard = require "word_game.ui.table.board"
+--[[ app/core/session/loop/debug_overlay.lua - FPS / perf overlay (no word_game requires) ]]
 
 local M = {}
 
@@ -10,9 +8,6 @@ end
 
 function M.draw(game)
 	if _RELEASE_MODE or G.video_control or not G.F_VERBOSE then
-		if TableBoard.is_active() then
-			TableBoard.draw_debug_answers()
-		end
 		return
 	end
 
@@ -46,10 +41,6 @@ function M.draw(game)
 	end
 
 	love.graphics.pop()
-
-	if TableBoard.is_active() then
-		TableBoard.draw_debug_answers()
-	end
 end
 
 return M

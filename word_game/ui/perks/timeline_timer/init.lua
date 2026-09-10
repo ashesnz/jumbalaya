@@ -343,8 +343,8 @@ function M.reset(duration)
 	M.progress_target = math.max(1, (wr and wr.target) or 1)
 	M.sync_progress()
 	StageLabel.sync()
-	if WORD_GAME and WORD_GAME.SidebarStageButton and WORD_GAME.SidebarStageButton.reset then
-		WORD_GAME.SidebarStageButton.reset()
+	if WORD_GAME and WORD_GAME_UI.SidebarStageButton and WORD_GAME_UI.SidebarStageButton.reset then
+		WORD_GAME_UI.SidebarStageButton.reset()
 	end
 end
 
@@ -368,8 +368,8 @@ function M.reset_progress(target)
 	M.display_combo = 0
 	M.sync_progress()
 	StageLabel.sync()
-	if WORD_GAME and WORD_GAME.SidebarStageButton and WORD_GAME.SidebarStageButton.reset then
-		WORD_GAME.SidebarStageButton.reset()
+	if WORD_GAME and WORD_GAME_UI.SidebarStageButton and WORD_GAME_UI.SidebarStageButton.reset then
+		WORD_GAME_UI.SidebarStageButton.reset()
 	end
 end
 
@@ -515,8 +515,8 @@ end
 
 local function register_updater()
 	Updaters.register("early_board", "timeline_timer", function(game, dt)
-		if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME and WORD_GAME.TimelineTimer then
-			WORD_GAME.TimelineTimer.update(dt)
+		if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME and WORD_GAME_UI.TimelineTimer then
+			WORD_GAME_UI.TimelineTimer.update(dt)
 		end
 	end)
 end

@@ -171,8 +171,8 @@ end
 function Card:stop_drag()
     SceneNode.stop_drag(self)
     if self.area == G.hand
-        and WORD_GAME and WORD_GAME.VoucherDiscard
-        and WORD_GAME.VoucherDiscard.try_discard(self) then
+        and WORD_GAME and WORD_GAME_UI.VoucherDiscard
+        and WORD_GAME_UI.VoucherDiscard.try_discard(self) then
         return
     end
     if G.placement_table then
@@ -208,8 +208,8 @@ function Card:click()
         end
     end
     if self.area and self.area == G.deck and self.area.cards[1] == self then
-        if WORD_GAME and WORD_GAME.TableDeck and WORD_GAME.TableDeck.uses_table_draw() then
-            WORD_GAME.TableDeck.show_info()
+        if WORD_GAME and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
+            WORD_GAME_UI.TableDeck.show_info()
         end
     end
 end

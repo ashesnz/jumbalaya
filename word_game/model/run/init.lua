@@ -12,4 +12,5 @@ return {
 	Mode = require("word_game.model.run.mode"),
 	Match = require("word_game.model.run.match"),
 	InputLock = require("word_game.model.run.input_lock"),
+	Busy = require("word_game.model.run.busy"),
 }

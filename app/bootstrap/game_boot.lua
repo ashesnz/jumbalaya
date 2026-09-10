@@ -5,6 +5,9 @@
 require "word_game.model.game"
 require "word_game.model.cards"
 require "word_game.model.game.globals"
+require "word_game.ui.util.colour"
+require "word_game.ui.util.localize"
+require "word_game.model.meta.profile_stats"
 require "app.startup"
 require "app.core.persistence.save"
 require "app.core.session.loop"
@@ -29,23 +32,41 @@ require "word_game.ui.cardarea.init"
 
 Dictionary = require "dictionary"
 WORD_GAME = require "word_game"
-require("word_game.ui.presentation.install").install(WORD_GAME)
+WORD_GAME_UI = require "word_game.ui.facade.exports"
+WORD_GAME_UI.install()
+WORD_GAME.Run.Register(WORD_GAME, WORD_GAME_UI)
+require("word_game.ui.presentation.install").install(WORD_GAME_UI, WORD_GAME)
 require("word_game.ui.play_effects.hand_clear").install(WORD_GAME.Play)
 
 require "app.callbacks.registry"
 
 DEVTOOLS = require "devtools"
 
+G.consume_board_click = function()
+	local ui = WORD_GAME_UI
+	if ui and ui.FirstPlayTutorial and ui.FirstPlayTutorial.consume_click() then
+		return true
+	end
+	if ui and ui.PerkStamp and ui.PerkStamp.consume_click() then
+		return true
+	end
+	return false
+end
+
 -- Per-frame hook registration (keeps Game:update free of hard-coded calls).
 local Updaters = require "app.core.session.updaters"
+local Busy = require "word_game.model.run.busy"
+Updaters.register('early_board', 'busy_flags', function()
+	Busy.sync_from_ui(WORD_GAME_UI)
+end)
 Updaters.register('early_board', 'sidebar_stage_button', function(game, dt)
-	if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME and WORD_GAME.SidebarStageButton then
-		WORD_GAME.SidebarStageButton.update(dt)
+	if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME_UI and WORD_GAME_UI.SidebarStageButton then
+		WORD_GAME_UI.SidebarStageButton.update(dt)
 	end
 end)
 Updaters.register('early_board', 'table_board', function(game, dt)
-	if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME and WORD_GAME.TableBoard then
-		WORD_GAME.TableBoard.update(game, dt)
+	if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME_UI and WORD_GAME_UI.TableBoard then
+		WORD_GAME_UI.TableBoard.update(game, dt)
 	end
 end)
 Updaters.register('early_board', 'title_garden_pan', function(game, dt)
@@ -54,18 +75,18 @@ Updaters.register('early_board', 'title_garden_pan', function(game, dt)
 	end
 end)
 Updaters.register('late_board', 'table_controls_stabilize', function(game, dt)
-	if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.stabilize_table_board()
+	if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME_UI and WORD_GAME_UI.HandShuffle then
+		WORD_GAME_UI.HandShuffle.stabilize_table_board()
 	end
 end)
 Updaters.register('post_input', 'play_hold_redraw', function(game, dt)
-	if WORD_GAME and WORD_GAME.PlayHoldRedraw then
-		WORD_GAME.PlayHoldRedraw.update(dt)
+	if WORD_GAME_UI and WORD_GAME_UI.PlayHoldRedraw then
+		WORD_GAME_UI.PlayHoldRedraw.update(dt)
 	end
 end)
 Updaters.register('post_input', 'card_inspect', function(game, dt)
-	if WORD_GAME and WORD_GAME.CardInspect then
-		WORD_GAME.CardInspect.update(dt)
+	if WORD_GAME_UI and WORD_GAME_UI.CardInspect then
+		WORD_GAME_UI.CardInspect.update(dt)
 	end
 end)
 Updaters.register('post_input', 'word_feedback_queue', function()
@@ -74,12 +95,12 @@ Updaters.register('post_input', 'word_feedback_queue', function()
 	end
 end)
 Updaters.register('post_input', 'trade_card_fly', function(_, dt)
-	if WORD_GAME and WORD_GAME.TradeUI and WORD_GAME.TradeUI.step_card_fly then
-		WORD_GAME.TradeUI.step_card_fly(dt)
+	if WORD_GAME_UI and WORD_GAME_UI.TradeUI and WORD_GAME_UI.TradeUI.step_card_fly then
+		WORD_GAME_UI.TradeUI.step_card_fly(dt)
 	end
 end)
 Updaters.register('post_input', 'perk_stamp', function(_, dt)
-	if WORD_GAME and WORD_GAME.PerkStamp and WORD_GAME.PerkStamp.update then
-		WORD_GAME.PerkStamp.update(dt)
+	if WORD_GAME_UI and WORD_GAME_UI.PerkStamp and WORD_GAME_UI.PerkStamp.update then
+		WORD_GAME_UI.PerkStamp.update(dt)
 	end
 end)

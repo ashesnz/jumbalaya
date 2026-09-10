@@ -137,8 +137,8 @@ T.describe("Bonus cards", function()
 		bonus_stack.clear()
 		layout_globals()
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.TimelineTimer = WORD_GAME.TimelineTimer or { pause = function() end }
-		WORD_GAME.BonusStackUI = bonus_stack
+		WORD_GAME_UI.TimelineTimer = WORD_GAME_UI.TimelineTimer or { pause = function() end }
+		WORD_GAME_UI.BonusStackUI = bonus_stack
 
 		local play_effects = require("word_game.ui.play_effects")
 		local queued = 0
@@ -225,7 +225,7 @@ T.describe("Bonus cards", function()
 		bonus_stack.clear()
 		layout_globals()
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.BonusStackUI = bonus_stack
+		WORD_GAME_UI.BonusStackUI = bonus_stack
 		local felt = require("word_game.ui.layout.felt")
 		local before = felt.play_column()
 		local hand_col = felt.hand_play_column()
@@ -246,12 +246,12 @@ T.describe("Bonus cards", function()
 		bonus_stack.clear()
 		layout_globals()
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.TimelineTimer = WORD_GAME.TimelineTimer or { pause = function() end }
-		WORD_GAME.BonusStackUI = bonus_stack
+		WORD_GAME_UI.TimelineTimer = WORD_GAME_UI.TimelineTimer or { pause = function() end }
+		WORD_GAME_UI.BonusStackUI = bonus_stack
 		local felt = require("word_game.ui.layout.felt")
 		local play_effects = require("word_game.ui.play_effects")
 
-		WORD_GAME.Layout = {
+		WORD_GAME_UI.Layout = {
 			update_all = function()
 				G.hand.T.x = G.hand.T.x + 2
 				G.placement_table.area.T.x = G.placement_table.area.T.x + 2
@@ -275,7 +275,7 @@ T.describe("Bonus cards", function()
 		}
 		G.GAME.word_round = { set = 1, hand_index = 3, jumble = j }
 
-		WORD_GAME.Layout = {
+		WORD_GAME_UI.Layout = {
 			update_all = function()
 				G.hand.T.x = G.hand.T.x + 2
 				G.placement_table.area.T.x = G.placement_table.area.T.x + 2
@@ -672,7 +672,7 @@ T.describe("Bonus cards", function()
 		card.bonus_card = true
 		local spawned = {}
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.FloatUpText = {
+		WORD_GAME_UI.FloatUpText = {
 			from_card = function(target, text, opts)
 				spawned[#spawned + 1] = { card = target, text = text, opts = opts }
 			end,
@@ -682,7 +682,7 @@ T.describe("Bonus cards", function()
 		T.assert_equal(#spawned, 1)
 		T.assert_equal(spawned[1].card, card)
 		T.assert_equal(spawned[1].text, "+" .. tostring(bonus_stack.BONUS_POINTS))
-		WORD_GAME.FloatUpText = nil
+		WORD_GAME_UI.FloatUpText = nil
 	end)
 
 	T.it("awards a random perk when the last bonus gutter card is consumed", function()
@@ -692,7 +692,7 @@ T.describe("Bonus cards", function()
 		G.STATES = G.STATES or { TABLE_BOARD = 1 }
 		local played
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.PerkStamp = {
+		WORD_GAME_UI.PerkStamp = {
 			play = function(entry)
 				played = entry
 				return true
@@ -709,14 +709,14 @@ T.describe("Bonus cards", function()
 		T.assert_not_nil(played.id)
 		T.assert_not_nil(played.name)
 		T.assert_not_nil(played.desc)
-		WORD_GAME.PerkStamp = nil
+		WORD_GAME_UI.PerkStamp = nil
 	end)
 
 	T.it("does not award a perk when the bonus gutter is cleared without consumption", function()
 		bonus_stack.clear()
 		local played = false
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.PerkStamp = {
+		WORD_GAME_UI.PerkStamp = {
 			play = function()
 				played = true
 				return true
@@ -725,6 +725,6 @@ T.describe("Bonus cards", function()
 		bonus_stack.promote_to_bonus({ mock_card("N", 3, 3) })
 		bonus_stack.clear()
 		T.assert_false(played)
-		WORD_GAME.PerkStamp = nil
+		WORD_GAME_UI.PerkStamp = nil
 	end)
 end)

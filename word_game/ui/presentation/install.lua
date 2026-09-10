@@ -7,9 +7,12 @@ local RunMode = require("word_game.model.run.mode")
 
 local M = {}
 
-function M.install(word_game)
+function M.install(ui, domain)
 	Presentation.clear()
-	local Layout = word_game.Layout
+	ui = ui or rawget(_G, "WORD_GAME_UI") or {}
+	domain = domain or rawget(_G, "WORD_GAME") or {}
+	local Layout = ui.Layout
+	local Scheduler = require("app.effects.timeline_scheduler")
 	local backgrounds = require("word_game.ui.layout.backgrounds")
 
 	Presentation.on("layout_refresh", function()
@@ -26,32 +29,32 @@ function M.install(word_game)
 	end)
 
 	Presentation.on("sidebar_refresh", function()
-		if word_game.Sidebar then
-			word_game.Sidebar:refresh()
+		if ui.Sidebar then
+			ui.Sidebar:refresh()
 		end
 	end)
 
 	Presentation.on("sidebar_ensure", function()
-		if word_game.Sidebar then
-			word_game.Sidebar:ensure()
+		if ui.Sidebar then
+			ui.Sidebar:ensure()
 		end
 	end)
 
 	Presentation.on("sidebar_clear_hand", function()
-		if word_game.Sidebar and word_game.Sidebar.clear_hand then
-			word_game.Sidebar:clear_hand()
+		if ui.Sidebar and ui.Sidebar.clear_hand then
+			ui.Sidebar:clear_hand()
 		end
 	end)
 
 	Presentation.on("sidebar_sync_visibility", function()
-		if word_game.Sidebar and word_game.Sidebar.sync_visibility then
-			word_game.Sidebar.sync_visibility()
+		if ui.Sidebar and ui.Sidebar.sync_visibility then
+			ui.Sidebar.sync_visibility()
 		end
 	end)
 
 	Presentation.on("hand_shuffle_sync_position", function()
-		if word_game.HandShuffle and word_game.HandShuffle.sync_position then
-			word_game.HandShuffle.sync_position()
+		if ui.HandShuffle and ui.HandShuffle.sync_position then
+			ui.HandShuffle.sync_position()
 		end
 	end)
 
@@ -64,94 +67,94 @@ function M.install(word_game)
 	end)
 
 	Presentation.on("score_banner_reset", function(target)
-		if word_game.ScoreBanner and word_game.ScoreBanner.reset then
-			word_game.ScoreBanner.reset(target)
+		if ui.ScoreBanner and ui.ScoreBanner.reset then
+			ui.ScoreBanner.reset(target)
 		end
 	end)
 
 	Presentation.on("score_banner_snap", function()
-		if word_game.ScoreBanner and word_game.ScoreBanner.snap_to_actual then
-			word_game.ScoreBanner.snap_to_actual()
+		if ui.ScoreBanner and ui.ScoreBanner.snap_to_actual then
+			ui.ScoreBanner.snap_to_actual()
 		end
 	end)
 
 	Presentation.on("score_banner_reset_jumble", function()
-		if word_game.ScoreBanner and word_game.ScoreBanner.reset_jumble_score then
-			word_game.ScoreBanner.reset_jumble_score()
+		if ui.ScoreBanner and ui.ScoreBanner.reset_jumble_score then
+			ui.ScoreBanner.reset_jumble_score()
 		end
 	end)
 
 	Presentation.on("score_banner_set_mode", function(mode, label)
-		if word_game.ScoreBanner and word_game.ScoreBanner.set_banner_mode then
-			word_game.ScoreBanner.set_banner_mode(mode, label)
+		if ui.ScoreBanner and ui.ScoreBanner.set_banner_mode then
+			ui.ScoreBanner.set_banner_mode(mode, label)
 		end
 	end)
 
 	Presentation.on("score_banner_hide_points", function()
-		if word_game.ScoreBanner and word_game.ScoreBanner.hide_points_to_get_display then
-			word_game.ScoreBanner.hide_points_to_get_display()
+		if ui.ScoreBanner and ui.ScoreBanner.hide_points_to_get_display then
+			ui.ScoreBanner.hide_points_to_get_display()
 		end
 	end)
 
 	Presentation.on("score_banner_sync_preview", function(enabled)
-		if word_game.ScoreBanner and word_game.ScoreBanner.sync_points_to_get_preview then
-			word_game.ScoreBanner.sync_points_to_get_preview(enabled)
+		if ui.ScoreBanner and ui.ScoreBanner.sync_points_to_get_preview then
+			ui.ScoreBanner.sync_points_to_get_preview(enabled)
 		end
 	end)
 
 	Presentation.on("score_banner_jumble_hand_start", function()
-		if not word_game.ScoreBanner then return end
-		if not word_game.ScoreBanner.state then return end
-		local hud = word_game.ScoreBanner.state()
+		if not ui.ScoreBanner then return end
+		if not ui.ScoreBanner.state then return end
+		local hud = ui.ScoreBanner.state()
 		hud.to_go_label = "SCORE"
 		hud.target = 0
 		hud.remaining = 0
-		if word_game.ScoreBanner.reset_jumble_score then
-			word_game.ScoreBanner.reset_jumble_score()
+		if ui.ScoreBanner.reset_jumble_score then
+			ui.ScoreBanner.reset_jumble_score()
 		end
 	end)
 
 	Presentation.on("stage_label_sync", function()
-		if word_game.StageLabel and word_game.StageLabel.sync then
-			word_game.StageLabel.sync()
+		if ui.StageLabel and ui.StageLabel.sync then
+			ui.StageLabel.sync()
 		end
 	end)
 
 	Presentation.on("stage_label_force_sync", function()
-		if word_game.StageLabel and word_game.StageLabel.force_sync then
-			word_game.StageLabel.force_sync()
+		if ui.StageLabel and ui.StageLabel.force_sync then
+			ui.StageLabel.force_sync()
 		end
 	end)
 
 	Presentation.on("timeline_reset", function()
-		if not word_game.TimelineTimer then return end
+		if not ui.TimelineTimer then return end
 		local wr = G.GAME and G.GAME.word_round
 		if RunMode.is_classic() then
 			local target = (wr and wr.target) or round_config.hand_target(1, 1)
-			if word_game.TimelineTimer.reset_progress then
-				word_game.TimelineTimer.reset_progress(target)
+			if ui.TimelineTimer.reset_progress then
+				ui.TimelineTimer.reset_progress(target)
 			end
 			return
 		end
-		if word_game.TimelineTimer.reset then
-			word_game.TimelineTimer.reset(round_config.TIMELINE_SECONDS)
+		if ui.TimelineTimer.reset then
+			ui.TimelineTimer.reset(round_config.TIMELINE_SECONDS)
 		end
 	end)
 
 	Presentation.on("timeline_reset_puzzle_smoke", function()
-		if word_game.TimelineTimer and word_game.TimelineTimer.reset_puzzle_smoke then
-			word_game.TimelineTimer.reset_puzzle_smoke()
+		if ui.TimelineTimer and ui.TimelineTimer.reset_puzzle_smoke then
+			ui.TimelineTimer.reset_puzzle_smoke()
 		end
 	end)
 
 	Presentation.on("timeline_sync_progress", function()
-		if word_game.TimelineTimer and word_game.TimelineTimer.sync_progress then
-			word_game.TimelineTimer.sync_progress()
+		if ui.TimelineTimer and ui.TimelineTimer.sync_progress then
+			ui.TimelineTimer.sync_progress()
 		end
 	end)
 
 	Presentation.on("timeline_time_remaining", function()
-		local timer = word_game.TimelineTimer
+		local timer = ui.TimelineTimer
 		if timer and timer.time_remaining then
 			return timer.time_remaining
 		end
@@ -159,7 +162,7 @@ function M.install(word_game)
 
 	Presentation.on("timeline_add_time", function(seconds)
 		if not seconds or seconds == 0 then return false end
-		local timer = word_game.TimelineTimer
+		local timer = ui.TimelineTimer
 		if timer and timer.add_time then
 			timer.add_time(seconds)
 			return true
@@ -168,7 +171,7 @@ function M.install(word_game)
 	end)
 
 	Presentation.on("timeline_classic_sync_progress", function()
-		local timer = word_game.TimelineTimer
+		local timer = ui.TimelineTimer
 		if not timer or not timer.is_progress_mode or not timer.is_progress_mode() then
 			return false
 		end
@@ -179,26 +182,26 @@ function M.install(word_game)
 	end)
 
 	Presentation.on("timeline_classic_progress_target", function()
-		local timer = word_game.TimelineTimer
+		local timer = ui.TimelineTimer
 		if timer and timer.progress_target then
 			return timer.progress_target
 		end
 	end)
 
 	Presentation.on("bonus_stack_on_hand_start", function(set, hand_index)
-		if word_game.BonusStackUI and word_game.BonusStackUI.on_hand_start then
-			word_game.BonusStackUI.on_hand_start(set, hand_index)
+		if ui.BonusStackUI and ui.BonusStackUI.on_hand_start then
+			ui.BonusStackUI.on_hand_start(set, hand_index)
 		end
 	end)
 
 	Presentation.on("jumble_hud_refresh", function()
 		local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
-		if not j or not word_game.ScoreBanner then return end
-		local hud = word_game.ScoreBanner.state()
+		if not j or not ui.ScoreBanner then return end
+		local hud = ui.ScoreBanner.state()
 		hud.to_go_label = "SCORE"
 		hud.remaining = j.total_score or 0
-		if word_game.ScoreBanner.sync_points_to_get_preview then
-			word_game.ScoreBanner.sync_points_to_get_preview(false)
+		if ui.ScoreBanner.sync_points_to_get_preview then
+			ui.ScoreBanner.sync_points_to_get_preview(false)
 		end
 		Presentation.emit("timeline_sync_progress")
 	end)
@@ -218,8 +221,8 @@ function M.install(word_game)
 	end)
 
 	Presentation.on("boss_word_begin", function(wr, on_complete)
-		if word_game.PlayEffects and word_game.PlayEffects.present_boss_word then
-			word_game.PlayEffects.present_boss_word(wr, on_complete)
+		if ui.PlayEffects and ui.PlayEffects.present_boss_word then
+			ui.PlayEffects.present_boss_word(wr, on_complete)
 			return true
 		end
 		return false
@@ -241,7 +244,7 @@ function M.install(word_game)
 		if wr then
 			Presentation.emit("score_banner_reset", wr.target)
 		end
-		local jumble = word_game.Jumble
+		local jumble = domain.Jumble
 		if jumble and jumble.is_active_hand(set, hand_index) then
 			Presentation.emit("timeline_reset")
 		end
@@ -249,6 +252,82 @@ function M.install(word_game)
 		Presentation.emit("stage_label_sync")
 		Presentation.emit("sidebar_refresh")
 		Presentation.emit("stage_backgrounds", set, hand_index)
+	end)
+
+	Presentation.on("hand_shuffle_sync", function()
+		if ui.HandShuffle and ui.HandShuffle.sync then
+			ui.HandShuffle.sync()
+		end
+	end)
+
+	Presentation.on("voucher_discard_ui_reset", function()
+		if ui.VoucherDiscard and ui.VoucherDiscard.reset then
+			ui.VoucherDiscard.reset()
+		end
+	end)
+
+	Presentation.on("voucher_discard_recorded", function(from_left, to_left)
+		local vd = ui.VoucherDiscard
+		if not vd then return end
+		if vd.roll_discards_left then
+			vd.roll_discards_left(from_left, to_left)
+		end
+		if vd.sync_sidebar_ui then
+			vd.sync_sidebar_ui()
+		end
+	end)
+
+	Presentation.on("voucher_discard_ui_sync", function()
+		if ui.VoucherDiscard and ui.VoucherDiscard.sync_sidebar_ui then
+			ui.VoucherDiscard.sync_sidebar_ui()
+		end
+	end)
+
+	Presentation.on("table_deck_reset", function()
+		if ui.TableDeck and ui.TableDeck.reset then
+			ui.TableDeck.reset()
+		end
+	end)
+
+	Presentation.on("bonus_card_return", function(card)
+		if ui.BonusStackUI and ui.BonusStackUI.return_card then
+			return ui.BonusStackUI.return_card(card)
+		end
+		return false
+	end)
+
+	Presentation.on("match_ended", function(won)
+		local overlay_def
+		if ui.EndMatch and ui.EndMatch.overlay_definition then
+			overlay_def = ui.EndMatch.overlay_definition(won)
+		elseif type(build_game_over) == "function" then
+			overlay_def = build_game_over()
+		end
+		if overlay_def and G.FUNCS and G.FUNCS.show_overlay then
+			G.FUNCS.show_overlay{
+				definition = overlay_def,
+				config = { no_esc = true },
+			}
+		end
+	end)
+
+	Presentation.on("run_board_ready", function()
+		Scheduler.add{
+			mode = "delayed",
+			delay = 0.45,
+			blocking = false,
+			func = function()
+				if G.STATE == G.STATES.TABLE_BOARD and G.STAGE == G.STAGES.RUN then
+					if ui.PerkStamp and ui.PerkStamp.try_opening_demo then
+						ui.PerkStamp.try_opening_demo()
+					end
+				end
+				return true
+			end,
+		}
+		if ui.FirstPlayTutorial and ui.FirstPlayTutorial.try_schedule then
+			ui.FirstPlayTutorial.try_schedule()
+		end
 	end)
 end
 

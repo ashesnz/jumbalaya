@@ -14,7 +14,7 @@ T.describe("Classic run mode", function()
 			jumble = { total_score = 50 },
 		}
 		local token_reward = require("word_game.ui.table.token_reward")
-		WORD_GAME.TokenReward = token_reward
+		WORD_GAME_UI.TokenReward = token_reward
 		token_reward.reset()
 
 		T.assert_true(token_reward.is_eligible(), "Classic should award tokens after every hand")
@@ -28,7 +28,7 @@ T.describe("Classic run mode", function()
 		local tt = require("word_game.ui.perks.timeline_timer")
 		local jumble = require("word_game.model.jumble")
 		local rules = require("word_game.model.jumble_play.jumble_rules")
-		WORD_GAME.TimelineTimer = tt
+		WORD_GAME_UI.TimelineTimer = tt
 		WORD_GAME.Jumble = jumble
 
 		G.GAME.word_round = {
@@ -89,13 +89,13 @@ T.describe("Classic run mode", function()
 		}
 		token_reward.reset()
 		local focus_started = false
-		local prev_focus = WORD_GAME.HandClearFocus
-		WORD_GAME.HandClearFocus = {
+		local prev_focus = WORD_GAME_UI.HandClearFocus
+		WORD_GAME_UI.HandClearFocus = {
 			is_eligible = function() return true end,
 			begin = function() focus_started = true end,
 		}
 		effects.capture_token_timer_if_cleared(true)
-		WORD_GAME.HandClearFocus = prev_focus
+		WORD_GAME_UI.HandClearFocus = prev_focus
 		T.assert_false(focus_started, "Classic should not spotlight-clear when the target is met")
 	end)
 
@@ -123,8 +123,8 @@ T.describe("Classic run mode", function()
 		}
 		local tt = require("word_game.ui.perks.timeline_timer")
 		local stage_btn = require("word_game.ui.sidebar.stage_button")
-		WORD_GAME.TimelineTimer = tt
-		WORD_GAME.SidebarStageButton = stage_btn
+		WORD_GAME_UI.TimelineTimer = tt
+		WORD_GAME_UI.SidebarStageButton = stage_btn
 		tt.reset_progress(25)
 		tt.sync_progress()
 		T.assert_true(stage_btn.is_next_mode())
@@ -143,7 +143,7 @@ T.describe("Classic run mode", function()
 		local RunMode = require("word_game.model.run.mode")
 		local rules = require("word_game.model.jumble_play.jumble_rules")
 		local tt = require("word_game.ui.perks.timeline_timer")
-		WORD_GAME.TimelineTimer = tt
+		WORD_GAME_UI.TimelineTimer = tt
 		tt.reset_progress(25)
 		tt.sync_progress()
 
@@ -239,7 +239,7 @@ T.describe("Classic run mode", function()
 			captured = config
 			return config
 		end
-		WORD_GAME.FloatUpText = float_up_text
+		WORD_GAME_UI.FloatUpText = float_up_text
 
 		play_effects.show_post_target_multiplier_fx({ post_target_doubled = true })
 		float_up_text.spawn = original_spawn
@@ -287,8 +287,8 @@ T.describe("Classic run mode", function()
 		local placement_controls = require("word_game.ui.table.controls.placement")
 		local HandShuffle = require("word_game.ui.table.controls")
 		local tt = require("word_game.ui.perks.timeline_timer")
-		WORD_GAME.TimelineTimer = tt
-		WORD_GAME.HandShuffle = HandShuffle
+		WORD_GAME_UI.TimelineTimer = tt
+		WORD_GAME_UI.HandShuffle = HandShuffle
 		WORD_GAME.Jumble = {
 			is_active = function() return true end,
 			state = function() return G.GAME.word_round.jumble end,
@@ -350,8 +350,8 @@ T.describe("Classic run mode", function()
 		}
 		local tt = require("word_game.ui.perks.timeline_timer")
 		local token_reward = require("word_game.ui.table.token_reward")
-		WORD_GAME.TimelineTimer = tt
-		WORD_GAME.TokenReward = token_reward
+		WORD_GAME_UI.TimelineTimer = tt
+		WORD_GAME_UI.TokenReward = token_reward
 		tt.reset_progress(25)
 		token_reward.reset()
 		token_reward.capture_reward()

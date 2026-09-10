@@ -32,9 +32,9 @@ T.describe("Token reward fly animation", function()
 		}
 
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.Layout = Layout
-		WORD_GAME.TimelineTimer = timeline
-		WORD_GAME.TableDeck = {
+		WORD_GAME_UI.Layout = Layout
+		WORD_GAME_UI.TimelineTimer = timeline
+		WORD_GAME_UI.TableDeck = {
 			token_center_px = function() return 400, 300 end,
 			bump_token_display = function() end,
 		}

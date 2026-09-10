@@ -61,7 +61,7 @@ T.describe("Timeline Timer & Shape Math", function()
 
 	T.it("resets back to 60s when a new hand is started", function()
 		mock_env.reset_game()
-		WORD_GAME.Sidebar = {
+		WORD_GAME_UI.Sidebar = {
 			refresh = function() end,
 			clear_hand = function() end,
 			sync_visibility = function() end,
@@ -70,7 +70,7 @@ T.describe("Timeline Timer & Shape Math", function()
 		local round = require("word_game.model.round")
 		mock_env.install_presentation({
 			TimelineTimer = tt,
-			Sidebar = WORD_GAME.Sidebar,
+			Sidebar = WORD_GAME_UI.Sidebar,
 			ScoreBanner = {
 				reset = function() end,
 				state = function() return { to_go_label = "SCORE", target = 0, remaining = 0 } end,
@@ -87,7 +87,7 @@ T.describe("Timeline Timer & Shape Math", function()
 		-- Start new hand
 		round.start_hand(1, 1)
 		T.assert_equal(tt.time_remaining, 60.0, "Timeline timer must reset to 60s on new hand")
-		WORD_GAME.Sidebar = nil
+		WORD_GAME_UI.Sidebar = nil
 	end)
 
 	T.it("positions timeline rect above the score banner and matches card area width", function()
@@ -324,7 +324,7 @@ T.describe("Timeline Timer & Shape Math", function()
 	T.it("resets to a score slider on new classic hands", function()
 		mock_env.reset_game()
 		G.GAME.run_mode = "classic"
-		WORD_GAME.Sidebar = {
+		WORD_GAME_UI.Sidebar = {
 			refresh = function() end,
 			clear_hand = function() end,
 			sync_visibility = function() end,
@@ -333,7 +333,7 @@ T.describe("Timeline Timer & Shape Math", function()
 		local round = require("word_game.model.round")
 		mock_env.install_presentation({
 			TimelineTimer = tt,
-			Sidebar = WORD_GAME.Sidebar,
+			Sidebar = WORD_GAME_UI.Sidebar,
 			ScoreBanner = {
 				reset = function() end,
 				state = function() return { to_go_label = "SCORE", target = 0, remaining = 0 } end,
@@ -348,7 +348,7 @@ T.describe("Timeline Timer & Shape Math", function()
 		T.assert_true(tt.is_progress_mode())
 		T.assert_equal(tt.progress_target, 25)
 		T.assert_equal(tt.progress_score, 0)
-		WORD_GAME.Sidebar = nil
+		WORD_GAME_UI.Sidebar = nil
 	end)
 
 	T.it("pauses countdown until resumed or reset", function()
@@ -368,7 +368,7 @@ T.describe("Timeline Timer & Shape Math", function()
 
 	T.it("syncs stage label when a new hand is started", function()
 		mock_env.reset_game()
-		WORD_GAME.Sidebar = {
+		WORD_GAME_UI.Sidebar = {
 			refresh = function() end,
 			clear_hand = function() end,
 			sync_visibility = function() end,
@@ -376,7 +376,7 @@ T.describe("Timeline Timer & Shape Math", function()
 		local stage_label = require("word_game.ui.score_banner.stage_label")
 		local round = require("word_game.model.round")
 		mock_env.install_presentation({
-			Sidebar = WORD_GAME.Sidebar,
+			Sidebar = WORD_GAME_UI.Sidebar,
 			ScoreBanner = {
 				reset = function() end,
 				state = function() return { to_go_label = "SCORE", target = 0, remaining = 0 } end,
@@ -391,7 +391,7 @@ T.describe("Timeline Timer & Shape Math", function()
 		round.start_hand(1, 3)
 		T.assert_equal(stage_label.left_count, 1)
 		T.assert_equal(stage_label.right_count, 3)
-		WORD_GAME.Sidebar = nil
+		WORD_GAME_UI.Sidebar = nil
 	end)
 
 	T.it("rolls stage label digits when advancing to the next hand", function()

@@ -25,7 +25,7 @@ T.describe("Debug stage jump (devtools.sections.stage)", function()
 				destroyed = destroyed + 1
 			end,
 		}
-		WORD_GAME.BonusStackUI = {
+		WORD_GAME_UI.BonusStackUI = {
 			cards = function() return bonus_cards end,
 			clear = function() bonus_cards = {} end,
 			promote_to_bonus = function(cards)

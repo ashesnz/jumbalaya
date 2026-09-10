@@ -104,8 +104,8 @@ function Game:update(dt)
 end
 
 function Game:draw_spotlight_overlay(overlay)
-	if WORD_GAME and WORD_GAME.TableBoard then
-		WORD_GAME.TableBoard.draw_spotlight_overlay(self, overlay)
+	if WORD_GAME and WORD_GAME_UI.TableBoard then
+		WORD_GAME_UI.TableBoard.draw_spotlight_overlay(self, overlay)
 	end
 end
 
@@ -145,14 +145,14 @@ function Game:render_board_pass()
 	end
 	perf_checkpoint('panels', 'draw')
 
-	if self.placement_table and WORD_GAME and WORD_GAME.TableBoard then
-		WORD_GAME.TableBoard.draw_hud()
-		WORD_GAME.TableBoard.draw_board(self)
+	if self.placement_table and WORD_GAME and WORD_GAME_UI.TableBoard then
+		WORD_GAME_UI.TableBoard.draw_hud()
+		WORD_GAME_UI.TableBoard.draw_board(self)
 	end
 
-	if WORD_GAME and WORD_GAME.TableBoard then
-		WORD_GAME.TableBoard.draw_reward_passes()
-		WORD_GAME.TableBoard.draw_attention_passes(self)
+	if WORD_GAME and WORD_GAME_UI.TableBoard then
+		WORD_GAME_UI.TableBoard.draw_reward_passes()
+		WORD_GAME_UI.TableBoard.draw_attention_passes(self)
 	end
 
 	if G.SPLASH_FRONT then draw_with_container(G.SPLASH_FRONT) end
@@ -170,14 +170,14 @@ function Game:render_menu_pass()
 	local show_background = (not self.OVERLAY_MENU) or (not self.F_HIDE_BG)
 
 	if self.OVERLAY_MENU and self.OVERLAY_MENU ~= self.INPUT.dragging.target then
-		if WORD_GAME and WORD_GAME.TradeUI and WORD_GAME.TradeUI.backdrop_pass then
-			WORD_GAME.TradeUI.backdrop_pass()
+		if WORD_GAME and WORD_GAME_UI.TradeUI and WORD_GAME_UI.TradeUI.backdrop_pass then
+			WORD_GAME_UI.TradeUI.backdrop_pass()
 		end
 		draw_with_container(self.OVERLAY_MENU)
 	end
 	if (show_background or self.OVERLAY_MENU)
-		and WORD_GAME and WORD_GAME.TradeUI and WORD_GAME.TradeUI.draw_pass then
-		WORD_GAME.TradeUI.draw_pass()
+		and WORD_GAME and WORD_GAME_UI.TradeUI and WORD_GAME_UI.TradeUI.draw_pass then
+		WORD_GAME_UI.TradeUI.draw_pass()
 	end
 
 	if self.debug_tools and self.debug_tools ~= self.INPUT.dragging.target then
@@ -194,8 +194,8 @@ function Game:render_chrome_pass()
 		G.ALERT_ON_SCREEN = true
 	end
 
-	if self.placement_table and WORD_GAME and WORD_GAME.TableBoard then
-		WORD_GAME.TableBoard.draw_card_interaction(self)
+	if self.placement_table and WORD_GAME and WORD_GAME_UI.TableBoard then
+		WORD_GAME_UI.TableBoard.draw_card_interaction(self)
 	end
 
 	for _, popup in pairs(self.LIVE.POPUP) do draw_with_container(popup) end
@@ -210,8 +210,8 @@ function Game:render_chrome_pass()
 	self.POINTER:draw()
 	love.graphics.pop()
 
-	if WORD_GAME and WORD_GAME.PlayHoldRedraw then
-		WORD_GAME.PlayHoldRedraw.draw()
+	if WORD_GAME and WORD_GAME_UI.PlayHoldRedraw then
+		WORD_GAME_UI.PlayHoldRedraw.draw()
 	end
 
 	if self.FIRST_PLAY_TUTORIAL_OVERLAY then

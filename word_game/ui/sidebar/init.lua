@@ -15,8 +15,8 @@ end
 local WordSidebar = {}
 
 WordSidebar.roll_to_next_hand = function()
-	if WORD_GAME and WORD_GAME.StageLabel and WORD_GAME.StageLabel.roll_to_next_hand then
-		WORD_GAME.StageLabel.roll_to_next_hand()
+	if WORD_GAME and WORD_GAME_UI.StageLabel and WORD_GAME_UI.StageLabel.roll_to_next_hand then
+		WORD_GAME_UI.StageLabel.roll_to_next_hand()
 	elseif StageLabel.roll_to_next_hand then
 		StageLabel.roll_to_next_hand()
 	end
@@ -24,8 +24,8 @@ end
 WordSidebar.hud_definition = hud_definition.hud_definition
 WordSidebar.relayout = hud_definition.relayout
 local function sync_hand_controls()
-	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.sync()
+	if WORD_GAME and WORD_GAME_UI.HandShuffle then
+		WORD_GAME_UI.HandShuffle.sync()
 	end
 end
 

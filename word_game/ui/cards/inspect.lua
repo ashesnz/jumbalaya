@@ -144,16 +144,16 @@ function M.update(dt)
 		end
 		peek = math.min(1, peek + dt / M.ZOOM_TIME)
 		apply_visual(want, peek)
-		return
-	end
-
-	if peek_card and peek > 0 then
+	elseif peek_card and peek > 0 then
 		peek = math.max(0, peek - dt / (M.ZOOM_TIME * 0.85))
 		apply_visual(peek_card, peek)
 		if peek <= 0 then
 			restore_scale(peek_card)
 			peek_card = nil
 		end
+	end
+	if G.GAME then
+		G.GAME.inspecting_card = (peek_card and peek > 0.01) and peek_card or nil
 	end
 end
 

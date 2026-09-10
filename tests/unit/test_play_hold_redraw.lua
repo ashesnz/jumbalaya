@@ -18,11 +18,11 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 		G.STATE = G.STATES.TABLE_BOARD
 		G.GAME = { word_score_animating = false, hand_redraw_animating = false }
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.HandShuffle = WORD_GAME.HandShuffle or {}
-		WORD_GAME.HandShuffle.play_button_uie = function()
+		WORD_GAME_UI.HandShuffle = WORD_GAME_UI.HandShuffle or {}
+		WORD_GAME_UI.HandShuffle.play_button_uie = function()
 			return { states = { visible = true }, config = { button = "play_word" } }
 		end
-		WORD_GAME.TradeUI = { is_open = function() return false end }
+		WORD_GAME_UI.TradeUI = { is_open = function() return false end }
 		T.assert_false(PlayHoldRedraw.can_hold(), "can_hold should stay false while disabled")
 	end)
 
@@ -52,15 +52,15 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 		}
 
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.HandShuffle = WORD_GAME.HandShuffle or {}
-		WORD_GAME.HandShuffle.play_button_uie = function() return mock_btn end
-		WORD_GAME.TradeUI = { is_open = function() return false end }
+		WORD_GAME_UI.HandShuffle = WORD_GAME_UI.HandShuffle or {}
+		WORD_GAME_UI.HandShuffle.play_button_uie = function() return mock_btn end
+		WORD_GAME_UI.TradeUI = { is_open = function() return false end }
 
 		T.assert_true(PlayHoldRedraw.can_hold(), "Should allow hold when table board is active")
 
-		WORD_GAME.TradeUI = { is_open = function() return true end }
+		WORD_GAME_UI.TradeUI = { is_open = function() return true end }
 		T.assert_false(PlayHoldRedraw.can_hold(), "Should not allow hold while the card marketplace is open")
-		WORD_GAME.TradeUI = { is_open = function() return false end }
+		WORD_GAME_UI.TradeUI = { is_open = function() return false end }
 
 		G.GAME.hand_redraw_animating = true
 		T.assert_equal(PlayHoldRedraw.can_hold(), false, "Should not allow hold during redraw animation")
@@ -88,7 +88,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 
 		local dealt_count = 0
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.HandShuffle = {
+		WORD_GAME_UI.HandShuffle = {
 			play_button_uie = function() return mock_btn end,
 			sync = function() end,
 		}
@@ -98,7 +98,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 				if on_complete then on_complete() end
 			end,
 		}
-		WORD_GAME.TradeUI = { is_open = function() return false end }
+		WORD_GAME_UI.TradeUI = { is_open = function() return false end }
 
 		local queued_events = {}
 		G.TIMELINE = { enqueue = function(_, ev) queued_events[#queued_events + 1] = ev end }
@@ -167,10 +167,10 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 		}
 
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.HandShuffle = WORD_GAME.HandShuffle or {}
-		WORD_GAME.HandShuffle.play_button_uie = function() return mock_btn end
-		WORD_GAME.HandShuffle.sync = function() return true end
-		WORD_GAME.HandShuffle.sync = function() end
+		WORD_GAME_UI.HandShuffle = WORD_GAME_UI.HandShuffle or {}
+		WORD_GAME_UI.HandShuffle.play_button_uie = function() return mock_btn end
+		WORD_GAME_UI.HandShuffle.sync = function() return true end
+		WORD_GAME_UI.HandShuffle.sync = function() end
 		WORD_GAME.Deck = WORD_GAME.Deck or {}
 		WORD_GAME.Deck.deal_into_hand = function(target_size, on_complete)
 			dealt_count = target_size
@@ -266,8 +266,8 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 		}
 
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.HandShuffle = WORD_GAME.HandShuffle or {}
-		WORD_GAME.HandShuffle.play_button_uie = function() return mock_btn end
+		WORD_GAME_UI.HandShuffle = WORD_GAME_UI.HandShuffle or {}
+		WORD_GAME_UI.HandShuffle.play_button_uie = function() return mock_btn end
 
 		G.INPUT = {
 			pointer_held = true,
@@ -325,8 +325,8 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 		}
 
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.HandShuffle = WORD_GAME.HandShuffle or {}
-		WORD_GAME.HandShuffle.play_button_uie = function() return mock_btn end
+		WORD_GAME_UI.HandShuffle = WORD_GAME_UI.HandShuffle or {}
+		WORD_GAME_UI.HandShuffle.play_button_uie = function() return mock_btn end
 
 		G.INPUT = {
 			pointer_held = true,
@@ -445,13 +445,13 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 		}
 
 		WORD_GAME = WORD_GAME or {}
-		WORD_GAME.HandShuffle = WORD_GAME.HandShuffle or {}
-		WORD_GAME.HandShuffle.play_button_uie = function() return mock_btn end
-		WORD_GAME.HandShuffle.sync = function() return true end
-		WORD_GAME.HandShuffle.sync = function() end
+		WORD_GAME_UI.HandShuffle = WORD_GAME_UI.HandShuffle or {}
+		WORD_GAME_UI.HandShuffle.play_button_uie = function() return mock_btn end
+		WORD_GAME_UI.HandShuffle.sync = function() return true end
+		WORD_GAME_UI.HandShuffle.sync = function() end
 
 		local refreshed = false
-		WORD_GAME.TableInput = {
+		WORD_GAME_UI.TableInput = {
 			refresh_card_input = function()
 				refreshed = true
 				if G.hand then G.hand:set_ranks() end

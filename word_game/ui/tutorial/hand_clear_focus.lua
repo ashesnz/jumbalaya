@@ -12,7 +12,7 @@ local active = false
 local overlay_colour = { 0.06, 0.08, 0.12, 0 }
 
 function M.is_eligible()
-	local token = WORD_GAME and WORD_GAME.TokenReward
+	local token = WORD_GAME and WORD_GAME_UI.TokenReward
 	return token and token.is_eligible and token.is_eligible()
 end
 
@@ -25,8 +25,8 @@ local function refresh_input()
 	if G.placement_table and G.placement_table.area and G.placement_table.area.set_ranks then
 		G.placement_table.area:set_ranks()
 	end
-	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.sync()
+	if WORD_GAME and WORD_GAME_UI.HandShuffle then
+		WORD_GAME_UI.HandShuffle.sync()
 	end
 end
 

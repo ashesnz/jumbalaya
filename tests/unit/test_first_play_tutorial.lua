@@ -39,8 +39,8 @@ T.describe("First play tutorial", function()
 
 	local FirstPlayTutorial = require("word_game.ui.tutorial.first_play")
 	_G.WORD_GAME = _G.WORD_GAME or {}
-	WORD_GAME.FirstPlayTutorial = FirstPlayTutorial
-	WORD_GAME.PerkStamp = { try_opening_demo = function() end }
+	WORD_GAME_UI.FirstPlayTutorial = FirstPlayTutorial
+	WORD_GAME_UI.PerkStamp = { try_opening_demo = function() end }
 
 	local function reset_env()
 		layout_instances = {}
@@ -129,7 +129,7 @@ T.describe("First play tutorial", function()
 	T.it("advance moves to play button spotlight step", function()
 		reset_env()
 		G.hand_action_bar = { REMOVED = false, T = { x = 12, y = 8, w = 1, h = 1 } }
-		WORD_GAME.HandShuffle = {
+		WORD_GAME_UI.HandShuffle = {
 			sync = function() end,
 			play_button_uie = function()
 				return { T = { x = 12, y = 8, w = 1, h = 1 } }
@@ -146,7 +146,7 @@ T.describe("First play tutorial", function()
 	T.it("advance moves to timeline goal spotlight step", function()
 		reset_env()
 		G.hand_action_bar = { REMOVED = false, T = { x = 12, y = 8, w = 1, h = 1 } }
-		WORD_GAME.HandShuffle = {
+		WORD_GAME_UI.HandShuffle = {
 			sync = function() end,
 			play_button_uie = function()
 				return { T = { x = 12, y = 8, w = 1, h = 1 } }

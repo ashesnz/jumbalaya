@@ -19,7 +19,7 @@ local function debug_bonus_letters()
 end
 
 local function destroy_bonus_stack_cards()
-	local bonus_stack = WORD_GAME and WORD_GAME.BonusStackUI
+	local bonus_stack = WORD_GAME and WORD_GAME_UI.BonusStackUI
 	local deck = WORD_GAME and WORD_GAME.Deck
 	if not bonus_stack or not deck or not deck.destroy_card then return end
 	for _, card in ipairs(bonus_stack.cards() or {}) do
@@ -30,7 +30,7 @@ end
 
 local function seed_bonus_gutter()
 	if not (WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.create_letter_card) then return end
-	if not (WORD_GAME and WORD_GAME.BonusStackUI and WORD_GAME.BonusStackUI.promote_to_bonus) then
+	if not (WORD_GAME and WORD_GAME_UI.BonusStackUI and WORD_GAME_UI.BonusStackUI.promote_to_bonus) then
 		return
 	end
 
@@ -40,7 +40,7 @@ local function seed_bonus_gutter()
 	for _, letter in ipairs(debug_bonus_letters()) do
 		cards[#cards + 1] = WORD_GAME.Deck.create_letter_card(letter, "red")
 	end
-	WORD_GAME.BonusStackUI.promote_to_bonus(cards)
+	WORD_GAME_UI.BonusStackUI.promote_to_bonus(cards)
 end
 
 local function jump_to_hand(ctx, set, hand_index)
@@ -57,21 +57,21 @@ local function jump_to_hand(ctx, set, hand_index)
 	if G.FUNCS.close_overlay then
 		G.FUNCS.close_overlay()
 	end
-	if WORD_GAME.PlayHoldRedraw and WORD_GAME.PlayHoldRedraw.reset then
-		WORD_GAME.PlayHoldRedraw.reset()
+	if WORD_GAME_UI.PlayHoldRedraw and WORD_GAME_UI.PlayHoldRedraw.reset then
+		WORD_GAME_UI.PlayHoldRedraw.reset()
 	end
-	if WORD_GAME.HandClearFocus and WORD_GAME.HandClearFocus.reset then
-		WORD_GAME.HandClearFocus.reset()
+	if WORD_GAME_UI.HandClearFocus and WORD_GAME_UI.HandClearFocus.reset then
+		WORD_GAME_UI.HandClearFocus.reset()
 	end
-	if WORD_GAME.TokenReward and WORD_GAME.TokenReward.reset then
-		WORD_GAME.TokenReward.reset()
+	if WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.reset then
+		WORD_GAME_UI.TokenReward.reset()
 	end
 	local wr = G.GAME and G.GAME.word_round
 	if wr and wr.jumble and WORD_GAME.Deck and WORD_GAME.Deck.destroy_boss_cards then
 		WORD_GAME.Deck.destroy_boss_cards()
 	end
-	if WORD_GAME.ScoreBanner and WORD_GAME.ScoreBanner.set_banner_mode then
-		WORD_GAME.ScoreBanner.set_banner_mode("normal")
+	if WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.set_banner_mode then
+		WORD_GAME_UI.ScoreBanner.set_banner_mode("normal")
 	end
 
 	WORD_GAME.Round.start_hand(set, hand_index)
@@ -79,12 +79,12 @@ local function jump_to_hand(ctx, set, hand_index)
 		WORD_GAME.Deck.reset_table_deck()
 	end
 	opening_deal.deal()
-	if WORD_GAME.Layout then
-		if WORD_GAME.Layout.refresh_placement_layout then
-			WORD_GAME.Layout.refresh_placement_layout()
+	if WORD_GAME_UI.Layout then
+		if WORD_GAME_UI.Layout.refresh_placement_layout then
+			WORD_GAME_UI.Layout.refresh_placement_layout()
 		end
-		if WORD_GAME.Layout.request_refresh then
-			WORD_GAME.Layout.request_refresh()
+		if WORD_GAME_UI.Layout.request_refresh then
+			WORD_GAME_UI.Layout.request_refresh()
 		end
 	end
 	if G.placement_table and G.placement_table.apply_screen_position then
@@ -93,17 +93,17 @@ local function jump_to_hand(ctx, set, hand_index)
 	if set == 1 and hand_index == round_config.BONUS_STACK_HAND_FIRST then
 		seed_bonus_gutter()
 	end
-	if WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.sync()
+	if WORD_GAME_UI.HandShuffle then
+		WORD_GAME_UI.HandShuffle.sync()
 	end
-	if WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync_position then
-		WORD_GAME.HandShuffle.sync_position()
+	if WORD_GAME_UI.HandShuffle and WORD_GAME_UI.HandShuffle.sync_position then
+		WORD_GAME_UI.HandShuffle.sync_position()
 	end
-	if WORD_GAME.Sidebar then
-		WORD_GAME.Sidebar:refresh()
+	if WORD_GAME_UI.Sidebar then
+		WORD_GAME_UI.Sidebar:refresh()
 	end
-	if WORD_GAME.TableInput and WORD_GAME.TableInput.refresh_card_input then
-		WORD_GAME.TableInput.refresh_card_input()
+	if WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
+		WORD_GAME_UI.TableInput.refresh_card_input()
 	end
 	play_sfx("generic1", 0.9, 0.7)
 end

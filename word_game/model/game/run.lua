@@ -36,9 +36,7 @@ function Game:start_gameplay_board()
     local opening_deal = require "word_game.model.jumble_play.opening_deal"
     opening_deal.deal()
 
-    if G.FUNCS.ensure_table_board_sidebar then
-        G.FUNCS.ensure_table_board_sidebar()
-    end
+    Presentation.emit("sidebar_ensure")
     if WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.sync_deck_count_display then
         WORD_GAME.Deck.sync_deck_count_display()
     end
@@ -57,22 +55,7 @@ function Game:start_gameplay_board()
                 return true
             end,
         }
-        if WORD_GAME and WORD_GAME.PerkStamp and WORD_GAME.PerkStamp.try_opening_demo then
-            Scheduler.add{
-                mode = "delayed",
-                delay = 0.45,
-                blocking = false,
-                func = function()
-                    if G.STATE == G.STATES.TABLE_BOARD and G.STAGE == G.STAGES.RUN then
-                        WORD_GAME.PerkStamp.try_opening_demo()
-                    end
-                    return true
-                end,
-            }
-        end
-        if WORD_GAME and WORD_GAME.FirstPlayTutorial and WORD_GAME.FirstPlayTutorial.try_schedule then
-            WORD_GAME.FirstPlayTutorial.try_schedule()
-        end
+        Presentation.emit("run_board_ready")
     end
 end
 
@@ -283,9 +266,7 @@ function Game:start_run(args)
         G.STATE = saveTable.STATE or G.STATES.TABLE_BOARD
         G.STATE_COMPLETE = true
         LayoutRequest.refresh()
-        if G.FUNCS.ensure_table_board_sidebar then
-            G.FUNCS.ensure_table_board_sidebar()
-        end
+        Presentation.emit("sidebar_ensure")
         if WORD_GAME and WORD_GAME.Round then
             WORD_GAME.Round.restore_from_save()
         end

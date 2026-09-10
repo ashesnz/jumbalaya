@@ -47,7 +47,7 @@ word_game/ui/      Presentation — may import model/config
 | `ui/sidebar/` | Right-hand HUD |
 | `ui/layout/`, `ui/score_banner/`, `ui/perks/`, etc. | As named |
 
-Cross-package: `WORD_GAME` facade in `word_game/init.lua`. Tests and `app/` should use the facade, not deep `word_game.model.*` requires unless testing internals.
+Cross-package: `WORD_GAME` (domain, `word_game/init.lua`) and `WORD_GAME_UI` (presentation, `word_game/ui/facade/exports.lua`). Tests and `app/` should use those facades, not deep `word_game.model.*` requires unless testing internals. Model code emits via `word_game.model.presentation`; it must not call `WORD_GAME_UI` or `G.FUNCS`.
 
 ## Sidebar (right-hand HUD)
 
@@ -56,11 +56,11 @@ All right-column HUD code lives in `word_game/ui/sidebar/`. Use **sidebar** nami
 | Concept | Location / symbol |
 |---------|-------------------|
 | Package | `word_game/ui/sidebar/` |
-| Facade | `WORD_GAME.Sidebar` (instance from `word_game/ui/sidebar/init.lua`) |
+| Facade | `WORD_GAME_UI.Sidebar` (instance from `word_game/ui/sidebar/init.lua`) |
 | HUD global | `G.SIDEBAR_HUD` |
 | Attach node | `G.SIDEBAR_ATTACH` |
-| Column geometry | `WORD_GAME.Layout.sidebar_rect`, `sidebar_height`, `update_sidebar_attach` (implemented in `sidebar/layout.lua`, re-exported via `layout/init.lua`) |
-| End Run button | `WORD_GAME.SidebarStageButton` in `sidebar/stage_button.lua` |
+| Column geometry | `WORD_GAME_UI.Layout.sidebar_rect`, `sidebar_height`, `update_sidebar_attach` (implemented in `sidebar/layout.lua`, re-exported via `layout/init.lua`) |
+| End Run button | `WORD_GAME_UI.SidebarStageButton` in `sidebar/stage_button.lua` |
 | G.FUNCS | `end_run_from_sidebar`, `ensure_table_board_sidebar` in `sidebar/funcs.lua` |
 
 Do **not** use vault naming (`G.VAULT_HUD`, `VaultStageButton`, `layout/vault.lua`, etc.).

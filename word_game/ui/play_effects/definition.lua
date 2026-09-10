@@ -25,13 +25,13 @@ function M.capture_token_timer_if_cleared(cleared, opts)
 	opts = opts or {}
 	if not cleared or not RunMode.ends_hand_on_target() then return end
 	if not opts.skip_focus
-		and WORD_GAME and WORD_GAME.HandClearFocus and WORD_GAME.HandClearFocus.begin then
-		WORD_GAME.HandClearFocus.begin()
+		and WORD_GAME and WORD_GAME_UI.HandClearFocus and WORD_GAME_UI.HandClearFocus.begin then
+		WORD_GAME_UI.HandClearFocus.begin()
 	end
-	if WORD_GAME and WORD_GAME.TokenReward and WORD_GAME.TokenReward.capture_reward then
-		WORD_GAME.TokenReward.capture_reward()
-	elseif WORD_GAME and WORD_GAME.TokenReward and WORD_GAME.TokenReward.capture_timer then
-		WORD_GAME.TokenReward.capture_timer()
+	if WORD_GAME and WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.capture_reward then
+		WORD_GAME_UI.TokenReward.capture_reward()
+	elseif WORD_GAME and WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.capture_timer then
+		WORD_GAME_UI.TokenReward.capture_timer()
 	end
 end
 
@@ -45,11 +45,11 @@ end
 
 function M.show_post_target_multiplier_fx(result)
 	if not result or not result.post_target_doubled then return end
-	local tt = WORD_GAME and WORD_GAME.TimelineTimer
+	local tt = WORD_GAME and WORD_GAME_UI.TimelineTimer
 	if tt and tt.pulse_post_target then
 		tt.pulse_post_target()
 	end
-	local FloatUp = WORD_GAME and WORD_GAME.FloatUpText
+	local FloatUp = WORD_GAME and WORD_GAME_UI.FloatUpText
 	if FloatUp and FloatUp.from_timeline then
 		-- Same gold float-up-and-fade as "Hand Cleared", anchored to the slider tip.
 		FloatUp.from_timeline("×2", {
@@ -62,9 +62,9 @@ function M.show_post_target_multiplier_fx(result)
 end
 
 function M.roll_jumble_banners(result)
-	if not (WORD_GAME and WORD_GAME.ScoreBanner) then return end
+	if not (WORD_GAME and WORD_GAME_UI.ScoreBanner) then return end
 	local function bump_timeline_progress()
-		local tt = WORD_GAME and WORD_GAME.TimelineTimer
+		local tt = WORD_GAME and WORD_GAME_UI.TimelineTimer
 		if not tt or not tt.on_word_played or not result then return end
 		if result.kind == "word_play" then
 			tt.on_word_played(result.old_score, result.new_score)
@@ -73,11 +73,11 @@ function M.roll_jumble_banners(result)
 		end
 	end
 	if M.triggers_boss_word(result) then
-		if WORD_GAME.ScoreBanner.hide_points_to_get_display then
-			WORD_GAME.ScoreBanner.hide_points_to_get_display()
+		if WORD_GAME_UI.ScoreBanner.hide_points_to_get_display then
+			WORD_GAME_UI.ScoreBanner.hide_points_to_get_display()
 		end
-		if result.kind == "word_play" and WORD_GAME.ScoreBanner.roll_jumble_score then
-			WORD_GAME.ScoreBanner.roll_jumble_score(
+		if result.kind == "word_play" and WORD_GAME_UI.ScoreBanner.roll_jumble_score then
+			WORD_GAME_UI.ScoreBanner.roll_jumble_score(
 				result.old_pts, result.new_pts, result.old_multi, result.new_multi
 			)
 		end
@@ -85,8 +85,8 @@ function M.roll_jumble_banners(result)
 		return
 	end
 	if result.kind == "word_play" then
-		if WORD_GAME.ScoreBanner.roll_jumble_score then
-			WORD_GAME.ScoreBanner.roll_jumble_score(
+		if WORD_GAME_UI.ScoreBanner.roll_jumble_score then
+			WORD_GAME_UI.ScoreBanner.roll_jumble_score(
 				result.old_pts, result.new_pts, result.old_multi, result.new_multi
 			)
 		end
@@ -97,11 +97,11 @@ function M.roll_jumble_banners(result)
 		bump_timeline_progress()
 	end
 	if result.cleared and RunMode.ends_hand_on_target() then
-		if WORD_GAME.ScoreBanner.hide_points_to_get_display then
-			WORD_GAME.ScoreBanner.hide_points_to_get_display()
+		if WORD_GAME_UI.ScoreBanner.hide_points_to_get_display then
+			WORD_GAME_UI.ScoreBanner.hide_points_to_get_display()
 		end
-	elseif WORD_GAME.ScoreBanner.sync_points_to_get_preview then
-		WORD_GAME.ScoreBanner.sync_points_to_get_preview(true, { remain_dur = 0.4 })
+	elseif WORD_GAME_UI.ScoreBanner.sync_points_to_get_preview then
+		WORD_GAME_UI.ScoreBanner.sync_points_to_get_preview(true, { remain_dur = 0.4 })
 	end
 end
 
@@ -121,9 +121,9 @@ function M.set_word_score_animating(active)
 	-- deal_boss_hand and other sequences call set_ranks while this flag is still
 	-- true, which leaves drag.can false until ranks are refreshed.
 	if not active
-		and WORD_GAME and WORD_GAME.TableInput
-		and WORD_GAME.TableInput.refresh_card_input then
-		WORD_GAME.TableInput.refresh_card_input()
+		and WORD_GAME and WORD_GAME_UI.TableInput
+		and WORD_GAME_UI.TableInput.refresh_card_input then
+		WORD_GAME_UI.TableInput.refresh_card_input()
 	end
 end
 
@@ -147,8 +147,8 @@ function M.sync_hand_after_deal()
 		end
 		G.hand:snap_VT()
 	end
-	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.sync_position()
+	if WORD_GAME and WORD_GAME_UI.HandShuffle then
+		WORD_GAME_UI.HandShuffle.sync_position()
 	end
 end
 
@@ -170,8 +170,8 @@ function M.show_puzzle_bank_feedback(puzzle_total)
 end
 
 function M.sync_hand_controls()
-	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.sync()
+	if WORD_GAME and WORD_GAME_UI.HandShuffle then
+		WORD_GAME_UI.HandShuffle.sync()
 	end
 end
 
@@ -184,12 +184,12 @@ function M.restore_boss_layout(opts)
 	if wr and wr.jumble then
 		wr.jumble.locked_hand_layout = nil
 	end
-	if WORD_GAME and WORD_GAME.Layout then
-		WORD_GAME.Layout.update_all()
-		WORD_GAME.Layout.set_screen_positions()
+	if WORD_GAME and WORD_GAME_UI.Layout then
+		WORD_GAME_UI.Layout.update_all()
+		WORD_GAME_UI.Layout.set_screen_positions()
 	end
-	if WORD_GAME and WORD_GAME.Sidebar and WORD_GAME.Sidebar.sync_visibility then
-		WORD_GAME.Sidebar.sync_visibility()
+	if WORD_GAME and WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
+		WORD_GAME_UI.Sidebar.sync_visibility()
 	end
 	G.ARGS = G.ARGS or {}
 	G.ARGS.pending_layout = true
@@ -199,8 +199,8 @@ function M.restore_boss_layout(opts)
 		G.hand:snap_VT()
 		G.hand:hard_set_cards()
 	end
-	if WORD_GAME and WORD_GAME.HandShuffle then
-		WORD_GAME.HandShuffle.sync_position()
+	if WORD_GAME and WORD_GAME_UI.HandShuffle then
+		WORD_GAME_UI.HandShuffle.sync_position()
 	end
 	local stack_ui = bonus_stack_ui()
 	if opts.keep_bonus_stack and stack_ui.sync_positions
@@ -210,7 +210,7 @@ function M.restore_boss_layout(opts)
 end
 
 function M.show_bonus_flyovers(used_cards)
-	local FloatUp = WORD_GAME and WORD_GAME.FloatUpText
+	local FloatUp = WORD_GAME and WORD_GAME_UI.FloatUpText
 	if not FloatUp or not FloatUp.from_card then return end
 	for _, card in ipairs(used_cards or {}) do
 		local stack_ui = bonus_stack_ui()

@@ -1,12 +1,7 @@
 --[[ word_game/model/run/register.lua - Register run teardown participants ]]
 
 local RunScope = require("word_game.model.run.scope")
-
-local function hook(name, mod, method)
-	if mod and mod[method] then
-		RunScope.on_teardown(name, mod[method])
-	end
-end
+local Busy = require("word_game.model.run.busy")
 
 local function call(name, fn)
 	if fn then
@@ -14,37 +9,40 @@ local function call(name, fn)
 	end
 end
 
-return function(word_game)
-	call("TradeUI", word_game.TradeUI and word_game.TradeUI.teardown_run)
-	call("PlacementWord", word_game.PlacementWord and word_game.PlacementWord.clear)
-	call("BonusStack", word_game.BonusStack and word_game.BonusStack.clear)
-	call("BonusStackUI", word_game.BonusStackUI and word_game.BonusStackUI.clear)
-	call("BossWordAnnounce", word_game.BossWordAnnounce and word_game.BossWordAnnounce.clear)
-	call("Confetti", word_game.Confetti and word_game.Confetti.clear)
-	call("PlayHoldRedraw", word_game.PlayHoldRedraw and word_game.PlayHoldRedraw.reset)
-	call("HandClearFocus", word_game.HandClearFocus and word_game.HandClearFocus.reset)
-	call("FirstPlayTutorial", word_game.FirstPlayTutorial and word_game.FirstPlayTutorial.reset)
-	call("StageLabel", word_game.StageLabel and word_game.StageLabel.reset)
+return function(domain, ui)
+	domain = domain or {}
+	ui = ui or {}
+	call("BusyFlags", Busy.clear)
+	call("TradeUI", ui.TradeUI and ui.TradeUI.teardown_run)
+	call("PlacementWord", domain.PlacementWord and domain.PlacementWord.clear)
+	call("BonusStack", domain.BonusStack and domain.BonusStack.clear)
+	call("BonusStackUI", ui.BonusStackUI and ui.BonusStackUI.clear)
+	call("BossWordAnnounce", ui.BossWordAnnounce and ui.BossWordAnnounce.clear)
+	call("Confetti", ui.Confetti and ui.Confetti.clear)
+	call("PlayHoldRedraw", ui.PlayHoldRedraw and ui.PlayHoldRedraw.reset)
+	call("HandClearFocus", ui.HandClearFocus and ui.HandClearFocus.reset)
+	call("FirstPlayTutorial", ui.FirstPlayTutorial and ui.FirstPlayTutorial.reset)
+	call("StageLabel", ui.StageLabel and ui.StageLabel.reset)
 	call("ScoreBanner", function()
-		if word_game.ScoreBanner and word_game.ScoreBanner.reset then
-			word_game.ScoreBanner.reset(0)
+		if ui.ScoreBanner and ui.ScoreBanner.reset then
+			ui.ScoreBanner.reset(0)
 		end
-		if word_game.ScoreBanner and word_game.ScoreBanner.reset_jumble_score then
-			word_game.ScoreBanner.reset_jumble_score()
+		if ui.ScoreBanner and ui.ScoreBanner.reset_jumble_score then
+			ui.ScoreBanner.reset_jumble_score()
 		end
 	end)
 	call("TimelineTimer", function()
-		if word_game.Round and word_game.Round.reset_timeline then
-			word_game.Round.reset_timeline()
+		if domain.Round and domain.Round.reset_timeline then
+			domain.Round.reset_timeline()
 		end
 	end)
-	call("TokenReward", word_game.TokenReward and word_game.TokenReward.reset)
-	call("FloatUpText", word_game.FloatUpText and word_game.FloatUpText.clear)
-	call("HandShuffleAnim", word_game.HandShuffleAnim and word_game.HandShuffleAnim.reset)
-	call("PlacementRecallAnim", word_game.HandPlacementRecallAnim and word_game.HandPlacementRecallAnim.reset)
-	call("VoucherDiscard", word_game.VoucherDiscard and word_game.VoucherDiscard.reset)
-	call("TableDeck", word_game.TableDeck and word_game.TableDeck.reset)
-	call("HandShuffle", word_game.HandShuffle and word_game.HandShuffle.destroy)
-	call("PerkStamp", word_game.PerkStamp and word_game.PerkStamp.clear_runtime)
-	call("Sidebar", word_game.Sidebar and word_game.Sidebar.destroy)
+	call("TokenReward", ui.TokenReward and ui.TokenReward.reset)
+	call("FloatUpText", ui.FloatUpText and ui.FloatUpText.clear)
+	call("HandShuffleAnim", ui.HandShuffleAnim and ui.HandShuffleAnim.reset)
+	call("PlacementRecallAnim", ui.HandPlacementRecallAnim and ui.HandPlacementRecallAnim.reset)
+	call("VoucherDiscard", domain.VoucherDiscard and domain.VoucherDiscard.reset)
+	call("TableDeck", ui.TableDeck and ui.TableDeck.reset)
+	call("HandShuffle", ui.HandShuffle and ui.HandShuffle.destroy)
+	call("PerkStamp", ui.PerkStamp and ui.PerkStamp.clear_runtime)
+	call("Sidebar", ui.Sidebar and ui.Sidebar.destroy)
 end

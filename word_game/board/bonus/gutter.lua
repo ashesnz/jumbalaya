@@ -11,14 +11,10 @@ local function window_left_x()
 	return -((G.ROOM and G.ROOM.T and G.ROOM.T.x) or 0)
 end
 
---- Timeline HUD anchor; defers to layout.placement when available (not at module load).
+--- Timeline HUD anchor; uses the last rect published by layout, else placement geometry.
 local function timeline_rect()
-	if WORD_GAME and WORD_GAME.Layout and WORD_GAME.Layout.timeline_rect then
-		return WORD_GAME.Layout.timeline_rect()
-	end
-	local ok, placement_layout = pcall(require, "word_game.ui.layout.placement")
-	if ok and placement_layout and placement_layout.timeline_rect then
-		return placement_layout.timeline_rect()
+	if G.ARGS and G.ARGS.timeline_rect then
+		return G.ARGS.timeline_rect
 	end
 	local pt = G.placement_table
 	if pt and pt.area and pt.area.T then

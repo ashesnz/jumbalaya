@@ -43,7 +43,7 @@ local function tile_scale()
 end
 
 local function perk_stamp()
-	return WORD_GAME and WORD_GAME.PerkStamp
+	return WORD_GAME and WORD_GAME_UI.PerkStamp
 end
 
 local function perk_stamp_imprint_count()
@@ -195,7 +195,7 @@ function M.sync_sidebar_ui()
 	M.hide_discard_pile_cards()
 	M.sync_voucher_counter()
 	M.sync_discard_pile_area()
-	if hud_definition.sync_end_run_row then
+	if hud_definition and hud_definition.sync_end_run_row then
 		hud_definition.sync_end_run_row()
 	end
 end

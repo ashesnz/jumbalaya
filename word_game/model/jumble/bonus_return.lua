@@ -5,6 +5,8 @@
 	instead of reaching into board geometry or the UI boss-word stack directly.
 ]]
 
+local Presentation = require("word_game.model.presentation")
+
 local M = {}
 
 --- @param card Card|nil
@@ -13,9 +15,9 @@ function M.return_card(card)
 	if not card or not card.bonus_card then
 		return false
 	end
-	local boss = WORD_GAME and WORD_GAME.BonusStackUI
-	if boss and boss.return_card then
-		return boss.return_card(card)
+	local handled = Presentation.emit("bonus_card_return", card)
+	if handled then
+		return true
 	end
 	local gutter = WORD_GAME and WORD_GAME.Board and WORD_GAME.Board.BonusGutter
 	if gutter and gutter.return_card then

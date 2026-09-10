@@ -231,7 +231,7 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 
 		_G.G.STATE = _G.G.STATES.TABLE_BOARD
 		_G.WORD_GAME.Jumble = jumble
-		_G.WORD_GAME.ScoreBanner = sb
+		_G.WORD_GAME_UI.ScoreBanner = sb
 
 		local wr = {
 			target = 20,

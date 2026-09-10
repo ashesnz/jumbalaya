@@ -170,7 +170,7 @@ end
 function M.is_next_mode()
 	if not table_discard.end_run_button_visible() then return false end
 	if not run_mode().is_classic() then return false end
-	local tt = WORD_GAME and WORD_GAME.TimelineTimer
+	local tt = WORD_GAME and WORD_GAME_UI.TimelineTimer
 	if not tt or not tt.is_progress_mode or not tt.is_progress_mode() then return false end
 	if tt.sync_progress then tt.sync_progress() end
 	return tt.goal_reached == true
@@ -225,8 +225,8 @@ function M.update(dt)
 
 	if next_mode ~= anim.known_next_mode then
 		anim.known_next_mode = next_mode
-		if WORD_GAME and WORD_GAME.HandShuffle and WORD_GAME.HandShuffle.sync_visibility then
-			WORD_GAME.HandShuffle.sync_visibility()
+		if WORD_GAME and WORD_GAME_UI.HandShuffle and WORD_GAME_UI.HandShuffle.sync_visibility then
+			WORD_GAME_UI.HandShuffle.sync_visibility()
 		end
 	end
 
@@ -290,7 +290,7 @@ end
 function M.collect_and_advance()
 	if not M.is_next_mode() and anim.mode ~= "next" then return false end
 	if input_lock().is_table_busy() then return false end
-	local token_reward = WORD_GAME and WORD_GAME.TokenReward
+	local token_reward = WORD_GAME and WORD_GAME_UI.TokenReward
 	if token_reward and token_reward.is_active and token_reward.is_active() then
 		return false
 	end

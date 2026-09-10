@@ -384,7 +384,7 @@ T.describe("perk stamp panel layout", function()
 		G.TILESCALE = 1
 		G.TILESIZE = 71
 		G.TABLE_BOARD_SIDEBAR_WIDTH = 3.0
-		WORD_GAME.Sidebar = { refresh = function() end }
+		WORD_GAME_UI.Sidebar = { refresh = function() end }
 
 		local sidebar_x, sidebar_y = 16.2, 0.2
 		local slot_w, slot_h = 3.0, 1.4
@@ -550,7 +550,7 @@ T.describe("perk stamp Perks.png sidebar imprint", function()
 	G.STATES = G.STATES or { TABLE_BOARD = 1 }
 	G.STATE = G.STATES.TABLE_BOARD
 	G.ROOM = G.ROOM or { T = { x = 0, y = 0, w = 20, h = 11.5, r = 0 } }
-	WORD_GAME.Sidebar = { refresh = function() end }
+	WORD_GAME_UI.Sidebar = { refresh = function() end }
 
 	local Stamp = require("word_game.ui.perks.stamp")
 	local perk_cfg = require("word_game.config.perks")

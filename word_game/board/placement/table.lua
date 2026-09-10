@@ -121,7 +121,7 @@ function PlacementTable:draw_run_pass(game)
 	for _, v in pairs(game.LIVE.CARD) do
 		if v.area == self.area
 			and (not v.parent and v ~= controller.dragging.target and v ~= controller.focused.target)
-			and not (WORD_GAME and WORD_GAME.CardInspect and WORD_GAME.CardInspect.is(v)) then
+			and not (G.GAME and G.GAME.inspecting_card == v) then
 			love.graphics.push()
 			v:translate_container()
 			v:draw()
