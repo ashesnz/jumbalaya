@@ -35,7 +35,7 @@ dictionary/              Offline word validation
 tests/                   Headless suite — `love tests`
 _tools/                  Python asset pipelines (not runtime) — do not edit for gameplay
 resources/               Assets, shaders, sounds, fonts
-AlphaCardsBackup/        Legacy Balatro reference — do not edit
+AlphaCardsBackup/        Legacy card-engine reference — do not edit
 ```
 
 ## Dependency rules

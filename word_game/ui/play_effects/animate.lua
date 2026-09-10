@@ -4,7 +4,7 @@ local M = {}
 
 local facade = require("word_game.ui.facade")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
-local bonus_stack_ui = require("word_game.ui.perks.bonus_stack")
+local bonus_stack_ui = facade.bonus_stack_ui()
 local card_fly_off = require("word_game.ui.play_effects.card_fly_off")
 local jumble_fixed_letters = require("word_game.ui.table.jumble_fixed_letters")
 local round_config = require("word_game.config.gameplay.round")

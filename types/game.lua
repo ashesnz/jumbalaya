@@ -54,12 +54,19 @@
 ---@field match_won boolean
 ---@field [string] any
 
+---@class JumbleSlot
+---@field kind string
+---@field letter string|nil
+---@field cards table[]|nil
+---@field min number|nil
+---@field max number|nil
+
 ---@class JumbleState
 ---@field total_score number
----@field puzzle_index number
+---@field puzzle_index number|nil
 ---@field solved boolean
----@field bonus_available boolean
----@field bonus_card_id any
+---@field bonus_available boolean|nil
+---@field bonus_card_id string|nil
 ---@field puzzle_points number
 ---@field puzzle_multi number
 ---@field puzzle_words string[]
@@ -67,8 +74,13 @@
 ---@field time_left number|nil
 ---@field puzzle table|nil
 ---@field pattern string|nil
----@field slots table[]|nil
----@field [string] any
+---@field slots JumbleSlot[]|nil
+---@field boss_word_active boolean|nil
+---@field boss_word_staging boolean|nil
+---@field boss_puzzle_hidden boolean|nil
+---@field pending_boss table|nil
+---@field boss_cards Card[]|nil
+---@field locked_hand_layout table|nil
 
 ---@class WordRound
 ---@field set number
@@ -81,21 +93,25 @@
 ---@field [string] any
 
 ---@class GameRunState
----@field modifiers table
----@field round_resets table
+---@field modifiers table<string, boolean>|nil
+---@field round_resets table|nil
 ---@field run_state RunState|nil
+---@field run_mode "classic"|"jumble"|string|nil
 ---@field won boolean|nil
 ---@field seeded boolean|nil
 ---@field pseudorandom table
 ---@field current_round table|nil
----@field round_scores any
----@field starting_deck_size number
----@field starting_params { hand_size: number, usable_slots: number }
+---@field round_scores table<string, { amt: number }>|nil
+---@field starting_deck_size number|nil
+---@field starting_params { hand_size: number, usable_slots: number }|nil
 ---@field word_round WordRound|nil
 ---@field placement_word string|nil
 ---@field placement_word_valid boolean|nil
 ---@field word_score_animating boolean|nil
----@field [string] any
+---@field hand_shuffle_animating boolean|nil
+---@field seed_streams { seed: string, hashed_seed: number }|nil
+---@field points number|nil
+---@field deck_alpha { pos: { x: number, y: number } }|nil
 
 ---@class WordGameTableDeck
 ---@field uses_table_draw fun(): boolean
@@ -107,13 +123,38 @@
 ---@field can_inspect fun(card: SceneNode): boolean
 ---@field begin_hold fun(card: SceneNode)
 
+---@class WordGameHandShuffle
+---@field sync fun()
+---@field sync_position fun()
+---@field stabilize_table_board fun()
+---@field shuffle_hand fun()
+---@field placement_has_cards fun(): boolean
+
+---@class WordGamePlay
+---@field on_hand_cleared fun(opts: table|nil)|nil
+---@field continue_after_dealer fun()|nil
+---@field resolve_after_clear fun(opts: table|nil): string
+---@field jumble_next fun(opts: table|nil)|nil
+
 ---@class WordGame
----@field Deck { reveal_in_hand: fun(card: Card), populate_jumble_deck: fun(), reset_table_deck: fun(), deal_jumble_hand: fun(), deal_into_hand: fun(n: number) }|nil
+---@field Deck table|nil
+---@field Jumble table|nil
+---@field Play WordGamePlay|nil
+---@field HandShuffle WordGameHandShuffle|nil
+---@field BonusStack table|nil
+---@field BonusStackUI table|nil
 ---@field TableDeck WordGameTableDeck|nil
----@field TableInput table|nil
+---@field TableInput { refresh_card_input: fun() }|nil
 ---@field CardInspect WordGameCardInspect|nil
----@field Layout { sidebar_frac: fun(): number, sidebar_width: fun(): number, inner_width: fun(): number, update_all: fun(), request_refresh: fun() }|nil
+---@field Layout { sidebar_frac: fun(): number, sidebar_width: fun(): number, inner_width: fun(): number, update_all: fun(), request_refresh: fun(), refresh_placement_layout: fun()|nil }|nil
 ---@field TableBoard { update: fun(game: Game, dt: number), draw_board: fun(game: Game), is_active: fun(): boolean }|nil
+---@field Sidebar table|nil
+---@field TradeUI table|nil
+---@field ScoreBanner table|nil
+---@field TimelineTimer table|nil
+---@field TokenReward table|nil
+---@field CardFlyOff table|nil
+---@field InputLock table|nil
 
 ---@class GameInstanceTables
 ---@field NODE SceneNode[]
@@ -191,6 +232,15 @@
 ---@field deck CardArea|nil
 ---@field discard CardArea|nil
 ---@field play CardArea|nil
+---@field hand_action_bar UIPanel|nil
+---@field table_shuffle_bar UIPanel|nil
+---@field hand_play_button UIPanel|nil
+---@field table_shuffle_button UIPanel|nil
+---@field PLAY_WORD_UI UIPanel|nil
+---@field SIDEBAR_HUD UIPanel|nil
+---@field TIMELINE table|nil
+---@field OVERLAY_MENU UIPanel|nil
+---@field RUN { active: boolean }|nil
 ---@field consumeables CardArea|nil
 ---@field view_deck CardArea[]|nil
 ---@field VIEWING_DECK any

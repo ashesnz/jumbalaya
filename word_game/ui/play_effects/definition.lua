@@ -4,7 +4,9 @@ local M = {}
 
 local facade = require("word_game.ui.facade")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
-local bonus_stack_ui = require("word_game.ui.perks.bonus_stack")
+local function bonus_stack_ui()
+	return facade.bonus_stack_ui()
+end
 local round_config = require("word_game.config.gameplay.round")
 
 local RunMode = facade.run_mode()
@@ -176,7 +178,7 @@ end
 function M.restore_boss_layout(opts)
 	opts = opts or {}
 	if not opts.keep_bonus_stack then
-		bonus_stack_ui.clear()
+		bonus_stack_ui().clear()
 	end
 	local wr = G.GAME and G.GAME.word_round
 	if wr and wr.jumble then
@@ -200,9 +202,10 @@ function M.restore_boss_layout(opts)
 	if WORD_GAME and WORD_GAME.HandShuffle then
 		WORD_GAME.HandShuffle.sync_position()
 	end
-	if opts.keep_bonus_stack and bonus_stack_ui.sync_positions
-		and not bonus_stack_ui.is_animating() then
-		bonus_stack_ui.sync_positions()
+	local stack_ui = bonus_stack_ui()
+	if opts.keep_bonus_stack and stack_ui.sync_positions
+		and not stack_ui.is_animating() then
+		stack_ui.sync_positions()
 	end
 end
 
@@ -210,8 +213,9 @@ function M.show_bonus_flyovers(used_cards)
 	local FloatUp = WORD_GAME and WORD_GAME.FloatUpText
 	if not FloatUp or not FloatUp.from_card then return end
 	for _, card in ipairs(used_cards or {}) do
-		if bonus_stack_ui.is_bonus_card(card) then
-			FloatUp.from_card(card, "+" .. tostring(bonus_stack_ui.BONUS_POINTS), {
+		local stack_ui = bonus_stack_ui()
+		if stack_ui.is_bonus_card(card) then
+			FloatUp.from_card(card, "+" .. tostring(stack_ui.BONUS_POINTS), {
 				colour = G.C and G.C.GOLD or { 1, 0.85, 0.2, 1 },
 			})
 		end

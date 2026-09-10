@@ -1,7 +1,9 @@
---[[ word_game/ui/card_fly_off.lua - Played cards fly off-screen instead of the recycle pile ]]
+--[[ word_game/ui/play_effects/card_fly_off.lua - Played cards fly off-screen instead of the recycle pile ]]
 
 local facade = require("word_game.ui.facade")
-local bonus_stack_ui = require("word_game.ui.perks.bonus_stack")
+local function bonus_stack_ui()
+	return facade.bonus_stack_ui()
+end
 
 local function deck_mod()
 	return facade.deck()
@@ -83,8 +85,9 @@ function M.stash_played_card(card)
 end
 
 local function fly_one_card(queue_event, card, index, count, return_to_deck, on_card_done)
-	if bonus_stack_ui.is_bonus_card(card) then
-		bonus_stack_ui.consume_card(card)
+	local stack_ui = bonus_stack_ui()
+	if stack_ui.is_bonus_card(card) then
+		stack_ui.consume_card(card)
 		if on_card_done then on_card_done() end
 		return
 	end

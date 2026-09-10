@@ -56,6 +56,10 @@ end
 --Removes the overlay menu if one exists, unpauses the game, and saves the settings to file
 G.FUNCS.close_overlay = function()
   if not G.OVERLAY_MENU then return end
+  local ok, components = pcall(require, "word_game.ui.widgets.components")
+  if ok and components and components.clear_dynamic_actions then
+    components.clear_dynamic_actions()
+  end
   G.INPUT.locks.frame_set = true
   G.INPUT.locks.frame = true
   G.INPUT:shift_context_layer(-1000)

@@ -1,4 +1,4 @@
-// Jumbalaya - gold shimmer overlay (Balatro voucher-style travelling shine).
+// Jumbalaya - gold shimmer overlay (voucher-style travelling shine).
 // Drawn over the yellow dissolve face with normal alpha. The stripe's alpha
 // is the animation — gold-on-gold additive was effectively invisible.
 //
@@ -43,7 +43,7 @@ vec4 effect(vec4 colour, Image texture, vec2 texture_coords, vec2 screen_coords)
 	float phase = fract(uv.x * SWEEP_X + uv.y * SWEEP_Y - clock * SWEEP_SPEED);
 	float beam = pow(1.0 - abs(phase - 0.5) * 2.0, 3.0);
 
-	// Slower Balatro-voucher crawl so the face isn't a single hard stripe.
+	// Slower voucher-style crawl so the face isn't a single hard stripe.
 	float v = clock / 84.0;
 	float fac = 0.8 + 0.9 * sin(13. * uv.x + 5.32 * uv.y + v * 12.
 		+ cos(v * 5.3 + uv.y * 4.2 - uv.x * 4.));

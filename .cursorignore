@@ -46,7 +46,7 @@ resources/fonts/
 *.woff2
 
 # ------------------------------------------------------------------------------
-# Reference / backup codebases (Balatro fork — 80MB+, not this project)
+# Reference / backup codebases (legacy card-engine fork — 80MB+, not this project)
 # ------------------------------------------------------------------------------
 AlphaCardsBackup/
 

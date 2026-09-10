@@ -21,8 +21,8 @@ function M.play_button_uie()
 end
 
 function M.shuffle_button_uie()
-	if not G.hand_shuffle_bar or G.hand_shuffle_bar.REMOVED then return nil end
-	return G.hand_shuffle_bar:find_node_by_id("hand_shuffle_button")
+	if not G.table_shuffle_bar or G.table_shuffle_bar.REMOVED then return nil end
+	return G.table_shuffle_bar:find_node_by_id("hand_shuffle_button")
 end
 
 function M.placement_has_cards()
@@ -59,7 +59,7 @@ end
 
 function M.buttons_present()
 	if not G.hand_action_bar or G.hand_action_bar.REMOVED then return false end
-	if not G.hand_shuffle_bar or G.hand_shuffle_bar.REMOVED then return false end
+	if not G.table_shuffle_bar or G.table_shuffle_bar.REMOVED then return false end
 	return M.play_button_uie() ~= nil and M.shuffle_button_uie() ~= nil
 end
 
@@ -130,7 +130,7 @@ local function sync_play_button(play_btn, show)
 end
 
 function M.sync_visibility(_opts)
-	if G.hand_shuffle_bar and not G.hand_shuffle_bar.REMOVED then
+	if G.table_shuffle_bar and not G.table_shuffle_bar.REMOVED then
 		sync_shuffle_button(M.shuffle_button_uie(), action_visible())
 	end
 	if G.hand_action_bar and not G.hand_action_bar.REMOVED then

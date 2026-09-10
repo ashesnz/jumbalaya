@@ -104,7 +104,7 @@ function M.return_placement_cards_to_hand(placement_has_cards, sync_visibility)
 end
 
 function M.stabilize()
-	if not G.hand or (not G.hand_action_bar and not G.hand_shuffle_bar) then return end
+	if not G.hand or (not G.hand_action_bar and not G.table_shuffle_bar) then return end
 	layout().place_action_bars()
 end
 

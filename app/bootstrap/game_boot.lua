@@ -53,7 +53,7 @@ Updaters.register('early_board', 'title_garden_pan', function(game, dt)
 		update_title_garden_pan((game and game.real_dt) or dt)
 	end
 end)
-Updaters.register('late_board', 'hand_shuffle_stabilize', function(game, dt)
+Updaters.register('late_board', 'table_controls_stabilize', function(game, dt)
 	if game.STATE == game.STATES.TABLE_BOARD and WORD_GAME and WORD_GAME.HandShuffle then
 		WORD_GAME.HandShuffle.stabilize_table_board()
 	end

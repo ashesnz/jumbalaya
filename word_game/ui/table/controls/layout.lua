@@ -177,8 +177,8 @@ function M.place_action_bars()
 	pos_sig = sig
 	local anchors = M.button_anchors()
 	local size = anchors.size
-	if G.hand_shuffle_bar and not G.hand_shuffle_bar.REMOVED then
-		M.place_bar(G.hand_shuffle_bar, anchors.shuffle_x, anchors.y, size)
+	if G.table_shuffle_bar and not G.table_shuffle_bar.REMOVED then
+		M.place_bar(G.table_shuffle_bar, anchors.shuffle_x, anchors.y, size)
 	end
 	if G.hand_action_bar and not G.hand_action_bar.REMOVED then
 		M.place_bar(G.hand_action_bar, anchors.play_x, anchors.y, size)
@@ -196,7 +196,7 @@ end
 function M.snap()
 	if not G.hand then return end
 	if (not G.hand_action_bar or G.hand_action_bar.REMOVED)
-		and (not G.hand_shuffle_bar or G.hand_shuffle_bar.REMOVED) then
+		and (not G.table_shuffle_bar or G.table_shuffle_bar.REMOVED) then
 		return
 	end
 	M.sync_position()
@@ -210,21 +210,21 @@ function M.ensure(visible, sync_visibility)
 	local has_play = G.hand_action_bar
 		and not G.hand_action_bar.REMOVED
 		and G.hand_action_bar:find_node_by_id("hand_play_button")
-	local has_shuffle = G.hand_shuffle_bar
-		and not G.hand_shuffle_bar.REMOVED
-		and G.hand_shuffle_bar:find_node_by_id("hand_shuffle_button")
+	local has_shuffle = G.table_shuffle_bar
+		and not G.table_shuffle_bar.REMOVED
+		and G.table_shuffle_bar:find_node_by_id("hand_shuffle_button")
 	if has_play and has_shuffle then
 		sync_visibility()
 		return
 	end
-	if G.hand_action_bar or G.hand_shuffle_bar then
+	if G.hand_action_bar or G.table_shuffle_bar then
 		M.destroy()
 	end
 
 	local size = definition.button_size()
 	pos_sig = nil
 	locked_anchors = nil
-	G.hand_shuffle_bar = LayoutView{
+	G.table_shuffle_bar = LayoutView{
 		definition = {
 			n = G.UI.ROOT,
 			config = { align = "cm", colour = G.C.CLEAR, minw = size, minh = size },
@@ -249,7 +249,7 @@ function M.ensure(visible, sync_visibility)
 		},
 	}
 
-	G.hand_shuffle_button = G.hand_shuffle_bar
+	G.table_shuffle_button = G.table_shuffle_bar
 	G.hand_play_button = G.hand_action_bar
 	G.PLAY_WORD_UI = G.hand_action_bar
 
@@ -260,15 +260,15 @@ end
 function M.destroy()
 	pos_sig = nil
 	locked_anchors = nil
-	if G.hand_shuffle_bar then
-		G.hand_shuffle_bar:remove()
-		G.hand_shuffle_bar = nil
+	if G.table_shuffle_bar then
+		G.table_shuffle_bar:remove()
+		G.table_shuffle_bar = nil
 	end
 	if G.hand_action_bar then
 		G.hand_action_bar:remove()
 		G.hand_action_bar = nil
 	end
-	G.hand_shuffle_button = nil
+	G.table_shuffle_button = nil
 	G.hand_play_button = nil
 	if G.PLAY_WORD_UI then
 		G.PLAY_WORD_UI = nil

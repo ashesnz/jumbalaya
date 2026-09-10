@@ -55,7 +55,7 @@ T.describe("Run lifecycle (RunScope)", function()
 				self.removed = true
 			end,
 		}
-		G.hand_shuffle_bar = {
+		G.table_shuffle_bar = {
 			remove = function(self)
 				self.removed = true
 			end,
@@ -76,9 +76,9 @@ T.describe("Run lifecycle (RunScope)", function()
 		}
 		WORD_GAME.HandShuffle = {
 			destroy = function()
-				if G.hand_shuffle_bar then G.hand_shuffle_bar:remove() end
+				if G.table_shuffle_bar then G.table_shuffle_bar:remove() end
 				if G.hand_action_bar then G.hand_action_bar:remove() end
-				G.hand_shuffle_bar = nil
+				G.table_shuffle_bar = nil
 				G.hand_action_bar = nil
 			end,
 		}
@@ -92,7 +92,7 @@ T.describe("Run lifecycle (RunScope)", function()
 		game:teardown_run_ui()
 
 		T.assert_nil(G.SIDEBAR_HUD, "Sidebar HUD should be torn down before a new run")
-		T.assert_nil(G.hand_shuffle_bar, "Hand action bar should be torn down before a new run")
+		T.assert_nil(G.table_shuffle_bar, "Hand action bar should be torn down before a new run")
 		T.assert_nil(G.hand_action_bar, "Hand shuffle bar should be torn down before a new run")
 	end)
 

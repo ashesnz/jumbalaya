@@ -1,4 +1,4 @@
---[[ word_game/ui/odometer.lua - Rolling digit + label (sidebar counters, voucher discard, etc.) ]]
+--[[ word_game/ui/widgets/odometer.lua - Rolling digit + label (sidebar counters, voucher discard, etc.) ]]
 
 local Odometer = EaseNode:derive("Odometer")
 local Roll = require("word_game.ui.util.roll")
@@ -36,7 +36,7 @@ end
 
 function Odometer:construct(config)
 	config = config or {}
-	self.label = config.label or "Plays Left"
+	self.label = config.label or ""
 	self.colour = config.colour or G.C.RED
 	self.label_colour = config.label_colour or (G.C.UI and G.C.UI.TEXT_LIGHT) or { 1, 1, 1, 1 }
 	self.label_on_top = config.label_on_top

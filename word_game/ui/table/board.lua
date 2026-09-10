@@ -1,5 +1,5 @@
 --[[
-	word_game/ui/table_board.lua - TABLE_BOARD update and draw coordinator.
+	word_game/ui/table/board.lua - TABLE_BOARD update and draw coordinator.
 ]]
 
 local M = {}

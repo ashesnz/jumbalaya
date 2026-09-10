@@ -23,18 +23,37 @@ local CHROME = {
 Components.CHROME = CHROME
 
 local action_seq = 0
+local registered_actions = {}
+
+--- Removes generated G.FUNCS handlers (overlay menus, cyclers with closures).
+function Components.clear_dynamic_actions()
+	if G and G.FUNCS then
+		for name in pairs(registered_actions) do
+			G.FUNCS[name] = nil
+		end
+	end
+	registered_actions = {}
+	action_seq = 0
+end
 
 --- Turns an action spec into an engine callback name. Functions are
 --- registered as generated G.FUNCS entries so closures work as handlers;
 --- strings pass through untouched.
 ---@param action function|string|nil
 ---@param fallback string|nil
+---@param action_id string|nil Stable id when def.id is set (reuses slot).
 ---@return string|nil
-local function resolve_action(action, fallback)
+local function resolve_action(action, fallback, action_id)
 	if type(action) == "function" then
-		action_seq = action_seq + 1
-		local name = "__component_action_" .. action_seq
+		local name
+		if action_id then
+			name = "__component_action_" .. action_id
+		else
+			action_seq = action_seq + 1
+			name = "__component_action_" .. action_seq
+		end
 		G.FUNCS[name] = function(node) action(node) end
+		registered_actions[name] = true
 		return name
 	end
 	if action == "nil" then return nil end
@@ -54,8 +73,8 @@ Components.resolve_action = resolve_action
 function Components.button(def)
 	def = def or {}
 
-	local click = resolve_action(def.onClick or def.button, "close_overlay")
-	local tick = resolve_action(def.onTick or def.func)
+	local click = resolve_action(def.onClick or def.button, "close_overlay", def.id)
+	local tick = resolve_action(def.onTick or def.func, nil, def.id and (def.id .. "_tick"))
 
 	local minw = def.minw or def.width or 2.7
 	local maxw = def.maxw or (minw - 0.2)
@@ -212,7 +231,7 @@ function Components.cycler(def)
 	def.current_option_val = def.options[def.current_option]
 	-- Engine's cycle handler dispatches through `opt_callback`; `onChange`
 	-- is the public name (and accepts closures via resolve_action).
-	def.opt_callback = resolve_action(def.onChange or def.opt_callback)
+	def.opt_callback = resolve_action(def.onChange or def.opt_callback, nil, def.id and (def.id .. "_cycle"))
 	def.scale = def.scale or 1
 	def.ref_table = def.ref_table or nil
 	def.ref_value = def.ref_value or nil

@@ -196,7 +196,7 @@ Runtime hand size (`WORD_GAME.HandSize.get()`) lives in `word_game/model/hand_si
 | `menu/` | Main menu + `title_logo` |
 | `overlays/` | Options, settings, results, `end_match` |
 | `widgets/` | Shared controls + `odometer` |
-| `callbacks/` | `G.FUNCS` bindings (`hand_shuffle`, `trade`, `placement`, `overlays`) |
+| `callbacks/` | `G.FUNCS` bindings (`table_controls`, `trade`, `placement`, `overlays`) |
 | `cardarea/` | `CardArea` class — boot via `require "word_game.ui.cardarea.init"` |
 | `sidebar/` | Right-hand HUD — boot via `require "word_game.ui.sidebar.init"` |
 

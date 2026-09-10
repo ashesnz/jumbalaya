@@ -16,14 +16,14 @@ local function luminance(rgb)
 end
 
 T.describe("bonus card gold shader (gold_seal.fs)", function()
-	T.it("declares Balatro gold_seal clock plus the standard sprite uniforms", function()
+	T.it("declares gold_seal clock plus the standard sprite uniforms", function()
 		local src = read_shader_source()
-		T.assert_not_nil(src:match("uniform vec4 gold_seal"), "must declare gold_seal like Balatro")
+		T.assert_not_nil(src:match("uniform vec4 gold_seal"), "must declare gold_seal uniform")
 		T.assert_not_nil(src:match("uniform float time"), "must declare time so sprite_shader pcall can finish")
 		T.assert_not_nil(src:match("uniform vec2 mouse_screen_pos"), "must declare mouse_screen_pos")
 	end)
 
-	T.it("sweeps in card-local UV like Balatro voucher/foil, not atlas texture_coords", function()
+	T.it("sweeps in card-local UV like voucher foil, not atlas texture_coords", function()
 		local src = read_shader_source()
 		T.assert_not_nil(src:match("card_uv"), "must convert atlas coords into 0-1 card UV")
 		T.assert_not_nil(src:match("texture_details%.xy"), "UV must subtract the sprite cell origin")

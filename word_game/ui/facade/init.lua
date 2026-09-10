@@ -86,7 +86,7 @@ function M.bonus_stack()
 end
 
 function M.bonus_stack_ui()
-	return WORD_GAME and WORD_GAME.BonusStackUI
+	return (WORD_GAME and WORD_GAME.BonusStackUI) or load("word_game.ui.perks.bonus_stack")
 end
 
 function M.dissolve_fx()

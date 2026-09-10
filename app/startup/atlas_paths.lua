@@ -8,7 +8,7 @@ function M.scale_suffix(texture_scaling)
 	return (texture_scaling or 2) > 1 and "2x" or "1x"
 end
 
---- Prefer resources/textures/{1x|2x}/filename (Balatro/AlphaCards layout), then
+--- Prefer resources/textures/{1x|2x}/filename (AlphaCards-style layout), then
 --- fall back to resources/assets/ (legacy single @2x copy).
 ---@return string path
 ---@return string|nil source "1x", "2x", or "legacy"
