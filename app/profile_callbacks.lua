@@ -1,11 +1,10 @@
 -- Application profile and save callbacks.
 
 --Determines if there is a valid save file to load and continue from main menu
---
----@param e {}
 --**e** Is the UIE that called this function
 
 local Scheduler = require "app.effects.timeline_scheduler"
+---@param e table
 G.FUNCS.can_resume_run = function(e)
   if e.config.func then --refers to this function, or 'can_resume_run', so this doesn't run repeatedly
     local _can_continue = nil

@@ -4,22 +4,39 @@ on:
   push:
   pull_request:
 
+env:
+  LOVE_VERSION: "11.5"
+  EMMYLUA_CHECK_VERSION: "0.25.1"
+
 jobs:
   love-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install LÖVE
+      - name: Install LÖVE ${{ env.LOVE_VERSION }}
         run: |
-          sudo apt-get update
-          if sudo apt-get install -y love; then
-            love --version
-          else
-            curl -fsSL -o love.AppImage https://github.com/love2d/love/releases/download/11.5/love-11.5-x86_64.AppImage
-            chmod +x love.AppImage
-            ./love.AppImage --appimage-extract
-            sudo ln -sf "$PWD/squashfs-root/bin/love" /usr/local/bin/love || sudo ln -sf "$PWD/squashfs-root/love" /usr/local/bin/love
-            love --version
+          curl -fsSL -o love.AppImage \
+            "https://github.com/love2d/love/releases/download/${LOVE_VERSION}/love-${LOVE_VERSION}-x86_64.AppImage"
+          chmod +x love.AppImage
+          ./love.AppImage --appimage-extract
+          love_bin="$PWD/squashfs-root/bin/love"
+          if [ ! -x "$love_bin" ]; then
+            love_bin="$PWD/squashfs-root/love"
           fi
+          echo "$love_bin" >> "$GITHUB_PATH"
+          "$love_bin" --version | grep -F "${LOVE_VERSION}"
       - name: Run headless suite
         run: love tests
+
+  emmylua-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: emmylua-check-${{ env.EMMYLUA_CHECK_VERSION }}
+      - name: Install emmylua_check ${{ env.EMMYLUA_CHECK_VERSION }}
+        run: cargo install emmylua_check --version "${EMMYLUA_CHECK_VERSION}" --locked
+      - name: Static analysis (errors block CI)
+        run: emmylua_check . --severity error -f github

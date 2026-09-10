@@ -21,6 +21,10 @@
     ]
   },
   "diagnostics": {
+    "globals": [
+      "unlock_card",
+      "discover_card"
+    ],
     "disable": [
       "inject-field",
       "missing-fields",

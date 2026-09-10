@@ -38,4 +38,4 @@ Jumble mode is the player experience (`word_game/model/jumble/`, `word_game/mode
 
 ## Verification
 
-After logic changes: `love tests`. For structural refactors: `emmylua_check . --severity warn`. Minimize diff scope; match existing naming and patterns.
+After logic changes: `love tests`. For structural refactors: `emmylua_check . --severity warn` (CI pins `emmylua_check` at error severity — see `docs/testing.md`). Minimize diff scope; match existing naming and patterns.

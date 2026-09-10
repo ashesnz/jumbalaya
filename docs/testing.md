@@ -75,7 +75,16 @@ Prefer `mock_env.reset_game()` at the top of a `describe` block. When mocking `G
 | `test_play_hold_redraw.lua` | Hold-to-redraw |
 | `test_layout.lua` | Sidebar HUD geometry and fixed width |
 
-## Verification after refactors
+## CI
+
+GitHub Actions (`.github/workflows/tests.yml`) runs on every push and PR:
+
+| Job | Tool | Pin |
+|-----|------|-----|
+| `love-tests` | LÖVE AppImage **11.5** | `LOVE_VERSION` in workflow — not distro `apt` packages |
+| `emmylua-check` | `emmylua_check` **0.25.1** | `EMMYLUA_CHECK_VERSION` in workflow |
+
+CI runs `emmylua_check . --severity error` (blocks on analyzer errors). Locally, use `--severity warn` before structural refactors:
 
 ```sh
 love tests

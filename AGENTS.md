@@ -151,7 +151,7 @@ After logic changes:
 love tests
 ```
 
-After structural refactors:
+After structural refactors (local; CI runs errors-only — see `docs/testing.md`):
 
 ```sh
 emmylua_check . --severity warn

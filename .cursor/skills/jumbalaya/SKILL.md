@@ -99,7 +99,7 @@ love tests
 1. Keep `G.FUNCS` string names stable unless updating all UI definitions that reference them
 2. Re-export geometry on `WORD_GAME.Layout` if moving sidebar layout helpers
 3. Update `word_game/init.lua` facade exports when adding cross-package APIs
-4. Run `love tests` and `emmylua_check . --severity warn` for structural changes
+4. Run `love tests`; for structural changes also run `emmylua_check . --severity warn` locally (CI runs error severity — see `docs/testing.md`)
 5. Update `docs/code-organization.md` when package layout changes materially
 
 ## Avoid

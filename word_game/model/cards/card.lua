@@ -33,8 +33,6 @@
 ---@field remove_from_area fun(self: Card)
 ---@field align fun(self: Card)
 ---@field load fun(self: Card, cardTable: table)
-
-
 ---@field set_debuff fun(self: Card, should_debuff: boolean)
 ---@field add_to_deck fun(self: Card, from_debuff: boolean|nil)
 ---@field remove_from_deck fun(self: Card, from_debuff: boolean|nil)

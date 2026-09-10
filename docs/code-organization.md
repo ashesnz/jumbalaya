@@ -349,14 +349,15 @@ Additional rules:
 
 ## Verification
 
-Every structural refactor should pass:
+Local before merge:
 
 ```sh
-emmylua_check . --severity warn
+love tests
+emmylua_check . --severity warn   # deeper pass; CI blocks on errors only
 git diff --check
-love .
-love tests/runner.lua
 ```
+
+CI (`.github/workflows/tests.yml`): LÖVE **11.5** AppImage (not `apt`) + pinned `emmylua_check` **0.25.1** at `--severity error`. Details in [testing.md](testing.md).
 
 For package splits, compare public API names before and after. Startup success alone does not verify jumble puzzle transitions, hold-to-redraw, token fly, or perk purchase — smoke-test those manually.
 
