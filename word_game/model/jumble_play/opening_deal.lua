@@ -7,7 +7,7 @@
 local M = {}
 
 function M.deal()
-	if not G.hand or not G.deck then return end
+	if not G.dealt_letters or not G.draw_pile then return end
 
 	local wr = G.GAME and G.GAME.word_round
 	if WORD_GAME and WORD_GAME.Deck

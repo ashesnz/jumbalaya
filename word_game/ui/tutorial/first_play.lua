@@ -83,9 +83,9 @@ local function from_save()
 end
 
 local function refresh_board_input()
-	if G.hand and G.hand.set_ranks then G.hand:set_ranks() end
-	if G.placement_table and G.placement_table.area and G.placement_table.area.set_ranks then
-		G.placement_table.area:set_ranks()
+	if G.dealt_letters and G.dealt_letters.set_ranks then G.dealt_letters:set_ranks() end
+	if G.pattern_row and G.pattern_row.area and G.pattern_row.area.set_ranks then
+		G.pattern_row.area:set_ranks()
 	end
 	if WORD_GAME_UI.TableControls then
 		WORD_GAME_UI.TableControls.sync()
@@ -166,7 +166,7 @@ end
 local function hand_bubble_config()
 	dealt_hand.apply_screen_position()
 
-	local hand = G.hand and G.hand.T
+	local hand = G.dealt_letters and G.dealt_letters.T
 	local room = G.ROOM_ATTACH and G.ROOM_ATTACH.T
 	if not hand or not room then
 		return { align = "cm", offset = { x = 0, y = 0 }, major = G.ROOM_ATTACH }
@@ -181,11 +181,11 @@ local function hand_bubble_config()
 end
 
 local function placement_bubble_config()
-	if G.placement_table and G.placement_table.apply_screen_position then
-		G.placement_table:apply_screen_position()
+	if G.pattern_row and G.pattern_row.apply_screen_position then
+		G.pattern_row:apply_screen_position()
 	end
 
-	local area = G.placement_table and G.placement_table.area
+	local area = G.pattern_row and G.pattern_row.area
 	local placement = area and area.T
 	local room = G.ROOM_ATTACH and G.ROOM_ATTACH.T
 	if not placement or not room then
@@ -258,8 +258,8 @@ end
 
 local function build_selections(step)
 	local selections = { bubble_ui }
-	if step.spotlight == "hand" and G.hand then
-		selections = { G.hand, bubble_ui }
+	if step.spotlight == "hand" and G.dealt_letters then
+		selections = { G.dealt_letters, bubble_ui }
 	end
 	return selections
 end

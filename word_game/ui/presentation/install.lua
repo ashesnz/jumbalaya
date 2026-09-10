@@ -61,8 +61,8 @@ function M.install(ui, domain)
 	Presentation.on("layout_refresh_placement", function()
 		if Layout and Layout.refresh_placement_layout then
 			Layout.refresh_placement_layout()
-		elseif G.placement_table and G.placement_table.apply_screen_position then
-			G.placement_table:apply_screen_position()
+		elseif G.pattern_row and G.pattern_row.apply_screen_position then
+			G.pattern_row:apply_screen_position()
 		end
 	end)
 

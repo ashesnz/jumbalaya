@@ -78,11 +78,11 @@ function M.reset_globals()
 		G.LIVE.CARDAREA = {}
 	end
 	G.SIDEBAR_HUD = nil
-	if G.placement_table then
-		if G.placement_table.reset_run then
-			pcall(G.placement_table.reset_run)
+	if G.pattern_row then
+		if G.pattern_row.reset_run then
+			pcall(G.pattern_row.reset_run)
 		else
-			G.placement_table.area = nil
+			G.pattern_row.area = nil
 		end
 	end
 	if G.HAND_CLEAR_OVERLAY and G.HAND_CLEAR_OVERLAY.remove then

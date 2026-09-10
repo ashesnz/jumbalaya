@@ -36,7 +36,7 @@ function M.draw(session)
 	if not j or not j.slots or j.boss_puzzle_hidden then return end
 
 	local geo = session.jumble_geometry
-		or (G.placement_table and G.placement_table.jumble_geometry)
+		or (G.pattern_row and G.pattern_row.jumble_geometry)
 	if not geo then return end
 
 	local area = session.area

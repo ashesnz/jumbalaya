@@ -27,11 +27,11 @@ function M.apply_screen_position(session)
 
 	local j = WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.state
 		and WORD_GAME.Jumble.state()
-	if jumble_geometry.is_boss_row(j) and G.hand then
+	if jumble_geometry.is_boss_row(j) and G.dealt_letters then
 		local gap = math.max(0.28, ctx:card_h() * 0.22)
-		area.T.y = G.hand.T.y - area.T.h - gap
-	elseif jumble_geometry.span_active() and G.hand then
-		area.T.y = jumble_geometry.anchor_y(felt, area.T.h, G.hand.T.y)
+		area.T.y = G.dealt_letters.T.y - area.T.h - gap
+	elseif jumble_geometry.span_active() and G.dealt_letters then
+		area.T.y = jumble_geometry.anchor_y(felt, area.T.h, G.dealt_letters.T.y)
 	else
 		area.T.y = felt.y + pad_y
 	end

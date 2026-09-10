@@ -25,12 +25,12 @@ end
 
 local function held_cards()
 	local out = {}
-	if G.hand and G.hand.cards then
-		for _, card in ipairs(G.hand.cards) do
+	if G.dealt_letters and G.dealt_letters.cards then
+		for _, card in ipairs(G.dealt_letters.cards) do
 			out[#out + 1] = card
 		end
 	end
-	local area = G.placement_table and G.placement_table.area
+	local area = G.pattern_row and G.pattern_row.area
 	if area and area.cards then
 		for _, card in ipairs(area.cards) do
 			out[#out + 1] = card

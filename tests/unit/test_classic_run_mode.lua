@@ -275,8 +275,8 @@ T.describe("Classic run mode", function()
 			mode = "jumble",
 			jumble = { total_score = 32, puzzle_points = 0, puzzle_multi = 1.0, slots = {} },
 		}
-		G.placement_table = { area = { T = { x = 4, y = 4, w = 10, h = 2 }, cards = {} } }
-		G.hand = { T = { x = 3, y = 8, w = 12, h = 2.8 }, cards = {} }
+		G.pattern_row = { area = { T = { x = 4, y = 4, w = 10, h = 2 }, cards = {} } }
+		G.dealt_letters = { T = { x = 3, y = 8, w = 12, h = 2.8 }, cards = {} }
 		G.TILE_W = 20
 		G.TILE_H = 11.5
 		G.ROOM_ATTACH = { T = { x = 0, y = 0, w = 20, h = 11.5 } }
@@ -311,7 +311,7 @@ T.describe("Classic run mode", function()
 		T.assert_equal(captured.colour, G.C.RED)
 
 		captured = nil
-		G.placement_table.area.cards = { { ability = { letter = "A" } } }
+		G.pattern_row.area.cards = { { ability = { letter = "A" } } }
 		local played = false
 		WORD_GAME.Play = { play_jumble_word = function() played = true end }
 		placement_controls.try_play()

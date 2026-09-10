@@ -21,10 +21,10 @@ local function snap_moveable(moveable)
 end
 
 function M.card_area_width()
-	if G.placement_table and G.placement_table.area and G.placement_table.area.T and (G.placement_table.area.T.w or 0) > 0 then
-		return G.placement_table.area.T.w
+	if G.pattern_row and G.pattern_row.area and G.pattern_row.area.T and (G.pattern_row.area.T.w or 0) > 0 then
+		return G.pattern_row.area.T.w
 	end
-	local placement_area = G.placement_table and G.placement_table.area
+	local placement_area = G.pattern_row and G.pattern_row.area
 	if placement_area and placement_area.T and (placement_area.T.w or 0) > 0 then
 		return placement_area.T.w
 	end
@@ -103,7 +103,7 @@ end
 
 function M.set_screen_positions(opts)
 	opts = opts or {}
-	if G.STAGE == G.STAGES.RUN and G.hand then
+	if G.STAGE == G.STAGES.RUN and G.dealt_letters then
 		if WORD_GAME_UI.Layout then
 			WORD_GAME_UI.Layout.update_all()
 		end
@@ -113,53 +113,53 @@ function M.set_screen_positions(opts)
 		if G.STATE == G.STATES.TABLE_BOARD
 			and WORD_GAME_UI.Layout and WORD_GAME_UI.Layout.deck_rect then
 			local deck = WORD_GAME_UI.Layout.deck_rect()
-			if G.deck and G.deck.T then
-			G.deck.T.x = deck.x
-			G.deck.T.y = deck.y
-			G.deck.T.w = deck.w
-			G.deck.T.h = deck.h
-			if G.deck.hard_set_T then G.deck:hard_set_T(deck.x, deck.y, deck.w, deck.h) end
+			if G.draw_pile and G.draw_pile.T then
+			G.draw_pile.T.x = deck.x
+			G.draw_pile.T.y = deck.y
+			G.draw_pile.T.w = deck.w
+			G.draw_pile.T.h = deck.h
+			if G.draw_pile.hard_set_T then G.draw_pile:hard_set_T(deck.x, deck.y, deck.w, deck.h) end
 			end
 			-- Invisible recycle pile; voucher discard dissolves on the perk imprint.
-			if G.discard and G.discard.T then
-				G.discard.T.x = -20
-				G.discard.T.y = -20
-				if G.discard.hard_set_T then
-					G.discard:hard_set_T(-20, -20, G.discard.T.w, G.discard.T.h)
+			if G.recycle_stash and G.recycle_stash.T then
+				G.recycle_stash.T.x = -20
+				G.recycle_stash.T.y = -20
+				if G.recycle_stash.hard_set_T then
+					G.recycle_stash:hard_set_T(-20, -20, G.recycle_stash.T.w, G.recycle_stash.T.h)
 				end
 			end
 		else
-			if G.deck and G.deck.T then
-				G.deck.T.x = rect.x + pad_x
-				G.deck.T.y = rect.y + rect.h - G.deck.T.h - pad_y
+			if G.draw_pile and G.draw_pile.T then
+				G.draw_pile.T.x = rect.x + pad_x
+				G.draw_pile.T.y = rect.y + rect.h - G.draw_pile.T.h - pad_y
 			end
 		end
 
 		dealt_hand.apply_screen_position()
 
-		if G.discard and G.discard.T
+		if G.recycle_stash and G.recycle_stash.T
 			and not (WORD_GAME_UI.VoucherDiscard and WORD_GAME_UI.VoucherDiscard.uses_table_draw
 				and WORD_GAME_UI.VoucherDiscard.uses_table_draw()) then
-			G.discard.T.x = rect.x + rect.w * 0.5
-			G.discard.T.y = rect.y + rect.h * 0.5
+			G.recycle_stash.T.x = rect.x + rect.w * 0.5
+			G.recycle_stash.T.y = rect.y + rect.h * 0.5
 		end
 
-		if G.hand.snap_VT then G.hand:snap_VT() end
-		snap_moveable(G.hand)
-		snap_moveable(G.deck)
-		snap_moveable(G.discard)
-		if G.deck and G.deck.cards and G.deck.cards[1] then
-			if G.deck.relayout then G.deck:relayout() end
-			if G.deck.hard_set_cards then G.deck:hard_set_cards() end
+		if G.dealt_letters.snap_VT then G.dealt_letters:snap_VT() end
+		snap_moveable(G.dealt_letters)
+		snap_moveable(G.draw_pile)
+		snap_moveable(G.recycle_stash)
+		if G.draw_pile and G.draw_pile.cards and G.draw_pile.cards[1] then
+			if G.draw_pile.relayout then G.draw_pile:relayout() end
+			if G.draw_pile.hard_set_cards then G.draw_pile:hard_set_cards() end
 		end
 
 		if WORD_GAME_UI.TableControls and not opts.skip_hand_shuffle then
 			WORD_GAME_UI.TableControls.sync()
 		end
-		local placement = G.placement_table and G.placement_table.area
-		if G.placement_table and G.placement_table.apply_screen_position then
-			G.placement_table:apply_screen_position()
-			placement = G.placement_table.area
+		local placement = G.pattern_row and G.pattern_row.area
+		if G.pattern_row and G.pattern_row.apply_screen_position then
+			G.pattern_row:apply_screen_position()
+			placement = G.pattern_row.area
 		end
 
 		if placement then
@@ -177,11 +177,11 @@ function M.set_screen_positions(opts)
 end
 
 function M.refresh_placement_layout()
-	if G.STAGE ~= G.STAGES.RUN or not G.placement_table then return end
-	if G.placement_table.apply_screen_position then
-		G.placement_table:apply_screen_position()
+	if G.STAGE ~= G.STAGES.RUN or not G.pattern_row then return end
+	if G.pattern_row.apply_screen_position then
+		G.pattern_row:apply_screen_position()
 	end
-	local placement = G.placement_table.area
+	local placement = G.pattern_row.area
 	if placement then
 		placement:snap_VT()
 		if placement.velocity then

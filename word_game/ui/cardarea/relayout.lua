@@ -51,7 +51,7 @@ end
 
 function M.relayout(area, face_down_in_pile)
 	if not area.cards then return end
-	if (area == G.hand or area == G.deck or area == G.discard) and G.view_deck and G.view_deck[1] and G.view_deck[1].cards then return end
+	if (area == G.dealt_letters or area == G.draw_pile or area == G.recycle_stash) and G.view_deck and G.view_deck[1] and G.view_deck[1].cards then return end
 
 	deck.relayout(area)
 	hand.relayout(area)

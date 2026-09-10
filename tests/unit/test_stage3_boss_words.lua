@@ -204,8 +204,8 @@ T.describe("Stage 1-3 boss words", function()
 		G.CARD_W = 2
 		G.CARD_H = 2.8
 		G.ROOM = { T = { x = 1, y = 0, w = 20, h = 11.5 } }
-		G.hand = { T = { x = 3.2, y = 8.0, w = 10.5, h = 2.8 } }
-		G.placement_table = { area = { T = { x = 4.0, y = 2.0, w = 10.0, h = 2.8 } } }
+		G.dealt_letters = { T = { x = 3.2, y = 8.0, w = 10.5, h = 2.8 } }
+		G.pattern_row = { area = { T = { x = 4.0, y = 2.0, w = 10.0, h = 2.8 } } }
 		local timer = layout.timeline_rect()
 		local stack = bonus_stack_ui.stack_layout()
 		local window_left = -(G.ROOM.T.x or 0)
@@ -214,7 +214,7 @@ T.describe("Stage 1-3 boss words", function()
 		T.assert_almost_equal(stack.x, window_left + bonus_stack_ui.LEFT_WINDOW_MARGIN, 0.02)
 		T.assert_true(stack.x > window_left, "Small margin should keep cards off the hard left")
 		T.assert_true(
-			stack.x + stack.card_w < G.hand.T.x,
+			stack.x + stack.card_w < G.dealt_letters.T.x,
 			"Stack should not overlap the dealt hand"
 		)
 		T.assert_almost_equal(stack.step_y, stack.card_h * 0.5, 0.001)
@@ -293,7 +293,7 @@ T.describe("Stage 1-3 boss words", function()
 			remove_from_area = function(self) self.area = nil end,
 		}
 
-		G.hand = {
+		G.dealt_letters = {
 			cards = { hand_card },
 			T = { x = 3, y = 8, w = 10, h = 2.8 },
 			config = { type = "hand" },
@@ -323,18 +323,18 @@ T.describe("Stage 1-3 boss words", function()
 				end
 			end,
 		}
-		hand_card.area = G.hand
+		hand_card.area = G.dealt_letters
 
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME_UI.TableInput = {
 			refresh_card_input = function()
-				if G.hand then G.hand:set_ranks() end
+				if G.dealt_letters then G.dealt_letters:set_ranks() end
 			end,
 		}
 		WORD_GAME_UI.PlayHoldRedraw = WORD_GAME_UI.PlayHoldRedraw or { is_animating = function() return false end }
 
 		-- Mirrors deal_boss_hand finish while countdown animation is still running.
-		G.hand:set_ranks()
+		G.dealt_letters:set_ranks()
 		T.assert_false(hand_card.states.drag.can, "set_ranks during score animation must block drag")
 
 		play_effects.set_word_score_animating(false)
@@ -364,7 +364,7 @@ T.describe("Stage 1-3 boss words", function()
 		G.CARD_H = 2.8
 		G.TILE_W = 20
 		G.TILE_H = 11.5
-		G.hand = {
+		G.dealt_letters = {
 			cards = {},
 			T = { x = 3, y = 8.5, w = 10, h = 2.8 },
 			remove_card = function(self, card)
@@ -401,7 +401,7 @@ T.describe("Stage 1-3 boss words", function()
 				card_h = function() return G.CARD_H end,
 			},
 		}
-		G.placement_table = session
+		G.pattern_row = session
 
 		local blank_i = nil
 		for i, slot in ipairs(slots) do
@@ -426,8 +426,8 @@ T.describe("Stage 1-3 boss words", function()
 			set_card_area = function(self, area) self.area = area end,
 			remove_from_area = function(self) self.area = nil end,
 		}
-		G.hand.cards[#G.hand.cards + 1] = card
-		card.area = G.hand
+		G.dealt_letters.cards[#G.dealt_letters.cards + 1] = card
+		card.area = G.dealt_letters
 
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.Jumble = jumble
@@ -557,7 +557,7 @@ T.describe("Stage 1-3 boss words", function()
 		}
 		WORD_GAME_UI.PlayHoldRedraw = { is_animating = function() return false end }
 		WORD_GAME_UI.TableInput = { refresh_card_input = function() end }
-		G.hand = nil
+		G.dealt_letters = nil
 
 		T.assert_true(InputLock.is_table_busy(), "Staging must lock play before the intro starts")
 

@@ -227,7 +227,7 @@ Only `init.lua` at package root — subpackages:
 | `jumble/geometry.lua` | Span/fixed screen geometry, puzzle row width, card alignment |
 | `bonus/gutter.lua` | Bonus stack layout and drag/snap hit tests |
 
-Fixed-letter tile draw is installed from `ui/table/board.lua` via `placement_table.draw_pattern_overlay`.
+Fixed-letter tile draw is installed from `ui/table/board.lua` via `pattern_row.draw_pattern_overlay`.
 
 ### Integration hooks
 

@@ -10,7 +10,7 @@ local mock_env = require("tests.helpers.mock_env")
 
 local function stub_areas()
 	G.letter_inventory = {}
-	G.deck = {
+	G.draw_pile = {
 		cards = {},
 		config = {},
 		T = { x = 0, y = 0 },
@@ -19,13 +19,13 @@ local function stub_areas()
 		shuffle = function() end,
 		hard_set_T = function() end,
 	}
-	G.hand = {
+	G.dealt_letters = {
 		cards = {}, config = {},
 		emplace = function() end, set_ranks = function() end,
 		relayout = function() end, snap_VT = function() end,
 		hard_set_cards = function() end,
 	}
-	G.discard = {
+	G.recycle_stash = {
 		cards = {}, config = {},
 		emplace = function() end, remove_card = function() end,
 	}
@@ -41,7 +41,7 @@ local function build_deck(letter, copies)
 			REMOVED = false,
 		}
 		cards[#cards + 1] = card
-		G.deck:emplace(card)
+		G.draw_pile:emplace(card)
 		G.letter_inventory[#G.letter_inventory + 1] = card
 	end
 	return cards

@@ -49,8 +49,8 @@ local function window_left_x()
 end
 
 local function detach_card(card)
-	if G.placement_table and G.placement_table.on_remove_card then
-		G.placement_table:on_remove_card(card)
+	if G.pattern_row and G.pattern_row.on_remove_card then
+		G.pattern_row:on_remove_card(card)
 	end
 	if card.area and card.area.remove_card then
 		card.area:remove_card(card)
@@ -86,8 +86,8 @@ function M.stash_played_card(card)
 		if card.states.hover then card.states.hover.can = false end
 		if card.states.click then card.states.click.can = false end
 	end
-	if G.discard and G.discard.emplace then
-		G.discard:emplace(card)
+	if G.recycle_stash and G.recycle_stash.emplace then
+		G.recycle_stash:emplace(card)
 	end
 end
 

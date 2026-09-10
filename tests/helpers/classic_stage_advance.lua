@@ -29,10 +29,10 @@ function M.setup_card_areas()
 	mock_env.ensure_card_class()
 	require("word_game.ui.cardarea.init")
 
-	G.deck = CardArea(0, 0, 1, 1, { type = "deck", card_limit = 52 })
-	G.hand = CardArea(0, 0, 7, 1, { type = "hand", card_limit = 7 })
-	G.discard = CardArea(0, 0, 1, 1, { type = "discard", card_limit = 500 })
-	G.placement_table = {
+	G.draw_pile = CardArea(0, 0, 1, 1, { type = "deck", card_limit = 52 })
+	G.dealt_letters = CardArea(0, 0, 7, 1, { type = "hand", card_limit = 7 })
+	G.recycle_stash = CardArea(0, 0, 1, 1, { type = "discard", card_limit = 500 })
+	G.pattern_row = {
 		area = CardArea(0, 0, 5, 1, { type = "play" }),
 		on_remove_card = function() end,
 		relayout = function() end,
@@ -46,8 +46,8 @@ function M.wire_table_input()
 	WORD_GAME = WORD_GAME or {}
 	WORD_GAME_UI.TableInput = {
 		refresh_card_input = function()
-			if G.hand and G.hand.set_ranks then
-				G.hand:set_ranks()
+			if G.dealt_letters and G.dealt_letters.set_ranks then
+				G.dealt_letters:set_ranks()
 			end
 		end,
 	}
@@ -122,7 +122,7 @@ function M.stub_word_feedback()
 end
 
 function M.assert_hand_draggable(T, label)
-	for i, card in ipairs(G.hand.cards or {}) do
+	for i, card in ipairs(G.dealt_letters.cards or {}) do
 		T.assert_true(card.states and card.states.drag and card.states.drag.can,
 			(label or "Hand") .. " card " .. i .. " must be draggable")
 	end

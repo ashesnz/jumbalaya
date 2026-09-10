@@ -10,7 +10,7 @@ function M.button_size()
 end
 
 function M.play_gap()
-	local card_w = (G.hand and G.hand.card_w) or G.CARD_W or 1
+	local card_w = (G.dealt_letters and G.dealt_letters.card_w) or G.CARD_W or 1
 	return math.max(0.32, card_w * 0.24)
 end
 

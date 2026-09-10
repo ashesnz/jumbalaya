@@ -19,46 +19,46 @@ local function snap_moveable(moveable)
 end
 
 function M.apply_screen_position()
-	if not G.hand then return end
+	if not G.dealt_letters then return end
 	local wr = G.GAME and G.GAME.word_round
 	local locked = wr and wr.jumble and wr.jumble.locked_hand_layout
 	if locked then
-		G.hand.T.x = locked.x
-		G.hand.T.y = locked.y
-		G.hand.T.w = locked.w
-		G.hand.T.h = locked.h
-		if G.hand.hard_set_T then G.hand:hard_set_T(locked.x, locked.y, locked.w, locked.h) end
-		if G.hand.cards and G.hand.cards[1] then
-			if G.hand.relayout then G.hand:relayout() end
-			if G.hand.hard_set_cards then G.hand:hard_set_cards() end
+		G.dealt_letters.T.x = locked.x
+		G.dealt_letters.T.y = locked.y
+		G.dealt_letters.T.w = locked.w
+		G.dealt_letters.T.h = locked.h
+		if G.dealt_letters.hard_set_T then G.dealt_letters:hard_set_T(locked.x, locked.y, locked.w, locked.h) end
+		if G.dealt_letters.cards and G.dealt_letters.cards[1] then
+			if G.dealt_letters.relayout then G.dealt_letters:relayout() end
+			if G.dealt_letters.hard_set_cards then G.dealt_letters:hard_set_cards() end
 		end
-		snap_moveable(G.hand)
+		snap_moveable(G.dealt_letters)
 		return
 	end
 	local hand_size = facade.hand_size().get()
 	local hand_w = get_hand_area_width(hand_size)
-	local hand_h = (G.CARD_H or G.hand.T.h) * 0.95
+	local hand_h = (G.CARD_H or G.dealt_letters.T.h) * 0.95
 	local felt = felt_layout.hand_felt_rect()
 
-	G.hand.T = G.hand.T or { x = 0, y = 0, w = hand_w, h = hand_h }
-	G.hand.T.w = hand_w
-	G.hand.T.h = hand_h
-	G.hand.T.x = felt.x + math.max(0, (felt.w - hand_w) / 2)
-	G.hand.T.y = G.TILE_H - hand_h - HAND_BOTTOM_MARGIN
-	if G.hand.hard_set_T then G.hand:hard_set_T(G.hand.T.x, G.hand.T.y, hand_w, hand_h) end
+	G.dealt_letters.T = G.dealt_letters.T or { x = 0, y = 0, w = hand_w, h = hand_h }
+	G.dealt_letters.T.w = hand_w
+	G.dealt_letters.T.h = hand_h
+	G.dealt_letters.T.x = felt.x + math.max(0, (felt.w - hand_w) / 2)
+	G.dealt_letters.T.y = G.TILE_H - hand_h - HAND_BOTTOM_MARGIN
+	if G.dealt_letters.hard_set_T then G.dealt_letters:hard_set_T(G.dealt_letters.T.x, G.dealt_letters.T.y, hand_w, hand_h) end
 
-	if G.hand.cards and G.hand.cards[1] then
-		if G.hand.relayout then G.hand:relayout() end
-		if G.hand.hard_set_cards then G.hand:hard_set_cards() end
+	if G.dealt_letters.cards and G.dealt_letters.cards[1] then
+		if G.dealt_letters.relayout then G.dealt_letters:relayout() end
+		if G.dealt_letters.hard_set_cards then G.dealt_letters:hard_set_cards() end
 	end
 
-	snap_moveable(G.hand)
+	snap_moveable(G.dealt_letters)
 end
 
 function M.stabilize()
-	if not G.hand then return end
+	if not G.dealt_letters then return end
 	M.apply_screen_position()
-	if G.hand.cards and G.hand.cards[1] and G.hand.hard_set_cards then G.hand:hard_set_cards() end
+	if G.dealt_letters.cards and G.dealt_letters.cards[1] and G.dealt_letters.hard_set_cards then G.dealt_letters:hard_set_cards() end
 end
 
 return M

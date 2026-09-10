@@ -48,7 +48,7 @@ T.describe("Card marketplace offers (word_game.model.trade)", function()
 
 	T.it("greys out remove and modify when the offered letter is not in the deck", function()
 		G.letter_inventory = {}
-		G.deck = {
+		G.draw_pile = {
 			cards = {},
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 			config = {},
@@ -65,7 +65,7 @@ T.describe("Card marketplace offers (word_game.model.trade)", function()
 	T.it("enables deck actions after the offered letter is added to the deck", function()
 		G.letter_inventory = {}
 		local cards = {}
-		G.deck = {
+		G.draw_pile = {
 			cards = cards,
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 			config = {},
@@ -91,7 +91,7 @@ T.describe("Card marketplace offers (word_game.model.trade)", function()
 	T.it("counts every live copy of a letter in the deck", function()
 		G.letter_inventory = {}
 		local cards = {}
-		G.deck = {
+		G.draw_pile = {
 			cards = cards,
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 			config = {},
@@ -102,9 +102,9 @@ T.describe("Card marketplace offers (word_game.model.trade)", function()
 			G.letter_inventory[#G.letter_inventory + 1] = card
 			return card
 		end
-		G.deck:emplace(deck.create_letter_card("E", "red"))
-		G.deck:emplace(deck.create_letter_card("E", "black"))
-		G.deck:emplace(deck.create_letter_card("A", "red"))
+		G.draw_pile:emplace(deck.create_letter_card("E", "red"))
+		G.draw_pile:emplace(deck.create_letter_card("E", "black"))
+		G.draw_pile:emplace(deck.create_letter_card("A", "red"))
 		deck.create_letter_card = create_letter_card
 
 		T.assert_equal(deck.count_letters_in_deck("E"), 2)

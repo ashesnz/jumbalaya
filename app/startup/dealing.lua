@@ -58,7 +58,7 @@ function get_table_felt_rect()
 end
 
 function apply_run_layout()
-	if G.STAGE == G.STAGES.RUN and G.hand then
+	if G.STAGE == G.STAGES.RUN and G.dealt_letters then
 		Layout.set_screen_positions()
 	end
 end

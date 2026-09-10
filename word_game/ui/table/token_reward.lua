@@ -135,8 +135,8 @@ local function timeline_center_px()
 end
 
 local function resolve_target_px()
-	if G.deck and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.token_center_px then
-		local cx, cy = WORD_GAME_UI.TableDeck.token_center_px(G.deck)
+	if G.draw_pile and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.token_center_px then
+		local cx, cy = WORD_GAME_UI.TableDeck.token_center_px(G.draw_pile)
 		if cx and cy then return cx, cy end
 	end
 	local deck = Layout.deck_rect()

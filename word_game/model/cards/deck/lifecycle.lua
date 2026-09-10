@@ -7,8 +7,8 @@ return function(context)
 	M.STARTING_LETTERS = { "E", "E", "A", "A", "I", "O", "T", "S", "R", "Y", "N", "C" }
 
 	function M.shuffle_deck()
-		if not G.deck or not G.deck.cards then return end
-		local cards = G.deck.cards
+		if not G.draw_pile or not G.draw_pile.cards then return end
+		local cards = G.draw_pile.cards
 		for i = #cards, 2, -1 do
 			local j = math.random(1, i)
 			cards[i], cards[j] = cards[j], cards[i]
@@ -16,25 +16,25 @@ return function(context)
 	end
 
  function M.populate_starting_deck()
- 	G.deck.config = G.deck.config or {}
+ 	G.draw_pile.config = G.draw_pile.config or {}
 		G.letter_inventory = {}
 		G.letter_card_id = 0
-		G.deck.cards = {}
+		G.draw_pile.cards = {}
 		for _, letter in ipairs(M.STARTING_LETTERS) do
-			G.deck:emplace(M.create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR))
+			G.draw_pile:emplace(M.create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR))
 		end
 		G.GAME.starting_deck_size = #M.STARTING_LETTERS
-		G.deck.config.card_limit = #M.STARTING_LETTERS
+		G.draw_pile.config.card_limit = #M.STARTING_LETTERS
 		M.shuffle_deck()
- 	if G.deck.hard_set_T then G.deck:hard_set_T() end
+ 	if G.draw_pile.hard_set_T then G.draw_pile:hard_set_T() end
 		M.sync_deck_count_display()
 	end
 
 	 function M.draft_letter(letter, color)
-	 	G.deck.config = G.deck.config or {}
+	 	G.draw_pile.config = G.draw_pile.config or {}
 	 local card = M.create_letter_card(letter, color)
-		G.deck:emplace(card)
-		G.deck.config.card_limit = (G.deck.config.card_limit or #M.STARTING_LETTERS) + 1
+		G.draw_pile:emplace(card)
+		G.draw_pile.config.card_limit = (G.draw_pile.config.card_limit or #M.STARTING_LETTERS) + 1
 		M.sync_deck_count_display()
 		return card
 	end
@@ -43,8 +43,8 @@ return function(context)
 		if not card then return end
 		for _, area in ipairs(M.all_areas()) do
 			if area and card.area == area then
-				if G.placement_table and area == G.placement_table.area then
-					G.placement_table:on_remove_card(card)
+				if G.pattern_row and area == G.pattern_row.area then
+					G.pattern_row:on_remove_card(card)
 				end
 				area:remove_card(card)
 				break
@@ -57,10 +57,10 @@ return function(context)
 			end
 		end
 		card.REMOVED = true
-		if G.deck then
-			G.deck.config = G.deck.config or {}
+		if G.draw_pile then
+			G.draw_pile.config = G.draw_pile.config or {}
 			local total = #(G.letter_inventory or {})
-			G.deck.config.card_limit = math.max(total, (G.deck.config.card_limit or 1) - 1)
+			G.draw_pile.config.card_limit = math.max(total, (G.draw_pile.config.card_limit or 1) - 1)
 		end
 		if card.remove then
 			card:remove()

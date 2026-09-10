@@ -17,6 +17,12 @@
 	- `G.letter_inventory` — live letter cards for the run; `G.letter_card_id` — next instance id.
 	- Set progress: `G.GAME.word_round.set` only.
 
+	TABLE_BOARD CardArea instances (prefer `WORD_GAME.Deck` / `Board` accessors in new code):
+	- `G.dealt_letters` — player's dealt row (was `G.hand`)
+	- `G.draw_pile` — draw stack (was `G.deck`)
+	- `G.recycle_stash` — recycle / fly-off stash (was `G.discard`)
+	- `G.pattern_row` — pattern row controller; `.area` is the placement CardArea
+
 	Adding G.GAME fields:
 	- Assign an owning module below and declare the field on GameRunState here.
 	- Do not add ad-hoc keys from UI, tests, or one-off call sites without an owner.
@@ -285,10 +291,10 @@
 ---@field GAME GameRunState Live run snapshot — field owners in types/game.lua
 ---@field ROOM SceneNode
 ---@field ROOM_ATTACH EaseNode
----@field hand CardArea|nil
----@field deck CardArea|nil
----@field discard CardArea|nil
----@field play CardArea|nil
+---@field dealt_letters CardArea|nil Player's dealt letter row
+---@field draw_pile CardArea|nil Draw pile (sidebar stack)
+---@field recycle_stash CardArea|nil Played / fly-off recycle stash (off-screen)
+---@field pattern_row PlacementTable|nil Pattern row controller (`.area` is the CardArea)
 ---@field hand_action_bar UIPanel|nil
 ---@field table_shuffle_bar UIPanel|nil
 ---@field hand_play_button UIPanel|nil
@@ -301,8 +307,6 @@
 ---@field view_deck CardArea[]|nil
 ---@field VIEWING_DECK any
 ---@field deck_preview any
----@field placement_table table|nil
----@field placement_table PlacementTable|nil
 ---@field real_dt number
 ---@field HIGHLIGHT_H number
 ---@field E_MANAGER Scheduler

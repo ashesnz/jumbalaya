@@ -26,4 +26,9 @@ end
 
 Deck.Registry = require("word_game.model.cards.registry")
 
+local TableAreas = require("word_game.model.table_areas")
+Deck.dealt_letters = TableAreas.dealt_letters
+Deck.draw_pile = TableAreas.draw_pile
+Deck.recycle_stash = TableAreas.recycle_stash
+
 return Deck

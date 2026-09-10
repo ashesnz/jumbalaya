@@ -33,7 +33,7 @@ function M.clear_bounce(node)
 end
 
 local function placement_area()
-	return G.placement_table and G.placement_table.area
+	return G.pattern_row and G.pattern_row.area
 end
 
 local function jumble_active()
@@ -50,15 +50,15 @@ function M.recall_placement_cards(opts)
 		local p_area = placement_area()
 		for i = #p_area.cards, 1, -1 do
 			local card = p_area.cards[i]
-			if G.placement_table then
-				G.placement_table:on_remove_card(card)
+			if G.pattern_row then
+				G.pattern_row:on_remove_card(card)
 			end
 			p_area:remove_card(card)
 			local stack = bonus_stack_ui()
 			if stack and stack.is_bonus_card(card) then
 				stack.return_card(card)
-			elseif G.hand then
-				G.hand:emplace(card)
+			elseif G.dealt_letters then
+				G.dealt_letters:emplace(card)
 			end
 		end
 		if p_area.hard_set_cards then
@@ -71,18 +71,18 @@ function M.recall_placement_cards(opts)
 			WORD_GAME.Jumble.clear_blank_cards(wr.jumble.slots)
 			WORD_GAME.Jumble.sync_placement_cards(wr.jumble.slots)
 		end
-		if G.placement_table and G.placement_table.jumble_geometry then
-			G.placement_table.jumble_geometry.relayout(G.placement_table)
+		if G.pattern_row and G.pattern_row.jumble_geometry then
+			G.pattern_row.jumble_geometry.relayout(G.pattern_row)
 		end
 	end
 	facade.placement_word().clear()
-	if G.hand then
-		if G.hand.clear_selection then G.hand:clear_selection() end
-		if G.hand.set_ranks then G.hand:set_ranks() end
-		if G.hand.relayout then G.hand:relayout() end
+	if G.dealt_letters then
+		if G.dealt_letters.clear_selection then G.dealt_letters:clear_selection() end
+		if G.dealt_letters.set_ranks then G.dealt_letters:set_ranks() end
+		if G.dealt_letters.relayout then G.dealt_letters:relayout() end
 		if not opts.skip_hand_snap then
-			if G.hand.hard_set_cards then G.hand:hard_set_cards() end
-			if G.hand.snap_VT then G.hand:snap_VT() end
+			if G.dealt_letters.hard_set_cards then G.dealt_letters:hard_set_cards() end
+			if G.dealt_letters.snap_VT then G.dealt_letters:snap_VT() end
 		end
 	end
 end
@@ -104,7 +104,7 @@ function M.return_placement_cards_to_hand(placement_has_cards, sync_visibility)
 end
 
 function M.stabilize()
-	if not G.hand or (not G.hand_action_bar and not G.table_shuffle_bar) then return end
+	if not G.dealt_letters or (not G.hand_action_bar and not G.table_shuffle_bar) then return end
 	layout().place_action_bars()
 end
 
@@ -136,11 +136,11 @@ end
 
 function M.shuffle_hand(placement_has_cards)
 	if placement_has_cards() then return end
-	if not G.hand or #G.hand.cards < 2 then return end
+	if not G.dealt_letters or #G.dealt_letters.cards < 2 then return end
 	if InputLock.is_table_busy() then return end
 	if G.INPUT and G.INPUT.dragging and G.INPUT.dragging.target then return end
-	G.hand:clear_selection()
-	hand_shuffle_anim.animate(G.hand)
+	G.dealt_letters:clear_selection()
+	hand_shuffle_anim.animate(G.dealt_letters)
 end
 
 return M

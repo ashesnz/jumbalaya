@@ -110,12 +110,12 @@ return function(context)
 	end
 
 	function M.sanitize_hand()
-		if not G.hand or not G.hand.cards then return end
-		for i = #G.hand.cards, 1, -1 do
-			local card = G.hand.cards[i]
+		if not G.dealt_letters or not G.dealt_letters.cards then return end
+		for i = #G.dealt_letters.cards, 1, -1 do
+			local card = G.dealt_letters.cards[i]
 			M.reveal_in_hand(card)
 			if not M.is_letter_card(card) then
-				G.hand:remove_card(card)
+				G.dealt_letters:remove_card(card)
 				if card and card.remove then
 					card:remove()
 				end
@@ -124,9 +124,9 @@ return function(context)
 	end
 
 	function M.all_areas()
-		local areas = { G.deck, G.hand, G.discard }
-		if G.placement_table and G.placement_table.area then
-			areas[#areas + 1] = G.placement_table.area
+		local areas = { G.draw_pile, G.dealt_letters, G.recycle_stash }
+		if G.pattern_row and G.pattern_row.area then
+			areas[#areas + 1] = G.pattern_row.area
 		end
 		return areas
 	end
@@ -148,8 +148,8 @@ return function(context)
 			if area and area.cards then
 				for i = #area.cards, 1, -1 do
 					local card = area.cards[i]
-					if G.placement_table and area == G.placement_table.area then
-						G.placement_table:on_remove_card(card)
+					if G.pattern_row and area == G.pattern_row.area then
+						G.pattern_row:on_remove_card(card)
 					end
 					area:remove_card(card)
 					all[#all + 1] = card
@@ -159,10 +159,10 @@ return function(context)
 		end
 
 		for _, card in ipairs(all) do
-			G.deck:emplace(card)
+			G.draw_pile:emplace(card)
 		end
-		G.deck:shuffle("letter_deck_reset")
-		G.deck:hard_set_T()
+		G.draw_pile:shuffle("letter_deck_reset")
+		G.draw_pile:hard_set_T()
 	end
 
 	function M.letter_center()
@@ -179,8 +179,8 @@ return function(context)
 		color = color or LetterPalette.DEFAULT_FACE_COLOR
 		local front = M.front(letter, color)
 		G.letter_card_id = (G.letter_card_id or 0) + 1
-		local deck_x = (G.deck and G.deck.T and G.deck.T.x) or 0
-		local deck_y = (G.deck and G.deck.T and G.deck.T.y) or 0
+		local deck_x = (G.draw_pile and G.draw_pile.T and G.draw_pile.T.x) or 0
+		local deck_y = (G.draw_pile and G.draw_pile.T and G.draw_pile.T.y) or 0
 		local card = Card(
 			deck_x, deck_y, G.CARD_W or 1, G.CARD_H or 1.4,
 			front,

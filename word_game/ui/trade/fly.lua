@@ -21,8 +21,8 @@ end
 
 local function deck_target_px()
 	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
-	if G.deck and G.deck.T then
-		local t = G.deck.T
+	if G.draw_pile and G.draw_pile.T then
+		local t = G.draw_pile.T
 		return (t.x + (t.w or 0) * 0.5) * ts, (t.y + (t.h or 0) * 0.5) * ts
 	end
 	local rect = Layout.deck_rect()

@@ -38,7 +38,7 @@ function PlacementContext:controller()
 end
 
 function PlacementContext:placement_area()
-	local pt = self.game.placement_table
+	local pt = self.game.pattern_row
 	return pt and pt.area
 end
 

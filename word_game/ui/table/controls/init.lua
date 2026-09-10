@@ -26,7 +26,7 @@ function M.shuffle_button_uie()
 end
 
 function M.placement_has_cards()
-	local area = G.placement_table and G.placement_table.area
+	local area = G.pattern_row and G.pattern_row.area
 	if area and area.cards and #area.cards > 0 then
 		return true
 	end
@@ -66,7 +66,7 @@ end
 function M.visible()
 	return G.STATE == G.STATES.TABLE_BOARD
 		and G.ROOM_ATTACH ~= nil
-		and G.hand ~= nil
+		and G.dealt_letters ~= nil
 end
 
 local function action_visible()

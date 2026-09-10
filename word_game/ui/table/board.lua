@@ -64,9 +64,9 @@ function M.update(game, dt)
 	if WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.update then
 		WORD_GAME_UI.BossWordAnnounce.update(dt)
 	end
-	if game.placement_table then
-		ensure_placement_pattern_overlay(game.placement_table)
-		game.placement_table:update(dt)
+	if game.pattern_row then
+		ensure_placement_pattern_overlay(game.pattern_row)
+		game.pattern_row:update(dt)
 	end
 	if WORD_GAME_UI.TimelineTimer and WORD_GAME_UI.TimelineTimer.update then
 		WORD_GAME_UI.TimelineTimer.update(dt)
@@ -86,11 +86,11 @@ function M.draw_spotlight_overlay(game, overlay)
 	if overlay.redraw_banner and WORD_GAME_UI.ScoreBanner then
 		WORD_GAME_UI.ScoreBanner.draw()
 	end
-	if overlay.redraw_tokens and G.deck and not boss_sequence_active()
+	if overlay.redraw_tokens and G.draw_pile and not boss_sequence_active()
 		and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.draw then
 		love.graphics.push()
-		G.deck:translate_container()
-		WORD_GAME_UI.TableDeck.draw(G.deck)
+		G.draw_pile:translate_container()
+		WORD_GAME_UI.TableDeck.draw(G.draw_pile)
 		love.graphics.pop()
 	end
 	if overlay.redraw_confetti and WORD_GAME_UI.Confetti then
@@ -116,10 +116,10 @@ function M.draw_spotlight_overlay(game, overlay)
 		end
 	end
 
-	if overlay.redraw_hand and G.hand then
+	if overlay.redraw_hand and G.dealt_letters then
 		local bonus_stack = WORD_GAME_UI.BonusStackUI
 		for _, v in pairs(game.LIVE.CARD) do
-			if v.area == G.hand
+			if v.area == G.dealt_letters
 				and (not v.parent and v ~= game.INPUT.dragging.target and v ~= game.INPUT.focused.target)
 				and not (bonus_stack and bonus_stack.contains(v)) then
 				love.graphics.push()
@@ -130,9 +130,9 @@ function M.draw_spotlight_overlay(game, overlay)
 		end
 	end
 
-	if overlay.redraw_placement and G.placement_table and G.placement_table.draw_run_pass then
-		ensure_placement_pattern_overlay(G.placement_table)
-		G.placement_table:draw_run_pass(game)
+	if overlay.redraw_placement and G.pattern_row and G.pattern_row.draw_run_pass then
+		ensure_placement_pattern_overlay(G.pattern_row)
+		G.pattern_row:draw_run_pass(game)
 	end
 
 	if overlay.redraw_play and G.hand_action_bar and not G.hand_action_bar.REMOVED then
@@ -174,9 +174,9 @@ function M.draw_hud()
 end
 
 function M.draw_board(game)
-	if game.placement_table then
-		ensure_placement_pattern_overlay(game.placement_table)
-		game.placement_table:draw_run_pass(game)
+	if game.pattern_row then
+		ensure_placement_pattern_overlay(game.pattern_row)
+		game.pattern_row:draw_run_pass(game)
 		M.draw_hand_pass(game)
 	end
 	local bonus_stack_ui = WORD_GAME_UI.BonusStackUI
@@ -186,39 +186,39 @@ function M.draw_board(game)
 end
 
 function M.should_draw_sidebar_deck()
-	if not G.deck then return false end
+	if not G.draw_pile then return false end
 	if boss_sequence_active() then return false end
 	if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
 		return true
 	end
-	return #G.deck.cards > 0
+	return #G.draw_pile.cards > 0
 end
 
 function M.draw_hand_pass(game)
 	if M.should_draw_sidebar_deck() then
 		love.graphics.push()
-		G.deck:translate_container()
+		G.draw_pile:translate_container()
 		if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
-			WORD_GAME_UI.TableDeck.draw(G.deck)
+			WORD_GAME_UI.TableDeck.draw(G.draw_pile)
 		else
-			G.deck:draw()
+			G.draw_pile:draw()
 		end
 		love.graphics.pop()
 	end
 
-	if not G.hand or #G.hand.cards == 0 then
+	if not G.dealt_letters or #G.dealt_letters.cards == 0 then
 		-- still draw bonus stack card overlays below
 	else
 		love.graphics.push()
-		G.hand:translate_container()
-		G.hand:draw()
+		G.dealt_letters:translate_container()
+		G.dealt_letters:draw()
 		love.graphics.pop()
 	end
 
 	local bonus_stack = WORD_GAME_UI.BonusStackUI
 	local controller = game.INPUT
 	for _, v in pairs(game.LIVE.CARD) do
-		local from_hand = v.area == G.hand
+		local from_hand = v.area == G.dealt_letters
 		local from_bonus = bonus_stack and bonus_stack.contains(v) and not v.area
 		if (from_hand or from_bonus)
 			and (not v.parent and v ~= controller.dragging.target and v ~= controller.focused.target)
@@ -267,7 +267,7 @@ function M.draw_card_interaction(game)
 		and WORD_GAME_UI.FirstPlayTutorial.is_active() then
 		return
 	end
-	if not game.placement_table then return end
+	if not game.pattern_row then return end
 	local bonus_stack = WORD_GAME_UI.BonusStackUI
 	if game.INPUT.dragging.target and game.INPUT.dragging.target ~= game.INPUT.focused.target then
 		love.graphics.push()
@@ -277,7 +277,7 @@ function M.draw_card_interaction(game)
 	end
 
 	if game.INPUT.focused.target and getmetatable(game.INPUT.focused.target) == Card
-		and (game.INPUT.focused.target.area == G.hand
+		and (game.INPUT.focused.target.area == G.dealt_letters
 			or (bonus_stack and bonus_stack.contains(game.INPUT.focused.target)))
 		and game.INPUT.focused.target ~= game.INPUT.dragging.target then
 		love.graphics.push()

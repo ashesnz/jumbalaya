@@ -48,13 +48,13 @@ function M.card_on_placement(session, card)
 end
 
 function M.point_in_hand(x, y)
-	if not G.hand then return false end
+	if not G.dealt_letters then return false end
 	local pad_x = G.CARD_W * 0.15
 	local pad_y = G.CARD_H * 0.2
-	return x >= G.hand.T.x - pad_x
-		and x <= G.hand.T.x + G.hand.T.w + pad_x
-		and y >= G.hand.T.y - pad_y
-		and y <= G.hand.T.y + G.hand.T.h + pad_y
+	return x >= G.dealt_letters.T.x - pad_x
+		and x <= G.dealt_letters.T.x + G.dealt_letters.T.w + pad_x
+		and y >= G.dealt_letters.T.y - pad_y
+		and y <= G.dealt_letters.T.y + G.dealt_letters.T.h + pad_y
 end
 
 local function bonus_origin_slot(card)
@@ -67,11 +67,11 @@ end
 
 function M.restore_bonus_card(session, card, origin_slot, origin_insert)
 	if not BonusStack.is_bonus_card(card) then return false end
-	if G.hand then
-		M.drop_from_area_list(G.hand, card)
+	if G.dealt_letters then
+		M.drop_from_area_list(G.dealt_letters, card)
 	end
-	if G.deck then
-		M.drop_from_area_list(G.deck, card)
+	if G.draw_pile then
+		M.drop_from_area_list(G.draw_pile, card)
 	end
 
 	local jumble = WORD_GAME and WORD_GAME.Jumble
@@ -101,9 +101,9 @@ function M.point_in_return_zone(session, x, y)
 	end
 	if M.point_in_hand(x, y) then return true end
 	local area = session and session.area
-	if not area or not G.hand then return false end
+	if not area or not G.dealt_letters then return false end
 	local top = area.T.y + area.T.h
-	local bottom = G.hand.T.y
+	local bottom = G.dealt_letters.T.y
 	if y < top or y > bottom then return false end
 	local felt = get_table_felt_rect and get_table_felt_rect()
 	if felt then
@@ -142,11 +142,11 @@ function M.place_in_row(session, card)
 	elseif from_area == area then
 		jumble.remove_card_from_blanks(card)
 	end
-	if G.deck and G.deck ~= area then
-		M.drop_from_area_list(G.deck, card)
+	if G.draw_pile and G.draw_pile ~= area then
+		M.drop_from_area_list(G.draw_pile, card)
 	end
-	if G.hand and G.hand ~= area and G.hand ~= from_area then
-		M.drop_from_area_list(G.hand, card)
+	if G.dealt_letters and G.dealt_letters ~= area and G.dealt_letters ~= from_area then
+		M.drop_from_area_list(G.dealt_letters, card)
 	end
 
 	local cx = card.T.x + card.T.w / 2
@@ -158,10 +158,10 @@ function M.place_in_row(session, card)
 	if not slot_i then
 		if BonusStack.is_bonus_card(card) then
 			M.restore_bonus_card(session, card, origin_slot, origin_insert)
-		elseif from_area == area or (from_area and from_area == G.hand) then
-			if G.hand then
-				G.hand:emplace(card)
-				G.hand:relayout()
+		elseif from_area == area or (from_area and from_area == G.dealt_letters) then
+			if G.dealt_letters then
+				G.dealt_letters:emplace(card)
+				G.dealt_letters:relayout()
 			end
 		elseif from_bonus then
 			bonus_gutter.return_card(card)
@@ -202,12 +202,12 @@ function M.return_to_hand(session, card)
 		placement_word().clear()
 		return true
 	end
-	if not G.hand or not M.card_on_placement(session, card) then return false end
+	if not G.dealt_letters or not M.card_on_placement(session, card) then return false end
 	jumble.remove_card_from_blanks(card)
-	G.hand:emplace(card)
-	G.hand:relayout()
-	G.hand:snap_VT()
-	G.hand:hard_set_cards()
+	G.dealt_letters:emplace(card)
+	G.dealt_letters:relayout()
+	G.dealt_letters:snap_VT()
+	G.dealt_letters:hard_set_cards()
 	jumble_geometry.relayout(session)
 	session.area:hard_set_cards()
 	placement_word().clear()

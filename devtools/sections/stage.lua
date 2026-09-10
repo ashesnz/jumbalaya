@@ -87,8 +87,8 @@ local function jump_to_hand(ctx, set, hand_index)
 			WORD_GAME_UI.Layout.request_refresh()
 		end
 	end
-	if G.placement_table and G.placement_table.apply_screen_position then
-		G.placement_table:apply_screen_position()
+	if G.pattern_row and G.pattern_row.apply_screen_position then
+		G.pattern_row:apply_screen_position()
 	end
 	if set == 1 and hand_index == round_config.BONUS_STACK_HAND_FIRST then
 		seed_bonus_gutter()

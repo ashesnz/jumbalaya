@@ -145,7 +145,7 @@ function Game:render_board_pass()
 	end
 	perf_checkpoint('panels', 'draw')
 
-	if self.placement_table and WORD_GAME_UI.TableBoard then
+	if self.pattern_row and WORD_GAME_UI.TableBoard then
 		WORD_GAME_UI.TableBoard.draw_hud()
 		WORD_GAME_UI.TableBoard.draw_board(self)
 	end
@@ -194,7 +194,7 @@ function Game:render_chrome_pass()
 		G.ALERT_ON_SCREEN = true
 	end
 
-	if self.placement_table and WORD_GAME_UI.TableBoard then
+	if self.pattern_row and WORD_GAME_UI.TableBoard then
 		WORD_GAME_UI.TableBoard.draw_card_interaction(self)
 	end
 

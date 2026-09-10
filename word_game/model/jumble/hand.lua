@@ -43,25 +43,25 @@ function M.apply_puzzle(wr, puzzle)
 
 	Presentation.emit("puzzle_applied")
 
-	local area = G.placement_table and G.placement_table.area
+	local area = G.pattern_row and G.pattern_row.area
 	if area and area.cards then
 		for i = #area.cards, 1, -1 do
 			local card = area.cards[i]
-			if G.placement_table then
-				G.placement_table:on_remove_card(card)
+			if G.pattern_row then
+				G.pattern_row:on_remove_card(card)
 			end
 			area:remove_card(card)
 			if card.bonus_card then
 				bonus_return.return_card(card)
-			elseif card.area ~= G.hand and G.hand then
-				G.hand:emplace(card)
+			elseif card.area ~= G.dealt_letters and G.dealt_letters then
+				G.dealt_letters:emplace(card)
 			end
 		end
 		if area.config then
 			area.config.card_limit = M.blank_count(j.slots, puzzle)
 		end
-		if G.placement_table then
-			G.placement_table:relayout()
+		if G.pattern_row then
+			G.pattern_row:relayout()
 			if area.hard_set_cards then
 				area:hard_set_cards()
 			end

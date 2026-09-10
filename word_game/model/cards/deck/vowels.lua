@@ -17,7 +17,7 @@ return function(context)
 	end
 
 	function M.held_has_vowel()
-		return cards_have_vowel(G.hand and G.hand.cards) or cards_have_vowel(placement_cards())
+		return cards_have_vowel(G.dealt_letters and G.dealt_letters.cards) or cards_have_vowel(placement_cards())
 	end
 
 	local function needs_vowel()
@@ -35,7 +35,7 @@ return function(context)
 	end
 
 	local function take_letter_from_deck(prefer_vowel)
-		if not G.deck or #G.deck.cards == 0 then return nil end
+		if not G.draw_pile or #G.draw_pile.cards == 0 then return nil end
 
 		local function accept(card)
 			if not card then return nil end
@@ -47,8 +47,8 @@ return function(context)
 			return nil
 		end
 
-		while #G.deck.cards > 0 do
-			local top = table.remove(G.deck.cards)
+		while #G.draw_pile.cards > 0 do
+			local top = table.remove(G.draw_pile.cards)
 			if top and not deck_owns(top) then
 				if top.remove_from_area then top:remove_from_area() end
 			else
@@ -63,8 +63,8 @@ return function(context)
 	context.take_letter_from_deck = take_letter_from_deck
 
 	function M.deck_has_vowel()
-		for _, card in ipairs(G.deck and G.deck.cards or {}) do
-			if not card.area or card.area == G.deck then
+		for _, card in ipairs(G.draw_pile and G.draw_pile.cards or {}) do
+			if not card.area or card.area == G.draw_pile then
 				local letter = Dictionary and Dictionary.letter_from_card(card)
 				if Dictionary.is_vowel_letter(letter) then
 					return true
@@ -79,7 +79,7 @@ return function(context)
 	end
 
 	function M.ensure_vowel_in_hand()
-		if not G.hand or M.held_has_vowel() then return false end
+		if not G.dealt_letters or M.held_has_vowel() then return false end
 		if not M.deck_has_vowel() then return false end
 
 		local target = hand_size_cfg.get()
@@ -92,30 +92,30 @@ return function(context)
 		end
 		if M.held_has_vowel() then return true end
 
-		local swap_card = find_consonant(G.hand.cards) or find_consonant(placement_cards())
+		local swap_card = find_consonant(G.dealt_letters.cards) or find_consonant(placement_cards())
 		local vowel_card = take_letter_from_deck(true)
 		if not vowel_card or not Dictionary.is_vowel_letter(card_letter(vowel_card)) then
 			if vowel_card then
-				G.deck:emplace(vowel_card)
+				G.draw_pile:emplace(vowel_card)
 			end
 			return false
 		end
 		if not swap_card then
-			G.deck:emplace(vowel_card)
+			G.draw_pile:emplace(vowel_card)
 			return false
 		end
 		if swap_card.area then
 			swap_card.area:remove_card(swap_card)
 		end
-		G.deck:emplace(swap_card)
+		G.draw_pile:emplace(swap_card)
 		return give_vowel_to_hand(vowel_card)
 	end
 
 	function M.ensure_letters_in_hand(letters)
-		if not letters or not G.hand or not G.deck or not Dictionary then return end
+		if not letters or not G.dealt_letters or not G.draw_pile or not Dictionary then return end
 
 		local function in_hand(letter)
-			for _, card in ipairs(G.hand.cards) do
+			for _, card in ipairs(G.dealt_letters.cards) do
 				if Dictionary.letter_from_card(card) == letter then
 					return true
 				end
@@ -131,15 +131,15 @@ return function(context)
 		for _, letter in ipairs(letters) do
 			if not in_hand(letter) then
 				local from_deck = nil
-				for _, deck_card in ipairs(G.deck.cards) do
+				for _, deck_card in ipairs(G.draw_pile.cards) do
 					if deck_owns(deck_card) and Dictionary.letter_from_card(deck_card) == letter then
 						from_deck = deck_card
 						break
 					end
 				end
 				local swap_card = nil
-				for _, hand_card in ipairs(G.hand.cards) do
-					if hand_card.area == G.hand then
+				for _, hand_card in ipairs(G.dealt_letters.cards) do
+					if hand_card.area == G.dealt_letters then
 						local have = Dictionary.letter_from_card(hand_card)
 						if not needed[have] then
 							swap_card = hand_card
@@ -148,17 +148,17 @@ return function(context)
 					end
 				end
 				if from_deck and swap_card then
-					G.hand:remove_card(swap_card)
-					G.deck:remove_card(from_deck)
+					G.dealt_letters:remove_card(swap_card)
+					G.draw_pile:remove_card(from_deck)
 					fly_from_deck_to_hand(from_deck)
-					G.deck:emplace(swap_card)
+					G.draw_pile:emplace(swap_card)
 				end
 			end
 		end
 
-		if G.hand then
-			G.hand:set_ranks()
-			G.hand:relayout()
+		if G.dealt_letters then
+			G.dealt_letters:set_ranks()
+			G.dealt_letters:relayout()
 		end
 	end
 

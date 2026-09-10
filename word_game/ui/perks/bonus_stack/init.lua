@@ -62,8 +62,8 @@ end
 
 function M.detach(card)
 	if not card then return end
-	if G.placement_table and G.placement_table.on_remove_card then
-		G.placement_table:on_remove_card(card)
+	if G.pattern_row and G.pattern_row.on_remove_card then
+		G.pattern_row:on_remove_card(card)
 	end
 	if card.area and card.area.remove_card then
 		card.area:remove_card(card)
@@ -152,10 +152,10 @@ end
 
 function M.sync_positions()
 	if not M.cards() or M.is_animating() then return end
-	local placement = G.placement_table and G.placement_table.area
+	local placement = G.pattern_row and G.pattern_row.area
 	for i, card in ipairs(M.cards() or {}) do
 		if card and not card.REMOVED then
-			if card.area == G.hand and M.is_bonus_card(card) then
+			if card.area == G.dealt_letters and M.is_bonus_card(card) then
 				M.return_card(card)
 			elseif card.area == placement then
 				-- Bonus cards placed in the puzzle row keep their slot layout.

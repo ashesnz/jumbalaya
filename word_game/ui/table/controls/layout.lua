@@ -72,14 +72,14 @@ end
 local function dragging_hand_card()
 	local target = G.INPUT and G.INPUT.dragging and G.INPUT.dragging.target
 	return target and target.states and target.states.drag and target.states.drag.is
-		and target.area == G.hand
+		and target.area == G.dealt_letters
 end
 
 function M.hand_position_drift()
-	if not G.hand then return false end
-	if math.abs((G.hand.VT.x or 0) - (G.hand.T.x or 0)) > SNAP_EPS then return true end
-	if math.abs((G.hand.VT.y or 0) - (G.hand.T.y or 0)) > SNAP_EPS then return true end
-	for _, card in ipairs(G.hand.cards or {}) do
+	if not G.dealt_letters then return false end
+	if math.abs((G.dealt_letters.VT.x or 0) - (G.dealt_letters.T.x or 0)) > SNAP_EPS then return true end
+	if math.abs((G.dealt_letters.VT.y or 0) - (G.dealt_letters.T.y or 0)) > SNAP_EPS then return true end
+	for _, card in ipairs(G.dealt_letters.cards or {}) do
 		if card.states and card.states.drag and card.states.drag.is then
 			goto continue
 		end
@@ -111,19 +111,19 @@ function M.snap_bar(bar)
 end
 
 function M.snap_hand_container()
-	if not G.hand or dragging_hand_card() then return end
-	G.hand:snap_VT()
-	if G.hand.velocity then
-		G.hand.velocity.x = 0
-		G.hand.velocity.y = 0
-		G.hand.velocity.r = 0
-		G.hand.velocity.scale = 0
+	if not G.dealt_letters or dragging_hand_card() then return end
+	G.dealt_letters:snap_VT()
+	if G.dealt_letters.velocity then
+		G.dealt_letters.velocity.x = 0
+		G.dealt_letters.velocity.y = 0
+		G.dealt_letters.velocity.r = 0
+		G.dealt_letters.velocity.scale = 0
 	end
 end
 
 function M.snap_hand_cards()
-	if not G.hand or dragging_hand_card() then return end
-	for _, card in ipairs(G.hand.cards or {}) do
+	if not G.dealt_letters or dragging_hand_card() then return end
+	for _, card in ipairs(G.dealt_letters.cards or {}) do
 		if card.states and card.states.drag and card.states.drag.is then
 			goto continue
 		end
@@ -186,7 +186,7 @@ function M.place_action_bars()
 end
 
 function M.sync_position()
-	if not G.hand or not G.ROOM_ATTACH then return end
+	if not G.dealt_letters or not G.ROOM_ATTACH then return end
 	local sig = M.layout_pos_sig()
 	if sig == pos_sig and locked_anchors then return end
 	locked_anchors = nil
@@ -194,7 +194,7 @@ function M.sync_position()
 end
 
 function M.snap()
-	if not G.hand then return end
+	if not G.dealt_letters then return end
 	if (not G.hand_action_bar or G.hand_action_bar.REMOVED)
 		and (not G.table_shuffle_bar or G.table_shuffle_bar.REMOVED) then
 		return

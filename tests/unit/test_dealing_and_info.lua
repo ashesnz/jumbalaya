@@ -30,7 +30,7 @@ T.describe("Card Dealing & Hand Capacity (word_game.model.cards.deck)", function
 	end)
 
 	T.it("shuffles the starter deck when it is populated", function()
-		G.deck = {
+		G.draw_pile = {
 			cards = {},
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 			hard_set_T = function() end,
@@ -42,16 +42,16 @@ T.describe("Card Dealing & Hand Capacity (word_game.model.cards.deck)", function
 		end
 		deck.populate_starting_deck()
 		deck.create_letter_card = create_letter_card
-		T.assert_equal(#G.deck.cards, 12, "Starter population should create twelve cards")
+		T.assert_equal(#G.draw_pile.cards, 12, "Starter population should create twelve cards")
 		local letters = {}
-		for _, card in ipairs(G.deck.cards) do letters[card.ability.letter] = (letters[card.ability.letter] or 0) + 1 end
+		for _, card in ipairs(G.draw_pile.cards) do letters[card.ability.letter] = (letters[card.ability.letter] or 0) + 1 end
 		T.assert_equal(letters.E, 2, "Shuffling should preserve all starter cards")
 		T.assert_equal(letters.C, 1, "Shuffling should preserve the starter composition")
 	end)
 
 	T.it("rebuilds the jumble deck without accumulating extra copies", function()
 		G.GAME = G.GAME or {}
-		G.deck = {
+		G.draw_pile = {
 			cards = {},
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 			hard_set_T = function() end,
@@ -64,22 +64,22 @@ T.describe("Card Dealing & Hand Capacity (word_game.model.cards.deck)", function
 		deck.populate_jumble_deck()
 		deck.populate_jumble_deck()
 		deck.create_letter_card = create_letter_card
-		T.assert_equal(#G.deck.cards, 12, "Jumble deck should stay at twelve cards after repopulation")
+		T.assert_equal(#G.draw_pile.cards, 12, "Jumble deck should stay at twelve cards after repopulation")
 		T.assert_equal(G.GAME.deck_left_count, 12, "Deck count display should match the live deck size")
 	end)
 
 	T.it("takes cards from the top of the deck stack", function()
-		G.deck = { cards = {
+		G.draw_pile = { cards = {
 			{ ability = { letter = "A", letter_color = "red" }, T = { w = 1, h = 1 } },
 			{ ability = { letter = "Z", letter_color = "red" }, T = { w = 1, h = 1 } },
 		}, T = { x = 0, y = 0, w = 1, h = 1 } }
-		G.hand = {
+		G.dealt_letters = {
 			cards = {},
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 			set_ranks = function() end,
 			relayout = function() end,
 		}
-		G.placement_table = { area = { cards = {} } }
+		G.pattern_row = { area = { cards = {} } }
 		local ensure_vowel = deck.ensure_vowel_in_hand
 		local ensure_playable = deck.ensure_playable_held
 		deck.ensure_vowel_in_hand = function() end
@@ -87,33 +87,33 @@ T.describe("Card Dealing & Hand Capacity (word_game.model.cards.deck)", function
 		deck.draw_to_hand(1)
 		deck.ensure_vowel_in_hand = ensure_vowel
 		deck.ensure_playable_held = ensure_playable
-		T.assert_equal(G.hand.cards[1].ability.letter, "Z", "The top card should be drawn first")
-		T.assert_equal(#G.deck.cards, 1, "Drawing should pop exactly one card")
+		T.assert_equal(G.dealt_letters.cards[1].ability.letter, "Z", "The top card should be drawn first")
+		T.assert_equal(#G.draw_pile.cards, 1, "Drawing should pop exactly one card")
 	end)
 
 	T.it("counts held cards across both hand and placement area", function()
-		G.hand = { cards = { {}, {}, {} } }
-		G.placement_table = { area = { cards = { {}, {} } } }
+		G.dealt_letters = { cards = { {}, {}, {} } }
+		G.pattern_row = { area = { cards = { {}, {} } } }
 		T.assert_equal(deck.held_count(), 5, "Held count should sum hand (3) + placement area (2) = 5")
 	end)
 
 	T.it("held count reflects empty hand and placement correctly", function()
-		G.hand = { cards = {} }
-		G.placement_table = { area = { cards = {} } }
+		G.dealt_letters = { cards = {} }
+		G.pattern_row = { area = { cards = {} } }
 		T.assert_equal(deck.held_count(), 0, "Held count should be 0 when empty")
 	end)
 
 	T.it("counts the physical cards remaining in the deck", function()
 		G.GAME.starting_deck_size = 12
-		G.deck = { cards = { {}, {}, {}, {}, {} } }
-		G.hand = { cards = { {}, {}, {}, {}, {}, {}, {} } }
-		G.placement_table = { area = { cards = {} } }
+		G.draw_pile = { cards = { {}, {}, {}, {}, {} } }
+		G.dealt_letters = { cards = { {}, {}, {}, {}, {}, {}, {} } }
+		G.pattern_row = { area = { cards = {} } }
 		T.assert_equal(deck.cards_left(), 5, "Cards left should come from the live deck array")
 	end)
 
 	T.it("calculates exact deal events needed for 2 cards played", function()
-		G.hand = { cards = { {}, {}, {}, {}, {} } } -- 5 in hand (2 played)
-		G.placement_table = { area = { cards = {} } }
+		G.dealt_letters = { cards = { {}, {}, {}, {}, {} } } -- 5 in hand (2 played)
+		G.pattern_row = { area = { cards = {} } }
 		local queued = {}
 		G.TIMELINE = {
 			enqueue = function(self, ev)
@@ -130,8 +130,8 @@ T.describe("Card Dealing & Hand Capacity (word_game.model.cards.deck)", function
 	end)
 
 	T.it("calculates exact deal events needed for 3 cards played", function()
-		G.hand = { cards = { {}, {}, {}, {} } } -- 4 in hand (3 played)
-		G.placement_table = { area = { cards = {} } }
+		G.dealt_letters = { cards = { {}, {}, {}, {} } } -- 4 in hand (3 played)
+		G.pattern_row = { area = { cards = {} } }
 		local queued = {}
 		G.TIMELINE = {
 			enqueue = function(self, ev)
@@ -153,9 +153,9 @@ T.describe("Sidebar deck information", function()
 
 	T.it("shows only total cards left when the deck is clicked", function()
 		G.GAME.starting_deck_size = 12
-		G.deck = { cards = { {}, {}, {}, {}, {} } }
-		G.hand = { cards = { {}, {}, {}, {}, {}, {}, {} } }
-		G.placement_table = { area = { cards = {} } }
+		G.draw_pile = { cards = { {}, {}, {}, {}, {} } }
+		G.dealt_letters = { cards = { {}, {}, {}, {}, {}, {}, {} } }
+		G.pattern_row = { area = { cards = {} } }
 		G.STATE = G.STATES.TABLE_BOARD
 		local captured
 		spawn_attention = function(args) captured = args end
@@ -166,7 +166,7 @@ T.describe("Sidebar deck information", function()
 	T.it("includes the cards-left counter in the Sidebar HUD", function()
 		G.GAME = G.GAME or {}
 		G.GAME.deck_left_count = 2
-		G.deck = { cards = { {}, {} } }
+		G.draw_pile = { cards = { {}, {} } }
 		local definition = hud_definition.hud_definition()
 		local function contains(node)
 			if node.config and node.config.id == "row_deck_count" then return true end
@@ -180,11 +180,11 @@ T.describe("Sidebar deck information", function()
 
 	T.it("updates the live deck count when cards are drawn", function()
 		G.GAME = G.GAME or {}
-		G.deck = { cards = { {}, {}, {}, {}, {} } }
-		G.hand = { cards = {} }
+		G.draw_pile = { cards = { {}, {}, {}, {}, {} } }
+		G.dealt_letters = { cards = {} }
 		deck.sync_deck_count_display()
 		T.assert_equal(G.ARGS.deck_left_count, 5, "Sync should publish the current deck size")
-		G.deck.cards = { {}, {}, {}, {} }
+		G.draw_pile.cards = { {}, {}, {}, {} }
 		deck.sync_deck_count_display()
 		T.assert_equal(G.ARGS.deck_left_count, 4, "Sync should reflect deck changes after a draw")
 		T.assert_equal(G.GAME.deck_left_count, 4, "G.GAME mirror should follow cards left")
@@ -194,7 +194,7 @@ T.describe("Sidebar deck information", function()
 		local effects = require("word_game.ui.play_effects")
 		G.GAME = G.GAME or {}
 		G.GAME.deck_left_count = 5
-		G.discard = {
+		G.recycle_stash = {
 			cards = {},
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 		}
@@ -216,8 +216,8 @@ T.describe("Sidebar deck information", function()
 		G.TIMELINE = orig_manager
 		deck.destroy_card = orig_destroy
 		T.assert_equal(destroyed, 0, "Jumble word plays should not destroy used cards")
-		T.assert_equal(#G.discard.cards, 1, "Used cards should enter the played pool")
-		T.assert_true(G.discard.cards[1].played_pool, "Played cards should be tagged for hidden storage")
+		T.assert_equal(#G.recycle_stash.cards, 1, "Used cards should enter the played pool")
+		T.assert_true(G.recycle_stash.cards[1].played_pool, "Played cards should be tagged for hidden storage")
 	end)
 
 	T.it("keeps the full deck count when advancing through jumble stages", function()
@@ -226,7 +226,7 @@ T.describe("Sidebar deck information", function()
 
 		local cards = {}
 		G.letter_inventory = {}
-		G.deck = {
+		G.draw_pile = {
 			cards = cards,
 			config = { card_limit = 52 },
 			emplace = function(self, card) table.insert(self.cards, card) end,
@@ -234,7 +234,7 @@ T.describe("Sidebar deck information", function()
 			shuffle = function() end,
 			hard_set_T = function() end,
 		}
-		G.hand = {
+		G.dealt_letters = {
 			cards = {},
 			config = {},
 			emplace = function(self, card) table.insert(self.cards, card) end,
@@ -251,7 +251,7 @@ T.describe("Sidebar deck information", function()
 			snap_VT = function() end,
 			hard_set_cards = function() end,
 		}
-		G.discard = {
+		G.recycle_stash = {
 			cards = {},
 			emplace = function(self, card) table.insert(self.cards, card) end,
 			remove_card = function(self, card)
@@ -264,7 +264,7 @@ T.describe("Sidebar deck information", function()
 			end,
 			hard_set_cards = function() end,
 		}
-		G.placement_table = {
+		G.pattern_row = {
 			area = {
 				cards = {},
 				emplace = function(self, card) table.insert(self.cards, card) end,
@@ -311,8 +311,8 @@ T.describe("Sidebar deck information", function()
 
 			for _ = 1, 3 do
 				local used = {}
-				if G.hand.cards[1] then
-					used[#used + 1] = G.hand.cards[1]
+				if G.dealt_letters.cards[1] then
+					used[#used + 1] = G.dealt_letters.cards[1]
 				end
 				local queued = {}
 				local orig_manager = G.TIMELINE
@@ -338,19 +338,19 @@ T.describe("Sidebar deck information", function()
 		for i = 1, 12 do
 			G.letter_inventory[#G.letter_inventory + 1] = { ability = { letter = "E" } }
 		end
-		G.hand = { cards = {} }
+		G.dealt_letters = { cards = {} }
 		for i = 1, 7 do
-			G.hand.cards[#G.hand.cards + 1] = G.letter_inventory[i]
+			G.dealt_letters.cards[#G.dealt_letters.cards + 1] = G.letter_inventory[i]
 		end
-		G.deck = { cards = {} }
+		G.draw_pile = { cards = {} }
 		for i = 8, 12 do
-			G.deck.cards[#G.deck.cards + 1] = G.letter_inventory[i]
+			G.draw_pile.cards[#G.draw_pile.cards + 1] = G.letter_inventory[i]
 		end
-		G.placement_table = { area = { cards = {} } }
+		G.pattern_row = { area = { cards = {} } }
 		T.assert_equal(deck.cards_left(), 5, "Cards left should match cards still in the draw pile")
 		T.assert_equal(deck.draw_pile_count(), 5, "Draw pile should track physical deck cards")
 
-		G.hand.cards[#G.hand.cards + 1] = table.remove(G.deck.cards)
+		G.dealt_letters.cards[#G.dealt_letters.cards + 1] = table.remove(G.draw_pile.cards)
 		deck.sync_deck_count_display()
 		T.assert_equal(deck.cards_left(), 4, "Drawing into hand should decrement cards left")
 		T.assert_equal(G.ARGS.deck_left_count, 4, "HUD counter should follow cards left")
@@ -360,14 +360,14 @@ T.describe("Sidebar deck information", function()
 	T.it("sidebar HUD cards-left matches the physical deck after jumble deal", function()
 		G.GAME.word_round = { mode = "jumble", set = 1, hand_index = 1 }
 		G.letter_inventory = {}
-		G.deck = {
+		G.draw_pile = {
 			cards = {},
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 			remove_card = function(self) return table.remove(self.cards) end,
 			config = {},
 			hard_set_T = function() end,
 		}
-		G.hand = {
+		G.dealt_letters = {
 			cards = {},
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 			set_ranks = function() end,
@@ -375,8 +375,8 @@ T.describe("Sidebar deck information", function()
 			snap_VT = function() end,
 			hard_set_cards = function() end,
 		}
-		G.discard = { cards = {} }
-		G.placement_table = { area = { cards = {}, hard_set_cards = function() end } }
+		G.recycle_stash = { cards = {} }
+		G.pattern_row = { area = { cards = {}, hard_set_cards = function() end } }
 		local create_letter_card = deck.create_letter_card
 		deck.create_letter_card = function(letter, color)
 			return { ability = { letter = letter, letter_color = color } }
@@ -394,7 +394,7 @@ T.describe("Sidebar deck information", function()
 
 		deck.deal_jumble_hand()
 		deck.sync_deck_count_display()
-		local expected = #G.deck.cards
+		local expected = #G.draw_pile.cards
 		T.assert_equal(G.ARGS.deck_left_count, expected,
 			"HUD counter should match the physical draw pile after dealing")
 		T.assert_equal(G.GAME.deck_left_count, expected,
@@ -424,9 +424,9 @@ T.describe("Sidebar deck information", function()
 
 		local stale_game = { deck_left_count = 0 }
 		G.GAME = stale_game
-		G.deck = { cards = { {}, {}, {}, {}, {} } }
-		G.hand = { cards = { {}, {}, {}, {}, {}, {}, {} } }
-		G.placement_table = { area = { cards = {} } }
+		G.draw_pile = { cards = { {}, {}, {}, {}, {} } }
+		G.dealt_letters = { cards = { {}, {}, {}, {}, {}, {}, {} } }
+		G.pattern_row = { area = { cards = {} } }
 		deck.sync_deck_count_display()
 		T.assert_equal(G.ARGS.deck_left_count, 5, "Sync should publish the live draw pile count")
 
@@ -451,7 +451,7 @@ T.describe("Sidebar deck information", function()
 		T.assert_equal(text_node.config.text, "5",
 			"Cards-left text must stay bound to G.ARGS when G.GAME is replaced")
 
-		G.deck.cards = { {}, {}, {} }
+		G.draw_pile.cards = { {}, {}, {} }
 		deck.sync_deck_count_display()
 		text_node:update_text()
 		T.assert_equal(text_node.config.text, "3",
@@ -462,7 +462,7 @@ T.describe("Sidebar deck information", function()
 
 	T.it("reshuffles discard into deck and deals seven when hand and deck are empty", function()
 		G.GAME.word_round = { mode = "jumble", set = 1, hand_index = 1 }
-		G.hand = {
+		G.dealt_letters = {
 			cards = {},
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 			set_ranks = function() end,
@@ -470,13 +470,13 @@ T.describe("Sidebar deck information", function()
 			snap_VT = function() end,
 			hard_set_cards = function() end,
 		}
-		G.deck = {
+		G.draw_pile = {
 			cards = {},
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 			remove_card = function(self) return table.remove(self.cards) end,
 			config = {},
 		}
-		G.discard = {
+		G.recycle_stash = {
 			cards = {},
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 			remove_card = function(self, card)
@@ -489,21 +489,21 @@ T.describe("Sidebar deck information", function()
 			end,
 			hard_set_cards = function() end,
 		}
-		G.placement_table = { area = { cards = {} } }
+		G.pattern_row = { area = { cards = {} } }
 		G.letter_inventory = {}
 		for i = 1, 12 do
 			local card = { ability = { letter = "E", letter_color = "red" } }
 			G.letter_inventory[#G.letter_inventory + 1] = card
-			G.discard:emplace(card)
+			G.recycle_stash:emplace(card)
 		end
 		local orig_jumble = WORD_GAME and WORD_GAME.Jumble
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.Jumble = { ensure_playable_puzzle = function() return true end }
 
 		T.assert_true(deck.try_jumble_reshuffle_and_deal())
-		T.assert_equal(#G.discard.cards, 0, "Discard pile should be empty after recycle")
-		T.assert_equal(#G.hand.cards, 7, "Player should receive a full hand of seven cards")
-		T.assert_equal(#G.deck.cards, 5, "Remaining cards should stay in the deck")
+		T.assert_equal(#G.recycle_stash.cards, 0, "Discard pile should be empty after recycle")
+		T.assert_equal(#G.dealt_letters.cards, 7, "Player should receive a full hand of seven cards")
+		T.assert_equal(#G.draw_pile.cards, 5, "Remaining cards should stay in the deck")
 		T.assert_equal(deck.cards_left(), 5, "Cards left should match the physical draw pile")
 
 		WORD_GAME.Jumble = orig_jumble
@@ -522,7 +522,7 @@ T.describe("Sidebar deck information", function()
 
 		G.GAME = G.GAME or {}
 		G.GAME.word_round = { mode = "jumble", set = 1, hand_index = 1 }
-		G.hand = {
+		G.dealt_letters = {
 			cards = {},
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 			set_ranks = function() end,
@@ -530,13 +530,13 @@ T.describe("Sidebar deck information", function()
 			snap_VT = function() end,
 			hard_set_cards = function() end,
 		}
-		G.deck = {
+		G.draw_pile = {
 			cards = {},
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 			remove_card = function(self) return table.remove(self.cards) end,
 			config = {},
 		}
-		G.discard = {
+		G.recycle_stash = {
 			cards = { { ability = { letter = "E" } } },
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 			remove_card = function(self, card)
@@ -549,8 +549,8 @@ T.describe("Sidebar deck information", function()
 			end,
 			hard_set_cards = function() end,
 		}
-		G.placement_table = { area = { cards = {} } }
-		G.letter_inventory = G.discard.cards
+		G.pattern_row = { area = { cards = {} } }
+		G.letter_inventory = G.recycle_stash.cards
 
 		deck.try_jumble_reshuffle_and_deal()
 
@@ -560,17 +560,17 @@ T.describe("Sidebar deck information", function()
 
 	T.it("does not reshuffle while cards remain in hand, deck, or placement", function()
 		G.GAME.word_round = { mode = "jumble", set = 1, hand_index = 1 }
-		G.hand = { cards = { { ability = { letter = "A" } } } }
-		G.deck = { cards = { { ability = { letter = "C" } } } }
-		G.discard = { cards = { { ability = { letter = "B" } } } }
-		G.placement_table = { area = { cards = {} } }
+		G.dealt_letters = { cards = { { ability = { letter = "A" } } } }
+		G.draw_pile = { cards = { { ability = { letter = "C" } } } }
+		G.recycle_stash = { cards = { { ability = { letter = "B" } } } }
+		G.pattern_row = { area = { cards = {} } }
 		T.assert_false(deck.needs_jumble_reshuffle(), "Hand still has cards")
 
-		G.hand.cards = {}
+		G.dealt_letters.cards = {}
 		T.assert_false(deck.needs_jumble_reshuffle(), "Deck still has cards")
 
-		G.deck.cards = {}
-		G.placement_table.area.cards = { { ability = { letter = "D" } } }
+		G.draw_pile.cards = {}
+		G.pattern_row.area.cards = { { ability = { letter = "D" } } }
 		T.assert_false(deck.needs_jumble_reshuffle(), "Placement still has cards")
 	end)
 
@@ -578,7 +578,7 @@ T.describe("Sidebar deck information", function()
 		mock_env.reset_game()
 		G.STATE = G.STATES.TABLE_BOARD
 		G.STAGE = G.STAGES.RUN
-		G.deck = {
+		G.draw_pile = {
 			cards = {},
 			T = { x = 12, y = 4, w = 2.4, h = 1.8 },
 			translate_container = function() end,
@@ -603,19 +603,19 @@ T.describe("Info Text & Score Notification Alignment (word_game.model.jumble_pla
 	mock_env.reset_game()
 
 	T.it("calculates gap metrics between placement area and hand correctly", function()
-		G.placement_table = {
+		G.pattern_row = {
 			area = {
 				T = { x = 2, y = 2, w = 10, h = 2 }
 			}
 		}
-		G.hand = {
+		G.dealt_letters = {
 			T = { x = 2, y = 6, w = 10, h = 2 }
 		}
 		G.table_felt = { x = 1, y = 1, w = 15, h = 9 }
 
 		-- Hand gap should be between top (area.y + area.h = 4) and bottom (hand.y = 6)
-		local top = G.placement_table.area.T.y + G.placement_table.area.T.h
-		local bottom = G.hand.T.y
+		local top = G.pattern_row.area.T.y + G.pattern_row.area.T.h
+		local bottom = G.dealt_letters.T.y
 		local gap = bottom - top
 		T.assert_true(gap > 0, "Gap should be positive between placement table and hand")
 		T.assert_equal(gap, 2, "Gap between y=4 and y=6 should be 2")

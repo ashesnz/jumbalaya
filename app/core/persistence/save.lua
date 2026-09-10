@@ -13,6 +13,7 @@ end
 --- pending run write.
 function queue_run_snapshot()
 	if G.F_NO_SAVING == true then return end
+	local TableAreas = require("word_game.model.table_areas")
 	local card_areas = {}
 	for name, value in pairs(G) do
 		if type(value) == "table" and value.is_kind and value:is_kind(CardArea) then
@@ -29,10 +30,10 @@ function queue_run_snapshot()
 		BACK = G.GAME.selected_back:save(),
 		VERSION = G.VERSION,
 	}
-	if G.placement_table and G.placement_table.area then
-		local serialized = G.placement_table.area:save()
+	if G.pattern_row and G.pattern_row.area then
+		local serialized = G.pattern_row.area:save()
 		if serialized then
-			G.ARGS.run_snapshot.cardAreas.placement_table = serialized
+			G.ARGS.run_snapshot.cardAreas.pattern_row = serialized
 		end
 	end
 
@@ -62,8 +63,8 @@ function rebuild_card_inventory()
 	local seen = {}
 	local max_id = 0
 	local areas = {
-		G.deck, G.hand, G.discard,
-		G.placement_table and G.placement_table.area,
+		G.draw_pile, G.dealt_letters, G.recycle_stash,
+		G.pattern_row and G.pattern_row.area,
 	}
 	for _, area in ipairs(areas) do
 		if area and area.cards then
@@ -78,8 +79,8 @@ function rebuild_card_inventory()
 		end
 	end
 	G.letter_card_id = max_id
-	if G.deck and G.deck.config and #G.letter_inventory > 0 then
-		G.deck.config.card_limit = math.max(G.deck.config.card_limit or 52, #G.letter_inventory)
+	if G.draw_pile and G.draw_pile.config and #G.letter_inventory > 0 then
+		G.draw_pile.config.card_limit = math.max(G.draw_pile.config.card_limit or 52, #G.letter_inventory)
 	end
 	if G.GAME then G.GAME.starting_deck_size = #G.letter_inventory end
 end
@@ -87,13 +88,15 @@ end
 --- Feeds each stored area blob back into its live counterpart.
 function restore_card_areas(save_table)
 	if not save_table or not save_table.cardAreas then return end
+	local TableAreas = require("word_game.model.table_areas")
 	for name, data in pairs(save_table.cardAreas) do
-		if name == 'placement_slots' or name == 'placement_table' then
-			if G.placement_table and G.placement_table.area then
-				G.placement_table.area:load(data)
+		local key = TableAreas.resolve_save_key(name)
+		if key == "pattern_row" then
+			if G.pattern_row and G.pattern_row.area then
+				G.pattern_row.area:load(data)
 			end
 		else
-			local area = G[name]
+			local area = G[key]
 			if area and area.load then area:load(data) end
 		end
 	end
@@ -118,8 +121,8 @@ function Game:discard_run()
 		if self.SPLASH_BACK then self.SPLASH_BACK:remove(); self.SPLASH_BACK = nil end
 		if self.SPLASH_LOGO then self.SPLASH_LOGO:remove(); self.SPLASH_LOGO = nil end
 		if self.GAME_OVER_UI then self.GAME_OVER_UI:remove(); self.GAME_OVER_UI = nil end
-		if self.placement_table then
-			self.placement_table.area = nil
+		if self.pattern_row then
+			self.pattern_row.area = nil
 		end
 		if self.OVERLAY_MENU then self.OVERLAY_MENU:remove(); self.OVERLAY_MENU = nil end
 		for key, value in pairs(G) do

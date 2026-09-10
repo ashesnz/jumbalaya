@@ -30,7 +30,7 @@ function M.present_boss_word(wr, on_complete)
 		return
 	end
 
-	if G.hand and wr.jumble then
+	if G.dealt_letters and wr.jumble then
 		wr.jumble.locked_hand_layout = nil
 	end
 
@@ -73,8 +73,8 @@ function M.present_boss_word(wr, on_complete)
 		end
 		if WORD_GAME_UI.Layout and WORD_GAME_UI.Layout.refresh_placement_layout then
 			WORD_GAME_UI.Layout.refresh_placement_layout()
-		elseif G.placement_table and G.placement_table.apply_screen_position then
-			G.placement_table:apply_screen_position()
+		elseif G.pattern_row and G.pattern_row.apply_screen_position then
+			G.pattern_row:apply_screen_position()
 		end
 		if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
 			WORD_GAME_UI.Sidebar.sync_visibility()

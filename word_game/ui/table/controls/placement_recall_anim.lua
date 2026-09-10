@@ -28,7 +28,7 @@ local function set_animating(active)
 end
 
 local function placement_area()
-	return G.placement_table and G.placement_table.area
+	return G.pattern_row and G.pattern_row.area
 end
 
 local function bonus_stack_ui()
@@ -101,8 +101,8 @@ local function slide_card_to_bonus_stack(card, p_area, delay)
 			if not card or not p_area then return true end
 			local sx, sy = card.T.x, card.T.y
 			local sr = card.T.r or 0
-			if G.placement_table then
-				G.placement_table:on_remove_card(card)
+			if G.pattern_row then
+				G.pattern_row:on_remove_card(card)
 			end
 			if card.area == p_area then
 				p_area:remove_card(card)
@@ -153,20 +153,20 @@ local function slide_card_to_hand(card, p_area, delay)
 		delay = delay,
 		blockable = false,
 		func = function()
-			if not card or not G.hand or not p_area then return true end
+			if not card or not G.dealt_letters or not p_area then return true end
 
 			local sx, sy = card.T.x, card.T.y
 			local sr = card.T.r or 0
 
-			if G.placement_table then
-				G.placement_table:on_remove_card(card)
+			if G.pattern_row then
+				G.pattern_row:on_remove_card(card)
 			end
 			if card.area == p_area then
 				p_area:remove_card(card)
 			end
 
 			card.placement_recall_slide = true
-			G.hand:emplace(card)
+			G.dealt_letters:emplace(card)
 
 			local tx, ty, tr = card.T.x, card.T.y, card.T.r or 0
 			local arc = (G.CARD_H or 1.4) * ARC_FRAC
@@ -206,8 +206,8 @@ local function slide_card_to_hand(card, p_area, delay)
 end
 
 local function finish_recall()
-	if G.hand then
-		for _, card in ipairs(G.hand.cards or {}) do
+	if G.dealt_letters then
+		for _, card in ipairs(G.dealt_letters.cards or {}) do
 			card.placement_recall_slide = nil
 		end
 	end
@@ -218,8 +218,8 @@ local function finish_recall()
 		if slots and WORD_GAME.Jumble.sync_placement_cards then
 			WORD_GAME.Jumble.sync_placement_cards(slots)
 		end
-		if G.placement_table and G.placement_table.jumble_geometry then
-			G.placement_table.jumble_geometry.relayout(G.placement_table)
+		if G.pattern_row and G.pattern_row.jumble_geometry then
+			G.pattern_row.jumble_geometry.relayout(G.pattern_row)
 		end
 	end
 
@@ -230,17 +230,17 @@ local function finish_recall()
 		area:hard_set_cards()
 	end
 
-	if G.hand then
-		if G.hand.clear_selection then G.hand:clear_selection() end
-		if G.hand.set_ranks then G.hand:set_ranks() end
-		if G.hand.relayout then G.hand:relayout() end
-		if G.hand.hard_set_cards then G.hand:hard_set_cards() end
-		if G.hand.snap_VT then G.hand:snap_VT() end
+	if G.dealt_letters then
+		if G.dealt_letters.clear_selection then G.dealt_letters:clear_selection() end
+		if G.dealt_letters.set_ranks then G.dealt_letters:set_ranks() end
+		if G.dealt_letters.relayout then G.dealt_letters:relayout() end
+		if G.dealt_letters.hard_set_cards then G.dealt_letters:hard_set_cards() end
+		if G.dealt_letters.snap_VT then G.dealt_letters:snap_VT() end
 	end
 end
 
 function M.animate(on_complete)
-	if animating or not G.hand or not placement_area() then
+	if animating or not G.dealt_letters or not placement_area() then
 		if on_complete then on_complete() end
 		return false
 	end

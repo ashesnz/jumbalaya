@@ -111,7 +111,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 				remove_from_area = function(self) end,
 			}
 		end
-		G.hand = {
+		G.dealt_letters = {
 			cards = hand_cards,
 			unhighlight_all = function() end,
 			set_ranks = function() end,
@@ -123,10 +123,10 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 				end
 			end,
 		}
-		for _, c in ipairs(hand_cards) do c.area = G.hand end
+		for _, c in ipairs(hand_cards) do c.area = G.dealt_letters end
 
 		local deck_cards = {}
-		G.deck = {
+		G.draw_pile = {
 			cards = deck_cards,
 			emplace = function(self, card)
 				deck_cards[#deck_cards + 1] = card
@@ -146,7 +146,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 			if ev.func then ev.func() end
 		end
 
-		T.assert_equal(#G.deck.cards, 7, "Held cards should return to the deck")
+		T.assert_equal(#G.draw_pile.cards, 7, "Held cards should return to the deck")
 		T.assert_equal(dealt_count, 7, "Hold redraw should deal a full replacement hand")
 		T.assert_equal(G.GAME.word_round.jumble.redraws_remaining, 0, "Redraw allowance should be consumed")
 	end)
@@ -193,7 +193,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 			}
 		end
 
-		G.hand = {
+		G.dealt_letters = {
 			cards = hand_cards,
 			unhighlight_all = function(self) end,
 			set_ranks = function(self) end,
@@ -210,11 +210,11 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 		}
 
 		for _, c in ipairs(hand_cards) do
-			c.area = G.hand
+			c.area = G.dealt_letters
 		end
 
 		local deck_cards = {}
-		G.deck = {
+		G.draw_pile = {
 			cards = deck_cards,
 			emplace = function(self, card)
 				deck_cards[#deck_cards + 1] = card
@@ -246,7 +246,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 			if ev.func then ev.func() end
 		end
 
-		T.assert_equal(#G.deck.cards, 7, "All 7 hand cards should be returned to deck")
+		T.assert_equal(#G.draw_pile.cards, 7, "All 7 hand cards should be returned to deck")
 		T.assert_equal(dealt_count, 7, "Should trigger deal_into_hand for 7 cards")
 	end)
 
@@ -402,7 +402,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 			}
 		end
 
-		G.hand = {
+		G.dealt_letters = {
 			cards = hand_cards,
 			config = { type = "hand" },
 			emplace = function(self, card)
@@ -431,10 +431,10 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 		}
 
 		for _, card in ipairs(hand_cards) do
-			card.area = G.hand
+			card.area = G.dealt_letters
 		end
 
-		G.deck = {
+		G.draw_pile = {
 			cards = {},
 			config = { type = "deck" },
 			emplace = function(self, card)
@@ -454,7 +454,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 		WORD_GAME_UI.TableInput = {
 			refresh_card_input = function()
 				refreshed = true
-				if G.hand then G.hand:set_ranks() end
+				if G.dealt_letters then G.dealt_letters:set_ranks() end
 			end,
 		}
 
@@ -473,7 +473,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 						T = { x = i, y = 8, w = 1, h = 1.4 },
 						states = { drag = {}, hover = {}, collide = {} },
 					}
-					G.hand:emplace(new_card)
+					G.dealt_letters:emplace(new_card)
 				end
 				if on_complete then on_complete() end
 			end,
@@ -499,8 +499,8 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 		T.assert_true(refreshed, "TableInput.refresh_card_input should have been called")
 
 		-- Verify all 7 new hand cards are now draggable
-		T.assert_equal(#G.hand.cards, 7, "Hand should have 7 new cards")
-		for i, card in ipairs(G.hand.cards) do
+		T.assert_equal(#G.dealt_letters.cards, 7, "Hand should have 7 new cards")
+		for i, card in ipairs(G.dealt_letters.cards) do
 			T.assert_true(card.states.drag.can, "Card " .. i .. " in hand must be draggable after redraw")
 			T.assert_true(card.states.hover.can, "Card " .. i .. " in hand must be hoverable after redraw")
 			T.assert_true(card.states.collide.can, "Card " .. i .. " in hand must be collidable after redraw")

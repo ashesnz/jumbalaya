@@ -27,7 +27,7 @@ local function setup_hand_shuffle_env()
 	G.HAND_CARD_SPACING = 0.78
 	G.TABLE_HAND_SIZE = 7
 	G.ROOM = { T = { x = 0, y = 0, w = 20, h = 11.5 } }
-	G.placement_table = G.placement_table or { area = { cards = {} } }
+	G.pattern_row = G.pattern_row or { area = { cards = {} } }
 	G.GAME = G.GAME or {}
 	G.GAME.run_state = G.GAME.run_state or {}
 	G.ARGS = G.ARGS or {}
@@ -46,15 +46,15 @@ T.describe("Table controls", function()
 	T.it("detects placement cards from the placement area and jumble slots", function()
 		local TableControls = require("word_game.ui.table.controls")
 		setup_hand_shuffle_env()
-		G.placement_table = {
+		G.pattern_row = {
 			area = { cards = {} },
 		}
 		T.assert_equal(false, TableControls.placement_has_cards())
 
-		G.placement_table.area.cards = { { ability = { letter = "A" } } }
+		G.pattern_row.area.cards = { { ability = { letter = "A" } } }
 		T.assert_equal(true, TableControls.placement_has_cards())
 
-		G.placement_table.area.cards = {}
+		G.pattern_row.area.cards = {}
 		G.GAME = {
 			word_round = {
 				mode = "jumble",

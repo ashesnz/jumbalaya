@@ -189,8 +189,8 @@ function Game:start_run(args)
     local hand_size_cfg = require("word_game.model.hand_size")
     local hand_size = hand_size_cfg.get()
 
-    if not self.placement_table then
-        self.placement_table = require("word_game.board").PlacementTable(self)
+    if not self.pattern_row then
+        self.pattern_row = require("word_game.board").PlacementTable(self)
     end
 
     local CAI = {
@@ -202,8 +202,8 @@ function Game:start_run(args)
         hand_H = 0.95*G.CARD_H,
         play_W = math.min(5, hand_size)*G.CARD_W + 0.3*G.CARD_W,
         play_H = 0.95*G.CARD_H,
-        placement_W = self.placement_table:area_width(),
-        placement_H = self.placement_table:area_height(),
+        placement_W = self.pattern_row:area_width(),
+        placement_H = self.pattern_row:area_height(),
         usable_W = 2.3*G.CARD_W,
         usable_H = 0.95*G.CARD_H
     }
@@ -215,18 +215,18 @@ function Game:start_run(args)
         CAI.usable_H, 
         {card_limit = self.GAME.starting_params.usable_slots, type = 'usable', selection_limit = 1})
 
-    self.placement_table:create_area(CAI.placement_W, CAI.placement_H)
-    self.placement_table:setup()
+    self.pattern_row:create_area(CAI.placement_W, CAI.placement_H)
+    self.pattern_row:setup()
 
-    self.discard = CardArea(
+    self.recycle_stash = CardArea(
         0, 0,
         CAI.discard_W,CAI.discard_H,
         {card_limit = 500, type = 'discard'})
-    self.deck = CardArea(
+    self.draw_pile = CardArea(
         0, 0,
         CAI.deck_W,CAI.deck_H, 
         {card_limit = 12, type = 'deck'})
-    self.hand = CardArea(
+    self.dealt_letters = CardArea(
         0, 0,
         CAI.hand_W,CAI.hand_H,
         {card_limit = self.GAME.starting_params.hand_size, type = 'hand', selection_limit = 1})
@@ -242,12 +242,12 @@ function Game:start_run(args)
     Scheduler.delayed{delay = 0.5}
 
     if not saveTable then
-        self.deck:shuffle()
-        self.deck:hard_set_T()
+        self.draw_pile:shuffle()
+        self.draw_pile:hard_set_T()
     end
 
-    self.deck:relayout()
-    self.deck:hard_set_cards()
+    self.draw_pile:relayout()
+    self.draw_pile:hard_set_cards()
 
     Presentation.emit("sidebar_ensure")
     apply_run_layout()

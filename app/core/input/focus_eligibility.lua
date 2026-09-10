@@ -13,9 +13,9 @@ function InputRouter:is_node_focusable(node)
 		else
 			if node:is_kind(Card)
 				and (node.facing == 'front'
-					or node.area == G.hand
-					or node.area == (G.placement_table and G.placement_table.area)
-					or node == G.deck
+					or node.area == G.dealt_letters
+					or node.area == (G.pattern_row and G.pattern_row.area)
+					or node == G.draw_pile
 					or node.bonus_card
 					or (WORD_GAME_UI.BonusStackUI and WORD_GAME_UI.BonusStackUI.contains(node)))
 				and node.states.hover.can

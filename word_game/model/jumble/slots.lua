@@ -8,7 +8,7 @@ local function geometry(session)
 	if session and session.jumble_geometry then
 		return session.jumble_geometry
 	end
-	local pt = G.placement_table
+	local pt = G.pattern_row
 	return pt and pt.jumble_geometry
 end
 
@@ -194,7 +194,7 @@ function M.all_blanks_filled(slots, puzzle)
 end
 
 function M.sync_placement_cards(slots)
-	local area = G.placement_table and G.placement_table.area
+	local area = G.pattern_row and G.pattern_row.area
 	if not area then return end
 	area.cards = {}
 	for _, slot in ipairs(slots or {}) do
@@ -406,8 +406,8 @@ function M.assign_card_to_blank(slot_index, card, insert_pos)
 			local displaced = slot.card
 			if displaced.bonus_card then
 				bonus_return.return_card(displaced)
-			elseif G.hand and displaced.area ~= G.hand then
-				G.hand:emplace(displaced)
+			elseif G.dealt_letters and displaced.area ~= G.dealt_letters then
+				G.dealt_letters:emplace(displaced)
 			end
 		end
 		detach_card_from_slots(j.slots, card)
@@ -416,14 +416,14 @@ function M.assign_card_to_blank(slot_index, card, insert_pos)
 		return false
 	end
 
-	if G.placement_table and G.placement_table.area and card.set_card_area then
-		card:set_card_area(G.placement_table.area)
+	if G.pattern_row and G.pattern_row.area and card.set_card_area then
+		card:set_card_area(G.pattern_row.area)
 	end
 	M.sync_placement_cards(j.slots)
-	if G.placement_table then
-		G.placement_table:relayout()
-		if G.placement_table.area then
-			G.placement_table.area:hard_set_cards()
+	if G.pattern_row then
+		G.pattern_row:relayout()
+		if G.pattern_row.area then
+			G.pattern_row.area:hard_set_cards()
 		end
 	end
 	return true
@@ -434,10 +434,10 @@ function M.remove_card_from_blanks(card)
 	if not j then return end
 	detach_card_from_slots(j.slots, card)
 	M.sync_placement_cards(j.slots)
-	if G.placement_table then
-		G.placement_table:relayout()
-		if G.placement_table.area then
-			G.placement_table.area:hard_set_cards()
+	if G.pattern_row then
+		G.pattern_row:relayout()
+		if G.pattern_row.area then
+			G.pattern_row.area:hard_set_cards()
 		end
 	end
 end

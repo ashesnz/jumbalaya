@@ -132,20 +132,20 @@ function M.add_points(_amount)
 end
 
 function M.sync_hand_after_deal()
-	if G.hand and G.hand.cards[1] then
-		G.hand:relayout()
-		for _, card in ipairs(G.hand.cards) do
+	if G.dealt_letters and G.dealt_letters.cards[1] then
+		G.dealt_letters:relayout()
+		for _, card in ipairs(G.dealt_letters.cards) do
 			if not card.bounce and card.states and not card.states.drag.is then
 				card:hard_set_T()
 			end
 		end
-		if G.hand.velocity then
-			G.hand.velocity.x = 0
-			G.hand.velocity.y = 0
-			G.hand.velocity.r = 0
-			G.hand.velocity.scale = 0
+		if G.dealt_letters.velocity then
+			G.dealt_letters.velocity.x = 0
+			G.dealt_letters.velocity.y = 0
+			G.dealt_letters.velocity.r = 0
+			G.dealt_letters.velocity.scale = 0
 		end
-		G.hand:snap_VT()
+		G.dealt_letters:snap_VT()
 	end
 	if WORD_GAME_UI.TableControls then
 		WORD_GAME_UI.TableControls.sync_position()
@@ -153,9 +153,9 @@ function M.sync_hand_after_deal()
 end
 
 function M.align_placement_table()
-	if G.placement_table and G.placement_table.area then
-		G.placement_table:relayout()
-		G.placement_table.area:hard_set_cards()
+	if G.pattern_row and G.pattern_row.area then
+		G.pattern_row:relayout()
+		G.pattern_row.area:hard_set_cards()
 	end
 end
 
@@ -194,10 +194,10 @@ function M.restore_boss_layout(opts)
 	G.ARGS = G.ARGS or {}
 	G.ARGS.pending_layout = true
 	M.align_placement_table()
-	if G.hand then
-		G.hand:relayout()
-		G.hand:snap_VT()
-		G.hand:hard_set_cards()
+	if G.dealt_letters then
+		G.dealt_letters:relayout()
+		G.dealt_letters:snap_VT()
+		G.dealt_letters:hard_set_cards()
 	end
 	if WORD_GAME_UI.TableControls then
 		WORD_GAME_UI.TableControls.sync_position()

@@ -166,10 +166,10 @@ function M.should_show_end_run()
 end
 
 function M.sync_discard_pile_area()
-	if not G.discard or not G.discard.states then return end
-	G.discard.states.collide.can = false
-	G.discard.states.hover.can = false
-	G.discard.states.release_on.can = false
+	if not G.recycle_stash or not G.recycle_stash.states then return end
+	G.recycle_stash.states.collide.can = false
+	G.recycle_stash.states.hover.can = false
+	G.recycle_stash.states.release_on.can = false
 end
 
 function M.stash_discarded_card(card)
@@ -181,8 +181,8 @@ function M.stash_discarded_card(card)
 end
 
 function M.hide_discard_pile_cards()
-	if not G.discard or not G.discard.cards then return end
-	for _, card in ipairs(G.discard.cards) do
+	if not G.recycle_stash or not G.recycle_stash.cards then return end
+	for _, card in ipairs(G.recycle_stash.cards) do
 		M.stash_discarded_card(card)
 	end
 end
@@ -262,7 +262,7 @@ end
 
 function M.can_discard_card(card)
 	if not M.voucher_discard_active() then return false end
-	if not card or card.REMOVED or card.area ~= G.hand then return false end
+	if not card or card.REMOVED or card.area ~= G.dealt_letters then return false end
 	if card.bonus_card or card.boss_temp then return false end
 	if InputLock.is_table_busy() then return false end
 	return true

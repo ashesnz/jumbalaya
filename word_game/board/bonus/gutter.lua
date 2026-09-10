@@ -16,7 +16,7 @@ local function timeline_rect()
 	if G.ARGS and G.ARGS.timeline_rect then
 		return G.ARGS.timeline_rect
 	end
-	local pt = G.placement_table
+	local pt = G.pattern_row
 	if pt and pt.area and pt.area.T then
 		local t = pt.area.T
 		return { x = t.x, y = t.y - t.h, w = t.w, h = t.h * 0.5 }
@@ -100,9 +100,9 @@ function M.return_card(card)
 		end
 	end
 	if card.area then
-		if G.placement_table and card.area == G.placement_table.area
-			and G.placement_table.on_remove_card then
-			G.placement_table:on_remove_card(card)
+		if G.pattern_row and card.area == G.pattern_row.area
+			and G.pattern_row.on_remove_card then
+			G.pattern_row:on_remove_card(card)
 		end
 		if card.area.remove_card then
 			card.area:remove_card(card)

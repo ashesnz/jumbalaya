@@ -130,7 +130,7 @@ T.describe("placement row lock-in shimmer", function()
 		end
 
 		-- Drop lands inside the placement area (centre within area bounds),
-		-- and with no G.hand there is no return zone to divert it to.
+		-- and with no G.dealt_letters there is no return zone to divert it to.
 		snap.try_snap(session, card)
 
 		T.assert_equal(session.card_shimmer_t[card], config.LOCK_SHIMMER_DURATION,
@@ -143,7 +143,7 @@ T.describe("placement row lock-in shimmer", function()
 		local card = make_card()
 		card.area = session.area
 
-		G.hand = {
+		G.dealt_letters = {
 			cards = {},
 			emplace = function(self, c) table.insert(self.cards, c) end,
 			relayout = function() end,
@@ -161,6 +161,6 @@ T.describe("placement row lock-in shimmer", function()
 
 		T.assert_nil(session.card_shimmer_t[card],
 			"returning a card to the hand must not trigger the lock-in shimmer")
-		G.hand = nil
+		G.dealt_letters = nil
 	end)
 end)

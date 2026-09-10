@@ -14,19 +14,19 @@ local function set_score_animating(active)
 end
 
 local function discard_remaining_hand()
-	if not G.hand then return 0 end
-	local n = #(G.hand.cards or {})
+	if not G.dealt_letters then return 0 end
+	local n = #(G.dealt_letters.cards or {})
 	if G.TIMELINE and G.TIMELINE.enqueue then
 		for i = 1, n do
 			Scheduler.add{
 				mode = "delayed",
 				delay = 0.07,
 				func = function()
-					local card = G.hand and G.hand.cards and G.hand.cards[1]
+					local card = G.dealt_letters and G.dealt_letters.cards and G.dealt_letters.cards[1]
 					if card then
 						CardMotion.move{
-							from = G.hand,
-							to = G.discard,
+							from = G.dealt_letters,
+							to = G.recycle_stash,
 							percent = 50,
 							direction = "down",
 							stay_flipped = false,
@@ -43,7 +43,7 @@ local function discard_remaining_hand()
 end
 
 local function play_hand_clear()
-	local major = (G.placement_table and G.placement_table.area)
+	local major = (G.pattern_row and G.pattern_row.area)
 		or G.PLAY_ATTACH
 		or G.ROOM_ATTACH
 	if WORD_GAME_UI.Confetti then

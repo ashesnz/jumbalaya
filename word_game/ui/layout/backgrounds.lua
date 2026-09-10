@@ -88,7 +88,7 @@ function M.swirl()
 
 	G.SPLASH_BACK = Sprite(-30, -6, G.ROOM.T.w + 60, G.ROOM.T.h + 12, G.TEXTURE_ATLASES["ui_1"], {x = 2, y = 0})
 	G.SPLASH_BACK:set_alignment({
-		major = G.hand,
+		major = G.dealt_letters,
 		type = "cm",
 		bond = "Strong",
 		offset = {x = 0, y = 0},

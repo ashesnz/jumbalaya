@@ -111,7 +111,7 @@ function Card:align_h_popup()
                     (self.ability.set == 'Perk' and 0.0) or
                     -0.05,
                 y = focused_ui and (
-                            popup_direction == 'tm' and (self.area and self.area == G.hand and -0.08 or-0.15) or
+                            popup_direction == 'tm' and (self.area and self.area == G.dealt_letters and -0.08 or-0.15) or
                             popup_direction == 'bm' and 0.12 or
                             0
                         ) or
@@ -170,13 +170,13 @@ end
 
 function Card:stop_drag()
     SceneNode.stop_drag(self)
-    if self.area == G.hand
+    if self.area == G.dealt_letters
         and WORD_GAME_UI.VoucherDiscard
         and WORD_GAME_UI.VoucherDiscard.try_discard(self) then
         return
     end
-    if G.placement_table then
-        G.placement_table:try_snap_card(self)
+    if G.pattern_row then
+        G.pattern_row:try_snap_card(self)
     end
 end
 
@@ -207,7 +207,7 @@ function Card:click()
             play_sfx('card_slide1', nil, 0.3)
         end
     end
-    if self.area and self.area == G.deck and self.area.cards[1] == self then
+    if self.area and self.area == G.draw_pile and self.area.cards[1] == self then
         if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
             WORD_GAME_UI.TableDeck.show_info()
         end

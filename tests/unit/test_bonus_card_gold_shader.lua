@@ -232,8 +232,8 @@ T.describe("bonus card gold visuals", function()
 		bonus_stack.clear()
 		G.CARD_W, G.CARD_H = 2, 2.8
 		G.ROOM = G.ROOM or { T = { x = 1, y = 0, w = 20, h = 11.5 } }
-		G.hand = G.hand or { T = { x = 3.2, y = 8.0, w = 10.5, h = 2.8 } }
-		G.placement_table = G.placement_table or {
+		G.dealt_letters = G.dealt_letters or { T = { x = 3.2, y = 8.0, w = 10.5, h = 2.8 } }
+		G.pattern_row = G.pattern_row or {
 			area = { T = { x = 0.6, y = 2.0, w = 18.0, h = 2.8 } },
 		}
 

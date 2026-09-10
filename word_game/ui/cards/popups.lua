@@ -12,14 +12,14 @@ function G.DEFINITIONS.card_focus_ui(card)
 
   local playing_card_colour = deep_clone(G.C.WHITE)
   playing_card_colour[4] = 1.5
-  if G.hand and card.area == G.hand then Easing.value{ref_table = playing_card_colour, ref_value = 4, mod = -1.5, timer = 'REAL', delay = 0.2, ease = 'quad'} end
+  if G.dealt_letters and card.area == G.dealt_letters then Easing.value{ref_table = playing_card_colour, ref_value = 4, mod = -1.5, timer = 'REAL', delay = 0.2, ease = 'quad'} end
 
   local t_card_norm = {x = card.T.x + card.T.w/2 - G.ROOM.T.w/2, y = card.T.y + card.T.h/2 - G.ROOM.T.h/2}
 
   local base_background = LayoutView{
     T = {card.VT.x,card.VT.y,0,0},
     definition = 
-      (not G.hand or card.area ~= G.hand) and {n=G.UI.ROOT, config = {align = 'cm', minw = card_width + 0.3, minh = card.T.h + 0.3, r = 0.1, colour = with_alpha(G.C.BLACK, 0.7), outline_colour = tint(G.C.MUTED_GREY, 0.5), outline = 1.5, line_emboss = 0.8}, nodes={
+      (not G.dealt_letters or card.area ~= G.dealt_letters) and {n=G.UI.ROOT, config = {align = 'cm', minw = card_width + 0.3, minh = card.T.h + 0.3, r = 0.1, colour = with_alpha(G.C.BLACK, 0.7), outline_colour = tint(G.C.MUTED_GREY, 0.5), outline = 1.5, line_emboss = 0.8}, nodes={
         {n=G.UI.ROW, config={id = 'ATTACH_TO_ME'}, nodes={}}
       }} or 
       {n=G.UI.ROOT, config = {align = 'cm', minw = card_width, minh = card.T.h, r = 0.1, colour = playing_card_colour}, nodes={
@@ -29,7 +29,7 @@ function G.DEFINITIONS.card_focus_ui(card)
         align = 'cm',
         offset = {x= 0.007*t_card_norm.x*card.T.w, y = 0.007*t_card_norm.y*card.T.h}, 
         parent = card,
-        r_bond = (not G.hand or card.area ~= G.hand) and 'Weak' or 'Strong'
+        r_bond = (not G.dealt_letters or card.area ~= G.dealt_letters) and 'Weak' or 'Strong'
       }
   }
 

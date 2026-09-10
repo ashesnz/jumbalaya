@@ -12,10 +12,10 @@ M.STACK_Y_LIFT_PX = gutter.STACK_Y_LIFT_PX
 
 local function gameplay_left_edge()
 	local edge
-	if G.hand and G.hand.T then
-		edge = G.hand.T.x
+	if G.dealt_letters and G.dealt_letters.T then
+		edge = G.dealt_letters.T.x
 	end
-	local area = G.placement_table and G.placement_table.area
+	local area = G.pattern_row and G.pattern_row.area
 	if area and area.T then
 		if edge then
 			edge = math.min(edge, area.T.x)

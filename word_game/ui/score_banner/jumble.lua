@@ -174,13 +174,13 @@ end
 
 function M.calc_points_to_get_pos(cx, ts)
 	ts = ts or ((G and G.TILESCALE or 1) * (G and G.TILESIZE or 1))
-	local area = G and G.placement_table and G.placement_table.area
+	local area = G and G.pattern_row and G.pattern_row.area
 	local felt = Layout.felt_rect()
 	local card_bottom = (area and area.T and area.T.y and area.T.h)
 		and ((area.T.y + area.T.h) * ts)
 		or ((felt.y + 2.0) * ts)
-	local hand_top = (G and G.hand and G.hand.T and G.hand.T.y)
-		and (G.hand.T.y * ts)
+	local hand_top = (G and G.dealt_letters and G.dealt_letters.T and G.dealt_letters.T.y)
+		and (G.dealt_letters.T.y * ts)
 		or ((felt.y + felt.h - 2.5) * ts)
 	local gap_cy = (card_bottom + hand_top) * 0.5 - ts * POINTS_TO_GET_RAISE
 	return cx or ((felt.x + felt.w * 0.5) * ts), gap_cy

@@ -45,7 +45,7 @@ T.describe("First play tutorial", function()
 	local function reset_env()
 		layout_instances = {}
 		G.FIRST_PLAY_TUTORIAL_OVERLAY = nil
-		G.hand = { T = { x = 2, y = 6, w = 8, h = 1.4 } }
+		G.dealt_letters = { T = { x = 2, y = 6, w = 8, h = 1.4 } }
 		G.SETTINGS = G.SETTINGS or {}
 		G.SETTINGS.first_play_tutorial_complete = false
 		G.SETTINGS.first_play_tutorial_force = false

@@ -3,9 +3,9 @@
 local M = {}
 
 function M.refresh_card_input()
-	if G.hand and G.hand.set_ranks then G.hand:set_ranks() end
-	if G.placement_table and G.placement_table.area and G.placement_table.area.set_ranks then
-		G.placement_table.area:set_ranks()
+	if G.dealt_letters and G.dealt_letters.set_ranks then G.dealt_letters:set_ranks() end
+	if G.pattern_row and G.pattern_row.area and G.pattern_row.area.set_ranks then
+		G.pattern_row.area:set_ranks()
 	end
 end
 

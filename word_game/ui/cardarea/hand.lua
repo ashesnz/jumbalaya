@@ -50,7 +50,7 @@ function M.draw_layer(self, v, draw_card_layer)
 	table.sort(resting, by_x)
 	table.sort(hopping, by_x)
 	local function draw_card(card)
-		if card ~= G.INPUT.focused.target or self == G.hand then
+		if card ~= G.INPUT.focused.target or self == G.dealt_letters then
 			draw_card_layer(card, v)
 		end
 	end

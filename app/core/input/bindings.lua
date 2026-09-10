@@ -33,7 +33,7 @@ function InputRouter:button_press_update(button, dt)
 			end
 		end
 		if button == 'b' then
-			if G.hand and self.focused.target and self.focused.target.area == G.hand then
+			if G.dealt_letters and self.focused.target and self.focused.target.area == G.dealt_letters then
 				self:queue_R_cursor_press()
 			else
 				self.interrupt.focus = true

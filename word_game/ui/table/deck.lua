@@ -506,13 +506,13 @@ function M.draw(area)
 end
 
 function M.show_info()
-	if not M.uses_table_draw() or not G.deck then return end
+	if not M.uses_table_draw() or not G.draw_pile then return end
 	spawn_attention({
 		scale = 0.58,
 		text = "Cards left: " .. tostring(deck_mod().cards_left()),
 		hold = 2.0,
 		align = "cm",
-		major = G.deck,
+		major = G.draw_pile,
 		offset = { x = 0, y = -0.35 },
 		colour = G.C.WHITE,
 	})

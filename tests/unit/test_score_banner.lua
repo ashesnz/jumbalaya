@@ -192,12 +192,12 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 		local sb = require("word_game.ui.score_banner")
 
 		local ts = 10
-		_G.G.placement_table = {
+		_G.G.pattern_row = {
 			area = {
 				T = { x = 2.0, y = 3.0, w = 6.0, h = 2.0 },
 			},
 		}
-		_G.G.hand = {
+		_G.G.dealt_letters = {
 			T = { x = 2.0, y = 7.0, w = 6.0, h = 2.0 },
 		}
 
@@ -260,7 +260,7 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 		_G.G.STATE = _G.G.STATES.TABLE_BOARD
 		_G.G.TILESCALE = 1
 		_G.G.TILESIZE = 73
-		_G.G.hand = {
+		_G.G.dealt_letters = {
 			T = { x = 2.0, y = 7.0, w = 6.0, h = 2.0 },
 			cards = {},
 		}
@@ -303,7 +303,7 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 		local announce = require("word_game.ui.score_banner.boss_announce")
 
 		_G.G.STATE = _G.G.STATES.TABLE_BOARD
-		_G.G.hand = {
+		_G.G.dealt_letters = {
 			T = { x = 2.0, y = 7.0, w = 6.0, h = 2.0 },
 			cards = {},
 		}
@@ -332,7 +332,7 @@ T.describe("Score Banner Bubble & Bounce Animations (word_game.ui.score_banner)"
 
 		_G.G.STATE = _G.G.STATES.TABLE_BOARD
 		_G.G.GAME.word_hud = {}
-		_G.G.hand = {
+		_G.G.dealt_letters = {
 			T = { x = 2.0, y = 7.0, w = 6.0, h = 2.0 },
 			cards = {},
 		}

@@ -73,33 +73,33 @@ T.describe("save round-trip", function()
 	end)
 
 	T.it("CardArea:save / load and restore_card_areas rebuild the hand", function()
-		G.hand = CardArea(0, 0, 8, 2, { type = "hand", card_limit = 7, selection_limit = 1 })
-		G.hand:emplace(make_letter("C", 1))
-		G.hand:emplace(make_letter("A", 2))
-		T.assert_equal(#G.hand.cards, 2)
+		G.dealt_letters = CardArea(0, 0, 8, 2, { type = "hand", card_limit = 7, selection_limit = 1 })
+		G.dealt_letters:emplace(make_letter("C", 1))
+		G.dealt_letters:emplace(make_letter("A", 2))
+		T.assert_equal(#G.dealt_letters.cards, 2)
 
-		local area_blob = G.hand:save()
+		local area_blob = G.dealt_letters:save()
 		T.assert_equal(#area_blob.cards, 2)
 		T.assert_equal(area_blob.cards[1].state.ability.letter, "C")
 		T.assert_equal(area_blob.cards[2].state.ability.letter, "A")
 
 		local snapshot = {
 			STATE = G.STATES.TABLE_BOARD,
-			cardAreas = { hand = area_blob },
+			cardAreas = { dealt_letters = area_blob },
 		}
 		local source = pack_to_source(snapshot)
 		local loaded = unpack_source(source)
 
-		G.deck, G.discard, G.placement_table = nil, nil, nil
-		G.hand = CardArea(0, 0, 8, 2, { type = "hand", card_limit = 7, selection_limit = 1 })
+		G.draw_pile, G.recycle_stash, G.pattern_row = nil, nil, nil
+		G.dealt_letters = CardArea(0, 0, 8, 2, { type = "hand", card_limit = 7, selection_limit = 1 })
 		restore_card_areas(loaded)
-		T.assert_equal(#G.hand.cards, 2)
-		T.assert_equal(G.hand.cards[1].ability.letter, "C")
-		T.assert_equal(G.hand.cards[2].ability.letter, "A")
-		T.assert_equal(G.hand.cards[1].playing_card, 1)
-		T.assert_equal(G.hand.cards[2].playing_card, 2)
+		T.assert_equal(#G.dealt_letters.cards, 2)
+		T.assert_equal(G.dealt_letters.cards[1].ability.letter, "C")
+		T.assert_equal(G.dealt_letters.cards[2].ability.letter, "A")
+		T.assert_equal(G.dealt_letters.cards[1].playing_card, 1)
+		T.assert_equal(G.dealt_letters.cards[2].playing_card, 2)
 		local indexed = 0
-		for _, card in ipairs(G.hand.cards) do
+		for _, card in ipairs(G.dealt_letters.cards) do
 			if card.playing_card then
 				indexed = indexed + 1
 			end
@@ -135,7 +135,7 @@ T.describe("save round-trip", function()
 			STATE = G.STATES.TABLE_BOARD,
 			GAME = { chips = 99, seed_streams = { seed = "ABCD1234" } },
 			cardAreas = {
-				hand = {
+				dealt_letters = {
 					config = { type = "hand" },
 					cards = { make_letter("T", 4):save() },
 				},
@@ -148,8 +148,8 @@ T.describe("save round-trip", function()
 		local restored = unpack_source(source)
 		T.assert_equal(restored.GAME.chips, 99)
 		T.assert_equal(restored.GAME.seed_streams.seed, "ABCD1234")
-		T.assert_equal(restored.cardAreas.hand.cards[1].state.ability.letter, "T")
-		T.assert_equal(restored.cardAreas.hand.cards[1].state.playing_card, 4)
+		T.assert_equal(restored.cardAreas.dealt_letters.cards[1].state.ability.letter, "T")
+		T.assert_equal(restored.cardAreas.dealt_letters.cards[1].state.playing_card, 4)
 		love.filesystem.remove(path)
 	end)
 
@@ -172,7 +172,7 @@ T.describe("save round-trip", function()
 			BonusStackUI = { on_hand_start = function() end },
 		})
 
-		G.hand = CardArea(0, 0, 8, 2, { type = "hand", card_limit = 7, selection_limit = 1 })
+		G.dealt_letters = CardArea(0, 0, 8, 2, { type = "hand", card_limit = 7, selection_limit = 1 })
 		local path = jumble_fixture.write_temp("test_jumble_hand_save.acs", write_save_file, make_letter("R", 9):save())
 		local loaded = jumble_fixture.read_temp(path, read_save_payload, unpack_source)
 		T.assert_not_nil(loaded)
@@ -183,8 +183,8 @@ T.describe("save round-trip", function()
 		T.assert_equal(wr.set, 2)
 		T.assert_equal(wr.jumble.total_score, 18)
 		T.assert_equal(G.GAME.timeline_seconds, 60, "restore_from_save resets fuse via timeline_reset")
-		T.assert_equal(#G.hand.cards, 1)
-		T.assert_equal(G.hand.cards[1].ability.letter, "R")
+		T.assert_equal(#G.dealt_letters.cards, 1)
+		T.assert_equal(G.dealt_letters.cards[1].ability.letter, "R")
 		love.filesystem.remove(path)
 	end)
 end)

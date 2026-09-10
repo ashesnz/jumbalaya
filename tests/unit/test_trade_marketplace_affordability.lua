@@ -7,7 +7,7 @@ local mock_env = require("tests.helpers.mock_env")
 
 local function stub_market_env()
 	G.letter_inventory = {}
-	G.deck = {
+	G.draw_pile = {
 		cards = {},
 		config = {},
 		emplace = function(self, card) table.insert(self.cards, card) end,
@@ -15,7 +15,7 @@ local function stub_market_env()
 		shuffle = function() end,
 		hard_set_T = function() end,
 	}
-	G.hand = {
+	G.dealt_letters = {
 		cards = {}, config = {},
 		emplace = function() end, set_ranks = function() end,
 		relayout = function() end, snap_VT = function() end,
@@ -81,7 +81,7 @@ local function bind_offer_with_letter(trade, deck, letter)
 	stub_market_env()
 	local card = deck.create_letter_card(letter, "red")
 	card.ability.letter = letter
-	G.deck:emplace(card)
+	G.draw_pile:emplace(card)
 	G.letter_inventory[1] = card
 	trade.sync_offer_cards(rolled)
 	return rolled, rolled.add.letters[1]

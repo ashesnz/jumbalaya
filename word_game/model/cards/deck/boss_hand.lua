@@ -9,7 +9,7 @@ return function(deck_module, context)
 		opts = opts or {}
 		local stagger = opts.fast and 0.04 or 0.1
 		local finish_delay = opts.fast and 0.06 or 0.2
-		if not G.hand or not letters or #letters == 0 then
+		if not G.dealt_letters or not letters or #letters == 0 then
 			if on_complete then on_complete() end
 			return
 		end
@@ -26,35 +26,35 @@ return function(deck_module, context)
 				end
 			end
 			j.boss_cards[#j.boss_cards + 1] = card
-			G.deck:emplace(card)
+			G.draw_pile:emplace(card)
 			if G.TIMELINE and G.TIMELINE.enqueue then
 				Scheduler.add{
 					mode = "window",
 					delay = (i - 1) * stagger,
 					blocking = true,
 					func = function()
-						CardMotion.move{from = G.deck, to = G.hand, percent = 50, direction = "up", stay_flipped = false, card = card, delay = 0.08}
+						CardMotion.move{from = G.draw_pile, to = G.dealt_letters, percent = 50, direction = "up", stay_flipped = false, card = card, delay = 0.08}
 						return true
 					end,
 				}
 			elseif context.fly_from_deck_to_hand then
 				context.fly_from_deck_to_hand(card)
 			else
-				G.deck:remove_card(card)
-				G.hand:emplace(card)
+				G.draw_pile:remove_card(card)
+				G.dealt_letters:emplace(card)
 			end
 		end
 		local finish = function()
 			local j_finish = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
 			if not (j_finish and j_finish.boss_puzzle_hidden)
-				and G.placement_table and G.placement_table.apply_screen_position then
-				G.placement_table:apply_screen_position()
+				and G.pattern_row and G.pattern_row.apply_screen_position then
+				G.pattern_row:apply_screen_position()
 			end
-			if G.hand then
-				G.hand:set_ranks()
-				G.hand:relayout()
-				G.hand:snap_VT()
-				G.hand:hard_set_cards()
+			if G.dealt_letters then
+				G.dealt_letters:set_ranks()
+				G.dealt_letters:relayout()
+				G.dealt_letters:snap_VT()
+				G.dealt_letters:hard_set_cards()
 			end
 			deck_module.sync_deck_count_display()
 			if on_complete then on_complete() end

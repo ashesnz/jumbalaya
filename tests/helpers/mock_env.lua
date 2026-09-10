@@ -308,10 +308,10 @@ function M.setup()
 
 	local ok_geo, jg = pcall(require, "word_game.board.jumble.geometry")
 	if ok_geo then
-		G.placement_table = G.placement_table or {}
-		G.placement_table.jumble_geometry = jg
-		if not G.placement_table.relayout then
-			G.placement_table.relayout = function() end
+		G.pattern_row = G.pattern_row or {}
+		G.pattern_row.jumble_geometry = jg
+		if not G.pattern_row.relayout then
+			G.pattern_row.relayout = function() end
 		end
 	end
 end
@@ -342,8 +342,8 @@ function M.reset_game()
 		pcall(function() G.SIDEBAR_HUD:remove() end)
 	end
 	G.SIDEBAR_HUD = nil
-	local jg = G.placement_table and G.placement_table.jumble_geometry
-	G.placement_table = {
+	local jg = G.pattern_row and G.pattern_row.jumble_geometry
+	G.pattern_row = {
 		relayout = function() end,
 		jumble_geometry = jg,
 	}

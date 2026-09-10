@@ -53,7 +53,7 @@ function M.add_selection(self, card, silent, handlers)
 end
 
 function M.remove_selection(self, card, force)
-	if (not force) and  card and card.ability.forced_selection and self == G.hand then return end
+	if (not force) and  card and card.ability.forced_selection and self == G.dealt_letters then return end
 	for i = #self.selected,1,-1 do
 		if self.selected[i] == card then
 			table.remove(self.selected, i)
@@ -66,7 +66,7 @@ end
 function M.clear_selection(self)
 	for i = #self.selected, 1, -1 do
 		local card = self.selected[i]
-		local pinned_by_effect = self == G.hand and card.ability.forced_selection
+		local pinned_by_effect = self == G.dealt_letters and card.ability.forced_selection
 		if not pinned_by_effect then
 			card:set_selected(false)
 			table.remove(self.selected, i)

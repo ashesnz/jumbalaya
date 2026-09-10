@@ -54,13 +54,13 @@ function InputRouter:update_focus(dir)
 	if #G.ARGS.focusables > 0 then
 		if dir then
 			if (dir == 'L' or dir == '') and self.focused.target and self.focused.target:is_kind(Card)
-				and self.focused.target.area == G.hand and G.hand then
+				and self.focused.target.area == G.dealt_letters and G.dealt_letters then
 				-- Inside the hand, walk card ranks with wraparound.
 				local slot = self.focused.target.slot or 1
 				local next_slot = slot + (dir == 'L' and -1 or 1)
-				if next_rank > #G.hand.cards then next_rank = 1 end
-				if next_rank == 0 then next_rank = #G.hand.cards end
-				if next_slot ~= slot then G.ARGS.focus_list[1] = {node = G.hand.cards[next_slot]} end
+				if next_rank > #G.dealt_letters.cards then next_rank = 1 end
+				if next_rank == 0 then next_rank = #G.dealt_letters.cards end
+				if next_slot ~= slot then G.ARGS.focus_list[1] = {node = G.dealt_letters.cards[next_slot]} end
 			else
 				-- Origin: focused node midpoint (funneled), else hover/cursor pos.
 				G.ARGS.focus_cursor_pos = G.ARGS.focus_cursor_pos or {}

@@ -44,7 +44,7 @@ end
 
 function M.can_discard_card(card)
 	if not M.unlocked() or M.left() <= 0 then return false end
-	if not card or card.REMOVED or card.area ~= G.hand then return false end
+	if not card or card.REMOVED or card.area ~= G.dealt_letters then return false end
 	if card.bonus_card or card.boss_temp then return false end
 	return true
 end

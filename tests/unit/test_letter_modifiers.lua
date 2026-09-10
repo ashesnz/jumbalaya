@@ -268,7 +268,7 @@ T.describe("Trade modifier application (word_game.model.trade)", function()
 		G.letter_inventory = {}
 		local card = { ability = { letter = "K", letter_color = "red" }, REMOVED = false }
 		G.letter_inventory[1] = card
-		G.deck = { cards = { card }, config = {} }
+		G.draw_pile = { cards = { card }, config = {} }
 		state.get().tokens = 100
 
 		local item = { letter = "K", card = card, mode = "market" }
@@ -284,7 +284,7 @@ T.describe("Trade modifier application (word_game.model.trade)", function()
 		G.letter_inventory = {}
 		local card = { ability = { letter = "T", letter_color = "black" }, REMOVED = false }
 		G.letter_inventory[1] = card
-		G.deck = { cards = { card }, config = {} }
+		G.draw_pile = { cards = { card }, config = {} }
 		state.get().tokens = 100
 
 		local item = { letter = "T", card = card, mode = "market" }

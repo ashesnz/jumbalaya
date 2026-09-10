@@ -10,12 +10,12 @@ T.describe("TableInput", function()
 	T.it("refresh_card_input relayouts hand and placement drag ranks", function()
 		local hand_calls = 0
 		local placement_calls = 0
-		G.hand = {
+		G.dealt_letters = {
 			set_ranks = function()
 				hand_calls = hand_calls + 1
 			end,
 		}
-		G.placement_table = {
+		G.pattern_row = {
 			area = {
 				set_ranks = function()
 					placement_calls = placement_calls + 1
@@ -30,12 +30,12 @@ T.describe("TableInput", function()
 
 	T.it("refresh_card_input tolerates missing placement table", function()
 		local hand_calls = 0
-		G.hand = {
+		G.dealt_letters = {
 			set_ranks = function()
 				hand_calls = hand_calls + 1
 			end,
 		}
-		G.placement_table = nil
+		G.pattern_row = nil
 
 		TableInput.refresh_card_input()
 		T.assert_equal(hand_calls, 1)

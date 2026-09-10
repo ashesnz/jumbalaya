@@ -43,7 +43,7 @@ end
 local function card_over_voucher(rect)
 	rect = rect or { x = 170, y = 90, w = 80, h = 40 }
 	return {
-		area = G.hand,
+		area = G.dealt_letters,
 		T = {
 			x = (rect.x + rect.w * 0.5) / ((G.TILESCALE or 1) * (G.TILESIZE or 1)) - 0.5,
 			y = (rect.y + rect.h * 0.5) / ((G.TILESCALE or 1) * (G.TILESIZE or 1)) - 0.7,
@@ -217,14 +217,14 @@ T.describe("table discard bin", function()
 		}
 		G.CARD_W = 1
 		G.CARD_H = 1.4
-		G.hand = { cards = {} }
+		G.dealt_letters = { cards = {} }
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME_UI.VoucherDiscard = table_discard
 		WORD_GAME.Deck = deck
 		mock_discard_voucher()
 
 		local card = card_over_voucher()
-		G.hand.cards[1] = card
+		G.dealt_letters.cards[1] = card
 
 		T.assert_false(table_discard.can_discard_card(card), "voucher discard disabled should block drag discard")
 		T.assert_false(table_discard.try_discard(card), "voucher discard disabled should reject drop")
@@ -249,17 +249,17 @@ T.describe("table discard bin", function()
 		G.GAME.round_scores = { cards_discarded = { amt = 0 } }
 		G.CARD_W = 1
 		G.CARD_H = 1.4
-		G.discard = {
+		G.recycle_stash = {
 			T = { x = 17.5, y = 9.2, w = 0.58, h = 0.81 },
 			cards = {},
 			relayout = function() end,
 			hard_set_cards = function() end,
 		}
-		G.deck = {
+		G.draw_pile = {
 			cards = { { id = "new" } },
 			remove_card = function(self) return table.remove(self.cards) end,
 		}
-		G.hand = {
+		G.dealt_letters = {
 			cards = {},
 			emplace = function(self, card)
 				self.cards[#self.cards + 1] = card
@@ -286,7 +286,7 @@ T.describe("table discard bin", function()
 		mock_discard_voucher()
 
 		local card = card_over_voucher()
-		G.hand.cards[1] = card
+		G.dealt_letters.cards[1] = card
 
 		local replaced = false
 		local orig_replacement = deck.draw_jumble_replacement
@@ -330,14 +330,14 @@ T.describe("table discard bin", function()
 		}
 		G.CARD_W = 1
 		G.CARD_H = 1.4
-		G.hand = { cards = {} }
+		G.dealt_letters = { cards = {} }
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME_UI.VoucherDiscard = table_discard
 		WORD_GAME.Deck = deck
 		mock_discard_voucher()
 
 		local card = card_over_voucher()
-		G.hand.cards[1] = card
+		G.dealt_letters.cards[1] = card
 
 		T.assert_false(table_discard.can_discard_card(card), "voucher discard disabled should block drag discard")
 		T.assert_false(table_discard.try_discard(card), "voucher discard disabled should reject drop")
@@ -357,7 +357,7 @@ T.describe("table discard bin", function()
 		table_discard.record_discard()
 		T.assert_equal(table_discard.discards_left(), 0)
 
-		G.hand = {
+		G.dealt_letters = {
 			cards = {},
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 			set_ranks = function() end,
@@ -365,11 +365,11 @@ T.describe("table discard bin", function()
 			snap_VT = function() end,
 			hard_set_cards = function() end,
 		}
-		G.deck = {
+		G.draw_pile = {
 			cards = { {}, {} },
 			remove_card = function(self) return table.remove(self.cards) end,
 		}
-		G.placement_table = { area = { cards = {}, hard_set_cards = function() end } }
+		G.pattern_row = { area = { cards = {}, hard_set_cards = function() end } }
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME_UI.VoucherDiscard = table_discard
 		WORD_GAME.Jumble = { ensure_playable_puzzle = function() end }
@@ -499,17 +499,17 @@ T.describe("table discard bin", function()
 		table_discard.sync_voucher_counter(true)
 		mock_discard_voucher()
 
-		G.discard = {
+		G.recycle_stash = {
 			T = { x = 17.5, y = 9.2, w = 0.58, h = 0.81 },
 			cards = {},
 			relayout = function() end,
 			hard_set_cards = function() end,
 		}
-		G.deck = {
+		G.draw_pile = {
 			cards = { { id = "new" } },
 			remove_card = function(self) return table.remove(self.cards) end,
 		}
-		G.hand = {
+		G.dealt_letters = {
 			cards = {},
 			emplace = function(self, card)
 				self.cards[#self.cards + 1] = card
@@ -535,7 +535,7 @@ T.describe("table discard bin", function()
 		MockEnv.install_presentation()
 
 		local card = card_over_voucher()
-		G.hand.cards[1] = card
+		G.dealt_letters.cards[1] = card
 
 		T.assert_equal(table_discard.discards_left(), 2)
 		T.assert_equal(table_discard.visible_counter_digit(), "2")

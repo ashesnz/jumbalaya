@@ -9,21 +9,21 @@ return function(context)
 	local take_letter_from_deck = context.take_letter_from_deck
 
 	local function placement_count()
-		local area = G.placement_table and G.placement_table.area
+		local area = G.pattern_row and G.pattern_row.area
 		return (area and area.cards and #area.cards) or 0
 	end
 
 	function M.held_count()
-		return ((G.hand and G.hand.cards and #G.hand.cards) or 0) + placement_count()
+		return ((G.dealt_letters and G.dealt_letters.cards and #G.dealt_letters.cards) or 0) + placement_count()
 	end
 
 	function M.hand_card_count()
-		return (G.hand and G.hand.cards and #G.hand.cards) or 0
+		return (G.dealt_letters and G.dealt_letters.cards and #G.dealt_letters.cards) or 0
 	end
 
 	function M.draw_pile_count()
-		if G.deck and G.deck.cards then
-			return #G.deck.cards
+		if G.draw_pile and G.draw_pile.cards then
+			return #G.draw_pile.cards
 		end
 		return 0
 	end
@@ -45,7 +45,7 @@ return function(context)
 
 	function M.deal_one_to_hand(target_size)
 		target_size = target_size or hand_size_cfg.get()
-		if not G.hand or M.held_count() >= target_size then return false end
+		if not G.dealt_letters or M.held_count() >= target_size then return false end
 		local card = take_letter_from_deck(needs_vowel())
 		if not card then return false end
 		return context.fly_from_deck_to_hand(card)
@@ -89,9 +89,9 @@ return function(context)
 
 	function M.deal_fresh_hand(on_complete)
 		local hand_size_n = hand_size_cfg.get()
-		if G.hand then
-			G.hand.config.card_limit = hand_size_n
-			G.hand.config.selected_limit = hand_size_n
+		if G.dealt_letters then
+			G.dealt_letters.config.card_limit = hand_size_n
+			G.dealt_letters.config.selected_limit = hand_size_n
 		end
 		LayoutRequest.refresh()
 		return M.deal_into_hand(hand_size_n, on_complete)
@@ -99,24 +99,24 @@ return function(context)
 
 	function M.draw_to_hand(target_size)
 		target_size = target_size or hand_size_cfg.get()
-		while G.hand and M.held_count() < target_size do
+		while G.dealt_letters and M.held_count() < target_size do
 			local card = take_letter_from_deck(needs_vowel())
 			if not card then break end
-			G.hand:emplace(card)
+			G.dealt_letters:emplace(card)
 		end
 		M.ensure_vowel_in_hand()
 		M.ensure_playable_held()
-		if G.hand then
+		if G.dealt_letters then
 			M.sanitize_hand()
 			while M.held_count() < target_size do
 				local card = take_letter_from_deck(needs_vowel())
 				if not card then break end
-				G.hand:emplace(card)
+				G.dealt_letters:emplace(card)
 			end
 			M.ensure_vowel_in_hand()
 			M.ensure_playable_held()
-			G.hand:set_ranks()
-			G.hand:relayout()
+			G.dealt_letters:set_ranks()
+			G.dealt_letters:relayout()
 		end
 	end
 end

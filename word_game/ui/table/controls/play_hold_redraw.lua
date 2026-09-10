@@ -134,9 +134,9 @@ function M.reset()
 	if WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
 		WORD_GAME_UI.TableInput.refresh_card_input()
 	else
-		if G.hand and G.hand.set_ranks then G.hand:set_ranks() end
-		if G.placement_table and G.placement_table.area and G.placement_table.area.set_ranks then
-			G.placement_table.area:set_ranks()
+		if G.dealt_letters and G.dealt_letters.set_ranks then G.dealt_letters:set_ranks() end
+		if G.pattern_row and G.pattern_row.area and G.pattern_row.area.set_ranks then
+			G.pattern_row.area:set_ranks()
 		end
 	end
 end
@@ -156,8 +156,8 @@ local function discard_hand_down(on_complete)
 	recall_placement_cards()
 
 	local cards_to_discard = {}
-	if G.hand and G.hand.cards then
-		for _, card in ipairs(G.hand.cards) do
+	if G.dealt_letters and G.dealt_letters.cards then
+		for _, card in ipairs(G.dealt_letters.cards) do
 			cards_to_discard[#cards_to_discard + 1] = card
 		end
 	end
@@ -175,8 +175,8 @@ local function discard_hand_down(on_complete)
 			mode = "delayed",
 			delay = M.DISCARD_STAGGER * (i - 1),
 			func = function()
-				if card.area == G.hand then
-					G.hand:remove_card(card)
+				if card.area == G.dealt_letters then
+					G.dealt_letters:remove_card(card)
 				end
 				if card.T then
 					card.T.y = target_offscreen_y
@@ -198,17 +198,17 @@ local function discard_hand_down(on_complete)
 		blocking = true,
 		func = function()
 			for _, card in ipairs(cards_to_discard) do
-				if G.deck then
-					G.deck:emplace(card)
+				if G.draw_pile then
+					G.draw_pile:emplace(card)
 				end
 			end
-			if G.deck then
-				G.deck:shuffle("play_hold_redraw")
-				G.deck:hard_set_T()
+			if G.draw_pile then
+				G.draw_pile:shuffle("play_hold_redraw")
+				G.draw_pile:hard_set_T()
 			end
-			if G.hand then
-				G.hand:relayout()
-				G.hand:hard_set_cards()
+			if G.dealt_letters then
+				G.dealt_letters:relayout()
+				G.dealt_letters:hard_set_cards()
 			end
 			if on_complete then
 				on_complete()
@@ -226,13 +226,13 @@ local function finish_redraw()
 	if WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
 		WORD_GAME_UI.TableInput.refresh_card_input()
 	else
-		if G.hand and G.hand.set_ranks then G.hand:set_ranks() end
-		if G.placement_table and G.placement_table.area and G.placement_table.area.set_ranks then
-			G.placement_table.area:set_ranks()
+		if G.dealt_letters and G.dealt_letters.set_ranks then G.dealt_letters:set_ranks() end
+		if G.pattern_row and G.pattern_row.area and G.pattern_row.area.set_ranks then
+			G.pattern_row.area:set_ranks()
 		end
 	end
-	if G.hand and G.hand.relayout then
-		G.hand:relayout()
+	if G.dealt_letters and G.dealt_letters.relayout then
+		G.dealt_letters:relayout()
 	end
 	if WORD_GAME_UI.TableControls then
 		WORD_GAME_UI.TableControls.sync()

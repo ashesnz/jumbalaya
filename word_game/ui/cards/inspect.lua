@@ -26,7 +26,7 @@ local function is_letter_card(card)
 	if set ~= "Default" and set ~= "Enhanced" then return false end
 	local area = card.area
 	if not area then return false end
-	return area == G.hand or (area.config and area.config.type == "placement")
+	return area == G.dealt_letters or (area.config and area.config.type == "placement")
 end
 
 local function ease_inout(t)

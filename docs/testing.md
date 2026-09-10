@@ -33,12 +33,12 @@ tests/
 `tests/helpers/mock_env.lua` provides:
 
 - `ensure_engine_globals()` — loads real `Card`, `Sprite`, `AnimNode`, etc.
-- `reset_game()` — preferred per-suite reset: `G.GAME`, `G.placement_table`, layout stubs, bonus-stack/fly-off state
+- `reset_game()` — preferred per-suite reset: `G.GAME`, `G.pattern_row`, layout stubs, bonus-stack/fly-off state
 - `setup()` — low-level globals only; called by `reset_game()`, avoid at describe level unless booting a custom shell (e.g. screen-wipe tests)
 - `install_hand_clear(play_module)` — mirrors `game_boot` wiring for `Play.on_hand_cleared` / `continue_after_dealer`
 - `teardown_boot_pollution()` — alias for `reset_game()`
 
-Prefer `mock_env.reset_game()` at the top of a `describe` block. When mocking `G.deck`, keep `G.letter_inventory` and `G.deck.cards` as **separate tables** (production does not alias them).
+Prefer `mock_env.reset_game()` at the top of a `describe` block. When mocking `G.draw_pile`, keep `G.letter_inventory` and `G.draw_pile.cards` as **separate tables** (production does not alias them).
 
 ## Adding New Tests
 

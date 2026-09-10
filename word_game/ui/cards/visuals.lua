@@ -427,7 +427,7 @@ function Card:draw_shadow()
 		and G.SETTINGS.GRAPHICS.shadows == 'On'
 		and self.ability.effect ~= 'Glass Card'
 		and not self.greyed
-		and ((self.area and self.area ~= G.discard and self.area.config.type ~= 'deck')
+		and ((self.area and self.area ~= G.recycle_stash and self.area.config.type ~= 'deck')
 			or not self.area or self.states.drag.is)
 
 	if wants_shadow then
@@ -587,7 +587,7 @@ function Card:draw(layer)
 	end
 
 	if layer == 'card' or layer == 'both' then
-		if self.area ~= G.hand and self.children.focused_ui then
+		if self.area ~= G.dealt_letters and self.children.focused_ui then
 			self.children.focused_ui:draw()
 		end
 
@@ -617,7 +617,7 @@ function Card:draw(layer)
 			love.graphics.pop()
 		end
 
-		if self.area == G.hand and self.children.focused_ui then
+		if self.area == G.dealt_letters and self.children.focused_ui then
 			self.children.focused_ui:draw()
 		end
 

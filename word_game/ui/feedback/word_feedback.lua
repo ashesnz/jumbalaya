@@ -128,11 +128,11 @@ function M.spawn_attention(args)
 end
 
 local function placement_area()
-	return G.placement_table and G.placement_table.area
+	return G.pattern_row and G.pattern_row.area
 end
 
 local function hand_dealt_metrics()
-	if not G.hand then return nil end
+	if not G.dealt_letters then return nil end
 
 	local wr = G.GAME and G.GAME.word_round
 	local locked = wr and wr.jumble and wr.jumble.locked_hand_layout
@@ -143,8 +143,8 @@ local function hand_dealt_metrics()
 		right = locked.x + locked.w
 		top = locked.y
 		bottom = locked.y + locked.h
-	elseif G.hand.cards and #G.hand.cards > 0 then
-		for _, card in ipairs(G.hand.cards) do
+	elseif G.dealt_letters.cards and #G.dealt_letters.cards > 0 then
+		for _, card in ipairs(G.dealt_letters.cards) do
 			if card and card.T then
 				local cl = card.T.x
 				local cr = card.T.x + (card.T.w or G.CARD_W or 1)
@@ -159,11 +159,11 @@ local function hand_dealt_metrics()
 	end
 
 	if not left then
-		if not G.hand.T then return nil end
-		left = G.hand.T.x
-		right = G.hand.T.x + G.hand.T.w
-		top = G.hand.T.y
-		bottom = G.hand.T.y + G.hand.T.h
+		if not G.dealt_letters.T then return nil end
+		left = G.dealt_letters.T.x
+		right = G.dealt_letters.T.x + G.dealt_letters.T.w
+		top = G.dealt_letters.T.y
+		bottom = G.dealt_letters.T.y + G.dealt_letters.T.h
 	end
 
 	local row_w = right - left
@@ -177,17 +177,17 @@ local function hand_dealt_metrics()
 		w = row_w,
 		h = row_h,
 		bottom = bottom,
-		gap_w = math.min(math.max(row_w, G.hand.T.w), felt.w * 0.82),
-		inner_h = math.max(row_h, G.hand.T.h),
+		gap_w = math.min(math.max(row_w, G.dealt_letters.T.w), felt.w * 0.82),
+		inner_h = math.max(row_h, G.dealt_letters.T.h),
 	}
 end
 
 local function hand_gap_metrics()
 	local area = placement_area()
-	if not area or not area.T or not G.hand or not G.hand.T then return nil end
+	if not area or not area.T or not G.dealt_letters or not G.dealt_letters.T then return nil end
 	local felt = get_table_felt_rect()
 	local top = area.T.y + area.T.h
-	local bottom = G.hand.T.y
+	local bottom = G.dealt_letters.T.y
 	if bottom <= top + 0.04 then
 		bottom = top + math.max(0.28, (G.CARD_H or 1) * 0.32)
 	end
@@ -317,7 +317,7 @@ end
 function M.show_classic_proceed(opts)
 	opts = opts or {}
 	M.show(RunMode.classic_proceed_message(), G.C.RED, opts.hold or 2.8, opts.offset_y or 0.15)
-	local major = (G.placement_table and G.placement_table.area)
+	local major = (G.pattern_row and G.pattern_row.area)
 		or G.PLAY_ATTACH
 		or G.ROOM_ATTACH
 	if major and major.pulse then

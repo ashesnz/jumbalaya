@@ -13,8 +13,8 @@ T.describe("Debug wordlist answers", function()
 	end
 
 	T.it("includes active bonus-stack cards in debug answer counts", function()
-		G.hand = { cards = { mock_card("A"), mock_card("T") } }
-		G.placement_table = { area = { cards = { mock_card("E") } } }
+		G.dealt_letters = { cards = { mock_card("A"), mock_card("T") } }
+		G.pattern_row = { area = { cards = { mock_card("E") } } }
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.BonusStack = {
 			is_active = function() return true end,
@@ -47,9 +47,9 @@ T.describe("Debug wordlist answers", function()
 
 	T.it("does not double-count bonus cards placed in the puzzle row", function()
 		local placed = mock_card("R")
-		G.hand = { cards = { mock_card("C") } }
-		G.placement_table = { area = { cards = { placed } } }
-		placed.area = G.placement_table.area
+		G.dealt_letters = { cards = { mock_card("C") } }
+		G.pattern_row = { area = { cards = { placed } } }
+		placed.area = G.pattern_row.area
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.BonusStack = {
 			is_active = function() return true end,
@@ -73,8 +73,8 @@ T.describe("Debug wordlist answers", function()
 	end)
 
 	T.it("skips bonus-stack cards when the gutter stack is inactive", function()
-		G.hand = { cards = { mock_card("C") } }
-		G.placement_table = { area = { cards = {} } }
+		G.dealt_letters = { cards = { mock_card("C") } }
+		G.pattern_row = { area = { cards = {} } }
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.BonusStack = {
 			is_active = function() return false end,

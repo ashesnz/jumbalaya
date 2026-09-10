@@ -57,11 +57,11 @@ end
 --- Right press: clears hand selections (gated against mid-play states).
 function InputRouter:queue_R_cursor_press(x, y)
 	if self.locks.frame then return end
-	if not G.SETTINGS.paused and G.hand and G.hand.selected[1] then
+	if not G.SETTINGS.paused and G.dealt_letters and G.dealt_letters.selected[1] then
 		if self.locked or self.locks.frame then
 			return
 		end
-		G.hand:clear_selection()
+		G.dealt_letters:clear_selection()
 	end
 end
 

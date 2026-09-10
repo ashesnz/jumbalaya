@@ -16,8 +16,8 @@ T.describe("Bonus cards", function()
 		G.CARD_W = 2
 		G.CARD_H = 2.8
 		G.ROOM = { T = { x = 1, y = 0, w = 20, h = 11.5 } }
-		G.hand = { T = { x = 3.2, y = 8.0, w = 10.5, h = 2.8 } }
-		G.placement_table = {
+		G.dealt_letters = { T = { x = 3.2, y = 8.0, w = 10.5, h = 2.8 } }
+		G.pattern_row = {
 			area = {
 				T = { x = 0.6, y = 2.0, w = 18.0, h = 2.8 },
 				hard_set_cards = function() end,
@@ -203,8 +203,8 @@ T.describe("Bonus cards", function()
 				end
 			end,
 		}
-		G.placement_table.area = area
-		G.placement_table.on_remove_card = function() end
+		G.pattern_row.area = area
+		G.pattern_row.on_remove_card = function() end
 		local cards = { mock_card("V", 9.5, 4), mock_card("E", 10.5, 4) }
 		for _, card in ipairs(cards) do
 			card.area = area
@@ -238,7 +238,7 @@ T.describe("Bonus cards", function()
 		local window_left = -(G.ROOM.T.x or 0)
 		T.assert_almost_equal(stack_x, window_left + bonus_stack.LEFT_WINDOW_MARGIN, 0.02)
 		T.assert_true(stack_x > window_left, "Small margin should keep cards off the hard left")
-		T.assert_true(stack_x + G.CARD_W < G.hand.T.x, "Stack should sit away from the dealt hand")
+		T.assert_true(stack_x + G.CARD_W < G.dealt_letters.T.x, "Stack should sit away from the dealt hand")
 		bonus_stack.clear()
 	end)
 
@@ -253,19 +253,19 @@ T.describe("Bonus cards", function()
 
 		WORD_GAME_UI.Layout = {
 			update_all = function()
-				G.hand.T.x = G.hand.T.x + 2
-				G.placement_table.area.T.x = G.placement_table.area.T.x + 2
+				G.dealt_letters.T.x = G.dealt_letters.T.x + 2
+				G.pattern_row.area.T.x = G.pattern_row.area.T.x + 2
 			end,
 			set_screen_positions = function()
-				G.hand.T.x = G.hand.T.x + 2
-				G.placement_table.area.T.x = G.placement_table.area.T.x + 2
+				G.dealt_letters.T.x = G.dealt_letters.T.x + 2
+				G.pattern_row.area.T.x = G.pattern_row.area.T.x + 2
 			end,
 		}
-		G.hand.relayout = function(self)
+		G.dealt_letters.relayout = function(self)
 			self.T.x = self.T.x + 2
 		end
-		G.placement_table.relayout = function()
-			G.placement_table.area.T.x = G.placement_table.area.T.x + 2
+		G.pattern_row.relayout = function()
+			G.pattern_row.area.T.x = G.pattern_row.area.T.x + 2
 		end
 
 		local j = {
@@ -277,29 +277,29 @@ T.describe("Bonus cards", function()
 
 		WORD_GAME_UI.Layout = {
 			update_all = function()
-				G.hand.T.x = G.hand.T.x + 2
-				G.placement_table.area.T.x = G.placement_table.area.T.x + 2
+				G.dealt_letters.T.x = G.dealt_letters.T.x + 2
+				G.pattern_row.area.T.x = G.pattern_row.area.T.x + 2
 			end,
 			set_screen_positions = function()
-				G.hand.T.x = G.hand.T.x + 2
-				G.placement_table.area.T.x = G.placement_table.area.T.x + 2
+				G.dealt_letters.T.x = G.dealt_letters.T.x + 2
+				G.pattern_row.area.T.x = G.pattern_row.area.T.x + 2
 			end,
 		}
-		G.hand.relayout = function(self)
+		G.dealt_letters.relayout = function(self)
 			self.T.x = self.T.x + 2
 		end
-		G.placement_table.relayout = function()
-			G.placement_table.area.T.x = G.placement_table.area.T.x + 2
+		G.pattern_row.relayout = function()
+			G.pattern_row.area.T.x = G.pattern_row.area.T.x + 2
 		end
 
 		local hand_before = {
-			x = G.hand.T.x, y = G.hand.T.y, w = G.hand.T.w, h = G.hand.T.h,
+			x = G.dealt_letters.T.x, y = G.dealt_letters.T.y, w = G.dealt_letters.T.w, h = G.dealt_letters.T.h,
 		}
 		local area_before = {
-			x = G.placement_table.area.T.x,
-			y = G.placement_table.area.T.y,
-			w = G.placement_table.area.T.w,
-			h = G.placement_table.area.T.h,
+			x = G.pattern_row.area.T.x,
+			y = G.pattern_row.area.T.y,
+			w = G.pattern_row.area.T.w,
+			h = G.pattern_row.area.T.h,
 		}
 		local col_before = felt.play_column()
 		local hand_col_before = felt.hand_play_column()
@@ -307,14 +307,14 @@ T.describe("Bonus cards", function()
 		local orig_animate = bonus_stack.animate_cards_to_stack
 		bonus_stack.animate_cards_to_stack = function()
 			T.assert_true(bonus_stack.is_animating())
-			T.assert_almost_equal(G.hand.T.x, hand_before.x, 0.001)
-			T.assert_almost_equal(G.hand.T.y, hand_before.y, 0.001)
-			T.assert_almost_equal(G.hand.T.w, hand_before.w, 0.001)
-			T.assert_almost_equal(G.hand.T.h, hand_before.h, 0.001)
-			T.assert_almost_equal(G.placement_table.area.T.x, area_before.x, 0.001)
-			T.assert_almost_equal(G.placement_table.area.T.y, area_before.y, 0.001)
-			T.assert_almost_equal(G.placement_table.area.T.w, area_before.w, 0.001)
-			T.assert_almost_equal(G.placement_table.area.T.h, area_before.h, 0.001)
+			T.assert_almost_equal(G.dealt_letters.T.x, hand_before.x, 0.001)
+			T.assert_almost_equal(G.dealt_letters.T.y, hand_before.y, 0.001)
+			T.assert_almost_equal(G.dealt_letters.T.w, hand_before.w, 0.001)
+			T.assert_almost_equal(G.dealt_letters.T.h, hand_before.h, 0.001)
+			T.assert_almost_equal(G.pattern_row.area.T.x, area_before.x, 0.001)
+			T.assert_almost_equal(G.pattern_row.area.T.y, area_before.y, 0.001)
+			T.assert_almost_equal(G.pattern_row.area.T.w, area_before.w, 0.001)
+			T.assert_almost_equal(G.pattern_row.area.T.h, area_before.h, 0.001)
 			T.assert_almost_equal(felt.play_column().x, col_before.x, 0.001)
 			T.assert_almost_equal(felt.play_column().w, col_before.w, 0.001)
 			T.assert_almost_equal(felt.hand_play_column().x, hand_col_before.x, 0.001)
@@ -326,14 +326,14 @@ T.describe("Bonus cards", function()
 			sync_placement_cards = function() end,
 		}, j, { mock_card("V", 9.5, 4), mock_card("E", 10.5, 4) })
 
-		T.assert_almost_equal(G.hand.T.x, hand_before.x, 0.001)
-		T.assert_almost_equal(G.hand.T.y, hand_before.y, 0.001)
-		T.assert_almost_equal(G.hand.T.w, hand_before.w, 0.001)
-		T.assert_almost_equal(G.hand.T.h, hand_before.h, 0.001)
-		T.assert_almost_equal(G.placement_table.area.T.x, area_before.x, 0.001)
-		T.assert_almost_equal(G.placement_table.area.T.y, area_before.y, 0.001)
-		T.assert_almost_equal(G.placement_table.area.T.w, area_before.w, 0.001)
-		T.assert_almost_equal(G.placement_table.area.T.h, area_before.h, 0.001)
+		T.assert_almost_equal(G.dealt_letters.T.x, hand_before.x, 0.001)
+		T.assert_almost_equal(G.dealt_letters.T.y, hand_before.y, 0.001)
+		T.assert_almost_equal(G.dealt_letters.T.w, hand_before.w, 0.001)
+		T.assert_almost_equal(G.dealt_letters.T.h, hand_before.h, 0.001)
+		T.assert_almost_equal(G.pattern_row.area.T.x, area_before.x, 0.001)
+		T.assert_almost_equal(G.pattern_row.area.T.y, area_before.y, 0.001)
+		T.assert_almost_equal(G.pattern_row.area.T.w, area_before.w, 0.001)
+		T.assert_almost_equal(G.pattern_row.area.T.h, area_before.h, 0.001)
 		T.assert_almost_equal(felt.play_column().x, col_before.x, 0.001)
 		T.assert_almost_equal(felt.play_column().w, col_before.w, 0.001)
 
@@ -416,16 +416,16 @@ T.describe("Bonus cards", function()
 			{ REMOVED = false, boss_temp = false, bonus_card = false },
 			{ REMOVED = false, bonus_card = true },
 		}
-		G.deck = {
+		G.draw_pile = {
 			cards = {},
 			config = { card_limit = 0 },
 			emplace = function(self, card) self.cards[#self.cards + 1] = card end,
 			hard_set_T = function() end,
 		}
-		G.hand = { cards = {}, remove_card = function() end }
-		G.placement_table = { area = { cards = {}, hard_set_cards = function() end } }
+		G.dealt_letters = { cards = {}, remove_card = function() end }
+		G.pattern_row = { area = { cards = {}, hard_set_cards = function() end } }
 		deck_mod.populate_jumble_deck()
-		T.assert_equal(#G.deck.cards, 1)
+		T.assert_equal(#G.draw_pile.cards, 1)
 	end)
 
 	T.it("persists promoted boss cards into stage 1-4", function()
@@ -471,15 +471,15 @@ T.describe("Bonus cards", function()
 	T.it("returns a placement bonus card to the left gutter when dropped there", function()
 		bonus_stack.clear()
 		layout_globals()
-		G.hand = mock_hand()
+		G.dealt_letters = mock_hand()
 		local snap = require("word_game.board.placement.snap")
 		local card = mock_card("B", 5, 2.4)
 		bonus_stack.promote_to_bonus({ card })
 		local slots = { { kind = "blank", card = card } }
 		mock_jumble(slots)
-		card.area = G.placement_table.area
-		G.placement_table.area.cards = { card }
-		G.placement_table.area.remove_card = function(self, c)
+		card.area = G.pattern_row.area
+		G.pattern_row.area.cards = { card }
+		G.pattern_row.area.remove_card = function(self, c)
 			for i, held in ipairs(self.cards) do
 				if held == c then
 					table.remove(self.cards, i)
@@ -491,9 +491,9 @@ T.describe("Bonus cards", function()
 		local gutter_x, gutter_y = bonus_stack.target_position(1)
 		card.T.x, card.T.y = gutter_x, gutter_y
 		local cx = card.T.x + card.T.w / 2
-		T.assert_true(cx < G.placement_table.area.T.x, "test drop should be left of the placement row")
+		T.assert_true(cx < G.pattern_row.area.T.x, "test drop should be left of the placement row")
 		snap.try_snap({
-			area = G.placement_table.area,
+			area = G.pattern_row.area,
 			ctx = {
 				card_w = function() return G.CARD_W end,
 				card_h = function() return G.CARD_H end,
@@ -502,22 +502,22 @@ T.describe("Bonus cards", function()
 		T.assert_nil(slots[1].card, "Bonus card should leave the placement row")
 		T.assert_true(bonus_stack.contains(card), "Bonus card should return to the gutter")
 		T.assert_nil(card.area)
-		T.assert_equal(#G.hand.cards, 0)
+		T.assert_equal(#G.dealt_letters.cards, 0)
 		bonus_stack.clear()
 	end)
 
 	T.it("returns a placement bonus card to its slot when dropped below the row", function()
 		bonus_stack.clear()
 		layout_globals()
-		G.hand = mock_hand()
+		G.dealt_letters = mock_hand()
 		local snap = require("word_game.board.placement.snap")
 		local card = mock_card("B", 5, 2.4)
 		bonus_stack.promote_to_bonus({ card })
 		local slots = { { kind = "blank", card = card } }
 		mock_jumble(slots)
-		card.area = G.placement_table.area
-		G.placement_table.area.cards = { card }
-		G.placement_table.area.remove_card = function(self, c)
+		card.area = G.pattern_row.area
+		G.pattern_row.area.cards = { card }
+		G.pattern_row.area.remove_card = function(self, c)
 			for i, held in ipairs(self.cards) do
 				if held == c then
 					table.remove(self.cards, i)
@@ -528,28 +528,28 @@ T.describe("Bonus cards", function()
 		end
 		card.T.x, card.T.y = 5, 7
 		snap.try_snap({
-			area = G.placement_table.area,
+			area = G.pattern_row.area,
 			ctx = {
 				card_w = function() return G.CARD_W end,
 				card_h = function() return G.CARD_H end,
 			},
 		}, card)
 		T.assert_equal(slots[1].card, card, "Bonus card should return to its placement slot")
-		T.assert_equal(card.area, G.placement_table.area)
-		T.assert_equal(#G.hand.cards, 0)
+		T.assert_equal(card.area, G.pattern_row.area)
+		T.assert_equal(#G.dealt_letters.cards, 0)
 		bonus_stack.clear()
 	end)
 
 	T.it("rejects a gutter bonus card dropped on the dealt hand", function()
 		bonus_stack.clear()
 		layout_globals()
-		G.hand = mock_hand()
+		G.dealt_letters = mock_hand()
 		local snap = require("word_game.board.placement.snap")
 		local card = mock_card("B", 5, 8.5)
 		bonus_stack.promote_to_bonus({ card })
 		mock_jumble({})
 		snap.try_snap({
-			area = G.placement_table.area,
+			area = G.pattern_row.area,
 			ctx = {
 				card_w = function() return G.CARD_W end,
 				card_h = function() return G.CARD_H end,
@@ -557,22 +557,22 @@ T.describe("Bonus cards", function()
 		}, card)
 		T.assert_true(bonus_stack.contains(card), "Gutter bonus should return to the gutter")
 		T.assert_nil(card.area)
-		T.assert_equal(#G.hand.cards, 0, "Bonus cards must not enter the dealt hand")
+		T.assert_equal(#G.dealt_letters.cards, 0, "Bonus cards must not enter the dealt hand")
 		bonus_stack.clear()
 	end)
 
 	T.it("restores a placement bonus card dropped on the dealt hand", function()
 		bonus_stack.clear()
 		layout_globals()
-		G.hand = mock_hand()
+		G.dealt_letters = mock_hand()
 		local snap = require("word_game.board.placement.snap")
 		local card = mock_card("B", 5, 2.4)
 		bonus_stack.promote_to_bonus({ card })
 		local slots = { { kind = "blank", card = card } }
 		mock_jumble(slots)
-		card.area = G.placement_table.area
-		G.placement_table.area.cards = { card }
-		G.placement_table.area.remove_card = function(self, c)
+		card.area = G.pattern_row.area
+		G.pattern_row.area.cards = { card }
+		G.pattern_row.area.remove_card = function(self, c)
 			for i, held in ipairs(self.cards) do
 				if held == c then
 					table.remove(self.cards, i)
@@ -583,28 +583,28 @@ T.describe("Bonus cards", function()
 		end
 		card.T.x, card.T.y = 5, 8.5
 		snap.try_snap({
-			area = G.placement_table.area,
+			area = G.pattern_row.area,
 			ctx = {
 				card_w = function() return G.CARD_W end,
 				card_h = function() return G.CARD_H end,
 			},
 		}, card)
 		T.assert_equal(slots[1].card, card, "Bonus card should return to its placement slot")
-		T.assert_equal(card.area, G.placement_table.area)
-		T.assert_equal(#G.hand.cards, 0)
+		T.assert_equal(card.area, G.pattern_row.area)
+		T.assert_equal(#G.dealt_letters.cards, 0)
 		bonus_stack.clear()
 	end)
 
 	T.it("sync_positions ejects bonus cards that end up in the dealt hand", function()
 		bonus_stack.clear()
 		layout_globals()
-		G.hand = mock_hand()
+		G.dealt_letters = mock_hand()
 		local card = mock_card("B", 5, 8.5)
 		bonus_stack.promote_to_bonus({ card })
-		G.hand:emplace(card)
-		T.assert_equal(#G.hand.cards, 1)
+		G.dealt_letters:emplace(card)
+		T.assert_equal(#G.dealt_letters.cards, 1)
 		bonus_stack.sync_positions()
-		T.assert_equal(#G.hand.cards, 0)
+		T.assert_equal(#G.dealt_letters.cards, 0)
 		T.assert_true(bonus_stack.contains(card))
 		T.assert_nil(card.area)
 		bonus_stack.clear()
@@ -617,10 +617,10 @@ T.describe("Bonus cards", function()
 		local bonus = mock_card("G", 4, 2)
 		local dealt = mock_card("H", 6, 2)
 		bonus_stack.promote_to_bonus({ bonus })
-		bonus.area = G.placement_table.area
-		dealt.area = G.placement_table.area
-		G.placement_table.area.cards = { bonus, dealt }
-		G.placement_table.area.remove_card = function(self, card)
+		bonus.area = G.pattern_row.area
+		dealt.area = G.pattern_row.area
+		G.pattern_row.area.cards = { bonus, dealt }
+		G.pattern_row.area.remove_card = function(self, card)
 			for i, held in ipairs(self.cards) do
 				if held == card then
 					table.remove(self.cards, i)
@@ -629,8 +629,8 @@ T.describe("Bonus cards", function()
 				end
 			end
 		end
-		G.placement_table.on_remove_card = function() end
-		G.hand = {
+		G.pattern_row.on_remove_card = function() end
+		G.dealt_letters = {
 			cards = {},
 			emplace = function(self, card)
 				self.cards[#self.cards + 1] = card
@@ -647,8 +647,8 @@ T.describe("Bonus cards", function()
 		hand_shuffle.recall_placement_cards()
 		T.assert_true(bonus_stack.contains(bonus), "Gutter card should return to the gutter")
 		T.assert_nil(bonus.area)
-		T.assert_equal(#G.hand.cards, 1)
-		T.assert_equal(G.hand.cards[1], dealt)
+		T.assert_equal(#G.dealt_letters.cards, 1)
+		T.assert_equal(G.dealt_letters.cards[1], dealt)
 		bonus_stack.clear()
 	end)
 

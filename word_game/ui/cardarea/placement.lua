@@ -15,28 +15,28 @@ function M.add_selection(self, card, silent)
 end
 
 function M.on_remove_card(self, card)
-	if G.placement_table and G.placement_table.area == self then
-		G.placement_table:on_remove_card(card)
+	if G.pattern_row and G.pattern_row.area == self then
+		G.pattern_row:on_remove_card(card)
 	end
 end
 
 function M.on_remove(self)
-	if G.placement_table and G.placement_table.area == self then
-		G.placement_table.area = nil
+	if G.pattern_row and G.pattern_row.area == self then
+		G.pattern_row.area = nil
 	end
 end
 
 function M.relayout(self)
 	if self.config.type ~= 'placement' then return end
-	if G.placement_table and G.placement_table.area == self then
-		G.placement_table:relayout()
+	if G.pattern_row and G.pattern_row.area == self then
+		G.pattern_row:relayout()
 	end
 end
 
 function M.draw_shadows(self)
 	if self.config.type ~= 'placement' then return end
-	if G.placement_table and G.placement_table.area == self then
-		G.placement_table:draw_shadows()
+	if G.pattern_row and G.pattern_row.area == self then
+		G.pattern_row:draw_shadows()
 	end
 end
 

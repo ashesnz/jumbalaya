@@ -25,8 +25,8 @@ function CardMotion.move(options)
             end
 
             if not options.mute and drawn then
-                if options.from == G.deck or options.from == G.hand
-                    or options.from == G.discard then
+                if options.from == G.draw_pile or options.from == G.dealt_letters
+                    or options.from == G.recycle_stash then
                     G.VIBRATION = G.VIBRATION + 0.6
                 end
                 play_sfx('card_slide1', 0.85 + percent * 0.2 / 100, 0.6 * (options.volume or 1))

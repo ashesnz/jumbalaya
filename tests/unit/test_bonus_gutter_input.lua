@@ -15,8 +15,8 @@ local function layout_globals()
 		states = { hover = { can = true }, click = { can = false }, drag = { can = false } },
 		collides_with_point = function() return true end,
 	}
-	G.hand = { T = { x = 3.2, y = 8.0, w = 10.5, h = 2.8 }, cards = {} }
-	G.placement_table = {
+	G.dealt_letters = { T = { x = 3.2, y = 8.0, w = 10.5, h = 2.8 }, cards = {} }
+	G.pattern_row = {
 		area = {
 			T = { x = 0.6, y = 2.0, w = 18.0, h = 2.8 },
 			cards = {},
@@ -121,7 +121,7 @@ T.describe("bonus gutter input", function()
 	T.it("places a gutter bonus card into a placement blank", function()
 		bonus_stack.clear()
 		layout_globals()
-		G.hand = mock_hand()
+		G.dealt_letters = mock_hand()
 		local snap = require("word_game.board.placement.snap")
 		local card = {
 			ability = { letter = "B", bonus = 10 },
@@ -155,12 +155,12 @@ T.describe("bonus gutter input", function()
 			build_word = jumble.build_word,
 		}
 
-		local blank_x = G.placement_table.area.T.x + G.CARD_W * 0.5
+		local blank_x = G.pattern_row.area.T.x + G.CARD_W * 0.5
 		card.T.x = blank_x - card.T.w * 0.5
-		card.T.y = G.placement_table.area.T.y
+		card.T.y = G.pattern_row.area.T.y
 
 		snap.try_snap({
-			area = G.placement_table.area,
+			area = G.pattern_row.area,
 			ctx = {
 				card_w = function() return G.CARD_W end,
 				card_h = function() return G.CARD_H end,
@@ -168,8 +168,8 @@ T.describe("bonus gutter input", function()
 		}, card)
 
 		T.assert_equal(slots[1].card, card, "gutter bonus card should land in a placement blank")
-		T.assert_equal(card.area, G.placement_table.area)
-		T.assert_true(card.T.x >= G.placement_table.area.T.x,
+		T.assert_equal(card.area, G.pattern_row.area)
+		T.assert_true(card.T.x >= G.pattern_row.area.T.x,
 			"placed bonus card should sit in the puzzle row, not the gutter")
 		bonus_stack.clear()
 	end)
