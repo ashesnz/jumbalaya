@@ -1,5 +1,6 @@
---[[ word_game/model/presentation.lua - UI reaction hooks registered at boot ]]
+--[[ word_game/model/presentation.lua - UI reaction hooks registered at boot (see types/presentation.lua) ]]
 
+---@type Presentation
 local M = {
 	_listeners = {},
 }

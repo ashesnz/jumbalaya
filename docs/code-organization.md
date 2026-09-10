@@ -69,7 +69,9 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 
 ## Package entry point
 
-`word_game/init.lua` registers the domain facade as `WORD_GAME`. Presentation is `WORD_GAME_UI` from `word_game/ui/facade/exports.lua`. `app/`, `tests/`, and `devtools/` should use those tables instead of deep requires. Model/board code emits `word_game.model.presentation` events; it must not call `WORD_GAME_UI` or `G.FUNCS`. Named `G.FUNCS` strings are catalogued in `types/g_funcs.lua`.
+`word_game/init.lua` registers the domain facade as `WORD_GAME`. Presentation is `WORD_GAME_UI` from `word_game/ui/facade/exports.lua`. `app/`, `tests/`, and `devtools/` should use those tables instead of deep requires.
+
+**Runtime bus (unchanged):** live state stays on `G` — `G.GAME` for run snapshot, `G.FUNCS` for UIBox input by string. Facades are the supported cross-package API. New `G.GAME` keys need a owning module and a field in `types/game.lua`; new UI callbacks stay as `G.FUNCS` string names in `types/g_funcs.lua`. Model→UI uses `Presentation` (`types/presentation.lua`), not `G.FUNCS`.
 
 ### Domain (`WORD_GAME`)
 
@@ -88,7 +90,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `Timeline` | Authoritative fuse seconds on `G.GAME`; classic goal/target reads |
 | `Match` | `end_run()` — centralized discard-bin surrender / game-over transition |
 | `VoucherDiscard` | Discard-bin allowance rules (`model/perks/voucher_discard`) |
-| `Perks` | Perk model package (`model/perks`: registry, effects, hand timer) |
+| `Perks` | Perk model package (`model/perks`: registry, effects) |
 
 ### Presentation (`WORD_GAME_UI`)
 
@@ -119,7 +121,9 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `Card` presentation | Model class in `model/cards/card.lua`; draw/tooltip mixins install from `ui/cards/bind.lua` at boot (not from model) |
 | Layout refresh | `word_game/model/layout/request.lua` sets `G.ARGS.pending_layout`; model code must not `require` `word_game.ui.layout` |
 | Timeline reads | `word_game/model/run/timeline.lua` owns `G.GAME.timeline_*` and ticks on TABLE_BOARD `dt`; HUD syncs via `timeline_sync_from_model` |
-| UI reactions | `word_game/model/presentation.lua` emits events; `word_game/ui/presentation/install.lua` registers handlers at boot |
+| `G.GAME` field owners | `types/game.lua` | Declared keys + owning module; no ad-hoc fields |
+| `G.FUNCS` names | `types/g_funcs.lua` | String catalog for UIBox/button callbacks |
+| UI reactions | `Presentation` + `ui/presentation/install.lua` | Contract in `types/presentation.lua` |
 
 Prefer `WORD_GAME.Play`, `WORD_GAME.Jumble`, `WORD_GAME_UI.BonusStackUI`, etc. across package boundaries instead of deep requires.
 

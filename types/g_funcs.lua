@@ -1,8 +1,16 @@
 --[[
-	types/g_funcs.lua - Catalog of G.FUNCS string names (analyzer-only).
+	types/g_funcs.lua - G.FUNCS string catalog and UI-input bus contract (analyzer-only).
 
 	UI definitions bind these by string. Implementations live in app/callbacks
 	and word_game/ui; model code must not call G.FUNCS.
+
+	Runtime bus:
+	- **G.FUNCS** — UIBox/button input dispatch by string name (this catalog).
+	- **G.GAME** — live run state (field owners: types/game.lua).
+	- **Presentation** — model→UI notify (types/presentation.lua).
+
+	Cross-package callers use WORD_GAME / WORD_GAME_UI facades; keep adding new
+	callback names here when wiring UIBox definitions — do not replace with ad-hoc globals.
 ]]
 
 ---@meta
@@ -66,6 +74,7 @@
 ---| "classic_stage_next"
 ---| "first_play_tutorial_next"
 
+--- UI input callback table on the live Game instance. String keys only — see GameFuncName.
 ---@class GameFuncs
 ---@field [GameFuncName] fun(...: any)
 ---@field [string] fun(...: any)

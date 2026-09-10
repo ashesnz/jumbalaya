@@ -1,6 +1,20 @@
 --[[
-	Analyzer-only types for the live Game instance `G`.
-	Not required by Love2D. LuaLS / EmmyLua pick this up via ---@meta.
+	types/game.lua - Live run state on G.GAME (analyzer-only).
+
+	Runtime bus (live state stays on G):
+	- **G.GAME** — authoritative run snapshot; domain modules read/write through their owner.
+	- **G.FUNCS** — UI input callbacks by string name (catalog: types/g_funcs.lua).
+	- **Presentation** — model→UI notify (contract: types/presentation.lua).
+
+	Cross-package API:
+	- **WORD_GAME** / **WORD_GAME_UI** facades are the supported entry points for app/, tests/,
+	  and devtools. Prefer facade methods over new top-level G.GAME keys.
+
+	Adding G.GAME fields:
+	- Assign an owning module below and declare the field on GameRunState here.
+	- Do not add ad-hoc keys from UI, tests, or one-off call sites without an owner.
+	- UI animation gates either write a documented flag (see InputLock) or go through
+	  run/busy.lua sync_from_ui for mirrored *_busy flags.
 ]]
 
 ---@meta
@@ -91,33 +105,64 @@
 ---@field [string] any
 
 ---@class GameRunState
----@field modifiers table<string, boolean>|nil
----@field round_resets table|nil
+--- Run-wide fields. Each group has a single owning module — extend here when adding keys.
+---
+--- Owner: model/game/run.lua, model/run/scope.lua
+---@field run_mode "classic"|"time_run"|string|nil
+---@field run_generation number|nil
 ---@field run_state RunState|nil
----@field run_mode "classic"|"jumble"|string|nil
 ---@field won boolean|nil
 ---@field seeded boolean|nil
----@field pseudorandom table
----@field current_round table|nil
----@field round_scores table<string, { amt: number }>|nil
+---@field pseudorandom table|nil
+---@field seed_streams { seed: string, hashed_seed: number }|nil
 ---@field starting_deck_size number|nil
 ---@field starting_params { hand_size: number, usable_slots: number }|nil
+---@field points number|nil
+---@field round number|nil
+---@field round_scores table<string, { amt: number }>|nil
+---@field round_resets table|nil
+---@field modifiers table<string, boolean>|nil
+---@field current_round table|nil
+---@field deck_alpha { pos: { x: number, y: number } }|nil
+---@field deck_left_count number|nil
+---@field chips_text string|nil
+---
+--- Owner: model/round/init.lua (+ jumble/hand.lua for wr.jumble)
 ---@field word_round WordRound|nil
+---
+--- Owner: model/run/timeline.lua (Time Run fuse; classic goal/target reads)
 ---@field timeline_seconds number|nil
 ---@field timeline_duration number|nil
 ---@field timeline_active boolean|nil
 ---@field timeline_frozen boolean|nil
 ---@field timeline_boss_override boolean|nil
+--- Owner: model/run/timeline.lua (fuse); classic mirror writes via ui/perks/timeline_timer
 ---@field timeline_goal_reached boolean|nil
 ---@field timeline_progress_target number|nil
----@field trade_ui_busy boolean|nil
+---
+--- Owner: model/jumble/placement_word.lua
 ---@field placement_word string|nil
 ---@field placement_word_valid boolean|nil
+---
+--- Owner: model/perks/voucher_discard.lua (+ round reset)
+---@field voucher_discards_used number|nil
+---@field discard_bin_count number|nil
+---
+--- Owner: model/perks/registry.lua
+---@field selected_perk string|nil
+---
+--- Owner: model/jumble_play/* and ui/table/controls/* (InputLock reads)
 ---@field word_score_animating boolean|nil
 ---@field hand_shuffle_animating boolean|nil
----@field seed_streams { seed: string, hashed_seed: number }|nil
----@field points number|nil
----@field deck_alpha { pos: { x: number, y: number } }|nil
+---@field hand_redraw_animating boolean|nil
+---@field placement_recall_animating boolean|nil
+---
+--- Owner: model/run/busy.lua (mirrored from UI each frame in game_boot)
+---@field trade_ui_busy boolean|nil
+---@field token_reward_busy boolean|nil
+---@field card_fly_off_busy boolean|nil
+---@field play_hold_redraw_busy boolean|nil
+---@field [string] any
 
 ---@class WordGameTableDeck
 ---@field uses_table_draw fun(): boolean
@@ -227,12 +272,12 @@
 ---@field save_settings fun(self: Game)
 ---@field C table
 ---@field UIT table
----@field FUNCS GameFuncs
+---@field FUNCS GameFuncs UI input bus — string names in types/g_funcs.lua
 ---@field ARGS table
 ---@field I GameInstanceTables
 ---@field TIMERS GameTimers
 ---@field FRAMES { DRAW: number, MOVE: number }
----@field GAME GameRunState
+---@field GAME GameRunState Live run snapshot — field owners in types/game.lua
 ---@field ROOM SceneNode
 ---@field ROOM_ATTACH EaseNode
 ---@field hand CardArea|nil
