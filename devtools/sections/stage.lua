@@ -1,7 +1,12 @@
 --[[ devtools/sections/stage.lua - Jump to a match stage from the debug panel. ]]
 
 local layout = require "devtools.layout"
+local game_runtime = require "devtools.runtime"
 local round_config = require "word_game.config.gameplay.round"
+
+local function shell()
+	return game_runtime.game()
+end
 local opening_deal = require "word_game.model.jumble_play.opening_deal"
 local Funcs = require("bridge.funcs_registry")
 
@@ -46,14 +51,15 @@ end
 
 local function jump_to_hand(ctx, set, hand_index)
 	if not ctx:is_run_stage() then return end
-	if G.STATE ~= G.STATES.TABLE_BOARD then return end
+	local game = shell()
+	if not game or game.STATE ~= game.STATES.TABLE_BOARD then return end
 	if not (WORD_GAME and WORD_GAME.Round) then return end
 
 	set = math.max(1, math.min(round_config.SETS_TO_WIN or 8, set))
 	hand_index = math.max(1, math.min(round_config.hands_in_set(set), hand_index or 1))
-	if G.GAME then
-		G.GAME.word_score_animating = false
-		G.GAME.hand_redraw_animating = false
+	if game.GAME then
+		game.GAME.word_score_animating = false
+		game.GAME.hand_redraw_animating = false
 	end
 	if Funcs.get("close_overlay") then
 		Funcs.dispatch("close_overlay")
@@ -67,7 +73,7 @@ local function jump_to_hand(ctx, set, hand_index)
 	if WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.reset then
 		WORD_GAME_UI.TokenReward.reset()
 	end
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game.GAME and game.GAME.word_round
 	if wr and wr.jumble and WORD_GAME.Deck and WORD_GAME.Deck.destroy_boss_cards then
 		WORD_GAME.Deck.destroy_boss_cards()
 	end
@@ -88,8 +94,8 @@ local function jump_to_hand(ctx, set, hand_index)
 			WORD_GAME_UI.Layout.request_refresh()
 		end
 	end
-	if G.pattern_row and G.pattern_row.apply_screen_position then
-		G.pattern_row:apply_screen_position()
+	if game.pattern_row and game.pattern_row.apply_screen_position then
+		game.pattern_row:apply_screen_position()
 	end
 	if set == 1 and hand_index == round_config.BONUS_STACK_HAND_FIRST then
 		seed_bonus_gutter()

@@ -1,13 +1,20 @@
 --[[ devtools/sections/view.lua - Visual debug overlays. ]]
 
 local layout = require "devtools.layout"
+local game_runtime = require "devtools.runtime"
+
+local function shell()
+	return game_runtime.game()
+end
 
 local function bbox_label()
-	return G.DEBUG and "ON" or "OFF"
+	local game = shell()
+	return game and game.DEBUG and "ON" or "OFF"
 end
 
 local function atlas_label()
-	return G.F_ATLAS_DEBUG_OVERLAY and "ON" or "OFF"
+	local game = shell()
+	return game and game.F_ATLAS_DEBUG_OVERLAY and "ON" or "OFF"
 end
 
 return {
@@ -18,11 +25,13 @@ return {
 		panel.state.bbox_status = bbox_label()
 		panel.state.atlas_status = atlas_label()
 		panel:action("toggle_bboxes", function()
-			G.DEBUG = not G.DEBUG
+			local game = shell()
+			if game then game.DEBUG = not game.DEBUG end
 			panel:set_label("bbox_status", bbox_label())
 		end)
 		panel:action("toggle_atlas_debug", function()
-			G.F_ATLAS_DEBUG_OVERLAY = not G.F_ATLAS_DEBUG_OVERLAY
+			local game = shell()
+			if game then game.F_ATLAS_DEBUG_OVERLAY = not game.F_ATLAS_DEBUG_OVERLAY end
 			panel:set_label("atlas_status", atlas_label())
 		end)
 	end,

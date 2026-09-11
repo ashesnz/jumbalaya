@@ -27,7 +27,8 @@ function M.boss_slot_spacing()
 end
 
 function M.card_spacing()
-	return (G and g().HAND_CARD_SPACING) or M.PLACEMENT_CARD_SPACING
+	local shell = g()
+	return (shell and shell.HAND_CARD_SPACING) or M.PLACEMENT_CARD_SPACING
 end
 
 function M.row_width_for_slots(slots)

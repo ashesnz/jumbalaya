@@ -1,34 +1,34 @@
 --[[
-	types/game.lua - Live run state on G.GAME (analyzer-only).
+	types/game.lua - Live run state on Game.GAME (analyzer-only).
 
-	Runtime bus (live state stays on G):
-	- **G.GAME** — authoritative run snapshot; domain modules read/write through their owner.
+	Runtime bus (live state on the Game shell via bridge/runtime.lua):
+	- **Game.GAME** — authoritative run snapshot; domain modules read/write through their owner.
 	- **UIBox callbacks** — string handlers via bridge/funcs_registry.lua (catalog: types/funcs.lua).
 	- **Presentation** — model→UI notify (contract: types/presentation.lua).
 
 	Cross-package API:
 	- **WORD_GAME** / **WORD_GAME_UI** facades are the supported entry points for app/, tests/,
-	  and devtools. Prefer facade methods over new top-level G.GAME keys.
+	  and devtools. Prefer facade methods over new top-level Game.GAME keys.
 	- Do not guard UI with `WORD_GAME and WORD_GAME_UI.X` — after boot `WORD_GAME` is always
 	  set; test the export: `if WORD_GAME_UI.X then …`. Use `WORD_GAME.Jumble` etc. for domain.
 
 	Letter registry and run inventory:
-	- `G.LETTERS` — face/center definitions (`faces`, `centers`, `center_pools`, `locked`).
-	- `G.letter_inventory` — live letter cards for the run; `G.letter_card_id` — next instance id.
-	- Set progress: `G.GAME.word_round.set` only.
+	- **LETTERS** — face/center definitions (`faces`, `centers`, `center_pools`, `locked`).
+	- **letter_inventory** — live letter cards for the run; **letter_card_id** — next instance id.
+	- Set progress: **Game.GAME.word_round.set** only.
 
 	TABLE_BOARD CardArea instances (prefer `WORD_GAME.Deck` / `Board` accessors in new code):
-	- `G.dealt_letters` — player's dealt row (was `G.hand`)
-	- `G.draw_pile` — draw stack (was `G.deck`)
-	- `G.recycle_stash` — recycle / fly-off stash (was `G.discard`)
-	- `G.pattern_row` — pattern row controller; `.area` is the placement CardArea
+	- **dealt_letters** — player's dealt row (was hand)
+	- **draw_pile** — draw stack (was deck)
+	- **recycle_stash** — recycle / fly-off stash (was discard)
+	- **pattern_row** — pattern row controller; `.area` is the placement CardArea
 
-	Adding fields — **do not grow G ad hoc**:
-	- **Run state** → `G.GAME` only. New feature needs a facade method + owned field on
+	Adding fields — **do not grow the Game shell ad hoc**:
+	- **Run state** → Game.GAME only. New feature needs a facade method + owned field on
 	  `GameRunState` (declare owner here) or it does not ship.
-	- **Live scene nodes** (CardArea, UIBox, overlays) may stay on `G` as engine/runtime
+	- **Live scene nodes** (CardArea, UIBox, overlays) may stay on the Game shell as engine/runtime
 	  wiring; prefer `WORD_GAME.Deck` / `Board` accessors over new top-level names.
-	- **Letter definitions** → `G.LETTERS` via `word_game/model/cards/registry.lua`, not
+	- **Letter definitions** → LETTERS via `word_game/model/cards/registry.lua`, not
 	  ad-hoc globals. `app/core/` must not reference jumble, letters, or card faces.
 	- After `GameRunState` is fully closed, re-enable `inject-field` in `.emmyrc.json`.
 ]]

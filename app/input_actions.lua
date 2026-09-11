@@ -11,7 +11,7 @@ local M = {}
 function M.key_press(controller, key)
     if not _RELEASE_MODE then
         if key == 'tab' and not g().debug_tools then
-            g().debug_panel = g().debug_panel or DEVTOOLS.DebugPanel(G)
+            g().debug_panel = g().debug_panel or DEVTOOLS.DebugPanel(g())
             g().debug_panel:open()
         end
         if key == 'h' then

@@ -63,7 +63,7 @@ function DebugPanel:build_definition()
 		end
 	end
 
-	return {n = G.UI.ROOT, config = {align = 'cm', r = 0.1}, nodes = {
+	return {n = self.game.UI.ROOT, config = {align = 'cm', r = 0.1}, nodes = {
 		layout.panel_container(content),
 	}}
 end
@@ -80,7 +80,7 @@ function DebugPanel:open()
 	self.ui = RetainedUI.create{
 		definition = self:build_definition(),
 		-- tri = top-right inside room; panel width subtracted so it stays on-screen
-		config = {align = 'tri', offset = {x = 6, y = 0.2}, major = G.ROOM_ATTACH, bond = 'Weak'},
+		config = {align = 'tri', offset = {x = 6, y = 0.2}, major = self.game.ROOM_ATTACH, bond = 'Weak'},
 	}
 	self.game.debug_tools = self.ui
 

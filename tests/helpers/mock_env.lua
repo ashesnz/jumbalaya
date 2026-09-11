@@ -17,6 +17,7 @@ function M.ensure_engine_globals()
 	package.path = "./?.lua;./?/init.lua;" .. package.path
 
 	_G.G = _G.G or {}
+	require("bridge.runtime").bind_game(_G.G)
 	_G.WORD_GAME = _G.WORD_GAME or {}
 	_G.WORD_GAME_UI = _G.WORD_GAME_UI or {}
 	G.SETTINGS = G.SETTINGS or {
@@ -325,7 +326,6 @@ end
 
 function M.reset_game()
 	M.setup()
-	require("bridge.runtime").bind_game(G)
 	require("word_game.model.jumble.bonus_stack").clear()
 	local ok_fly, card_fly_off = pcall(require, "word_game.ui.play_effects.card_fly_off")
 	if ok_fly and card_fly_off.reset then

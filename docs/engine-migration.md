@@ -928,6 +928,7 @@ Each PR: `love tests` → `emmylua_check . --severity warn` → manual smoke (§
 | **PR-9d** | `word_game/model/` purge off `G` | ✅ |
 | **PR-9d′** | `app/` + `board/` + engine purge; move `Game()` boot out of `globals.lua` | ✅ |
 | **PR-9e** | Retire `G.FUNCS` + `types/g_funcs.lua` | ✅ |
+| **PR-9f** | Retire global `G` singleton (`G = self`, `_G.G` fallback) | ✅ |
 
 #### PR-9d — `word_game/model/` purge ✅
 
@@ -965,17 +966,17 @@ Each PR: `love tests` → `emmylua_check . --severity warn` → manual smoke (§
 
 **Exit:** `rg '\.FUNCS\b' app word_game packages` → **0** runtime reads ✅; **486 tests** ✅
 
-**Remaining for PR-9 (final):** retire `G = self` in `Game:construct` and `_G.G` fallback in `bridge/runtime.lua` once scene graph is fully injected.
+#### PR-9f — Retire global `G` singleton ✅
 
 | Action | Files |
 |--------|-------|
-| Runtime shell | `bridge/runtime.lua` — `bind_game`, `game()`, `state()`, `stage()`, `settings()` |
-| Delete (final) | `G = self` in `Game:construct`; `_G.G` fallback in `bridge/runtime.lua` |
-| Types | `types/game.lua` → fold into `types/store.lua` |
+| Delete | `G = self` in `Game:construct`; `_G.G` fallback in `bridge/runtime.lua` |
+| Migrate | `bridge/pile_sync.lua`, `bridge/store_sync.lua`, `main.lua`, devtools → `BridgeRuntime.game()` |
+| Tests | `test_phase9_no_g_singleton.lua` — `Game()` does not assign `_G.G` |
 
-**Exit:** `rg '\bG\.' --glob '*.lua' -g '!tests/**' -g '!devtools/**'` → **0**.
+**Exit:** `rg '\bG\.' --glob '*.lua' -g '!tests/**' -g '!devtools/**'` → **0** ✅; **487 tests** ✅
 
-**Tests:** `test_phase9_runtime_shell.lua`; final `test_phase9_no_g_singleton.lua` (boot without `G = Game()`).
+**Deferred:** fold `types/game.lua` schema into `types/store.lua` (analyzer-only; no runtime impact).
 
 ---
 

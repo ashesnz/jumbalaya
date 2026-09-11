@@ -1,6 +1,5 @@
 
 local BridgeRuntime = require("bridge.runtime")
-local function g() return BridgeRuntime.game() end
 --[[
 	jumbalaya-engine/clock.lua - Clock / timers service for testable time.
 ]]
@@ -20,8 +19,9 @@ end
 function Clock.from_globals()
 	return Clock.new(0, {
 		time_fn = function()
-			if _G.G and _G.G.TIMERS and _G.G.TIMERS.REAL then
-				return _G.G.TIMERS.REAL
+			local shell = BridgeRuntime.game()
+			if shell and shell.TIMERS and shell.TIMERS.REAL then
+				return shell.TIMERS.REAL
 			end
 			return 0
 		end,
@@ -37,9 +37,10 @@ end
 
 function Clock:advance(dt)
 	if self._time_fn then
-		if _G.G and _G.G.TIMERS then
-			_G.G.TIMERS.REAL = (_G.G.TIMERS.REAL or 0) + (dt or 0)
-			return _G.G.TIMERS.REAL
+		local shell = BridgeRuntime.game()
+		if shell and shell.TIMERS then
+			shell.TIMERS.REAL = (shell.TIMERS.REAL or 0) + (dt or 0)
+			return shell.TIMERS.REAL
 		end
 		return self:get_time()
 	end

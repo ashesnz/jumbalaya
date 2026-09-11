@@ -55,7 +55,8 @@ end
 
 local function report_body(message)
 	local file, function_line, trace = relevant_trace(message)
-	local version = (G and g().VERSION) or VERSION or "?"
+	local shell = g()
+	local version = (shell and shell.VERSION) or VERSION or "?"
 	local body = "Jumbalaya crash report\n"
 		.. "version: " .. tostring(version) .. "\n"
 		.. "file: " .. tostring(file) .. "\n"
@@ -69,18 +70,20 @@ local function report_body(message)
 end
 
 function M.crash_mailto_url(message)
-	local subject = "Jumbalaya crash (" .. tostring((G and g().VERSION) or VERSION or "?") .. ")"
+	local shell = g()
+	local subject = "Jumbalaya crash (" .. tostring((shell and shell.VERSION) or VERSION or "?") .. ")"
 	return "mailto:" .. SUPPORT_EMAIL
 		.. "?subject=" .. encode_mailto(subject)
 		.. "&body=" .. encode_mailto(report_body(message))
 end
 
 function M.crash_reports_opted_in()
-	return G
-		and g().SETTINGS
-		and g().SETTINGS.crashreports
+	local shell = g()
+	return shell
+		and shell.SETTINGS
+		and shell.SETTINGS.crashreports
 		and _RELEASE_MODE
-		and g().F_CRASH_REPORTS
+		and shell.F_CRASH_REPORTS
 		and true
 		or false
 end
@@ -195,7 +198,8 @@ function love.errhand(message)
 	love.audio.stop()
 	love.graphics.reset()
 	love.graphics.setNewFont("resources/fonts/Outfit-Bold.ttf", 20)
-	love.graphics.setBackgroundColor(G and g().C and g().C.BLACK or { 0, 0, 0, 1 })
+	local shell = g()
+	love.graphics.setBackgroundColor(shell and shell.C and shell.C.BLACK or { 0, 0, 0, 1 })
 	love.graphics.setColor(255, 255, 255, 255)
 	love.graphics.clear(love.graphics.getBackgroundColor())
 	love.graphics.origin()

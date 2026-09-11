@@ -18,7 +18,7 @@ return {
 		panel.state.tutorial_force_status = tutorial_force_label()
 		panel:action("delete_save", function()
 			delete_saved_run()
-			if G and G.discard_run then G:discard_run() end
+			if ctx.game and ctx.game.discard_run then ctx.game:discard_run() end
 		end)
 		panel:action("add_tokens", function(ctx)
 			if ctx:is_run_stage() then state.add_tokens(10) end

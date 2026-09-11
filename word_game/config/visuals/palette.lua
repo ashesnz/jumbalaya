@@ -2,7 +2,7 @@
 	word_game/config/palette.lua - the Jumbalaya colour system.
 
 	Pure data: every entry is either an RGB(A) hex string or a literal
-	colour table. `build()` converts it into the live `G.C` table using a
+	colour table. `build()` converts it into the live Game.C table using a
 	hex-conversion helper supplied by the caller, so this module has no
 	engine dependencies and can be required at any time.
 
@@ -14,7 +14,7 @@
 ---@class PaletteSpec
 local M = {}
 
---- Colours converted through `hex`; keys mirror G.C's public surface.
+--- Colours converted through `hex`; keys mirror Game.C's public surface.
 M.HEX = {
 	MULTIPLIER = 'E0564F',
 	POINTS = '4C7DE0',
@@ -113,7 +113,7 @@ end
 
 --- Builds the full colour table.
 ---@param hex fun(input: string): table RGBA converter
----@return table colours ready to assign to G.C
+---@return table colours ready to assign to Game.C
 function M.build(hex)
 	local colours = {}
 	for key, value in pairs(M.HEX) do colours[key] = convert(value, hex) end

@@ -3,6 +3,11 @@
 ]]
 
 local Layout = require("word_game.ui.layout")
+local game_runtime = require("devtools.runtime")
+
+local function shell()
+	return game_runtime.game()
+end
 
 local M = {
 	state = {
@@ -25,12 +30,14 @@ end
 
 local function held_cards()
 	local out = {}
-	if G.dealt_letters and G.dealt_letters.cards then
-		for _, card in ipairs(G.dealt_letters.cards) do
+	local game = shell()
+	if not game then return out end
+	if game.dealt_letters and game.dealt_letters.cards then
+		for _, card in ipairs(game.dealt_letters.cards) do
 			out[#out + 1] = card
 		end
 	end
-	local area = G.pattern_row and G.pattern_row.area
+	local area = game.pattern_row and game.pattern_row.area
 	if area and area.cards then
 		for _, card in ipairs(area.cards) do
 			out[#out + 1] = card
@@ -134,28 +141,30 @@ end
 
 local function hint_row(len)
 	local key = "len" .. len
-	return { n = G.UI.ROW, config = { align = "cl", padding = 0.015, minw = HINT_ROW_WIDTH, maxw = HINT_ROW_WIDTH }, nodes = {
-		{ n = G.UI.TEXT, config = {
+	local game = shell()
+	return { n = game.UI.ROW, config = { align = "cl", padding = 0.015, minw = HINT_ROW_WIDTH, maxw = HINT_ROW_WIDTH }, nodes = {
+		{ n = game.UI.TEXT, config = {
 			text = len .. ": ",
 			scale = HINT_LABEL_SCALE,
-			colour = G.C.GOLD,
+			colour = game.C.GOLD,
 			shadow = true,
 		}},
-		{ n = G.UI.TEXT, config = {
+		{ n = game.UI.TEXT, config = {
 			ref_table = M.state,
 			ref_value = key,
 			scale = HINT_SCALE,
-			colour = G.C.WHITE,
+			colour = game.C.WHITE,
 			shadow = true,
 		}},
 	}}
 end
 
 function M.refresh_hint()
-	if not G.debug_toggle_button or G.debug_toggle_button.REMOVED then return end
+	local game = shell()
+	if not game or not game.debug_toggle_button or game.debug_toggle_button.REMOVED then return end
 
-	if G.debug_toggle_button.config and G.debug_toggle_button.config.offset then
-		G.debug_toggle_button.config.offset.y = hint_offset_y()
+	if game.debug_toggle_button.config and game.debug_toggle_button.config.offset then
+		game.debug_toggle_button.config.offset.y = hint_offset_y()
 	end
 
 	local puzzle = active_jumble_puzzle()
@@ -164,7 +173,7 @@ function M.refresh_hint()
 	if key == M._last_counts_key then return end
 	M._last_counts_key = key
 	format_hint(counts, puzzle)
-	G.debug_toggle_button:recalculate()
+	game.debug_toggle_button:recalculate()
 end
 
 function M.visible()
@@ -176,9 +185,10 @@ function M.ensure()
 end
 
 function M.destroy()
-	if G.debug_toggle_button then
-		G.debug_toggle_button:remove()
-		G.debug_toggle_button = nil
+	local game = shell()
+	if game and game.debug_toggle_button then
+		game.debug_toggle_button:remove()
+		game.debug_toggle_button = nil
 	end
 	M._last_counts_key = nil
 	for len = 3, 7 do

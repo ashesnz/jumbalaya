@@ -1,12 +1,18 @@
 --[[ bridge/pile_sync.lua - Phase 8: store-authoritative pile sync (areas ↔ store) ]]
 
+local BridgeRuntime = require("bridge.runtime")
 local store_sync = require("bridge.store_sync")
+
+local function game()
+	return BridgeRuntime.game()
+end
 
 local M = {}
 
 --- True when TABLE_BOARD view is installed and store-backed pile draw is active.
 function M.chrome_release_enabled()
-	if not G or G.STATE ~= G.STATES.TABLE_BOARD then return false end
+	local shell = game()
+	if not shell or shell.STATE ~= shell.STATES.TABLE_BOARD then return false end
 	local views_install = package.loaded["word_game.ui.views.install"]
 	if not views_install or not views_install.table_board_view then return false end
 	return views_install.table_board_view() ~= nil
@@ -58,40 +64,42 @@ local function snapshot_bonus()
 end
 
 local function area_for_pile(pile_id)
-	if not G then return nil end
+	local shell = game()
+	if not shell then return nil end
 	if pile_id == "pattern" then
-		return G.pattern_row and G.pattern_row.area
+		return shell.pattern_row and shell.pattern_row.area
 	end
-	return G[PILE_AREA[pile_id]]
+	return shell[PILE_AREA[pile_id]]
 end
 
 local function interaction_cards()
 	local out = {}
-	if not G or not G.INPUT then return out end
-	if G.INPUT.dragging and G.INPUT.dragging.target then
-		out[G.INPUT.dragging.target] = true
+	local shell = game()
+	if not shell or not shell.INPUT then return out end
+	if shell.INPUT.dragging and shell.INPUT.dragging.target then
+		out[shell.INPUT.dragging.target] = true
 	end
-	if G.INPUT.focused and G.INPUT.focused.target then
-		out[G.INPUT.focused.target] = true
+	if shell.INPUT.focused and shell.INPUT.focused.target then
+		out[shell.INPUT.focused.target] = true
 	end
 	return out
 end
 
 function M.collect_piles()
-	if not G then return nil end
-	local pattern_area = G.pattern_row and G.pattern_row.area
+	local shell = game()
+	if not shell then return nil end
+	local pattern_area = shell.pattern_row and shell.pattern_row.area
 	return {
-		hand = snapshot_area(G.dealt_letters, "hand"),
-		draw = snapshot_area(G.draw_pile, "draw"),
-		discard = snapshot_area(G.recycle_stash, "discard"),
+		hand = snapshot_area(shell.dealt_letters, "hand"),
+		draw = snapshot_area(shell.draw_pile, "draw"),
+		discard = snapshot_area(shell.recycle_stash, "discard"),
 		pattern = snapshot_area(pattern_area, "pattern"),
 		bonus = snapshot_bonus(),
 	}
 end
 
 function M.sync_areas_to_store(store)
-	local runtime = require("bridge.runtime")
-	store = store or runtime.store()
+	store = store or BridgeRuntime.store()
 	if not store then return end
 	local piles = M.collect_piles()
 	if not piles then return end
@@ -102,8 +110,7 @@ end
 ---@param store table|nil
 ---@param pile_ids string[]|nil
 function M.release_static_chrome(store, pile_ids)
-	local runtime = require("bridge.runtime")
-	store = store or runtime.store()
+	store = store or BridgeRuntime.store()
 	if not store then return end
 	M.sync_areas_to_store(store)
 	pile_ids = pile_ids or { "hand", "draw", "pattern" }
@@ -136,8 +143,9 @@ function M.sync_store_pile_to_area(store, pile_id)
 	local pile = state and state.piles and state.piles[pile_id]
 	if not pile then return end
 
+	local shell = game()
 	local by_id = {}
-	for _, card in ipairs(G.letter_inventory or {}) do
+	for _, card in ipairs((shell and shell.letter_inventory) or {}) do
 		local id = card_id(card)
 		if id then by_id[id] = card end
 	end
@@ -167,8 +175,7 @@ end
 --- Mirror all store piles onto live CardAreas (after save restore or shuffle).
 ---@param store table|nil
 function M.sync_store_to_areas(store)
-	local runtime = require("bridge.runtime")
-	store = store or runtime.store()
+	store = store or BridgeRuntime.store()
 	if not store then return end
 	for pile_id in pairs(PILE_AREA) do
 		M.sync_store_pile_to_area(store, pile_id)

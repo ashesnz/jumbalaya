@@ -15,12 +15,9 @@ function M.bind_game(game)
 	_game = game
 end
 
---- Live Game instance; falls back to global G during the Phase 9 strangler.
+--- Live Game instance (bound from Game:construct).
 function M.game()
-	if _game then
-		return _game
-	end
-	return _G.G
+	return _game
 end
 
 function M.store()

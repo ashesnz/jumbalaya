@@ -1,12 +1,11 @@
 --[[
-	Initializes the shared game state used by the Jumbalaya runtime.
-	global state container `G` (instantiated at the bottom of this file as
-	`G = Game()`).
+	Initializes the shared Game shell used by the Jumbalaya runtime.
 
 	Everything the game reads/writes at runtime - feature flags, settings,
-	render scale, colours, instance registries (`G.LIVE.*`), state machine enums,
-	table layout constants, etc. - lives on `G`. This function is called once
-	during boot (`G:launch()` in `app/startup.lua`) to set all of that up.
+	render scale, colours, instance registries (LIVE.*), state machine enums,
+	table layout constants, etc. - lives on the Game instance bound via
+	bridge/runtime.lua. This function is called once during boot
+	(Game:launch() in app/startup.lua) to set all of that up.
 
 ]]
 
@@ -18,10 +17,10 @@ local Dimensions = require("word_game.config.layout.dimensions")
 VERSION = '1.0.0i'
 VERSION = VERSION..'-FULL'
 
---- Populates every field on `G` (self here is the `Game` instance). Called
---- once at boot; some settings-menu / save-load code paths also re-invoke
---- parts of this indirectly by resetting `G.SETTINGS`, so avoid assuming
---- this only ever runs a single time in the process lifetime.
+--- Populates every field on the Game shell (self). Called once at boot;
+--- some settings-menu / save-load code paths also re-invoke parts of this
+--- indirectly by resetting SETTINGS, so avoid assuming this only ever runs
+--- a single time in the process lifetime.
 function Game:define_constants()
     self.VERSION = VERSION
 
@@ -90,7 +89,7 @@ function Game:define_constants()
     self.PITCH_MOD = 1
 
     -- Numeric values are stable save-format identifiers: run saves persist
-    -- `G.STATE` and restore it verbatim (see Game:start_run), so existing
+    -- STATE and restore it verbatim (see Game:start_run), so existing
     -- numbers must not be renumbered or old saves break.
     self.STATES = {
         GAME_OVER = 4,
@@ -164,4 +163,4 @@ function Game:define_constants()
 end
 
 -- Game singleton is constructed from app/bootstrap/runtime_boot.lua after this
--- module loads (Game:construct still sets G = self during the Phase 9 strangler).
+-- module loads (Game:construct binds bridge/runtime.lua).

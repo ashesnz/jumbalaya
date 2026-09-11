@@ -2,7 +2,7 @@
 	word_game package - Jumbalaya domain facade (WORD_GAME).
 
 	Presentation lives on WORD_GAME_UI (`word_game/ui/facade/exports`).
-	Game class, G singleton, startup, save, and loop are loaded by app/bootstrap.lua.
+	Game class, runtime shell, startup, save, and loop are loaded by app/bootstrap.lua.
 ]]
 
 local Run = require("word_game.model.run")

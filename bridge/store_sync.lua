@@ -1,5 +1,5 @@
 --[[
-	bridge/store_sync.lua - Phase 8 store bridge (G.GAME mirror retired in PR-2).
+	bridge/store_sync.lua - Phase 8 store bridge (run snapshot on Game.GAME).
 
 	Contract:
 	- The store owns run snapshot state.
@@ -37,20 +37,22 @@ function M.patch(store, patch)
 	store:patch(patch)
 end
 
---- Retired in PR-2: store is authoritative; no G.GAME mirror.
+--- Retired in PR-2: store is authoritative; no Game.GAME mirror write path.
 function M.sync_to_g(_store) end
 
---- Clear legacy G.GAME slot on run teardown (bridge-only).
+--- Clear run snapshot on the live Game shell (bridge-only).
 function M.clear_g_mirror()
-	if _G.G then
-		_G.G.GAME = nil
+	local shell = runtime.game()
+	if shell then
+		shell.GAME = nil
 	end
 end
 
 --- Legacy mirror read when store is not bound (headless tests; bridge-only).
 function M.legacy_mirror_get()
-	if _G.G then
-		return _G.G.GAME
+	local shell = runtime.game()
+	if shell then
+		return shell.GAME
 	end
 	return nil
 end
@@ -58,19 +60,20 @@ end
 --- Legacy mirror patch when store is not bound (headless tests; bridge-only).
 ---@param fields table
 function M.legacy_mirror_patch(fields)
-	local game = M.legacy_mirror_get()
-	if not game or not fields then return game end
+	local game_state = M.legacy_mirror_get()
+	if not game_state or not fields then return game_state end
 	for key, value in pairs(fields) do
-		game[key] = value
+		game_state[key] = value
 	end
-	return game
+	return game_state
 end
 
---- Bootstrap helper: adopt legacy G.GAME table into store (tests / one-time boot).
+--- Bootstrap helper: adopt live Game.GAME table into store (tests / one-time boot).
 ---@param store table
 function M.sync_from_g(store)
-	if _G.G and _G.G.GAME then
-		store:replace(_G.G.GAME)
+	local shell = runtime.game()
+	if shell and shell.GAME then
+		store:replace(shell.GAME)
 	end
 end
 
@@ -111,7 +114,8 @@ end
 
 --- Headless tests: create store, bind WORD_GAME.
 function M.ensure_test_binding()
-	if not _G.G then return nil end
+	local shell = runtime.game()
+	if not shell then return nil end
 	local word_game = package.loaded["word_game"]
 	local store = runtime.store()
 	if not store then
@@ -120,10 +124,10 @@ function M.ensure_test_binding()
 			word_game._bind_store(store)
 		end
 	end
-	if _G.G.GAME then
+	if shell.GAME then
 		M.sync_from_g(store)
 	end
-	if _G.G.dealt_letters or _G.G.draw_pile then
+	if shell.dealt_letters or shell.draw_pile then
 		require("bridge.pile_sync").sync_areas_to_store(store)
 	end
 	local engine_boot = package.loaded["app.bootstrap.engine_services_boot"]
