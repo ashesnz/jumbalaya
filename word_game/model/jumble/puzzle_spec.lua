@@ -31,22 +31,10 @@ function M.word_fits_pattern(word, puzzle)
 end
 
 local function random_boss_puzzle(words)
-	if not words or #words == 0 then return nil end
-	local word = words[math.random(#words)]
-	local revealed = {}
-	local revealed_count = 0
-	while revealed_count < 2 do
-		local index = math.random(#word)
-		if not revealed[index] then
-			revealed[index] = true
-			revealed_count = revealed_count + 1
-		end
-	end
-	local pattern = {}
-	for index = 1, #word do
-		pattern[index] = revealed[index] and word:sub(index, index) or "_"
-	end
-	return { kind = "rigid", pattern = table.concat(pattern), boss_word = word, display = table.concat(pattern) }
+	return core.random_boss_puzzle(words, {
+		pick_word = function(ws) return ws[math.random(#ws)] end,
+		pick_index = function(max) return math.random(max) end,
+	})
 end
 
 local function build_validated_puzzles(set, hand_index)

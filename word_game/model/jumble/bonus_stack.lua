@@ -1,27 +1,17 @@
 --[[ word_game/model/jumble/bonus_stack.lua - Bonus gutter card stack state and scoring ]]
 
 local round_config = require("word_game.config.gameplay.round")
+local core = require("jumbalaya_core.rules.bonus_stack")
 
 local M = {}
 
-M.BONUS_POINTS = 10
+M.BONUS_POINTS = core.BONUS_POINTS
 
 local stack_cards
 local stack_animating = false
 
-function M.is_bonus_card(card)
-	return card and card.bonus_card
-end
-
-function M.bonus_points_for(used_cards)
-	local total = 0
-	for _, card in ipairs(used_cards or {}) do
-		if M.is_bonus_card(card) then
-			total = total + M.BONUS_POINTS
-		end
-	end
-	return total
-end
+M.is_bonus_card = core.is_bonus_card
+M.bonus_points_for = core.bonus_points_for
 
 function M.is_animating()
 	return stack_animating

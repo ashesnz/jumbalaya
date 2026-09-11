@@ -181,32 +181,28 @@ Baseline: **372 tests passing** (`love tests`). Store shim is **not wired at boo
 
 ## 3. Phase 1 — Extract `jumbalaya-core` (2–4 weeks)
 
-### Phase 1 status — in progress (slice 3 complete)
+### Phase 1 status — complete
 
 | Deliverable | Location |
 |-------------|----------|
 | Core package | `packages/jumbalaya_core/` |
-| Store + default state | `packages/jumbalaya_core/store/` |
-| Round config (canonical) | `packages/jumbalaya_core/config/gameplay/round.lua` |
-| Pure jumble rules + perk math | `packages/jumbalaya_core/rules/` |
-| Jumble patterns + slots + validation | `packages/jumbalaya_core/jumble/` |
-| Hand lifecycle + round reducers | `packages/jumbalaya_core/jumble/hand.lua`, `packages/jumbalaya_core/round/` |
+| Store + default state + run state | `packages/jumbalaya_core/store/` |
+| Config (round, hand, economy, letter tiers, perks pool) | `packages/jumbalaya_core/config/` |
+| Pure rules (jumble, play, perk/modifier effects, hand size, bonus stack, voucher discard) | `packages/jumbalaya_core/rules/` |
+| Jumble (patterns, slots, validation, hand, placement preview) | `packages/jumbalaya_core/jumble/` |
+| Cards (identity, modifiers, playability, deck config, letter card data, pile counts) | `packages/jumbalaya_core/cards/` |
+| Perk registry rolls | `packages/jumbalaya_core/perks/registry.lua` |
 | Dictionary card helpers | `packages/jumbalaya_core/dictionary/cards.lua` |
 | Test fixtures | `packages/jumbalaya_core/fixtures/` |
-| Legacy re-export | `word_game/config/gameplay/round.lua` → core |
-| G glue layers | `word_game/model/jumble_play/jumble_rules.lua`, `word_game/model/jumble/*`, `word_game/model/round/init.lua` |
-| Core-first tests | `tests/unit/test_core_*.lua` (rules, patterns, hand, round, dictionary cards) |
+| Legacy re-exports | `word_game/config/*`, thin G glue in `word_game/model/*` |
+| Core-first tests | `tests/unit/test_core_*.lua` (15 files) |
 | Package path | `main.lua`, `tests/runner.lua` |
 
-**Done (slice 1):** dictionary re-export, round config, jumble scoring rules, perk multiplier math, store skeleton.
+**Exit criteria met:** Core package runs scoring, pattern, validation, play evaluation, perk/modifier, and deck-data tests with zero `G` and zero Love2D rendering.
 
-**Done (slice 2):** `slot_topology`, `puzzle_spec`, `slots`, `validation` extracted to core; word_game jumble modules are thin G glue.
+**Deferred to Phase 5:** `Card` / `CardArea` scene-node operations (`create_letter_card`, dealing animations, pile mutations). Pure data helpers live in `jumbalaya_core.cards.letter_card`; glue still owns `Card` instances.
 
-**Done (slice 3):** `jumble/hand.lua`, `round/init.lua` reducers, dictionary letter helpers; `build_score_opts` passes `used_cards` through to core scoring.
-
-**In progress (slice 4):** cards/deck logic split — `LetterCard` data vs `Card` scene node. Pure card helpers live in `packages/jumbalaya_core/cards/` (`identity`, `letter_modifiers`, `playability`, `deck_config`, `letter_card`).
-
-Baseline: **412 tests passing** (`love tests`).
+Baseline: **417 tests passing** (`love tests`). Next: **Phase 2** — wire `bridge/store_sync.lua` at boot and dual-write `G.GAME`.
 
 ---
 

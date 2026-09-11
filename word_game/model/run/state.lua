@@ -1,24 +1,11 @@
 --[[ word_game/model/run/state.lua - Match-long run state on G.GAME.run_state ]]
 
-local economy = require("word_game.config.gameplay.economy")
-local perks_cfg = require("word_game.config.perks")
+local core_run_state = require("jumbalaya_core.store.run_state")
 
 local M = {}
 
 function M.new()
-	return {
-		tokens = economy.STARTING_TOKENS,
-		perks = {},
-		perk_slots = perks_cfg.SLOT_COUNT,
-		stats = {
-			best_puzzle = nil,
-			best_puzzle_score = 0,
-			words_played = 0,
-		},
-		trade_used_this_hand = false,
-		match_over = false,
-		match_won = false,
-	}
+	return core_run_state.new()
 end
 
 --- Migrates legacy save field `G.GAME.alpha` → `run_state` once per load.
@@ -43,36 +30,19 @@ function M.get()
 end
 
 function M.tokens()
-	local rs = M.get()
-	return rs and rs.tokens or 0
+	return core_run_state.tokens(M.get())
 end
 
 function M.add_tokens(amount)
-	local rs = M.get()
-	if not rs then return 0 end
-	amount = math.floor(amount or 0)
-	if amount <= 0 then return 0 end
-	rs.tokens = (rs.tokens or 0) + amount
-	return amount
+	return core_run_state.add_tokens(M.get(), amount)
 end
 
 function M.spend_tokens(amount)
-	local rs = M.get()
-	if not rs then return false end
-	amount = math.floor(amount or 0)
-	if amount <= 0 then return true end
-	if (rs.tokens or 0) < amount then return false end
-	rs.tokens = rs.tokens - amount
-	return true
+	return core_run_state.spend_tokens(M.get(), amount)
 end
 
 function M.has_perk(key)
-	local rs = M.get()
-	if not rs then return false end
-	for _, perk in ipairs(rs.perks or {}) do
-		if perk == key then return true end
-	end
-	return false
+	return core_run_state.has_perk(M.get(), key)
 end
 
 function M.rightmost_perk()

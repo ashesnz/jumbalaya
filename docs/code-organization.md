@@ -7,7 +7,7 @@ Jumbalaya uses a small application shell around the Love2D engine and a separate
 
 New code should use the package style. Existing global APIs should only be changed through a dedicated migration so load order and string-based callbacks remain stable.
 
-### Engine migration (in progress)
+### Engine migration (Phase 1 complete — Phase 2 next)
 
 Roadmap: [engine-migration.md](engine-migration.md). Phase 0 coupling baseline: [engine-migration-coupling-inventory.md](engine-migration-coupling-inventory.md).
 

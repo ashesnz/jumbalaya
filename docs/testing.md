@@ -102,6 +102,9 @@ These tests must pass on every PR while migrating off the Balatro engine pattern
 | `test_core_cards_playability.lua` | `jumbalaya_core` deck playability helpers without `G` |
 | `test_core_cards_deck_config.lua` | `jumbalaya_core` starting deck and trade letter weights without `G` |
 | `test_core_cards_letter_card.lua` | `jumbalaya_core` letter card data, sort, and inventory filters without `G` |
+| `test_core_hand_size.lua` | `jumbalaya_core` hand size from base + perks without `G` |
+| `test_core_perk_effects.lua` | `jumbalaya_core` perk word/bank effects without `G` |
+| `test_core_play_evaluate.lua` | `jumbalaya_core` play evaluation (bank + word play) without `G` |
 
 ## CI
 

@@ -1,6 +1,7 @@
---[[ word_game/model/perks/registry.lua - Perk stamp rolls and selection ]]
+--[[ word_game/model/perks/registry.lua - Perk stamp rolls and selection (G glue over core) ]]
 
 local cfg = require("word_game.config.perks")
+local core = require("jumbalaya_core.perks.registry")
 
 local M = {}
 
@@ -19,25 +20,15 @@ local function rand_int(key, min, max)
 	return idx
 end
 
-local function copy_perk(entry)
-	return {
-		id = entry.id,
-		name = entry.name,
-		desc = entry.desc,
-		pos = { x = entry.pos.x, y = entry.pos.y },
-	}
-end
-
 function M.roll_stamp_perk()
-	local pool = cfg.POOL
-	if #pool == 0 then return nil end
 	local rs = require("word_game.model.run.state").get()
-	if rs and #(rs.perks or {}) == 0 then
-		local first = cfg.by_id("discard_bin") or pool[1]
-		if first then return copy_perk(first) end
-	end
-	local idx = rand_int(cfg.RANDOM_SEED_PREFIX .. "stamp", 1, #pool)
-	return copy_perk(pool[idx])
+	return core.roll_stamp_perk({
+		pool = cfg.POOL,
+		perk_count = rs and #(rs.perks or {}) or 0,
+		rand_int = rand_int,
+		seed_prefix = cfg.RANDOM_SEED_PREFIX,
+		by_id = cfg.by_id,
+	})
 end
 
 function M.selected()
@@ -48,7 +39,12 @@ function M.apply_choice(perk)
 	if not perk or not perk.id then return false end
 	local entry = cfg.by_id(perk.id)
 	if not entry then return false end
-	local stored = copy_perk(entry)
+	local stored = {
+		id = entry.id,
+		name = entry.name,
+		desc = entry.desc,
+		pos = { x = entry.pos.x, y = entry.pos.y },
+	}
 	if G.GAME then
 		G.GAME.selected_perk = stored
 	end
@@ -56,22 +52,7 @@ function M.apply_choice(perk)
 end
 
 function M.description_vars(center, profile)
-	local condition = center and center.unlock_condition or {}
-	local stats = profile and profile.career_stats or {}
-	local variables = cfg.DESCRIPTION_VARIABLES[center and center.name]
-	if variables then
-		local result = { condition.extra }
-		for _, key in ipairs(variables) do
-			if key == "v_blank" then
-				local usage = profile and profile.bonus_usage and profile.bonus_usage[key]
-				result[#result + 1] = usage and usage.count or 0
-			else
-				result[#result + 1] = stats[key]
-			end
-		end
-		return result
-	end
-	return nil
+	return core.description_vars(center, profile, cfg.DESCRIPTION_VARIABLES)
 end
 
 return M

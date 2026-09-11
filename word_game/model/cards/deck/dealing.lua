@@ -5,6 +5,7 @@ return function(context)
 	local M = context.module
 	local LayoutRequest = require("word_game.model.layout.request")
 	local hand_size_cfg = require("word_game.model.hand_size")
+	local pile_counts = require("jumbalaya_core.cards.pile_counts")
 	local needs_vowel = context.needs_vowel
 	local take_letter_from_deck = context.take_letter_from_deck
 
@@ -14,18 +15,18 @@ return function(context)
 	end
 
 	function M.held_count()
-		return ((G.dealt_letters and G.dealt_letters.cards and #G.dealt_letters.cards) or 0) + placement_count()
+		return pile_counts.held_count(
+			G.dealt_letters and G.dealt_letters.cards,
+			(G.pattern_row and G.pattern_row.area and G.pattern_row.area.cards)
+		)
 	end
 
 	function M.hand_card_count()
-		return (G.dealt_letters and G.dealt_letters.cards and #G.dealt_letters.cards) or 0
+		return pile_counts.hand_card_count(G.dealt_letters and G.dealt_letters.cards)
 	end
 
 	function M.draw_pile_count()
-		if G.draw_pile and G.draw_pile.cards then
-			return #G.draw_pile.cards
-		end
-		return 0
+		return pile_counts.draw_pile_count(G.draw_pile and G.draw_pile.cards)
 	end
 
 	function M.cards_left()

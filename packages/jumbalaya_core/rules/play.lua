@@ -79,7 +79,7 @@ function M.evaluate(j, wr, opts)
 	end
 	local old_pts, new_pts, old_multi, new_multi = record(word, { used_cards = used_cards })
 	if opts.on_word_recorded then
-		opts.on_word_recorded(j)
+		opts.on_word_recorded(j, word)
 	end
 
 	local old_score = jumble_rules.total_with_puzzle(j, old_pts, old_multi)

@@ -1,8 +1,8 @@
---[[ word_game/model/perks/voucher_discard.lua - Discard-bin allowance (rules only) ]]
+--[[ word_game/model/perks/voucher_discard.lua - Discard-bin allowance (G glue over core) ]]
 
 local Presentation = require("word_game.model.presentation")
-local round_config = require("word_game.config.gameplay.round")
 local run_state = require("word_game.model.run.state")
+local core = require("jumbalaya_core.rules.voucher_discard")
 
 local M = {}
 
@@ -25,16 +25,16 @@ function M.used()
 end
 
 function M.max_fills()
-	return round_config.VOUCHER_DISCARDS_PER_HAND
+	return core.max_fills()
 end
 
 function M.left()
-	return math.max(0, M.max_fills() - M.used())
+	return core.left(M.used())
 end
 
 function M.unlocked()
 	local rs = run_state.get()
-	return rs and #(rs.perks or {}) >= 1
+	return core.unlocked(rs and #(rs.perks or {}) or 0)
 end
 
 function M.reset()
@@ -43,10 +43,12 @@ function M.reset()
 end
 
 function M.can_discard_card(card)
-	if not M.unlocked() or M.left() <= 0 then return false end
-	if not card or card.REMOVED or card.area ~= G.dealt_letters then return false end
-	if card.bonus_card or card.boss_temp then return false end
-	return true
+	local rs = run_state.get()
+	return core.can_discard_card(card, {
+		perk_count = rs and #(rs.perks or {}) or 0,
+		used = M.used(),
+		hand_area = G.dealt_letters,
+	})
 end
 
 function M.record_discard()
@@ -67,7 +69,7 @@ function M.stash_discarded_card(card)
 end
 
 function M.is_full()
-	return M.used() >= M.max_fills()
+	return core.is_full(M.used())
 end
 
 return M

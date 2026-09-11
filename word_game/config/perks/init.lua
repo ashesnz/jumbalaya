@@ -1,11 +1,12 @@
 --[[ word_game/config/perks/init.lua - Perk pool for stamp rewards ]]
 
 local dimensions = require("word_game.config.layout.dimensions")
+local core_perks = require("jumbalaya_core.config.perks")
 
 local M = {}
 
-M.RANDOM_SEED_PREFIX = "perk_pick_"
-M.SLOT_COUNT = 12
+M.RANDOM_SEED_PREFIX = core_perks.RANDOM_SEED_PREFIX
+M.SLOT_COUNT = core_perks.SLOT_COUNT
 
 -- Sidebar stamp imprint window: width as a fraction of the sidebar panel.
 -- Design reference width is 190 px at the canonical 3.0-tile sidebar (73 px/tile).
@@ -75,128 +76,7 @@ end
 
 M.DESCRIPTION_VARIABLES = {}
 
--- Sprites from resources/assets/Perks.png (3×2 horizontal voucher grid).
-M.POOL = {
-	{
-		id = "discard_bin",
-		name = "Discard Bin",
-		desc = "Drag up to 2 hand cards onto this voucher each hand to discard them.",
-		token_cost = 10,
-		pos = { x = 0, y = 0 },
-	},
-    {
-        id = "wide_hand",
-        name = "Wide Hand",
-        desc = "Your hand size is increased to 8 cards.",
-        token_cost = 10,
-        pos = { x = 1, y = 0 },
-    },
-	{
-        id = "combo_starter",
-        name = "Hot Start",
-        desc = "Each puzzle starts with a 1.2× multiplier.",
-        token_cost = 10,
-        pos = { x = 4, y = 0 },
-    },
-    {
-        id = "combo_master",
-        name = "Combo Master",
-        desc = "Each additional word increases the multiplier by +0.3× instead of +0.2×.",
-        token_cost = 10,
-        pos = { x = 5, y = 0 },
-    },
-    {
-        id = "combo_keeper",
-        name = "Combo Keeper",
-        desc = "Banking a puzzle preserves 0.2× of your current multiplier for the next puzzle.",
-        token_cost = 10,
-        pos = { x = 6, y = 0 },
-    },
-	{
-		id = "letter_boost",
-		name = "Letter Boost",
-		desc = "High-tier letters score +2 bonus points.",
-		token_cost = 10,
-		pos = { x = 2, y = 0 },
-	},
-	{
-		id = "red_rush",
-		name = "Red Rush",
-		desc = "Red letters score +1 bonus point.",
-		token_cost = 10,
-		pos = { x = 3, y = 0 },
-	},
-	{
-		id = "vowel_veil",
-		name = "Vowel Veil",
-		desc = "Vowels score +2 bonus points.",
-		token_cost = 10,
-		pos = { x = 4, y = 0 },
-	},
-	{
-		id = "long_word",
-		name = "Long Word",
-		desc = "Words of 6+ letters gain +15 bonus points.",
-		token_cost = 10,
-		pos = { x = 5, y = 0 },
-	},
-	{
-		id = "extra_redraw",
-		name = "Extra Redraw",
-		desc = "+1 redraw this showdown.",
-		token_cost = 10,
-		pos = { x = 6, y = 0 },
-	},
-	{
-		id = "time_bank",
-		name = "Time Bank",
-		desc = "Banking a solved puzzle restores 2 seconds. But lose 2 seconds for next word",
-		token_cost = 10,
-		pos = { x = 0, y = 1 },
-	},
-	{
-		id = "speed_demon",
-		name = "Speed Demon",
-		desc = "Words played within 3 seconds gain +0.2× multiplier.",
-		token_cost = 10,
-		pos = { x = 1, y = 1 },
-	},
-	{
-		id = "time_saver",
-		name = "Time Saver",
-		desc = "Every 5 seconds remaining when a stage is cleared grants +5 bonus points.",
-		token_cost = 10,
-		pos = { x = 2, y = 1 },
-	},
-	{
-		id = "last_second",
-		name = "Last Second",
-		desc = "Words played with less than 10 seconds remaining gain +50% points.",
-		token_cost = 10,
-		pos = { x = 3, y = 1 },
-	},
-	{
-    	id = "risky_business",
-    	name = "Risky Business",
-    	desc = "Words of 6+ letters gain +0.5× multiplier, but words of 3 letters gain -0.2×.",
-		token_cost = 10,
-    	pos = { x = 0, y = 2 },
-    },
-    {
-    	id = "greedy",
-    	name = "Greedy",
-    	desc = "If you play 3 or more words on a puzzle, gain +20% points when banking it.",
-		token_cost = 10,
-    	pos = { x = 1, y = 2 },
-    },
-}
-
-
-function M.by_id(id)
-	for _, perk in ipairs(M.POOL) do
-		if perk.id == id then return perk end
-	end
-	return nil
-end
+M.POOL = core_perks.POOL
+M.by_id = core_perks.by_id
 
 return M
