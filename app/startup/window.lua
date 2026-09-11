@@ -2,6 +2,8 @@
 	app/startup/window.lua - Viewport and window initialization.
 ]]
 
+local Funcs = require("bridge.funcs_registry")
+
 function Game:init_window(reset)
 	self.ROOM_PADDING_H= 0.7
 	self.ROOM_PADDING_W = 1
@@ -28,6 +30,5 @@ function Game:init_window(reset)
 
 	Funcs.dispatch("apply_window_changes", true)
 	local Window = require "app.core.platform.window"
-local Funcs = require("bridge.funcs_registry")
 	Window.sync_resize()
 end

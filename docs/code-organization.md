@@ -13,11 +13,12 @@ Jumbalaya is organized in **four cooperating layers**. They are not duplicates �
 
 **Do not delete `app/` or `packages/`** — see [app vs packages](#app-vs-packages) below. The long-term plan is to *shrink* `app/core/` into `jumbalaya-engine`, not merge everything back into one tree.
 
-### Engine migration (Phase 9 complete)
+### Engine migration
 
-Phases 0–9 of [engine-migration.md](engine-migration.md) are done: store authority, retained UI in `jumbalaya-engine`, `G.FUNCS` retired to `bridge/funcs_registry.lua`, global `G` singleton retired in favour of `bridge/runtime.lua`.
+Phases 0–9 are **complete** (store, engine package, retained UI, `Funcs` registry, no global `G`). **Phase 10** (glue hygiene, CardArea retirement, engine extraction) is active.
 
-Historical coupling baseline: [engine-migration-coupling-inventory.md](engine-migration-coupling-inventory.md).
+- Guide: [engine-migration.md](engine-migration.md)
+- Grep snapshot: [engine-migration-coupling-inventory.md](engine-migration-coupling-inventory.md)
 
 **Freeze policy (ongoing):**
 

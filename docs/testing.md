@@ -80,9 +80,9 @@ Prefer `mock_env.reset_game()` at the top of a `describe` block. Tests that call
 | `test_play_hold_redraw.lua` | Hold-to-redraw |
 | `test_layout.lua` | Sidebar HUD geometry and fixed width |
 
-## Engine migration CI gate (Phase 0+)
+## Engine migration CI gate
 
-These tests must pass on every PR while migrating off the Balatro engine pattern. See [engine-migration.md](engine-migration.md).
+These tests must pass on every PR. Phases 0–9 are complete; Phase 10 consolidation is ongoing. See [engine-migration.md](engine-migration.md).
 
 | File | Covers |
 |------|--------|

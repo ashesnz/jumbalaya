@@ -1,182 +1,112 @@
-# Engine migration — coupling inventory (Phase 0)
+# Engine migration — coupling snapshot
 
-Baseline captured **2026-09-11**. Re-run the commands in [Refreshing this inventory](#refreshing-this-inventory) before Phase 1.
+Post–Phase 9 metrics. Refresh before Phase 10 PRs that claim a grep delta.
 
-Related: [engine-migration.md](engine-migration.md) (full roadmap), [code-organization.md](code-organization.md) (freeze policy).
-
----
-
-## Summary
-
-| Coupling | Total refs | Primary locations | Migration phase |
-|----------|------------|-------------------|-----------------|
-| `G.GAME` in model | 103 | `run/scope.lua`, `round/init.lua`, `jumble/placement_word.lua` | Phase 1–2 (store) |
-| `G.` in model (all) | 489 | `cards/deck/jumble.lua`, `run/scope.lua`, `cards/deck/*` | Phase 1–5 |
-| `G.FUNCS` in production Lua | 134 | `callbacks/overlays.lua`, `callbacks/window.lua`, `ui/callbacks/*` | Phase 4 |
-| `G.` in board | 48 | `placement/snap.lua` (26), `bonus/gutter.lua` (12) | Phase 5 |
-| `G.FUNCS` catalog entries | 58 | `types/g_funcs.lua` | Phase 4 |
-| `G.FUNCS` static registrations | 55 | `app/callbacks/*`, `word_game/ui/callbacks/*`, `sidebar/funcs.lua` | Phase 4 |
-
-`dictionary/` has **zero** `G` references — ready for `jumbalaya-core` as-is.
+**Authoritative guide:** [engine-migration.md](engine-migration.md)  
+**Package rules:** [code-organization.md](code-organization.md)
 
 ---
 
-## Test baseline (Phase 0)
+## Summary (2026-09-11)
 
-| Check | Result |
-|-------|--------|
-| `love tests` | **385 passed** (0 failed) |
-| `emmylua_check . --severity warn` | Run locally (CI uses error severity) |
-
-### Migration CI gate tests
-
-These suites must stay green through every migration phase:
-
-| File | Covers |
-|------|--------|
-| `test_jumble_patterns.lua` | Pattern validation, slots, geometry |
-| `test_jumble_scoring.lua` | Scoring, odometer, targets |
-| `test_jumble_play_flow.lua` | Play flow, marketplace, stage files |
-| `test_timeline_timer.lua` | Fuse bar |
-| `test_voucher_tokens.lua` | Perk stamp rolls |
-| `test_save_roundtrip.lua` | Save/load, jumble hand restore |
-| `test_store_sync.lua` | Store ↔ `G.GAME` shim contract |
-| `test_g_funcs_registry.lua` | `G.FUNCS` catalog freeze |
-| `test_core_jumble_rules.lua` | Core scoring without `G` |
-| `test_core_jumble_patterns.lua` | Core patterns/slots without `G` |
+| Metric | Post–Phase 9 | Phase 10 target |
+|--------|--------------|-----------------|
+| `love tests` | **487** passed | stay green |
+| `G.` in production (`!tests`, `!devtools`) | **0** | **0** |
+| `.FUNCS` runtime reads | **0** | **0** |
+| `CardArea` (app + word_game + bridge + packages) | **~72** | **0** (10b) |
+| `require("app.")` in `packages/` | **2** (`retained_ui` → AnimNode) | **0** (10c) |
+| Glue modules (`glue over` in `word_game/model/`) | **10** | shrink (10a) |
+| `test_core_*` files | **14** | grow with new rules |
+| `Funcs.register` sites | **~59** | stable catalog (`types/funcs.lua`) |
 
 ---
 
-## `G.GAME` by model module
+## Refresh commands
 
-Grouped by `types/game.lua` field owners. Counts are `G.GAME` references only.
-
-| Module | `G.GAME` refs | Owns / touches |
-|--------|---------------|----------------|
-| `run/scope.lua` | 10 | `run_mode`, `run_state`, scope transitions |
-| `round/init.lua` | 10 | `word_round` lifecycle |
-| `jumble/placement_word.lua` | 8 | `placement_word`, `placement_word_valid` |
-| `run/state.lua` | 7 | `run_state` (tokens, perks) |
-| `perks/voucher_discard.lua` | 7 | `voucher_discards_used`, `discard_bin_count` |
-| `run/busy.lua` | 6 | `trade_ui_busy`, `token_reward_busy`, … |
-| `cards/deck/jumble.lua` | 6 | deck dealing + `word_round.jumble` |
-| `run/match.lua` | 5 | match end / surrender |
-| `jumble/hand.lua` | 5 | puzzle hand start |
-| `perks/registry.lua` | 4 | `selected_perk` |
-| `jumble/puzzle_spec.lua` | 4 | puzzle spec on `word_round.jumble` |
-| `jumble_play/jumble_rules.lua` | 3 | play evaluation reads |
-| `jumble_play/hand.lua` | 3 | hand-clear model path |
-| `jumble/validation.lua` | 3 | slot validation |
-| `trade/init.lua` | 2 | marketplace state |
-| `run/timeline.lua` | 2 | `timeline_*` fuse fields |
-| `run/mode.lua` | 2 | `run_mode` |
-| `run/input_lock.lua` | 2 | animation lock reads |
-| `persistence/run_save.lua` | 2 | save snapshot |
-| `jumble_play/jumble.lua` | 2 | play / end hand |
-| `game/run.lua` | 2 | run bootstrap |
-| `cards/deck/dealing.lua` | 2 | deal paths |
-| `cards/deck/boss_hand.lua` | 2 | boss word staging |
-| `persistence/progress.lua` | 1 | profile progress gate |
-| `perks/effects.lua` | 1 | perk hooks |
-| `jumble_play/opening_deal.lua` | 1 | timeout re-deal |
-| `cards/deck/lifecycle.lua` | 1 | `starting_deck_size` |
-
----
-
-## Scene globals (`G` outside `G.GAME`)
-
-Live `CardArea` / table wiring on `G` (migrate in Phase 5):
-
-| Global | Role | Accessor |
-|--------|------|----------|
-| `G.dealt_letters` | Dealt hand row | `word_game/model/table_areas.lua` |
-| `G.draw_pile` | Draw stack | `table_areas.draw_pile()` |
-| `G.recycle_stash` | Fly-off / recycle | `table_areas.recycle_stash()` |
-| `G.pattern_row` | Pattern row controller | `table_areas.pattern_row()` |
-| `G.SIDEBAR_HUD` | Right-hand HUD UIBox | `word_game/ui/sidebar/` |
-| `G.SIDEBAR_ATTACH` | Sidebar layout attach node | `sidebar/layout.lua` |
-| `G.LETTERS` | Letter face registry | `model/cards/registry.lua` |
-| `G.letter_inventory` | Run letter card pool | `model/cards/deck/` |
-
----
-
-## `G.FUNCS` by area
-
-| Area | Module | Refs | Callbacks registered |
-|------|--------|------|----------------------|
-| Overlays | `word_game/ui/callbacks/overlays.lua` | 15 | `open_options`, `open_settings`, `quit`, … |
-| Window | `app/callbacks/window.lua` | 13 | `change_vsync`, `change_screenmode`, … |
-| Text input | `app/callbacks/ui_controls/text_input.lua` | 12 | `text_input`, `key_button`, … |
-| Run lifecycle | `app/callbacks/run_lifecycle.lua` | 9 | `begin_run`, `return_to_menu`, … |
-| Profile | `app/profile_callbacks.lua` | 7 | `load_profile`, `delete_profile`, … |
-| Trade | `word_game/ui/callbacks/trade.lua` | 5 | `trade_pick`, `trade_skip`, … |
-| Table controls | `word_game/ui/callbacks/table_controls.lua` | 5 | `play_placement_word`, `shuffle_hand`, … |
-| Sidebar | `word_game/ui/sidebar/funcs.lua` | 5 | `end_run_from_sidebar`, `classic_stage_next`, … |
-| Screen wipe | `app/screen_wipe.lua` | 6 | `wipe_in`, `wipe_out` |
-
-Full catalog: `types/g_funcs.lua` (58 names). Static audit: `tests/helpers/g_funcs_audit.lua`.
-
----
-
-## `word_game/board/` coupling
-
-| Module | `G.` refs | Notes |
-|--------|-----------|-------|
-| `placement/snap.lua` | 26 | Drag snap — highest board coupling |
-| `bonus/gutter.lua` | 12 | Bonus stack hit tests |
-| `placement/layout.lua` | 6 | Row geometry |
-| `placement/config.lua` | 2 | Tunables |
-| `placement/table.lua` | 1 | Row host |
-| `placement/shimmer.lua` | 1 | Lock-in FX |
-
-Board must stay free of UI imports at load time; Phase 5 replaces `G`/`CardArea` with rect + pile state.
-
----
-
-## Store shim contract
-
-Module: `bridge/store_sync.lua`
-
-| API | Direction | Use |
-|-----|-----------|-----|
-| `store_sync.new(initial)` | — | Create store |
-| `store_sync.replace(store, state)` | store → `G.GAME` | Full state swap |
-| `store_sync.patch(store, patch)` | store → `G.GAME` | Shallow merge |
-| `store_sync.sync_to_g(store)` | store → `G.GAME` | Mirror only |
-| `store_sync.sync_from_g(store)` | `G.GAME` → store | Boot / test bridge |
-| `store_sync.subscribe(store, fn)` | notify | View layer (Phase 2+) |
-
-Tests: `tests/unit/test_store_sync.lua`.
-
-**Wired at boot** — `app/bootstrap/store_boot.lua` instantiates `G._store` and mirrors to `G.GAME`. Model code reads/writes via `word_game/model/game_access.lua`.
-
----
-
-## Phase 0 exit criteria
-
-- [x] Coupling inventory documented (this file)
-- [x] `bridge/store_sync.lua` shim defined and tested
-- [x] `G.FUNCS` catalog freeze enforced by `test_g_funcs_registry.lua`
-- [x] Global growth freeze documented in `code-organization.md`
-- [x] Migration CI gate tests listed in `testing.md`
-- [x] `love tests` baseline green (385 tests)
-
----
-
-## Refreshing this inventory
+Run from repo root:
 
 ```sh
-# G.GAME in model (per file)
-rg '\bG\.GAME\b' word_game/model --count | sort -t: -k2 -nr
+# Production G reads (tests/devtools exempt)
+rg '\bG\.' --glob '*.lua' -g '!tests/**' -g '!devtools/**'
 
-# G.FUNCS in production
-rg '\bG\.FUNCS\b' --count --glob '*.lua' | grep -v '^tests/' | grep -v '^docs/'
+# Legacy FUNCS table reads
+rg '\.FUNCS\b' app word_game packages
 
-# Board coupling
-rg '\bG\.' word_game/board --count | sort -t: -k2 -nr
+# CardArea (Phase 10b gate)
+rg -c 'CardArea' app word_game bridge packages -g '!tests/**'
 
-# Re-validate catalog
+# Engine must not depend on app/ (Phase 10c gate)
+rg 'require\("app\.' packages/
+
+# Glue layer size (Phase 10a)
+rg -l 'glue over' word_game/model
+
+# Callback catalog
+rg 'Funcs\.register' app word_game
+
+# Tests
 love tests
 ```
 
-Update the summary table and date when counts change materially.
+---
+
+## Runtime buses (replacement map)
+
+| Legacy (removed) | Current |
+|------------------|---------|
+| Global `G` | `BridgeRuntime.game()` |
+| `G.GAME` direct reads in model | `game_access.get()` / `WORD_GAME.store()` |
+| `G.FUNCS.name(...)` | `Funcs.dispatch("name", ...)` |
+| `G.FUNCS` table on Game | `bridge/funcs_registry.lua` module table |
+| `types/g_funcs.lua` | `types/funcs.lua` |
+
+---
+
+## CI gate tests
+
+Must pass on every PR. Full list: [testing.md](testing.md#engine-migration-ci-gate-phase-0).
+
+| Tier | Examples |
+|------|----------|
+| Core (no boot) | `test_core_jumble_rules.lua`, `test_core_play_evaluate.lua`, … |
+| Store / piles | `test_store_sync.lua`, `test_phase5_pile_sync.lua` |
+| Engine / boot | `test_phase7_bootstrap.lua`, `test_phase9_no_g_singleton.lua` |
+| Callback catalog | `test_g_funcs_registry.lua` |
+| Gameplay integration | `test_jumble_play_flow.lua`, `test_save_roundtrip.lua` |
+
+---
+
+## Completed coupling removals (Phase 9)
+
+| Coupling | Status |
+|----------|--------|
+| `G.GAME` reads in `word_game/model/` | ✅ `live_game()` / `game_access` |
+| `G.` reads in `word_game/ui/` | ✅ `game_runtime` |
+| `G.` reads in `app/`, `board/`, `jumbalaya-engine/` | ✅ `BridgeRuntime.game()` |
+| Global `G` singleton (`G = self`) | ✅ `bind_game` only |
+| `G.FUNCS` / `types/g_funcs.lua` | ✅ `funcs_registry` + `types/funcs.lua` |
+| `LayoutView` / `app/core/ui/` | ✅ `jumbalaya-engine/retained_ui/` |
+
+---
+
+## Remaining coupling (Phase 10)
+
+| Coupling | Where | Target PR |
+|----------|-------|-----------|
+| Live `Card` / `CardArea` nodes | `word_game/ui/cardarea/`, deck dealing | 10b |
+| `pile_sync` dual-write | `bridge/pile_sync.lua` | 10b |
+| `app/core/scene` imported by engine | `retained_ui/node.lua`, `panel.lua` | 10c |
+| Glue modules (rules already in core) | `word_game/model/*` | 10a |
+| `Game.GAME` + store parallel reads | Various glue | 10d |
+| Test `mock_env` `_G.G` stub | `tests/helpers/mock_env.lua` | optional cleanup |
+
+---
+
+## Checklist for Phase 10 PRs
+
+- [ ] `love tests` passes
+- [ ] Grep deltas recorded in PR description
+- [ ] New rules have `test_core_*` coverage
+- [ ] No new glue-only rule logic in `word_game/model/`
+- [ ] Manual smoke for touched screens (see engine-migration.md §7)

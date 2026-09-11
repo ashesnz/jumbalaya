@@ -1,5 +1,6 @@
 return function(InputRouter)
 local BridgeRuntime = require("bridge.runtime")
+local Funcs = require("bridge.funcs_registry")
 local function g() return BridgeRuntime.game() end
 
 
@@ -38,7 +39,6 @@ function InputRouter:button_press_update(button, dt)
 		end
 		if button == 'b' then
 			local hand = require("app.core.input.card_focus").hand_area()
-local Funcs = require("bridge.funcs_registry")
 			if hand and self.focused.target and self.focused.target.area == hand then
 				self:queue_R_cursor_press()
 			else
