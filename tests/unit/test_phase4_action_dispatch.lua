@@ -63,7 +63,7 @@ T.describe("Phase 4 Gameplay Action Dispatch", function()
 
 	T.it("emits app actions for menu lifecycle callbacks", function()
 		mock_env.reset_game()
-		local app_events = require("app.services.app_events")
+		local app_events = require("app.bootstrap.app_events")
 		local seen = {}
 		app_events.on("APP_RETURN_TO_MENU", function(action)
 			seen[#seen + 1] = action.type

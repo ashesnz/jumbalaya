@@ -1,6 +1,6 @@
 --[[ app/core/input/action_bridge.lua - Phase 4 router → typed action dispatch ]]
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 
 
 local action_dispatch = require("app.input.action_dispatch")

@@ -160,6 +160,8 @@ Understanding *what* is duplicated clarifies *what* to merge.
 
 **Phase 12 done:** `app/` has no scene graph classes. Engine boot is `jumbalaya-engine.boot`; `app/bootstrap/engine_boot.lua` delegates to it.
 
+**Phase 12 follow-up (2026-09-12):** Stray shell modules folded into target tree (`callbacks/controllers/`, `callbacks/screen_wipe`, `callbacks/profile`, `input/actions`, `bootstrap/app_events`). `jumbalaya-engine/shell.lua` holds the bound Game shell; `app/runtime.lua` delegates to it. Engine `require("app.")` sites down to **6** (`Funcs` + `action_dispatch` only).
+
 ### 5e. Rules vs glue (`word_game/model/` vs `jumbalaya_core/`)
 
 Most rules already moved. **10 glue modules** remain (labeled *glue over jumbalaya_core*):

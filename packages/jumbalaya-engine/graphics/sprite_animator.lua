@@ -1,6 +1,6 @@
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 --[[ app/core/graphics/sprite_animator.lua - strip-frame animation (GfxAnimator) ]]
 
 GfxAnimator = GfxSprite:derive("GfxAnimator")

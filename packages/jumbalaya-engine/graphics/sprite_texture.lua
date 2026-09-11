@@ -1,6 +1,6 @@
 return function(GfxSprite)
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 
 local sprite_util = require("jumbalaya-engine.graphics.sprite_util")
 

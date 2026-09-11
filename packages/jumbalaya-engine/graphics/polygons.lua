@@ -1,6 +1,6 @@
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 function pointer_triangle(x, y, w, h, vert)
 	local scale = 2
 	if vert then

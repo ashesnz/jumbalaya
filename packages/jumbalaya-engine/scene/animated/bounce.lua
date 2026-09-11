@@ -1,6 +1,6 @@
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 return function(AnimNode)
 --- Quick squash-and-stretch pulse (the classic "card bounce").
 function AnimNode:pulse(amount, rot_amt)

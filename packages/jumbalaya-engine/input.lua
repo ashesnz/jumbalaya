@@ -2,8 +2,8 @@
 	jumbalaya-engine/input.lua - InputService interface and Love2D adapter.
 ]]
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 
 ---@class InputService
 local InputService = {}
@@ -56,15 +56,11 @@ end
 function InputService:on_action(action)
 	if not action then return end
 	if action.type and action.type:match("^APP_") then
-		local app_events = package.loaded["app.services.app_events"]
-		if app_events and app_events.emit then
-			app_events.emit(action)
-		end
+		shell.emit_app_action(action)
 		return
 	end
 	if self._store then
-		require("app.bootstrap.store_sync").dispatch(self._store, action)
-
+		self._store:dispatch(action)
 	end
 end
 

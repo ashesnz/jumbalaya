@@ -21,14 +21,14 @@ require "word_game.ui.overlays"
 require "word_game.ui.effects"
 require "word_game.ui.cards.tooltip"
 
-local InputActions = require "app.input_actions"
+local InputActions = require "app.input.actions"
 
 local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 InputController._input_actions = InputActions
 
-require "app.screen_wipe"
-require "app.profile_callbacks"
+require "app.callbacks.screen_wipe"
+require "app.callbacks.profile"
 require "app.callbacks.settings"
 require "word_game.model.cards.card"
 require("word_game.ui.cards.bind").install()
@@ -36,7 +36,8 @@ require "word_game.ui.cardarea.init"
 
 Dictionary = require "dictionary"
 WORD_GAME = require "word_game"
-require("app.services.app_events")
+local app_events = require("app.bootstrap.app_events")
+require("jumbalaya-engine.shell").bind_app_events(app_events)
 
 require "app.callbacks.registry"
 

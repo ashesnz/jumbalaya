@@ -2,9 +2,9 @@
 	app/runtime.lua - Runtime service accessors (store, engine, game shell).
 ]]
 
-local M = {}
+local shell = require("jumbalaya-engine.shell")
 
-local _game = nil
+local M = {}
 
 local function word_game()
 	return package.loaded["word_game"]
@@ -12,12 +12,12 @@ end
 
 --- Register the live Game instance (called from Game:construct).
 function M.bind_game(game)
-	_game = game
+	shell.bind_game(game)
 end
 
 --- Live Game instance (bound from Game:construct).
 function M.game()
-	return _game
+	return shell.game()
 end
 
 function M.store()

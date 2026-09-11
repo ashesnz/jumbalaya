@@ -10,8 +10,8 @@
 local MIXER = require("jumbalaya-engine.sound.mixer")
 local game_access = require("word_game.model.game_access")
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 
 -- Reused request records: keeps per-frame allocation at zero.
 local play_request, mix_request, retag_request = {}, {}, {}

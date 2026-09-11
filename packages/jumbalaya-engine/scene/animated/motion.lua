@@ -1,6 +1,6 @@
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 return function(AnimNode)
 local MWM
 --- Per-frame entry point. Frame-gated so repeated calls in one frame are free;

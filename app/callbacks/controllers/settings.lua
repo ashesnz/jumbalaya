@@ -1,7 +1,7 @@
 --[[ app/controllers/settings.lua - Phase 4 window / graphics settings controller ]]
 
 local Components = require "word_game.ui.widgets.components"
-local Overlays = require("app.controllers.overlays")
+local Overlays = require("app.callbacks.controllers.overlays")
 
 local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end

@@ -1,7 +1,7 @@
 --[[ app/callbacks/overlays/menu_core.lua - Overlay menu FUNCS registration ]]
 
-local Bridge = require("app.controllers.callback_bridge")
-local Overlays = require("app.controllers.overlays")
+local Bridge = require("app.callbacks.controllers.callback_bridge")
+local Overlays = require("app.callbacks.controllers.overlays")
 local Funcs = require("app.callbacks.funcs")
 
 Funcs.register("switch_tab", Overlays.switch_tab)

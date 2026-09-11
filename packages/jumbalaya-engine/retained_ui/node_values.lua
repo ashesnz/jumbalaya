@@ -1,7 +1,7 @@
 
-local BridgeRuntime = require("app.runtime")
+local shell = require("jumbalaya-engine.shell")
 local Funcs = require("app.callbacks.funcs")
-local function g() return BridgeRuntime.game() end
+local function g() return shell.game() end
 return function(Target)
 function LayoutNode:set_values(_T, recalculate)
 	if not recalculate or not self.T then

@@ -15,7 +15,7 @@
 	  word_game.ui.callbacks.tutorial         - first_play_tutorial_next
 
 	App controllers (Phase 4b — registration in app/callbacks/*):
-	  app.controllers.run_lifecycle, settings, overlays, ui_controls
+	  app.callbacks.controllers.run_lifecycle, settings, overlays, ui_controls
 
 	Instance-bound sidebar callbacks (registration via sidebar:install()):
 	  word_game.ui.sidebar.funcs            - ensure/rebuild/end_run/classic_stage_next

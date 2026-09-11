@@ -1,7 +1,7 @@
 --[[ app/core/graphics/sprite.lua - textured atlas quad (GfxSprite) ]]
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 
 GfxSprite = AnimNode:derive("GfxSprite")
 Sprite = GfxSprite

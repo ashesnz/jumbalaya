@@ -1,6 +1,6 @@
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 function reset_hit_order()
 	g().HIT_ORDER = clear_table(g().HIT_ORDER)
 end

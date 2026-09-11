@@ -1,6 +1,6 @@
 --[[ app/core/input/card_focus.lua - Optional TABLE_BOARD card-focus hooks (installed at boot) ]]
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 
 
 local M = {

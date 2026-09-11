@@ -1,7 +1,7 @@
 
-local BridgeRuntime = require("app.runtime")
+local shell = require("jumbalaya-engine.shell")
 local Funcs = require("app.callbacks.funcs")
-local function g() return BridgeRuntime.game() end
+local function g() return shell.game() end
 return function(Target)
 function LayoutNode:update(dt)
 	g().ARGS.FUNC_TRACKER = g().ARGS.FUNC_TRACKER or {}

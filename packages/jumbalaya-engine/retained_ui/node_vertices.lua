@@ -1,6 +1,6 @@
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 return function(Target)
 local function rounded_rect_vertices(w, h, radius, ext_up, segs)
 	radius = math.max(1, radius or 8)

@@ -1,6 +1,6 @@
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 return function(Target)
 function LayoutNode:set_wh()
 	local padding = (self.config and self.config.padding) or g().UI.padding

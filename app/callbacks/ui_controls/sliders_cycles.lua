@@ -3,7 +3,7 @@
 local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 
-local UIControls = require("app.controllers.ui_controls")
+local UIControls = require("app.callbacks.controllers.ui_controls")
 local Funcs = require("app.callbacks.funcs")
 
 

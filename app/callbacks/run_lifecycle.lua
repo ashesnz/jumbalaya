@@ -1,7 +1,7 @@
 --[[ app/callbacks/run_lifecycle.lua - Run start / menu return FUNCS registration ]]
 
 local action_dispatch = require("app.input.action_dispatch")
-local RunLifecycle = require("app.controllers.run_lifecycle")
+local RunLifecycle = require("app.callbacks.controllers.run_lifecycle")
 local Funcs = require("app.callbacks.funcs")
 
 Funcs.register("notify_then_start_run", function(e)

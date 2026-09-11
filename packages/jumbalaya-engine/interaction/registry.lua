@@ -1,6 +1,6 @@
 return function(InputRouter)
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 
 
 function InputRouter:cull_registry()

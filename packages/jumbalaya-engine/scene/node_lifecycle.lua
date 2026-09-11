@@ -1,6 +1,6 @@
 return function(Node)
-	local BridgeRuntime = require("app.runtime")
-	local function g() return BridgeRuntime.game() end
+	local shell = require("jumbalaya-engine.shell")
+	local function g() return shell.game() end
 
 	function Node:drag()
 		if not (self.config and self.config.d_popup) then return end

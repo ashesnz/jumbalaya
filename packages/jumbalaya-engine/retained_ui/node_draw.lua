@@ -1,6 +1,6 @@
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 return function(Target)
 function LayoutNode:pulse(amount, rot_amt)
 	if self.ui_kind == g().UI.OBJECT then

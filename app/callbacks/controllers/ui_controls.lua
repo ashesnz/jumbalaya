@@ -1,6 +1,6 @@
 --[[ app/controllers/ui_controls.lua - Phase 4 UI control controller (sliders, cycles) ]]
 
-local Bridge = require("app.controllers.callback_bridge")
+local Bridge = require("app.callbacks.controllers.callback_bridge")
 
 local BridgeRuntime = require("app.runtime")
 local Funcs = require("app.callbacks.funcs")

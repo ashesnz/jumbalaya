@@ -1,7 +1,7 @@
 -- Application settings, text input, overlay menus, and run lifecycle callbacks.
 
-package.loaded["app.screen_wipe"] = nil
-require "app.screen_wipe"
+package.loaded["app.callbacks.screen_wipe"] = nil
+require "app.callbacks.screen_wipe"
 
 local modules = {
 	"app.callbacks.ui_controls",

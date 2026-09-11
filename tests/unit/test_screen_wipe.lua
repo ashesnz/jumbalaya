@@ -40,8 +40,8 @@ local function boot_for_wipe()
 	game.ROOM_ATTACH:set_container(game.ROOM)
 	game.smoothing = { xy = 0.5, scale = 0.5, r = 0.5, max_vel = 58 }
 	BridgeRuntime.bind_game(game)
-	package.loaded["app.screen_wipe"] = nil
-	require("app.screen_wipe")
+	package.loaded["app.callbacks.screen_wipe"] = nil
+	require("app.callbacks.screen_wipe")
 end
 
 local function advance_frames(n)

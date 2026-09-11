@@ -1,6 +1,6 @@
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 --[[ app/core/graphics/sprite_util.lua - shared helpers for GfxSprite mixins ]]
 
 local M = {}

@@ -1,7 +1,7 @@
 return function(InputRouter)
-local BridgeRuntime = require("app.runtime")
+local shell = require("jumbalaya-engine.shell")
 local Funcs = require("app.callbacks.funcs")
-local function g() return BridgeRuntime.game() end
+local function g() return shell.game() end
 
 
 function InputRouter:capture_focused_input(button, input_type, dt)

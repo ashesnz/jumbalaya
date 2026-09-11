@@ -2,8 +2,8 @@
 
 local Kind = require("jumbalaya-engine.object")
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 
 ---@class Node : Kind
 Node = Kind:derive("Node")

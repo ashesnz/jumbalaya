@@ -1,6 +1,6 @@
 local EffectsScheduler = require("word_game.ui.effects.timeline_scheduler")
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 
 
 return function(InputRouter)

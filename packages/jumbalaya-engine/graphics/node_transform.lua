@@ -1,6 +1,6 @@
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 function push_node_transform(moveable, scale, rotate, offset, _)
 	love.graphics.push()
 	love.graphics.scale(g().TILESCALE * g().TILESIZE)

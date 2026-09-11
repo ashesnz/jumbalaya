@@ -16,9 +16,11 @@ local RetainedUI = require("jumbalaya-engine.retained_ui")
 local ViewHost = require("jumbalaya-engine.view_host")
 local Kind = require("jumbalaya-engine.object")
 local Boot = require("jumbalaya-engine.boot")
+local Shell = require("jumbalaya-engine.shell")
 
 return {
 	Boot = Boot,
+	Shell = Shell,
 	Kind = Kind,
 	Scene = {
 		Node = require("jumbalaya-engine.scene.node"),

@@ -1,7 +1,7 @@
 
-local BridgeRuntime = require("app.runtime")
+local shell = require("jumbalaya-engine.shell")
 local Funcs = require("app.callbacks.funcs")
-local function g() return BridgeRuntime.game() end
+local function g() return shell.game() end
 return function(Target)
 function RetainedPanel:calculate_xywh(node, _T, recalculate, _scale)
 	node.ARGS.xywh_node_trans = node.ARGS.xywh_node_trans or {}
