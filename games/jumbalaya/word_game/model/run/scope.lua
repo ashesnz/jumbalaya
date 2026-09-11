@@ -1,4 +1,9 @@
---[[ word_game/model/run/scope.lua - Run lifecycle boundary for store and run caches.
+--[[
+	word_game/model/run/scope.lua - Run lifecycle boundary for store and run caches.
+
+	Core: jumbalaya_core.store.default_state (teardown reset)
+	Store: bind_run / replace via store_sync; RUN_STATE_INIT on new run
+	Presentation: none (teardown hooks notify UI via install.lua subscribers)
 
 	Every new run must pass through this module so stale UI bindings, module
 	caches, and live_game().ARGS mirrors cannot leak across runs.
@@ -9,6 +14,8 @@ local live_game = require("word_game.model.live_game")
 local game_access = require("word_game.model.game_access")
 local store_sync = require("app.bootstrap.store_sync")
 local BridgeRuntime = require("app.runtime")
+local CoreStore = require("jumbalaya_core.store")
+local run_state_mod = require("word_game.model.run.state")
 
 local M = {}
 
@@ -116,7 +123,6 @@ function M.teardown()
 	M.reset_globals()
 	local store = BridgeRuntime.store()
 	if store then
-		local CoreStore = require("jumbalaya_core.store")
 		store_sync.replace(store, CoreStore.default_state())
 	end
 	live_game().GAME = nil
@@ -154,7 +160,6 @@ function M.begin_run(game_table, opts)
 		error("RunScope.begin_run requires a fresh run table for new runs")
 	end
 	M.reset_args()
-	local run_state_mod = require("word_game.model.run.state")
 	run_state_mod.migrate_legacy_field(game_table)
 	game_table.run_generation = M.generation()
 	local store = BridgeRuntime.store()

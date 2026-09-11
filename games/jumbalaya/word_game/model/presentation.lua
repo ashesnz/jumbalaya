@@ -1,4 +1,10 @@
---[[ word_game/model/presentation.lua - UI reaction hooks registered at boot (see types/presentation.lua) ]]
+--[[
+	word_game/model/presentation.lua - Model→UI event bus (contract: types/presentation.lua).
+
+	Core: none (glue only)
+	Store: none — listeners read game_access.get() in ui/presentation/install.lua
+	Presentation: emit(event, …) fans out to registered UI handlers at boot
+]]
 
 ---@type Presentation
 local M = {

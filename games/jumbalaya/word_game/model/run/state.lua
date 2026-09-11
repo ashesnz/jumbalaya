@@ -1,4 +1,10 @@
---[[ word_game/model/run/state.lua - Match-long run state on game snapshot run_state ]]
+--[[
+	word_game/model/run/state.lua - Match-long economy state (tokens, perks, stats).
+
+	Core: jumbalaya_core.store.run_state
+	Store: run_state subtree; RUN_STATE_* dispatches
+	Presentation: tokens_changed, perk_acquired (via install subscribers)
+]]
 
 local live_game = require("word_game.model.live_game")
 

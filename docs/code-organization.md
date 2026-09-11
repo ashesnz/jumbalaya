@@ -184,7 +184,8 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `word_game/board/` | Top-of-file `require` for model modules; no UI imports at load time |
 | `word_game/model/` | Prefer `jumbalaya_core` for pure rules; glue reads `live_game()` / `game_access.get()` |
 | `jumbalaya_core/` | **Never** import `app/`, `word_game/`, or Love2D |
-| Inline `require(...)` inside functions | Avoid — hoist to module scope unless breaking a documented circular dependency |
+| Inline `require(...)` inside functions | Avoid — hoist to module scope unless breaking a documented circular dependency (enforced in hot paths: deal/draw, play/shuffle controls, card update) |
+| `word_game/model/` glue headers | Each file documents **Core** (jumbalaya_core backing), **Store** (dispatch/patch + types/store.lua fields), **Presentation** (Presentation.emit events) |
 | `Card` presentation | Model class in `model/cards/card.lua`; draw/tooltip mixins install from `ui/cards/bind.lua` at boot |
 | Layout refresh | `word_game/model/layout/request.lua` sets pending layout on the Game shell; model must not `require` `word_game.ui.layout` |
 | Run-state field owners | `types/game.lua` | Declared keys + owning module; no ad-hoc fields |

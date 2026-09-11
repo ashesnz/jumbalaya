@@ -1,4 +1,10 @@
---[[ word_game/model/jumble_play/jumble_rules.lua - Jumble play logic (G glue over jumbalaya_core) ]]
+--[[
+	word_game/model/jumble_play/jumble_rules.lua - Jumble play evaluation and scoring.
+
+	Core: jumbalaya_core.rules.jumble, jumbalaya_core.rules.play, jumbalaya_core.jumble.placement_preview
+	Store: PLAY_WORD, placement preview via SET_PLACEMENT_PREVIEW; word_round.jumble mutations
+	Presentation: word_played, jumble_solved, boss_word_staged (see play_effects subscribers)
+]]
 
 local InputLock = require("word_game.model.run.input_lock")
 local RunMode = require("word_game.model.run.mode")

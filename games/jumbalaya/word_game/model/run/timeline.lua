@@ -1,4 +1,10 @@
---[[ word_game/model/run/timeline.lua - Time Run fuse (store-backed via game_access) ]]
+--[[
+	word_game/model/run/timeline.lua - Time Run fuse (classic goal mirror).
+
+	Core: jumbalaya_core.config.gameplay.round (targets)
+	Store: timeline_seconds, timeline_duration, timeline_active, timeline_goal_reached, …
+	Presentation: timeline_tick, timeline_goal_reached, timeline_reset
+]]
 
 local Presentation = require("word_game.model.presentation")
 local round_config = require("word_game.config.gameplay.round")

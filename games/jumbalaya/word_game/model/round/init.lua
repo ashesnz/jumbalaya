@@ -1,10 +1,25 @@
---[[ word_game/model/round/init.lua - Set / hand controller (glue over jumbalaya_core + store) ]]
+--[[
+	word_game/model/round/init.lua - Set / hand progression controller.
+
+	Core: jumbalaya_core.round, jumbalaya_core.jumble.hand
+	Store: ROUND_INIT_RUN, ROUND_START_HAND, ROUND_RECORD_WORD via game_access.dispatch
+	Presentation: hand_started, round_restore_from_save, timeline_reset
+]]
 
 local state = require("word_game.model.run.state")
 local game_access = require("word_game.model.game_access")
 local Presentation = require("word_game.model.presentation")
 local core_round = require("jumbalaya_core.round")
 local core_jumble_hand = require("jumbalaya_core.jumble.hand")
+
+-- Lazy: jumble → placement_word → round (documented cycle).
+local _jumble
+local function jumble()
+	if not _jumble then
+		_jumble = require("word_game.model.jumble")
+	end
+	return _jumble
+end
 
 local M = {}
 
@@ -37,7 +52,7 @@ function M.start_hand(set, hand_index)
 
 	local wr = game_access.word_round()
 	if not core_jumble_hand.clear_if_inactive_hand(wr, set, hand_index) then
-		require("word_game.model.jumble").start_hand(wr)
+		jumble().start_hand(wr)
 	end
 
 	Presentation.emit("hand_started", set, hand_index)

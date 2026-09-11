@@ -38,6 +38,8 @@
 ---@field remove_from_deck fun(self: Card, from_debuff: boolean|nil)
 local live_game = require("word_game.model.live_game")
 local CardRegistry = require("word_game.model.cards.registry")
+local UIViewHost = require("word_game.ui.views.ui_view_host")
+local Deck = require("word_game.model.cards.deck")
 
 Card = EaseNode:derive("Card")
 
@@ -141,7 +143,6 @@ function Card:update_alert()
                 self.children.alert:remove()
                 self.children.alert = nil
             elseif not self.config.center.alerted and not self.children.alert and self.config.center.discovered then
-                local UIViewHost = require("word_game.ui.views.ui_view_host")
                 self.children.alert = UIViewHost.create{
                     definition = build_card_alert(), 
                     config = {align=(self.ability.set == 'Perk' and (self.config.center.order%2)==1) and "tli" or "tri",
@@ -355,8 +356,7 @@ function Card:load(saved)
     self:set_sprites(self.config.center, self.config.card)
 
     if self.ability and self.ability.modified then
-        local deck = require("word_game.model.cards.deck")
-        deck.restore_letter_face(self)
+        Deck.restore_letter_face(self)
     end
 end
 

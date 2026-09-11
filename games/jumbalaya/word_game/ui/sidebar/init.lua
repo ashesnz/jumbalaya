@@ -11,6 +11,7 @@ local StageLabel = require("word_game.ui.score_banner.stage_label")
 local sidebar_callbacks = require("word_game.ui.sidebar.callbacks")
 local table_discard = require("word_game.ui.perks.discard_bin")
 local views_install = require("word_game.ui.views.install")
+local game_access = require("word_game.model.game_access")
 
 local function deck_mod()
 	return facade.deck()
@@ -115,7 +116,6 @@ function WordSidebar:draw()
 end
 
 function WordSidebar:clear_hand()
-	local game_access = require("word_game.model.game_access")
 	game_access.mutate(function(g)
 		if g.word_round then
 			g.word_round.played_words = {}

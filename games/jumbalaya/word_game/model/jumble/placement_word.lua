@@ -1,4 +1,10 @@
---[[ word_game/model/jumble/placement_word.lua - Placement row word preview (store-backed) ]]
+--[[
+	word_game/model/jumble/placement_word.lua - Placement row word preview.
+
+	Core: jumbalaya_core.jumble.placement_preview (via round helpers)
+	Store: SET_PLACEMENT_PREVIEW → placement_word, placement_word_valid
+	Presentation: placement_word_changed
+]]
 
 local round = require("word_game.model.round")
 local Presentation = require("word_game.model.presentation")

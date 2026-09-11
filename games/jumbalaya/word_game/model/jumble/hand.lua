@@ -1,4 +1,10 @@
---[[ word_game/model/jumble/hand.lua - Jumble hand lifecycle (G glue over jumbalaya_core) ]]
+--[[
+	word_game/model/jumble/hand.lua - Jumble hand lifecycle (start, clear, advance).
+
+	Core: jumbalaya_core.jumble.hand
+	Store: word_round.jumble via game_access; timeline fields via Timeline module
+	Presentation: hand_cleared, jumble_hand_started, boss_word_reveal
+]]
 
 local live_game = require("word_game.model.live_game")
 

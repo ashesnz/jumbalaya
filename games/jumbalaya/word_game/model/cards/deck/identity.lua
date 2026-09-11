@@ -6,6 +6,9 @@ return function(context)
 	local core_identity = require("jumbalaya_core.cards.identity")
 	local core_letter_card = require("jumbalaya_core.cards.letter_card")
 	local LetterPalette = require "word_game.config.visuals.letter_card_palette"
+	local Presentation = require("word_game.model.presentation")
+	local piles = require("word_game.model.piles")
+	local voucher_discard = require("word_game.model.perks.voucher_discard")
 
 	function M.front_key(letter, color)
 		return core_identity.front_key(letter, color)
@@ -111,10 +114,8 @@ return function(context)
 	end
 
 	function M.reset_table_deck()
-		local Presentation = require("word_game.model.presentation")
-		local piles = require("word_game.model.piles")
 		Presentation.emit("table_deck_reset")
-		require("word_game.model.perks.voucher_discard").reset()
+		voucher_discard.reset()
 		piles.hydrate_hosts_from_store({ "hand", "draw", "discard", "pattern" })
 		local all = {}
 		for _, area in ipairs(M.all_areas()) do

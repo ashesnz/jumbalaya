@@ -1,5 +1,9 @@
 --[[
-	model/run.lua - Starting a match (init_game_object, start_run, board).
+	word_game/model/game/run.lua - Match bootstrap (init_game_object, start_run, board).
+
+	Core: jumbalaya_core.store.default_state (via RunScope)
+	Store: game_access.patch on round start; word_round owned by round/init
+	Presentation: layout_refresh, table_board_ready (via LayoutRequest / install hooks)
 ]]
 
 local live_game = require("word_game.model.live_game")
@@ -10,6 +14,8 @@ local Scheduler = require "word_game.ui.effects.timeline_scheduler"
 local RunScope = require "word_game.model.run.scope"
 local RunMode = require "word_game.model.run.mode"
 local game_access = require "word_game.model.game_access"
+local hand_size_cfg = require("word_game.model.hand_size")
+local Board = require("word_game.board")
 
 --- Tear down run-scoped UI and caches (delegates to RunScope).
 function Game:teardown_run_ui()
@@ -190,11 +196,10 @@ function Game:start_run(args)
         end
       }
 
-    local hand_size_cfg = require("word_game.model.hand_size")
     local hand_size = hand_size_cfg.get()
 
     if not self.pattern_row then
-        self.pattern_row = require("word_game.board").PlacementTable(self)
+        self.pattern_row = Board.PlacementTable(self)
     end
 
     local CAI = {

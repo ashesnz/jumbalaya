@@ -1,4 +1,10 @@
--- Jumble-mode deck: built from Deck.STARTING_LETTERS with recycling replacements.
+--[[
+	word_game/model/cards/deck/jumble.lua - Jumble deal, draw, reshuffle, and refill.
+
+	Core: jumbalaya_core.cards.letter_card
+	Store: pile hosts via piles; deck_left_count patches
+	Presentation: deal animations via Scheduler; layout_refresh via LayoutRequest
+]]
 local live_game = require("word_game.model.live_game")
 
 
@@ -16,6 +22,8 @@ return function(context)
 	local core_letter_card = require("jumbalaya_core.cards.letter_card")
 	local game_access = require("word_game.model.game_access")
 	local piles = require("word_game.model.piles")
+	local TableAreas = require("word_game.model.table_areas")
+	local LayoutRequest = require("word_game.model.layout.request")
 
 	local function commit_piles(pile_ids)
 		if M.commit_pile_hosts then
@@ -302,7 +310,6 @@ return function(context)
 		if not live_game().dealt_letters then return nil end
 		if M.draw_pile_count() == 0 then
 			if M.try_jumble_reshuffle_and_deal() then
-				local TableAreas = require("word_game.model.table_areas")
 				local hand = TableAreas.hand_cards()
 				return hand[#hand]
 			end
@@ -436,6 +443,6 @@ return function(context)
 			live_game().dealt_letters:set_ranks()
 			live_game().dealt_letters:relayout()
 		end
-		require("word_game.model.layout.request").refresh()
+		LayoutRequest.refresh()
 	end
 end

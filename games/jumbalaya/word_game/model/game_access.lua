@@ -1,4 +1,10 @@
---[[ word_game/model/game_access.lua - Read/write game snapshot via store (Phase 10d) ]]
+--[[
+	word_game/model/game_access.lua - Read/write run snapshot via WORD_GAME.store().
+
+	Core: jumbalaya_core.store reducers (dispatched through store_sync)
+	Store: get / patch / dispatch / mutate on GameRunState (types/store.lua)
+	Presentation: none — callers emit after store writes
+]]
 
 local store_sync = require("app.bootstrap.store_sync")
 local runtime = require("app.runtime")

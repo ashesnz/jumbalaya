@@ -5,6 +5,8 @@ local function runtime() return GameRT.game() end
 
 local Scheduler = require "word_game.ui.effects.timeline_scheduler"
 local game_access = require("word_game.model.game_access")
+local piles = require("word_game.model.piles")
+local runtime = require("app.runtime")
 
 local M = {}
 
@@ -184,10 +186,9 @@ function M.animate(hand, on_complete)
 			hand:snap_VT()
 			hand:hard_set_cards()
 			set_animating(false)
-			local runtime = require("app.runtime")
 			local store = runtime.store()
 			if store then
-				require("word_game.model.piles").release_static_chrome(store, { "hand" })
+				piles.release_static_chrome(store, { "hand" })
 			end
 			if on_complete then on_complete() end
 			return true

@@ -1,4 +1,10 @@
---[[ word_game/model/piles.lua - Store-authoritative pile sync for CardPile hosts ]]
+--[[
+	word_game/model/piles.lua - Store-authoritative pile sync for CardPile hosts.
+
+	Core: jumbalaya_core.store.selectors.piles (snapshot shape)
+	Store: patches piles on store; hydrates dealt_letters / draw_pile / pattern_row hosts
+	Presentation: none — CardArea relayout triggered by callers
+]]
 
 local BridgeRuntime = require("app.runtime")
 

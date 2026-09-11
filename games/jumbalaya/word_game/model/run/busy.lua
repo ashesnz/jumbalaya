@@ -1,4 +1,10 @@
---[[ word_game/model/run/busy.lua - Model-side table-busy flags (store-backed via game_access) ]]
+--[[
+	word_game/model/run/busy.lua - Table-busy flags (input lock during FX).
+
+	Core: none
+	Store: trade_ui_busy, token_reward_busy, card_fly_off_busy, play_hold_redraw_busy
+	Presentation: none — InputLock reads flags via game_access.get()
+]]
 
 local game_access = require("word_game.model.game_access")
 

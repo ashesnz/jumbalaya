@@ -8,6 +8,7 @@ local RunMode = facade.run_mode()
 local definition = require("word_game.ui.table.controls.definition")
 local layout = require("word_game.ui.table.controls.layout")
 local animate = require("word_game.ui.table.controls.animate")
+local placement = require("word_game.ui.table.controls.placement")
 
 layout.bind_animate(animate)
 animate.bind_layout(layout)
@@ -171,7 +172,7 @@ end
 
 --- Play button: validate placement and resolve the word.
 function M.play()
-	require("word_game.ui.table.controls.placement").try_play()
+	placement.try_play()
 end
 
 --- Advance after a cleared jumble hand (Time Run proceed).

@@ -1,4 +1,10 @@
---[[ word_game/model/perks/effects.lua - Gameplay hooks for collected perks (G glue over core) ]]
+--[[
+	word_game/model/perks/effects.lua - Collected perk gameplay hooks.
+
+	Core: jumbalaya_core.rules.perk_effects, jumbalaya_core.rules.perk_math
+	Store: reads run_state.perks via game_access.get()
+	Presentation: none — scoring hooks consumed by jumble_rules / play flow
+]]
 
 local live_game = require("word_game.model.live_game")
 
