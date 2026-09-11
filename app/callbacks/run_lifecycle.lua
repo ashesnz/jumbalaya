@@ -1,20 +1,12 @@
 --[[
 	app/callbacks/run_lifecycle.lua - Run start / menu return G.FUNCS.
-
-	setup_run and notify_then_setup_run are legacy aliases kept for save/UI compat.
 ]]
-
-G.FUNCS.setup_run = function(e)
-  G.FUNCS.begin_run(e)
-end
 
 G.FUNCS.notify_then_start_run = function(e)
   G.OVERLAY_MENU:remove()
   G.OVERLAY_MENU = nil
   G.FUNCS.begin_run(e)
 end
-
-G.FUNCS.notify_then_setup_run = G.FUNCS.notify_then_start_run
 
 G.FUNCS.begin_run = function(e, args)
   G.SETTINGS.paused = false
