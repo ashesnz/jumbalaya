@@ -42,6 +42,12 @@ function LayoutNode:draw_self()
 
 	if self.config.colour[4] > 0.01 then
 		if self.ui_kind == g().UI.TEXT and self.config.scale then
+			if not self.config.text_drawable then
+				self:update_text()
+			end
+			if not self.config.text_drawable then
+				return
+			end
 			-- Text: optional drop shadow pass at depth 0.97, then the glyph.
 			self.ARGS.text_parallax = self.ARGS.text_parallax or {}
 			local font_obj = self.config.font or self.config.lang.font

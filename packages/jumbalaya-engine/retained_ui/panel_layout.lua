@@ -33,6 +33,9 @@ function RetainedPanel:calculate_xywh(node, _T, recalculate, _scale)
 			local text_w = (font_face and font_face.getWidth and font_face:getWidth(node.config.text))
 				or (string.len(node.config.text) * 12)
 			local text_h = (font_face and font_face.getHeight and font_face:getHeight()) or 20
+			if font_face and love.graphics and love.graphics.newText then
+				node.config.text_drawable = love.graphics.newText(font_face, {g().C.WHITE, node.config.text})
+			end
 			local px_w = text_w * squish * scale * g().TILESCALE * font_scale
 			local px_h = text_h * scale * g().TILESCALE * font_scale * height_scale
 			if node.config.vert then px_w, px_h = px_h, px_w end

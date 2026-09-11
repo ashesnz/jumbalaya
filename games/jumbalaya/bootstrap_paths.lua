@@ -43,6 +43,20 @@ function M.resolve()
 	return M
 end
 
+local function mount_game_assets_if_needed(paths)
+	if not (love and love.filesystem and love.filesystem.mount) then
+		return
+	end
+	if paths.game_root == paths.source then
+		return
+	end
+	if love.filesystem.getInfo("resources/fonts/Outfit-Bold.ttf") then
+		return
+	end
+	-- Repo-root shim (`love .`): Love source is the repo root but assets live under game_root.
+	love.filesystem.mount("/", paths.game_root, true)
+end
+
 function M.install()
 	local paths = M.resolve()
 	local chunks = {
@@ -56,6 +70,7 @@ function M.install()
 		chunks[#chunks + 1] = paths.test_root .. "/?/init.lua"
 	end
 	package.path = table.concat(chunks, ";") .. ";" .. package.path
+	mount_game_assets_if_needed(paths)
 	return paths
 end
 
