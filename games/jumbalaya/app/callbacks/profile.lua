@@ -21,7 +21,12 @@ Funcs.register("can_resume_run",  function(e)
         g().STORED_RUN = read_save_payload(g().SETTINGS.profile..'/'..'save.acs')
         if g().STORED_RUN ~= nil then g().STORED_RUN = unpack_source(g().STORED_RUN) end
       end
-      if not g().STORED_RUN.VERSION or g().STORED_RUN.VERSION < '0.9.2' then
+      local domain = rawget(_G, "WORD_GAME")
+      local schema_ok = domain
+        and domain.Persistence
+        and domain.Persistence.SaveSchema
+        and domain.Persistence.SaveSchema.is_loadable(g().STORED_RUN)
+      if not g().STORED_RUN.VERSION or g().STORED_RUN.VERSION < '0.9.2' or not schema_ok then
         e.config.colour = g().C.UI.BACKGROUND_INACTIVE
         e.config.button = nil
       else

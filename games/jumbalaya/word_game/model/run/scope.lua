@@ -15,7 +15,6 @@ local game_access = require("word_game.model.game_access")
 local store_sync = require("app.bootstrap.store_sync")
 local BridgeRuntime = require("app.runtime")
 local CoreStore = require("jumbalaya_core.store")
-local run_state_mod = require("word_game.model.run.state")
 
 local M = {}
 
@@ -160,7 +159,6 @@ function M.begin_run(game_table, opts)
 		error("RunScope.begin_run requires a fresh run table for new runs")
 	end
 	M.reset_args()
-	run_state_mod.migrate_legacy_field(game_table)
 	game_table.run_generation = M.generation()
 	local store = BridgeRuntime.store()
 	if not store then

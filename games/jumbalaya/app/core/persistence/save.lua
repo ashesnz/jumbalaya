@@ -41,6 +41,9 @@ function queue_run_snapshot()
 		VERSION = g.VERSION,
 	}
 	local persist = persistence()
+	if persist and persist.SaveSchema then
+		persist.SaveSchema.stamp_write(g.ARGS.run_snapshot)
+	end
 	if persist and persist.RunSave and persist.RunSave.append_pattern_row_snapshot then
 		persist.RunSave.append_pattern_row_snapshot(g.ARGS.run_snapshot)
 	end

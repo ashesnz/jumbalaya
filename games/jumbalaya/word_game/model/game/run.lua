@@ -119,6 +119,12 @@ function Game:start_run(args)
         saveTable = nil
         delete_saved_run()
     end
+    if saveTable and WORD_GAME and WORD_GAME.Persistence and WORD_GAME.Persistence.SaveSchema then
+        if not WORD_GAME.Persistence.SaveSchema.prepare_loaded(saveTable) then
+            saveTable = nil
+            delete_saved_run()
+        end
+    end
     self.STORED_RUN = nil
 
     local prior = game_access.get()

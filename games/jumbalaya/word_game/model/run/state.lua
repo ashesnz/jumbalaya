@@ -20,24 +20,10 @@ function M.new()
 	return core_run_state.new()
 end
 
---- Migrates legacy save field `alpha` → `run_state` once per load.
-function M.migrate_legacy_field(game)
-	if not game or type(game) ~= "table" then return end
-	if game.run_state then
-		game.alpha = nil
-		return
-	end
-	if game.alpha then
-		game.run_state = game.alpha
-		game.alpha = nil
-	end
-end
-
 function M.get()
 	local game = game_access.get()
 	if not game then return nil end
 	if live_game().RUN and live_game().RUN.active == false then return nil end
-	M.migrate_legacy_field(game)
 	game.run_state = game.run_state or M.new()
 	return game.run_state
 end
