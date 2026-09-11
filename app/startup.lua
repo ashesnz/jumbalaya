@@ -15,7 +15,7 @@ function Game:launch()
 	local settings_ver = nil
 	if settings then
 		local settings_file = unpack_source(settings)
-		if G.VERSION >= '1.0.0' and (love.system.getOS() == 'Windows') and ((not settings_file.version) or (settings_file.version < '1.0.0')) then
+		if self.VERSION >= '1.0.0' and (love.system.getOS() == 'Windows') and ((not settings_file.version) or (settings_file.version < '1.0.0')) then
 			for i = 1, 3 do
 				love.filesystem.remove(i..'/'..'profile.acs')
 				love.filesystem.remove(i..'/'..'save.acs')
@@ -27,7 +27,7 @@ function Game:launch()
 			end
 			self.SETTINGS.profile = 1
 		else
-			if G.VERSION < '1.0.0' then
+			if self.VERSION < '1.0.0' then
 				settings_ver = settings_file.version
 			end
 			for k, v in pairs(settings_file) do
@@ -35,7 +35,7 @@ function Game:launch()
 			end
 		end
 	end
-	self.SETTINGS.version = settings_ver or G.VERSION
+	self.SETTINGS.version = settings_ver or self.VERSION
 	self.SETTINGS.paused = nil
 
 	local sound = self.SETTINGS.SOUND or {}
@@ -65,7 +65,7 @@ function Game:launch()
 	boot_stage('settings', 'window init', 0.2)
 	self:init_window()
 
-	if G.F_SOUND_THREAD and love.filesystem and love.filesystem.getInfo
+	if self.F_SOUND_THREAD and love.filesystem and love.filesystem.getInfo
 		and love.filesystem.getInfo('app/core/audio/manager.lua') then
 		boot_stage('window init', 'audio worker')
 		self.AUDIO_WORKER = {
@@ -82,11 +82,11 @@ function Game:launch()
 	if love.thread and love.thread.newThread and (not love.filesystem.getInfo or love.filesystem.getInfo('app/core/persistence/worker.lua')) then
 		local thread_ok, thread_res = pcall(love.thread.newThread, 'app/core/persistence/worker.lua')
 		if thread_ok and thread_res then
-			G.DISK_WORKER = {
+			self.DISK_WORKER = {
 				thread = thread_res,
 				channel = love.thread.getChannel('disk_write_queue')
 			}
-			G.DISK_WORKER.thread:start(2)
+			self.DISK_WORKER.thread:start(2)
 		end
 	end
 	boot_stage('save worker', 'shaders',0.4)
@@ -113,7 +113,7 @@ function Game:launch()
 		self.SETTINGS.GRAPHICS.texture_scaling = self.SETTINGS.GRAPHICS.texture_scaling > 1 and 2 or 1
 	end
 
-	self:load_profile(G.SETTINGS.profile or 1)
+	self:load_profile(self.SETTINGS.profile or 1)
 
 	self.SETTINGS.QUEUED_CHANGE = {}
 	self.SETTINGS.music_control = {desired_track = '', current_track = '', lerp = 1}

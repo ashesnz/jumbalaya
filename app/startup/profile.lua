@@ -1,5 +1,7 @@
 --[[ app/startup/profile.lua - Profile load and localization setup ]]
 
+local BridgeRuntime = require("bridge.runtime")
+
 local DEFAULT_PROFILE = {
 	career_stats = { c_wins = 0 },
 	bonus_usage = {},
@@ -16,17 +18,20 @@ local function recursive_init(defaults, profile)
 end
 
 local function load_profile_data(profile_index)
-	if not G.PROFILES[profile_index] then profile_index = 1 end
-	G.SETTINGS.profile = profile_index
+	local game = BridgeRuntime.game()
+	if not game then return end
+
+	if not game.PROFILES[profile_index] then profile_index = 1 end
+	game.SETTINGS.profile = profile_index
 
 	local info = read_save_payload(profile_index .. "/profile.acs")
 	if info ~= nil then
 		for k, v in pairs(unpack_source(info)) do
-			G.PROFILES[G.SETTINGS.profile][k] = v
+			game.PROFILES[game.SETTINGS.profile][k] = v
 		end
 	end
 
-	local profile = G.PROFILES[G.SETTINGS.profile]
+	local profile = game.PROFILES[game.SETTINGS.profile]
 	recursive_init(DEFAULT_PROFILE, profile)
 	profile.career_stats = profile.career_stats or { c_wins = 0 }
 	profile.bonus_usage = profile.bonus_usage or {}
@@ -38,8 +43,8 @@ end
 
 function Game:set_language()
 	if not self.LANGUAGES then
-		if not (love.filesystem.read("localization/" .. G.SETTINGS.language .. ".lua")) or G.F_ENGLISH_ONLY then
-			G.SETTINGS.language = "en-us"
+		if not (love.filesystem.read("localization/" .. self.SETTINGS.language .. ".lua")) or self.F_ENGLISH_ONLY then
+			self.SETTINGS.language = "en-us"
 		end
 
 		self.LANGUAGES = {
@@ -77,9 +82,9 @@ function Game:set_language()
 
 	self.LANG = self.LANGUAGES[self.SETTINGS.language] or self.LANGUAGES["en-us"]
 
-	local localization = love.filesystem.getInfo("localization/" .. G.SETTINGS.language .. ".lua")
+	local localization = love.filesystem.getInfo("localization/" .. self.SETTINGS.language .. ".lua")
 	if localization ~= nil then
-		self.localization = assert(loadstring(love.filesystem.read("localization/" .. G.SETTINGS.language .. ".lua")))()
+		self.localization = assert(loadstring(love.filesystem.read("localization/" .. self.SETTINGS.language .. ".lua")))()
 		init_localization()
 	end
 end
