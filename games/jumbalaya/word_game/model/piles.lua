@@ -1,14 +1,8 @@
---[[ word_game/model/piles.lua - Store-authoritative pile sync (Phase 10b) ]]
+--[[ word_game/model/piles.lua - Store-authoritative pile sync for CardPile hosts ]]
 
 local BridgeRuntime = require("app.runtime")
-local game_access = require("word_game.model.game_access")
 
 local M = {}
-
---- Resting cards render from store piles; pile hosts keep drag/focus cards only.
-function M.chrome_release_enabled()
-	return true
-end
 
 local PILE_HOST = {
 	hand = "dealt_letters",

@@ -4,18 +4,18 @@ Jumbalaya is organized in **four cooperating layers**. They are not duplicates �
 
 | Layer | Path | Role |
 |-------|------|------|
-| **Application** | `app/` | Love2D entry, bootstrap, lifecycle, input callbacks, persistence shell |
+| **Application** | `games/jumbalaya/app/` | Love2D entry, bootstrap, lifecycle, input callbacks, persistence shell |
 | **Portable core** | `packages/jumbalaya_core/` | Engine-agnostic rules, store, reducers — **no Love2D, no globals** |
 | **Portable engine** | `packages/jumbalaya-engine/` | Service interfaces (clock, input map, event bus, retained UI, views) |
-| **This game** | `word_game/` | Jumbalaya runtime glue, presentation, board geometry, game-specific config |
+| **This game** | `games/jumbalaya/word_game/` | Jumbalaya runtime glue, presentation, board geometry, game-specific config |
 
-`bridge/` holds migration shims (`runtime.lua`, `funcs_registry.lua`, `store_sync.lua`, `pile_sync.lua`) that wire the layers together at boot.
+Shell wiring (`app/runtime.lua`, `app/callbacks/funcs.lua`, `app/bootstrap/store_sync.lua`, `jumbalaya-engine.shell`) is injected at boot via `app/bootstrap/shell_bind.lua`. The old `bridge/` folder is dissolved.
 
 **Do not delete `app/` or `packages/`** — see [app vs packages](#app-vs-packages) below. The long-term plan is to *shrink* `app/core/` into `jumbalaya-engine`, not merge everything back into one tree.
 
 ### Engine migration
 
-Phases 0–9 are **complete** (store, engine package, retained UI, `Funcs` registry, no global `G`). **Phase 10** (glue hygiene, CardArea retirement, engine extraction) is active.
+Phases 0–13 are **complete** (store, engine package, retained UI, `Funcs` registry, no global `G`, `games/jumbalaya/` layout). **Phase 10a** (glue hygiene) continues incrementally.
 
 - Guide: [engine-migration.md](engine-migration.md)
 - Grep snapshot: [engine-migration-coupling-inventory.md](engine-migration-coupling-inventory.md)
@@ -25,32 +25,25 @@ Phases 0–9 are **complete** (store, engine package, retained UI, `Funcs` regis
 - No new run-state keys without a declared owner in `types/game.lua` **and** a store field / reducer in `jumbalaya_core`.
 - No new UIBox callback names without an entry in `types/funcs.lua` — enforced by `tests/unit/test_g_funcs_registry.lua`.
 - New features ship via `WORD_GAME` / `WORD_GAME_UI` facade methods; model code uses `Presentation.emit`, not `Funcs.dispatch`.
-- Store authority lives on `WORD_GAME.store()`; `bridge/store_sync.lua` binds the live `Game.GAME` snapshot at boot and in tests.
+- Store authority lives on `WORD_GAME.store()` / `game_access`; `app/bootstrap/store_sync.lua` creates the store and binds runs at boot.
 
 ---
 
 ## Directory responsibilities
 
 ```text
-app/                          Love2D application shell
-  bootstrap/                  engine_adapter → engine_boot, runtime_boot, store_boot, presentation_boot
-  startup/                    profile, window, dealing, assets, menu_boot
-  core/                       Scene graph (Card, Sprite, input router, audio, session loop)
-  controllers/                Run lifecycle, settings, overlay controllers (Funcs.register)
-  callbacks/                  App-level callback installers
-bridge/                       Runtime shell, funcs registry, store sync, pile sync, action dispatch
 packages/
   jumbalaya_core/               Portable domain: store, rules, jumble, cards, config (headless-testable)
   jumbalaya-engine/             Portable engine: retained_ui, clock, input, event_bus, views
-word_game/
-  config/                     Game tuning + jumble puzzle tables; some files re-export jumbalaya_core
-  model/                      Runtime glue over jumbalaya_core (live_game, Card, deck, persistence)
-  board/                      Pattern-row snap/geometry (no UI imports at require time)
-  ui/                         TABLE_BOARD presentation, HUD, menus, overlays, controls
-devtools/                     Development-only tools (stage jump, word hints)
-dictionary/                   Offline word validation
-types/                        Analyzer-only EmmyLua declarations
-docs/                         Design and engineering documentation (this folder)
+games/jumbalaya/
+  app/                          Love2D shell: bootstrap, callbacks, startup, session/persistence
+  word_game/                    Runtime glue, presentation, board geometry, config
+  devtools/                     Dev-only panel (snake_case Lua modules under devtools/sections/)
+  dictionary/                   Offline word validation
+  localization/                 Locale tables (e.g. en-us.lua — BCP47 tag, not snake_case)
+  tests/                        Headless suite — love games/jumbalaya tests
+docs/                           Design and engineering documentation (this folder)
+_tools/                         Python asset/dev pipelines (not runtime)
 ```
 
 ### app vs packages
@@ -103,11 +96,11 @@ These layers serve different purposes and should not be merged:
 
 Dependency direction: `word_game/ui/` → `jumbalaya-engine` + `app/core/` → never reverse into gameplay rules.
 
-`app/core/graphics/flow_text.lua` (`DynaText`) reads colours and timers from the bound **Game shell** (`bridge/runtime.game()`); localization and copy remain in `word_game/ui/`.
+`jumbalaya-engine/graphics/flow_text.lua` (`DynaText`) reads colours and timers from the bound **Game shell** (`jumbalaya-engine.shell`); localization copy lives in `games/jumbalaya/localization/`.
 
 ### Callback ownership
 
-UIBox buttons still bind **string names** (`func = 'shuffle_hand'`). Runtime dispatch goes through `bridge/funcs_registry.lua` (`Funcs.register`, `Funcs.dispatch`). Implementations live in `app/controllers/` and `word_game/ui/callbacks/`.
+UIBox buttons still bind **string names** (`func = 'shuffle_hand'`). Runtime dispatch goes through `app/callbacks/funcs.lua` (`Funcs.register`, `Funcs.dispatch`). Implementations live in `app/callbacks/` and `word_game/ui/callbacks/`.
 
 | Area | Module |
 |------|--------|

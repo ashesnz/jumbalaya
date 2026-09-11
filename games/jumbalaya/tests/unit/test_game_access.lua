@@ -38,12 +38,6 @@ T.describe("game_access and store authority", function()
 		T.assert_equal(game_access.get().shuffle_hand_count, 1)
 	end)
 
-	T.it("sync_to_g does not mirror onto G.GAME", function()
-		G.GAME = { points = 1 }
-		store_sync.sync_to_g(word_game.store())
-		T.assert_equal(G.GAME.points, 1)
-	end)
-
 	T.it("allows tests to bind an isolated store via WORD_GAME", function()
 		local store = Store.new({ points = 99 })
 		word_game._bind_store(store)

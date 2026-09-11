@@ -14,8 +14,10 @@
 	built-in debug library returned by require("debug").
 
 	Adding a feature section:
-	  1. Create devtools/sections/my_feature.lua  (id, order, register, build)
+	  1. Create devtools/sections/my_feature.lua  (snake_case; id, order, register, build)
 	  2. Register it in devtools/registry.lua → load_defaults()
+
+	Dev pipelines (Python, one-off refactors) live under repo _tools/, not devtools/.
 ]]
 
 local registry = require "devtools.registry"

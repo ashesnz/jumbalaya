@@ -32,9 +32,6 @@ function M.patch(store, patch)
 	store:patch(patch)
 end
 
---- Retired: store is authoritative; no Game.GAME mirror write path.
-function M.sync_to_g(_store) end
-
 ---@param store table
 ---@param fn fun(state: table)
 function M.subscribe(store, fn)
@@ -58,9 +55,6 @@ function M.bind_run(store, game_table)
 	store:replace(game_table)
 	return store:get()
 end
-
---- Retired in PR-2.
-function M.adopt_current_g_game(_store) end
 
 --- Replace store from a saved snapshot.
 ---@param store table

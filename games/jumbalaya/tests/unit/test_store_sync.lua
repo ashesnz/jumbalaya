@@ -1,10 +1,10 @@
---[[ tests/unit/test_store_sync.lua - bridge/store_sync contract (Phase 8 PR-2) ]]
+--[[ tests/unit/test_store_sync.lua - app/bootstrap/store_sync contract ]]
 
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
 local store_sync = require("app.bootstrap.store_sync")
 
-T.describe("store_sync shim", function()
+T.describe("store_sync", function()
 	mock_env.reset_game()
 
 	T.it("replace updates store state", function()
@@ -19,13 +19,6 @@ T.describe("store_sync shim", function()
 		store_sync.patch(store, { chips = 99 })
 		T.assert_equal(store_sync.get_state(store).chips, 99)
 		T.assert_equal(store_sync.get_state(store).word_round.set, 1)
-	end)
-
-	T.it("sync_to_g is a no-op after PR-2", function()
-		local store = store_sync.new({ chips = 1 })
-		G.GAME = nil
-		store_sync.sync_to_g(store)
-		T.assert_nil(G.GAME)
 	end)
 
 	T.it("bind_run adopts a game table snapshot", function()

@@ -36,10 +36,6 @@ T.describe("Store piles", function()
 		T.assert_equal(state.piles.hand[1].pile_id, "hand")
 	end)
 
-	T.it("chrome_release_enabled is on", function()
-		T.assert_true(piles.chrome_release_enabled())
-	end)
-
 	T.it("release_static_chrome snapshots then clears resting pile host cards", function()
 		local store = Store.new({
 			piles = { hand = {}, draw = {}, pattern = {}, bonus = {}, discard = {} },

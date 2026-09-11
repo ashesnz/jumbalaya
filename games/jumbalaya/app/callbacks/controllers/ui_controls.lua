@@ -1,6 +1,6 @@
 --[[ app/controllers/ui_controls.lua - Phase 4 UI control controller (sliders, cycles) ]]
 
-local Bridge = require("app.callbacks.controllers.callback_bridge")
+local dispatch_wrap = require("app.callbacks.controllers.dispatch_wrap")
 
 local BridgeRuntime = require("app.runtime")
 local Funcs = require("app.callbacks.funcs")
@@ -79,6 +79,6 @@ function M.cycle_option(e)
 	end
 end
 
-M.drag_slider = Bridge.wrap("drag_slider", drag_slider_impl)
+M.drag_slider = dispatch_wrap.wrap("drag_slider", drag_slider_impl)
 
 return M

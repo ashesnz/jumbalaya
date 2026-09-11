@@ -27,8 +27,6 @@ function M.migrate_legacy_field(game)
 	end
 end
 
-local function sync_store() end
-
 function M.get()
 	local game = game_access.get()
 	if not game then return nil end
@@ -44,13 +42,11 @@ end
 
 function M.add_tokens(amount)
 	local added = core_run_state.add_tokens(M.get(), amount)
-	if added > 0 then sync_store() end
 	return added
 end
 
 function M.spend_tokens(amount)
 	local ok = core_run_state.spend_tokens(M.get(), amount)
-	if ok then sync_store() end
 	return ok
 end
 
@@ -78,7 +74,6 @@ function M.add_perk(id)
 		return true
 	end
 	rs.perks[#rs.perks + 1] = id
-	sync_store()
 	return true
 end
 
@@ -96,7 +91,6 @@ function M.record_word_played()
 	local stats = M.ensure_stats()
 	if not stats then return end
 	stats.words_played = (stats.words_played or 0) + 1
-	sync_store()
 end
 
 function M.record_puzzle_score(pattern, score)
@@ -111,7 +105,6 @@ function M.record_puzzle_score(pattern, score)
 		stats.best_puzzle = stats.best_puzzle or "Puzzle"
 	end
 	stats.best_puzzle_score = score
-	sync_store()
 end
 
 local function current_puzzle_label(j)
