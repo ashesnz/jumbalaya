@@ -916,7 +916,7 @@ Each PR: `love tests` → `emmylua_check . --severity warn` → manual smoke (§
 
 ---
 
-#### PR-9 — Retire `G` singleton + `engine_boot` scene graph (last)
+#### PR-9 — Retire `G` singleton + `engine_boot` scene graph (last) ✅
 
 **Goal:** `rg '\bG\.'` zero in production; lifecycle on `RuntimeContext` + Love2D adapter.
 
