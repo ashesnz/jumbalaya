@@ -112,8 +112,10 @@ return function(context)
 
 	function M.reset_table_deck()
 		local Presentation = require("word_game.model.presentation")
+		local piles = require("word_game.model.piles")
 		Presentation.emit("table_deck_reset")
 		require("word_game.model.perks.voucher_discard").reset()
+		piles.hydrate_hosts_from_store({ "hand", "draw", "discard", "pattern" })
 		local all = {}
 		for _, area in ipairs(M.all_areas()) do
 			if area and area.cards then
@@ -134,6 +136,11 @@ return function(context)
 		end
 		live_game().draw_pile:shuffle("letter_deck_reset")
 		live_game().draw_pile:hard_set_T()
+		if M.commit_pile_hosts then
+			M.commit_pile_hosts({ "hand", "draw", "discard", "pattern" })
+		elseif M.sync_deck_count_display then
+			M.sync_deck_count_display()
+		end
 	end
 
 	function M.letter_center()

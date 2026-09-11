@@ -1,11 +1,2 @@
-
-local BridgeRuntime = require("bridge.runtime")
-local function g() return BridgeRuntime.game() end
-function reset_hit_order()
-	g().HIT_ORDER = clear_table(g().HIT_ORDER)
-end
-
---- Records a rendered node in the collision hash (draw order preserved).
-function track_hit_target(obj)
-	if obj then g().HIT_ORDER[#g().HIT_ORDER + 1] = obj end
-end
+--[[ Compatibility shim — implementation lives in jumbalaya-engine. ]]
+return require("jumbalaya-engine.graphics.hit_order")

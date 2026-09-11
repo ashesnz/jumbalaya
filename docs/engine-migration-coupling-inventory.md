@@ -14,7 +14,7 @@ Post–Phase 9 metrics. Refresh before Phase 10 PRs that claim a grep delta.
 | `love tests` | 487 passed | **490 passed, 0 failed** | stay green |
 | `G.` in production (`!tests`, `!devtools`) | 0 | **0** | **0** |
 | `.FUNCS` runtime reads | 0 | **0** | **0** |
-| `CardArea` (app + word_game + bridge + packages) | ~72 | **74** | **0** (10b) |
+| `CardArea` (app + word_game + bridge + packages) | ~72 | **0** (renamed → `CardPile`) | **0** (10b) |
 | `require("app.")` in `packages/` | 2 (`retained_ui` → AnimNode) | **2** | **0** (10c) |
 | Glue modules (`glue over` in `word_game/model/`) | 10 | **10** | shrink (10a) |
 | `test_core_*` files | 14 | **14** | grow with new rules |
@@ -111,7 +111,7 @@ Must pass on every PR. Full list: [testing.md](testing.md#engine-migration-ci-ga
 |----------|-------|-----------|
 | Live `Card` / `CardArea` nodes | `word_game/ui/cardarea/`, deck dealing | 10b |
 | `pile_sync` dual-write | `bridge/pile_sync.lua` | 10b |
-| `app/core/scene` imported by engine | `retained_ui/node.lua`, `panel.lua` | 10c |
+| `app/core/scene` imported by engine | — | **0** (10c: `jumbalaya-engine.scene`) |
 | Glue modules (rules already in core) | `word_game/model/*` | 10a |
 | `Game.GAME` + store parallel reads | Various glue | 10d |
 | Test `mock_env` `_G.G` stub | `tests/helpers/mock_env.lua` | optional cleanup |

@@ -1,6 +1,6 @@
 --[[ app/core/ui/node.lua - one node in a RetainedPanel tree (LayoutNode) ]]
 
-local AnimNode = require("app.core.scene.animated.init")
+local AnimNode = require("jumbalaya-engine.scene.animated.init")
 
 ---@class LayoutNode : AnimNode
 ---@field parent RetainedPanel|LayoutNode|nil

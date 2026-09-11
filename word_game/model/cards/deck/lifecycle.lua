@@ -32,7 +32,7 @@ return function(context)
 		live_game().draw_pile.config.card_limit = #M.STARTING_LETTERS
 		M.shuffle_deck()
  	if live_game().draw_pile.hard_set_T then live_game().draw_pile:hard_set_T() end
-		piles.sync_hosts_to_store()
+		piles.sync_hosts_to_store(nil, { "draw" })
 		piles.release_static_chrome(nil, { "draw" })
 		M.sync_deck_count_display()
 	end

@@ -1,6 +1,6 @@
 --[[ jumbalaya-engine/retained_ui/panel.lua - retained-mode UI tree container (RetainedPanel) ]]
 
-local AnimNode = require("app.core.scene.animated.init")
+local AnimNode = require("jumbalaya-engine.scene.animated.init")
 
 local BridgeRuntime = require("bridge.runtime")
 local function g() return BridgeRuntime.game() end

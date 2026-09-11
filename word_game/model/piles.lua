@@ -90,11 +90,22 @@ function M.collect_piles()
 	}
 end
 
-function M.sync_hosts_to_store(store)
+---@param store table|nil
+---@param pile_ids string[]|nil When set, only these piles are overwritten from host snapshots.
+function M.sync_hosts_to_store(store, pile_ids)
 	store = store or BridgeRuntime.store()
 	if not store then return end
-	local piles = M.collect_piles()
-	if not piles then return end
+	local snapshot = M.collect_piles()
+	if not snapshot then return end
+	local state = store:get() or {}
+	local piles = state.piles or {}
+	if pile_ids then
+		for _, pile_id in ipairs(pile_ids) do
+			piles[pile_id] = snapshot[pile_id] or {}
+		end
+	else
+		piles = snapshot
+	end
 	store:patch({ piles = piles })
 end
 
@@ -124,8 +135,8 @@ end
 function M.release_static_chrome(store, pile_ids)
 	store = store or BridgeRuntime.store()
 	if not store then return end
-	M.sync_hosts_to_store(store)
 	pile_ids = pile_ids or { "hand", "draw", "pattern" }
+	M.sync_hosts_to_store(store, pile_ids)
 	local keep = interaction_cards()
 	for _, pile_id in ipairs(pile_ids) do
 		local host = host_for_pile(pile_id)

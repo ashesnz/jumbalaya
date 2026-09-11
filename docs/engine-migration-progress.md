@@ -77,13 +77,13 @@ Metrics refreshed **2026-09-12** from repo root. Compare to post–Phase 9 basel
 | `love tests` | 487 passed | **488 passed, 0 failed** | all green |
 | `G.` in production (`!tests`, `!devtools`) | 0 | **0** | 0 |
 | `.FUNCS` runtime reads | 0 | **0** | 0 |
-| `CardArea` refs (app + word_game + bridge + packages) | ~72 | **74** | 0 |
+| `CardArea` refs (app + word_game + bridge + packages) | ~72 | **0** (renamed → `CardPile`) | 0 |
 | `require("app.")` in `packages/` | 2 | **2** | 0 |
 | Glue modules (`glue over` in `word_game/model/`) | 10 | **10** | shrink |
 | `test_core_*` files | 14 | **14** | grow with rules |
 | `Funcs.register` sites | ~59 | **59** | stable catalog |
 | `bridge/` require sites | — | **194** | 0 (dissolve folder) |
-| `pile_sync` active | yes | **yes** (`chrome_release_enabled = false`) | deleted |
+| `pile_sync` active | yes | **deleted** (`word_game/model/piles.lua`, chrome always on) | deleted |
 
 ### Phase completion
 
@@ -91,8 +91,8 @@ Metrics refreshed **2026-09-12** from repo root. Compare to post–Phase 9 basel
 |-------|-------|--------|-------|
 | **0–9** | Store, engine package, retained UI, `Funcs`, no global `G` | ✅ **Complete** | See [engine-migration.md §3](engine-migration.md#3-completed-migration-phases-09) |
 | **10a** | Glue hygiene — model is wiring only | 🟡 **In progress** | `round/` done (PR 10a-1); jumble/ + perks/ next |
-| **10b** | Retire `CardArea` dual-write | 🔴 **Blocked / not started** | `pile_sync` still dual-writes; 74 `CardArea` refs |
-| **10c** | Engine extraction — no `app/` imports in packages | 🟡 **Minimal** | 2 imports: `retained_ui/node.lua`, `panel.lua` → `AnimNode` |
+| **10b** | Retire `CardArea` dual-write | ✅ **Complete** | `pile_sync` deleted; store-authoritative piles; `CardPile` hosts drag only |
+| **10c** | Engine extraction — no `app/` imports in packages | ✅ **Complete** | `Kind`, scene graph, draw helpers in `jumbalaya-engine/`; `app/core/*` shims |
 | **10d** | Single state bus | 🟡 **Partial** | Store authoritative at boot; glue still reads `live_game().GAME` in places |
 | **11** | Dissolve `bridge/` folder | ⬜ **Planned** | After 10b–10d |
 | **12** | Shrink `app/` to shell only | ⬜ **Planned** | After 10c |
@@ -137,21 +137,23 @@ Understanding *what* is duplicated clarifies *what* to merge.
 |------|------|
 | `word_game/ui/cardarea/` | Live `Card` nodes in `CardArea` containers (drag, focus) |
 | `store.piles` + `PileView` | Store-backed snapshot (Phase 5+) |
-| `bridge/pile_sync.lua` | Dual-write between the two |
+| `word_game/model/piles.lua` | Store sync + chrome release (replaces `pile_sync`) |
 
-**Fix (Phase 10b):** Largest duplication win. Enable store-only rendering; delete `pile_sync` and shrink `cardarea/`.
+**Phase 10b complete:** Store-authoritative resting piles; `CardPile` hosts drag/focus only. `word_game/ui/cardarea/` remains until interaction ports to engine views.
 
 ### 5d. Scene graph (`app/core/` vs `jumbalaya-engine/`)
 
 | Location | Contents |
 |----------|----------|
-| `app/core/scene/` | `Object`, `Node`, `AnimNode`, animated motion |
+| `jumbalaya-engine/scene/` | `Node`, `AnimNode`, animated motion (was `app/core/scene/`) |
+| `jumbalaya-engine/object.lua` | `Kind` class system (was `app/core/object.lua`) |
+| `jumbalaya-engine/graphics/` | `draw`, `node_transform`, `hit_order`, `polygons` |
 | `app/core/graphics/` | `Sprite`, particles, `DynaText`, draw helpers |
 | `app/core/input/` | Router, focus, pointer, gamepad |
 | `packages/jumbalaya-engine/retained_ui/` | Panels, layout, hit testing (depends on `app` `AnimNode`) |
 | `packages/jumbalaya-engine/` | Clock, input service, EventBus, views |
 
-**Fix (Phase 10c / 12):** Move `app/core/scene/` (+ graphics/input that engine needs) into `jumbalaya-engine`. Leave Love2D-specific startup in `app/`.
+**Phase 10c done:** Scene graph + draw helpers live in `jumbalaya-engine/`. `app/core/scene/`, `object.lua`, and moved graphics modules are thin re-export shims for legacy requires.
 
 ### 5e. Rules vs glue (`word_game/model/` vs `jumbalaya_core/`)
 
