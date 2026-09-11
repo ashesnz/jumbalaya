@@ -39,8 +39,9 @@ T.describe("Full Game Boot & Run Simulation", function()
 
 			-- Verify title screen initialized cleanly
 			T.assert_not_nil(G.GAME, "G.GAME must be initialized after boot")
-			T.assert_not_nil(G._store, "G._store must be wired after boot")
-			T.assert_not_nil(G._engine, "G._engine must be wired after boot")
+			local word_game = require("word_game")
+			T.assert_not_nil(word_game.store(), "WORD_GAME.store must be wired after boot")
+			T.assert_not_nil(word_game.engine(), "WORD_GAME.engine must be wired after boot")
 			T.assert_not_nil(G.STAGE, "G.STAGE must be set after boot")
 			T.assert_equal(G.STAGES.MAIN_MENU, G.STAGE, "Initial boot should open to title screen stage")
 
