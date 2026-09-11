@@ -1,17 +1,15 @@
 --[[
-	bridge/store_sync.lua - Phase 0–2 store ↔ G.GAME compatibility shim.
+	bridge/store_sync.lua - Phase 7 store ↔ G.GAME compatibility shim.
 
-	Contract (engine migration Phase 0–2):
-	- The store owns run snapshot state during migration.
-	- G.GAME is a mirror for legacy readers until Phase 7 removes G.
-	- New code should use store APIs; do not write G.GAME directly once a
-	  module has been migrated to dispatch through the store.
-
-	Delegates to jumbalaya_core.Store; mirrors onto G.GAME for legacy readers.
+	Contract:
+	- The store owns run snapshot state.
+	- G.GAME is a read mirror for legacy UI/engine code until G is retired.
+	- New code uses WORD_GAME.store() / game_access; do not write G.GAME directly.
 ]]
 
 local CoreStore = require("jumbalaya_core.store")
 local default_state = require("jumbalaya_core.store.default_state")
+local runtime = require("bridge.runtime")
 
 local M = {}
 
@@ -86,7 +84,7 @@ end
 --- When legacy code assigns a fresh G.GAME table, adopt it into the store.
 ---@param store table|nil
 function M.adopt_current_g_game(store)
-	store = store or (_G.G and _G.G._store)
+	store = store or runtime.store()
 	if not store or not _G.G or not _G.G.GAME then return end
 	if store:get() ~= _G.G.GAME then
 		M.sync_from_g(store)
@@ -98,25 +96,26 @@ end
 function M.ensure_test_binding()
 	if not _G.G then return nil end
 	local word_game = package.loaded["word_game"]
-	if not _G.G._store then
-		_G.G._store = M.new()
-	end
-	if word_game and word_game._bind_store then
-		word_game._bind_store(_G.G._store)
+	local store = runtime.store()
+	if not store then
+		store = M.new()
+		if word_game and word_game._bind_store then
+			word_game._bind_store(store)
+		end
 	end
 	if _G.G.GAME then
-		M.sync_from_g(_G.G._store)
+		M.sync_from_g(store)
 	end
 	if _G.G.dealt_letters or _G.G.draw_pile then
-		require("bridge.pile_sync").sync_areas_to_store(_G.G._store)
+		require("bridge.pile_sync").sync_areas_to_store(store)
 	else
-		M.sync_to_g(_G.G._store)
+		M.sync_to_g(store)
 	end
 	local engine_boot = package.loaded["app.bootstrap.engine_services_boot"]
 	if engine_boot and engine_boot.install then
 		engine_boot.install()
 	end
-	return _G.G._store
+	return store
 end
 
 return M

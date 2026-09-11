@@ -1,7 +1,7 @@
 --[[
 	word_game package - Jumbalaya domain facade (WORD_GAME).
 
-	Presentation lives on WORD_GAME_UI (`word_game.ui.facade.exports`).
+	Presentation lives on WORD_GAME_UI (`word_game/ui/facade/exports`).
 	Game class, G singleton, startup, save, and loop are loaded by app/bootstrap.lua.
 ]]
 
@@ -38,17 +38,14 @@ function M._bind_engine(engine)
 end
 
 function M.store()
-	return M._store or (G and G._store)
+	return M._store
 end
 
 function M.engine()
-	return M._engine or (G and G._engine)
+	return M._engine
 end
 
 function M.state()
-	if G and G._store then
-		return G._store:get()
-	end
 	local store = M.store()
 	if store then
 		return store:get()

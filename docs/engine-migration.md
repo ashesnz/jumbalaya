@@ -583,6 +583,27 @@ Only after all UIBox definitions are gone:
 
 **Exit criteria:** No UIBox instances; no `G.LIVE.UIBOX`; TABLE_BOARD renders from store.
 
+### Phase 6 status — complete (dual-write strangler)
+
+| Deliverable | Location |
+|-------------|----------|
+| EventBus on engine context | `jumbalaya-engine/event_bus.lua`, `context.lua` |
+| Presentation → EventBus bridge | `bridge/event_bridge.lua`, `presentation.bind_events` |
+| TABLE_BOARD view component | `word_game/ui/views/table_board_view.lua` |
+| Sidebar / Trade store subscribers | `word_game/ui/views/{sidebar_view,trade_view}.lua` |
+| View install at boot | `word_game/ui/views/install.lua`, `board.ensure_store_subscription` |
+| Store-backed pile draw path | `word_game/ui/table/board.lua` → `PileView` when legacy piles empty |
+| FX subscribers | `word_game/ui/fx_subscribers.lua` (jumble HUD + `PLAY_RESOLVED`) |
+| Play resolution event | `word_game/ui/play_effects/resolution.lua` → `PLAY_RESOLVED` |
+| Types | `types/engine_services.lua` (`EventBus`) |
+| Tests | `test_phase6_1` … `test_phase6_3` |
+
+**Exit criteria met (strangler):** `G.LIVE.UIBOX` retired from live registry; TABLE_BOARD subscribes to store and renders hand/draw piles via `PileView` when CardArea mirrors are empty; `Presentation.emit` forwards to engine `EventBus`; FX modules subscribe via presentation + store.
+
+**Deferred to Phase 7:** Remove remaining `LayoutView` trees (menu, trade overlay, sidebar HUD, controls); delete `app/core/ui/`; full TABLE_BOARD render without `Card`/`CardArea` scene nodes.
+
+Baseline: **464+ tests passing** (`love tests`).
+
 ---
 
 ## 9. Phase 7 — Remove `G` and Legacy Engine (1–2 weeks)

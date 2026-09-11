@@ -5,6 +5,7 @@ local round = require("word_game.model.round")
 local opening_deal = require("word_game.model.jumble_play.opening_deal")
 local rules = require("word_game.model.jumble_play.jumble_rules")
 local store_sync = require("bridge.store_sync")
+local runtime = require("bridge.runtime")
 local game_access = require("word_game.model.game_access")
 
 function M.play_jumble_word(opts)
@@ -12,8 +13,9 @@ function M.play_jumble_word(opts)
 	local jumble = WORD_GAME and WORD_GAME.Jumble
 	local j = jumble and jumble.state()
 	local result = rules.evaluate_play(jumble, j)
-	if result and G and G._store then
-		store_sync.sync_to_g(G._store)
+	local store = runtime.store()
+	if result and store then
+		store_sync.sync_to_g(store)
 	end
 	return result
 end
@@ -27,8 +29,9 @@ function M.end_jumble_hand_model()
 	wr.jumble = nil
 	game_access.patch({ word_score_animating = false })
 	round.advance_hand()
-	if G and G._store then
-		store_sync.sync_to_g(G._store)
+	local store = runtime.store()
+	if store then
+		store_sync.sync_to_g(store)
 	end
 	return score
 end

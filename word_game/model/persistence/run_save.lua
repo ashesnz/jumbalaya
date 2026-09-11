@@ -2,6 +2,7 @@
 
 local TableAreas = require("word_game.model.table_areas")
 local game_access = require("word_game.model.game_access")
+local runtime = require("bridge.runtime")
 
 local M = {}
 
@@ -39,8 +40,9 @@ end
 function M.restore_card_areas(save_table)
 	if not save_table then return end
 	if save_table.store then
-		if G._store then
-			G._store:replace(save_table.store)
+		local store = runtime.store()
+		if store then
+			store:replace(save_table.store)
 		end
 		if save_table.store.GAME and _G.G then
 			_G.G.GAME = save_table.store.GAME
@@ -82,16 +84,18 @@ function M.restore_card_areas(save_table)
 				end
 			end
 		end
-		if G._store then
-			G._store:patch({ piles = store_piles })
+		local store = runtime.store()
+		if store then
+			store:patch({ piles = store_piles })
 		end
 	end
 	M.rebuild_card_inventory()
 end
 
 function M.append_pattern_row_snapshot(snapshot)
-	if G._store then
-		snapshot.store = G._store:get()
+	local store = runtime.store()
+	if store then
+		snapshot.store = store:get()
 	else
 		snapshot.store = {
 			GAME = G.GAME,

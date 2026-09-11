@@ -18,9 +18,15 @@
 ---@field get_time fun(self: Clock): number
 ---@field advance fun(self: Clock, dt: number): number
 
+---@class EventBus
+---@field on fun(self: EventBus, event: string, fn: fun(...))
+---@field emit fun(self: EventBus, event: string, ...)
+---@field clear fun(self: EventBus, event: string|nil)
+
 ---@class EngineContext
 ---@field store table
 ---@field renderer Renderer
 ---@field input InputService
 ---@field audio AudioService
 ---@field clock Clock
+---@field events EventBus

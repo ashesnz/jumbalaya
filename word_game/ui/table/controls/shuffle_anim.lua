@@ -182,8 +182,10 @@ function M.animate(hand, on_complete)
 			hand:snap_VT()
 			hand:hard_set_cards()
 			set_animating(false)
-			if G and G._store then
-				require("bridge.pile_sync").sync_areas_to_store(G._store)
+			local runtime = require("bridge.runtime")
+			local store = runtime.store()
+			if store then
+				require("bridge.pile_sync").sync_areas_to_store(store)
 			end
 			if on_complete then on_complete() end
 			return true

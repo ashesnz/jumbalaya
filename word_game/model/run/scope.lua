@@ -5,6 +5,7 @@
 ]]
 
 local store_sync = require("bridge.store_sync")
+local runtime = require("bridge.runtime")
 
 local M = {}
 
@@ -110,17 +111,19 @@ function M.teardown()
 	end
 
 	M.reset_globals()
-	if G._store then
+	local store = runtime.store()
+	if store then
 		local CoreStore = require("jumbalaya_core.store")
-		store_sync.replace(G._store, CoreStore.default_state())
+		store_sync.replace(store, CoreStore.default_state())
 	end
 	G.GAME = nil
 end
 
 function M.init_new_run_state()
 	local run_state = require("word_game.model.run.state")
-	if G._store then
-		store_sync.dispatch(G._store, { type = "RUN_STATE_INIT" })
+	local store = runtime.store()
+	if store then
+		store_sync.dispatch(store, { type = "RUN_STATE_INIT" })
 	else
 		G.GAME.run_state = run_state.new()
 	end
@@ -138,8 +141,9 @@ function M.begin_run(game_table, opts)
 	local run_state_mod = require("word_game.model.run.state")
 	run_state_mod.migrate_legacy_field(game_table)
 	game_table.run_generation = M.generation()
-	if G._store then
-		store_sync.bind_run(G._store, game_table)
+	local store = runtime.store()
+	if store then
+		store_sync.bind_run(store, game_table)
 	else
 		G.GAME = game_table
 	end

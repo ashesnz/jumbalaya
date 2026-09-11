@@ -55,7 +55,8 @@ function M.collect_piles()
 end
 
 function M.sync_areas_to_store(store)
-	store = store or (G and G._store)
+	local runtime = require("bridge.runtime")
+	store = store or runtime.store()
 	if not store then return end
 	local piles = M.collect_piles()
 	if not piles then return end

@@ -11,10 +11,12 @@ local Presentation = require("word_game.model.presentation")
 local core_hand = require("jumbalaya_core.jumble.hand")
 local game_access = require("word_game.model.game_access")
 local store_sync = require("bridge.store_sync")
+local runtime = require("bridge.runtime")
 
 local function sync_store()
-	if G and G._store then
-		store_sync.sync_to_g(G._store)
+	local store = runtime.store()
+	if store then
+		store_sync.sync_to_g(store)
 	end
 end
 

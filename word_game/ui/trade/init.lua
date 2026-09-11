@@ -19,6 +19,7 @@ local trade_definition = require("word_game.ui.trade.definition")
 local trade_draw = require("word_game.ui.trade.draw")
 local trade_animate = require("word_game.ui.trade.animate")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
+local views_install = require("word_game.ui.views.install")
 
 local M = {}
 
@@ -142,6 +143,11 @@ end
 local cannot_afford_anything = M.cannot_afford_anything
 
 open_overlay = function()
+	local runtime = require("bridge.runtime")
+	local engine = runtime.engine()
+	if engine then
+		views_install.install_trade(engine)
+	end
 	G.SETTINGS.paused = true
 	if WORD_GAME_UI.PlayHoldRedraw and WORD_GAME_UI.PlayHoldRedraw.reset then
 		WORD_GAME_UI.PlayHoldRedraw.reset()

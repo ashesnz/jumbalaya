@@ -7,6 +7,7 @@ local state = require("word_game.model.run.state")
 local game_access = require("word_game.model.game_access")
 local deck = require("word_game.model.cards.deck")
 local store_sync = require("bridge.store_sync")
+local runtime = require("bridge.runtime")
 local LetterPalette = require("word_game.config.visuals.letter_card_palette")
 
 local M = {}
@@ -22,8 +23,9 @@ local function game_state()
 end
 
 local function mark_trade_used()
-	if G and G._store then
-		store_sync.dispatch(G._store, { type = "RUN_STATE_MARK_TRADE_USED" })
+	local store = runtime.store()
+	if store then
+		store_sync.dispatch(store, { type = "RUN_STATE_MARK_TRADE_USED" })
 	else
 		local rs = state.get()
 		if rs then rs.trade_used_this_hand = true end

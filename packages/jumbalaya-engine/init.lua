@@ -11,6 +11,7 @@ local Adapters = require("jumbalaya-engine.adapters.love2d")
 local LetterCardView = require("jumbalaya-engine.views.letter_card_view")
 local PileView = require("jumbalaya-engine.views.pile_view")
 local SettingsService = require("jumbalaya-engine.settings")
+local EventBus = require("jumbalaya-engine.event_bus")
 
 return {
 	Renderer = Renderer,
@@ -18,6 +19,7 @@ return {
 	AudioService = AudioService,
 	Clock = Clock,
 	Context = Context,
+	EventBus = EventBus,
 	Adapters = Adapters,
 	SettingsService = SettingsService,
 	Views = {

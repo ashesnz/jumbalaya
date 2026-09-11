@@ -4,9 +4,8 @@
 
 local M = {}
 
-local Engine = require("jumbalaya-engine")
-local Renderer = Engine.Renderer
-local PileView = Engine.Views.PileView
+local views_install = require("word_game.ui.views.install")
+local runtime = require("bridge.runtime")
 
 local placement_snap = require("word_game.board.placement.snap")
 local modifier_feedback = require("word_game.ui.feedback.modifier_feedback")
@@ -37,6 +36,19 @@ end
 
 function M.is_active()
 	return G.STATE == G.STATES.TABLE_BOARD
+end
+
+function M.ensure_store_subscription()
+	if not runtime.store() then return nil end
+	local engine = runtime.engine()
+	if engine then
+		views_install.install_table_board(engine)
+	end
+	return views_install.table_board_view()
+end
+
+function M.table_board_view()
+	return views_install.table_board_view()
 end
 
 function M.update(game, dt)
@@ -186,8 +198,9 @@ function M.should_draw_sidebar_deck()
 	if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
 		return true
 	end
-	if G._store then
-		local state = G._store:get()
+	local store = runtime.store()
+	if store then
+		local state = store:get()
 		if state.piles and state.piles.draw then
 			return #state.piles.draw >= 0
 		end
@@ -197,12 +210,18 @@ function M.should_draw_sidebar_deck()
 end
 
 function M.draw_hand_pass(game)
+	local table_view = M.ensure_store_subscription()
+	local draw_from_store = table_view and table_view:should_render_draw_from_store()
+	local hand_from_store = table_view and table_view:should_render_hand_from_store()
+
 	if M.should_draw_sidebar_deck() then
 		love.graphics.push()
 		if G.draw_pile then
 			G.draw_pile:translate_container()
 		end
-		if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
+		if draw_from_store and table_view then
+			table_view:draw_draw_pile()
+		elseif WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
 			WORD_GAME_UI.TableDeck.draw(G.draw_pile)
 		elseif G.draw_pile then
 			G.draw_pile:draw()
@@ -210,15 +229,9 @@ function M.draw_hand_pass(game)
 		love.graphics.pop()
 	end
 
-	if G._store then
-		local state = G._store:get()
-		if state.piles and state.piles.hand and #state.piles.hand > 0 and (not G.dealt_letters or #G.dealt_letters.cards == 0) then
-			local pile_view = PileView.new("hand", state.piles.hand, { x = 0, y = 0, w = 5, h = 1 })
-			pile_view:draw(Renderer.love2d())
-		end
-	end
-
-	if not G.dealt_letters or #G.dealt_letters.cards == 0 then
+	if hand_from_store and table_view then
+		table_view:draw_hand()
+	elseif not G.dealt_letters or #G.dealt_letters.cards == 0 then
 		-- still draw bonus stack card overlays below
 	else
 		love.graphics.push()

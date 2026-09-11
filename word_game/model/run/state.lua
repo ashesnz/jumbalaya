@@ -4,6 +4,7 @@ local perks_cfg = require("word_game.config.perks")
 local core_run_state = require("jumbalaya_core.store.run_state")
 local game_access = require("word_game.model.game_access")
 local store_sync = require("bridge.store_sync")
+local runtime = require("bridge.runtime")
 
 local M = {}
 
@@ -25,8 +26,9 @@ function M.migrate_legacy_field(game)
 end
 
 local function sync_store()
-	if G and G._store and G.GAME then
-		store_sync.sync_to_g(G._store)
+	local store = runtime.store()
+	if store and G and G.GAME then
+		store_sync.sync_to_g(store)
 	end
 end
 
@@ -73,8 +75,9 @@ function M.add_perk(id)
 	rs.perks = rs.perks or {}
 	local slots = rs.perk_slots or perks_cfg.SLOT_COUNT
 	if #rs.perks >= slots then return false end
-	if G and G._store then
-		store_sync.dispatch(G._store, { type = "RUN_STATE_ADD_PERK", id = id })
+	local store = runtime.store()
+	if store then
+		store_sync.dispatch(store, { type = "RUN_STATE_ADD_PERK", id = id })
 		return true
 	end
 	rs.perks[#rs.perks + 1] = id

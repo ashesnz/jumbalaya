@@ -7,6 +7,7 @@ local hud_definition = require("word_game.ui.sidebar.hud_definition")
 local StageLabel = require("word_game.ui.score_banner.stage_label")
 local sidebar_callbacks = require("word_game.ui.sidebar.callbacks")
 local table_discard = require("word_game.ui.perks.discard_bin")
+local views_install = require("word_game.ui.views.install")
 
 local function deck_mod()
 	return facade.deck()
@@ -55,6 +56,11 @@ function WordSidebar:ensure()
 		return nil
 	end
 	if G.STAGE ~= G.STAGES.RUN then return end
+	local runtime = require("bridge.runtime")
+	local engine = runtime.engine()
+	if engine then
+		views_install.install_sidebar(engine)
+	end
 	if not G.ROOM_ATTACH then return end
 	if G.SIDEBAR_HUD then
 		for _, row_id in ipairs(REQUIRED_SIDEBAR_ROWS) do

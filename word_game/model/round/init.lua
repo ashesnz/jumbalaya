@@ -6,12 +6,14 @@ local game_access = require("word_game.model.game_access")
 local Presentation = require("word_game.model.presentation")
 local core_round = require("jumbalaya_core.round")
 local store_sync = require("bridge.store_sync")
+local runtime = require("bridge.runtime")
 
 local M = {}
 
 local function dispatch(action)
-	if G and G._store then
-		store_sync.dispatch(G._store, action)
+	local store = runtime.store()
+	if store then
+		store_sync.dispatch(store, action)
 	else
 		local game = game_access.get()
 		if not game then return end
@@ -49,9 +51,10 @@ function M.restore_from_save()
 	wr.hand_index = wr.hand_index or 1
 	wr.target = wr.target or round_config.hand_target(wr.set, wr.hand_index)
 	wr.hand_name = wr.hand_name or round_config.hand_name(wr.hand_index, wr.set)
-	if G._store then
-		store_sync.sync_from_g(G._store)
-		store_sync.sync_to_g(G._store)
+	local store = runtime.store()
+	if store then
+		store_sync.sync_from_g(store)
+		store_sync.sync_to_g(store)
 	end
 	Presentation.emit("round_restore_from_save", wr)
 end

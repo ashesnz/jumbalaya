@@ -7,6 +7,7 @@
 
 local facade = require("word_game.ui.facade")
 local effects = require("word_game.ui.play_effects")
+local Presentation = require("word_game.model.presentation")
 
 local RunMode = facade.run_mode()
 
@@ -24,6 +25,14 @@ function M.resolve(play_module, opts)
 	if result.kind == "invalid" then
 		effects.show_validation_error(result.err)
 		return result
+	end
+
+	Presentation.emit("PLAY_RESOLVED", result)
+	local runtime = require("bridge.runtime")
+	local engine = runtime.engine()
+	if engine and WORD_GAME_UI then
+		local fx_subscribers = require("word_game.ui.fx_subscribers")
+		fx_subscribers.install(engine, WORD_GAME_UI)
 	end
 
 	effects.roll_jumble_banners(result)

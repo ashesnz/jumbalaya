@@ -1,15 +1,21 @@
---[[ word_game/model/game_access.lua - Read/write game snapshot via store (Phase 2) ]]
+--[[ word_game/model/game_access.lua - Read/write game snapshot via store (Phase 7) ]]
 
 local store_sync = require("bridge.store_sync")
+local runtime = require("bridge.runtime")
 
 local M = {}
 
+local function store()
+	return runtime.store()
+end
+
 function M.get()
-	if G and G._store then
-		if G.GAME and G.GAME ~= G._store:get() then
-			store_sync.adopt_current_g_game(G._store)
+	local s = store()
+	if s then
+		if G and G.GAME and G.GAME ~= s:get() then
+			store_sync.adopt_current_g_game(s)
 		end
-		return G._store:get()
+		return s:get()
 	end
 	return G and G.GAME
 end
@@ -22,8 +28,9 @@ end
 function M.dispatch(action)
 	local game = M.get()
 	if not game or not action then return game end
-	if G and G._store then
-		return store_sync.dispatch(G._store, action)
+	local s = store()
+	if s then
+		return store_sync.dispatch(s, action)
 	end
 	local reducers = require("jumbalaya_core.store.reducers.init")
 	reducers.reduce(game, action)
@@ -31,8 +38,9 @@ function M.dispatch(action)
 end
 
 function M.patch(fields)
-	if G and G._store then
-		return store_sync.dispatch(G._store, { type = "GAME_PATCH", patch = fields })
+	local s = store()
+	if s and fields then
+		return store_sync.dispatch(s, { type = "GAME_PATCH", patch = fields })
 	end
 	local game = G and G.GAME
 	if game and fields then
@@ -47,8 +55,9 @@ function M.mutate(fn)
 	local game = M.get()
 	if not game or not fn then return game end
 	fn(game)
-	if G and G._store then
-		store_sync.sync_to_g(G._store)
+	local s = store()
+	if s then
+		store_sync.sync_to_g(s)
 	end
 	return game
 end

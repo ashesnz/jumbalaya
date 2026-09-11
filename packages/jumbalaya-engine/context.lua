@@ -6,6 +6,7 @@ local Renderer = require("jumbalaya-engine.renderer")
 local InputService = require("jumbalaya-engine.input")
 local AudioService = require("jumbalaya-engine.audio")
 local Clock = require("jumbalaya-engine.clock")
+local EventBus = require("jumbalaya-engine.event_bus")
 local Love2D = require("jumbalaya-engine.adapters.love2d")
 
 ---@class EngineContext
@@ -21,6 +22,7 @@ function Context.new(opts)
 		input = opts.input or InputService.new(store),
 		audio = opts.audio or AudioService.new(),
 		clock = opts.clock or Clock.from_globals(),
+		events = opts.events or EventBus.new(),
 	}, Context)
 
 	if store and ctx.audio and ctx.audio.bind_store then

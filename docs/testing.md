@@ -99,6 +99,9 @@ These tests must pass on every PR while migrating off the Balatro engine pattern
 | `test_phase5_3_snap.lua` | Phase 5.3 Snap placement `MOVE_CARD` dispatch |
 | `test_phase5_4_persistence.lua` | Phase 5.4 store-based run save/restore |
 | `test_phase5_pile_sync.lua` | Phase 5 pile dual-write bridge |
+| `test_phase6_1_table_board.lua` | Phase 6.1 TableBoardView store subscription and pile rendering |
+| `test_phase6_2_fx_subscribers.lua` | Phase 6.2 EventBus, FX subscribers, presentation hooks |
+| `test_phase6_3_uibox_retirement.lua` | Phase 6.3 `G.LIVE.UIBOX` retirement and store-backed TABLE_BOARD draw |
 | `test_core_store_dispatch.lua` | `jumbalaya_core` store reducers without `G` |
 | `test_g_funcs_registry.lua` | `G.FUNCS` catalog freeze |
 | `test_core_jumble_rules.lua` | `jumbalaya_core` scoring rules without `G` |

@@ -1,12 +1,9 @@
 --[[
-	Application bootstrap.
+	Application bootstrap (Phase 7).
 
-	Loads legacy global modules in dependency order. Keep this list centralized:
-	the runtime classes extend one another at module load time, and the UI/domain
-	modules attach functions to globals created by the runtime and game packages.
+	Orchestrates engine classes, domain runtime, store, and presentation facades.
 ]]
 
-require "app.bootstrap.engine_boot"
-require "app.bootstrap.game_boot"
+require("app.bootstrap.engine_adapter").install()
 
 return true

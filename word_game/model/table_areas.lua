@@ -21,8 +21,10 @@ end
 
 local function get_store_state(state)
 	if state then return state end
-	if G and G._store then
-		return G._store:get()
+	local runtime = require("bridge.runtime")
+	local store = runtime.store()
+	if store then
+		return store:get()
 	end
 	return nil
 end

@@ -1,12 +1,14 @@
---[[ bridge/action_dispatch.lua - Phase 4 unified action dispatch via engine InputService ]]
+--[[ bridge/action_dispatch.lua - Phase 7 unified action dispatch via engine InputService ]]
 
 local store_sync = require("bridge.store_sync")
+local runtime = require("bridge.runtime")
 
 local M = {}
 
 local function engine_input()
-	if G and G._engine and G._engine.input then
-		return G._engine.input
+	local engine = runtime.engine()
+	if engine and engine.input then
+		return engine.input
 	end
 	return nil
 end
@@ -18,8 +20,9 @@ function M.dispatch(action)
 		input:on_action(action)
 		return
 	end
-	if G and G._store then
-		store_sync.dispatch(G._store, action)
+	local store = runtime.store()
+	if store then
+		store_sync.dispatch(store, action)
 	end
 end
 

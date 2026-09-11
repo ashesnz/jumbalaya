@@ -20,7 +20,9 @@ end
 --- Collects store state plus game metadata and flags a pending run write.
 function queue_run_snapshot()
 	if G.F_NO_SAVING == true then return end
-	local store_state = G._store and G._store:get() or { GAME = G.GAME }
+	local runtime = require("bridge.runtime")
+	local store = runtime.store()
+	local store_state = store and store:get() or { GAME = G.GAME }
 
 	G.ARGS.run_snapshot = save_safe_clone{
 		store = store_state,
