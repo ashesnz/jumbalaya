@@ -98,6 +98,26 @@ function M.sync_hosts_to_store(store)
 	store:patch({ piles = piles })
 end
 
+--- Copy resting store cards into empty pile hosts so deal/shuffle can mutate hosts.
+---@param pile_ids string[]|nil
+function M.hydrate_hosts_from_store(pile_ids)
+	local store = BridgeRuntime.store()
+	if not store then return end
+	local state = store:get()
+	if not state or not state.piles then return end
+	pile_ids = pile_ids or { "hand", "draw", "discard", "pattern" }
+	for _, pile_id in ipairs(pile_ids) do
+		local host = host_for_pile(pile_id)
+		local store_pile = state.piles[pile_id]
+		if host and host.emplace and store_pile and #store_pile > 0 and #(host.cards or {}) == 0 then
+			for _, card in ipairs(store_pile) do
+				host:emplace(card)
+			end
+			if host.set_ranks then host:set_ranks() end
+		end
+	end
+end
+
 --- Snapshot hosts to store, then drop resting cards (keep drag/focus in hosts).
 ---@param store table|nil
 ---@param pile_ids string[]|nil

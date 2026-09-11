@@ -15,6 +15,15 @@ return function(context)
 	local deal_boss_hand = require("word_game.model.cards.deck.boss_hand")(M, context)
 	local core_letter_card = require("jumbalaya_core.cards.letter_card")
 	local game_access = require("word_game.model.game_access")
+	local piles = require("word_game.model.piles")
+
+	local function commit_piles(pile_ids)
+		if M.commit_pile_hosts then
+			M.commit_pile_hosts(pile_ids)
+		else
+			M.sync_deck_count_display()
+		end
+	end
 
 	function M.is_jumble_deck()
 		local wr = game_access.word_round()
@@ -85,7 +94,7 @@ return function(context)
 		if live_game().draw_pile.hard_set_T then
 			live_game().draw_pile:hard_set_T()
 		end
-		M.sync_deck_count_display()
+		commit_piles({ "hand", "draw", "discard", "pattern" })
 	end
 
 	function M.clear_hand_and_placement()
@@ -135,6 +144,7 @@ return function(context)
 
 	function M.return_hand_to_deck(on_complete, opts)
 		opts = opts or {}
+		piles.hydrate_hosts_from_store({ "hand", "draw" })
 		local cards = {}
 		if live_game().dealt_letters and live_game().dealt_letters.cards then
 			for _, card in ipairs(live_game().dealt_letters.cards) do
@@ -153,7 +163,7 @@ return function(context)
 				live_game().draw_pile:emplace(card)
 			end
 			M.shuffle_deck()
-			M.sync_deck_count_display()
+			commit_piles({ "hand", "draw" })
 			if on_complete then on_complete() end
 			return
 		end
@@ -180,7 +190,7 @@ return function(context)
 				blocking = true,
 				func = function()
 					M.shuffle_deck()
-					M.sync_deck_count_display()
+					commit_piles({ "hand", "draw" })
 					if on_complete then on_complete() end
 					return true
 				end,
@@ -196,6 +206,7 @@ return function(context)
 		if not live_game().recycle_stash or not live_game().recycle_stash.cards or #live_game().recycle_stash.cards == 0 then
 			return false
 		end
+		piles.hydrate_hosts_from_store({ "draw", "discard" })
 		for i = #live_game().recycle_stash.cards, 1, -1 do
 			local card = live_game().recycle_stash.cards[i]
 			live_game().recycle_stash:remove_card(card)
@@ -210,7 +221,7 @@ return function(context)
 			live_game().recycle_stash:hard_set_cards()
 		end
 		M.shuffle_deck()
-		M.sync_deck_count_display()
+		commit_piles({ "draw", "discard" })
 		return true
 	end
 
@@ -234,7 +245,8 @@ return function(context)
 			return false
 		end
 
-		local to_deal = math.min(hand_size_cfg.get(), #(live_game().draw_pile.cards or {}))
+		piles.hydrate_hosts_from_store({ "draw" })
+		local to_deal = math.min(hand_size_cfg.get(), M.draw_pile_count())
 		for _ = 1, to_deal do
 			local card = live_game().draw_pile:remove_card()
 			if card and live_game().dealt_letters then
@@ -247,7 +259,7 @@ return function(context)
 			live_game().dealt_letters:snap_VT()
 			live_game().dealt_letters:hard_set_cards()
 		end
-		M.sync_deck_count_display()
+		commit_piles({ "hand", "draw", "discard" })
 		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.ensure_playable_puzzle then
 			WORD_GAME.Jumble.ensure_playable_puzzle()
 		end
@@ -268,7 +280,8 @@ return function(context)
 		end
 		voucher_discard.reset()
 		M.clear_hand_and_placement()
-		local to_deal = math.min(hand_size_cfg.get(), #(live_game().draw_pile.cards or {}))
+		piles.hydrate_hosts_from_store({ "draw" })
+		local to_deal = math.min(hand_size_cfg.get(), M.draw_pile_count())
 		for _ = 1, to_deal do
 			local card = live_game().draw_pile:remove_card()
 			if card then
@@ -279,7 +292,7 @@ return function(context)
 		live_game().dealt_letters:relayout()
 		live_game().dealt_letters:snap_VT()
 		live_game().dealt_letters:hard_set_cards()
-		M.sync_deck_count_display()
+		commit_piles({ "hand", "draw", "pattern" })
 		if WORD_GAME and WORD_GAME.Jumble then
 			WORD_GAME.Jumble.ensure_playable_puzzle()
 		end
@@ -289,10 +302,13 @@ return function(context)
 		if not live_game().dealt_letters then return nil end
 		if M.draw_pile_count() == 0 then
 			if M.try_jumble_reshuffle_and_deal() then
-				return live_game().dealt_letters.cards and live_game().dealt_letters.cards[#live_game().dealt_letters.cards]
+				local TableAreas = require("word_game.model.table_areas")
+				local hand = TableAreas.hand_cards()
+				return hand[#hand]
 			end
 			return nil
 		end
+		piles.hydrate_hosts_from_store({ "draw" })
 		local card = live_game().draw_pile:remove_card()
 		if not card then return nil end
 		local function finish()
@@ -300,7 +316,7 @@ return function(context)
 				live_game().dealt_letters:set_ranks()
 				live_game().dealt_letters:relayout()
 			end
-			M.sync_deck_count_display()
+			commit_piles({ "hand", "draw" })
 		end
 		if live_game().TIMELINE and live_game().TIMELINE.enqueue then
 			Scheduler.add{

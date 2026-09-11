@@ -391,6 +391,16 @@ function M.sync_game()
 	end
 end
 
+--- Clear store pile snapshots so host-only test setups stay authoritative.
+function M.clear_store_piles()
+	local store = require("bridge.runtime").store()
+	if store then
+		store:patch({
+			piles = { hand = {}, draw = {}, pattern = {}, bonus = {}, discard = {} },
+		})
+	end
+end
+
 function M.teardown_boot_pollution()
 	M.reset_game()
 end

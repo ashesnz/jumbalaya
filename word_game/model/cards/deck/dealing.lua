@@ -47,6 +47,10 @@ return function(context)
 		M.sync_deck_count_display()
 	end
 
+	function M.hydrate_pile_hosts(pile_ids)
+		piles.hydrate_hosts_from_store(pile_ids)
+	end
+
 	M.DEAL_DELAY = 0.14
 
 	function M.deal_one_to_hand(target_size)
@@ -63,7 +67,7 @@ return function(context)
 		local function finish()
 			M.ensure_vowel_in_hand()
 			M.ensure_playable_held()
-			M.sync_deck_count_display()
+			M.commit_pile_hosts({ "hand", "draw" })
 			if on_complete then on_complete() end
 		end
 		if need <= 0 then

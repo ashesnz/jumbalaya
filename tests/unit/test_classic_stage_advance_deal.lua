@@ -5,6 +5,8 @@
 local T = require("tests.framework")
 local fixture = require("tests.helpers.classic_stage_advance")
 local TableAreas = require("word_game.model.table_areas")
+local piles = require("word_game.model.piles")
+local deck = require("word_game.model.cards.deck")
 
 local function hand_count()
 	return #TableAreas.hand_cards()
@@ -26,6 +28,7 @@ T.describe("Classic stage advance deal", function()
 			"Stage 1-1 should open with a full hand")
 
 		for _ = 1, 3 do
+			piles.hydrate_hosts_from_store({ "hand", "discard" })
 			local card = G.dealt_letters.cards[1]
 			if card then
 				G.dealt_letters:remove_card(card)
@@ -33,6 +36,7 @@ T.describe("Classic stage advance deal", function()
 				G.recycle_stash:emplace(card)
 			end
 		end
+		deck.commit_pile_hosts({ "hand", "discard" })
 
 		ctx.clear_hand()
 		T.assert_equal(draw_count(), ctx.starter,
@@ -76,10 +80,12 @@ T.describe("Classic stage advance deal", function()
 		local ctx = fixture.begin()
 
 		while hand_count() > 3 do
+			piles.hydrate_hosts_from_store({ "hand", "pattern" })
 			local card = G.dealt_letters.cards[1]
 			G.dealt_letters:remove_card(card)
 			G.pattern_row.area:emplace(card)
 		end
+		deck.commit_pile_hosts({ "hand", "pattern" })
 		T.assert_equal(hand_count(), 3)
 		T.assert_equal(#TableAreas.pattern_cards(), 4)
 

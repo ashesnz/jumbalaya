@@ -36,8 +36,14 @@ return function(context)
 		end
 	end
 
+	local piles = require("word_game.model.piles")
+
 	local function take_letter_from_deck(prefer_vowel)
-		if not live_game().draw_pile or #live_game().draw_pile.cards == 0 then return nil end
+		if not live_game().draw_pile then return nil end
+		if #live_game().draw_pile.cards == 0 then
+			piles.hydrate_hosts_from_store({ "draw" })
+		end
+		if #live_game().draw_pile.cards == 0 then return nil end
 
 		local function accept(card)
 			if not card then return nil end

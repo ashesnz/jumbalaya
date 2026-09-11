@@ -41,8 +41,12 @@ return function(context)
 	 	live_game().draw_pile.config = live_game().draw_pile.config or {}
 	 local card = M.create_letter_card(letter, color)
 		live_game().draw_pile:emplace(card)
-		live_game().draw_pile.config.card_limit = (live_game().draw_pile.config.card_limit or #M.STARTING_LETTERS) + 1
-		M.sync_deck_count_display()
+	 live_game().draw_pile.config.card_limit = (live_game().draw_pile.config.card_limit or #M.STARTING_LETTERS) + 1
+		if M.commit_pile_hosts then
+			M.commit_pile_hosts({ "draw" })
+		else
+			M.sync_deck_count_display()
+		end
 		return card
 	end
 

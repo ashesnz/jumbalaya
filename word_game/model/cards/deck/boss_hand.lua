@@ -61,7 +61,11 @@ return function(deck_module, context)
 				live_game().dealt_letters:snap_VT()
 				live_game().dealt_letters:hard_set_cards()
 			end
-			deck_module.sync_deck_count_display()
+			if deck_module.commit_pile_hosts then
+				deck_module.commit_pile_hosts({ "hand", "draw", "pattern" })
+			else
+				deck_module.sync_deck_count_display()
+			end
 			if on_complete then on_complete() end
 		end
 		if live_game().TIMELINE and live_game().TIMELINE.enqueue then

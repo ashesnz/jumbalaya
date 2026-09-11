@@ -45,7 +45,7 @@ T.describe("Card Dealing & Hand Capacity (word_game.model.cards.deck)", function
 		local TableAreas = require("word_game.model.table_areas")
 		T.assert_equal(#TableAreas.draw_cards(), 12, "Starter population should create twelve cards")
 		local letters = {}
-		for _, card in ipairs(G.draw_pile.cards) do letters[card.ability.letter] = (letters[card.ability.letter] or 0) + 1 end
+		for _, card in ipairs(TableAreas.draw_cards()) do letters[card.ability.letter] = (letters[card.ability.letter] or 0) + 1 end
 		T.assert_equal(letters.E, 2, "Shuffling should preserve all starter cards")
 		T.assert_equal(letters.C, 1, "Shuffling should preserve the starter composition")
 	end)
@@ -71,6 +71,7 @@ T.describe("Card Dealing & Hand Capacity (word_game.model.cards.deck)", function
 	end)
 
 	T.it("takes cards from the top of the deck stack", function()
+		mock_env.clear_store_piles()
 		G.draw_pile = { cards = {
 			{ ability = { letter = "A", letter_color = "red" }, T = { w = 1, h = 1 } },
 			{ ability = { letter = "Z", letter_color = "red" }, T = { w = 1, h = 1 } },
@@ -89,23 +90,27 @@ T.describe("Card Dealing & Hand Capacity (word_game.model.cards.deck)", function
 		deck.draw_to_hand(1)
 		deck.ensure_vowel_in_hand = ensure_vowel
 		deck.ensure_playable_held = ensure_playable
-		T.assert_equal(G.dealt_letters.cards[1].ability.letter, "Z", "The top card should be drawn first")
-		T.assert_equal(#G.draw_pile.cards, 1, "Drawing should pop exactly one card")
+		local TableAreas = require("word_game.model.table_areas")
+		T.assert_equal(TableAreas.hand_cards()[1].ability.letter, "Z", "The top card should be drawn first")
+		T.assert_equal(#TableAreas.draw_cards(), 1, "Drawing should pop exactly one card")
 	end)
 
 	T.it("counts held cards across both hand and placement area", function()
+		mock_env.clear_store_piles()
 		G.dealt_letters = { cards = { {}, {}, {} } }
 		G.pattern_row = { area = { cards = { {}, {} } } }
 		T.assert_equal(deck.held_count(), 5, "Held count should sum hand (3) + placement area (2) = 5")
 	end)
 
 	T.it("held count reflects empty hand and placement correctly", function()
+		mock_env.clear_store_piles()
 		G.dealt_letters = { cards = {} }
 		G.pattern_row = { area = { cards = {} } }
 		T.assert_equal(deck.held_count(), 0, "Held count should be 0 when empty")
 	end)
 
 	T.it("counts the physical cards remaining in the deck", function()
+		mock_env.clear_store_piles()
 		G.GAME.starting_deck_size = 12
 		G.draw_pile = { cards = { {}, {}, {}, {}, {} } }
 		G.dealt_letters = { cards = { {}, {}, {}, {}, {}, {}, {} } }
@@ -114,6 +119,7 @@ T.describe("Card Dealing & Hand Capacity (word_game.model.cards.deck)", function
 	end)
 
 	T.it("calculates exact deal events needed for 2 cards played", function()
+		mock_env.clear_store_piles()
 		G.dealt_letters = { cards = { {}, {}, {}, {}, {} } } -- 5 in hand (2 played)
 		G.pattern_row = { area = { cards = {} } }
 		local queued = {}
@@ -132,6 +138,7 @@ T.describe("Card Dealing & Hand Capacity (word_game.model.cards.deck)", function
 	end)
 
 	T.it("calculates exact deal events needed for 3 cards played", function()
+		mock_env.clear_store_piles()
 		G.dealt_letters = { cards = { {}, {}, {}, {} } } -- 4 in hand (3 played)
 		G.pattern_row = { area = { cards = {} } }
 		local queued = {}
@@ -328,6 +335,7 @@ T.describe("Sidebar deck information", function()
 	end)
 
 	T.it("reports jumble cards left as the physical draw pile count", function()
+		mock_env.clear_store_piles()
 		G.GAME.word_round = { mode = "jumble", set = 1, hand_index = 1 }
 		G.letter_inventory = {}
 		for i = 1, 12 do
@@ -400,6 +408,7 @@ T.describe("Sidebar deck information", function()
 	end)
 
 	T.it("sidebar HUD text node reads G.ARGS even when G.GAME is replaced", function()
+		mock_env.clear_store_piles()
 		mock_env.ensure_engine_globals()
 		require("jumbalaya-engine.retained_ui")
 		G.LANG = G.LANG or {
@@ -452,6 +461,7 @@ T.describe("Sidebar deck information", function()
 	end)
 
 	T.it("reshuffles discard into deck and deals seven when hand and deck are empty", function()
+		mock_env.clear_store_piles()
 		G.GAME.word_round = { mode = "jumble", set = 1, hand_index = 1 }
 		G.dealt_letters = {
 			cards = {},

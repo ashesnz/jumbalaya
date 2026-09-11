@@ -32,9 +32,16 @@ local function get_store_state(state)
 end
 
 local function pile_or_host(state, pile_id, host_cards_fn)
-	local s = get_store_state(state)
-	if s and s.piles and s.piles[pile_id] and #s.piles[pile_id] > 0 then
-		return s.piles[pile_id]
+	if state ~= nil then
+		if state.piles and state.piles[pile_id] then
+			return state.piles[pile_id]
+		end
+		return {}
+	end
+	local s = get_store_state(nil)
+	local store_pile = s and s.piles and s.piles[pile_id]
+	if store_pile and #store_pile > 0 then
+		return store_pile
 	end
 	return host_cards_fn()
 end

@@ -108,11 +108,7 @@ return function(context)
 			card:pulse(0.18, 0.08)
 		end
 		M.play_deal_slide()
-		if M.commit_pile_hosts then
-			M.commit_pile_hosts({ "hand", "draw" })
-		else
-			M.sync_deck_count_display()
-		end
+		M.sync_deck_count_display()
 		return true
 	end
 
