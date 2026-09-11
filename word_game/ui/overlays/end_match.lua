@@ -1,5 +1,8 @@
 --[[ word_game/ui/end_match.lua - End-of-Match results overlay ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local facade = require("word_game.ui.facade")
 local widgets = require("word_game.ui.widgets")
 local state = facade.run_state()
@@ -34,26 +37,26 @@ end
 function M.definition(won)
 	local stats = match_stats()
 	local title = won and "MATCH WON" or "MATCH OVER"
-	local colour = won and G.C.GOLD or G.C.RED
+	local colour = won and runtime().C.GOLD or runtime().C.RED
 	local lines = M.summary_lines(stats)
 	local contents = {
-		{ n = G.UI.ROW, config = { align = "cm", padding = 0.12 }, nodes = {
-			{ n = G.UI.TEXT, config = { text = title, scale = 0.7, colour = colour, shadow = true } },
+		{ n = runtime().UI.ROW, config = { align = "cm", padding = 0.12 }, nodes = {
+			{ n = runtime().UI.TEXT, config = { text = title, scale = 0.7, colour = colour, shadow = true } },
 		}},
 	}
 	for i, line in ipairs(lines) do
 		local padding = i == 1 and 0.06 or 0.04
-		contents[#contents + 1] = { n = G.UI.ROW, config = { align = "cm", padding = padding }, nodes = {
-			{ n = G.UI.TEXT, config = {
+		contents[#contents + 1] = { n = runtime().UI.ROW, config = { align = "cm", padding = padding }, nodes = {
+			{ n = runtime().UI.TEXT, config = {
 				text = line.label .. ": " .. tostring(line.value),
 				scale = 0.36,
-				colour = G.C.UI.TEXT_LIGHT,
+				colour = runtime().C.UI.TEXT_LIGHT,
 				shadow = true,
 			}},
 		}}
 	end
-	contents[#contents + 1] = { n = G.UI.ROW, config = { align = "cm", padding = 0.1 }, nodes = {
-		widgets.button("Back to Menu", "return_to_menu", G.C.RED, 3.4, 0.75),
+	contents[#contents + 1] = { n = runtime().UI.ROW, config = { align = "cm", padding = 0.1 }, nodes = {
+		widgets.button("Back to Menu", "return_to_menu", runtime().C.RED, 3.4, 0.75),
 	}}
 
 	return build_generic_options({
@@ -63,8 +66,8 @@ function M.definition(won)
 end
 
 function M.stat_line(label, value)
-	return { n = G.UI.ROW, config = { align = "cm", padding = 0.04 }, nodes = {
-		{ n = G.UI.TEXT, config = { text = label .. "  " .. tostring(value), scale = 0.38, colour = G.C.UI.TEXT_LIGHT, shadow = true } },
+	return { n = runtime().UI.ROW, config = { align = "cm", padding = 0.04 }, nodes = {
+		{ n = runtime().UI.TEXT, config = { text = label .. "  " .. tostring(value), scale = 0.38, colour = runtime().C.UI.TEXT_LIGHT, shadow = true } },
 	}}
 end
 
@@ -74,7 +77,7 @@ function M.overlay_definition(won)
 	if type(title) ~= "string" or title == "" then
 		title = won and "YOU WIN!" or "GAME OVER"
 	end
-	local title_col = won and G.C.GOLD or G.C.RED
+	local title_col = won and runtime().C.GOLD or runtime().C.RED
 	local eased = deep_clone(title_col)
 	eased[4] = 0
 	Easing.value{ref_table = eased, ref_value = 4, mod = 0.8, floored = true}
@@ -89,8 +92,8 @@ function M.overlay_definition(won)
 		no_back = true,
 		padding = 0.08,
 		contents = {
-			{ n = G.UI.ROW, config = { align = "cm", padding = 0.12 }, nodes = {
-				{ n = G.UI.OBJECT, config = { object = FlowText({
+			{ n = runtime().UI.ROW, config = { align = "cm", padding = 0.12 }, nodes = {
+				{ n = runtime().UI.OBJECT, config = { object = FlowText({
 					string = { title },
 					colours = { title_col },
 					shadow = true,
@@ -100,35 +103,35 @@ function M.overlay_definition(won)
 					maxw = 6.5,
 				})}},
 			}},
-			{ n = G.UI.ROW, config = { align = "cm", padding = 0.12, colour = G.C.BLACK, r = 0.1, emboss = 0.05 }, nodes = stat_nodes },
-			{ n = G.UI.ROW, config = { align = "cm", padding = 0.12 }, nodes = {
-				{ n = G.UI.ROW, config = {
+			{ n = runtime().UI.ROW, config = { align = "cm", padding = 0.12, colour = runtime().C.BLACK, r = 0.1, emboss = 0.05 }, nodes = stat_nodes },
+			{ n = runtime().UI.ROW, config = { align = "cm", padding = 0.12 }, nodes = {
+				{ n = runtime().UI.ROW, config = {
 					id = "from_game_over",
 					align = "cm",
 					minw = 5,
 					padding = 0.1,
 					r = 0.1,
 					hover = true,
-					colour = G.C.RED,
+					colour = runtime().C.RED,
 					button = "notify_then_start_run",
 					shadow = true,
 					focus_args = { nav = "wide", snap_to = true },
 				}, nodes = {
-					{ n = G.UI.TEXT, config = { text = localize("ui_start_new_run"), scale = 0.5, colour = G.C.UI.TEXT_LIGHT } },
+					{ n = runtime().UI.TEXT, config = { text = localize("ui_start_new_run"), scale = 0.5, colour = runtime().C.UI.TEXT_LIGHT } },
 				}},
-				{ n = G.UI.ROW, config = { minh = 0.08 }, nodes = {} },
-				{ n = G.UI.ROW, config = {
+				{ n = runtime().UI.ROW, config = { minh = 0.08 }, nodes = {} },
+				{ n = runtime().UI.ROW, config = {
 					align = "cm",
 					minw = 5,
 					padding = 0.1,
 					r = 0.1,
 					hover = true,
-					colour = G.C.RED,
+					colour = runtime().C.RED,
 					button = "return_to_menu",
 					shadow = true,
 					focus_args = { nav = "wide" },
 				}, nodes = {
-					{ n = G.UI.TEXT, config = { text = localize("ui_main_menu"), scale = 0.5, colour = G.C.UI.TEXT_LIGHT } },
+					{ n = runtime().UI.TEXT, config = { text = localize("ui_main_menu"), scale = 0.5, colour = runtime().C.UI.TEXT_LIGHT } },
 				}},
 			}},
 		},

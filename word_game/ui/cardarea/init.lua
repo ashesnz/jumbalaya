@@ -11,6 +11,9 @@
 	centralized.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local hand = require("word_game.ui.cardarea.hand")
 local deck = require("word_game.ui.cardarea.deck")
 local discard = require("word_game.ui.cardarea.discard")
@@ -50,7 +53,7 @@ local TYPE_HANDLERS = {
 CardArea = EaseNode:derive("CardArea")
 
 local function table_board()
-	return G.STATE == G.STATES.TABLE_BOARD
+	return runtime().STATE == runtime().STATES.TABLE_BOARD
 end
 
 local function face_down_in_pile(card)
@@ -62,7 +65,7 @@ end
 
 local function draw_card_layer(card, layer)
 	if not card then return end
-	if G.INPUT.dragging.target ~= card and not (WORD_GAME_UI.CardInspect and WORD_GAME_UI.CardInspect.is(card)) then
+	if runtime().INPUT.dragging.target ~= card and not (WORD_GAME_UI.CardInspect and WORD_GAME_UI.CardInspect.is(card)) then
 		card:draw(layer)
 	end
 end
@@ -77,7 +80,7 @@ end
 ---   `type` (string, default 'deck') - behaviour selector, see file header;
 ---   `selection_limit` (number, default 5) - max cards selectable at once;
 ---   `card_limit` (number, default 52) - max cards this area can hold;
----   `card_w` (number, default `G.CARD_W`) - card width override;
+---   `card_w` (number, default `runtime().CARD_W`) - card width override;
 ---   `sort` (string, default 'desc') - default `CardArea:sort` method.
 function CardArea:construct(X, Y, W, H, config)
 	EaseNode.construct(self, X, Y, W, H)
@@ -89,7 +92,7 @@ function CardArea:construct(X, Y, W, H, config)
 
 	config = config or {}
 	self.config = config
-	self.card_w = config.card_w or G.CARD_W
+	self.card_w = config.card_w or runtime().CARD_W
 	self.cards = {}
 	self.children = {}
 	self.selected = {}
@@ -103,7 +106,7 @@ function CardArea:construct(X, Y, W, H, config)
 	self.shuffle_amt = 0
 
 	if getmetatable(self) == CardArea then
-		table.insert(G.LIVE.CARDAREA, self)
+		table.insert(runtime().LIVE.CARDAREA, self)
 	end
 end
 
@@ -115,12 +118,12 @@ end
 --- @param location string|nil 'front' to insert at index 1
 --- @param stay_flipped boolean|nil if true, don't auto-flip a face-down card
 function CardArea:emplace(card, location, stay_flipped)
-	if table_board() and card and card.bonus_card and (self == G.dealt_letters or self == G.draw_pile) then
+	if table_board() and card and card.bonus_card and (self == runtime().dealt_letters or self == runtime().draw_pile) then
 		local origin_slot, origin_insert
 		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.slot_for_card then
 			origin_slot, origin_insert = WORD_GAME.Jumble.slot_for_card(card)
 		end
-		facade.board_snap().restore_bonus_card(G.pattern_row, card, origin_slot, origin_insert)
+		facade.board_snap().restore_bonus_card(runtime().pattern_row, card, origin_slot, origin_insert)
 		return
 	end
 	if location == 'front' or self.config.type == 'deck' then
@@ -130,17 +133,17 @@ function CardArea:emplace(card, location, stay_flipped)
 	end
 	if table_board() then
 		-- Pile art comes from the back sprite. Cards stay face-up and lerp into place.
-		if self == G.dealt_letters and WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.reveal_in_hand then
+		if self == runtime().dealt_letters and WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.reveal_in_hand then
 			WORD_GAME.Deck.reveal_in_hand(card)
 		end
 	elseif card.facing == 'back' and self.config.type ~= 'discard' and self.config.type ~= 'deck' and not stay_flipped then
 		card:flip()
-	elseif self == G.dealt_letters and stay_flipped then
+	elseif self == runtime().dealt_letters and stay_flipped then
 		card.ability.wheel_flipped = true
 	end
 
 	-- The deck pile is unbounded: overfilling just raises its own limit.
-	if self == G.draw_pile and #self.cards > self.config.card_limit then
+	if self == runtime().draw_pile and #self.cards > self.config.card_limit then
 		self.config.card_limit = #self.cards
 	end
 
@@ -257,7 +260,7 @@ end
 
 --- @param dt number seconds since last frame
 function CardArea:update(dt)
-	if self == G.dealt_letters then
+	if self == runtime().dealt_letters then
 		for k, v in pairs(self.cards) do
 			if v.ability.forced_selection and not self.selected[1] then
 				self:add_selection(v)
@@ -267,7 +270,7 @@ function CardArea:update(dt)
 	deck.update(self, dt)
 	discard.update(self, dt)
 	--Check and see if controller is being used
-	if G.INPUT.HID.controller and self ~= G.dealt_letters then self:clear_selection() end
+	if runtime().INPUT.HID.controller and self ~= runtime().dealt_letters then self:clear_selection() end
 	self.config.temp_limit = math.max(#self.cards, self.config.card_limit)
 	self.config.card_count = #self.cards
 end
@@ -282,11 +285,11 @@ end
 function CardArea:draw()
 	if not self.states.visible then return end
 	if not self.cards then return end
-	if G.VIEWING_DECK and (self==G.draw_pile or self==G.dealt_letters) then return end
+	if runtime().VIEWING_DECK and (self==runtime().draw_pile or self==runtime().dealt_letters) then return end
 
 	self.ARGS.invisible_area_types = self.ARGS.invisible_area_types or {discard=1, perk=1, usable=1, title = 1, title_2 = 1, placement=1, shelf=1}
 	if self.ARGS.invisible_area_types[self.config.type] or
-		(self.config.type == 'deck' and self ~= G.draw_pile) then
+		(self.config.type == 'deck' and self ~= runtime().draw_pile) then
 	else
 		chrome.draw_chrome(self)
 	end
@@ -304,14 +307,14 @@ function CardArea:draw()
 
 		if self.config.type == 'usable' or self.config.type == 'shop' or self.config.type == 'title_2' then
 			for i = 1, #self.cards do
-				if self.cards[i] ~= G.INPUT.focused.target then
+				if self.cards[i] ~= runtime().INPUT.focused.target then
 					if not self.cards[i].selected then
 						draw_card_layer(self.cards[i], v)
 					end
 				end
 			end
 			for i = 1, #self.cards do
-				if self.cards[i] ~= G.INPUT.focused.target then
+				if self.cards[i] ~= runtime().INPUT.focused.target then
 					if self.cards[i].selected then
 						draw_card_layer(self.cards[i], v)
 					end
@@ -323,7 +326,7 @@ function CardArea:draw()
 
 		if self.config.type == 'title' or self.config.type == 'perk' then
 			for i = 1, #self.cards do
-				if self.cards[i] ~= G.INPUT.focused.target or self == G.dealt_letters then
+				if self.cards[i] ~= runtime().INPUT.focused.target or self == runtime().dealt_letters then
 					draw_card_layer(self.cards[i], v)
 				end
 			end
@@ -393,10 +396,10 @@ end
 --- @return boolean|nil success true if a card was moved
 function CardArea:draw_card_from(area, stay_flipped, discarded_only)
 	if area:is_kind(CardArea) then
-		if #self.cards < self.config.card_limit or self == G.draw_pile or self == G.dealt_letters then
+		if #self.cards < self.config.card_limit or self == runtime().draw_pile or self == runtime().dealt_letters then
 			local card = area:remove_card(nil, discarded_only)
 			if card then
-				if area == G.recycle_stash then
+				if area == runtime().recycle_stash then
 					card.T.r = 0
 				end
 				self:emplace(card)
@@ -410,7 +413,7 @@ end
 --- only meaningful for the deck (opens deck info) and opponent deck
 --- (triggers opponent draw).
 function CardArea:click()
-	if self == G.draw_pile then
+	if self == runtime().draw_pile then
 		if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
 			WORD_GAME_UI.TableDeck.show_info()
 		end
@@ -454,7 +457,7 @@ function CardArea:load(cardAreaTable)
 	self.config = cardAreaTable.config
 
 	for i = 1, #cardAreaTable.cards do
-		local card = Card(0, 0, G.CARD_W, G.CARD_H, G.LETTERS.faces.empty, G.LETTERS.centers.letter_base, nil)
+		local card = Card(0, 0, runtime().CARD_W, runtime().CARD_H, runtime().LETTERS.faces.empty, runtime().LETTERS.centers.letter_base, nil)
 		card:load(cardAreaTable.cards[i])
 		self.cards[#self.cards + 1] = card
 		if card.selected then
@@ -468,7 +471,7 @@ function CardArea:load(cardAreaTable)
 end
 
 --- Tears down this area: removes all cards/children, unregisters from
---- `G.LIVE.CARDAREA`, then calls the base `EaseNode:remove`.
+--- `runtime().LIVE.CARDAREA`, then calls the base `EaseNode:remove`.
 function CardArea:remove()
 	local handler = type_handler(self)
 	if handler and handler.on_remove then
@@ -478,9 +481,9 @@ function CardArea:remove()
 	self.cards = nil
 	teardown_tree(self.children or {})
 	self.children = nil
-	for k, v in pairs(G.LIVE.CARDAREA) do
+	for k, v in pairs(runtime().LIVE.CARDAREA) do
 		if v == self then
-			table.remove(G.LIVE.CARDAREA, k)
+			table.remove(runtime().LIVE.CARDAREA, k)
 		end
 	end
 	EaseNode.remove(self)

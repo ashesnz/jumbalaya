@@ -5,37 +5,42 @@
 	use them directly.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Easing = require "app.effects.easing"
 local UIViewHost = require("word_game.ui.views.ui_view_host")
 
-function G.DEFINITIONS.card_focus_ui(card)
+local DEFINITIONS = runtime().DEFINITIONS
+
+function DEFINITIONS.card_focus_ui(card)
   local card_width = card.T.w
 
-  local face_highlight_colour = deep_clone(G.C.WHITE)
+  local face_highlight_colour = deep_clone(runtime().C.WHITE)
   face_highlight_colour[4] = 1.5
-  if G.dealt_letters and card.area == G.dealt_letters then Easing.value{ref_table = face_highlight_colour, ref_value = 4, mod = -1.5, timer = 'REAL', delay = 0.2, ease = 'quad'} end
+  if runtime().dealt_letters and card.area == runtime().dealt_letters then Easing.value{ref_table = face_highlight_colour, ref_value = 4, mod = -1.5, timer = 'REAL', delay = 0.2, ease = 'quad'} end
 
-  local t_card_norm = {x = card.T.x + card.T.w/2 - G.ROOM.T.w/2, y = card.T.y + card.T.h/2 - G.ROOM.T.h/2}
+  local t_card_norm = {x = card.T.x + card.T.w/2 - runtime().ROOM.T.w/2, y = card.T.y + card.T.h/2 - runtime().ROOM.T.h/2}
 
   local base_background = UIViewHost.create{
     T = {card.VT.x,card.VT.y,0,0},
     definition = 
-      (not G.dealt_letters or card.area ~= G.dealt_letters) and {n=G.UI.ROOT, config = {align = 'cm', minw = card_width + 0.3, minh = card.T.h + 0.3, r = 0.1, colour = with_alpha(G.C.BLACK, 0.7), outline_colour = tint(G.C.MUTED_GREY, 0.5), outline = 1.5, line_emboss = 0.8}, nodes={
-        {n=G.UI.ROW, config={id = 'ATTACH_TO_ME'}, nodes={}}
+      (not runtime().dealt_letters or card.area ~= runtime().dealt_letters) and {n=runtime().UI.ROOT, config = {align = 'cm', minw = card_width + 0.3, minh = card.T.h + 0.3, r = 0.1, colour = with_alpha(runtime().C.BLACK, 0.7), outline_colour = tint(runtime().C.MUTED_GREY, 0.5), outline = 1.5, line_emboss = 0.8}, nodes={
+        {n=runtime().UI.ROW, config={id = 'ATTACH_TO_ME'}, nodes={}}
       }} or 
-      {n=G.UI.ROOT, config = {align = 'cm', minw = card_width, minh = card.T.h, r = 0.1, colour = face_highlight_colour}, nodes={
-        {n=G.UI.ROW, config={id = 'ATTACH_TO_ME'}, nodes={}}
+      {n=runtime().UI.ROOT, config = {align = 'cm', minw = card_width, minh = card.T.h, r = 0.1, colour = face_highlight_colour}, nodes={
+        {n=runtime().UI.ROW, config={id = 'ATTACH_TO_ME'}, nodes={}}
       }},
     config = {
         align = 'cm',
         offset = {x= 0.007*t_card_norm.x*card.T.w, y = 0.007*t_card_norm.y*card.T.h}, 
         parent = card,
-        r_bond = (not G.dealt_letters or card.area ~= G.dealt_letters) and 'Weak' or 'Strong'
+        r_bond = (not runtime().dealt_letters or card.area ~= runtime().dealt_letters) and 'Weak' or 'Strong'
       }
   }
 
   base_background.set_alignment = function()
-    local card_norm = {x = card.T.x + card.T.w/2 - G.ROOM.T.w/2, y = card.T.y + card.T.h/2 - G.ROOM.T.h/2}
+    local card_norm = {x = card.T.x + card.T.w/2 - runtime().ROOM.T.w/2, y = card.T.y + card.T.h/2 - runtime().ROOM.T.h/2}
     EaseNode.set_alignment(card.children.focused_ui, {offset = {x= 0.007*card_norm.x*card.T.w, y = 0.007*card_norm.y*card.T.h}})
   end
 
@@ -46,10 +51,10 @@ end
 function desc_from_rows(desc_nodes, empty, maxw)
   local t = {}
   for k, v in ipairs(desc_nodes) do
-    t[#t+1] = {n=G.UI.ROW, config={align = "cm", maxw = maxw}, nodes=v}
+    t[#t+1] = {n=runtime().UI.ROW, config={align = "cm", maxw = maxw}, nodes=v}
   end
-  return {n=G.UI.ROW, config={align = "cm", colour = empty and G.C.CLEAR or G.C.UI.BACKGROUND_WHITE, r = 0.1, padding = 0.04, minw = 2, minh = 0.8, emboss = not empty and 0.05 or nil, filler = true}, nodes={
-    {n=G.UI.ROW, config={align = "cm", padding = 0.03}, nodes=t}
+  return {n=runtime().UI.ROW, config={align = "cm", colour = empty and runtime().C.CLEAR or runtime().C.UI.BACKGROUND_WHITE, r = 0.1, padding = 0.04, minw = 2, minh = 0.8, emboss = not empty and 0.05 or nil, filler = true}, nodes={
+    {n=runtime().UI.ROW, config={align = "cm", padding = 0.03}, nodes=t}
   }}
 end
 
@@ -57,27 +62,27 @@ end
 function transparent_multiline_text(desc_nodes)
   local t = {}
   for k, v in ipairs(desc_nodes) do
-    t[#t+1] = {n=G.UI.ROW, config={align = "cm"}, nodes=v}
+    t[#t+1] = {n=runtime().UI.ROW, config={align = "cm"}, nodes=v}
   end
-  return {n=G.UI.ROW, config={align = "cm", padding = 0.03}, nodes=t}
+  return {n=runtime().UI.ROW, config={align = "cm", padding = 0.03}, nodes=t}
 end
 
 
 function rows_to_infotip(desc_nodes, name)
   local t = {}
   for k, v in ipairs(desc_nodes) do
-    t[#t+1] = {n=G.UI.ROW, config={align = "cm"}, nodes=v}
+    t[#t+1] = {n=runtime().UI.ROW, config={align = "cm"}, nodes=v}
   end
-  return {n=G.UI.ROW, config={align = "cm", colour = tint(G.C.GREY, 0.15), r = 0.1}, nodes={
-    {n=G.UI.ROW, config={align = "tm", minh = 0.36, padding = 0.03}, nodes={{n=G.UI.TEXT, config={text = name, scale = 0.32, colour = G.C.UI.TEXT_LIGHT}}}},
-    {n=G.UI.ROW, config={align = "cm", minw = 1.5, minh = 0.4, r = 0.1, padding = 0.05, colour = G.C.WHITE}, nodes={{n=G.UI.ROW, config={align = "cm", padding = 0.03}, nodes=t}}}
+  return {n=runtime().UI.ROW, config={align = "cm", colour = tint(runtime().C.GREY, 0.15), r = 0.1}, nodes={
+    {n=runtime().UI.ROW, config={align = "tm", minh = 0.36, padding = 0.03}, nodes={{n=runtime().UI.TEXT, config={text = name, scale = 0.32, colour = runtime().C.UI.TEXT_LIGHT}}}},
+    {n=runtime().UI.ROW, config={align = "cm", minw = 1.5, minh = 0.4, r = 0.1, padding = 0.05, colour = runtime().C.WHITE}, nodes={{n=runtime().UI.ROW, config={align = "cm", padding = 0.03}, nodes=t}}}
   }}
 end
 
 
 function clear_overlay_infotip()
-  if not G.OVERLAY_MENU then return end
-  local infotip = G.OVERLAY_MENU:find_node_by_id('overlay_menu_infotip')
+  if not runtime().OVERLAY_MENU then return end
+  local infotip = runtime().OVERLAY_MENU:find_node_by_id('overlay_menu_infotip')
   if infotip and infotip.config.object then
     infotip.config.object:remove()
     infotip.config.object = EaseNode()
@@ -88,32 +93,32 @@ function overlay_infotip(text_rows)
   local t = {}
   if type(text_rows) ~= 'table' then text_rows = {"ERROR"} end
   for k, v in ipairs(text_rows) do
-    t[#t+1] = {n=G.UI.ROW, config={align = "cm"}, nodes={
-      {n=G.UI.TEXT, config={text = v,colour = G.C.UI.TEXT_LIGHT, scale = 0.45, bounce = true, shadow = true, lang = text_rows.lang}}
+    t[#t+1] = {n=runtime().UI.ROW, config={align = "cm"}, nodes={
+      {n=runtime().UI.TEXT, config={text = v,colour = runtime().C.UI.TEXT_LIGHT, scale = 0.45, bounce = true, shadow = true, lang = text_rows.lang}}
     }}
   end
-  return {n=G.UI.ROOT, config={align = "cm", colour = G.C.CLEAR, padding = 0.1}, nodes=t}
+  return {n=runtime().UI.ROOT, config={align = "cm", colour = runtime().C.CLEAR, padding = 0.1}, nodes=t}
 end
 
 
 function name_from_rows(name_nodes, background_colour)
   if not name_nodes or (type(name_nodes) ~= 'table') or not next(name_nodes) then return end
-  return {n=G.UI.ROW, config={align = "cm", padding = 0.05, r = 0.1, colour = background_colour, emboss = background_colour and 0.05 or nil}, nodes=name_nodes}
+  return {n=runtime().UI.ROW, config={align = "cm", padding = 0.05, r = 0.1, colour = background_colour, emboss = background_colour and 0.05 or nil}, nodes=name_nodes}
 end
 
 
-function G.DEFINITIONS.card_h_popup(card)
+function DEFINITIONS.card_h_popup(card)
   if card.tooltip_info then
     local tip = card.tooltip_info
     local debuffed = card.debuff
     local card_type_colour = get_type_colour(card.config.center or card.config, card)
     local card_type_background = 
-        (tip.card_type == 'Locked' and G.C.BLACK) or 
-        ((tip.card_type == 'Undiscovered') and shade(G.C.MUTED_GREY, 0.3)) or 
-        (tip.card_type == 'Enhanced' or tip.card_type == 'Default') and shade(G.C.BLACK, 0.1) or
-        (debuffed and shade(G.C.BLACK, 0.1)) or 
-        (card_type_colour and shade(G.C.BLACK, 0.1)) or
-        G.C.SET[tip.card_type] or
+        (tip.card_type == 'Locked' and runtime().C.BLACK) or 
+        ((tip.card_type == 'Undiscovered') and shade(runtime().C.MUTED_GREY, 0.3)) or 
+        (tip.card_type == 'Enhanced' or tip.card_type == 'Default') and shade(runtime().C.BLACK, 0.1) or
+        (debuffed and shade(runtime().C.BLACK, 0.1)) or 
+        (card_type_colour and shade(runtime().C.BLACK, 0.1)) or
+        runtime().C.SET[tip.card_type] or
         {0, 1, 1, 1}
 
     local outer_padding = 0.05
@@ -137,21 +142,21 @@ function G.DEFINITIONS.card_h_popup(card)
     if tip.info then
       for k, v in ipairs(tip.info) do
         info_boxes[#info_boxes+1] =
-        {n=G.UI.ROW, config={align = "cm"}, nodes={
-        {n=G.UI.ROW, config={align = "cm", colour = tint(G.C.MUTED_GREY, 0.5), r = 0.1, padding = 0.05, emboss = 0.05}, nodes={
+        {n=runtime().UI.ROW, config={align = "cm"}, nodes={
+        {n=runtime().UI.ROW, config={align = "cm", colour = tint(runtime().C.MUTED_GREY, 0.5), r = 0.1, padding = 0.05, emboss = 0.05}, nodes={
           rows_to_infotip(v, v.name),
         }}
       }}
       end
     end
 
-    return {n=G.UI.ROOT, config = {align = 'cm', colour = G.C.CLEAR}, nodes={
-      {n=G.UI.COLUMN, config={align = "cm", func = 'show_infotip',object = EaseNode(),ref_table = next(info_boxes) and info_boxes or nil}, nodes={
-        {n=G.UI.ROW, config={padding = outer_padding, r = 0.12, colour = tint(G.C.MUTED_GREY, 0.5), emboss = 0.07}, nodes={
-          {n=G.UI.ROW, config={align = "cm", padding = 0.07, r = 0.1, colour = with_alpha(card_type_background, 0.8)}, nodes={
-            name_from_rows(tip.name, is_letter_face and G.C.WHITE or nil),
+    return {n=runtime().UI.ROOT, config = {align = 'cm', colour = runtime().C.CLEAR}, nodes={
+      {n=runtime().UI.COLUMN, config={align = "cm", func = 'show_infotip',object = EaseNode(),ref_table = next(info_boxes) and info_boxes or nil}, nodes={
+        {n=runtime().UI.ROW, config={padding = outer_padding, r = 0.12, colour = tint(runtime().C.MUTED_GREY, 0.5), emboss = 0.07}, nodes={
+          {n=runtime().UI.ROW, config={align = "cm", padding = 0.07, r = 0.1, colour = with_alpha(card_type_background, 0.8)}, nodes={
+            name_from_rows(tip.name, is_letter_face and runtime().C.WHITE or nil),
             desc_from_rows(tip.main),
-            badges[1] and {n=G.UI.ROW, config={align = "cm", padding = 0.03}, nodes=badges} or nil,
+            badges[1] and {n=runtime().UI.ROW, config={align = "cm", padding = 0.03}, nodes=badges} or nil,
           }}
         }}
       }},
@@ -162,11 +167,11 @@ end
 
 function make_badge(_string, _badge_col, _text_col, scaling)
   scaling = scaling or 1
-  return {n=G.UI.ROW, config={align = "cm"}, nodes={
-    {n=G.UI.ROW, config={align = "cm", colour = _badge_col or G.C.GREEN, r = 0.1, minw = 2, minh = 0.4*scaling, emboss = 0.05, padding = 0.03*scaling}, nodes={
-      {n=G.UI.BOX, config={h=0.1,w=0.03}},
-      {n=G.UI.OBJECT, config={object = FlowText({string = _string or 'ERROR', colours = {_text_col or G.C.WHITE},float = true, shadow = true, offset_y = -0.05, silent = true, spacing = 1, scale = 0.33*scaling})}},
-      {n=G.UI.BOX, config={h=0.1,w=0.03}},
+  return {n=runtime().UI.ROW, config={align = "cm"}, nodes={
+    {n=runtime().UI.ROW, config={align = "cm", colour = _badge_col or runtime().C.GREEN, r = 0.1, minw = 2, minh = 0.4*scaling, emboss = 0.05, padding = 0.03*scaling}, nodes={
+      {n=runtime().UI.BOX, config={h=0.1,w=0.03}},
+      {n=runtime().UI.OBJECT, config={object = FlowText({string = _string or 'ERROR', colours = {_text_col or runtime().C.WHITE},float = true, shadow = true, offset_y = -0.05, silent = true, spacing = 1, scale = 0.33*scaling})}},
+      {n=runtime().UI.BOX, config={h=0.1,w=0.03}},
     }}
   }}
 end
@@ -181,8 +186,8 @@ function build_detailed_tooltip(_center)
       badges = {}
   }
   local desc = generate_card_ui(_center, full_UI_table, nil, _center.set, nil)
-  return {n=G.UI.ROOT, config={align = "cm", colour = G.C.CLEAR}, nodes={
-    {n=G.UI.ROW, config={align = "cm", colour = tint(G.C.MUTED_GREY, 0.5), r = 0.1, padding = 0.05, emboss = 0.05}, nodes={
+  return {n=runtime().UI.ROOT, config={align = "cm", colour = runtime().C.CLEAR}, nodes={
+    {n=runtime().UI.ROW, config={align = "cm", colour = tint(runtime().C.MUTED_GREY, 0.5), r = 0.1, padding = 0.05, emboss = 0.05}, nodes={
       rows_to_infotip(desc.info[1], desc.info[1].name),
     }}
   }}
@@ -194,19 +199,19 @@ function make_tooltip(tooltip)
   local text = tooltip.text or {}
   local rows = {}
   if title then
-      local r = {n=G.UI.ROW, config={align = "cm"}, nodes={
-          {n=G.UI.COLUMN, config={align = "cm"}, nodes={
-              {n=G.UI.TEXT, config={text = title,colour = G.C.UI.TEXT_DARK, scale = 0.4}}}}}}
+      local r = {n=runtime().UI.ROW, config={align = "cm"}, nodes={
+          {n=runtime().UI.COLUMN, config={align = "cm"}, nodes={
+              {n=runtime().UI.TEXT, config={text = title,colour = runtime().C.UI.TEXT_DARK, scale = 0.4}}}}}}
       table.insert(rows, r)
   end
   for i = 1, #text do
     if type(text[i]) == 'table' then
-      local r = {n=G.UI.ROW, config={align = "cm", padding = 0.03}, nodes={
-        {n=G.UI.TEXT, config={ref_table = text[i].ref_table, ref_value = text[i].ref_value,colour = G.C.UI.TEXT_DARK, scale = 0.4}}}}
+      local r = {n=runtime().UI.ROW, config={align = "cm", padding = 0.03}, nodes={
+        {n=runtime().UI.TEXT, config={ref_table = text[i].ref_table, ref_value = text[i].ref_value,colour = runtime().C.UI.TEXT_DARK, scale = 0.4}}}}
       table.insert(rows, r)
     else
-      local r = {n=G.UI.ROW, config={align = "cm", padding = 0.03}, nodes={
-              {n=G.UI.TEXT, config={text = text[i],colour = G.C.UI.TEXT_DARK, scale = 0.4}}}}
+      local r = {n=runtime().UI.ROW, config={align = "cm", padding = 0.03}, nodes={
+              {n=runtime().UI.TEXT, config={text = text[i],colour = runtime().C.UI.TEXT_DARK, scale = 0.4}}}}
       table.insert(rows, r)
     end
   end
@@ -214,8 +219,8 @@ function make_tooltip(tooltip)
     table.insert(rows, tooltip.filler.func(tooltip.filler.args))
   end
   local t = {
-      n=G.UI.ROOT, config = {align = "cm", padding = 0.05, r=0.1, colour = G.C.RED, emboss = 0.05}, nodes=
-      {{n=G.UI.COLUMN, config={align = "cm", padding = 0.05, r = 0.1, colour = G.C.WHITE, emboss = 0.05}, nodes=rows}}}
+      n=runtime().UI.ROOT, config = {align = "cm", padding = 0.05, r=0.1, colour = runtime().C.RED, emboss = 0.05}, nodes=
+      {{n=runtime().UI.COLUMN, config={align = "cm", padding = 0.05, r = 0.1, colour = runtime().C.WHITE, emboss = 0.05}, nodes=rows}}}
   return t
 end
 

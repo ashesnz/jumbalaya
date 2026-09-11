@@ -1,6 +1,9 @@
 --[[ word_game/ui/card_visuals.lua - sprites and motion/dissolve/draw ]]
 
 ---@class (partial) Card : EaseNode
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 
 local Scheduler = require "app.effects.timeline_scheduler"
 local DissolveFX = require "app.effects.dissolve_fx"
@@ -53,7 +56,7 @@ local function placeholder_art(self, center)
 
 	local locked = PLACEHOLDER_ART.locked[center.set]
 	if locked and not center.unlocked then
-		return { atlas = G.TEXTURE_ATLASES[locked.atlas], pos = G[locked.pos].pos }
+		return { atlas = runtime().TEXTURE_ATLASES[locked.atlas], pos = runtime()[locked.pos].pos }
 	end
 
 	if center.usable and center.demo then
@@ -62,7 +65,7 @@ local function placeholder_art(self, center)
 
 	local veil_pos = PLACEHOLDER_ART.undiscovered[center.set]
 	if veil_pos and not center.discovered then
-		return { atlas = G.TEXTURE_ATLASES[center.atlas or center.set], pos = G[veil_pos].pos }
+		return { atlas = runtime().TEXTURE_ATLASES[center.atlas or center.set], pos = runtime()[veil_pos].pos }
 	end
 
 	return nil
@@ -80,10 +83,10 @@ function Card:set_sprites(_center, _front)
 		if ph then
 			atlas, pos = ph.atlas, ph.pos
 		elseif _center.set == 'Companion' or _center.usable or _center.set == 'Perk' then
-			atlas = G.TEXTURE_ATLASES[_center.set]
+			atlas = runtime().TEXTURE_ATLASES[_center.set]
 			pos = self.config.center.pos
 		else
-			atlas = G.TEXTURE_ATLASES[_center.atlas or 'centers']
+			atlas = runtime().TEXTURE_ATLASES[_center.atlas or 'centers']
 			pos = _center.pos
 		end
 
@@ -100,11 +103,11 @@ function Card:set_sprites(_center, _front)
 		end
 
 		if not self.children.back then
-			local back_atlas = G.TEXTURE_ATLASES["playing_back"] or G.TEXTURE_ATLASES["centers"]
-			local default_back = G.LETTERS.centers and G.LETTERS.centers['deck_alpha']
+			local back_atlas = runtime().TEXTURE_ATLASES["playing_back"] or runtime().TEXTURE_ATLASES["centers"]
+			local default_back = runtime().LETTERS.centers and runtime().LETTERS.centers['deck_alpha']
 			local game = game_access.get()
 			local game_back_pos = game and game[self.back] and game[self.back].pos
-			local back_pos = G.TEXTURE_ATLASES["playing_back"] and {x = 0, y = 0}
+			local back_pos = runtime().TEXTURE_ATLASES["playing_back"] and {x = 0, y = 0}
 				or (self.params.bypass_back or (self.letter_card_id and game_back_pos)
 				or (default_back and default_back.pos) or {x = 0, y = 0})
 			self.children.back = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, back_atlas, back_pos)
@@ -113,8 +116,8 @@ function Card:set_sprites(_center, _front)
 			self.children.back.states.drag = self.states.drag
 			self.children.back.states.collide.can = false
 			self.children.back:set_role({major = self, role_type = 'Glued', draw_major = self})
-		elseif G.TEXTURE_ATLASES["playing_back"] and self.children.back.atlas ~= G.TEXTURE_ATLASES["playing_back"] then
-			self.children.back.atlas = G.TEXTURE_ATLASES["playing_back"]
+		elseif runtime().TEXTURE_ATLASES["playing_back"] and self.children.back.atlas ~= runtime().TEXTURE_ATLASES["playing_back"] then
+			self.children.back.atlas = runtime().TEXTURE_ATLASES["playing_back"]
 			self.children.back:set_sprite_pos({x = 0, y = 0})
 		end
 	end
@@ -147,7 +150,7 @@ function Card:set_sprites(_center, _front)
 				end
 			end
 		else
-			local face_atlas = G.TEXTURE_ATLASES[_front.atlas] or G.TEXTURE_ATLASES.letters
+			local face_atlas = runtime().TEXTURE_ATLASES[_front.atlas] or runtime().TEXTURE_ATLASES.letters
 			local face_pos = self.config.card and self.config.card.pos
 			if self.children.front then
 				self.children.front.atlas = face_atlas
@@ -166,7 +169,7 @@ end
 
 
 -- ============ Visual effects (destroy / dissolve / materialize) ============
--- Timed, event-driven animations (via `G.TIMELINE`) for card destruction
+-- Timed, event-driven animations (via `runtime().TIMELINE`) for card destruction
 -- and creation. These schedule multiple `Tween`s with delays rather than
 -- blocking, so callers should not assume the card is gone/visible
 -- immediately after calling these.
@@ -177,12 +180,12 @@ end
 --- @param dissolve_colours table|nil particle/dissolve tint colours (default white)
 --- @param explode_time_fac number|nil multiplier on the base explosion duration
 function Card:explode(dissolve_colours, explode_time_fac)
-    local explode_time = 1.3*(explode_time_fac or 1)*(math.sqrt(G.SETTINGS.GAMESPEED))
+    local explode_time = 1.3*(explode_time_fac or 1)*(math.sqrt(runtime().SETTINGS.GAMESPEED))
     self.dissolve = 0
     self.dissolve_colours = dissolve_colours
-        or {G.C.WHITE}
+        or {runtime().C.WHITE}
 
-    local start_time = G.TIMERS.TOTAL
+    local start_time = runtime().TIMERS.TOTAL
     local percent = 0
     play_sfx('explosion_buildup1')
     self.bounce = {
@@ -209,11 +212,11 @@ function Card:explode(dissolve_colours, explode_time_fac)
         blockable = false,
         func = (function()
                 if self.bounce then 
-                    percent = (G.TIMERS.TOTAL - start_time)/explode_time
-                    self.bounce.r = 0.05*(math.sin(5*G.TIMERS.TOTAL) + math.cos(0.33 + 41.15332*G.TIMERS.TOTAL) + math.cos(67.12*G.TIMERS.TOTAL))*percent
+                    percent = (runtime().TIMERS.TOTAL - start_time)/explode_time
+                    self.bounce.r = 0.05*(math.sin(5*runtime().TIMERS.TOTAL) + math.cos(0.33 + 41.15332*runtime().TIMERS.TOTAL) + math.cos(67.12*runtime().TIMERS.TOTAL))*percent
                     self.bounce.scale = percent*0.15
                 end
-                if G.TIMERS.TOTAL - start_time > 1.5*explode_time then return true end
+                if runtime().TIMERS.TOTAL - start_time > 1.5*explode_time then return true end
             end)
     }
     Scheduler.add{
@@ -252,7 +255,7 @@ function Card:explode(dissolve_colours, explode_time_fac)
                 func = function(t) return t end
             }
             self:pulse()
-            G.VIBRATION = G.VIBRATION + 1
+            runtime().VIBRATION = runtime().VIBRATION + 1
             play_sfx('explosion_release1')
             childParts1:fade(0.3*explode_time) return true end)
     }
@@ -316,7 +319,7 @@ function Card:start_dissolve(dissolve_colours, silent, dissolve_time_fac, no_bou
 		duration = dt,
 		remove = true,
 		colours = dissolve_colours
-			or {G.C.BLACK, G.C.ORANGE, G.C.RED, G.C.GOLD, G.C.MUTED_GREY},
+			or {runtime().C.BLACK, runtime().C.ORANGE, runtime().C.RED, runtime().C.GOLD, runtime().C.MUTED_GREY},
 		pulse = not no_bounce,
 		fade = {delay = 0.7 * dt, duration = 0.3 * dt},
 		on_start = not silent and function()
@@ -341,9 +344,9 @@ function Card:begin_materialize(dissolve_colours, silent, timefac)
 		mode = 'in',
 		duration = dt,
 		colours = dissolve_colours or
-		(self.ability.set == 'Companion' and {G.C.RARITY[self.config.center.rarity]}) or
-		(self.ability.set == 'Perk' and {G.C.SECONDARY_SET.Perk, G.C.CLEAR}) or
-		{G.C.GREEN},
+		(self.ability.set == 'Companion' and {runtime().C.RARITY[self.config.center.rarity]}) or
+		(self.ability.set == 'Perk' and {runtime().C.SECONDARY_SET.Perk, runtime().C.CLEAR}) or
+		{runtime().C.GREEN},
 		pulse = true,
 		particle = {timer = 0.025, scale = 0.25, speed = 3, lifespan = 0.7},
 		fade = {delay = 0.5 * dt, cap = true},
@@ -356,8 +359,8 @@ function Card:begin_materialize(dissolve_colours, silent, timefac)
 		end,
 	})
 	if not silent then
-		if not G.last_materialized or G.last_materialized +0.01 < G.TIMERS.REAL or G.last_materialized > G.TIMERS.REAL then
-			G.last_materialized = G.TIMERS.REAL
+		if not runtime().last_materialized or runtime().last_materialized +0.01 < runtime().TIMERS.REAL or runtime().last_materialized > runtime().TIMERS.REAL then
+			runtime().last_materialized = runtime().TIMERS.REAL
 			Scheduler.add{
 				blockable = false,
 				func = function()
@@ -406,7 +409,7 @@ end
 
 
 function Card:pulse(scale, rot_amount)
-    --G.VIBRATION = G.VIBRATION + 0.4
+    --runtime().VIBRATION = runtime().VIBRATION + 0.4
     local rot_amt = rot_amount and 0.4*pick_random({rot_amount, -rot_amount}) or pick_random({0.16, -0.16})
     scale = scale and scale*0.4 or 0.11
     EaseNode.pulse(self, scale, rot_amt)
@@ -416,8 +419,8 @@ end
 --- Syncs the shader clock and child scales that shadow/dissolve passes read.
 function Card:sync_shadow_state()
 	self.ARGS.send_to_shader = self.ARGS.send_to_shader or {}
-	self.ARGS.send_to_shader[1] = math.min(self.VT.r*3, 1) + G.TIMERS.REAL/(28) + (self.bounce and self.bounce.r*20 or 0) + self.tilt_var.amt
-	self.ARGS.send_to_shader[2] = G.TIMERS.REAL
+	self.ARGS.send_to_shader[1] = math.min(self.VT.r*3, 1) + runtime().TIMERS.REAL/(28) + (self.bounce and self.bounce.r*20 or 0) + self.tilt_var.amt
+	self.ARGS.send_to_shader[2] = runtime().TIMERS.REAL
 
 	for _, child in pairs(self.children) do
 		child.VT.scale = self.VT.scale
@@ -427,10 +430,10 @@ end
 --- Drops the soft shadow under the card unless suppressed.
 function Card:draw_shadow()
 	local wants_shadow = not self.no_shadow
-		and G.SETTINGS.GRAPHICS.shadows == 'On'
+		and runtime().SETTINGS.GRAPHICS.shadows == 'On'
 		and self.ability.effect ~= 'Glass Card'
 		and not self.greyed
-		and ((self.area and self.area ~= G.recycle_stash and self.area.config.type ~= 'deck')
+		and ((self.area and self.area ~= runtime().recycle_stash and self.area.config.type ~= 'deck')
 			or not self.area or self.states.drag.is)
 
 	if wants_shadow then
@@ -441,7 +444,7 @@ function Card:draw_shadow()
 		if self.inspecting then
 			self.shadow_height = self.shadow_height + 0.22
 		end
-		G.shared_shadow:apply_shader_effect('dissolve', self.shadow_height)
+		runtime().shared_shadow:apply_shader_effect('dissolve', self.shadow_height)
 	end
 end
 
@@ -455,16 +458,16 @@ function Card:update_tilt()
 	local tilt_factor = 0.3
 	if self.states.focus.is then
 		self.tilt_var.mx, self.tilt_var.my =
-			G.INPUT.cursor_position.x + self.tilt_var.dx*self.T.w*G.TILESCALE*G.TILESIZE,
-			G.INPUT.cursor_position.y + self.tilt_var.dy*self.T.h*G.TILESCALE*G.TILESIZE
+			runtime().INPUT.cursor_position.x + self.tilt_var.dx*self.T.w*runtime().TILESCALE*runtime().TILESIZE,
+			runtime().INPUT.cursor_position.y + self.tilt_var.dy*self.T.h*runtime().TILESCALE*runtime().TILESIZE
 		self.tilt_var.amt = math.abs(self.hover_offset.y + self.hover_offset.x - 1 + self.tilt_var.dx + self.tilt_var.dy - 1)*tilt_factor
 	elseif self.states.hover.is then
-		self.tilt_var.mx, self.tilt_var.my = G.INPUT.cursor_position.x, G.INPUT.cursor_position.y
+		self.tilt_var.mx, self.tilt_var.my = runtime().INPUT.cursor_position.x, runtime().INPUT.cursor_position.y
 		self.tilt_var.amt = math.abs(self.hover_offset.y + self.hover_offset.x - 1)*tilt_factor
 	elseif self.ambient_tilt then
-		local tilt_angle = G.TIMERS.REAL*(1.56 + (self.ID/1.14212)%1) + self.ID/1.35122
-		self.tilt_var.mx = ((0.5 + 0.5*self.ambient_tilt*math.cos(tilt_angle))*self.VT.w+self.VT.x+G.ROOM.T.x)*G.TILESIZE*G.TILESCALE
-		self.tilt_var.my = ((0.5 + 0.5*self.ambient_tilt*math.sin(tilt_angle))*self.VT.h+self.VT.y+G.ROOM.T.y)*G.TILESIZE*G.TILESCALE
+		local tilt_angle = runtime().TIMERS.REAL*(1.56 + (self.ID/1.14212)%1) + self.ID/1.35122
+		self.tilt_var.mx = ((0.5 + 0.5*self.ambient_tilt*math.cos(tilt_angle))*self.VT.w+self.VT.x+runtime().ROOM.T.x)*runtime().TILESIZE*runtime().TILESCALE
+		self.tilt_var.my = ((0.5 + 0.5*self.ambient_tilt*math.sin(tilt_angle))*self.VT.h+self.VT.y+runtime().ROOM.T.y)*runtime().TILESIZE*runtime().TILESCALE
 		self.tilt_var.amt = self.ambient_tilt*(0.5+math.cos(tilt_angle))*tilt_factor
 	end
 end
@@ -511,9 +514,9 @@ function Card:draw_front()
 	-- Undiscovered companions/perks wear a silhouetted veil instead of their art.
 	if not self.config.center.discovered and (self.ability.usable or self.config.center.unlocked)
 		and not self.config.center.demo and not self.bypass_discovery_center then
-		local shared_sprite = G.shared_undiscovered_companion
-		local scale_mod = -0.05 + 0.05*math.sin(1.8*G.TIMERS.REAL)
-		local rotate_mod = 0.03*math.sin(1.219*G.TIMERS.REAL)
+		local shared_sprite = runtime().shared_undiscovered_companion
+		local scale_mod = -0.05 + 0.05*math.sin(1.8*runtime().TIMERS.REAL)
+		local rotate_mod = 0.03*math.sin(1.219*runtime().TIMERS.REAL)
 
 		shared_sprite.role.draw_major = self
 		shared_sprite:apply_shader_effect('dissolve', nil, nil, nil, self.children.center, scale_mod, rotate_mod)
@@ -544,7 +547,7 @@ end
 
 --- Back art: deck-stack cards shade progressively deeper into the pile.
 function Card:draw_back()
-	local overlay = G.C.WHITE
+	local overlay = runtime().C.WHITE
 	if self.area and self.area.config.type == 'deck' then
 		overlay = {0.5 + ((#self.area.cards - self.slot)%7)/50,
 			0.5 + ((#self.area.cards - self.slot)%7)/50,
@@ -583,14 +586,14 @@ function Card:draw(layer)
 	end
 
 	-- The shadow quad follows whichever face is currently up.
-	G.shared_shadow = self.sprite_facing == 'front' and self.children.center or self.children.back
+	runtime().shared_shadow = self.sprite_facing == 'front' and self.children.center or self.children.back
 
 	if layer == 'shadow' or layer == 'both' then
 		self:draw_shadow()
 	end
 
 	if layer == 'card' or layer == 'both' then
-		if self.area ~= G.dealt_letters and self.children.focused_ui then
+		if self.area ~= runtime().dealt_letters and self.children.focused_ui then
 			self.children.focused_ui:draw()
 		end
 
@@ -613,14 +616,14 @@ function Card:draw(layer)
 
 		if self.children.overwrite then
 			love.graphics.push()
-			love.graphics.setColor(G.C.BLUE)
-			G.OVERLAY_TINT = {1, 1, 1, math.sin(5*G.TIMERS.REAL)}
+			love.graphics.setColor(runtime().C.BLUE)
+			runtime().OVERLAY_TINT = {1, 1, 1, math.sin(5*runtime().TIMERS.REAL)}
 			self.children.overwrite:draw('card')
-			G.OVERLAY_TINT = nil
+			runtime().OVERLAY_TINT = nil
 			love.graphics.pop()
 		end
 
-		if self.area == G.dealt_letters and self.children.focused_ui then
+		if self.area == runtime().dealt_letters and self.children.focused_ui then
 			self.children.focused_ui:draw()
 		end
 

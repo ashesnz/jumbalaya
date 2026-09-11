@@ -1,4 +1,7 @@
---[[ word_game/ui/sidebar/callbacks.lua - Sidebar G.FUNCS install (instance-bound) ]]
+--[[ word_game/ui/sidebar/callbacks.lua - Sidebar runtime().FUNCS install (instance-bound) ]]
+
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
 
 local register_sidebar = require("word_game.ui.sidebar.funcs")
 

@@ -1,5 +1,8 @@
 --[[ word_game/ui/trade/draw.lua - Marketplace backdrop rendering ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local M = {}
 
 --- Painted just before the overlay menu each frame while the marketplace is
@@ -8,12 +11,12 @@ local M = {}
 --- always matches the modal's rendered size).
 function M.backdrop_pass(ctx)
 	local offer = ctx.get_offer()
-	if not offer or not G.OVERLAY_MENU then return end
-	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.marketplace_bg
+	if not offer or not runtime().OVERLAY_MENU then return end
+	local atlas = runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES.marketplace_bg
 	if not atlas or not atlas.image or not love.graphics or not love.graphics.draw then return end
-	local room = G.ROOM and G.ROOM.T
+	local room = runtime().ROOM and runtime().ROOM.T
 	if not room then return end
-	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
+	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
 	local iw, ih = atlas.image:getDimensions()
 	local rw = room.w * ts
 	local rh = room.h * ts
@@ -22,8 +25,8 @@ function M.backdrop_pass(ctx)
 	-- ROW -> panel COLUMN -> outline ROW. Fall back to the whole room.
 	local dx, dy, dw, dh = 0, 0, rw, rh
 	local host = nil
-	if G.OVERLAY_MENU.find_node_by_id then
-		host = G.OVERLAY_MENU:find_node_by_id("trade_marketplace_body")
+	if runtime().OVERLAY_MENU.find_node_by_id then
+		host = runtime().OVERLAY_MENU:find_node_by_id("trade_marketplace_body")
 	end
 	local outer = host and host.parent and host.parent.parent and host.parent.parent.parent
 	local t = outer and outer.VT

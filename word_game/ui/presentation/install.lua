@@ -1,5 +1,8 @@
 --[[ word_game/ui/presentation/install.lua - Register model→UI presentation hooks at boot ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Presentation = require("word_game.model.presentation")
 local LayoutRequest = require("word_game.model.layout.request")
 local round_config = require("word_game.config.gameplay.round")
@@ -25,8 +28,8 @@ function M.install(ui, domain)
 		end,
 	})
 
-	G.notify_display_changed = function()
-		if G.STAGE == G.STAGES.RUN and ui.Sidebar then
+	runtime().notify_display_changed = function()
+		if runtime().STAGE == runtime().STAGES.RUN and ui.Sidebar then
 			ui.Sidebar.rebuild()
 		end
 	end
@@ -77,8 +80,8 @@ function M.install(ui, domain)
 	Presentation.on("layout_refresh_placement", function()
 		if Layout and Layout.refresh_placement_layout then
 			Layout.refresh_placement_layout()
-		elseif G.pattern_row and G.pattern_row.apply_screen_position then
-			G.pattern_row:apply_screen_position()
+		elseif runtime().pattern_row and runtime().pattern_row.apply_screen_position then
+			runtime().pattern_row:apply_screen_position()
 		end
 	end)
 
@@ -302,8 +305,8 @@ function M.install(ui, domain)
 		elseif type(build_game_over) == "function" then
 			overlay_def = build_game_over()
 		end
-		if overlay_def and G.FUNCS and G.FUNCS.show_overlay then
-			G.FUNCS.show_overlay{
+		if overlay_def and runtime().FUNCS and runtime().FUNCS.show_overlay then
+			runtime().FUNCS.show_overlay{
 				definition = overlay_def,
 				config = { no_esc = true },
 			}
@@ -316,7 +319,7 @@ function M.install(ui, domain)
 			delay = 0.45,
 			blocking = false,
 			func = function()
-				if G.STATE == G.STATES.TABLE_BOARD and G.STAGE == G.STAGES.RUN then
+				if runtime().STATE == runtime().STATES.TABLE_BOARD and runtime().STAGE == runtime().STAGES.RUN then
 					if ui.PerkStamp and ui.PerkStamp.try_opening_demo then
 						ui.PerkStamp.try_opening_demo()
 					end

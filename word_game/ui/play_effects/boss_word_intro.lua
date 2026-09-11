@@ -1,5 +1,8 @@
 --[[ word_game/ui/play_effects/boss_word_intro.lua - Boss-word intro countdown and staging ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local M = {}
 
 local definition
@@ -19,7 +22,7 @@ local function effects()
 end
 
 local function has_event_manager()
-	return G.TIMELINE and G.TIMELINE.enqueue
+	return runtime().TIMELINE and runtime().TIMELINE.enqueue
 end
 
 function M.present_boss_word(wr, on_complete)
@@ -30,7 +33,7 @@ function M.present_boss_word(wr, on_complete)
 		return
 	end
 
-	if G.dealt_letters and wr.jumble then
+	if runtime().dealt_letters and wr.jumble then
 		wr.jumble.locked_hand_layout = nil
 	end
 
@@ -73,8 +76,8 @@ function M.present_boss_word(wr, on_complete)
 		end
 		if WORD_GAME_UI.Layout and WORD_GAME_UI.Layout.refresh_placement_layout then
 			WORD_GAME_UI.Layout.refresh_placement_layout()
-		elseif G.pattern_row and G.pattern_row.apply_screen_position then
-			G.pattern_row:apply_screen_position()
+		elseif runtime().pattern_row and runtime().pattern_row.apply_screen_position then
+			runtime().pattern_row:apply_screen_position()
 		end
 		if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
 			WORD_GAME_UI.Sidebar.sync_visibility()

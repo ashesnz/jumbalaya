@@ -1,5 +1,8 @@
 --[[ word_game/ui/sidebar/hud_layout.lua - Sidebar HUD row geometry ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local felt = require("word_game.ui.layout.felt")
 local TableDeck = require("word_game.ui.table.deck")
 local stamp_grid = require("word_game.ui.perks.stamp.grid")
@@ -19,22 +22,22 @@ end
 
 local function sidebar_height()
 	local sidebar_w = felt.sidebar_width()
-	local ts = (G.TILESIZE or 1) * (G.TILESCALE or 1)
+	local ts = (runtime().TILESIZE or 1) * (runtime().TILESCALE or 1)
 	local win_h = (love and love.graphics and love.graphics.getHeight and love.graphics.getHeight() or 0) / ts
-	local room_y = (G.ROOM and G.ROOM.T and G.ROOM.T.y) or 0
+	local room_y = (runtime().ROOM and runtime().ROOM.T and runtime().ROOM.T.y) or 0
 	if win_h <= 0 then
-		win_h = (G.TILE_H or 11.5) + 2 * ((G.ROOM_PADDING_H or 0.7))
+		win_h = (runtime().TILE_H or 11.5) + 2 * ((runtime().ROOM_PADDING_H or 0.7))
 	end
 	return math.max(6, win_h)
 end
 
 local function deck_slot_size()
 	local scale = TableDeck.SIZE or 0.78
-	return TableDeck.footprint(G.CARD_W * scale, G.CARD_H * scale)
+	return TableDeck.footprint(runtime().CARD_W * scale, runtime().CARD_H * scale)
 end
 
 local function end_run_slot_size()
-	return table_discard.end_run_slot_size(G.CARD_W, G.CARD_H)
+	return table_discard.end_run_slot_size(runtime().CARD_W, runtime().CARD_H)
 end
 
 function M.stamp_slot_height()

@@ -1,5 +1,8 @@
 --[[ word_game/ui/perks/stamp/definition.lua - perk/stamp data copies and resolution ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local facade = require("word_game.ui.facade")
 local perk_cfg = require("word_game.config.perks")
 require("word_game.ui.perks.shared.voucher_sprite")
@@ -11,27 +14,27 @@ local game_access = require("word_game.model.game_access")
 local M = {}
 
 function M.perk_popup_definition(entry)
-	local w = (G.CARD_W or 1) * 0.9
+	local w = (runtime().CARD_W or 1) * 0.9
 	local h = w / (perk_cfg.VOUCHER_ASPECT or 2.3)
 	local sprite = PerkVoucherSprite(0, 0, w, h, entry)
 	return build_generic_options({
 		contents = {
-			{ n = G.UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
-				{ n = G.UI.OBJECT, config = { object = sprite, w = w, h = h } },
+			{ n = runtime().UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
+				{ n = runtime().UI.OBJECT, config = { object = sprite, w = w, h = h } },
 			}},
-			{ n = G.UI.ROW, config = { align = "cm", padding = 0.04 }, nodes = {
-				{ n = G.UI.TEXT, config = {
+			{ n = runtime().UI.ROW, config = { align = "cm", padding = 0.04 }, nodes = {
+				{ n = runtime().UI.TEXT, config = {
 					text = entry.name or "Perk",
 					scale = 0.42,
-					colour = G.C.GOLD,
+					colour = runtime().C.GOLD,
 					shadow = true,
 				}},
 			}},
-			{ n = G.UI.ROW, config = { align = "cm", padding = 0.06, maxw = 4.8 }, nodes = {
-				{ n = G.UI.TEXT, config = {
+			{ n = runtime().UI.ROW, config = { align = "cm", padding = 0.06, maxw = 4.8 }, nodes = {
+				{ n = runtime().UI.TEXT, config = {
 					text = entry.desc or "",
 					scale = 0.28,
-					colour = G.C.UI.TEXT_LIGHT,
+					colour = runtime().C.UI.TEXT_LIGHT,
 					shadow = true,
 				}},
 			}},

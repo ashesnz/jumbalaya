@@ -2,6 +2,9 @@
 	word_game/ui/views/sidebar_view.lua - Sidebar HUD store-backed view (Phase 6 / 8).
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Engine = require("jumbalaya-engine")
 local Layout = require("word_game.ui.layout")
 local hud_layout = require("word_game.ui.sidebar.hud_layout")
@@ -27,11 +30,11 @@ local function sidebar_signature(state)
 end
 
 local function tile_scale()
-	return (G.TILESCALE or 1) * (G.TILESIZE or 20)
+	return (runtime().TILESCALE or 1) * (runtime().TILESIZE or 20)
 end
 
 local function font_metrics()
-	local lang = (G and G.LANG) or {}
+	local lang = (runtime() and runtime().LANG) or {}
 	local font_obj = lang.font or {}
 	return {
 		face = font_obj.FONT,
@@ -47,8 +50,8 @@ local function text_box_size(text, scale)
 	local text_w = (metrics.face and metrics.face.getWidth and metrics.face:getWidth(text))
 		or (string.len(text or "") * 10)
 	local text_h = (metrics.face and metrics.face.getHeight and metrics.face:getHeight()) or 20
-	local px_w = text_w * metrics.squish * scale * (G.TILESCALE or 1) * metrics.font_scale
-	local px_h = text_h * scale * (G.TILESCALE or 1) * metrics.font_scale * metrics.height_scale
+	local px_w = text_w * metrics.squish * scale * (runtime().TILESCALE or 1) * metrics.font_scale
+	local px_h = text_h * scale * (runtime().TILESCALE or 1) * metrics.font_scale * metrics.height_scale
 	return px_w / tile, px_h / tile
 end
 
@@ -58,7 +61,7 @@ local function make_text_proxy(id, rect, text)
 			id = id,
 			text = text,
 			scale = hud_layout.SIDEBAR_COUNTER_SCALE,
-			colour = (G and G.C and G.C.UI and G.C.UI.TEXT_LIGHT) or { 1, 1, 1, 1 },
+			colour = (runtime() and runtime().C and runtime().C.UI and runtime().C.UI.TEXT_LIGHT) or { 1, 1, 1, 1 },
 			shadow = true,
 		},
 		T = { x = rect.x, y = rect.y, w = rect.w, h = rect.h },
@@ -89,7 +92,7 @@ local function make_button_proxy(layout)
 		config = {
 			id = "end_run_button",
 			button = stage_button.current_action and stage_button.current_action() or "end_run_from_sidebar",
-			colour = stage_button.current_colour and stage_button.current_colour() or ((G and G.C and G.C.RED) or { 1, 0, 0.4, 1 }),
+			colour = stage_button.current_colour and stage_button.current_colour() or ((runtime() and runtime().C and runtime().C.RED) or { 1, 0, 0.4, 1 }),
 			minw = rect.w,
 			minh = rect.h,
 			maxw = rect.w,
@@ -158,8 +161,8 @@ function SidebarView:state()
 end
 
 function SidebarView:deck_left_count()
-	if G and G.ARGS and G.ARGS.deck_left_count ~= nil then
-		return G.ARGS.deck_left_count
+	if runtime() and runtime().ARGS and runtime().ARGS.deck_left_count ~= nil then
+		return runtime().ARGS.deck_left_count
 	end
 	local state = self:state()
 	return state and state.deck_left_count or 0
@@ -173,7 +176,7 @@ function SidebarView:relayout()
 	self._label_proxy = label
 	local count_rect = self._layout.deck_count
 	self._deck_count_proxy = make_text_proxy("text_deck_count", count_rect, tostring(self:deck_left_count()))
-	self._deck_count_proxy.config.ref_table = G and G.ARGS
+	self._deck_count_proxy.config.ref_table = runtime() and runtime().ARGS
 	self._deck_count_proxy.config.ref_value = "deck_left_count"
 	stage_button.bind_button_proxy(button, label)
 	return self._layout
@@ -225,7 +228,7 @@ function SidebarView:remove()
 end
 
 local function draw_panel(rect)
-	local colour = (G and G.C and G.C.DYN_UI and G.C.DYN_UI.MAIN) or { 0.22, 0.32, 0.35, 1 }
+	local colour = (runtime() and runtime().C and runtime().C.DYN_UI and runtime().C.DYN_UI.MAIN) or { 0.22, 0.32, 0.35, 1 }
 	love.graphics.setColor(colour)
 	love.graphics.rectangle("fill", rect.x, rect.y, rect.w, rect.h)
 end
@@ -233,19 +236,19 @@ end
 local function draw_counter_row(rect, count)
 	local label = "Cards left: "
 	local scale = hud_layout.SIDEBAR_COUNTER_SCALE
-	local colour = (G and G.C and G.C.UI and G.C.UI.TEXT_LIGHT) or { 1, 1, 1, 1 }
+	local colour = (runtime() and runtime().C and runtime().C.UI and runtime().C.UI.TEXT_LIGHT) or { 1, 1, 1, 1 }
 	local label_w = text_box_size(label, scale)
 	local value_w = text_box_size(tostring(count), scale)
 	local total_w = label_w + value_w
 	local x = rect.x + math.max(0, (rect.w - total_w) * 0.5)
 	local y = rect.y + math.max(0, (rect.h - text_box_size("0", scale)) * 0.5)
 	love.graphics.setColor(colour)
-	love.graphics.print(label, x, y, 0, scale * (G.TILESCALE or 1))
-	love.graphics.print(tostring(count), x + label_w, y, 0, scale * (G.TILESCALE or 1))
+	love.graphics.print(label, x, y, 0, scale * (runtime().TILESCALE or 1))
+	love.graphics.print(tostring(count), x + label_w, y, 0, scale * (runtime().TILESCALE or 1))
 end
 
 function SidebarView:draw(renderer)
-	if not G or G.STAGE ~= G.STAGES.RUN then return end
+	if not runtime() or runtime().STAGE ~= runtime().STAGES.RUN then return end
 	if not hud_layout.end_run_button_visible() then return end
 	local layout = self:layout()
 	self._deck_count_proxy = self._deck_count_proxy or self:find_node_by_id("text_deck_count")

@@ -1,5 +1,8 @@
 --[[ word_game/ui/perks/bonus_stack/animate.lua - Gold transform and fly-to-gutter choreography ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local facade = require("word_game.ui.facade")
 local layout = require("word_game.ui.perks.bonus_stack.layout")
 
@@ -120,7 +123,7 @@ end
 local function fly_card_to_stack(queue_event, card, fly_index, card_delay)
 	local sx, sy = card.T.x, card.T.y
 	local tx, ty = layout.target_position(fly_index)
-	local started = (G.TIMERS and G.TIMERS.REAL) or 0
+	local started = (runtime().TIMERS and runtime().TIMERS.REAL) or 0
 	if play_sfx then
 		play_sfx("card_slide1", 0.88 + fly_index * 0.015, 0.55)
 	end
@@ -131,7 +134,7 @@ local function fly_card_to_stack(queue_event, card, fly_index, card_delay)
 		blockable = false,
 		blocking = false,
 		func = function()
-			local now = (G.TIMERS and G.TIMERS.REAL) or (started + card_delay)
+			local now = (runtime().TIMERS and runtime().TIMERS.REAL) or (started + card_delay)
 			local u = card_delay > 0 and math.min(1, (now - started) / card_delay) or 1
 			local e = smoothstep(u)
 			card.T.x = sx + (tx - sx) * e
@@ -172,7 +175,7 @@ function M.animate_cards_to_stack(queue_event, _easing_mod, opts)
 		if opts.on_complete then opts.on_complete() end
 	end
 
-	local can_queue = queue_event and G.TIMELINE and G.TIMELINE.enqueue
+	local can_queue = queue_event and runtime().TIMELINE and runtime().TIMELINE.enqueue
 	if not can_queue then
 		for index, card in ipairs(cards) do
 			S.become_bonus_card(card)

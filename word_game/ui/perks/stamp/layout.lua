@@ -1,15 +1,18 @@
 --[[ word_game/ui/perks/stamp/layout.lua - stamp panel geometry and coordinate helpers ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Layout = require("word_game.ui.layout")
 
 local M = {}
 
 function M.tile_scale()
-	return (G.TILESCALE or 1) * (G.TILESIZE or 1)
+	return (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
 end
 
 function M.room_translate()
-	local room = G and G.ROOM
+	local room = runtime() and runtime().ROOM
 	if not room or not love or not love.graphics then return end
 	local ts = M.tile_scale()
 	love.graphics.translate(room.T.w * ts * 0.5, room.T.h * ts * 0.5)
@@ -47,7 +50,7 @@ function M.sidebar_width_px()
 end
 
 function M.mouse_to_stamp_space(mx, my)
-	local room = G and G.ROOM and G.ROOM.T
+	local room = runtime() and runtime().ROOM and runtime().ROOM.T
 	if not room then return mx, my end
 	local ts = M.tile_scale()
 	local cx = room.w * ts * 0.5
@@ -65,7 +68,7 @@ function M.mouse_to_stamp_space(mx, my)
 end
 
 function M.screen_top_px()
-	local room = G.ROOM and G.ROOM.T
+	local room = runtime().ROOM and runtime().ROOM.T
 	return ((room and room.y) or 0) * M.tile_scale() + 10
 end
 

@@ -5,6 +5,9 @@
 	horizontal perk imprint on the side panel.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local facade = require("word_game.ui.facade")
 local Layout = require("word_game.ui.layout")
 local run_state = facade.run_state()
@@ -53,8 +56,8 @@ local function stamp_panel_rect_px(layout_count)
 	if sidebar_view and sidebar_view.find_node_by_id then
 		row = sidebar_view:find_node_by_id("row_stamp_slot")
 	end
-	if not row and G.SIDEBAR_HUD and G.SIDEBAR_HUD.find_node_by_id then
-		row = G.SIDEBAR_HUD:find_node_by_id("row_stamp_slot")
+	if not row and runtime().SIDEBAR_HUD and runtime().SIDEBAR_HUD.find_node_by_id then
+		row = runtime().SIDEBAR_HUD:find_node_by_id("row_stamp_slot")
 	end
 	local rx, ry, rw, rh = node_rect_px(row)
 	if not rx then
@@ -134,7 +137,7 @@ end
 
 function M.play(perk_entry, callback)
 	if animate.is_active() then return false end
-	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
+	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return false end
 	perk_entry = definition.resolve_stamp_perk(perk_entry)
 	if not perk_entry then return false end
 	local sprite_entry = definition.resolve_stamp_sprite()
@@ -157,7 +160,7 @@ function M.try_opening_demo()
 		and WORD_GAME_UI.FirstPlayTutorial.is_active() then
 		return false
 	end
-	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
+	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return false end
 	if animate.imprint_count() > 0 then return false end
 	local rs = run_state.get()
 	if not rs or #(rs.perks or {}) > 0 then return false end
@@ -167,7 +170,7 @@ function M.try_opening_demo()
 end
 
 function M.demo_play()
-	if G.STATE ~= G.STATES.TABLE_BOARD then return end
+	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return end
 	local anim = animate.get_anim()
 	if anim and not anim.debug and anim.t < animate.TOTAL_DUR then return end
 
@@ -188,7 +191,7 @@ function M.update(dt)
 end
 
 function M.draw_pass()
-	if G.STATE ~= G.STATES.TABLE_BOARD or not G.ROOM or not love.graphics then return end
+	if runtime().STATE ~= runtime().STATES.TABLE_BOARD or not runtime().ROOM or not love.graphics then return end
 
 	local prev_shader = love.graphics.getShader()
 	local cr, cg, cb, ca = love.graphics.getColor()
@@ -265,10 +268,10 @@ end
 
 function M.reset()
 	M.clear_runtime()
-	if G.SIDEBAR_HUD and G.SIDEBAR_HUD.remove then
-		pcall(function() G.SIDEBAR_HUD:remove() end)
+	if runtime().SIDEBAR_HUD and runtime().SIDEBAR_HUD.remove then
+		pcall(function() runtime().SIDEBAR_HUD:remove() end)
 	end
-	G.SIDEBAR_HUD = nil
+	runtime().SIDEBAR_HUD = nil
 end
 
 function M.has_imprint()
@@ -313,13 +316,13 @@ function M.show_perk_popup(perk_entry)
 end
 
 function M.consume_click(mx, my)
-	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
-	if G.OVERLAY_MENU then return false end
+	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return false end
+	if runtime().OVERLAY_MENU then return false end
 	local anim = animate.get_anim()
 	if anim and not anim.finished then return false end
 	if not animate.has_imprint() then return false end
 
-	local c = G.INPUT
+	local c = runtime().INPUT
 	if not c or c.clicked.handled or not c.clicked.target then return false end
 	if Card and getmetatable(c.clicked.target) == Card then return false end
 

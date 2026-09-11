@@ -1,5 +1,8 @@
 --[[ word_game/ui/feedback/modifier_feedback.lua - Floating modifier hint above a placed card ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local facade = require("word_game.ui.facade")
 
 local function deck_api()
@@ -18,7 +21,7 @@ function M.show_on_placed_card(card)
 	local FloatUp = WORD_GAME_UI.FloatUpText
 	if not FloatUp or not FloatUp.from_card_above then return end
 	FloatUp.from_card_above(card, text, {
-		colour = G.C and G.C.GOLD or DEFAULT_COLOUR,
+		colour = runtime().C and runtime().C.GOLD or DEFAULT_COLOUR,
 		font_px = 26,
 		life = 1.35,
 		speed = 1.2,

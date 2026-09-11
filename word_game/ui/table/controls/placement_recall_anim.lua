@@ -1,5 +1,8 @@
 --[[ word_game/ui/table/controls/placement_recall_anim.lua - Slide placement-row cards back to hand ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Scheduler = require "app.effects.timeline_scheduler"
 local game_access = require("word_game.model.game_access")
 local domain = require "word_game.ui.facade"
@@ -27,7 +30,7 @@ local function set_animating(active)
 end
 
 local function placement_area()
-	return G.pattern_row and G.pattern_row.area
+	return runtime().pattern_row and runtime().pattern_row.area
 end
 
 local function bonus_stack_ui()
@@ -100,8 +103,8 @@ local function slide_card_to_bonus_stack(card, p_area, delay)
 			if not card or not p_area then return true end
 			local sx, sy = card.T.x, card.T.y
 			local sr = card.T.r or 0
-			if G.pattern_row then
-				G.pattern_row:on_remove_card(card)
+			if runtime().pattern_row then
+				runtime().pattern_row:on_remove_card(card)
 			end
 			if card.area == p_area then
 				p_area:remove_card(card)
@@ -112,9 +115,9 @@ local function slide_card_to_bonus_stack(card, p_area, delay)
 			end
 			local tx, ty = card.T.x, card.T.y
 			local tr = card.T.r or 0
-			local arc = (G.CARD_H or 1.4) * ARC_FRAC
+			local arc = (runtime().CARD_H or 1.4) * ARC_FRAC
 			park_card(card, sx, sy, sr)
-			local started = G.TIMERS.REAL
+			local started = runtime().TIMERS.REAL
 			Scheduler.add{
 				mode = "window",
 				timer = "REAL",
@@ -122,7 +125,7 @@ local function slide_card_to_bonus_stack(card, p_area, delay)
 				blockable = false,
 				blocking = false,
 				func = function()
-					local u = math.min(1, (G.TIMERS.REAL - started) / SLIDE_DURATION)
+					local u = math.min(1, (runtime().TIMERS.REAL - started) / SLIDE_DURATION)
 					local e = smoothstep(u)
 					card.T.x = sx + (tx - sx) * e
 					card.T.y = sy + (ty - sy) * e - arc * math.sin(math.pi * u)
@@ -152,26 +155,26 @@ local function slide_card_to_hand(card, p_area, delay)
 		delay = delay,
 		blockable = false,
 		func = function()
-			if not card or not G.dealt_letters or not p_area then return true end
+			if not card or not runtime().dealt_letters or not p_area then return true end
 
 			local sx, sy = card.T.x, card.T.y
 			local sr = card.T.r or 0
 
-			if G.pattern_row then
-				G.pattern_row:on_remove_card(card)
+			if runtime().pattern_row then
+				runtime().pattern_row:on_remove_card(card)
 			end
 			if card.area == p_area then
 				p_area:remove_card(card)
 			end
 
 			card.placement_recall_slide = true
-			G.dealt_letters:emplace(card)
+			runtime().dealt_letters:emplace(card)
 
 			local tx, ty, tr = card.T.x, card.T.y, card.T.r or 0
-			local arc = (G.CARD_H or 1.4) * ARC_FRAC
+			local arc = (runtime().CARD_H or 1.4) * ARC_FRAC
 			park_card(card, sx, sy, sr)
 
-			local started = G.TIMERS.REAL
+			local started = runtime().TIMERS.REAL
 			Scheduler.add{
 				mode = "window",
 				timer = "REAL",
@@ -179,7 +182,7 @@ local function slide_card_to_hand(card, p_area, delay)
 				blockable = false,
 				blocking = false,
 				func = function()
-					local u = math.min(1, (G.TIMERS.REAL - started) / SLIDE_DURATION)
+					local u = math.min(1, (runtime().TIMERS.REAL - started) / SLIDE_DURATION)
 					local e = smoothstep(u)
 					card.T.x = sx + (tx - sx) * e
 					card.T.y = sy + (ty - sy) * e - arc * math.sin(math.pi * u)
@@ -205,8 +208,8 @@ local function slide_card_to_hand(card, p_area, delay)
 end
 
 local function finish_recall()
-	if G.dealt_letters then
-		for _, card in ipairs(G.dealt_letters.cards or {}) do
+	if runtime().dealt_letters then
+		for _, card in ipairs(runtime().dealt_letters.cards or {}) do
 			card.placement_recall_slide = nil
 		end
 	end
@@ -217,8 +220,8 @@ local function finish_recall()
 		if slots and WORD_GAME.Jumble.sync_placement_cards then
 			WORD_GAME.Jumble.sync_placement_cards(slots)
 		end
-		if G.pattern_row and G.pattern_row.jumble_geometry then
-			G.pattern_row.jumble_geometry.relayout(G.pattern_row)
+		if runtime().pattern_row and runtime().pattern_row.jumble_geometry then
+			runtime().pattern_row.jumble_geometry.relayout(runtime().pattern_row)
 		end
 	end
 
@@ -229,17 +232,17 @@ local function finish_recall()
 		area:hard_set_cards()
 	end
 
-	if G.dealt_letters then
-		if G.dealt_letters.clear_selection then G.dealt_letters:clear_selection() end
-		if G.dealt_letters.set_ranks then G.dealt_letters:set_ranks() end
-		if G.dealt_letters.relayout then G.dealt_letters:relayout() end
-		if G.dealt_letters.hard_set_cards then G.dealt_letters:hard_set_cards() end
-		if G.dealt_letters.snap_VT then G.dealt_letters:snap_VT() end
+	if runtime().dealt_letters then
+		if runtime().dealt_letters.clear_selection then runtime().dealt_letters:clear_selection() end
+		if runtime().dealt_letters.set_ranks then runtime().dealt_letters:set_ranks() end
+		if runtime().dealt_letters.relayout then runtime().dealt_letters:relayout() end
+		if runtime().dealt_letters.hard_set_cards then runtime().dealt_letters:hard_set_cards() end
+		if runtime().dealt_letters.snap_VT then runtime().dealt_letters:snap_VT() end
 	end
 end
 
 function M.animate(on_complete)
-	if animating or not G.dealt_letters or not placement_area() then
+	if animating or not runtime().dealt_letters or not placement_area() then
 		if on_complete then on_complete() end
 		return false
 	end
@@ -250,7 +253,7 @@ function M.animate(on_complete)
 		return false
 	end
 
-	if not (G.TIMELINE and G.TIMELINE.enqueue) then
+	if not (runtime().TIMELINE and runtime().TIMELINE.enqueue) then
 		return false
 	end
 

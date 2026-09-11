@@ -5,6 +5,9 @@
 	Classic: banked stage score becomes tokens (1 point = 1 token).
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local facade = require("word_game.ui.facade")
 local Layout = require("word_game.ui.layout")
 local round_config = require("word_game.config.gameplay.round")
@@ -49,9 +52,9 @@ local function ease_in_out(t)
 end
 
 local function room_translate()
-	local room = G and G.ROOM
+	local room = runtime() and runtime().ROOM
 	if not room or not love or not love.graphics then return end
-	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
+	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
 	love.graphics.translate(room.T.w * ts * 0.5, room.T.h * ts * 0.5)
 	love.graphics.rotate(room.T.r or 0)
 	love.graphics.translate(
@@ -126,7 +129,7 @@ function M.is_active()
 end
 
 local function timeline_center_px()
-	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
+	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
 	local rect = Layout.timeline_rect()
 	local w = rect.w * ts
 	local h = rect.h * ts
@@ -137,17 +140,17 @@ local function timeline_center_px()
 end
 
 local function resolve_target_px()
-	if G.draw_pile and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.token_center_px then
-		local cx, cy = WORD_GAME_UI.TableDeck.token_center_px(G.draw_pile)
+	if runtime().draw_pile and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.token_center_px then
+		local cx, cy = WORD_GAME_UI.TableDeck.token_center_px(runtime().draw_pile)
 		if cx and cy then return cx, cy end
 	end
 	local deck = Layout.deck_rect()
-	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
+	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
 	return (deck.x + deck.w * 0.5) * ts, deck.y * ts
 end
 
 local function sticker_quad()
-	local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.coin
+	local atlas = runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES.coin
 	if not atlas or not atlas.image then return end
 	local iw, ih = atlas.image:getDimensions()
 	local px, py = atlas.px or iw, atlas.py or ih
@@ -261,7 +264,7 @@ function M.try_award(callback)
 	fly_to_x, fly_to_y = end_x, end_y
 
 	if attention then
-		attention("+" .. tostring(amount) .. " tokens", G.C.GOLD or { 1, 0.85, 0.35, 1 }, 1.4)
+		attention("+" .. tostring(amount) .. " tokens", runtime().C.GOLD or { 1, 0.85, 0.35, 1 }, 1.4)
 	end
 	if play_sfx then
 		play_sfx("coin1", 1, 0.75)
@@ -300,13 +303,13 @@ function M.spend_fly(amount, callback)
 	-- Tokens leave the pile and continue beyond the playfield.
 	-- Keep the pile as the source so the animation agrees with the balance roll.
 	fly_from_x, fly_from_y = resolve_target_px()
-	local room = G and G.ROOM
-	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
-	fly_to_x = (room and room.T.w or G.TILE_W or 20) * ts + 80
+	local room = runtime() and runtime().ROOM
+	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
+	fly_to_x = (room and room.T.w or runtime().TILE_W or 20) * ts + 80
 	fly_to_y = fly_from_y - 24
 
 	if attention then
-		attention("-" .. tostring(amount) .. " tokens", G.C.RED or { 1, 0.35, 0.35, 1 }, 1.2)
+		attention("-" .. tostring(amount) .. " tokens", runtime().C.RED or { 1, 0.35, 0.35, 1 }, 1.2)
 	end
 	if play_sfx then
 		play_sfx("coin2", 0.9, 0.65)
@@ -315,7 +318,7 @@ end
 
 function M.update(dt)
 	if not active then return end
-	dt = dt or (G and G.real_dt) or 0.016
+	dt = dt or (runtime() and runtime().real_dt) or 0.016
 
 	spawn_acc = spawn_acc + dt
 	while spawned < total and spawn_acc >= STAGGER do
@@ -347,16 +350,16 @@ end
 
 function M.draw_pass()
 	if not active and #flyers == 0 then return end
-	if not game_access.get() or not G.ROOM then return end
-	if G.STATE ~= G.STATES.TABLE_BOARD then return end
+	if not game_access.get() or not runtime().ROOM then return end
+	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return end
 
 	M.update(math.min(0.05, love.timer and love.timer.getDelta() or 0.016))
 
 	local img, quad, pw, ph = sticker_quad()
 	if not img or not quad then return end
 
-	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
-	local size = math.max(22, G.CARD_W * ts * 0.16)
+	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
+	local size = math.max(22, runtime().CARD_W * ts * 0.16)
 	local scale = size / pw
 
 	local prev_shader = love.graphics.getShader()

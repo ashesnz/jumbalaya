@@ -1,5 +1,8 @@
 --[[ word_game/ui/perks/timeline_timer/draw.lua - timeline HUD render pass ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Layout = require("word_game.ui.layout")
 local game_access = require("word_game.model.game_access")
 local StageLabel = require("word_game.ui.score_banner.stage_label")
@@ -8,13 +11,13 @@ local M = {}
 
 function M.draw(timer, layout)
 	if not love or not love.graphics or not love.graphics.polygon then return end
-	if not game_access.get() or not G.ROOM then return end
-	if G.STATE ~= G.STATES.TABLE_BOARD then return end
+	if not game_access.get() or not runtime().ROOM then return end
+	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return end
 	local vis = timer.intro_visible
 	if vis == nil then vis = 1 end
 	if vis <= 0.001 then return end
 
-	local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
+	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
 	local rect = Layout.timeline_rect and Layout.timeline_rect() or Layout.portrait_rect()
 	local w = rect.w * ts
 	local h = rect.h * ts
@@ -54,7 +57,7 @@ function M.draw(timer, layout)
 	local shake = timer.display_shake_strength()
 	if shake > 0 then
 		love.graphics.push()
-		local real_time = (G.TIMERS and G.TIMERS.REAL) or 0
+		local real_time = (runtime().TIMERS and runtime().TIMERS.REAL) or 0
 		local ox = math.sin(real_time * 52) * shake
 		local oy = math.cos(real_time * 47) * shake * 0.72
 		love.graphics.translate(ox, oy)
@@ -105,7 +108,7 @@ function M.draw(timer, layout)
 		and frac_filled > 0.001 and frac_filled < 0.999
 		or (not timer.is_progress_mode() and frac_remaining > 0.001 and frac_remaining < 0.999)
 	if seam_active then
-		local real_time = (G.TIMERS and G.TIMERS.REAL) or 0
+		local real_time = (runtime().TIMERS and runtime().TIMERS.REAL) or 0
 		local flicker = math.sin(real_time * 24) * 0.15 + math.cos(real_time * 37) * 0.1
 		local level = timer.is_progress_mode() and timer.display_combo_level() or 1
 		local glow_scale = timer.is_progress_mode() and timer.display_smoke_glow_scale() or 1
@@ -186,10 +189,10 @@ function M.draw(timer, layout)
 		love.graphics.print(count_str, text_cx - tw * 0.5 + 1.5, text_cy - th * 0.5 + 2.0)
 
 		if timer.is_progress_mode() and (timer.goal_reached or timer.frozen_for_reward) then
-			local pulse = math.abs(math.sin(((G.TIMERS and G.TIMERS.REAL) or 0) * 6))
+			local pulse = math.abs(math.sin(((runtime().TIMERS and runtime().TIMERS.REAL) or 0) * 6))
 			love.graphics.setColor(1.0, 0.95 - pulse * 0.2, 0.55 - pulse * 0.15, 1)
 		elseif not timer.is_progress_mode() and timer.time_remaining <= 10 and timer.time_remaining > 0 then
-			local pulse_red = math.abs(math.sin(((G.TIMERS and G.TIMERS.REAL) or 0) * 8))
+			local pulse_red = math.abs(math.sin(((runtime().TIMERS and runtime().TIMERS.REAL) or 0) * 8))
 			love.graphics.setColor(1.0, 0.85 - pulse_red * 0.35, 0.85 - pulse_red * 0.35, 1)
 		else
 			love.graphics.setColor(1.0, 1.0, 1.0, 1.0)

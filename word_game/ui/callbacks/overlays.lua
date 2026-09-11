@@ -1,4 +1,7 @@
---[[ word_game/ui/callbacks/overlays.lua - Overlay screen G.FUNCS (stable names) ]]
+--[[ word_game/ui/callbacks/overlays.lua - Overlay screen runtime().FUNCS (stable names) ]]
+
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
 
 local game_access = require("word_game.model.game_access")
 local UIViewHost = require("word_game.ui.views.ui_view_host")
@@ -6,48 +9,48 @@ local UIViewHost = require("word_game.ui.views.ui_view_host")
 local M = {}
 
 function M.install()
-	G.FUNCS.open_options = function(e)
-		G.SETTINGS.paused = true
-		G.FUNCS.show_overlay{
+	runtime().FUNCS.open_options = function(e)
+		runtime().SETTINGS.paused = true
+		runtime().FUNCS.show_overlay{
 			definition = build_options(),
 		}
 	end
 
-	G.FUNCS.open_settings = function(e, instant)
-		G.SETTINGS.paused = true
-		G.FUNCS.show_overlay{
+	runtime().FUNCS.open_settings = function(e, instant)
+		runtime().SETTINGS.paused = true
+		runtime().FUNCS.show_overlay{
 			definition = build_settings(),
 			config = {offset = {x=0,y=instant and 0 or 10}}
 		}
 	end
 
-	G.FUNCS.language_selection = function(e)
-		G.SETTINGS.paused = true
-		G.FUNCS.show_overlay{
-			definition = G.DEFINITIONS.language_selector(),
+	runtime().FUNCS.language_selection = function(e)
+		runtime().SETTINGS.paused = true
+		runtime().FUNCS.show_overlay{
+			definition = runtime().DEFINITIONS.language_selector(),
 		}
 	end
 
-	G.FUNCS.profile_select = function(e)
-		G.SETTINGS.paused = true
-		G.focused_profile = G.SETTINGS.profile
+	runtime().FUNCS.profile_select = function(e)
+		runtime().SETTINGS.paused = true
+		runtime().focused_profile = runtime().SETTINGS.profile
 
 		for i = 1, 3 do
-			if i ~= G.focused_profile and love.filesystem.getInfo(i..'/'..'profile.acs') then G:load_profile(i) end
+			if i ~= runtime().focused_profile and love.filesystem.getInfo(i..'/'..'profile.acs') then runtime():load_profile(i) end
 		end
-		G:load_profile(G.focused_profile)
+		runtime():load_profile(runtime().focused_profile)
 
-		G.FUNCS.show_overlay{
-			definition = G.DEFINITIONS.profile_select(),
+		runtime().FUNCS.show_overlay{
+			definition = runtime().DEFINITIONS.profile_select(),
 		}
 	end
 
-	G.FUNCS.quit = function(e)
+	runtime().FUNCS.quit = function(e)
 		love.event.quit()
 	end
 
-	G.FUNCS.warn_lang = function(e)
-		local _infotip_object = G.OVERLAY_MENU:find_node_by_id('overlay_menu_infotip')
+	runtime().FUNCS.warn_lang = function(e)
+		local _infotip_object = runtime().OVERLAY_MENU:find_node_by_id('overlay_menu_infotip')
 		if _infotip_object.config.set ~= e.config.ref_table.label then
 			_infotip_object.config.object:remove()
 			_infotip_object.config.object = UIViewHost.create{
@@ -67,39 +70,39 @@ function M.install()
 		end
 	end
 
-	G.FUNCS.change_lang = function(e)
+	runtime().FUNCS.change_lang = function(e)
 		local lang = e.config.ref_table
-		if not lang or lang == G.LANG then
-			G.FUNCS.close_overlay()
+		if not lang or lang == runtime().LANG then
+			runtime().FUNCS.close_overlay()
 		else
-			G.SETTINGS.language = lang.key
-			G:set_language()
-			G:queue_wipe_transition({
+			runtime().SETTINGS.language = lang.key
+			runtime():set_language()
+			runtime():queue_wipe_transition({
 				function()
-					G:discard_run()
-					G:load_card_definitions()
-					G:open_main_menu()
+					runtime():discard_run()
+					runtime():load_card_definitions()
+					runtime():open_main_menu()
 					return true
 				end,
 			}, { flush_timeline = true })
 		end
 	end
 
-	G.FUNCS.copy_run_seed = function(e)
+	runtime().FUNCS.copy_run_seed = function(e)
 		local game = game_access.get()
 		local seed = game and game.seed_streams and game.seed_streams.seed
 		if not seed then return end
-		if G.F_LOCAL_CLIPBOARD then
-			G.CLIPBOARD = seed
+		if runtime().F_LOCAL_CLIPBOARD then
+			runtime().CLIPBOARD = seed
 		else
 			love.system.setClipboardText(seed)
 		end
 	end
 
-	G.FUNCS.show_infotip = function(e)
+	runtime().FUNCS.show_infotip = function(e)
 		if e.config.ref_table then
 			e.children.info = UIViewHost.create{
-				definition = {n=G.UI.ROOT, config = {align = 'cm', colour = G.C.CLEAR, padding = 0.02}, nodes=e.config.ref_table},
+				definition = {n=runtime().UI.ROOT, config = {align = 'cm', colour = runtime().C.CLEAR, padding = 0.02}, nodes=e.config.ref_table},
 				config = {offset = {x=-0.03,y=0}, align = 'cl', parent = e}
 			}
 			e.children.info:align_to_major()

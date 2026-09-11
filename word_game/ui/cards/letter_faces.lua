@@ -1,5 +1,8 @@
 --[[ letter_card_faces.lua - Shared letter-card atlas + runtime tint helpers ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Palette = require "word_game.config.visuals.letter_card_palette"
 
 local M = {}
@@ -30,7 +33,7 @@ function M.is_letter_card(card)
 end
 
 function M.atlas(name)
-	return G.TEXTURE_ATLASES and G.TEXTURE_ATLASES[name]
+	return runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES[name]
 end
 
 function M.frame_atlas()

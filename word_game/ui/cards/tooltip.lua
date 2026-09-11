@@ -1,16 +1,19 @@
 --[[ word_game/ui/card_tooltip.lua - Letter-card tooltip UI generation ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local facade = require("word_game.ui.facade")
 local perk = facade.perks_registry()
 
 function get_type_colour(_c, card)
 	if (_c.unlocked == false and not (card and card.bypass_lock)) then
-		return G.C.BLACK
+		return runtime().C.BLACK
 	end
 	if _c.set == "Finish" then
-		return G.C.DARK_FINISH
+		return runtime().C.DARK_FINISH
 	end
-	return G.C.SECONDARY_SET[_c.set] or { 0, 1, 1, 1 }
+	return runtime().C.SECONDARY_SET[_c.set] or { 0, 1, 1, 1 }
 end
 
 function generate_card_ui(_c, full_UI_table, specific_vars, card_type, badges, hide_desc, main_start, main_end)
@@ -93,7 +96,7 @@ function generate_card_ui(_c, full_UI_table, specific_vars, card_type, badges, h
 		end
 		localize { type = "descriptions", key = _c.key, set = _c.set, nodes = desc_nodes, vars = specific_vars or {} }
 	elseif _c.set == "Perk" then
-		local loc_vars = perk.description_vars(_c, G.PROFILES and G.PROFILES[G.SETTINGS.profile]) or {}
+		local loc_vars = perk.description_vars(_c, runtime().PROFILES and runtime().PROFILES[runtime().SETTINGS.profile]) or {}
 		localize { type = "descriptions", key = _c.key, set = _c.set, nodes = desc_nodes, vars = loc_vars }
 	end
 

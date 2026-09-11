@@ -1,5 +1,8 @@
 --[[ word_game/ui/play_effects/animate.lua - Play motion sequences and card choreography ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local M = {}
 
 local facade = require("word_game.ui.facade")
@@ -36,7 +39,7 @@ function M.bind_host(mod)
 end
 
 local function has_event_manager()
-	return G.TIMELINE and G.TIMELINE.enqueue
+	return runtime().TIMELINE and runtime().TIMELINE.enqueue
 end
 
 local function finish_used_card(card, return_to_deck)
@@ -140,7 +143,7 @@ function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_
 		delay = 0.05,
 		blocking = true,
 		func = function()
-			word_feedback.show_screen_centered("Well done!", G.C.GOLD, WELL_DONE_HOLD)
+			word_feedback.show_screen_centered("Well done!", runtime().C.GOLD, WELL_DONE_HOLD)
 			if play_sfx then
 				play_sfx("coin2", 1, 0.9)
 			end

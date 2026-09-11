@@ -1,5 +1,8 @@
 --[[ word_game/ui/trade/init.lua - The Card Marketplace overlay ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local facade = require("word_game.ui.facade")
 
 local function trade_model()
@@ -149,11 +152,11 @@ open_overlay = function()
 	if engine then
 		views_install.install_trade(engine)
 	end
-	G.SETTINGS.paused = true
+	runtime().SETTINGS.paused = true
 	if WORD_GAME_UI.PlayHoldRedraw and WORD_GAME_UI.PlayHoldRedraw.reset then
 		WORD_GAME_UI.PlayHoldRedraw.reset()
 	end
-	G.FUNCS.show_overlay({
+	runtime().FUNCS.show_overlay({
 		definition = M.definition(),
 		config = { no_esc = true, offset = { x = 0, y = modal_offset_y() }, no_jiggle = true },
 	})
@@ -162,11 +165,11 @@ end
 -- Rebuilds the modal body without any affordability gating, so in-flight
 -- animations can play out before the session is torn down.
 rebuild_overlay = function()
-	if not G.OVERLAY_MENU then
+	if not runtime().OVERLAY_MENU then
 		open_overlay()
 		return
 	end
-	local host = G.OVERLAY_MENU:find_node_by_id("trade_marketplace_body")
+	local host = runtime().OVERLAY_MENU:find_node_by_id("trade_marketplace_body")
 	if not host or not host.config then
 		open_overlay()
 		return
@@ -190,7 +193,7 @@ rebuild_overlay = function()
 		align = "cm",
 		parent = host,
 	}, body_def)
-	G.OVERLAY_MENU:recalculate()
+	runtime().OVERLAY_MENU:recalculate()
 end
 
 refresh_overlay = function()
@@ -216,16 +219,16 @@ local function close_menu()
 	session = nil
 	trade_fly.clear()
 	trade_animate.clear()
-	if G.FUNCS.close_overlay then
-		G.FUNCS.close_overlay()
+	if runtime().FUNCS.close_overlay then
+		runtime().FUNCS.close_overlay()
 	end
 end
 
 local function continue_run()
 	offer = nil
 	session = nil
-	if G.FUNCS.close_overlay then
-		G.FUNCS.close_overlay()
+	if runtime().FUNCS.close_overlay then
+		runtime().FUNCS.close_overlay()
 	end
 	if WORD_GAME and WORD_GAME.Play then
 		WORD_GAME.Play.continue_after_dealer()
@@ -269,7 +272,7 @@ local function refresh_or_finish()
 end
 
 local function fail(text)
-	word_feedback.show_screen_centered(tostring(text), G.C.RED, 1.4)
+	word_feedback.show_screen_centered(tostring(text), runtime().C.RED, 1.4)
 end
 
 function M.is_flying()
@@ -281,7 +284,7 @@ function M.is_open()
 end
 
 --- Advance the marketplace card fly animation. Called from the post_input
---- updater so progress continues while G.SETTINGS.paused freezes game dt.
+--- updater so progress continues while runtime().SETTINGS.paused freezes game dt.
 function M.step_card_fly(dt)
 	return trade_fly.step_card_fly(dt)
 end
@@ -356,11 +359,11 @@ function M.on_pick(e)
 		elseif WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.spend_tokens_display then
 			WORD_GAME_UI.TableDeck.spend_tokens_display(cost)
 		end
-		local ts = (G.TILESCALE or 1) * (G.TILESIZE or 1)
+		local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
 		local card = item.market_card
 		local transform = card and card.T
-		local start_x = transform and (transform.x + (transform.w or G.CARD_W) * 0.5) * ts
-		local start_y = transform and (transform.y + (transform.h or G.CARD_H) * 0.5) * ts
+		local start_x = transform and (transform.x + (transform.w or runtime().CARD_W) * 0.5) * ts
+		local start_y = transform and (transform.y + (transform.h or runtime().CARD_H) * 0.5) * ts
 		item.flying = true
 		-- Rebuild without the affordability check: if this purchase broke
 		-- us, the modal must stay open until the card finishes flying.

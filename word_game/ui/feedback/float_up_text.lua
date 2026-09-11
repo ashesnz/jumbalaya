@@ -5,6 +5,9 @@
 	Here it emits from a played card (or the play row) and wobbles like steam.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Layout = require("word_game.ui.layout")
 
 local FloatUpText = EaseNode:derive("FloatUpText")
@@ -36,7 +39,7 @@ function FloatUpText:construct(config)
 	local w = config.w or 1.4
 	local h = config.h or 0.55
 	EaseNode.construct(self, config.x or 0, config.y or 0, w, h)
-	self:set_container(G.ROOM)
+	self:set_container(runtime().ROOM)
 	self.states.hover.can = false
 	self.states.click.can = false
 	self.states.collide.can = false
@@ -83,9 +86,9 @@ end
 
 function FloatUpText:draw()
 	if not self.states.visible or (self.alpha or 1) <= 0 then return end
-	if not G.ROOM then return end
+	if not runtime().ROOM then return end
 
-	local ts = G.TILESCALE * G.TILESIZE
+	local ts = runtime().TILESCALE * runtime().TILESIZE
 	local font = title_font(self.font_px)
 	local txt = self.text
 	local w = self.VT.w * ts
@@ -127,7 +130,7 @@ function FloatUpText:remove()
 end
 
 function FloatUpText.spawn(config)
-	if not G.ROOM then return nil end
+	if not runtime().ROOM then return nil end
 	return FloatUpText(config)
 end
 

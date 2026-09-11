@@ -5,6 +5,9 @@
 	the foreground. Move past a threshold while held: cancel inspect and drag.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local game_access = require("word_game.model.game_access")
 
 local M = {}
@@ -28,7 +31,7 @@ local function is_letter_card(card)
 	if set ~= "Default" and set ~= "Enhanced" then return false end
 	local area = card.area
 	if not area then return false end
-	return area == G.dealt_letters or (area.config and area.config.type == "placement")
+	return area == runtime().dealt_letters or (area.config and area.config.type == "placement")
 end
 
 local function ease_inout(t)
@@ -38,7 +41,7 @@ local function ease_inout(t)
 end
 
 local function cursor_moved()
-	local c = G.INPUT
+	local c = runtime().INPUT
 	if not c or not c.press_state or not c.hover_state then return 0 end
 	local a, b = c.press_state.T, c.hover_state.T
 	if not a or not b then return 0 end
@@ -76,7 +79,7 @@ local function set_peek_card(card)
 end
 
 local function start_drag(card)
-	local c = G.INPUT
+	local c = runtime().INPUT
 	if not c or not card or card.REMOVED then return end
 	if not card.states.drag.can then return end
 	restore_scale(card)
@@ -91,7 +94,7 @@ local function start_drag(card)
 end
 
 local function wanted_card()
-	local c = G.INPUT
+	local c = runtime().INPUT
 	if not c then return nil end
 	if c.dragging and c.dragging.target then return nil end
 
@@ -130,7 +133,7 @@ end
 
 function M.update(dt)
 	dt = dt or 0
-	local c = G.INPUT
+	local c = runtime().INPUT
 	if c and c.pointer_held and hold_card then
 		hold_t = hold_t + dt
 	elseif not (c and c.pointer_held) then
@@ -162,7 +165,7 @@ end
 function M.draw_foreground()
 	local card = peek_card
 	if not card or card.REMOVED or peek <= 0.01 then return end
-	if G.INPUT and G.INPUT.dragging and G.INPUT.dragging.target == card then
+	if runtime().INPUT and runtime().INPUT.dragging and runtime().INPUT.dragging.target == card then
 		return
 	end
 	love.graphics.push()

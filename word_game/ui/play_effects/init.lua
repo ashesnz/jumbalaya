@@ -1,5 +1,8 @@
 --[[ word_game/ui/play_effects/init.lua - Play-button UI orchestration facade ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Scheduler = require "app.effects.timeline_scheduler"
 local definition = require("word_game.ui.play_effects.definition")
 local animate = require("word_game.ui.play_effects.animate")
@@ -9,7 +12,7 @@ local M = {}
 animate.bind_host(M)
 
 local function has_event_manager()
-	return G.TIMELINE and G.TIMELINE.enqueue
+	return runtime().TIMELINE and runtime().TIMELINE.enqueue
 end
 
 function M.queue_event(ev)
@@ -21,8 +24,8 @@ function M.queue_event(ev)
 end
 
 function M.request_layout_refresh()
-	G.ARGS = G.ARGS or {}
-	G.ARGS.pending_layout = true
+	runtime().ARGS = runtime().ARGS or {}
+	runtime().ARGS.pending_layout = true
 end
 
 for k, v in pairs(definition) do

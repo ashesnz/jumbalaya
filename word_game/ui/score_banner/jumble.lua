@@ -2,6 +2,9 @@
 	word_game/ui/score_banner/jumble.lua - Jumble score state, rolls, and animation.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Layout = require("word_game.ui.layout")
 local game_access = require("word_game.model.game_access")
 local facade = require("word_game.ui.facade")
@@ -174,14 +177,14 @@ function M.get_multi_growth(cur_multi)
 end
 
 function M.calc_points_to_get_pos(cx, ts)
-	ts = ts or ((G and G.TILESCALE or 1) * (G and G.TILESIZE or 1))
-	local area = G and G.pattern_row and G.pattern_row.area
+	ts = ts or ((runtime() and runtime().TILESCALE or 1) * (runtime() and runtime().TILESIZE or 1))
+	local area = runtime() and runtime().pattern_row and runtime().pattern_row.area
 	local felt = Layout.felt_rect()
 	local card_bottom = (area and area.T and area.T.y and area.T.h)
 		and ((area.T.y + area.T.h) * ts)
 		or ((felt.y + 2.0) * ts)
-	local hand_top = (G and G.dealt_letters and G.dealt_letters.T and G.dealt_letters.T.y)
-		and (G.dealt_letters.T.y * ts)
+	local hand_top = (runtime() and runtime().dealt_letters and runtime().dealt_letters.T and runtime().dealt_letters.T.y)
+		and (runtime().dealt_letters.T.y * ts)
 		or ((felt.y + felt.h - 2.5) * ts)
 	local gap_cy = (card_bottom + hand_top) * 0.5 - ts * POINTS_TO_GET_RAISE
 	return cx or ((felt.x + felt.w * 0.5) * ts), gap_cy

@@ -2,6 +2,9 @@
 	word_game/ui/fx_subscribers.lua - FX modules as store and presentation subscribers (Phase 6).
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Presentation = require("word_game.model.presentation")
 
 local M = {
@@ -16,7 +19,7 @@ function M.install(engine, ui)
 	local store = engine and engine.store
 	if store then
 		store:subscribe(function(state)
-			if G and G.STAGE ~= G.STAGES.RUN then return end
+			if runtime() and runtime().STAGE ~= runtime().STAGES.RUN then return end
 			local jumble = state.word_round and state.word_round.jumble
 			if not jumble then return end
 			local score = jumble.total_score or 0

@@ -1,5 +1,8 @@
 --[[ word_game/ui/play_effects/definition.lua - Play feedback, banners, and layout sync ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local M = {}
 
 local facade = require("word_game.ui.facade")
@@ -54,7 +57,7 @@ function M.show_post_target_multiplier_fx(result)
 	if FloatUp and FloatUp.from_timeline then
 		-- Same gold float-up-and-fade as "Hand Cleared", anchored to the slider tip.
 		FloatUp.from_timeline("×2", {
-			colour = G.C and G.C.GOLD or { 1, 0.85, 0.2, 1 },
+			colour = runtime().C and runtime().C.GOLD or { 1, 0.85, 0.2, 1 },
 			font_px = 32,
 			speed = 1.25,
 			life = 1.8,
@@ -110,7 +113,7 @@ function M.show_validation_error(err)
 	if word_feedback.is_invalid_reason(err) then
 		word_feedback.show_invalid()
 	else
-		word_feedback.show(err or "Cannot play", G.C.RED)
+		word_feedback.show(err or "Cannot play", runtime().C.RED)
 	end
 	play_sfx("cancel", 0.8, 0.6)
 end
@@ -131,20 +134,20 @@ function M.add_points(_amount)
 end
 
 function M.sync_hand_after_deal()
-	if G.dealt_letters and G.dealt_letters.cards[1] then
-		G.dealt_letters:relayout()
-		for _, card in ipairs(G.dealt_letters.cards) do
+	if runtime().dealt_letters and runtime().dealt_letters.cards[1] then
+		runtime().dealt_letters:relayout()
+		for _, card in ipairs(runtime().dealt_letters.cards) do
 			if not card.bounce and card.states and not card.states.drag.is then
 				card:hard_set_T()
 			end
 		end
-		if G.dealt_letters.velocity then
-			G.dealt_letters.velocity.x = 0
-			G.dealt_letters.velocity.y = 0
-			G.dealt_letters.velocity.r = 0
-			G.dealt_letters.velocity.scale = 0
+		if runtime().dealt_letters.velocity then
+			runtime().dealt_letters.velocity.x = 0
+			runtime().dealt_letters.velocity.y = 0
+			runtime().dealt_letters.velocity.r = 0
+			runtime().dealt_letters.velocity.scale = 0
 		end
-		G.dealt_letters:snap_VT()
+		runtime().dealt_letters:snap_VT()
 	end
 	if WORD_GAME_UI.TableControls then
 		WORD_GAME_UI.TableControls.sync_position()
@@ -152,19 +155,19 @@ function M.sync_hand_after_deal()
 end
 
 function M.align_placement_table()
-	if G.pattern_row and G.pattern_row.area then
-		G.pattern_row:relayout()
-		G.pattern_row.area:hard_set_cards()
+	if runtime().pattern_row and runtime().pattern_row.area then
+		runtime().pattern_row:relayout()
+		runtime().pattern_row.area:hard_set_cards()
 	end
 end
 
 function M.show_word_success(word)
-	word_feedback.show(word .. "  +" .. #word, G.C.GREEN, 1.2, 0.35)
+	word_feedback.show(word .. "  +" .. #word, runtime().C.GREEN, 1.2, 0.35)
 	play_sfx("coin2", 1, 0.9)
 end
 
 function M.show_puzzle_bank_feedback(puzzle_total)
-	word_feedback.show(puzzle_total .. " Points Scored!", G.C.GOLD, 1.5, 0.35)
+	word_feedback.show(puzzle_total .. " Points Scored!", runtime().C.GOLD, 1.5, 0.35)
 	play_sfx("coin2", 1, 0.9)
 end
 
@@ -190,13 +193,13 @@ function M.restore_boss_layout(opts)
 	if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
 		WORD_GAME_UI.Sidebar.sync_visibility()
 	end
-	G.ARGS = G.ARGS or {}
-	G.ARGS.pending_layout = true
+	runtime().ARGS = runtime().ARGS or {}
+	runtime().ARGS.pending_layout = true
 	M.align_placement_table()
-	if G.dealt_letters then
-		G.dealt_letters:relayout()
-		G.dealt_letters:snap_VT()
-		G.dealt_letters:hard_set_cards()
+	if runtime().dealt_letters then
+		runtime().dealt_letters:relayout()
+		runtime().dealt_letters:snap_VT()
+		runtime().dealt_letters:hard_set_cards()
 	end
 	if WORD_GAME_UI.TableControls then
 		WORD_GAME_UI.TableControls.sync_position()
@@ -215,7 +218,7 @@ function M.show_bonus_flyovers(used_cards)
 		local stack_ui = bonus_stack_ui()
 		if stack_ui.is_bonus_card(card) then
 			FloatUp.from_card(card, "+" .. tostring(stack_ui.BONUS_POINTS), {
-				colour = G.C and G.C.GOLD or { 1, 0.85, 0.2, 1 },
+				colour = runtime().C and runtime().C.GOLD or { 1, 0.85, 0.2, 1 },
 			})
 		end
 	end

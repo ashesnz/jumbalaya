@@ -8,6 +8,9 @@
 	EaseNode and the TO GO banner both use it).
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local ComicBurst = EaseNode:derive("ComicBurst")
 
 local YELLOW = { 1.00, 0.90, 0.12, 1 }
@@ -131,12 +134,12 @@ local function pop_scale(age)
 		u = u * u * (3 - 2 * u)
 		return 1.18 + (1.0 - 1.18) * u
 	end
-	return 1.0 + 0.018 * math.sin((G.TIMERS.REAL or 0) * 9)
+	return 1.0 + 0.018 * math.sin((runtime().TIMERS.REAL or 0) * 9)
 end
 
 function ComicBurst.make(radius)
 	radius = radius or 1
-	local rng = make_rng((G.TIMERS.TOTAL or 0) * 10000 + math.random(1, 99999))
+	local rng = make_rng((runtime().TIMERS.TOTAL or 0) * 10000 + math.random(1, 99999))
 	return {
 		alpha = 1,
 		age = 0,

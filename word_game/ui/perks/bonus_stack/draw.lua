@@ -1,5 +1,8 @@
 --[[ word_game/ui/perks/bonus_stack/draw.lua - Bonus gutter card pass ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local facade = require("word_game.ui.facade")
 
 local function bonus_stack_model()
@@ -10,7 +13,7 @@ local M = {}
 
 local function draw_label(layout)
 	if not bonus_stack_model().is_active() then return end
-	local font = G.FONTS and (G.FONTS.sm or G.FONTS.medium or G.FONTS.main)
+	local font = runtime().FONTS and (runtime().FONTS.sm or runtime().FONTS.medium or runtime().FONTS.main)
 	if not font then return end
 	love.graphics.setFont(font)
 	love.graphics.setColor(1, 0.92, 0.55, 0.95)
@@ -28,8 +31,8 @@ function M.draw_pass(layout_mod)
 	if bonus_stack_model().is_active() and not bonus_stack_model().is_animating() then
 		draw_label(layout)
 	end
-	local dragging = G.INPUT and G.INPUT.dragging and G.INPUT.dragging.target
-	local focused = G.INPUT and G.INPUT.focused and G.INPUT.focused.target
+	local dragging = runtime().INPUT and runtime().INPUT.dragging and runtime().INPUT.dragging.target
+	local focused = runtime().INPUT and runtime().INPUT.focused and runtime().INPUT.focused.target
 	for _, card in ipairs(cards) do
 		if card and not card.REMOVED and not card.area
 			and card ~= dragging and card ~= focused then

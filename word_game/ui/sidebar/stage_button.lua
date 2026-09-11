@@ -2,6 +2,9 @@
 	word_game/ui/sidebar/stage_button.lua - End Run / Next sidebar button (classic stage goal).
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local facade = require("word_game.ui.facade")
 local Layout = require("word_game.ui.layout")
 local table_discard = require("word_game.ui.perks.discard_bin")
@@ -42,7 +45,7 @@ local bound_button
 local bound_label
 
 local function font_metrics()
-	local lang = (G and G.LANG) or {}
+	local lang = (runtime() and runtime().LANG) or {}
 	local font_obj = lang.font or {}
 	return {
 		face = font_obj.FONT,
@@ -54,13 +57,13 @@ end
 
 local function text_box_size(text, scale)
 	local metrics = font_metrics()
-	local tile = (G.TILESIZE or 20) * (G.TILESCALE or 1)
+	local tile = (runtime().TILESIZE or 20) * (runtime().TILESCALE or 1)
 	local text_w = (metrics.face and metrics.face.getWidth and metrics.face:getWidth(text))
 		or (string.len(text or "") * 10)
 	local text_h = (metrics.face and metrics.face.getHeight and metrics.face:getHeight())
 		or 20
-	local px_w = text_w * metrics.squish * scale * (G.TILESCALE or 1) * metrics.font_scale
-	local px_h = text_h * scale * (G.TILESCALE or 1) * metrics.font_scale * metrics.height_scale
+	local px_w = text_w * metrics.squish * scale * (runtime().TILESCALE or 1) * metrics.font_scale
+	local px_h = text_h * scale * (runtime().TILESCALE or 1) * metrics.font_scale * metrics.height_scale
 	return px_w / tile, px_h / tile
 end
 
@@ -83,15 +86,15 @@ function M.label_scale_for(text)
 end
 
 local function red_colour()
-	return (G and G.C and G.C.RED) or { 1, 0, 0.4, 1 }
+	return (runtime() and runtime().C and runtime().C.RED) or { 1, 0, 0.4, 1 }
 end
 
 local function blue_colour()
-	return (G and G.C and G.C.BLUE) or { 0.2, 0.5, 1, 1 }
+	return (runtime() and runtime().C and runtime().C.BLUE) or { 0.2, 0.5, 1, 1 }
 end
 
 local function label_colour()
-	return (G and G.C and G.C.UI and G.C.UI.TEXT_LIGHT) or { 1, 1, 1, 1 }
+	return (runtime() and runtime().C and runtime().C.UI and runtime().C.UI.TEXT_LIGHT) or { 1, 1, 1, 1 }
 end
 
 local function clamp01(t)
@@ -135,8 +138,8 @@ end
 
 local function button_column()
 	if bound_button then return bound_button end
-	if G.SIDEBAR_HUD and G.SIDEBAR_HUD.find_node_by_id then
-		return G.SIDEBAR_HUD:find_node_by_id("end_run_button")
+	if runtime().SIDEBAR_HUD and runtime().SIDEBAR_HUD.find_node_by_id then
+		return runtime().SIDEBAR_HUD:find_node_by_id("end_run_button")
 	end
 	return nil
 end
@@ -192,7 +195,7 @@ local function set_display_mode(col, mode, opts)
 	local label = label_node(col)
 	if mode == "next" then
 		widget.mode = "next"
-		widget.panel_colour = opts.panel_colour or (G and G.C and G.C.BLUE) or blue_colour()
+		widget.panel_colour = opts.panel_colour or (runtime() and runtime().C and runtime().C.BLUE) or blue_colour()
 		widget.button_action = "classic_stage_next"
 		set_label_text(label, opts.label_text or LABEL_NEXT)
 		if label and label.config then
@@ -326,15 +329,15 @@ function M.update(dt)
 end
 
 local function pointer_tile()
-	if not G or not G.POINTER or not G.POINTER.T then return nil, nil end
-	return G.POINTER.T.x, G.POINTER.T.y
+	if not runtime() or not runtime().POINTER or not runtime().POINTER.T then return nil, nil end
+	return runtime().POINTER.T.x, runtime().POINTER.T.y
 end
 
 function M.point_in_button(rect, tx, ty)
 	if not rect or not widget.visible then return false end
 	tx, ty = tx or pointer_tile()
 	if not tx or not ty then return false end
-	local attach = G.SIDEBAR_ATTACH and G.SIDEBAR_ATTACH.T
+	local attach = runtime().SIDEBAR_ATTACH and runtime().SIDEBAR_ATTACH.T
 	if not attach then return false end
 	local x = attach.x + rect.x
 	local y = attach.y + rect.y
@@ -342,14 +345,14 @@ function M.point_in_button(rect, tx, ty)
 end
 
 function M.consume_click(mx, my, rect)
-	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
-	if G.OVERLAY_MENU then return false end
+	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return false end
+	if runtime().OVERLAY_MENU then return false end
 	if not widget.visible then return false end
 	if not M.point_in_button(rect, mx, my) then return false end
 	local action = widget.button_action
-	if action and G.FUNCS and G.FUNCS[action] then
+	if action and runtime().FUNCS and runtime().FUNCS[action] then
 		action_dispatch.dispatch_func(action)
-		G.FUNCS[action]()
+		runtime().FUNCS[action]()
 		return true
 	end
 	return M.press()
@@ -358,7 +361,7 @@ end
 function M.draw(rect)
 	if not rect or not widget.visible then return end
 	if not love or not love.graphics then return end
-	local attach = G.SIDEBAR_ATTACH and G.SIDEBAR_ATTACH.T
+	local attach = runtime().SIDEBAR_ATTACH and runtime().SIDEBAR_ATTACH.T
 	local ox = (attach and attach.x) or 0
 	local oy = (attach and attach.y) or 0
 	local x, y, w, h = ox + rect.x, oy + rect.y, rect.w, rect.h
@@ -372,7 +375,7 @@ function M.draw(rect)
 	local scale = M.label_scale_for(widget.label_text)
 	local tw, th = text_box_size(widget.label_text, scale)
 	love.graphics.setColor(label_colour())
-	love.graphics.print(widget.label_text, (w - tw) * 0.5, (h - th) * 0.5, 0, scale * (G.TILESCALE or 1))
+	love.graphics.print(widget.label_text, (w - tw) * 0.5, (h - th) * 0.5, 0, scale * (runtime().TILESCALE or 1))
 	love.graphics.pop()
 end
 

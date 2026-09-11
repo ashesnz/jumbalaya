@@ -5,13 +5,16 @@
   live in app/runtime/colour.lua and are installed as globals from there.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 function loc_colour(_c, _default)
-  G.ARGS.LOC_COLOURS = G.ARGS.LOC_COLOURS or {
-    red = G.C.RED, multiplier = G.C.MULTIPLIER, blue = G.C.BLUE, points = G.C.POINTS,
-    green = G.C.GREEN, money = G.C.MONEY, gold = G.C.GOLD, attention = G.C.FILTER,
-    purple = G.C.PURPLE, white = G.C.WHITE, inactive = G.C.UI.TEXT_INACTIVE,
-    finish = G.C.FINISH,
-    dark_finish = G.C.DARK_FINISH, legendary = G.C.RARITY[4],
+  runtime().ARGS.LOC_COLOURS = runtime().ARGS.LOC_COLOURS or {
+    red = runtime().C.RED, multiplier = runtime().C.MULTIPLIER, blue = runtime().C.BLUE, points = runtime().C.POINTS,
+    green = runtime().C.GREEN, money = runtime().C.MONEY, gold = runtime().C.GOLD, attention = runtime().C.FILTER,
+    purple = runtime().C.PURPLE, white = runtime().C.WHITE, inactive = runtime().C.UI.TEXT_INACTIVE,
+    finish = runtime().C.FINISH,
+    dark_finish = runtime().C.DARK_FINISH, legendary = runtime().C.RARITY[4],
   }
-  return G.ARGS.LOC_COLOURS[_c] or _default or G.C.UI.TEXT_DARK
+  return runtime().ARGS.LOC_COLOURS[_c] or _default or runtime().C.UI.TEXT_DARK
 end

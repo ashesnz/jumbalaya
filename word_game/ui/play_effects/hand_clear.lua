@@ -1,5 +1,8 @@
 --[[ word_game/ui/play_effects/hand_clear.lua - Hand-clear presentation and flow wiring ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local facade = require("word_game.ui.facade")
 local Scheduler = require("app.effects.timeline_scheduler")
 local CardMotion = require("app.effects.card_motion")
@@ -15,19 +18,19 @@ local function set_score_animating(active)
 end
 
 local function discard_remaining_hand()
-	if not G.dealt_letters then return 0 end
-	local n = #(G.dealt_letters.cards or {})
-	if G.TIMELINE and G.TIMELINE.enqueue then
+	if not runtime().dealt_letters then return 0 end
+	local n = #(runtime().dealt_letters.cards or {})
+	if runtime().TIMELINE and runtime().TIMELINE.enqueue then
 		for i = 1, n do
 			Scheduler.add{
 				mode = "delayed",
 				delay = 0.07,
 				func = function()
-					local card = G.dealt_letters and G.dealt_letters.cards and G.dealt_letters.cards[1]
+					local card = runtime().dealt_letters and runtime().dealt_letters.cards and runtime().dealt_letters.cards[1]
 					if card then
 						CardMotion.move{
-							from = G.dealt_letters,
-							to = G.recycle_stash,
+							from = runtime().dealt_letters,
+							to = runtime().recycle_stash,
 							percent = 50,
 							direction = "down",
 							stay_flipped = false,
@@ -44,13 +47,13 @@ local function discard_remaining_hand()
 end
 
 local function play_hand_clear()
-	local major = (G.pattern_row and G.pattern_row.area)
-		or G.PLAY_ATTACH
-		or G.ROOM_ATTACH
+	local major = (runtime().pattern_row and runtime().pattern_row.area)
+		or runtime().PLAY_ATTACH
+		or runtime().ROOM_ATTACH
 	if WORD_GAME_UI.Confetti then
 		WORD_GAME_UI.Confetti.burst()
 	end
-	feedback.show("Hand Cleared", G.C.GOLD, 1.8, 0.15)
+	feedback.show("Hand Cleared", runtime().C.GOLD, 1.8, 0.15)
 	play_sfx("applause", 1, 0.9)
 	play_sfx("timpani", 0.92, 0.9)
 	play_sfx("card_tick", 0.6, 0.5)
@@ -63,7 +66,7 @@ local function play_boss_clear()
 	if WORD_GAME_UI.Confetti then
 		WORD_GAME_UI.Confetti.burst()
 	end
-	feedback.show("Boss Defeated!", G.C.GOLD, 1.8, 0.15)
+	feedback.show("Boss Defeated!", runtime().C.GOLD, 1.8, 0.15)
 	play_sfx("applause", 1, 0.9)
 	play_sfx("timpani", 0.92, 0.9)
 end
@@ -142,7 +145,7 @@ function M.install(play_module)
 
 		local function play_clear_sequence()
 			local outcome = play_module.resolve_after_clear(opts)
-			if G.TIMELINE and G.TIMELINE.enqueue then
+			if runtime().TIMELINE and runtime().TIMELINE.enqueue then
 				Scheduler.add{
 					mode = "instant",
 					func = function()
@@ -182,11 +185,11 @@ function M.install(play_module)
 	end
 
 	function play_module.continue_after_dealer()
-		if G.FUNCS and G.FUNCS.close_overlay then
-			G.FUNCS.close_overlay()
+		if runtime().FUNCS and runtime().FUNCS.close_overlay then
+			runtime().FUNCS.close_overlay()
 		end
-		if G.SETTINGS then
-			G.SETTINGS.paused = false
+		if runtime().SETTINGS then
+			runtime().SETTINGS.paused = false
 		end
 		set_score_animating(true)
 		local function finish_deal()
@@ -203,7 +206,7 @@ function M.install(play_module)
 			end
 			finish_deal()
 		end
-		if G.TIMELINE and G.TIMELINE.enqueue then
+		if runtime().TIMELINE and runtime().TIMELINE.enqueue then
 			Scheduler.add{
 				mode = "delayed",
 				delay = 0.18,
@@ -236,7 +239,7 @@ function M.install(play_module)
 	function play_module.end_jumble_hand()
 		local score = play_module.end_jumble_hand_model()
 		if score == nil then return end
-		feedback.show("Time!  " .. score .. " points", G.C.GOLD, 2.2, 0.35)
+		feedback.show("Time!  " .. score .. " points", runtime().C.GOLD, 2.2, 0.35)
 		play_sfx("timpani", 0.9, 0.85)
 		if WORD_GAME_UI.ScoreBanner then
 			local hud = WORD_GAME_UI.ScoreBanner.state()

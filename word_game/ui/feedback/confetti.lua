@@ -5,6 +5,9 @@
 	hexagon plate down across the card felt.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Layout = require("word_game.ui.layout")
 
 local game_access = require("word_game.model.game_access")
@@ -31,9 +34,9 @@ local RAIN_GAP = 0.018
 local GRAVITY = 5.6
 
 local function room_translate()
-	local room = G.ROOM
+	local room = runtime().ROOM
 	if not room then return end
-	local ts = G.TILESCALE * G.TILESIZE
+	local ts = runtime().TILESCALE * runtime().TILESIZE
 	love.graphics.translate(room.T.w * ts * 0.5, room.T.h * ts * 0.5)
 	love.graphics.rotate(room.T.r)
 	love.graphics.translate(
@@ -177,13 +180,13 @@ local function paint_shape(p, ts)
 end
 
 function M.draw()
-	if not game_access.get() or not G.ROOM then return end
-	if G.STATE ~= G.STATES.TABLE_BOARD then return end
+	if not game_access.get() or not runtime().ROOM then return end
+	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return end
 	if #pieces == 0 and rain_left <= 0 then return end
 
 	local r = clip_rect()
 	if not r then return end
-	local ts = G.TILESCALE * G.TILESIZE
+	local ts = runtime().TILESCALE * runtime().TILESIZE
 
 	local prev_shader = love.graphics.getShader and love.graphics.getShader()
 	local cr, cg, cb, ca = 1, 1, 1, 1

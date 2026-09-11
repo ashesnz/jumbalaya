@@ -1,5 +1,8 @@
 --[[ word_game/ui/widgets/odometer.lua - Rolling digit + label (sidebar counters, voucher discard, etc.) ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Odometer = EaseNode:derive("Odometer")
 local Roll = require("word_game.ui.util.roll")
 
@@ -20,12 +23,12 @@ local function meter_font(px)
 end
 
 local function ui_text_metrics(scale, sample)
-	local font_obj = G.LANG and G.LANG.font or {}
+	local font_obj = runtime().LANG and runtime().LANG.font or {}
 	local font_face = font_obj.FONT
 	local squish = font_obj.squish or 1
 	local font_scale = font_obj.FONTSCALE or 0.12
 	local height_scale = font_obj.TEXT_HEIGHT_SCALE or 0.7
-	local tile = G.TILESIZE or 1
+	local tile = runtime().TILESIZE or 1
 	local text = sample or "8"
 	local text_w = (font_face and font_face.getWidth and font_face:getWidth(text)) or 8
 	local text_h = (font_face and font_face.getHeight and font_face:getHeight()) or 20
@@ -37,15 +40,15 @@ end
 function Odometer:construct(config)
 	config = config or {}
 	self.label = config.label or ""
-	self.colour = config.colour or G.C.RED
-	self.label_colour = config.label_colour or (G.C.UI and G.C.UI.TEXT_LIGHT) or { 1, 1, 1, 1 }
+	self.colour = config.colour or runtime().C.RED
+	self.label_colour = config.label_colour or (runtime().C.UI and runtime().C.UI.TEXT_LIGHT) or { 1, 1, 1, 1 }
 	self.label_on_top = config.label_on_top
 	self.value_fn = config.value_fn
 	self.display_count = config.value or (self.value_fn and self.value_fn()) or 0
 	self.roll = nil
 	self.pair = config.pair
 	self.subtitle_fn = config.subtitle_fn
-	self.subtitle_colour = config.subtitle_colour or G.C.RED
+	self.subtitle_colour = config.subtitle_colour or runtime().C.RED
 	self.config = config
 	self.text_scale = config.text_scale
 	self.text_shadow = config.text_shadow
@@ -72,7 +75,7 @@ function Odometer:construct(config)
 		scale_bond = "Weak",
 	}
 	if getmetatable(self) == Odometer then
-		table.insert(G.LIVE.TRANSFORM, self)
+		table.insert(runtime().LIVE.TRANSFORM, self)
 	end
 end
 
@@ -142,14 +145,14 @@ function Odometer:draw_text_scale()
 	local font_face = font_obj.FONT
 	if not font_face then return end
 
-	local tile = G.TILESIZE or 1
+	local tile = runtime().TILESIZE or 1
 	local draw_scale_x = scale * squish * font_scale / tile
 	local draw_scale_y = scale * font_scale / tile
 	local digit_h = raw_h * draw_scale_y
 	local slot_w = math.max(font_face:getWidth("0"), font_face:getWidth("8")) * draw_scale_x
 	local digit_x = 0
 	local digit_y = 0
-	local col = self.colour or (G.C.UI and G.C.UI.TEXT_LIGHT) or { 1, 1, 1, 1 }
+	local col = self.colour or (runtime().C.UI and runtime().C.UI.TEXT_LIGHT) or { 1, 1, 1, 1 }
 
 	local function print_num(text, y)
 		local tw = font_face:getWidth(text) * draw_scale_x

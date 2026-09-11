@@ -1,5 +1,8 @@
 --[[ word_game/ui/cardarea/relayout.lua - Slot math and per-type card positioning ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local hand = require("word_game.ui.cardarea.hand")
 local deck = require("word_game.ui.cardarea.deck")
 local placement = require("word_game.ui.cardarea.placement")
@@ -27,18 +30,18 @@ local function even_x(area, card, k, count)
 end
 
 local function selection_lift(card, scale)
-	if card.selected then return G.HIGHLIGHT_H * (scale or 1) end
+	if card.selected then return runtime().HIGHLIGHT_H * (scale or 1) end
 	return 0
 end
 
 local function fan_tilt(k, count, amplitude, phase_x, phase_y)
 	local lean = amplitude * (-count / 2 - 0.5 + k) / count
-	local wobble = 0.02 * math.sin(2 * G.TIMERS.REAL + phase_x + (phase_y or 0))
+	local wobble = 0.02 * math.sin(2 * runtime().TIMERS.REAL + phase_x + (phase_y or 0))
 	return lean + wobble
 end
 
 local function row_bob(x)
-	return 0.03 * math.sin(0.666 * G.TIMERS.REAL + x)
+	return 0.03 * math.sin(0.666 * runtime().TIMERS.REAL + x)
 end
 
 local function apply_parallax(card)
@@ -51,7 +54,7 @@ end
 
 function M.relayout(area, face_down_in_pile)
 	if not area.cards then return end
-	if (area == G.dealt_letters or area == G.draw_pile or area == G.recycle_stash) and G.view_deck and G.view_deck[1] and G.view_deck[1].cards then return end
+	if (area == runtime().dealt_letters or area == runtime().draw_pile or area == runtime().recycle_stash) and runtime().view_deck and runtime().view_deck[1] and runtime().view_deck[1].cards then return end
 
 	deck.relayout(area)
 	hand.relayout(area)
@@ -147,7 +150,7 @@ function M.relayout(area, face_down_in_pile)
 			if not card.states.drag.is then
 				card.T.x = even_x(area, card, k, count)
 				card.T.y = area.T.y + area.T.h / 2 - card.T.h / 2 - selection_lift(card)
-					+ (not card.selected and 0.05 * math.sin(3.332 * G.TIMERS.REAL + card.T.x) or 0)
+					+ (not card.selected and 0.05 * math.sin(3.332 * runtime().TIMERS.REAL + card.T.x) or 0)
 				apply_parallax(card)
 			end
 		end

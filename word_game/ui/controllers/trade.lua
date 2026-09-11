@@ -1,4 +1,7 @@
---[[ word_game/ui/controllers/trade.lua - Phase 4 trade G.FUNCS controller ]]
+--[[ word_game/ui/controllers/trade.lua - Phase 4 trade runtime().FUNCS controller ]]
+
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
 
 local action_dispatch = require("bridge.action_dispatch")
 local TradeUI = require("word_game.ui.trade")

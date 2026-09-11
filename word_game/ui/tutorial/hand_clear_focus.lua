@@ -5,6 +5,9 @@
 	score banner, token pile, and celebration effects stay prominent.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local M = {}
 local Easing = require "app.effects.easing"
 local game_access = require("word_game.model.game_access")
@@ -19,13 +22,13 @@ function M.is_eligible()
 end
 
 function M.is_active()
-	return active and G.HAND_CLEAR_OVERLAY ~= nil
+	return active and runtime().HAND_CLEAR_OVERLAY ~= nil
 end
 
 local function refresh_input()
-	if G.dealt_letters and G.dealt_letters.set_ranks then G.dealt_letters:set_ranks() end
-	if G.pattern_row and G.pattern_row.area and G.pattern_row.area.set_ranks then
-		G.pattern_row.area:set_ranks()
+	if runtime().dealt_letters and runtime().dealt_letters.set_ranks then runtime().dealt_letters:set_ranks() end
+	if runtime().pattern_row and runtime().pattern_row.area and runtime().pattern_row.area.set_ranks then
+		runtime().pattern_row.area:set_ranks()
 	end
 	if WORD_GAME_UI.TableControls then
 		WORD_GAME_UI.TableControls.sync()
@@ -33,7 +36,7 @@ local function refresh_input()
 end
 
 local function stop_drag()
-	local controller = G.INPUT
+	local controller = runtime().INPUT
 	if not controller or not controller.dragging or not controller.dragging.target then return end
 	local target = controller.dragging.target
 	if target.stop_drag then
@@ -45,21 +48,21 @@ end
 
 function M.begin()
 	if not M.is_eligible() or active then return end
-	if not G.ROOM_ATTACH then return end
+	if not runtime().ROOM_ATTACH then return end
 
 	active = true
 	if game_access.get() then
 		game_access.patch({ word_score_animating = true })
 	end
-	G.under_overlay = true
+	runtime().under_overlay = true
 	stop_drag()
 
 	overlay_colour[4] = 0
 	Easing.value{ref_table = overlay_colour, ref_value = 4, mod = 0.72, timer = "REAL", not_blockable = true, delay = 0.4}
 
-	G.HAND_CLEAR_OVERLAY = UIViewHost.create{
+	runtime().HAND_CLEAR_OVERLAY = UIViewHost.create{
 		definition = {
-			n = G.UI.ROOT,
+			n = runtime().UI.ROOT,
 			config = {
 				align = "cm",
 				padding = 32.05,
@@ -68,33 +71,33 @@ function M.begin()
 				emboss = 0.05,
 			},
 			nodes = {
-				{ n = G.UI.ROW, config = { align = "cm", minh = G.ROOM.T.h, minw = G.ROOM.T.w }, nodes = {} },
+				{ n = runtime().UI.ROW, config = { align = "cm", minh = runtime().ROOM.T.h, minw = runtime().ROOM.T.w }, nodes = {} },
 			},
 		},
 		config = {
 			align = "cm",
 			offset = { x = 0, y = 3.2 },
-			major = G.ROOM_ATTACH,
+			major = runtime().ROOM_ATTACH,
 			bond = "Weak",
 		},
 	}
-	G.HAND_CLEAR_OVERLAY.redraw_portrait = true
-	G.HAND_CLEAR_OVERLAY.redraw_banner = true
-	G.HAND_CLEAR_OVERLAY.redraw_tokens = true
-	G.HAND_CLEAR_OVERLAY.redraw_confetti = true
-	G.HAND_CLEAR_OVERLAY.redraw_token_reward = true
-	G.HAND_CLEAR_OVERLAY.redraw_attention = true
-	G.HAND_CLEAR_OVERLAY.selections = {}
+	runtime().HAND_CLEAR_OVERLAY.redraw_portrait = true
+	runtime().HAND_CLEAR_OVERLAY.redraw_banner = true
+	runtime().HAND_CLEAR_OVERLAY.redraw_tokens = true
+	runtime().HAND_CLEAR_OVERLAY.redraw_confetti = true
+	runtime().HAND_CLEAR_OVERLAY.redraw_token_reward = true
+	runtime().HAND_CLEAR_OVERLAY.redraw_attention = true
+	runtime().HAND_CLEAR_OVERLAY.selections = {}
 
 	refresh_input()
 end
 
 function M.end_focus()
-	if not active and not G.HAND_CLEAR_OVERLAY then return end
+	if not active and not runtime().HAND_CLEAR_OVERLAY then return end
 	active = false
-	if G.HAND_CLEAR_OVERLAY then
-		G.HAND_CLEAR_OVERLAY:remove()
-		G.HAND_CLEAR_OVERLAY = nil
+	if runtime().HAND_CLEAR_OVERLAY then
+		runtime().HAND_CLEAR_OVERLAY:remove()
+		runtime().HAND_CLEAR_OVERLAY = nil
 	end
 	refresh_input()
 end

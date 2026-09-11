@@ -1,5 +1,8 @@
 --[[ word_game/ui/perks/stamp/grid.lua - Sidebar stamp stack layout ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Layout = require("word_game.ui.layout")
 local perk_cfg = require("word_game.config.perks")
 
@@ -11,7 +14,7 @@ M.SLOT_ASPECT = perk_cfg.STAMP_SLOT_ASPECT
 local REF_TILE_PX = 71
 
 function M.tile_scale()
-	return (G.TILESCALE or 1) * (G.TILESIZE or 1)
+	return (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
 end
 
 function M.pad_px()

@@ -2,6 +2,9 @@
 	word_game/ui/score_banner/draw.lua - Jumble score banner rendering.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Layout = require("word_game.ui.layout")
 local game_access = require("word_game.model.game_access")
 local Roll = require("word_game.ui.util.roll")
@@ -25,9 +28,9 @@ local function ease_inout(t)
 end
 
 local function room_translate()
-	local room = G.ROOM
+	local room = runtime().ROOM
 	if not room then return end
-	local ts = G.TILESCALE * G.TILESIZE
+	local ts = runtime().TILESCALE * runtime().TILESIZE
 	love.graphics.translate(room.T.w * ts * 0.5, room.T.h * ts * 0.5)
 	love.graphics.rotate(room.T.r)
 	love.graphics.translate(
@@ -95,8 +98,8 @@ local function draw_rolling_digit(cx, cy, from_val, to_val, roll, font, scale, c
 end
 
 function M.draw(sb)
-	if not game_access.get() or not G.ROOM then return end
-	if G.STATE ~= G.STATES.TABLE_BOARD then return end
+	if not game_access.get() or not runtime().ROOM then return end
+	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return end
 
 	local dt = math.min(0.05, love.timer.getDelta())
 	sb.update(dt)
@@ -114,7 +117,7 @@ function M.draw(sb)
 		return
 	end
 
-	local ts = G.TILESCALE * G.TILESIZE
+	local ts = runtime().TILESCALE * runtime().TILESIZE
 	local rect = Layout.banner_rect()
 	local w = rect.w * ts
 	local h = rect.h * ts
@@ -137,7 +140,7 @@ function M.draw(sb)
 	if love.graphics.setLineStyle then love.graphics.setLineStyle("smooth") end
 	if love.graphics.setLineJoin then love.graphics.setLineJoin("bevel") end
 
-	local breathe = ease_inout(Roll.clamp01((math.sin((G.TIMERS.REAL or 0) * math.pi * 2 / 3) * 1.3 + 1) / 2))
+	local breathe = ease_inout(Roll.clamp01((math.sin((runtime().TIMERS.REAL or 0) * math.pi * 2 / 3) * 1.3 + 1) / 2))
 	local pulse_s = 1 + sb.pulse_value() * 0.1
 	local cx = x + w * 0.5
 	local cy = mid_y

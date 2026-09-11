@@ -2,6 +2,9 @@
 	word_game/ui/score_banner/fonts.lua - Title and bubble fonts, score shader helpers.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local M = {}
 
 local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
@@ -47,10 +50,10 @@ function M.bubble_font(px)
 end
 
 function M.set_score_shader(bounce_amount, is_mult)
-	local sh = G and G.SHADERS and G.SHADERS.score_bubble
+	local sh = runtime() and runtime().SHADERS and runtime().SHADERS.score_bubble
 	if not sh or not love.graphics.setShader then return end
 	pcall(function()
-		sh:send("time", (G.TIMERS and G.TIMERS.REAL) or 0)
+		sh:send("time", (runtime().TIMERS and runtime().TIMERS.REAL) or 0)
 		sh:send("bounce_amount", bounce_amount or 0)
 		sh:send("is_mult", is_mult and 1.0 or 0.0)
 	end)

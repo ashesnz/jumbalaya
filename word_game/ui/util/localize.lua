@@ -5,40 +5,43 @@
 	picks the right parsed blob for names, unlocks, and descriptions.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 function init_localization()
-  G.localization.misc.v_dictionary_parsed = {}
-  for k, v in pairs(G.localization.misc.v_dictionary or {}) do
+  runtime().localization.misc.v_dictionary_parsed = {}
+  for k, v in pairs(runtime().localization.misc.v_dictionary or {}) do
     if type(v) == 'table' then
-      G.localization.misc.v_dictionary_parsed[k] = {multi_line = true}
+      runtime().localization.misc.v_dictionary_parsed[k] = {multi_line = true}
       for kk, vv in ipairs(v) do
-        G.localization.misc.v_dictionary_parsed[k][kk] = loc_parse_string(vv)
+        runtime().localization.misc.v_dictionary_parsed[k][kk] = loc_parse_string(vv)
       end
     else
-      G.localization.misc.v_dictionary_parsed[k] = loc_parse_string(v)
+      runtime().localization.misc.v_dictionary_parsed[k] = loc_parse_string(v)
     end
   end
-  G.localization.misc.v_text_parsed = {}
-  for k, v in pairs(G.localization.misc.v_text or {}) do
-    G.localization.misc.v_text_parsed[k] = {}
+  runtime().localization.misc.v_text_parsed = {}
+  for k, v in pairs(runtime().localization.misc.v_text or {}) do
+    runtime().localization.misc.v_text_parsed[k] = {}
     for kk, vv in ipairs(v) do
-      G.localization.misc.v_text_parsed[k][kk] = loc_parse_string(vv)
+      runtime().localization.misc.v_text_parsed[k][kk] = loc_parse_string(vv)
     end
   end
-  G.localization.tutorial_parsed = {}
-  for k, v in pairs(G.localization.misc.tutorial or {}) do
-    G.localization.tutorial_parsed[k] = {multi_line = true}
+  runtime().localization.tutorial_parsed = {}
+  for k, v in pairs(runtime().localization.misc.tutorial or {}) do
+    runtime().localization.tutorial_parsed[k] = {multi_line = true}
       for kk, vv in ipairs(v) do
-        G.localization.tutorial_parsed[k][kk] = loc_parse_string(vv)
+        runtime().localization.tutorial_parsed[k][kk] = loc_parse_string(vv)
       end
   end
-  G.localization.quips_parsed = {}
-  for k, v in pairs(G.localization.misc.quips or {}) do
-    G.localization.quips_parsed[k] = {multi_line = true}
+  runtime().localization.quips_parsed = {}
+  for k, v in pairs(runtime().localization.misc.quips or {}) do
+    runtime().localization.quips_parsed[k] = {multi_line = true}
       for kk, vv in ipairs(v) do
-        G.localization.quips_parsed[k][kk] = loc_parse_string(vv)
+        runtime().localization.quips_parsed[k][kk] = loc_parse_string(vv)
       end
   end
-  for g_k, group in pairs(G.localization) do
+  for g_k, group in pairs(runtime().localization) do
     if g_k == 'descriptions' then
       for _, set in pairs(group) do
         for _, center in pairs(set) do
@@ -185,30 +188,30 @@ function each_utf8_char(s)
 end
 
 function localize(args, misc_cat)
-  if not G.localization or not G.localization.misc then
+  if not runtime().localization or not runtime().localization.misc then
     if type(args) == 'string' then return args end
     if type(args) == 'table' and args.key then return tostring(args.key) end
     return 'ERROR'
   end
 
   if args and not (type(args) == 'table') then
-    if misc_cat and G.localization.misc[misc_cat] then return G.localization.misc[misc_cat][args] or 'ERROR' end
-    return (G.localization.misc.dictionary and G.localization.misc.dictionary[args]) or 'ERROR'
+    if misc_cat and runtime().localization.misc[misc_cat] then return runtime().localization.misc[misc_cat][args] or 'ERROR' end
+    return (runtime().localization.misc.dictionary and runtime().localization.misc.dictionary[args]) or 'ERROR'
   end
 
   local loc_target = nil
   local ret_string = nil
   local desc_set = function(set_name)
-    return G.localization.descriptions[set_name]
+    return runtime().localization.descriptions[set_name]
   end
   if args.type == 'other' then
     loc_target = desc_set('Other') and desc_set('Other')[args.key]
   elseif args.type == 'descriptions' or args.type == 'unlocks' then 
     loc_target = desc_set(args.set) and desc_set(args.set)[args.key]
   elseif args.type == 'tutorial' then 
-    loc_target = G.localization.tutorial_parsed[args.key]
+    loc_target = runtime().localization.tutorial_parsed[args.key]
   elseif args.type == 'quips' then 
-    loc_target = G.localization.quips_parsed[args.key]
+    loc_target = runtime().localization.quips_parsed[args.key]
   elseif args.type == 'raw_descriptions' then 
     loc_target = desc_set(args.set) and desc_set(args.set)[args.key]
     local multi_line = {}
@@ -227,9 +230,9 @@ function localize(args, misc_cat)
     end
     return multi_line
   elseif args.type == 'text' then
-    loc_target = G.localization.misc.v_text_parsed[args.key]
+    loc_target = runtime().localization.misc.v_text_parsed[args.key]
   elseif args.type == 'variable' then 
-    loc_target = G.localization.misc.v_dictionary_parsed[args.key]
+    loc_target = runtime().localization.misc.v_dictionary_parsed[args.key]
     if not loc_target then return 'ERROR' end 
     if loc_target.multi_line then
       local assembled_strings = {}
@@ -249,7 +252,7 @@ function localize(args, misc_cat)
       ret_string = assembled_string or 'ERROR'
     end
   elseif args.type == 'name_text' then
-    if pcall(function() ret_string = G.localization.descriptions[(args.set or args.node.config.center.set)][args.key or args.node.config.center.key].name end) then
+    if pcall(function() ret_string = runtime().localization.descriptions[(args.set or args.node.config.center.set)][args.key or args.node.config.center.key].name end) then
     else ret_string = "ERROR" end
   elseif args.type == 'name' then
     local set = desc_set(args.set or args.node.config.center.set)
@@ -266,11 +269,11 @@ function localize(args, misc_cat)
         for _, subpart in ipairs(part.strings) do
           assembled_string = assembled_string..(type(subpart) == 'string' and subpart or args.vars[tonumber(subpart[1])] or 'ERROR')
         end
-        local desc_scale = G.LANG.font.DESCSCALE
+        local desc_scale = runtime().LANG.font.DESCSCALE
         if args.type == 'name' then
-          final_line[#final_line+1] = {n=G.UI.OBJECT, config={
+          final_line[#final_line+1] = {n=runtime().UI.OBJECT, config={
             object = FlowText({string = {assembled_string},
-              colours = {(part.control.V and args.vars.colours[tonumber(part.control.V)]) or (part.control.C and loc_colour(part.control.C)) or G.C.UI.TEXT_LIGHT},
+              colours = {(part.control.V and args.vars.colours[tonumber(part.control.V)]) or (part.control.C and loc_colour(part.control.C)) or runtime().C.UI.TEXT_LIGHT},
               bump = true,
               silent = true,
               pop_in = 0,
@@ -289,7 +292,7 @@ function localize(args, misc_cat)
           elseif part.control.E == '2' then
             _bump = true; _spacing = 1
           end
-          final_line[#final_line+1] = {n=G.UI.OBJECT, config={
+          final_line[#final_line+1] = {n=runtime().UI.OBJECT, config={
             object = FlowText({string = {assembled_string}, colours = {part.control.V and args.vars.colours[tonumber(part.control.V)] or loc_colour(part.control.C or nil)},
             float = _float,
             silent = _silent,
@@ -299,15 +302,15 @@ function localize(args, misc_cat)
             scale = 0.32*(part.control.s and tonumber(part.control.s) or 1)*desc_scale})
           }}
         elseif part.control.X then
-          final_line[#final_line+1] = {n=G.UI.COLUMN, config={align = "m", colour = loc_colour(part.control.X), r = 0.05, padding = 0.03, res = 0.15}, nodes={
-              {n=G.UI.TEXT, config={
+          final_line[#final_line+1] = {n=runtime().UI.COLUMN, config={align = "m", colour = loc_colour(part.control.X), r = 0.05, padding = 0.03, res = 0.15}, nodes={
+              {n=runtime().UI.TEXT, config={
                 text = assembled_string,
                 colour = loc_colour(part.control.C or nil),
                 scale = 0.32*(part.control.s and tonumber(part.control.s) or 1)*desc_scale}},
           }}
         else
-          final_line[#final_line+1] = {n=G.UI.TEXT, config={
-          detailed_tooltip = part.control.T and G.LETTERS.centers[part.control.T] or nil,
+          final_line[#final_line+1] = {n=runtime().UI.TEXT, config={
+          detailed_tooltip = part.control.T and runtime().LETTERS.centers[part.control.T] or nil,
           text = assembled_string,
           shadow = args.shadow,
           colour = part.control.V and args.vars.colours[tonumber(part.control.V)] or loc_colour(part.control.C or nil, args.default_col),

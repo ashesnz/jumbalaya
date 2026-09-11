@@ -1,5 +1,8 @@
 --[[ word_game/ui/stamp_puff.lua - Soft burst when a perk stamp lands ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local M = {}
 
 local PUFF_DUR = 0.62
@@ -66,7 +69,7 @@ function M.draw()
 			local dist = (w * 0.18 + u * w * 0.42) * (0.75 + 0.25 * math.sin(i * 1.7 + puff.seed))
 			local px = cx + math.cos(angle) * dist
 			local py = cy + math.sin(angle) * dist * 0.62
-			local r = math.max(1.5, (2.8 + 2.2 * (1 - u)) * ((G.TILESCALE or 1) * 0.12 + 0.8))
+			local r = math.max(1.5, (2.8 + 2.2 * (1 - u)) * ((runtime().TILESCALE or 1) * 0.12 + 0.8))
 			love.graphics.setColor(1, 0.94, 0.78, 0.5 * fade)
 			love.graphics.circle("fill", px, py, r)
 		end

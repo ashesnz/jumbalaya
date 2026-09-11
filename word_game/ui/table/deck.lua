@@ -6,6 +6,9 @@
 	A thin stack of paper edges faces the camera — a pack, not a book.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
 local TOKEN_HIGHLIGHT_TIME = 0.8
 local facade = require("word_game.ui.facade")
@@ -90,7 +93,7 @@ function M.token_count()
 end
 
 function M.update_tokens(dt)
-	dt = dt or (G and G.real_dt) or 0.016
+	dt = dt or (runtime() and runtime().real_dt) or 0.016
 	M.token_highlight = math.max(0, (M.token_highlight or 0) - dt)
 	local actual = state.tokens()
 	if M.token_display == nil then
@@ -116,7 +119,7 @@ function M.update_tokens(dt)
 end
 
 function M.update(dt, area)
-	dt = dt or (G and G.real_dt) or 0.016
+	dt = dt or (runtime() and runtime().real_dt) or 0.016
 	M.update_tokens(dt)
 end
 
@@ -135,7 +138,7 @@ local mesh
 local mesh_n
 
 function M.uses_table_draw()
-	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
+	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return false end
 	if felt.is_boss_sequence() then return false end
 	return true
 end
@@ -250,7 +253,7 @@ local function deck_origin_y(area, pack_h, miny)
 end
 
 local function tokens_atlas()
-	return G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.tokens
+	return runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES.tokens
 end
 
 local function token_layout(area, ox, oy, miny, pack_w, card_w, ts)
@@ -288,9 +291,9 @@ end
 
 function M.token_center_px(area)
 	if not area then return end
-	local ts = G.TILESCALE * G.TILESIZE
-	local W = G.CARD_W * M.SIZE
-	local D = G.CARD_H * M.SIZE
+	local ts = runtime().TILESCALE * runtime().TILESIZE
+	local W = runtime().CARD_W * M.SIZE
+	local D = runtime().CARD_H * M.SIZE
 	local n = area.cards and #area.cards or 0
 	local H = M.pack_stack_height(n)
 	local r = math.min(W, D) * 0.11
@@ -360,9 +363,9 @@ end
 function M.draw(area)
 	if not area or not area.cards then return end
 
-	local ts = G.TILESCALE * G.TILESIZE
-	local W = G.CARD_W * M.SIZE
-	local D = G.CARD_H * M.SIZE
+	local ts = runtime().TILESCALE * runtime().TILESIZE
+	local W = runtime().CARD_W * M.SIZE
+	local D = runtime().CARD_H * M.SIZE
 	local n = #area.cards
 	local H = M.pack_stack_height(n)
 	local r = math.min(W, D) * 0.11
@@ -506,15 +509,15 @@ function M.draw(area)
 end
 
 function M.show_info()
-	if not M.uses_table_draw() or not G.draw_pile then return end
+	if not M.uses_table_draw() or not runtime().draw_pile then return end
 	spawn_attention({
 		scale = 0.58,
 		text = "Cards left: " .. tostring(deck_mod().cards_left()),
 		hold = 2.0,
 		align = "cm",
-		major = G.draw_pile,
+		major = runtime().draw_pile,
 		offset = { x = 0, y = -0.35 },
-		colour = G.C.WHITE,
+		colour = runtime().C.WHITE,
 	})
 	play_sfx("generic1", 0.88, 0.62)
 end

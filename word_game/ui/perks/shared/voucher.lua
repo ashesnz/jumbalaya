@@ -1,11 +1,14 @@
 --[[ word_game/ui/perks/shared/voucher.lua - Perk stamp and voucher atlas quads ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local cfg = require("word_game.config.perks")
 
 local M = {}
 
 local function atlas()
-	return G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.Perk
+	return runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES.Perk
 end
 
 function M.voucher_grid_pos(pos)

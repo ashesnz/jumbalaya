@@ -1,5 +1,8 @@
 --[[ word_game/ui/cardarea/selection.lua - Card selection and highlight rules ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local M = {}
 
 local function type_handler(self, handlers)
@@ -10,7 +13,7 @@ function M.can_select(self, card, handlers)
 	if self.config.type == 'hand' then
 		return true
 	end
-	if self.config.type == 'placement' and not G.INPUT.HID.controller then
+	if self.config.type == 'placement' and not runtime().INPUT.HID.controller then
 		return true
 	end
 	local handler = type_handler(self, handlers)
@@ -19,7 +22,7 @@ function M.can_select(self, card, handlers)
 			return true
 		end
 	end
-	if G.INPUT.HID.controller then
+	if runtime().INPUT.HID.controller then
 		return false
 	else
 		if self.config.type == 'usable' or
@@ -53,7 +56,7 @@ function M.add_selection(self, card, silent, handlers)
 end
 
 function M.remove_selection(self, card, force)
-	if (not force) and  card and card.ability.forced_selection and self == G.dealt_letters then return end
+	if (not force) and  card and card.ability.forced_selection and self == runtime().dealt_letters then return end
 	for i = #self.selected,1,-1 do
 		if self.selected[i] == card then
 			table.remove(self.selected, i)
@@ -66,7 +69,7 @@ end
 function M.clear_selection(self)
 	for i = #self.selected, 1, -1 do
 		local card = self.selected[i]
-		local pinned_by_effect = self == G.dealt_letters and card.ability.forced_selection
+		local pinned_by_effect = self == runtime().dealt_letters and card.ability.forced_selection
 		if not pinned_by_effect then
 			card:set_selected(false)
 			table.remove(self.selected, i)

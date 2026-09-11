@@ -4,6 +4,9 @@
 	Displays "1-1" style stage markers with odometer digit rolls on hand advance.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local round_config = require("word_game.config.gameplay.round")
 local game_access = require("word_game.model.game_access")
 local Roll = require("word_game.ui.util.roll")
@@ -184,7 +187,7 @@ function M.draw_above_timer(x, y, w, h)
 	local cx = x + (w - total_w) * 0.5
 	local digit_y = y - gap - digit_h
 
-	local colour = (G and G.C and G.C.GOLD) or { 1, 0.85, 0.35, 1 }
+	local colour = (runtime() and runtime().C and runtime().C.GOLD) or { 1, 0.85, 0.35, 1 }
 
 	local lf, lt, lrt, lroll = Roll.view(M.left_roll, M.left_count or 1)
 	local rf, rt, rrt, rroll = Roll.view(M.right_roll, M.right_count or 1)

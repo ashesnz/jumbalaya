@@ -924,7 +924,7 @@ Each PR: `love tests` → `emmylua_check . --severity warn` → manual smoke (§
 |--------|-------|--------|
 | **PR-9a** | Runtime shell + session layer (`bridge/runtime.lua`, `lifecycle.lua`, `loop.lua`, save_queue) | ✅ |
 | **PR-9b** | `app/startup.lua`, input, persistence callbacks | ✅ |
-| **PR-9c** | `word_game/ui/` presentation purge | pending |
+| **PR-9c** | `word_game/ui/` presentation purge | ✅ |
 | **PR-9d** | `word_game/model/` + delete `globals.lua` / `G = Game()` | pending |
 | **PR-9e** | Retire `G.FUNCS` + `types/g_funcs.lua` | pending |
 

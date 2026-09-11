@@ -2,6 +2,9 @@
 	ui/title_logo.lua - Animated Jumbalaya title with juggling start/end A sprites.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local BASE_W = 933
 local BASE_H = 267
 
@@ -42,9 +45,9 @@ function TitleLogo:construct(X, Y, W, H)
 	EaseNode.construct(self, X, Y, W, H)
 	self.anim_time = 0
 	self.dissolve = 1
-	self.dissolve_colours = {G.C.WHITE, G.C.WHITE}
+	self.dissolve_colours = {runtime().C.WHITE, runtime().C.WHITE}
 
-	local base_atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.jumbalaya_base
+	local base_atlas = runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES.jumbalaya_base
 	if not base_atlas or not base_atlas.image then
 		self.states.visible = false
 		return
@@ -54,12 +57,12 @@ function TitleLogo:construct(X, Y, W, H)
 	-- Layout anchors are authored in 1x logical space (933×267), not PNG pixel size.
 	self.base_w = BASE_W
 	self.base_h = BASE_H
-	local full_atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES.Jumbalaya
+	local full_atlas = runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES.Jumbalaya
 	self.full_image = full_atlas and full_atlas.image or self.base_image
 
 	self.a_images = {}
 	for _, key in ipairs(LETTER_ORDER) do
-		local atlas = G.TEXTURE_ATLASES and G.TEXTURE_ATLASES["jumbalaya_"..key.."_a"]
+		local atlas = runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES["jumbalaya_"..key.."_a"]
 		self.a_images[key] = atlas and atlas.image or nil
 	end
 
@@ -132,20 +135,20 @@ end
 TitleLogo.juggle_pose = juggle_pose
 
 function TitleLogo:apply_shader_effect()
-	local sh = G.SHADERS and G.SHADERS.dissolve
+	local sh = runtime().SHADERS and runtime().SHADERS.dissolve
 	if not sh then return end
 
 	local _draw_major = self.role.draw_major or self
 	self.ARGS.prep_shader = self.ARGS.prep_shader or {}
 	self.ARGS.prep_shader.cursor_pos = self.ARGS.prep_shader.cursor_pos or {}
-	self.ARGS.prep_shader.cursor_pos[1] = _draw_major.tilt_var and _draw_major.tilt_var.mx * G.CANVAS_SCALE
-		or (G.INPUT and G.INPUT.cursor_position and G.INPUT.cursor_position.x * G.CANVAS_SCALE or 0)
-	self.ARGS.prep_shader.cursor_pos[2] = _draw_major.tilt_var and _draw_major.tilt_var.my * G.CANVAS_SCALE
-		or (G.INPUT and G.INPUT.cursor_position and G.INPUT.cursor_position.y * G.CANVAS_SCALE or 0)
+	self.ARGS.prep_shader.cursor_pos[1] = _draw_major.tilt_var and _draw_major.tilt_var.mx * runtime().CANVAS_SCALE
+		or (runtime().INPUT and runtime().INPUT.cursor_position and runtime().INPUT.cursor_position.x * runtime().CANVAS_SCALE or 0)
+	self.ARGS.prep_shader.cursor_pos[2] = _draw_major.tilt_var and _draw_major.tilt_var.my * runtime().CANVAS_SCALE
+		or (runtime().INPUT and runtime().INPUT.cursor_position and runtime().INPUT.cursor_position.y * runtime().CANVAS_SCALE or 0)
 
 	pcall(function()
 		sh:send("mouse_screen_pos", self.ARGS.prep_shader.cursor_pos)
-		sh:send("screen_scale", G.TILESCALE * G.TILESIZE * (_draw_major.mouse_damping or 1) * G.CANVAS_SCALE)
+		sh:send("screen_scale", runtime().TILESCALE * runtime().TILESIZE * (_draw_major.mouse_damping or 1) * runtime().CANVAS_SCALE)
 		sh:send("hovering", (_draw_major.hover_tilt or 0))
 		sh:send("dissolve", math.abs(_draw_major.dissolve or 0))
 		sh:send("dissolve_wipe", _draw_major.dissolve_wipe or 0)
@@ -154,8 +157,8 @@ function TitleLogo:apply_shader_effect()
 		local title_w, title_h = title_image:getDimensions()
 		sh:send("texture_details", {0, 0, title_w, title_h})
 		sh:send("image_details", {title_w, title_h})
-		sh:send("burn_colour_1", _draw_major.dissolve_colours and _draw_major.dissolve_colours[1] or G.C.CLEAR)
-		sh:send("burn_colour_2", _draw_major.dissolve_colours and _draw_major.dissolve_colours[2] or G.C.CLEAR)
+		sh:send("burn_colour_1", _draw_major.dissolve_colours and _draw_major.dissolve_colours[1] or runtime().C.CLEAR)
+		sh:send("burn_colour_2", _draw_major.dissolve_colours and _draw_major.dissolve_colours[2] or runtime().C.CLEAR)
 		sh:send("shadow", false)
 	end)
 	love.graphics.setShader(sh)
@@ -170,7 +173,7 @@ function TitleLogo:draw()
 
 	push_node_transform(self, 1)
 	self:apply_shader_effect()
-	love.graphics.setColor(G.C.WHITE)
+	love.graphics.setColor(runtime().C.WHITE)
 	-- Keep the authored, complete logo intact during its initial reveal. Once
 	-- the reveal is complete, use the base artwork so the A sprites can move
 	-- independently without leaving duplicate letters behind.

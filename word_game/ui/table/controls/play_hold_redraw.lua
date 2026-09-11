@@ -4,6 +4,9 @@
 	Hold for 5s: yellow ring drains clockwise from 12 o'clock, then hand cards
 	slide down off screen and 7 new cards deal in one at a time from the deck.
 ]]
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Scheduler = require "app.effects.timeline_scheduler"
 local facade = require("word_game.ui.facade")
 local InputLock = facade.input_lock()
@@ -70,7 +73,7 @@ local function is_pressing_play()
 	local btn = play_button_uie()
 	if not btn or not btn.states.visible or not btn.config.button then return false end
 
-	local c = G.INPUT
+	local c = runtime().INPUT
 	local press_state = (c and c.pointer_held) or (love.mouse and love.mouse.isDown and love.mouse.isDown(1))
 	if not press_state then return false end
 
@@ -85,7 +88,7 @@ local function is_pressing_play()
 		if belongs_to_play_button(node) then return true end
 	end
 
-	local pt = G.POINTER and G.POINTER.T
+	local pt = runtime().POINTER and runtime().POINTER.T
 	if pt and btn.collides_with_point and btn:collides_with_point(pt) then return true end
 
 	return false
@@ -108,7 +111,7 @@ function M.can_hold()
 	if not M.enabled() then return false end
 	if animating then return false end
 	if InputLock.is_table_busy() then return false end
-	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
+	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return false end
 	if gameplay_overlays_active() then return false end
 	local btn = play_button_uie()
 	return btn and btn.states.visible and btn.config.button ~= nil
@@ -133,9 +136,9 @@ function M.reset()
 	if WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
 		WORD_GAME_UI.TableInput.refresh_card_input()
 	else
-		if G.dealt_letters and G.dealt_letters.set_ranks then G.dealt_letters:set_ranks() end
-		if G.pattern_row and G.pattern_row.area and G.pattern_row.area.set_ranks then
-			G.pattern_row.area:set_ranks()
+		if runtime().dealt_letters and runtime().dealt_letters.set_ranks then runtime().dealt_letters:set_ranks() end
+		if runtime().pattern_row and runtime().pattern_row.area and runtime().pattern_row.area.set_ranks then
+			runtime().pattern_row.area:set_ranks()
 		end
 	end
 end
@@ -147,7 +150,7 @@ local function recall_placement_cards()
 end
 
 local function discard_hand_down(on_complete)
-	if not G.TIMELINE then
+	if not runtime().TIMELINE then
 		if on_complete then on_complete() end
 		return 0
 	end
@@ -155,8 +158,8 @@ local function discard_hand_down(on_complete)
 	recall_placement_cards()
 
 	local cards_to_discard = {}
-	if G.dealt_letters and G.dealt_letters.cards then
-		for _, card in ipairs(G.dealt_letters.cards) do
+	if runtime().dealt_letters and runtime().dealt_letters.cards then
+		for _, card in ipairs(runtime().dealt_letters.cards) do
 			cards_to_discard[#cards_to_discard + 1] = card
 		end
 	end
@@ -167,15 +170,15 @@ local function discard_hand_down(on_complete)
 		return 0
 	end
 
-	local target_offscreen_y = (G.ROOM and (G.ROOM.T.y + G.ROOM.T.h) or 11) + 2.5
+	local target_offscreen_y = (runtime().ROOM and (runtime().ROOM.T.y + runtime().ROOM.T.h) or 11) + 2.5
 
 	for i, card in ipairs(cards_to_discard) do
 		Scheduler.add{
 			mode = "delayed",
 			delay = M.DISCARD_STAGGER * (i - 1),
 			func = function()
-				if card.area == G.dealt_letters then
-					G.dealt_letters:remove_card(card)
+				if card.area == runtime().dealt_letters then
+					runtime().dealt_letters:remove_card(card)
 				end
 				if card.T then
 					card.T.y = target_offscreen_y
@@ -197,17 +200,17 @@ local function discard_hand_down(on_complete)
 		blocking = true,
 		func = function()
 			for _, card in ipairs(cards_to_discard) do
-				if G.draw_pile then
-					G.draw_pile:emplace(card)
+				if runtime().draw_pile then
+					runtime().draw_pile:emplace(card)
 				end
 			end
-			if G.draw_pile then
-				G.draw_pile:shuffle("play_hold_redraw")
-				G.draw_pile:hard_set_T()
+			if runtime().draw_pile then
+				runtime().draw_pile:shuffle("play_hold_redraw")
+				runtime().draw_pile:hard_set_T()
 			end
-			if G.dealt_letters then
-				G.dealt_letters:relayout()
-				G.dealt_letters:hard_set_cards()
+			if runtime().dealt_letters then
+				runtime().dealt_letters:relayout()
+				runtime().dealt_letters:hard_set_cards()
 			end
 			if on_complete then
 				on_complete()
@@ -225,13 +228,13 @@ local function finish_redraw()
 	if WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
 		WORD_GAME_UI.TableInput.refresh_card_input()
 	else
-		if G.dealt_letters and G.dealt_letters.set_ranks then G.dealt_letters:set_ranks() end
-		if G.pattern_row and G.pattern_row.area and G.pattern_row.area.set_ranks then
-			G.pattern_row.area:set_ranks()
+		if runtime().dealt_letters and runtime().dealt_letters.set_ranks then runtime().dealt_letters:set_ranks() end
+		if runtime().pattern_row and runtime().pattern_row.area and runtime().pattern_row.area.set_ranks then
+			runtime().pattern_row.area:set_ranks()
 		end
 	end
-	if G.dealt_letters and G.dealt_letters.relayout then
-		G.dealt_letters:relayout()
+	if runtime().dealt_letters and runtime().dealt_letters.relayout then
+		runtime().dealt_letters:relayout()
 	end
 	if WORD_GAME_UI.TableControls then
 		WORD_GAME_UI.TableControls.sync()
@@ -294,7 +297,7 @@ function M.update(dt)
 		return
 	end
 
-	local c = G.INPUT
+	local c = runtime().INPUT
 	local press_state = (c and c.pointer_held) or (love.mouse and love.mouse.isDown and love.mouse.isDown(1))
 	if not press_state then
 		if peak_hold_t >= M.CLICK_BLOCK then
@@ -362,12 +365,12 @@ function M.draw()
 	if not btn or not btn.states.visible then return end
 
 	local progress = M.hold_progress()
-	local w = (btn.VT.w or 1.25) * (G.TILESIZE or 20)
-	local h = (btn.VT.h or 1.25) * (G.TILESIZE or 20)
+	local w = (btn.VT.w or 1.25) * (runtime().TILESIZE or 20)
+	local h = (btn.VT.h or 1.25) * (runtime().TILESIZE or 20)
 	local cx, cy = w * 0.5, h * 0.5
 
 	local sprite = find_sprite_object(btn)
-	local sprite_w = sprite and sprite.VT and sprite.VT.w and (sprite.VT.w * (G.TILESIZE or 20))
+	local sprite_w = sprite and sprite.VT and sprite.VT.w and (sprite.VT.w * (runtime().TILESIZE or 20))
 	local radius = (sprite_w and sprite_w > 0 and (sprite_w * 0.5)) or (math.min(w, h) * 0.5)
 	local line_w = M.RING_WIDTH
 
@@ -376,12 +379,12 @@ function M.draw()
 		btn:translate_container()
 	elseif btn.panel and btn.panel.container and btn.panel.translate_container then
 		btn.panel:translate_container()
-	elseif G.ROOM and G.ROOM.translate_container then
-		G.ROOM:translate_container()
+	elseif runtime().ROOM and runtime().ROOM.translate_container then
+		runtime().ROOM:translate_container()
 	end
 
 	push_node_transform(btn, 1)
-	love.graphics.scale(1 / (G.TILESIZE or 1))
+	love.graphics.scale(1 / (runtime().TILESIZE or 1))
 
 	local a_top = -math.pi * 0.5
 

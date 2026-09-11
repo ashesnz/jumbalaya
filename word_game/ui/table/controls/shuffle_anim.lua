@@ -1,5 +1,8 @@
 --[[ word_game/ui/table/controls/shuffle_anim.lua - Smooth riffle shuffle animation for the hand ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Scheduler = require "app.effects.timeline_scheduler"
 local game_access = require("word_game.model.game_access")
 
@@ -20,7 +23,7 @@ local function smoothstep(u)
 end
 
 local function lift_height()
-	return (G.CARD_H or 1.4) * LIFT_FRAC
+	return (runtime().CARD_H or 1.4) * LIFT_FRAC
 end
 
 local function set_animating(active)
@@ -76,7 +79,7 @@ local function animate_card_move(move, delay, duration, lift)
 			card.shuffle_hop = true
 			park_card(card, move.sx, move.sy, move.sr)
 
-			local started = G.TIMERS.REAL
+			local started = runtime().TIMERS.REAL
 			Scheduler.add{
 				mode = "window",
 				timer = "REAL",
@@ -84,7 +87,7 @@ local function animate_card_move(move, delay, duration, lift)
 				blockable = false,
 				blocking = false,
 				func = function()
-					local u = math.min(1, (G.TIMERS.REAL - started) / duration)
+					local u = math.min(1, (runtime().TIMERS.REAL - started) / duration)
 					local e = smoothstep(u)
 					card.T.x = move.sx + (move.tx - move.sx) * e
 					card.T.y = move.sy + (move.ty - move.sy) * e - lift * math.sin(math.pi * u)
@@ -111,7 +114,7 @@ function M.animate(hand, on_complete)
 		return
 	end
 
-	if not (G.TIMELINE and G.TIMELINE.enqueue) then
+	if not (runtime().TIMELINE and runtime().TIMELINE.enqueue) then
 		hand:shuffle("hand_shuffle")
 		hand:relayout()
 		hand:hard_set_cards()

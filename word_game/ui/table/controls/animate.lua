@@ -1,5 +1,8 @@
 --[[ word_game/ui/table/controls/animate.lua - Hand shuffle bounce, recall, and settle ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local facade = require("word_game.ui.facade")
 local hand_shuffle_anim = require("word_game.ui.table.controls.shuffle_anim")
 local hand_placement_recall_anim = require("word_game.ui.table.controls.placement_recall_anim")
@@ -34,7 +37,7 @@ function M.clear_bounce(node)
 end
 
 local function placement_area()
-	return G.pattern_row and G.pattern_row.area
+	return runtime().pattern_row and runtime().pattern_row.area
 end
 
 local function jumble_active()
@@ -51,15 +54,15 @@ function M.recall_placement_cards(opts)
 		local p_area = placement_area()
 		for i = #p_area.cards, 1, -1 do
 			local card = p_area.cards[i]
-			if G.pattern_row then
-				G.pattern_row:on_remove_card(card)
+			if runtime().pattern_row then
+				runtime().pattern_row:on_remove_card(card)
 			end
 			p_area:remove_card(card)
 			local stack = bonus_stack_ui()
 			if stack and stack.is_bonus_card(card) then
 				stack.return_card(card)
-			elseif G.dealt_letters then
-				G.dealt_letters:emplace(card)
+			elseif runtime().dealt_letters then
+				runtime().dealt_letters:emplace(card)
 			end
 		end
 		if p_area.hard_set_cards then
@@ -72,18 +75,18 @@ function M.recall_placement_cards(opts)
 			WORD_GAME.Jumble.clear_blank_cards(wr.jumble.slots)
 			WORD_GAME.Jumble.sync_placement_cards(wr.jumble.slots)
 		end
-		if G.pattern_row and G.pattern_row.jumble_geometry then
-			G.pattern_row.jumble_geometry.relayout(G.pattern_row)
+		if runtime().pattern_row and runtime().pattern_row.jumble_geometry then
+			runtime().pattern_row.jumble_geometry.relayout(runtime().pattern_row)
 		end
 	end
 	facade.placement_word().clear()
-	if G.dealt_letters then
-		if G.dealt_letters.clear_selection then G.dealt_letters:clear_selection() end
-		if G.dealt_letters.set_ranks then G.dealt_letters:set_ranks() end
-		if G.dealt_letters.relayout then G.dealt_letters:relayout() end
+	if runtime().dealt_letters then
+		if runtime().dealt_letters.clear_selection then runtime().dealt_letters:clear_selection() end
+		if runtime().dealt_letters.set_ranks then runtime().dealt_letters:set_ranks() end
+		if runtime().dealt_letters.relayout then runtime().dealt_letters:relayout() end
 		if not opts.skip_hand_snap then
-			if G.dealt_letters.hard_set_cards then G.dealt_letters:hard_set_cards() end
-			if G.dealt_letters.snap_VT then G.dealt_letters:snap_VT() end
+			if runtime().dealt_letters.hard_set_cards then runtime().dealt_letters:hard_set_cards() end
+			if runtime().dealt_letters.snap_VT then runtime().dealt_letters:snap_VT() end
 		end
 	end
 end
@@ -91,7 +94,7 @@ end
 function M.return_placement_cards_to_hand(placement_has_cards, sync_visibility)
 	if not placement_has_cards() then return end
 	if InputLock.is_table_busy() then return end
-	if G.INPUT and G.INPUT.dragging and G.INPUT.dragging.target then return end
+	if runtime().INPUT and runtime().INPUT.dragging and runtime().INPUT.dragging.target then return end
 	if hand_placement_recall_anim.animate(function()
 		sync_visibility()
 	end) then
@@ -105,7 +108,7 @@ function M.return_placement_cards_to_hand(placement_has_cards, sync_visibility)
 end
 
 function M.stabilize()
-	if not G.dealt_letters or (not G.hand_action_bar and not G.table_shuffle_bar) then return end
+	if not runtime().dealt_letters or (not runtime().hand_action_bar and not runtime().table_shuffle_bar) then return end
 	layout().place_action_bars()
 end
 
@@ -136,11 +139,11 @@ end
 
 function M.shuffle_hand(placement_has_cards)
 	if placement_has_cards() then return end
-	if not G.dealt_letters or #G.dealt_letters.cards < 2 then return end
+	if not runtime().dealt_letters or #runtime().dealt_letters.cards < 2 then return end
 	if InputLock.is_table_busy() then return end
-	if G.INPUT and G.INPUT.dragging and G.INPUT.dragging.target then return end
-	G.dealt_letters:clear_selection()
-	hand_shuffle_anim.animate(G.dealt_letters)
+	if runtime().INPUT and runtime().INPUT.dragging and runtime().INPUT.dragging.target then return end
+	runtime().dealt_letters:clear_selection()
+	hand_shuffle_anim.animate(runtime().dealt_letters)
 end
 
 return M

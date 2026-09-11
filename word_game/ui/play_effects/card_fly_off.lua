@@ -1,5 +1,8 @@
 --[[ word_game/ui/play_effects/card_fly_off.lua - Played cards fly off-screen instead of the recycle pile ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local facade = require("word_game.ui.facade")
 local function bonus_stack_ui()
 	return facade.bonus_stack_ui()
@@ -45,12 +48,12 @@ local function sync_card_transform(card)
 end
 
 local function window_left_x()
-	return -((G.ROOM and G.ROOM.T and G.ROOM.T.x) or 0)
+	return -((runtime().ROOM and runtime().ROOM.T and runtime().ROOM.T.x) or 0)
 end
 
 local function detach_card(card)
-	if G.pattern_row and G.pattern_row.on_remove_card then
-		G.pattern_row:on_remove_card(card)
+	if runtime().pattern_row and runtime().pattern_row.on_remove_card then
+		runtime().pattern_row:on_remove_card(card)
 	end
 	if card.area and card.area.remove_card then
 		card.area:remove_card(card)
@@ -68,8 +71,8 @@ local function detach_card(card)
 	if card.states then
 		card.states.visible = true
 	end
-	if card.set_container and G.ROOM then
-		card:set_container(G.ROOM)
+	if card.set_container and runtime().ROOM then
+		card:set_container(runtime().ROOM)
 	end
 end
 
@@ -86,8 +89,8 @@ function M.stash_played_card(card)
 		if card.states.hover then card.states.hover.can = false end
 		if card.states.click then card.states.click.can = false end
 	end
-	if G.recycle_stash and G.recycle_stash.emplace then
-		G.recycle_stash:emplace(card)
+	if runtime().recycle_stash and runtime().recycle_stash.emplace then
+		runtime().recycle_stash:emplace(card)
 	end
 end
 
@@ -105,7 +108,7 @@ local function fly_one_card(queue_event, card, index, count, return_to_deck, on_
 		return
 	end
 
-	local can_animate = queue_event and G.TIMELINE and G.TIMELINE.enqueue and G.TIMERS and card.T
+	local can_animate = queue_event and runtime().TIMELINE and runtime().TIMELINE.enqueue and runtime().TIMERS and card.T
 	if not can_animate then
 		if card.area and card.area.remove_card then
 			card.area:remove_card(card)
@@ -117,10 +120,10 @@ local function fly_one_card(queue_event, card, index, count, return_to_deck, on_
 
 	detach_card(card)
 	local sx, sy = card.T.x, card.T.y
-	local sw = card.T.w or (G.CARD_W or 1)
+	local sw = card.T.w or (runtime().CARD_W or 1)
 	local tx = window_left_x() - sw * 0.6
 	local ty = sy + (index - (count + 1) * 0.5) * 0.04
-	local started = (G.TIMERS and G.TIMERS.REAL) or 0
+	local started = (runtime().TIMERS and runtime().TIMERS.REAL) or 0
 
 	if play_sfx then
 		play_sfx("card_slide1", 0.85 + (index / math.max(1, count)) * 0.2, 0.6)
@@ -132,7 +135,7 @@ local function fly_one_card(queue_event, card, index, count, return_to_deck, on_
 		delay = FLY_DURATION,
 		blocking = true,
 		func = function()
-			local now = (G.TIMERS and G.TIMERS.REAL) or (started + FLY_DURATION)
+			local now = (runtime().TIMERS and runtime().TIMERS.REAL) or (started + FLY_DURATION)
 			local u = FLY_DURATION > 0 and math.min(1, (now - started) / FLY_DURATION) or 1
 			local e = smoothstep(u)
 			card.T.x = sx + (tx - sx) * e
@@ -173,7 +176,7 @@ function M.fly_cards_off(cards, queue_event, opts)
 
 	for index, card in ipairs(list) do
 		local delay = (index == 1) and 0.04 or STAGGER
-		local can_animate = queue_event and G.TIMELINE and G.TIMELINE.enqueue and G.TIMERS and card.T
+		local can_animate = queue_event and runtime().TIMELINE and runtime().TIMELINE.enqueue and runtime().TIMERS and card.T
 		if can_animate then
 			queue_event(Tween({
 				mode = "delayed",

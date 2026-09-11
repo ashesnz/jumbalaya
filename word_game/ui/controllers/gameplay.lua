@@ -1,4 +1,7 @@
---[[ word_game/ui/controllers/gameplay.lua - Phase 4 gameplay G.FUNCS controller ]]
+--[[ word_game/ui/controllers/gameplay.lua - Phase 4 gameplay runtime().FUNCS controller ]]
+
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
 
 local action_dispatch = require("bridge.action_dispatch")
 local game_access = require("word_game.model.game_access")

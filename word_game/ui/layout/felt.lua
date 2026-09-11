@@ -2,6 +2,9 @@
 	word_game/ui/layout/felt.lua - Play column, felt, panel, and HUD metrics.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local game_access = require("word_game.model.game_access")
 
 local M = {}
@@ -18,15 +21,15 @@ M.SIDEBAR_BOTTOM_FRAC = 0.055
 M.SIDEBAR_WIDTH = 3.0
 
 function M.sidebar_frac()
-	return M.sidebar_width() / (G.TILE_W or 20)
+	return M.sidebar_width() / (runtime().TILE_W or 20)
 end
 
 function M.sidebar_width()
-	return G.TABLE_BOARD_SIDEBAR_WIDTH or M.SIDEBAR_WIDTH
+	return runtime().TABLE_BOARD_SIDEBAR_WIDTH or M.SIDEBAR_WIDTH
 end
 
 function M.sidebar_gap()
-	return math.max(0.15, G.TILE_W * 0.01)
+	return math.max(0.15, runtime().TILE_W * 0.01)
 end
 
 function M.right_margin()
@@ -34,11 +37,11 @@ function M.right_margin()
 end
 
 function M.window_width_tiles()
-	local ts = (G.TILESIZE or 1) * (G.TILESCALE or 1)
+	local ts = (runtime().TILESIZE or 1) * (runtime().TILESCALE or 1)
 	if love and love.graphics and love.graphics.getWidth then
 		return love.graphics.getWidth() / ts
 	end
-	return G.TILE_W or 20
+	return runtime().TILE_W or 20
 end
 
 function M.is_boss_sequence()
@@ -49,7 +52,7 @@ function M.is_boss_sequence()
 end
 
 function M.hand_play_column()
-	local pad_x = G.TILE_W * M.PLAY_LEFT_FRAC
+	local pad_x = runtime().TILE_W * M.PLAY_LEFT_FRAC
 	local gap = M.sidebar_gap()
 	local sidebar_x = M.sidebar_right_x() - M.sidebar_width()
 	return {
@@ -59,35 +62,35 @@ function M.hand_play_column()
 end
 
 function M.hand_felt_rect()
-	if G.STAGE == G.STAGES.RUN or G.STATE == G.STATES.TABLE_BOARD then
+	if runtime().STAGE == runtime().STAGES.RUN or runtime().STATE == runtime().STATES.TABLE_BOARD then
 		local col = M.hand_play_column()
-		local y = M.hud_top() + M.hud_height() + G.TILE_H * M.FELT_GAP_FRAC
-		local bottom = G.TILE_H * M.BOTTOM_PAD_FRAC
+		local y = M.hud_top() + M.hud_height() + runtime().TILE_H * M.FELT_GAP_FRAC
+		local bottom = runtime().TILE_H * M.BOTTOM_PAD_FRAC
 		return {
 			x = col.x,
 			y = y,
 			w = col.w,
-			h = math.max(3, G.TILE_H - y - bottom),
+			h = math.max(3, runtime().TILE_H - y - bottom),
 		}
 	end
 	return M.felt_rect()
 end
 
 function M.sidebar_right_x()
-	local room_x = (G.ROOM and G.ROOM.T and G.ROOM.T.x) or 0
+	local room_x = (runtime().ROOM and runtime().ROOM.T and runtime().ROOM.T.x) or 0
 	return M.window_width_tiles() - room_x
 end
 
 function M.hud_top()
-	return G.TILE_H * M.HUD_TOP_FRAC
+	return runtime().TILE_H * M.HUD_TOP_FRAC
 end
 
 function M.portrait_h()
-	return math.max(1.7, G.TILE_H * M.PORTRAIT_H_FRAC)
+	return math.max(1.7, runtime().TILE_H * M.PORTRAIT_H_FRAC)
 end
 
 function M.togo_h()
-	return math.max(0.8, G.TILE_H * M.TOGO_H_FRAC)
+	return math.max(0.8, runtime().TILE_H * M.TOGO_H_FRAC)
 end
 
 function M.meta_h()
@@ -99,11 +102,11 @@ function M.hud_height()
 end
 
 function M.play_column()
-	local pad_x = G.TILE_W * M.PLAY_LEFT_FRAC
+	local pad_x = runtime().TILE_W * M.PLAY_LEFT_FRAC
 	if M.is_boss_sequence() then
-		local room_x = (G.ROOM and G.ROOM.T and G.ROOM.T.x) or 0
+		local room_x = (runtime().ROOM and runtime().ROOM.T and runtime().ROOM.T.x) or 0
 		local win_w = M.window_width_tiles() - room_x
-		local margin = math.max(pad_x, G.TILE_W * 0.03)
+		local margin = math.max(pad_x, runtime().TILE_W * 0.03)
 		return {
 			x = margin,
 			w = math.max(4, win_w - 2 * margin),
@@ -118,22 +121,22 @@ function M.play_column()
 end
 
 function M.felt_rect()
-	if (G.STAGE == G.STAGES.RUN or G.STATE == G.STATES.TABLE_BOARD) then
+	if (runtime().STAGE == runtime().STAGES.RUN or runtime().STATE == runtime().STATES.TABLE_BOARD) then
 		local col = M.play_column()
-		local y = M.hud_top() + M.hud_height() + G.TILE_H * M.FELT_GAP_FRAC
-		local bottom = G.TILE_H * M.BOTTOM_PAD_FRAC
+		local y = M.hud_top() + M.hud_height() + runtime().TILE_H * M.FELT_GAP_FRAC
+		local bottom = runtime().TILE_H * M.BOTTOM_PAD_FRAC
 		return {
 			x = col.x,
 			y = y,
 			w = col.w,
-			h = math.max(3, G.TILE_H - y - bottom),
+			h = math.max(3, runtime().TILE_H - y - bottom),
 		}
 	end
 	return {
 		x = 0.8,
 		y = 2.0,
-		w = G.TILE_W - 1.6,
-		h = G.TILE_H - 3.5,
+		w = runtime().TILE_W - 1.6,
+		h = runtime().TILE_H - 3.5,
 	}
 end
 
@@ -151,7 +154,7 @@ end
 function M.hud_offset()
 	local col = M.play_column()
 	return {
-		x = col.x + col.w * 0.5 - G.TILE_W * 0.5,
+		x = col.x + col.w * 0.5 - runtime().TILE_W * 0.5,
 		y = M.hud_top(),
 	}
 end

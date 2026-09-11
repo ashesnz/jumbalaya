@@ -2,6 +2,9 @@
 	word_game/ui/views/table_board_view.lua - TABLE_BOARD store-backed pile rendering (Phase 6 / 8).
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local Engine = require("jumbalaya-engine")
 local PileView = Engine.Views.PileView
 local TableAreas = require("word_game.model.table_areas")
@@ -48,17 +51,17 @@ end
 
 function TableBoardView:legacy_area(pile_id)
 	local key = PILE_AREAS[pile_id]
-	if not key or not G then return nil end
+	if not key or not runtime() then return nil end
 	if pile_id == "pattern" then
-		local row = G.pattern_row
+		local row = runtime().pattern_row
 		return row and row.area
 	end
-	return G[key]
+	return runtime()[key]
 end
 
 function TableBoardView:interaction_cards()
 	local out = {}
-	local controller = G and G.INPUT
+	local controller = runtime() and runtime().INPUT
 	if not controller then return out end
 	if controller.dragging and controller.dragging.target then
 		out[controller.dragging.target] = true
@@ -124,8 +127,8 @@ function TableBoardView:should_render_pattern_from_store()
 end
 
 function TableBoardView:hand_rect()
-	if G and G.dealt_letters and G.dealt_letters.T then
-		return G.dealt_letters.T
+	if runtime() and runtime().dealt_letters and runtime().dealt_letters.T then
+		return runtime().dealt_letters.T
 	end
 	return { x = 0, y = 0, w = 5, h = 1, card_w = 1, card_h = 1 }
 end
@@ -135,22 +138,22 @@ function TableBoardView:draw_pile_rect()
 	if Layout and Layout.deck_rect then
 		return Layout.deck_rect()
 	end
-	if G and G.draw_pile and G.draw_pile.T then
-		return G.draw_pile.T
+	if runtime() and runtime().draw_pile and runtime().draw_pile.T then
+		return runtime().draw_pile.T
 	end
 	return { x = 0, y = 0, w = 1, h = 1, card_w = 1, card_h = 1 }
 end
 
 function TableBoardView:pattern_rect()
-	if G and G.pattern_row and G.pattern_row.area and G.pattern_row.area.T then
-		return G.pattern_row.area.T
+	if runtime() and runtime().pattern_row and runtime().pattern_row.area and runtime().pattern_row.area.T then
+		return runtime().pattern_row.area.T
 	end
 	return { x = 0, y = 0, w = 8, h = 1, card_w = 1, card_h = 1 }
 end
 
 function TableBoardView:decorate_rect(rect)
-	rect.card_w = rect.card_w or (G and G.CARD_W) or 1
-	rect.card_h = rect.card_h or (G and G.CARD_H) or 1
+	rect.card_w = rect.card_w or (runtime() and runtime().CARD_W) or 1
+	rect.card_h = rect.card_h or (runtime() and runtime().CARD_H) or 1
 	return rect
 end
 

@@ -5,6 +5,9 @@
 	placement row, play button, and score slider. Click anywhere to advance.
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local CharacterSpeech = require("word_game.ui.tutorial.character_speech")
 local Scheduler = require("app.effects.timeline_scheduler")
 local Easing = require("app.effects.easing")
@@ -62,15 +65,15 @@ local overlay_colour = { 0.06, 0.08, 0.12, 0 }
 local bubble_ui = nil
 
 local function settings()
-	return G and G.SETTINGS
+	return runtime() and runtime().SETTINGS
 end
 
 function M.is_active()
-	return active and G.FIRST_PLAY_TUTORIAL_OVERLAY ~= nil
+	return active and runtime().FIRST_PLAY_TUTORIAL_OVERLAY ~= nil
 end
 
 function M.should_show()
-	if G and G.F_SKIP_TUTORIAL then return false end
+	if runtime() and runtime().F_SKIP_TUTORIAL then return false end
 	local s = settings()
 	if not s then return false end
 	if s.first_play_tutorial_force then return true end
@@ -79,14 +82,14 @@ function M.should_show()
 end
 
 local function from_save()
-	local run = G and G.RUN
+	local run = runtime() and runtime().RUN
 	return run and run.from_save
 end
 
 local function refresh_board_input()
-	if G.dealt_letters and G.dealt_letters.set_ranks then G.dealt_letters:set_ranks() end
-	if G.pattern_row and G.pattern_row.area and G.pattern_row.area.set_ranks then
-		G.pattern_row.area:set_ranks()
+	if runtime().dealt_letters and runtime().dealt_letters.set_ranks then runtime().dealt_letters:set_ranks() end
+	if runtime().pattern_row and runtime().pattern_row.area and runtime().pattern_row.area.set_ranks then
+		runtime().pattern_row.area:set_ranks()
 	end
 	if WORD_GAME_UI.TableControls then
 		WORD_GAME_UI.TableControls.sync()
@@ -94,7 +97,7 @@ local function refresh_board_input()
 end
 
 local function stop_drag()
-	local controller = G.INPUT
+	local controller = runtime().INPUT
 	if not controller or not controller.dragging or not controller.dragging.target then return end
 	local target = controller.dragging.target
 	if target.stop_drag then
@@ -116,8 +119,8 @@ local function mark_complete()
 	if not s then return end
 	if not s.first_play_tutorial_force then
 		s.first_play_tutorial_complete = true
-		if G.queue_settings_write then
-			G:queue_settings_write()
+		if runtime().queue_settings_write then
+			runtime():queue_settings_write()
 		end
 	end
 end
@@ -129,13 +132,13 @@ local function try_opening_perk_demo()
 end
 
 function M.dismiss()
-	if not active and not G.FIRST_PLAY_TUTORIAL_OVERLAY then return end
+	if not active and not runtime().FIRST_PLAY_TUTORIAL_OVERLAY then return end
 	active = false
 	step_index = 1
 	clear_bubble()
-	if G.FIRST_PLAY_TUTORIAL_OVERLAY then
-		G.FIRST_PLAY_TUTORIAL_OVERLAY:remove()
-		G.FIRST_PLAY_TUTORIAL_OVERLAY = nil
+	if runtime().FIRST_PLAY_TUTORIAL_OVERLAY then
+		runtime().FIRST_PLAY_TUTORIAL_OVERLAY:remove()
+		runtime().FIRST_PLAY_TUTORIAL_OVERLAY = nil
 	end
 	mark_complete()
 	refresh_board_input()
@@ -151,26 +154,26 @@ local function bubble_definition(text_key)
 end
 
 local function room_centered_bubble(cx, center_y)
-	local room = G.ROOM_ATTACH and G.ROOM_ATTACH.T
+	local room = runtime().ROOM_ATTACH and runtime().ROOM_ATTACH.T
 	if not room then
-		return { align = "cm", offset = { x = 0, y = 0 }, major = G.ROOM_ATTACH }
+		return { align = "cm", offset = { x = 0, y = 0 }, major = runtime().ROOM_ATTACH }
 	end
 	local room_cx = room.x + room.w * 0.5
 	local room_cy = room.y + room.h * 0.5
 	return {
 		align = "cm",
 		offset = { x = cx - room_cx, y = center_y - room_cy },
-		major = G.ROOM_ATTACH,
+		major = runtime().ROOM_ATTACH,
 	}
 end
 
 local function hand_bubble_config()
 	dealt_hand.apply_screen_position()
 
-	local hand = G.dealt_letters and G.dealt_letters.T
-	local room = G.ROOM_ATTACH and G.ROOM_ATTACH.T
+	local hand = runtime().dealt_letters and runtime().dealt_letters.T
+	local room = runtime().ROOM_ATTACH and runtime().ROOM_ATTACH.T
 	if not hand or not room then
-		return { align = "cm", offset = { x = 0, y = 0 }, major = G.ROOM_ATTACH }
+		return { align = "cm", offset = { x = 0, y = 0 }, major = runtime().ROOM_ATTACH }
 	end
 
 	local hand_cx = hand.x + hand.w * 0.5
@@ -182,20 +185,20 @@ local function hand_bubble_config()
 end
 
 local function placement_bubble_config()
-	if G.pattern_row and G.pattern_row.apply_screen_position then
-		G.pattern_row:apply_screen_position()
+	if runtime().pattern_row and runtime().pattern_row.apply_screen_position then
+		runtime().pattern_row:apply_screen_position()
 	end
 
-	local area = G.pattern_row and G.pattern_row.area
+	local area = runtime().pattern_row and runtime().pattern_row.area
 	local placement = area and area.T
-	local room = G.ROOM_ATTACH and G.ROOM_ATTACH.T
+	local room = runtime().ROOM_ATTACH and runtime().ROOM_ATTACH.T
 	if not placement or not room then
-		return { align = "cm", offset = { x = 0, y = 0 }, major = G.ROOM_ATTACH }
+		return { align = "cm", offset = { x = 0, y = 0 }, major = runtime().ROOM_ATTACH }
 	end
 
 	local placement_cx = placement.x + placement.w * 0.5
 	local center_y = placement.y + placement.h + PLACEMENT_BUBBLE_GAP + PLACEMENT_BUBBLE_HEIGHT * 0.5
-	local max_center_y = (G.TILE_H or (room.y + room.h)) - PLACEMENT_BUBBLE_HEIGHT * 0.5 - 0.08
+	local max_center_y = (runtime().TILE_H or (room.y + room.h)) - PLACEMENT_BUBBLE_HEIGHT * 0.5 - 0.08
 	center_y = math.min(center_y, max_center_y)
 
 	return room_centered_bubble(placement_cx, center_y)
@@ -206,12 +209,12 @@ local function play_bubble_config()
 		WORD_GAME_UI.TableControls.sync()
 	end
 
-	local bar = G.hand_action_bar
+	local bar = runtime().hand_action_bar
 	local btn = WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.play_button_uie()
 	local target = (bar and not bar.REMOVED and bar.T) or (btn and btn.T)
-	local room = G.ROOM_ATTACH and G.ROOM_ATTACH.T
+	local room = runtime().ROOM_ATTACH and runtime().ROOM_ATTACH.T
 	if not target or not room then
-		return { align = "cm", offset = { x = 0, y = 0 }, major = G.ROOM_ATTACH }
+		return { align = "cm", offset = { x = 0, y = 0 }, major = runtime().ROOM_ATTACH }
 	end
 
 	local cx = target.x + target.w * 0.5
@@ -224,14 +227,14 @@ end
 
 local function timeline_bubble_config()
 	local rect = Layout.timeline_rect and Layout.timeline_rect() or Layout.portrait_rect()
-	local room = G.ROOM_ATTACH and G.ROOM_ATTACH.T
+	local room = runtime().ROOM_ATTACH and runtime().ROOM_ATTACH.T
 	if not rect or not room then
-		return { align = "cm", offset = { x = 0, y = 0 }, major = G.ROOM_ATTACH }
+		return { align = "cm", offset = { x = 0, y = 0 }, major = runtime().ROOM_ATTACH }
 	end
 
 	local timeline_cx = rect.x + rect.w * 0.5
 	local center_y = rect.y + rect.h + TIMELINE_BUBBLE_GAP + TIMELINE_BUBBLE_HEIGHT * 0.5
-	local max_center_y = (G.TILE_H or (room.y + room.h)) - TIMELINE_BUBBLE_HEIGHT * 0.5 - 0.08
+	local max_center_y = (runtime().TILE_H or (room.y + room.h)) - TIMELINE_BUBBLE_HEIGHT * 0.5 - 0.08
 	center_y = math.min(center_y, max_center_y)
 
 	return room_centered_bubble(timeline_cx, center_y)
@@ -253,21 +256,21 @@ local function resolve_bubble_config(step)
 	return {
 		align = step.bubble.align,
 		offset = step.bubble.offset,
-		major = G.ROOM_ATTACH,
+		major = runtime().ROOM_ATTACH,
 	}
 end
 
 local function build_selections(step)
 	local selections = { bubble_ui }
-	if step.spotlight == "hand" and G.dealt_letters then
-		selections = { G.dealt_letters, bubble_ui }
+	if step.spotlight == "hand" and runtime().dealt_letters then
+		selections = { runtime().dealt_letters, bubble_ui }
 	end
 	return selections
 end
 
 local function apply_step()
 	local step = STEPS[step_index]
-	if not step or not G.FIRST_PLAY_TUTORIAL_OVERLAY then return end
+	if not step or not runtime().FIRST_PLAY_TUTORIAL_OVERLAY then return end
 
 	clear_bubble()
 
@@ -285,11 +288,11 @@ local function apply_step()
 	bubble_ui.under_overlay = false
 	CharacterSpeech.pop_bubble(bubble_ui)
 
-	G.FIRST_PLAY_TUTORIAL_OVERLAY.selections = build_selections(step)
-	G.FIRST_PLAY_TUTORIAL_OVERLAY.redraw_hand = step.spotlight == "hand" and true or nil
-	G.FIRST_PLAY_TUTORIAL_OVERLAY.redraw_placement = step.spotlight == "placement" and true or nil
-	G.FIRST_PLAY_TUTORIAL_OVERLAY.redraw_play = step.spotlight == "play" and true or nil
-	G.FIRST_PLAY_TUTORIAL_OVERLAY.redraw_timeline = step.spotlight == "timeline" and true or nil
+	runtime().FIRST_PLAY_TUTORIAL_OVERLAY.selections = build_selections(step)
+	runtime().FIRST_PLAY_TUTORIAL_OVERLAY.redraw_hand = step.spotlight == "hand" and true or nil
+	runtime().FIRST_PLAY_TUTORIAL_OVERLAY.redraw_placement = step.spotlight == "placement" and true or nil
+	runtime().FIRST_PLAY_TUTORIAL_OVERLAY.redraw_play = step.spotlight == "play" and true or nil
+	runtime().FIRST_PLAY_TUTORIAL_OVERLAY.redraw_timeline = step.spotlight == "timeline" and true or nil
 	refresh_board_input()
 end
 
@@ -307,8 +310,8 @@ end
 
 function M.consume_click()
 	if not M.is_active() then return false end
-	if G.OVERLAY_MENU then return false end
-	local c = G.INPUT
+	if runtime().OVERLAY_MENU then return false end
+	local c = runtime().INPUT
 	if not c or c.clicked.handled then return false end
 	if c.dragging.prev_target and Card and getmetatable(c.dragging.prev_target) == Card then
 		return false
@@ -320,13 +323,13 @@ end
 function M.begin()
 	if active then return false end
 	if not M.should_show() then return false end
-	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
-	if not G.ROOM_ATTACH then return false end
+	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return false end
+	if not runtime().ROOM_ATTACH then return false end
 
 	active = true
 	step_index = 1
 	stop_drag()
-	G.under_overlay = true
+	runtime().under_overlay = true
 
 	overlay_colour[4] = 0
 	Easing.value{
@@ -338,9 +341,9 @@ function M.begin()
 		delay = 0.4,
 	}
 
-	G.FIRST_PLAY_TUTORIAL_OVERLAY = UIViewHost.create{
+	runtime().FIRST_PLAY_TUTORIAL_OVERLAY = UIViewHost.create{
 		definition = {
-			n = G.UI.ROOT,
+			n = runtime().UI.ROOT,
 			config = {
 				align = "cm",
 				padding = 32.05,
@@ -349,17 +352,17 @@ function M.begin()
 				emboss = 0.05,
 			},
 			nodes = {
-				{ n = G.UI.ROW, config = { align = "cm", minh = G.ROOM.T.h, minw = G.ROOM.T.w }, nodes = {} },
+				{ n = runtime().UI.ROW, config = { align = "cm", minh = runtime().ROOM.T.h, minw = runtime().ROOM.T.w }, nodes = {} },
 			},
 		},
 		config = {
 			align = "cm",
 			offset = { x = 0, y = 3.2 },
-			major = G.ROOM_ATTACH,
+			major = runtime().ROOM_ATTACH,
 			bond = "Weak",
 		},
 	}
-	G.FIRST_PLAY_TUTORIAL_OVERLAY.flop_overlay = true
+	runtime().FIRST_PLAY_TUTORIAL_OVERLAY.flop_overlay = true
 
 	apply_step()
 	return true
@@ -368,7 +371,7 @@ end
 function M.try_schedule()
 	if not M.should_show() then return end
 	if from_save() then return end
-	if G.STATE ~= G.STATES.TABLE_BOARD or G.STAGE ~= G.STAGES.RUN then return end
+	if runtime().STATE ~= runtime().STATES.TABLE_BOARD or runtime().STAGE ~= runtime().STAGES.RUN then return end
 
 	Scheduler.add{
 		mode = "delayed",
@@ -376,7 +379,7 @@ function M.try_schedule()
 		blocking = false,
 		blockable = false,
 		func = function()
-			if G.STATE == G.STATES.TABLE_BOARD and G.STAGE == G.STAGES.RUN then
+			if runtime().STATE == runtime().STATES.TABLE_BOARD and runtime().STAGE == runtime().STAGES.RUN then
 				M.begin()
 			end
 			return true
@@ -389,8 +392,8 @@ function M.reset()
 	local s = settings()
 	if s then
 		s.first_play_tutorial_complete = false
-		if G.queue_settings_write then
-			G:queue_settings_write()
+		if runtime().queue_settings_write then
+			runtime():queue_settings_write()
 		end
 	end
 end
@@ -399,7 +402,7 @@ function M.set_force(enabled)
 	local s = settings()
 	if not s then return end
 	s.first_play_tutorial_force = enabled and true or false
-	if enabled and G.STATE == G.STATES.TABLE_BOARD then
+	if enabled and runtime().STATE == runtime().STATES.TABLE_BOARD then
 		M.begin()
 	elseif not enabled and M.is_active() then
 		M.dismiss()

@@ -2,6 +2,9 @@
 	word_game/ui/views/table_controls_view.lua - Play/shuffle action bar hosts (Phase 8).
 ]]
 
+local GameRT = require("word_game.ui.util.game_runtime")
+local function runtime() return GameRT.game() end
+
 local RetainedUI = require("jumbalaya-engine.retained_ui")
 
 local TableControlsView = {}
@@ -31,13 +34,13 @@ end
 function TableControlsView.create_bar(button_def, size, config)
 	local inner = RetainedUI.create({
 		definition = {
-			n = G.UI.ROOT,
-			config = { align = "cm", colour = G.C.CLEAR, minw = size, minh = size },
+			n = runtime().UI.ROOT,
+			config = { align = "cm", colour = runtime().C.CLEAR, minw = size, minh = size },
 			nodes = { button_def },
 		},
 		config = config or {
 			align = "cm",
-			major = G.ROOM_ATTACH,
+			major = runtime().ROOM_ATTACH,
 			offset = { x = 0, y = 0 },
 		},
 	})
