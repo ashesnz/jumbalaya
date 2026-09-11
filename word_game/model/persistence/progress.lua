@@ -1,12 +1,14 @@
 --[[ word_game/model/persistence/progress.lua - Profile progress payload and card discovery ]]
 
 local Scheduler = require "app.effects.timeline_scheduler"
+local game_access = require("word_game.model.game_access")
 
 local M = {}
 
 function M.discover_card(card)
 	if not card or card.discovered or card.wip then return end
-	if G.GAME and (G.GAME.seeded or G.GAME.challenge) then return end
+	local game = game_access.get()
+	if game and (game.seeded or game.challenge) then return end
 	card.discovered = true
 	Scheduler.add{
 		func = function()

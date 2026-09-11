@@ -1,6 +1,7 @@
 --[[ packages/jumbalaya_core/store/init.lua - Engine-agnostic run state container ]]
 
 local default_state = require("jumbalaya_core.store.default_state")
+local reducers = require("jumbalaya_core.store.reducers")
 
 local M = {}
 M.__index = M
@@ -34,6 +35,12 @@ end
 
 function M:subscribe(fn)
 	self._subscribers[#self._subscribers + 1] = fn
+end
+
+function M:dispatch(action)
+	self._state = reducers.reduce(self._state, action)
+	self:_notify()
+	return self._state
 end
 
 function M:_notify()

@@ -6,6 +6,7 @@ local round = require("word_game.model.round")
 local jumble_rules = require("word_game.model.jumble_play.jumble_rules")
 local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
 local core = require("jumbalaya_core.jumble.validation")
+local game_access = require("word_game.model.game_access")
 
 local answer_cache = { signature = nil, words = nil }
 
@@ -56,7 +57,7 @@ local function answer_signature(hand_counts, puzzle, limit)
 	for letter, count in pairs(hand_counts or {}) do
 		parts[#parts + 1] = letter .. ":" .. count
 	end
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	local played = wr and wr.played_words
 	local played_count = 0
 	if played then
@@ -141,7 +142,7 @@ function M.debug_answer_counts()
 end
 
 function M.ensure_playable_puzzle(wr)
-	wr = wr or (G.GAME and G.GAME.word_round)
+	wr = wr or game_access.word_round()
 	local j = wr and wr.jumble
 	if not j then return false end
 	if j.boss_word_active then return true end

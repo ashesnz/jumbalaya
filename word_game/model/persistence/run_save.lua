@@ -1,6 +1,7 @@
 --[[ word_game/model/persistence/run_save.lua - Run snapshot restore and letter inventory ]]
 
 local TableAreas = require("word_game.model.table_areas")
+local game_access = require("word_game.model.game_access")
 
 local M = {}
 
@@ -34,9 +35,7 @@ function M.rebuild_card_inventory()
 	if draw_pile and draw_pile.config and #G.letter_inventory > 0 then
 		draw_pile.config.card_limit = math.max(draw_pile.config.card_limit or 52, #G.letter_inventory)
 	end
-	if G.GAME then
-		G.GAME.starting_deck_size = #G.letter_inventory
-	end
+	game_access.patch({ starting_deck_size = #G.letter_inventory })
 end
 
 function M.restore_card_areas(save_table)

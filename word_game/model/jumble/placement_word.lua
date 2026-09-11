@@ -1,7 +1,8 @@
---[[ word_game/model/jumble/placement_word.lua - Placement row word preview on G.GAME ]]
+--[[ word_game/model/jumble/placement_word.lua - Placement row word preview (store-backed) ]]
 
 local round = require("word_game.model.round")
 local Presentation = require("word_game.model.presentation")
+local game_access = require("word_game.model.game_access")
 
 local M = {}
 
@@ -12,21 +13,19 @@ local function build_word(slots)
 end
 
 function M.clear()
-	if not G.GAME then return end
-	G.GAME.placement_word = ""
-	G.GAME.placement_word_valid = false
+	if not game_access.get() then return end
+	game_access.dispatch({ type = "SET_PLACEMENT_PREVIEW", word = "", valid = false })
 	Presentation.emit("score_banner_sync_preview", true)
 end
 
 function M.refresh_from_jumble_slots(slots)
-	if not G.GAME then return end
+	if not game_access.get() then return end
 	local word = build_word(slots)
-	G.GAME.placement_word = word
+	local valid = false
 	if Dictionary and word ~= "" then
-		G.GAME.placement_word_valid = Dictionary.is_valid(word) and not round.is_word_played(word)
-	else
-		G.GAME.placement_word_valid = false
+		valid = Dictionary.is_valid(word) and not round.is_word_played(word)
 	end
+	game_access.dispatch({ type = "SET_PLACEMENT_PREVIEW", word = word, valid = valid })
 	Presentation.emit("score_banner_sync_preview", true)
 end
 

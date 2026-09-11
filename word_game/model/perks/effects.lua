@@ -1,6 +1,7 @@
 --[[ word_game/model/perks/effects.lua - Gameplay hooks for collected perks (G glue over core) ]]
 
 local state = require("word_game.model.run.state")
+local game_access = require("word_game.model.game_access")
 local round_config = require("word_game.config.gameplay.round")
 local Timeline = require("word_game.model.run.timeline")
 local perk_math = require("jumbalaya_core.rules.perk_math")
@@ -111,8 +112,7 @@ function M.apply_time_bank_penalty_on_word(j)
 end
 
 function M.hold_redraw_enabled()
-	local wr = G.GAME and G.GAME.word_round
-	return core.hold_redraw_enabled(perk_flags(), wr)
+	return core.hold_redraw_enabled(perk_flags(), game_access.word_round())
 end
 
 function M.consume_redraw(j)

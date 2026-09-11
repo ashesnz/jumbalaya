@@ -148,7 +148,7 @@ Module: `bridge/store_sync.lua`
 
 Tests: `tests/unit/test_store_sync.lua`.
 
-**Not wired at boot yet** — Phase 2 instantiates the store in `game_boot.lua`.
+**Wired at boot** — `app/bootstrap/store_boot.lua` instantiates `G._store` and mirrors to `G.GAME`. Model code reads/writes via `word_game/model/game_access.lua`.
 
 ---
 

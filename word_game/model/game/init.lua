@@ -10,6 +10,7 @@ function Game:construct()
 	---@diagnostic disable-next-line: global-in-non-module
 	G = self
 	self:define_constants()
+	require("app.bootstrap.store_boot").install()
 end
 
 function Game:prep_stage(new_stage, new_state, new_game_obj)

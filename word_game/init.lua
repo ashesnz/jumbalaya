@@ -7,7 +7,7 @@
 
 local Run = require("word_game.model.run")
 
-return {
+local M = {
 	Run = Run,
 	RunScope = Run.Scope,
 	Busy = require("word_game.model.run.busy"),
@@ -28,3 +28,24 @@ return {
 	VoucherDiscard = require("word_game.model.perks.voucher_discard"),
 	Persistence = require("word_game.model.persistence"),
 }
+
+function M._bind_store(store)
+	M._store = store
+end
+
+function M.store()
+	return M._store or (G and G._store)
+end
+
+function M.state()
+	if G and G._store then
+		return G._store:get()
+	end
+	local store = M.store()
+	if store then
+		return store:get()
+	end
+	return G and G.GAME
+end
+
+return M

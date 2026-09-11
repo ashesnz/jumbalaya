@@ -12,9 +12,10 @@ return function(context)
 	local Presentation = require("word_game.model.presentation")
 	local deal_boss_hand = require("word_game.model.cards.deck.boss_hand")(M, context)
 	local core_letter_card = require("jumbalaya_core.cards.letter_card")
+	local game_access = require("word_game.model.game_access")
 
 	function M.is_jumble_deck()
-		local wr = G.GAME and G.GAME.word_round
+		local wr = game_access.word_round()
 		return wr and wr.mode == "jumble"
 	end
 
@@ -116,7 +117,8 @@ return function(context)
 	end
 
 	function M.destroy_boss_cards()
-		local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
+		local wr = game_access.word_round()
+		local j = wr and wr.jumble
 		if not j or not j.boss_cards then return end
 		for _, card in ipairs(j.boss_cards) do
 			if card and not card.REMOVED then
@@ -256,7 +258,8 @@ return function(context)
 	function M.deal_jumble_hand()
 		if not G.dealt_letters then return end
 		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.clear_blank_cards then
-			local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
+			local wr = game_access.word_round()
+			local j = wr and wr.jumble
 			if j and j.slots then
 				WORD_GAME.Jumble.clear_blank_cards(j.slots)
 			end
@@ -344,10 +347,12 @@ return function(context)
 				G.recycle_stash:hard_set_cards()
 			end
 			Presentation.emit("hand_shuffle_sync")
-			if G.GAME and G.GAME.round_scores then
-				G.GAME.round_scores.cards_discarded = G.GAME.round_scores.cards_discarded or { amt = 0 }
-				G.GAME.round_scores.cards_discarded.amt = (G.GAME.round_scores.cards_discarded.amt or 0) + 1
-			end
+			game_access.mutate(function(g)
+				if g.round_scores then
+					g.round_scores.cards_discarded = g.round_scores.cards_discarded or { amt = 0 }
+					g.round_scores.cards_discarded.amt = (g.round_scores.cards_discarded.amt or 0) + 1
+				end
+			end)
 		end
 
 		voucher_discard.record_discard()

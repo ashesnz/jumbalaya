@@ -1,6 +1,9 @@
 --[[ word_game/model/run/state.lua - Match-long run state on G.GAME.run_state ]]
 
+local perks_cfg = require("word_game.config.perks")
 local core_run_state = require("jumbalaya_core.store.run_state")
+local game_access = require("word_game.model.game_access")
+local store_sync = require("bridge.store_sync")
 
 local M = {}
 
@@ -21,12 +24,19 @@ function M.migrate_legacy_field(game)
 	end
 end
 
+local function sync_store()
+	if G and G._store and G.GAME then
+		store_sync.sync_to_g(G._store)
+	end
+end
+
 function M.get()
-	if not G or not G.GAME then return nil end
+	local game = game_access.get()
+	if not game then return nil end
 	if G.RUN and G.RUN.active == false then return nil end
-	M.migrate_legacy_field(G.GAME)
-	G.GAME.run_state = G.GAME.run_state or M.new()
-	return G.GAME.run_state
+	M.migrate_legacy_field(game)
+	game.run_state = game.run_state or M.new()
+	return game.run_state
 end
 
 function M.tokens()
@@ -34,11 +44,15 @@ function M.tokens()
 end
 
 function M.add_tokens(amount)
-	return core_run_state.add_tokens(M.get(), amount)
+	local added = core_run_state.add_tokens(M.get(), amount)
+	if added > 0 then sync_store() end
+	return added
 end
 
 function M.spend_tokens(amount)
-	return core_run_state.spend_tokens(M.get(), amount)
+	local ok = core_run_state.spend_tokens(M.get(), amount)
+	if ok then sync_store() end
+	return ok
 end
 
 function M.has_perk(key)
@@ -59,7 +73,12 @@ function M.add_perk(id)
 	rs.perks = rs.perks or {}
 	local slots = rs.perk_slots or perks_cfg.SLOT_COUNT
 	if #rs.perks >= slots then return false end
+	if G and G._store then
+		store_sync.dispatch(G._store, { type = "RUN_STATE_ADD_PERK", id = id })
+		return true
+	end
 	rs.perks[#rs.perks + 1] = id
+	sync_store()
 	return true
 end
 
@@ -77,6 +96,7 @@ function M.record_word_played()
 	local stats = M.ensure_stats()
 	if not stats then return end
 	stats.words_played = (stats.words_played or 0) + 1
+	sync_store()
 end
 
 function M.record_puzzle_score(pattern, score)
@@ -91,6 +111,7 @@ function M.record_puzzle_score(pattern, score)
 		stats.best_puzzle = stats.best_puzzle or "Puzzle"
 	end
 	stats.best_puzzle_score = score
+	sync_store()
 end
 
 local function current_puzzle_label(j)
@@ -111,7 +132,7 @@ end
 
 --- If the current unbanked puzzle outscores the recorded best, keep it.
 function M.record_current_jumble_if_best()
-	local wr = G and G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	local j = wr and wr.jumble
 	if not j then return end
 	local score = math.floor((j.puzzle_points or 0) * (j.puzzle_multi or 1.0))

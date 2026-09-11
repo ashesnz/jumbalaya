@@ -1,6 +1,7 @@
 --[[ word_game/model/run/mode.lua - Classic vs Time Run mode helpers ]]
 
 local Timeline = require("word_game.model.run.timeline")
+local game_access = require("word_game.model.game_access")
 
 local M = {}
 
@@ -36,8 +37,9 @@ function M.resolve_for_new_run(explicit)
 end
 
 function M.current()
-	if G.GAME then
-		return G.GAME.run_mode or DEFAULT
+	local game = game_access.get()
+	if game then
+		return game.run_mode or DEFAULT
 	end
 	return M.preferred()
 end

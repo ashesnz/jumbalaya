@@ -1,4 +1,6 @@
---[[ word_game/model/run/busy.lua - Model-side table-busy flags on G.GAME (set by FX modules) ]]
+--[[ word_game/model/run/busy.lua - Model-side table-busy flags (store-backed via game_access) ]]
+
+local game_access = require("word_game.model.game_access")
 
 local M = {}
 
@@ -10,19 +12,22 @@ local FLAGS = {
 }
 
 function M.set(name, on)
-	if not G or not G.GAME then return end
-	G.GAME[name] = on and true or nil
+	game_access.mutate(function(g)
+		g[name] = on and true or nil
+	end)
 end
 
 function M.on(name)
-	return G and G.GAME and G.GAME[name] == true
+	local g = game_access.get()
+	return g and g[name] == true
 end
 
 function M.clear()
-	if not G or not G.GAME then return end
-	for _, name in ipairs(FLAGS) do
-		G.GAME[name] = nil
-	end
+	game_access.mutate(function(g)
+		for _, flag in ipairs(FLAGS) do
+			g[flag] = nil
+		end
+	end)
 end
 
 return M

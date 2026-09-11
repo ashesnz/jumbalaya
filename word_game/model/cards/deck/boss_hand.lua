@@ -3,6 +3,7 @@
 local Scheduler = require "app.effects.timeline_scheduler"
 local CardMotion = require "app.effects.card_motion"
 local LetterPalette = require "word_game.config.visuals.letter_card_palette"
+local game_access = require("word_game.model.game_access")
 
 return function(deck_module, context)
 	return function(letters, on_complete, opts)
@@ -14,7 +15,8 @@ return function(deck_module, context)
 			return
 		end
 		deck_module.clear_hand_and_placement()
-		local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
+		local wr = game_access.word_round()
+		local j = wr and wr.jumble
 		j.boss_cards = {}
 		for i, letter in ipairs(letters) do
 			local card = deck_module.create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR)
@@ -45,7 +47,8 @@ return function(deck_module, context)
 			end
 		end
 		local finish = function()
-			local j_finish = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
+			local wr_finish = game_access.word_round()
+			local j_finish = wr_finish and wr_finish.jumble
 			if not (j_finish and j_finish.boss_puzzle_hidden)
 				and G.pattern_row and G.pattern_row.apply_screen_position then
 				G.pattern_row:apply_screen_position()

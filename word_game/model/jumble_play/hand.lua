@@ -7,9 +7,10 @@ local opening_deal = require("word_game.model.jumble_play.opening_deal")
 local perk_effects = require("word_game.model.perks.effects")
 local state = require("word_game.model.run.state")
 local trade = require("word_game.model.trade")
+local game_access = require("word_game.model.game_access")
 
 local function wr_jumble()
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	return wr, wr and wr.jumble
 end
 
@@ -76,14 +77,14 @@ function M.resolve_after_clear(opts)
 end
 
 function M.begin_next_hand_after_boss()
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	if not wr then return end
 	round.start_hand(wr.set, wr.hand_index + 1)
 	opening_deal.deal()
 end
 
 function M.advance_after_dealer()
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	if not wr then return "none" end
 	local result = round.advance_hand()
 	if result == "win" then
@@ -98,11 +99,7 @@ end
 
 function M.finalize_match(won)
 	state.record_current_jumble_if_best()
-	local rs = state.get()
-	if rs then
-		rs.match_over = true
-		rs.match_won = won and true or false
-	end
+	game_access.dispatch({ type = "RUN_MATCH_END", won = won })
 	return won
 end
 

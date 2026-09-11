@@ -4,6 +4,7 @@ return function(context)
 	local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 	local deck_config = require("jumbalaya_core.cards.deck_config")
 	local core_letter_card = require("jumbalaya_core.cards.letter_card")
+	local game_access = require("word_game.model.game_access")
 
 	M.STARTING_LETTERS = deck_config.STARTING_LETTERS
 
@@ -24,7 +25,7 @@ return function(context)
 		for _, letter in ipairs(M.STARTING_LETTERS) do
 			G.draw_pile:emplace(M.create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR))
 		end
-		G.GAME.starting_deck_size = #M.STARTING_LETTERS
+		game_access.patch({ starting_deck_size = #M.STARTING_LETTERS })
 		G.draw_pile.config.card_limit = #M.STARTING_LETTERS
 		M.shuffle_deck()
  	if G.draw_pile.hard_set_T then G.draw_pile:hard_set_T() end

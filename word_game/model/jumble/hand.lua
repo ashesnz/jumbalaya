@@ -9,6 +9,14 @@ local round_config = require("word_game.config.gameplay.round")
 local jumble_rules = require("word_game.model.jumble_play.jumble_rules")
 local Presentation = require("word_game.model.presentation")
 local core_hand = require("jumbalaya_core.jumble.hand")
+local game_access = require("word_game.model.game_access")
+local store_sync = require("bridge.store_sync")
+
+local function sync_store()
+	if G and G._store then
+		store_sync.sync_to_g(G._store)
+	end
+end
 
 local function puzzle_hooks()
 	return {
@@ -27,13 +35,11 @@ function M.is_active_hand(set, hand_index)
 end
 
 function M.is_active()
-	local wr = G.GAME and G.GAME.word_round
-	return core_hand.is_active(wr)
+	return core_hand.is_active(game_access.word_round())
 end
 
 function M.state()
-	local wr = G.GAME and G.GAME.word_round
-	return core_hand.state(wr)
+	return core_hand.state(game_access.word_round())
 end
 
 function M.apply_puzzle(wr, puzzle)
@@ -135,9 +141,10 @@ end
 
 function M.record_puzzle_word(word, opts)
 	opts = opts or {}
+	store_sync.adopt_current_g_game()
 	local j = M.state()
 	if not j then return 0, 0, 1.0, 1.0 end
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	local used_cards = opts.used_cards
 	local score_opts = jumble_rules.build_score_opts(j, word, used_cards, {
 		wr = wr,
@@ -146,7 +153,9 @@ function M.record_puzzle_word(word, opts)
 		old_multi = j.puzzle_multi or 1.0,
 		word_count = #(j.puzzle_words or {}) + 1,
 	})
-	return core_hand.record_puzzle_word(j, word, score_opts)
+	local old_pts, new_pts, old_multi, new_multi = core_hand.record_puzzle_word(j, word, score_opts)
+	sync_store()
+	return old_pts, new_pts, old_multi, new_multi
 end
 
 function M.time_left()

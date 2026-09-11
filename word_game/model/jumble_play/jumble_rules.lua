@@ -7,6 +7,8 @@ local invariant = require("word_game.model.invariant")
 local core = require("jumbalaya_core.rules.jumble")
 local core_play = require("jumbalaya_core.rules.play")
 local placement_preview = require("jumbalaya_core.jumble.placement_preview")
+local store_sync = require("bridge.store_sync")
+local game_access = require("word_game.model.game_access")
 
 local M = {}
 
@@ -27,7 +29,7 @@ local function perk_flags()
 end
 
 local function word_round_ref(wr)
-	return wr or (G.GAME and G.GAME.word_round)
+	return wr or game_access.word_round()
 end
 
 M.placed_count = core.placed_count
@@ -151,7 +153,7 @@ end
 
 function M.can_jumble_next(jumble)
 	if not jumble or not jumble.is_active() then return false end
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	local j = jumble.state()
 	if not wr or not j or not j.solved then return false end
 	if InputLock.is_table_busy() then return false end
@@ -161,7 +163,8 @@ end
 function M.evaluate_play(jumble, j)
 	invariant.check(jumble ~= nil, "evaluate_play requires jumble module")
 	invariant.check(j ~= nil, "evaluate_play requires jumble state")
-	local wr = G.GAME and G.GAME.word_round
+	store_sync.adopt_current_g_game()
+	local wr = game_access.word_round()
 	local result = core_play.evaluate(j, wr, {
 		play_blocked = M.play_blocked,
 		placed_count = M.placed_count,

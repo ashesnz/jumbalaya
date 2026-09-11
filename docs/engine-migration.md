@@ -323,6 +323,26 @@ function WORD_GAME.state() return WORD_GAME._store:get() end
 
 **Exit criteria:** All model mutations go through store reducers; `G.GAME` is a synced mirror; tests pass.
 
+### Phase 2 status — complete
+
+| Deliverable | Location |
+|-------------|----------|
+| Store boot | `app/bootstrap/store_boot.lua` |
+| Dispatch + reducers | `packages/jumbalaya_core/store/reducers/` (`round`, `run_state`, `game`) |
+| Reader/writer helper | `word_game/model/game_access.lua` (`get`, `word_round`, `dispatch`, `patch`, `mutate`) |
+| Shim helpers | `bridge/store_sync.lua` (`dispatch`, `bind_run`, `adopt_current_g_game`, `sync_to_g`) |
+| Facade binding | `WORD_GAME.store()`, `WORD_GAME.state()`, `G._store` |
+| Run lifecycle | `RunScope.begin_run` → `bind_run`; teardown resets store |
+| Migrated model modules | All `word_game/model/*` readers/writers except `run/scope.lua` (lifecycle shell) and `game/run.lua` (Game class setup) |
+| Test binding | `mock_env.reset_game` → `ensure_test_binding` |
+| Tests | `test_phase2_store_boot.lua`, `test_core_store_dispatch.lua` |
+
+**Exit criteria met:** Model mutations go through `game_access` dispatch/mutate/patch (backed by store reducers when bound); `G.GAME` is a synced mirror for legacy UI; tests pass.
+
+**Deferred to Phase 3+:** Engine service interfaces (`packages/jumbalaya-engine/`), dropping `G.GAME` mirror (Phase 7), `Card`/`CardArea` pile state in store (Phase 5).
+
+Baseline: **437+ tests passing** (`love tests`; save round-trip tests require Love2D filesystem write access).
+
 ---
 
 ## 5. Phase 3 — Define Engine Service Interfaces (1–2 weeks)

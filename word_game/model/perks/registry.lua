@@ -2,11 +2,13 @@
 
 local cfg = require("word_game.config.perks")
 local core = require("jumbalaya_core.perks.registry")
+local game_access = require("word_game.model.game_access")
 
 local M = {}
 
 local function rand_float(key)
-	if type(advance_seed) == "function" and G and G.GAME and G.GAME.seed_streams then
+	local game = game_access.get()
+	if type(advance_seed) == "function" and game and game.seed_streams then
 		return advance_seed(key)
 	end
 	return math.random()
@@ -32,7 +34,8 @@ function M.roll_stamp_perk()
 end
 
 function M.selected()
-	return G.GAME and G.GAME.selected_perk
+	local game = game_access.get()
+	return game and game.selected_perk
 end
 
 function M.apply_choice(perk)
@@ -45,9 +48,7 @@ function M.apply_choice(perk)
 		desc = entry.desc,
 		pos = { x = entry.pos.x, y = entry.pos.y },
 	}
-	if G.GAME then
-		G.GAME.selected_perk = stored
-	end
+	game_access.dispatch({ type = "SET_SELECTED_PERK", perk = stored })
 	return true
 end
 

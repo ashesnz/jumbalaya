@@ -357,6 +357,7 @@ function M.reset_game()
 		},
 	}
 	G.ARGS = G.ARGS or {}
+	require("bridge.store_sync").ensure_test_binding()
 end
 
 function M.teardown_boot_pollution()

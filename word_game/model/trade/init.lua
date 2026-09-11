@@ -2,21 +2,14 @@
 
 local economy = require("word_game.config.gameplay.economy")
 local round_config = require("word_game.config.gameplay.round")
+local letter_tiers = require("jumbalaya_core.config.gameplay.letter_tiers")
 local state = require("word_game.model.run.state")
+local game_access = require("word_game.model.game_access")
 local deck = require("word_game.model.cards.deck")
+local store_sync = require("bridge.store_sync")
 local LetterPalette = require("word_game.config.visuals.letter_card_palette")
 
 local M = {}
-
-local TIERS = {
-	{ value = 1, letters = { "A", "E", "I", "O", "U", "L", "N", "S", "T", "R" } },
-	{ value = 2, letters = { "D", "G" } },
-	{ value = 3, letters = { "B", "C", "M", "P" } },
-	{ value = 4, letters = { "F", "H", "V", "W", "Y" } },
-	{ value = 5, letters = { "K" } },
-	{ value = 8, letters = { "J", "X" } },
-	{ value = 10, letters = { "Q", "Z" } },
-}
 
 M.ACTION_COSTS = {
 	add = economy.TRADE_ADD_COST,
@@ -24,8 +17,22 @@ M.ACTION_COSTS = {
 	modifier = economy.TRADE_MODIFIER_COST,
 }
 
+local function game_state()
+	return game_access.get()
+end
+
+local function mark_trade_used()
+	if G and G._store then
+		store_sync.dispatch(G._store, { type = "RUN_STATE_MARK_TRADE_USED" })
+	else
+		local rs = state.get()
+		if rs then rs.trade_used_this_hand = true end
+	end
+end
+
 local function rand_float(key)
-	if type(advance_seed) == "function" and G and G.GAME and G.GAME.seed_streams then
+	local game = game_state()
+	if type(advance_seed) == "function" and game and game.seed_streams then
 		return advance_seed(key)
 	end
 	return math.random()
@@ -75,7 +82,7 @@ function M.can_use()
 end
 
 function M.is_showdown_market()
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	return wr and round_config.is_showdown(wr.hand_index, wr.set) and true or false
 end
 
@@ -90,7 +97,7 @@ local function make_market_item(letter)
 end
 
 local function roll_add_offer()
-	local tiers = TIERS
+	local tiers = letter_tiers.TIERS
 	local count = economy.TRADE_IN or 2
 	local eligible = {}
 	for i, tier in ipairs(tiers) do
@@ -190,7 +197,7 @@ function M.add_letter(item, opts)
 		deck.apply_to_card(card)
 	end
 	if not (opts and opts.defer_used) then
-		rs.trade_used_this_hand = true
+		mark_trade_used()
 	end
 	return true, card
 end
@@ -207,7 +214,7 @@ function M.remove_card(item, opts)
 	deck.destroy_card(target)
 	item.card = nil
 	if not (opts and opts.defer_used) then
-		rs.trade_used_this_hand = true
+		mark_trade_used()
 	end
 	return true
 end
@@ -230,16 +237,14 @@ function M.apply(item, opts)
 		end
 		if not state.spend_tokens(M.ACTION_COSTS.modifier) then return false, "Not enough tokens" end
 		deck.apply_to_card(item.card)
+		mark_trade_used()
 		return true, item.card
 	end
 	return M.add_letter(item, { cost = (opts and opts.cost) or M.ACTION_COSTS.add, defer_used = opts and opts.defer_used })
 end
 
 function M.mark_used()
-	local rs = state.get()
-	if rs then
-		rs.trade_used_this_hand = true
-	end
+	mark_trade_used()
 end
 
 return M

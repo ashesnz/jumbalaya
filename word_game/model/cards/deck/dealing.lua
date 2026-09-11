@@ -6,6 +6,7 @@ return function(context)
 	local LayoutRequest = require("word_game.model.layout.request")
 	local hand_size_cfg = require("word_game.model.hand_size")
 	local pile_counts = require("jumbalaya_core.cards.pile_counts")
+	local game_access = require("word_game.model.game_access")
 	local needs_vowel = context.needs_vowel
 	local take_letter_from_deck = context.take_letter_from_deck
 
@@ -37,9 +38,7 @@ return function(context)
 		local count = M.cards_left()
 		G.ARGS = G.ARGS or {}
 		G.ARGS.deck_left_count = count
-		if G.GAME then
-			G.GAME.deck_left_count = count
-		end
+		game_access.patch({ deck_left_count = count })
 	end
 
 	M.DEAL_DELAY = 0.14

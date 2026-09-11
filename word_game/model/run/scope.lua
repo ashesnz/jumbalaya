@@ -4,6 +4,8 @@
 	caches, and G.ARGS mirrors cannot leak across runs.
 ]]
 
+local store_sync = require("bridge.store_sync")
+
 local M = {}
 
 local teardown_hooks = {}
@@ -108,12 +110,20 @@ function M.teardown()
 	end
 
 	M.reset_globals()
+	if G._store then
+		local CoreStore = require("jumbalaya_core.store")
+		store_sync.replace(G._store, CoreStore.default_state())
+	end
 	G.GAME = nil
 end
 
 function M.init_new_run_state()
 	local run_state = require("word_game.model.run.state")
-	G.GAME.run_state = run_state.new()
+	if G._store then
+		store_sync.dispatch(G._store, { type = "RUN_STATE_INIT" })
+	else
+		G.GAME.run_state = run_state.new()
+	end
 end
 
 function M.begin_run(game_table, opts)
@@ -125,10 +135,14 @@ function M.begin_run(game_table, opts)
 		error("RunScope.begin_run requires a fresh G.GAME table for new runs")
 	end
 	M.reset_args()
-	G.GAME = game_table
-	local run_state = require("word_game.model.run.state")
-	run_state.migrate_legacy_field(G.GAME)
-	G.GAME.run_generation = M.generation()
+	local run_state_mod = require("word_game.model.run.state")
+	run_state_mod.migrate_legacy_field(game_table)
+	game_table.run_generation = M.generation()
+	if G._store then
+		store_sync.bind_run(G._store, game_table)
+	else
+		G.GAME = game_table
+	end
 	local run = ensure_run_table()
 	run.active = true
 	run.from_save = opts.from_save or false

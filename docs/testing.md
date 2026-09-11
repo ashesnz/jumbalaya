@@ -91,6 +91,8 @@ These tests must pass on every PR while migrating off the Balatro engine pattern
 | `test_voucher_tokens.lua` | Perk economy |
 | `test_save_roundtrip.lua` | Persistence contract |
 | `test_store_sync.lua` | `bridge/store_sync.lua` shim |
+| `test_phase2_store_boot.lua` | Phase 2 store boot, dispatch dual-write, run binding |
+| `test_core_store_dispatch.lua` | `jumbalaya_core` store reducers without `G` |
 | `test_g_funcs_registry.lua` | `G.FUNCS` catalog freeze |
 | `test_core_jumble_rules.lua` | `jumbalaya_core` scoring rules without `G` |
 | `test_core_jumble_patterns.lua` | `jumbalaya_core` pattern/slot validation without `G` |

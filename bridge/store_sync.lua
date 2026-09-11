@@ -63,4 +63,52 @@ function M.subscribe(store, fn)
 	store:subscribe(fn)
 end
 
+--- Dispatch a store action and mirror onto G.GAME.
+---@param store table
+---@param action table
+---@return table state
+function M.dispatch(store, action)
+	store:dispatch(action)
+	M.sync_to_g(store)
+	return store:get()
+end
+
+--- Adopt a game table as the authoritative store snapshot (new run / save load).
+---@param store table
+---@param game_table table
+---@return table state
+function M.bind_run(store, game_table)
+	store:replace(game_table)
+	M.sync_to_g(store)
+	return store:get()
+end
+
+--- When legacy code assigns a fresh G.GAME table, adopt it into the store.
+---@param store table|nil
+function M.adopt_current_g_game(store)
+	store = store or (_G.G and _G.G._store)
+	if not store or not _G.G or not _G.G.GAME then return end
+	if store:get() ~= _G.G.GAME then
+		M.sync_from_g(store)
+		M.sync_to_g(store)
+	end
+end
+
+--- Headless tests: create store, bind WORD_GAME, mirror G.GAME.
+function M.ensure_test_binding()
+	if not _G.G then return nil end
+	local word_game = package.loaded["word_game"]
+	if not _G.G._store then
+		_G.G._store = M.new()
+	end
+	if word_game and word_game._bind_store then
+		word_game._bind_store(_G.G._store)
+	end
+	if _G.G.GAME then
+		M.sync_from_g(_G.G._store)
+	end
+	M.sync_to_g(_G.G._store)
+	return _G.G._store
+end
+
 return M

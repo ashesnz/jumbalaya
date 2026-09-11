@@ -3,23 +3,21 @@
 local Presentation = require("word_game.model.presentation")
 local run_state = require("word_game.model.run.state")
 local core = require("jumbalaya_core.rules.voucher_discard")
+local game_access = require("word_game.model.game_access")
 
 local M = {}
 
 local function write_used(count)
-	count = math.max(0, count or 0)
-	if G.GAME then
-		G.GAME.voucher_discards_used = count
-		G.GAME.discard_bin_count = count
-	end
+	game_access.dispatch({ type = "SET_VOUCHER_DISCARDS_USED", count = math.max(0, count or 0) })
 end
 
 function M.used()
-	if G.GAME and G.GAME.voucher_discards_used ~= nil then
-		return G.GAME.voucher_discards_used
+	local game = game_access.get()
+	if game and game.voucher_discards_used ~= nil then
+		return game.voucher_discards_used
 	end
-	if G.GAME and G.GAME.discard_bin_count ~= nil then
-		return G.GAME.discard_bin_count
+	if game and game.discard_bin_count ~= nil then
+		return game.discard_bin_count
 	end
 	return 0
 end

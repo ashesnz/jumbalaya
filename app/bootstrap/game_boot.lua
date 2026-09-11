@@ -32,6 +32,8 @@ require "word_game.ui.cardarea.init"
 
 Dictionary = require "dictionary"
 WORD_GAME = require "word_game"
+require("app.bootstrap.store_boot").install()
+
 WORD_GAME_UI = require "word_game.ui.facade.exports"
 WORD_GAME_UI.install()
 WORD_GAME.Run.Register(WORD_GAME, WORD_GAME_UI)

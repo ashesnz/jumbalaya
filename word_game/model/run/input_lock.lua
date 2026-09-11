@@ -2,12 +2,13 @@
 
 local BonusStack = require("word_game.model.jumble.bonus_stack")
 local Busy = require("word_game.model.run.busy")
+local game_access = require("word_game.model.game_access")
 
 local M = {}
 
 function M.is_table_busy()
-	if not G or not G.GAME then return false end
-	local game = G.GAME
+	local game = game_access.get()
+	if not game then return false end
 	if game.word_score_animating
 		or game.hand_redraw_animating
 		or game.hand_shuffle_animating
