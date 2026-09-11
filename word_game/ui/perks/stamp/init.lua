@@ -47,7 +47,15 @@ end
 
 local function stamp_panel_rect_px(layout_count)
 	layout_count = layout_count or layout_stamp_count()
-	local row = G.SIDEBAR_HUD and G.SIDEBAR_HUD.find_node_by_id and G.SIDEBAR_HUD:find_node_by_id("row_stamp_slot")
+	local row
+	local views_install = require("word_game.ui.views.install")
+	local sidebar_view = views_install.sidebar_view()
+	if sidebar_view and sidebar_view.find_node_by_id then
+		row = sidebar_view:find_node_by_id("row_stamp_slot")
+	end
+	if not row and G.SIDEBAR_HUD and G.SIDEBAR_HUD.find_node_by_id then
+		row = G.SIDEBAR_HUD:find_node_by_id("row_stamp_slot")
+	end
 	local rx, ry, rw, rh = node_rect_px(row)
 	if not rx then
 		local sidebar = Layout.sidebar_rect()

@@ -70,29 +70,14 @@ T.describe("table discard bin", function()
 		G.ROOM_ATTACH = { T = { x = 0, y = 0, w = G.TILE_W, h = G.TILE_H } }
 		G.SIDEBAR_ATTACH = { T = { x = 17, y = 0.22, w = 3, h = 10 } }
 
-		local hud_definition = require("word_game.ui.sidebar.hud_definition")
-		local def = hud_definition.hud_definition()
-		local function find_id(node, id)
-			if not node then return nil end
-			if node.config and node.config.id == id then return node end
-			for _, child in ipairs(node.nodes or {}) do
-				local found = find_id(child, id)
-				if found then return found end
-			end
-			for _, child in pairs(node.nodes or {}) do
-				if type(child) == "table" then
-					local found = find_id(child, id)
-					if found then return found end
-				end
-			end
-			return nil
-		end
+		local hud_layout = require("word_game.ui.sidebar.hud_layout")
+		local layout = hud_layout.compute()
 
-		T.assert_not_nil(find_id(def, "row_end_run"), "End Run row should exist")
-		T.assert_not_nil(find_id(def, "end_run_button"), "End Run button should occupy the discard slot")
-		T.assert_nil(find_id(def, "row_discards_left"), "discard counter overlays the voucher")
-		T.assert_nil(find_id(def, "row_perk_stamp_play"), "stamp play debug row should be removed")
-		T.assert_nil(find_id(def, "row_perk_stamp"), "stamp frame debug row should be removed")
+		T.assert_not_nil(layout.end_run, "End Run row should exist")
+		T.assert_not_nil(layout.end_button, "End Run button should occupy the discard slot")
+		T.assert_true(layout.deck_count.y < layout.end_run.y,
+			"End Run should sit below the cards-left counter")
+		T.assert_not_nil(layout.stamp_slot, "stamp slot row should exist")
 		MockEnv.reset_game()
 	end)
 

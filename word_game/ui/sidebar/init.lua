@@ -8,7 +8,6 @@ local StageLabel = require("word_game.ui.score_banner.stage_label")
 local sidebar_callbacks = require("word_game.ui.sidebar.callbacks")
 local table_discard = require("word_game.ui.perks.discard_bin")
 local views_install = require("word_game.ui.views.install")
-local game_access = require("word_game.model.game_access")
 
 local function deck_mod()
 	return facade.deck()
@@ -23,12 +22,16 @@ WordSidebar.roll_to_next_hand = function()
 		StageLabel.roll_to_next_hand()
 	end
 end
-WordSidebar.hud_definition = hud_definition.hud_definition
 WordSidebar.relayout = hud_definition.relayout
+
 local function sync_hand_controls()
 	if WORD_GAME_UI.TableControls then
 		WORD_GAME_UI.TableControls.sync()
 	end
+end
+
+local function sidebar_view()
+	return views_install.sidebar_view()
 end
 
 function WordSidebar.is_hidden()
@@ -43,14 +46,6 @@ function WordSidebar.sync_visibility()
 	end
 end
 
-local REQUIRED_SIDEBAR_ROWS = {
-	"row_sidebar_spacer",
-	"row_stamp_slot",
-	"row_deck",
-	"row_deck_count",
-	"row_end_run",
-}
-
 function WordSidebar:ensure()
 	if WordSidebar.is_hidden() then
 		self:destroy()
@@ -63,45 +58,27 @@ function WordSidebar:ensure()
 		views_install.install_sidebar(engine)
 	end
 	if not G.ROOM_ATTACH then return end
-	if G.SIDEBAR_HUD then
-		for _, row_id in ipairs(REQUIRED_SIDEBAR_ROWS) do
-			if not G.SIDEBAR_HUD:find_node_by_id(row_id) then
-				self:destroy()
-				break
-			end
-		end
-	end
-	if G.SIDEBAR_HUD then
-		deck_mod().sync_deck_count_display()
-		sync_hand_controls()
-		hud_definition.sync_end_run_row()
-		table_discard.sync_voucher_counter(true)
-		return G.SIDEBAR_HUD
-	end
 
-	Layout.update_sidebar_attach()
-	G.SIDEBAR_HUD = LayoutView({
-		definition = WordSidebar.hud_definition(),
-		config = {
-			align = "tri",
-			offset = { x = 0, y = 0 },
-			major = G.SIDEBAR_ATTACH or G.ROOM_ATTACH,
-			wh_bond = "Weak",
-		},
-	})
-	G.SIDEBAR_HUD:recalculate()
+	local view = sidebar_view()
+	if not view then return nil end
+
+	view:ensure_deck_count()
+	view:relayout()
+	G.SIDEBAR_HUD = view
+	deck_mod().sync_deck_count_display()
+	sync_hand_controls()
 	hud_definition.sync_end_run_row()
 	table_discard.sync_voucher_counter(true)
-	sync_hand_controls()
 	Layout.set_screen_positions()
-	return G.SIDEBAR_HUD
+	return view
 end
 
 function WordSidebar:destroy()
-	if G.SIDEBAR_HUD then
-		G.SIDEBAR_HUD:remove()
-		G.SIDEBAR_HUD = nil
+	local view = sidebar_view()
+	if view and view.remove then
+		view:remove()
 	end
+	G.SIDEBAR_HUD = nil
 end
 
 function WordSidebar:refresh()
@@ -109,7 +86,7 @@ function WordSidebar:refresh()
 		self:destroy()
 		return
 	end
-	if not G.SIDEBAR_HUD then
+	if not sidebar_view() then
 		if G.STATE == G.STATES.TABLE_BOARD then
 			self:ensure()
 		end
@@ -118,7 +95,24 @@ function WordSidebar:refresh()
 	hud_definition.relayout()
 end
 
+function WordSidebar:draw()
+	if WordSidebar.is_hidden() then return end
+	if G.STAGE ~= G.STAGES.RUN then return end
+	local view = sidebar_view()
+	if not view then
+		self:ensure()
+		view = sidebar_view()
+	end
+	if not view or not view.draw then return end
+	if not G.SIDEBAR_ATTACH then return end
+	love.graphics.push()
+	G.SIDEBAR_ATTACH:translate_container()
+	view:draw()
+	love.graphics.pop()
+end
+
 function WordSidebar:clear_hand()
+	local game_access = require("word_game.model.game_access")
 	game_access.mutate(function(g)
 		if g.word_round then
 			g.word_round.played_words = {}
@@ -126,21 +120,18 @@ function WordSidebar:clear_hand()
 	end)
 end
 
---- UIBox registration target (`ensure_table_board_sidebar`).
 function WordSidebar.ensure_table_board()
 	WordSidebar:ensure()
 end
 
---- Relayout or recreate the sidebar HUD (display resize, etc.).
 function WordSidebar.rebuild()
-	if G.SIDEBAR_HUD then
+	if sidebar_view() then
 		hud_definition.relayout()
 	else
 		WordSidebar:ensure()
 	end
 end
 
---- End Run / Next sidebar button press.
 function WordSidebar.end_run()
 	local stage_btn = WORD_GAME_UI.SidebarStageButton
 	if stage_btn and stage_btn.press then
@@ -152,7 +143,6 @@ function WordSidebar.end_run()
 	end
 end
 
---- Classic stage Next after target is met.
 function WordSidebar.classic_stage_next()
 	local stage_btn = WORD_GAME_UI.SidebarStageButton
 	if stage_btn and stage_btn.collect_and_advance then

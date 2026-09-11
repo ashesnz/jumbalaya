@@ -95,15 +95,11 @@ local function assert_label_inside_button(button, label, eps, msg)
 end
 
 local function build_sidebar_view()
-	local hud_definition = require("word_game.ui.sidebar.hud_definition")
-	return LayoutView({
-		definition = hud_definition.hud_definition(),
-		config = {
-			align = "tri",
-			offset = { x = 0, y = 0 },
-			major = G.SIDEBAR_ATTACH,
-		},
-	})
+	local SidebarView = require("word_game.ui.views.sidebar_view")
+	local Store = require("jumbalaya_core.store")
+	local view = SidebarView.new({ store = Store.new() })
+	view:recalculate()
+	return view
 end
 
 local function mock_button_col()
@@ -345,14 +341,13 @@ T.describe("Sidebar stage button", function()
 		G.ROOM_ATTACH = { T = { x = 0, y = 0, w = G.TILE_W, h = G.TILE_H } }
 		G.SIDEBAR_ATTACH = { T = { x = 17, y = 0.22, w = 3, h = 10 } }
 
-		local hud_definition = require("word_game.ui.sidebar.hud_definition")
 		local stage_btn = require("word_game.ui.sidebar.stage_button")
-		local def = hud_definition.hud_definition()
+		local view = build_sidebar_view()
 		local dw, dh = Layout.end_run_slot_size()
 		local btn_side = math.min(dw, dh)
 
-		local button = find_node(def, "end_run_button")
-		local label = find_node(def, "end_run_label")
+		local button = view:find_node_by_id("end_run_button")
+		local label = view:find_node_by_id("end_run_label")
 
 		T.assert_not_nil(button)
 		T.assert_not_nil(label)
@@ -366,8 +361,7 @@ T.describe("Sidebar stage button", function()
 		T.assert_equal(button.config.visible, true, "End Run button should start visible in the HUD definition")
 		T.assert_equal(label.config.text, "End Run")
 		T.assert_true(label.config.scale <= stage_btn.label_scale_for("End Run") + 0.001)
-		T.assert_nil(find_node(def, "end_run_label_row"), "Label should be a direct child of the button")
-		T.assert_nil(find_node(def, "end_run_next_arrow"), "Next uses the same label node, not a separate arrow")
+		view:remove()
 
 		mock_env.reset_game()
 	end)

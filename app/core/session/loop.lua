@@ -140,6 +140,9 @@ function Game:render_board_pass()
 
 	if G.STAGE == G.STAGES.RUN and G.STATE == G.STATES.TABLE_BOARD and WORD_GAME_UI and WORD_GAME_UI.TableBoard then
 		WORD_GAME_UI.TableBoard.draw_hud()
+		if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.draw then
+			WORD_GAME_UI.Sidebar.draw()
+		end
 		WORD_GAME_UI.TableBoard.draw_board(self)
 	end
 

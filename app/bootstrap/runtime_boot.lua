@@ -46,6 +46,13 @@ G.consume_board_click = function()
 	if ui and ui.PerkStamp and ui.PerkStamp.consume_click() then
 		return true
 	end
+	if ui and ui.SidebarStageButton and ui.SidebarStageButton.consume_click then
+		local views_install = require("word_game.ui.views.install")
+		local view = views_install.sidebar_view()
+		if view and view.consume_click and view:consume_click() then
+			return true
+		end
+	end
 	return false
 end
 

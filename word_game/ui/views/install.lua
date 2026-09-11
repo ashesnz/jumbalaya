@@ -26,7 +26,7 @@ function M.install_sidebar(engine)
 	if not engine or not engine.store then return end
 	local store = engine.store
 	if not M._sidebar_view then
-		M._sidebar_view = SidebarView.new(store)
+		M._sidebar_view = SidebarView.new({ store = store })
 	else
 		M._sidebar_view:bind_store(store)
 	end

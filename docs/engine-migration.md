@@ -822,18 +822,22 @@ Each PR: `love tests` → `emmylua_check . --severity warn` → manual smoke (§
 
 ---
 
-#### PR-4 — Sidebar HUD view
+#### PR-4 — Sidebar HUD view ✅
 
 **Goal:** Replace `G.SIDEBAR_HUD` LayoutView column with store-subscribed view.
 
 | Action | Files |
 |--------|-------|
-| View component | `word_game/ui/views/sidebar_view.lua` (expand from passive subscriber) |
-| Remove LayoutView | `word_game/ui/sidebar/init.lua` (`LayoutView({` ~line 82), `hud_definition.lua` |
-| Stage button | `word_game/ui/sidebar/stage_button.lua` — draw via Renderer or slim widget, not UIBox child |
-| Callbacks | `sidebar/funcs.lua`, `sidebar/callbacks.lua` — `action_dispatch` only |
+| View component | `word_game/ui/views/sidebar_view.lua` — layout, draw, store subscription |
+| Layout metrics | `word_game/ui/sidebar/hud_layout.lua` — row rects without UIBox |
+| Remove LayoutView | `word_game/ui/sidebar/init.lua`, `hud_definition.lua` (sync helpers only) |
+| Stage button | `word_game/ui/sidebar/stage_button.lua` — imperative draw + `consume_click` |
+| Draw hook | `app/core/session/loop.lua` — `Sidebar.draw()` in board pass |
+| Click hook | `app/bootstrap/runtime_boot.lua` — `consume_board_click` → stage button |
 
-**Exit:** `rg 'LayoutView\{' word_game/ui/sidebar` → **0**. End Run / deck count / stamps visible.
+**Exit:** `rg 'LayoutView\{' word_game/ui/sidebar` → **0**. `G.SIDEBAR_HUD` is a `SidebarView` instance.
+
+**Tests:** `test_phase6_2_fx_subscribers.lua`, `test_sidebar_stage_button.lua`, `test_dealing_and_info.lua`, `test_table_discard.lua`. `love tests` green (480 tests).
 
 **Smoke:** sidebar deck count, End Run, voucher discard, stage advance.
 

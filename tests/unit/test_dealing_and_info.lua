@@ -149,7 +149,7 @@ T.describe("Sidebar deck information", function()
 	mock_env.reset_game()
 	local deck = require("word_game.model.cards.deck")
 	local table_deck = require("word_game.ui.table.deck")
-	local hud_definition = require("word_game.ui.sidebar.hud_definition")
+	local hud_layout = require("word_game.ui.sidebar.hud_layout")
 
 	T.it("shows only total cards left when the deck is clicked", function()
 		G.GAME.starting_deck_size = 12
@@ -167,15 +167,8 @@ T.describe("Sidebar deck information", function()
 		G.GAME = G.GAME or {}
 		G.GAME.deck_left_count = 2
 		G.draw_pile = { cards = { {}, {} } }
-		local definition = hud_definition.hud_definition()
-		local function contains(node)
-			if node.config and node.config.id == "row_deck_count" then return true end
-			for _, child in ipairs(node.nodes or {}) do
-				if contains(child) then return true end
-			end
-			return false
-		end
-		T.assert_true(contains(definition), "Sidebar HUD should contain cards-left row")
+		local layout = hud_layout.compute()
+		T.assert_not_nil(layout.deck_count, "Sidebar HUD should contain cards-left row")
 	end)
 
 	T.it("updates the live deck count when cards are drawn", function()
@@ -386,7 +379,7 @@ T.describe("Sidebar deck information", function()
 
 		G.ARGS = G.ARGS or {}
 		G.ARGS.deck_left_count = 0
-		hud_definition.hud_definition()
+		deck.sync_deck_count_display()
 		T.assert_equal(G.ARGS.deck_left_count, #deck.STARTING_LETTERS,
 			"HUD build should sync cards left to the full draw pile before dealing")
 		T.assert_equal(G.GAME.deck_left_count, #deck.STARTING_LETTERS,
@@ -430,14 +423,9 @@ T.describe("Sidebar deck information", function()
 		deck.sync_deck_count_display()
 		T.assert_equal(G.ARGS.deck_left_count, 5, "Sync should publish the live draw pile count")
 
-		local view = LayoutView({
-			definition = hud_definition.hud_definition(),
-			config = {
-				align = "tri",
-				offset = { x = 0, y = 0 },
-				major = G.SIDEBAR_ATTACH,
-			},
-		})
+		local SidebarView = require("word_game.ui.views.sidebar_view")
+		local Store = require("jumbalaya_core.store")
+		local view = SidebarView.new({ store = Store.new() })
 		view:recalculate()
 
 		local text_node = view:find_node_by_id("text_deck_count")

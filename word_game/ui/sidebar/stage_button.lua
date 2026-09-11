@@ -1,15 +1,12 @@
 --[[
 	word_game/ui/sidebar/stage_button.lua - End Run / Next sidebar button (classic stage goal).
-
-	When the classic target is met, animates the sidebar button from red "End Run"
-	to a blue panel with "Next". Pressing Next banks pending score, flies tokens,
-	rolls the timeline score down to zero, then advances the hand.
 ]]
 
 local facade = require("word_game.ui.facade")
 local Layout = require("word_game.ui.layout")
 local table_discard = require("word_game.ui.perks.discard_bin")
 local game_access = require("word_game.model.game_access")
+local action_dispatch = require("bridge.action_dispatch")
 
 local function run_mode()
 	return facade.run_mode()
@@ -29,6 +26,21 @@ local TRANSITION_DUR = 0.55
 local LABEL_END_RUN = "End Run"
 local LABEL_NEXT = "Next"
 
+local widget = {
+	mode = "end_run",
+	transitioning = false,
+	transition_t = 0,
+	known_next_mode = false,
+	visible = true,
+	panel_colour = nil,
+	label_text = LABEL_END_RUN,
+	button_action = "end_run_from_sidebar",
+	rotation = 0,
+}
+
+local bound_button
+local bound_label
+
 local function font_metrics()
 	local lang = (G and G.LANG) or {}
 	local font_obj = lang.font or {}
@@ -44,7 +56,7 @@ local function text_box_size(text, scale)
 	local metrics = font_metrics()
 	local tile = (G.TILESIZE or 20) * (G.TILESCALE or 1)
 	local text_w = (metrics.face and metrics.face.getWidth and metrics.face:getWidth(text))
-		or (string.len(text) * 10)
+		or (string.len(text or "") * 10)
 	local text_h = (metrics.face and metrics.face.getHeight and metrics.face:getHeight())
 		or 20
 	local px_w = text_w * metrics.squish * scale * (G.TILESCALE or 1) * metrics.font_scale
@@ -69,13 +81,6 @@ function M.label_scale_for(text)
 	local dw, dh = Layout.end_run_slot_size()
 	return label_scale_for(text, math.min(dw, dh))
 end
-
-local anim = {
-	mode = "end_run",
-	transitioning = false,
-	transition_t = 0,
-	known_next_mode = false,
-}
 
 local function red_colour()
 	return (G and G.C and G.C.RED) or { 1, 0, 0.4, 1 }
@@ -120,29 +125,62 @@ local function find_node(uie, id)
 	return nil
 end
 
+function M.bind_button_proxy(button, label)
+	bound_button = button
+	bound_label = label
+	if not button then
+		M.reset()
+	end
+end
+
 local function button_column()
-	if not G.SIDEBAR_HUD or not G.SIDEBAR_HUD.find_node_by_id then return nil end
-	return G.SIDEBAR_HUD:find_node_by_id("end_run_button")
+	if bound_button then return bound_button end
+	if G.SIDEBAR_HUD and G.SIDEBAR_HUD.find_node_by_id then
+		return G.SIDEBAR_HUD:find_node_by_id("end_run_button")
+	end
+	return nil
 end
 
 local function label_node(col)
+	if bound_label and col == bound_button then return bound_label end
 	return find_node(col, "end_run_label")
 end
 
+local function apply_widget_to_proxy()
+	local col = button_column()
+	if not col or not col.config then return end
+	col.config.button = widget.button_action
+	col.config.colour = widget.panel_colour or red_colour()
+	col.config.visible = widget.visible
+	if col.states then col.states.visible = widget.visible end
+	col.T = col.T or {}
+	col.VT = col.VT or {}
+	col.T.r = widget.rotation
+	col.VT.r = widget.rotation
+	local label = label_node(col)
+	if label and label.config then
+		label.config.text = widget.label_text
+		label.config.scale = M.label_scale_for(widget.label_text)
+		if label.update_text then label:update_text() end
+	end
+end
+
 local function set_button_rotation(col, radians)
+	widget.rotation = radians or 0
 	if not col then return end
 	col.T = col.T or {}
 	col.VT = col.VT or {}
-	col.T.r = radians
-	col.VT.r = radians
+	col.T.r = widget.rotation
+	col.VT.r = widget.rotation
 end
 
 local function set_label_text(label, text)
+	widget.label_text = text or LABEL_END_RUN
 	if not label or not label.config then return end
-	label.config.text = text
+	label.config.text = widget.label_text
 	label.config.text_drawable = nil
 	label.config.prev_value = nil
-	label.config.scale = M.label_scale_for(text)
+	label.config.scale = M.label_scale_for(widget.label_text)
 	if label.update_text then label:update_text() end
 	if label.LayoutView and label.LayoutView.recalculate then
 		label.LayoutView:recalculate()
@@ -150,22 +188,41 @@ local function set_label_text(label, text)
 end
 
 local function set_display_mode(col, mode, opts)
-	if not col or not col.config then return end
 	opts = opts or {}
 	local label = label_node(col)
 	if mode == "next" then
-		col.config.colour = opts.panel_colour or blue_colour()
+		widget.mode = "next"
+		widget.panel_colour = opts.panel_colour or (G and G.C and G.C.BLUE) or blue_colour()
+		widget.button_action = "classic_stage_next"
 		set_label_text(label, opts.label_text or LABEL_NEXT)
 		if label and label.config then
 			label.config.colour = opts.label_colour or label_colour()
 		end
 	else
-		col.config.colour = opts.panel_colour or red_colour()
+		widget.mode = "end_run"
+		widget.panel_colour = opts.panel_colour or red_colour()
+		widget.button_action = "end_run_from_sidebar"
 		set_label_text(label, opts.label_text or LABEL_END_RUN)
 		if label and label.config then
 			label.config.colour = opts.label_colour or label_colour()
 		end
 	end
+	if col and col.config then
+		col.config.colour = widget.panel_colour
+		col.config.button = widget.button_action
+	end
+end
+
+function M.current_label()
+	return widget.label_text
+end
+
+function M.current_action()
+	return widget.button_action
+end
+
+function M.current_colour()
+	return widget.panel_colour or red_colour()
 end
 
 function M.is_next_mode()
@@ -178,44 +235,45 @@ function M.is_next_mode()
 end
 
 function M.reset()
-	anim.mode = "end_run"
-	anim.transitioning = false
-	anim.transition_t = 0
-	anim.known_next_mode = false
+	widget.mode = "end_run"
+	widget.transitioning = false
+	widget.transition_t = 0
+	widget.known_next_mode = false
+	widget.rotation = 0
+	widget.visible = true
+	widget.panel_colour = red_colour()
+	widget.label_text = LABEL_END_RUN
+	widget.button_action = "end_run_from_sidebar"
 	local col = button_column()
 	if col and col.config then
-		col.config.button = "end_run_from_sidebar"
 		set_display_mode(col, "end_run")
 		set_button_rotation(col, 0)
 	end
 end
 
 function M.sync()
+	widget.visible = table_discard.end_run_button_visible()
 	local col = button_column()
-	if not col or not col.config then return end
-
-	local show = table_discard.end_run_button_visible()
-	if col.states then
-		col.states.visible = show
+	if col and col.config then
+		if col.states then col.states.visible = widget.visible end
+		col.config.visible = widget.visible
 	end
-	col.config.visible = show
-	if not show then return end
+	if not widget.visible then return end
 
-	if anim.mode == "next" and not anim.transitioning then
-		col.config.button = "classic_stage_next"
+	if widget.mode == "next" and not widget.transitioning then
 		set_display_mode(col, "next")
 		set_button_rotation(col, 0)
-	elseif not anim.transitioning then
-		col.config.button = "end_run_from_sidebar"
+	elseif not widget.transitioning then
 		set_display_mode(col, "end_run")
 		set_button_rotation(col, 0)
 	end
+	apply_widget_to_proxy()
 end
 
 function M.update(dt)
 	dt = dt or 0
 	if not table_discard.end_run_button_visible() then
-		if anim.mode ~= "end_run" or anim.transitioning then
+		if widget.mode ~= "end_run" or widget.transitioning then
 			M.reset()
 		end
 		return
@@ -224,50 +282,98 @@ function M.update(dt)
 	local next_mode = M.is_next_mode()
 	local col = button_column()
 
-	if next_mode ~= anim.known_next_mode then
-		anim.known_next_mode = next_mode
+	if next_mode ~= widget.known_next_mode then
+		widget.known_next_mode = next_mode
 		if WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.sync_visibility then
 			WORD_GAME_UI.TableControls.sync_visibility()
 		end
 	end
 
-	if next_mode and anim.mode == "end_run" and not anim.transitioning then
-		anim.transitioning = true
-		anim.transition_t = 0
-	elseif not next_mode and (anim.mode == "next" or anim.transitioning) then
+	if next_mode and widget.mode == "end_run" and not widget.transitioning then
+		widget.transitioning = true
+		widget.transition_t = 0
+	elseif not next_mode and (widget.mode == "next" or widget.transitioning) then
 		M.reset()
 		M.sync()
 		return
 	end
 
-	if anim.transitioning and col then
-		anim.transition_t = anim.transition_t + dt
-		local u = ease_out_cubic(anim.transition_t / TRANSITION_DUR)
+	if widget.transitioning and col then
+		widget.transition_t = widget.transition_t + dt
+		local u = ease_out_cubic(widget.transition_t / TRANSITION_DUR)
 		set_button_rotation(col, u * math.pi * 2)
 
 		if u < 0.42 then
-			col.config.button = "end_run_from_sidebar"
 			set_display_mode(col, "end_run", { panel_colour = red_colour() })
 		else
 			local morph = (u - 0.42) / 0.58
-			col.config.button = "classic_stage_next"
 			set_display_mode(col, "next", {
 				panel_colour = lerp_colour(red_colour(), blue_colour(), morph),
 				label_text = LABEL_NEXT,
 			})
 		end
 
-		if anim.transition_t >= TRANSITION_DUR then
-			anim.transitioning = false
-			anim.mode = "next"
-			col.config.button = "classic_stage_next"
+		if widget.transition_t >= TRANSITION_DUR then
+			widget.transitioning = false
+			widget.mode = "next"
 			set_display_mode(col, "next")
 			set_button_rotation(col, 0)
 		end
-	elseif anim.mode == "next" and col then
-		col.config.button = "classic_stage_next"
+	elseif widget.mode == "next" and col then
 		set_display_mode(col, "next")
 	end
+	apply_widget_to_proxy()
+end
+
+local function pointer_tile()
+	if not G or not G.POINTER or not G.POINTER.T then return nil, nil end
+	return G.POINTER.T.x, G.POINTER.T.y
+end
+
+function M.point_in_button(rect, tx, ty)
+	if not rect or not widget.visible then return false end
+	tx, ty = tx or pointer_tile()
+	if not tx or not ty then return false end
+	local attach = G.SIDEBAR_ATTACH and G.SIDEBAR_ATTACH.T
+	if not attach then return false end
+	local x = attach.x + rect.x
+	local y = attach.y + rect.y
+	return tx >= x and tx <= x + rect.w and ty >= y and ty <= y + rect.h
+end
+
+function M.consume_click(mx, my, rect)
+	if G.STATE ~= G.STATES.TABLE_BOARD then return false end
+	if G.OVERLAY_MENU then return false end
+	if not widget.visible then return false end
+	if not M.point_in_button(rect, mx, my) then return false end
+	local action = widget.button_action
+	if action and G.FUNCS and G.FUNCS[action] then
+		action_dispatch.dispatch_func(action)
+		G.FUNCS[action]()
+		return true
+	end
+	return M.press()
+end
+
+function M.draw(rect)
+	if not rect or not widget.visible then return end
+	if not love or not love.graphics then return end
+	local attach = G.SIDEBAR_ATTACH and G.SIDEBAR_ATTACH.T
+	local ox = (attach and attach.x) or 0
+	local oy = (attach and attach.y) or 0
+	local x, y, w, h = ox + rect.x, oy + rect.y, rect.w, rect.h
+	local colour = widget.panel_colour or red_colour()
+	love.graphics.push()
+	love.graphics.translate(x + w * 0.5, y + h * 0.5)
+	love.graphics.rotate(widget.rotation or 0)
+	love.graphics.translate(-w * 0.5, -h * 0.5)
+	love.graphics.setColor(colour)
+	love.graphics.rectangle("fill", 0, 0, w, h)
+	local scale = M.label_scale_for(widget.label_text)
+	local tw, th = text_box_size(widget.label_text, scale)
+	love.graphics.setColor(label_colour())
+	love.graphics.print(widget.label_text, (w - tw) * 0.5, (h - th) * 0.5, 0, scale * (G.TILESCALE or 1))
+	love.graphics.pop()
 end
 
 local function commit_pending_score()
@@ -289,7 +395,7 @@ local function commit_pending_score()
 end
 
 function M.collect_and_advance()
-	if not M.is_next_mode() and anim.mode ~= "next" then return false end
+	if not M.is_next_mode() and widget.mode ~= "next" then return false end
 	if input_lock().is_table_busy() then return false end
 	local token_reward = WORD_GAME_UI.TokenReward
 	if token_reward and token_reward.is_active and token_reward.is_active() then
@@ -306,7 +412,7 @@ function M.collect_and_advance()
 end
 
 function M.press()
-	if M.is_next_mode() or anim.mode == "next" then
+	if M.is_next_mode() or widget.mode == "next" then
 		return M.collect_and_advance()
 	end
 	return table_discard.end_run()

@@ -357,6 +357,11 @@ function M.reset_game()
 	}
 	G.STATE = nil
 	G.ARGS = G.ARGS or {}
+	local ok_stage, stage_button = pcall(require, "word_game.ui.sidebar.stage_button")
+	if ok_stage and stage_button.reset then
+		stage_button.reset()
+		stage_button.bind_button_proxy(nil, nil)
+	end
 	local ok_views, views_install = pcall(require, "word_game.ui.views.install")
 	if ok_views and views_install.reset then
 		views_install.reset()

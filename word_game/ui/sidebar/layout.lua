@@ -37,15 +37,8 @@ function M.sidebar_height()
 end
 
 function M.sidebar_left()
-	local hud = G.SIDEBAR_HUD
-	if not hud then
-		if G.ROOM then return M.sidebar_rect().x end
-		return (G.TILE_W or 20) - (felt.sidebar_width and felt.sidebar_width() or 3.0)
-	end
-	if not (hud.T and (hud.T.x or 0) > 0) then return M.sidebar_rect().x end
-	local room = G.ROOM and G.ROOM.T
-	if not room then return (G.TILE_W or 20) - (felt.sidebar_width and felt.sidebar_width() or 3.0) end
-	return M.sidebar_rect().x
+	if G.ROOM then return M.sidebar_rect().x end
+	return (G.TILE_W or 20) - (felt.sidebar_width and felt.sidebar_width() or 3.0)
 end
 
 function M.deck_slot_size()
@@ -57,12 +50,22 @@ function M.end_run_slot_size()
 	return voucher_discard.end_run_slot_size(G.CARD_W, G.CARD_H)
 end
 
+local function layout_rows()
+	local views_install = require("word_game.ui.views.install")
+	local view = views_install.sidebar_view()
+	if view and view.layout then
+		return view:layout()
+	end
+	return require("word_game.ui.sidebar.hud_layout").compute()
+end
+
 local function slot_rect(row_id, w, h)
-	local row = G.SIDEBAR_HUD and G.SIDEBAR_HUD:find_node_by_id(row_id)
-	if row and row.T then
+	local layout = layout_rows()
+	local rect = require("word_game.ui.sidebar.hud_layout").slot_rect(layout, row_id)
+	if rect then
 		return {
-			x = row.T.x + math.max(0, ((row.T.w or w) - w) * 0.5),
-			y = row.T.y + math.max(0, ((row.T.h or h) - h) * 0.5),
+			x = rect.x + math.max(0, ((rect.w or w) - w) * 0.5),
+			y = rect.y + math.max(0, ((rect.h or h) - h) * 0.5),
 			w = w,
 			h = h,
 		}
@@ -88,14 +91,8 @@ function M.deck_rect()
 	local rect = slot_rect("row_deck", w, h)
 	if rect then return rect end
 
-	local hud = G.SIDEBAR_HUD
-	local col_x, col_w
-	if hud and hud.T and (hud.T.w or 0) > 0 then
-		col_x, col_w = hud.T.x, hud.T.w
-	else
-		local panel = felt.panel_rect()
-		col_x, col_w = panel.x, panel.w
-	end
+	local panel = felt.panel_rect()
+	local col_x, col_w = panel.x, panel.w
 	return {
 		x = col_x + math.max(0, (col_w - w) * 0.5),
 		y = G.TILE_H - h - 0.22,
