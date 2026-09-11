@@ -11,6 +11,7 @@ local hud_layout = require("word_game.ui.sidebar.hud_layout")
 local table_discard = require("word_game.ui.perks.discard_bin")
 local stage_button = require("word_game.ui.sidebar.stage_button")
 local facade = require("word_game.ui.facade")
+local TableDeck = require("word_game.ui.table.deck")
 
 local SidebarView = {}
 SidebarView.__index = SidebarView
@@ -247,15 +248,31 @@ local function draw_counter_row(rect, count)
 	love.graphics.print(tostring(count), x + label_w, y, 0, scale * (runtime().TILESCALE or 1))
 end
 
+local function draw_sidebar_deck(deck_rect)
+	if not deck_rect or not runtime().draw_pile or not TableDeck.uses_table_draw() then return end
+	local pile = runtime().draw_pile
+	pile.T.x = deck_rect.x
+	pile.T.y = deck_rect.y
+	pile.T.w = deck_rect.w
+	pile.T.h = deck_rect.h
+	if pile.hard_set_T then
+		pile:hard_set_T(deck_rect.x, deck_rect.y, deck_rect.w, deck_rect.h)
+	end
+	TableDeck.draw(pile)
+end
+
 function SidebarView:draw(renderer)
 	if not runtime() or runtime().STAGE ~= runtime().STAGES.RUN then return end
-	if not hud_layout.end_run_button_visible() then return end
+	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return end
 	local layout = self:layout()
 	self._deck_count_proxy = self._deck_count_proxy or self:find_node_by_id("text_deck_count")
 	stage_button.sync()
-	stage_button.draw(layout.end_button)
 	draw_panel(layout.panel)
+	draw_sidebar_deck(layout.deck)
 	draw_counter_row(layout.deck_count, self:deck_left_count())
+	if hud_layout.end_run_button_visible() then
+		stage_button.draw(layout.end_button)
+	end
 end
 
 function SidebarView:consume_click(mx, my)

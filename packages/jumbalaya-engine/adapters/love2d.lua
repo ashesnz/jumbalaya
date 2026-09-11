@@ -7,9 +7,16 @@ local M = {}
 function M.renderer()
 	return {
 		draw_card = function(view, rect)
-			if view and view.draw then
-				view:draw()
-				return
+			local card = view and view.card
+			if card and card.draw and card.translate_container then
+				local Card = rawget(_G, "Card")
+				if Card and getmetatable(card) == Card then
+					love.graphics.push()
+					card:translate_container()
+					card:draw()
+					love.graphics.pop()
+					return
+				end
 			end
 			if view and view.sprite and view.sprite.draw then
 				view.sprite:draw()

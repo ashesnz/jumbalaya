@@ -20,6 +20,7 @@ local jumble_fixed_letters = require("word_game.ui.table.jumble_fixed_letters")
 local felt = require("word_game.ui.layout.felt")
 local Layout = require("word_game.ui.layout")
 local play_effects = require("word_game.ui.play_effects")
+local pile_sync = require("bridge.pile_sync")
 
 local function ensure_placement_pattern_overlay(pt)
 	if not pt or pt.draw_pattern_overlay then return end
@@ -237,18 +238,46 @@ function M.should_draw_sidebar_deck()
 	return #runtime().draw_pile.cards > 0
 end
 
+local function draw_live_cards(cards, controller, skip)
+	skip = skip or {}
+	for _, card in ipairs(cards or {}) do
+		if card and not card.REMOVED and Card and getmetatable(card) == Card
+			and not card.parent
+			and not skip[card]
+			and card ~= controller.dragging.target
+			and card ~= controller.focused.target then
+			love.graphics.push()
+			card:translate_container()
+			card:draw()
+			love.graphics.pop()
+		end
+	end
+end
+
 function M.draw_hand_pass(game)
 	local table_view = M.ensure_store_subscription()
+	if table_view then
+		pile_sync.ensure_legacy_piles_from_store()
+	end
 	local draw_from_store = table_view and table_view:should_render_draw_from_store()
 	local hand_from_store = table_view and table_view:should_render_hand_from_store()
+	local controller = game.INPUT
 
-	if M.should_draw_sidebar_deck() then
+	local sidebar_draws_deck = WORD_GAME_UI.Sidebar
+		and runtime().STAGE == runtime().STAGES.RUN
+		and runtime().STATE == runtime().STATES.TABLE_BOARD
+	if M.should_draw_sidebar_deck() and not sidebar_draws_deck then
 		love.graphics.push()
 		if runtime().draw_pile then
 			runtime().draw_pile:translate_container()
 		end
 		if draw_from_store and table_view then
-			table_view:draw_draw_pile()
+			local draw_cards = table_view:pile_cards("draw")
+			if draw_cards and #draw_cards > 0 and Card and getmetatable(draw_cards[1]) == Card then
+				draw_live_cards(draw_cards, controller)
+			else
+				table_view:draw_draw_pile()
+			end
 		elseif WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
 			WORD_GAME_UI.TableDeck.draw(runtime().draw_pile)
 		elseif runtime().draw_pile and not draw_from_store then
@@ -262,7 +291,12 @@ function M.draw_hand_pass(game)
 		if runtime().dealt_letters then
 			runtime().dealt_letters:translate_container()
 		end
-		table_view:draw_hand()
+		local hand_cards = table_view:pile_cards("hand")
+		if hand_cards and #hand_cards > 0 and Card and getmetatable(hand_cards[1]) == Card then
+			draw_live_cards(hand_cards, controller)
+		else
+			table_view:draw_hand()
+		end
 		love.graphics.pop()
 	elseif runtime().dealt_letters and not hand_from_store and #runtime().dealt_letters.cards > 0 then
 		love.graphics.push()
@@ -272,7 +306,6 @@ function M.draw_hand_pass(game)
 	end
 
 	local bonus_stack = WORD_GAME_UI.BonusStackUI
-	local controller = game.INPUT
 	for _, v in pairs(game.LIVE.CARD) do
 		local from_hand = v.area == runtime().dealt_letters
 		local from_bonus = bonus_stack and bonus_stack.contains(v) and not v.area

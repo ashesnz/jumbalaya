@@ -9,13 +9,10 @@ end
 
 local M = {}
 
---- True when TABLE_BOARD view is installed and store-backed pile draw is active.
+--- True when resting cards should leave CardAreas and render from store snapshots.
+--- Disabled until the Love2D store renderer draws live Card nodes at layout poses.
 function M.chrome_release_enabled()
-	local shell = game()
-	if not shell or shell.STATE ~= shell.STATES.TABLE_BOARD then return false end
-	local views_install = package.loaded["word_game.ui.views.install"]
-	if not views_install or not views_install.table_board_view then return false end
-	return views_install.table_board_view() ~= nil
+	return false
 end
 
 local PILE_AREA = {
@@ -170,6 +167,24 @@ function M.sync_store_pile_to_area(store, pile_id)
 	area.cards = rebuilt
 	if area.set_ranks then area:set_ranks() end
 	if area.relayout then area:relayout() end
+end
+
+--- Rebuild live CardAreas from store when chrome release is off but areas were cleared.
+function M.ensure_legacy_piles_from_store(store)
+	if M.chrome_release_enabled() then return end
+	store = store or BridgeRuntime.store()
+	if not store then return end
+	local state = store:get()
+	if not state or not state.piles then return end
+	for _, pile_id in ipairs({ "hand", "draw", "pattern" }) do
+		local pile = state.piles[pile_id]
+		if pile and #pile > 0 then
+			local area = area_for_pile(pile_id)
+			if area and #(area.cards or {}) == 0 then
+				M.sync_store_pile_to_area(store, pile_id)
+			end
+		end
+	end
 end
 
 --- Mirror all store piles onto live CardAreas (after save restore or shuffle).

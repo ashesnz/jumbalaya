@@ -37,7 +37,7 @@ T.describe("Phase 5 Pile Sync Bridge", function()
 
 	end)
 
-	T.it("chrome_release_enabled requires TABLE_BOARD state and installed TableBoardView", function()
+	T.it("chrome_release_enabled stays off until store renderer draws live cards", function()
 		G.STATE = G.STATES.TABLE_BOARD
 		T.assert_false(pile_sync.chrome_release_enabled())
 
@@ -46,9 +46,35 @@ T.describe("Phase 5 Pile Sync Bridge", function()
 		local store = Store.new()
 		word_game._bind_store(store)
 		views_install.install_table_board(Engine.Context.new({ store = store }))
-		T.assert_true(pile_sync.chrome_release_enabled())
+		T.assert_false(pile_sync.chrome_release_enabled())
 		views_install.reset()
 		T.assert_false(pile_sync.chrome_release_enabled())
+	end)
+
+	T.it("ensure_legacy_piles_from_store rebuilds empty CardAreas from store", function()
+		local store = Store.new({
+			piles = {
+				hand = {
+					{ id = 7, letter_card_id = 7, ability = { letter = "M" }, pile_id = "hand", slot_index = 1 },
+				},
+				draw = {},
+				pattern = {},
+				bonus = {},
+				discard = {},
+			},
+		})
+		word_game._bind_store(store)
+
+		local card = { letter_card_id = 7, ability = { letter = "M" }, REMOVED = nil }
+		G.letter_inventory = { card }
+		G.dealt_letters = { cards = {}, set_ranks = function() end, relayout = function() end }
+		G.draw_pile = { cards = {} }
+		G.recycle_stash = { cards = {} }
+		G.pattern_row = { area = { cards = {} } }
+
+		pile_sync.ensure_legacy_piles_from_store(store)
+		T.assert_equal(#G.dealt_letters.cards, 1)
+		T.assert_equal(G.dealt_letters.cards[1], card)
 	end)
 
 	T.it("release_static_chrome snapshots then clears resting CardArea cards", function()
