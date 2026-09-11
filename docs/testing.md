@@ -21,7 +21,8 @@ tests/
 ├── runner.lua                # Auto-discovers and runs tests/unit/test_*.lua
 ├── framework.lua             # Test assertions (`describe`, `it`, `assert_equal`, etc.)
 ├── helpers/
-│   └── mock_env.lua          # Shared game globals and mock environment
+│   ├── mock_env.lua          # Shared game globals and mock environment
+│   └── g_funcs_audit.lua     # G.FUNCS catalog static audit (migration)
 └── unit/
     └── test_*.lua            # One file per feature area (auto-discovered)
 ```
@@ -75,6 +76,21 @@ Prefer `mock_env.reset_game()` at the top of a `describe` block. When mocking `G
 | `test_hand_shuffle.lua` | Shuffle/play buttons |
 | `test_play_hold_redraw.lua` | Hold-to-redraw |
 | `test_layout.lua` | Sidebar HUD geometry and fixed width |
+
+## Engine migration CI gate (Phase 0+)
+
+These tests must pass on every PR while migrating off the Balatro engine pattern. See [engine-migration.md](engine-migration.md).
+
+| File | Covers |
+|------|--------|
+| `test_jumble_patterns.lua` | Core rule tests (headless) |
+| `test_jumble_scoring.lua` | Scoring rules |
+| `test_jumble_play_flow.lua` | Play orchestration |
+| `test_timeline_timer.lua` | Fuse model |
+| `test_voucher_tokens.lua` | Perk economy |
+| `test_save_roundtrip.lua` | Persistence contract |
+| `test_store_sync.lua` | `bridge/store_sync.lua` shim |
+| `test_g_funcs_registry.lua` | `G.FUNCS` catalog freeze |
 
 ## CI
 

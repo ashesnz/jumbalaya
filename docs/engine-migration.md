@@ -164,6 +164,19 @@ Legacy code keeps working while you migrate module-by-module.
 
 **Exit criteria:** Full test pass, coupling inventory doc, shim interface agreed.
 
+### Phase 0 status — complete
+
+| Deliverable | Location |
+|-------------|----------|
+| Coupling inventory | [engine-migration-coupling-inventory.md](engine-migration-coupling-inventory.md) |
+| Store ↔ `G.GAME` shim | `bridge/store_sync.lua` |
+| Shim tests | `tests/unit/test_store_sync.lua` |
+| `G.FUNCS` catalog audit | `tests/helpers/g_funcs_audit.lua`, `tests/unit/test_g_funcs_registry.lua` |
+| Freeze policy | `docs/code-organization.md` (Engine migration section) |
+| CI gate list | `docs/testing.md` (Engine migration CI gate) |
+
+Baseline: **372 tests passing** (`love tests`). Store shim is **not wired at boot** until Phase 2.
+
 ---
 
 ## 3. Phase 1 — Extract `jumbalaya-core` (2–4 weeks)
