@@ -2,7 +2,7 @@ return function(ParticleEmitter)
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 
-local Scheduler = require("word_game.ui.effects.timeline_scheduler")
+local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 
 
 --- Spawns one particle. Records carry velocity components, a per-particle

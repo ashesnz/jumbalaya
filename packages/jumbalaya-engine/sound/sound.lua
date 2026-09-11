@@ -8,8 +8,6 @@
 ]]
 
 local MIXER = require("jumbalaya-engine.sound.mixer")
-local game_access = require("word_game.model.game_access")
-
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 
@@ -73,14 +71,14 @@ function mix_audio(dt)
 	-- Score intensity feeds the ambient fire/organ beds.
 	g().SETTINGS.ambient_control = g().SETTINGS.ambient_control or {}
 	g().ARGS.score_intensity = g().ARGS.score_intensity or {}
-	local game = game_access.get()
+	local game = shell.snapshot()
 	local hand = game and game.current_round and game.current_round.current_hand
 	if not hand or type(hand.points) ~= 'number' or type(hand.mult) ~= 'number' then
 		g().ARGS.score_intensity.earned_score = 0
 	else
 		g().ARGS.score_intensity.earned_score = hand.points * hand.mult
 	end
-	local wr = game_access.word_round()
+	local wr = shell.word_round()
 	g().ARGS.score_intensity.required_score = (wr and wr.target) or 0
 	local intensity = g().ARGS.score_intensity
 	intensity.flames = math.min(1, (g().STAGE == g().STAGES.RUN and 1 or 0) *

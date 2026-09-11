@@ -30,14 +30,19 @@ AlphaCardsBackup/        Legacy card-engine reference — do not edit
 
 ## Dependency rules
 
-- `word_game/ui/` → `app/core/` — **never** reverse
+Canonical game tree: `games/jumbalaya/` (`app/`, `word_game/`, …). Shared packages stay at repo root (`packages/`).
+
+- `jumbalaya_core` → nothing in `games/jumbalaya/app/`, `games/jumbalaya/word_game/`, or Love2D
+- `jumbalaya-engine` → `jumbalaya_core` only; shell via `jumbalaya-engine.shell` (no `require("app.*")` or `require("word_game.*")` in `packages/`)
+- `word_game/model/` → `jumbalaya_core`, `app/runtime`; never `word_game/ui/`
+- `word_game/ui/` → `jumbalaya-engine`, `word_game/model` (facade), `app/runtime` — **never** reverse
 - `word_game/board/` — snap/geometry only; no UI imports at require time (fixed-letter overlay wired from `ui/table/board.lua`)
-- Cross-package access: use `WORD_GAME` (domain, `word_game/init.lua`) and `WORD_GAME_UI` (presentation, `word_game/ui/facade/exports.lua`). Inside `word_game/model/`, hoist sibling requires to module scope; use `jumble/bonus_return` when model code must return bonus cards to the gutter.
-- **Runtime bus:** Game shell via `app/runtime.lua` (`require("app.runtime").game()`); run snapshot via `WORD_GAME.store()` / `game_access.get()`; UIBox strings via `app/callbacks/funcs.lua` (`Funcs.dispatch`). **Every new feature:** facade method + owned run-state field in `types/game.lua`, or it does not ship.
-- **Rules vs glue:** pure gameplay logic goes in `packages/jumbalaya_core/` (+ `test_core_*`); `word_game/model/` is runtime glue only — do not duplicate core rules.
-- `jumbalaya_core` never imports `app/`, `word_game/`, or Love2D. `app/core/` must not know jumble or letter faces.
+- `app/` → `word_game/` at boot only; no jumble rules; `app/core/` = session + persistence + platform only
+- Cross-package access: `WORD_GAME` and `WORD_GAME_UI` facades. Inside `word_game/model/`, hoist sibling requires to module scope; use `jumble/bonus_return` when model code must return bonus cards to the gutter.
+- **Runtime bus:** Game shell via `jumbalaya-engine.shell` (`app/runtime.lua` delegates); run snapshot via `WORD_GAME.store()` / `game_access.get()`; UIBox strings via `Funcs.dispatch`. Shell injection: `app/bootstrap/shell_bind.lua`. **Every new feature:** facade method + owned run-state field in `types/store.lua`, or it does not ship.
+- **Rules vs glue:** pure gameplay logic in `packages/jumbalaya_core/` (+ `test_core_*`); `word_game/model/` is runtime glue only.
 - Config = data; model glue = wiring; ui = presentation — keep separated
-- Bootstrap load order lives in `app/bootstrap.lua` only; `Game()` is constructed in `runtime_boot.lua` (no global `G` singleton)
+- Bootstrap load order in `app/bootstrap.lua` only; `Game()` in `runtime_boot.lua` (no global `G` singleton)
 - Model requests layout via `Layout.request_refresh()` / `Presentation.emit` — not UI modules or `Funcs.dispatch`. Presentation contract: `types/presentation.lua`.
 
 ## Active vs legacy

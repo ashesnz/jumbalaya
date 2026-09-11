@@ -1,7 +1,7 @@
 --[[ app/core/input/router.lua - routes pointer, keyboard, and gamepad input ]]
 
 local Kind = require("jumbalaya-engine.object")
-local Scheduler = require("word_game.ui.effects.timeline_scheduler")
+local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 
 ---@class InputRouter : Kind
 InputRouter = Kind:derive("InputRouter")

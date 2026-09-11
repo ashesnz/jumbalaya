@@ -1,4 +1,4 @@
-local EffectsScheduler = require("word_game.ui.effects.timeline_scheduler")
+local EffectsScheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 

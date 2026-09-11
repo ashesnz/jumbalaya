@@ -1,4 +1,4 @@
-local game_access = require("word_game.model.game_access")
+local shell = require("jumbalaya-engine.shell")
 
 --[[
 	app/core/util/random.lua - seeded streams and general randomness.
@@ -90,7 +90,7 @@ end
 function advance_seed(key)
 	if key == 'seed' then return math.random() end
 
-	local game = game_access.get()
+	local game = shell.snapshot()
 	if not game then return math.random() end
 	local streams = game.seed_streams
 	if not streams[key] then

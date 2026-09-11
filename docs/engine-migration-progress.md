@@ -1,6 +1,6 @@
 # Engine migration — progress & consolidation plan
 
-**Status:** Phase 10 active (post–Phase 9 complete)  
+**Status:** Phases 10–13 complete (post-migration maintenance)  
 **Last updated:** 2026-09-12  
 **Authoritative guide:** [engine-migration.md](engine-migration.md)  
 **Grep snapshot:** [engine-migration-coupling-inventory.md](engine-migration-coupling-inventory.md)
@@ -13,16 +13,16 @@ This document tracks how far the repo is toward a **clean, understandable custom
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│  app/                    Thin Love2D shell                    │
-│                          bootstrap · lifecycle · callbacks      │
+│  games/jumbalaya/app/         Thin Love2D shell               │
+│                               bootstrap · lifecycle · callbacks │
 ├──────────────────────────────────────────────────────────────┤
-│  word_game/              Jumbalaya game (glue + presentation)   │
+│  games/jumbalaya/word_game/   Jumbalaya game (glue + presentation)│
 ├──────────────────────────────────────────────────────────────┤
 │  packages/jumbalaya-engine/   Custom engine (scene, input, UI) │
 ├──────────────────────────────────────────────────────────────┤
 │  packages/jumbalaya_core/     Portable rules + store (no Love2D)│
 └──────────────────────────────────────────────────────────────┘
-         bridge/  →  dissolved (shims retired or moved home)
+         bridge/  →  dissolved; shell via jumbalaya-engine.shell
 ```
 
 **Principles:**
@@ -64,7 +64,7 @@ A common instinct is to put `packages/`, `word_game/`, and `app/` into a single 
 | `action_dispatch.lua` | Input action → store / engine input | `app/input/` or `jumbalaya-engine/input` | Move |
 | `event_bridge.lua` | `Presentation.emit` → `EventBus` | `app/bootstrap/presentation_boot.lua` (inline) | Inline |
 
-`bridge/` was dissolved in Phase 11 (2026-09-12). `runtime` and `Funcs` APIs remain under `app/runtime.lua` and `app/callbacks/funcs.lua`; `jumbalaya-engine` still imports `app.runtime` for shell access (Phase 12 may inject context instead).
+`bridge/` was dissolved in Phase 11 (2026-09-12). `runtime` and `Funcs` APIs remain under `app/runtime.lua` and `app/callbacks/funcs.lua`; Engine uses `jumbalaya-engine.shell` for shell access (`app/runtime.lua` delegates).
 
 ---
 
@@ -78,7 +78,8 @@ Metrics refreshed **2026-09-12** from repo root. Compare to post–Phase 9 basel
 | `G.` in production (`!tests`, `!devtools`) | 0 | **0** | 0 |
 | `.FUNCS` runtime reads | 0 | **0** | 0 |
 | `CardArea` refs (app + word_game + bridge + packages) | ~72 | **0** (renamed → `CardPile`) | 0 |
-| `require("app.")` in `packages/` | 2 | **2** | 0 |
+| `require("app.")` in `packages/` | 2 | **0** | 0 |
+| `require("word_game.")` in `packages/` | — | **0** | 0 |
 | Glue modules (`glue over` in `word_game/model/`) | 10 | **10** | shrink |
 | `test_core_*` files | 14 | **14** | grow with rules |
 | `Funcs.register` sites | ~59 | **59** | stable catalog |
@@ -327,43 +328,62 @@ test -d games/jumbalaya/app && test -d packages/jumbalaya-engine
 
 ---
 
-## 7. Dependency rules (unchanged — enforce during consolidation)
+## 7. Dependency rules (enforce on every PR)
+
+Paths below use the **canonical game tree** under `games/jumbalaya/` (Phase 13). `require()` module names are unchanged (`app.*`, `word_game.*`, …).
 
 ```text
-jumbalaya_core          → (nothing in app/ or word_game/)
-jumbalaya-engine        → jumbalaya_core only (shell callbacks injected at boot via app/bootstrap/shell_bind)
-word_game/model         → jumbalaya_core, app/runtime (post-11), never word_game/ui/
-word_game/ui            → jumbalaya-engine, word_game/model (facade), app/runtime
-app/                    → word_game/ at boot only; no jumble rules
+packages/jumbalaya_core/
+  → (nothing in games/jumbalaya/app/, games/jumbalaya/word_game/, or Love2D)
+
+packages/jumbalaya-engine/
+  → jumbalaya_core only
+  → shell surface via jumbalaya-engine.shell (no require("app.*") or require("word_game.*"))
+  → Game shell, Funcs, action_dispatch, and game_access injected at boot by
+    games/jumbalaya/app/bootstrap/shell_bind.lua
+
+games/jumbalaya/word_game/model/
+  → jumbalaya_core, app/runtime (store + shell), never word_game/ui/
+
+games/jumbalaya/word_game/ui/
+  → jumbalaya-engine, word_game/model (facade), app/runtime
+
+games/jumbalaya/app/
+  → word_game/ at boot only; no jumble rules in app/
+  → delegates shell to jumbalaya-engine.shell; app/runtime.lua is a thin facade
 ```
 
-Cross-package entry points: **`WORD_GAME`** and **`WORD_GAME_UI`** facades.
+**Cross-package entry points:** `WORD_GAME` and `WORD_GAME_UI` facades (`word_game/init.lua`, `word_game/ui/facade/exports.lua`). Model emits layout/UI work via `Presentation`, not `Funcs.dispatch`.
+
+**Shell injection (`shell_bind.install`):** `app_events`, `Funcs`, `action_dispatch`, `game_access` — engine code reads the live shell through `jumbalaya-engine.shell`, not `require("app.runtime")`.
+
+**State bus:** `WORD_GAME.store()` / `game_access` for run snapshot reads and writes; no `Game.GAME` mirror.
 
 ---
 
 ## 8. What to work on next (priority order)
 
-1. **Fix save roundtrip tests** — unblocks confident 10b persistence work.
-2. **Phase 10b PR-1** — TABLE_BOARD reads piles from store only (feature-flagged draw path).
-3. **Phase 10c PR-1** — move `Object` / `Node` / `AnimNode` into `jumbalaya-engine` (unblocks removing `app` import from retained_ui).
-4. **Phase 10a** — one glue module audit per PR in parallel if multiple contributors.
-5. **Phase 10d + 11** — after CardArea retirement.
+1. **Phase 10a glue hygiene** — continue moving rule logic from `word_game/model/` into `jumbalaya_core` (jumble/, perks/ after `round/`).
+2. **Remove root shims** — optional PR-C: delete repo-root `main.lua` / `conf.lua` / `tests/` once callers use `love games/jumbalaya` only.
+3. **Stale doc sweep** — align `code-organization.md`, `.cursor/rules/`, skills with `games/jumbalaya/` paths.
+4. **Grow `test_core_*`** — new pure rules land in core with headless tests first.
 
-Avoid big-bang PRs that touch menu + table + trade + bridge in one diff.
+Avoid big-bang PRs that touch menu + table + trade + bootstrap in one diff.
 
 ---
 
 ## 9. Verification checklist (every PR)
 
 ```sh
-love tests
+love games/jumbalaya tests
 emmylua_check . --severity warn
 
-# Migration gates
+# Migration gates (repo root)
 rg '\bG\.' --glob '*.lua' -g '!tests/**' -g '!devtools/**'
-rg 'CardArea' app word_game bridge packages -g '!tests/**'
+rg 'CardArea' games/jumbalaya packages -g '!tests/**'
 rg 'require\("app\.' packages/
-rg -l 'glue over' word_game/model
+rg 'require\("word_game\.' packages/
+rg -l 'glue over' games/jumbalaya/word_game/model
 rg 'bridge/' --glob '*.lua' -g '!docs/**'
 ```
 

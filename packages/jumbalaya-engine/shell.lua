@@ -8,6 +8,7 @@ local _game = nil
 local _app_events = nil
 local _funcs = nil
 local _action_dispatch = nil
+local _game_access = nil
 
 function M.bind_game(game)
 	_game = game
@@ -62,6 +63,22 @@ function M.dispatch_action_func(name, extra)
 		return _action_dispatch.dispatch_func(name, extra)
 	end
 	return false
+end
+
+function M.bind_game_access(module)
+	_game_access = module
+end
+
+function M.snapshot()
+	if _game_access and _game_access.get then
+		return _game_access.get()
+	end
+end
+
+function M.word_round()
+	if _game_access and _game_access.word_round then
+		return _game_access.word_round()
+	end
 end
 
 return M
