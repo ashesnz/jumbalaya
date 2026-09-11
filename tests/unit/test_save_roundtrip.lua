@@ -2,8 +2,10 @@
 
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
+local save_fs = require("tests.helpers.save_fs")
 
 T.describe("save round-trip", function()
+	save_fs.install()
 	mock_env.reset_game()
 	mock_env.ensure_card_class()
 	require("word_game.model.game")
@@ -129,6 +131,7 @@ T.describe("save round-trip", function()
 	end)
 
 	T.it("write_save_file / read_save_payload compress and restore a run snapshot", function()
+		save_fs.reset()
 		local path = "test_roundtrip_save.acs"
 		local snapshot = {
 			VERSION = "test",
@@ -154,6 +157,7 @@ T.describe("save round-trip", function()
 	end)
 
 	T.it("restores a jumble hand snapshot from disk via round.restore_from_save", function()
+		save_fs.reset()
 		local jumble_fixture = require("tests.helpers.jumble_save_fixture")
 		local round = require("word_game.model.round")
 		mock_env.install_presentation({

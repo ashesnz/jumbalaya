@@ -1,7 +1,7 @@
 --[[
 	jumbalaya_core - Engine-agnostic domain library (Phase 1).
 
-	No Love2D rendering, no global G. Game shell and UI import this package;
+	No Love2D rendering, no global game shell. Game shell and UI import this package;
 	tests can run core rules without mock_env.ensure_engine_globals().
 ]]
 

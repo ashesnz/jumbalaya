@@ -7,18 +7,24 @@ Post–Phase 9 metrics. Refresh before Phase 10 PRs that claim a grep delta.
 
 ---
 
-## Summary (2026-09-11)
+## Summary (2026-09-12, Step 0 baseline)
 
-| Metric | Post–Phase 9 | Phase 10 target |
-|--------|--------------|-----------------|
-| `love tests` | **487** passed | stay green |
-| `G.` in production (`!tests`, `!devtools`) | **0** | **0** |
-| `.FUNCS` runtime reads | **0** | **0** |
-| `CardArea` (app + word_game + bridge + packages) | **~72** | **0** (10b) |
-| `require("app.")` in `packages/` | **2** (`retained_ui` → AnimNode) | **0** (10c) |
-| Glue modules (`glue over` in `word_game/model/`) | **10** | shrink (10a) |
-| `test_core_*` files | **14** | grow with new rules |
-| `Funcs.register` sites | **~59** | stable catalog (`types/funcs.lua`) |
+| Metric | Post–Phase 9 (2026-09-11) | **Now** | Phase 10 target |
+|--------|---------------------------|---------|-----------------|
+| `love tests` | 487 passed | **488 passed, 0 failed** | stay green |
+| `G.` in production (`!tests`, `!devtools`) | 0 | **0** | **0** |
+| `.FUNCS` runtime reads | 0 | **0** | **0** |
+| `CardArea` (app + word_game + bridge + packages) | ~72 | **74** | **0** (10b) |
+| `require("app.")` in `packages/` | 2 (`retained_ui` → AnimNode) | **2** | **0** (10c) |
+| Glue modules (`glue over` in `word_game/model/`) | 10 | **10** | shrink (10a) |
+| `test_core_*` files | 14 | **14** | grow with new rules |
+| `Funcs.register` sites | ~59 | **59** | stable catalog (`types/funcs.lua`) |
+| `require("bridge` sites | — | **194** | **0** (Phase 11) |
+
+### Step 0 (2026-09-12)
+
+- ✅ `test_save_roundtrip` — fixed via `tests/helpers/save_fs.lua` (in-memory `love.filesystem` overlay; save dir is outside workspace in sandboxed runs).
+- ✅ Production `G.` reads — **0** (prior grep hit was a comment in `packages/jumbalaya_core/init.lua`; reworded).
 
 ---
 
@@ -44,6 +50,9 @@ rg -l 'glue over' word_game/model
 
 # Callback catalog
 rg 'Funcs\.register' app word_game
+
+# Bridge package (Phase 11 gate)
+rg 'require\("bridge' --glob '*.lua' -g '!docs/**'
 
 # Tests
 love tests
