@@ -23,7 +23,7 @@ jobs:
           if [ ! -x "$love_bin" ]; then
             love_bin="$PWD/squashfs-root/love"
           fi
-          echo "$love_bin" >> "$GITHUB_PATH"
+          echo "$(dirname "$love_bin")" >> "$GITHUB_PATH"
           "$love_bin" --version | grep -F "${LOVE_VERSION}"
       - name: Run headless suite
         run: love tests
