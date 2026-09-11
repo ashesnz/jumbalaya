@@ -2,6 +2,7 @@
 
 local dimensions = require("word_game.config.layout.dimensions")
 local perk_effects = require("word_game.model.perks.effects")
+local core_hand_size = require("jumbalaya_core.rules.hand_size")
 
 local M = {}
 
@@ -10,7 +11,7 @@ function M.get()
 	if G and G.TABLE_HAND_SIZE then
 		base = G.TABLE_HAND_SIZE
 	end
-	return base + perk_effects.hand_size_bonus()
+	return core_hand_size.get(base, { wide_hand = perk_effects.has("wide_hand") })
 end
 
 return M
