@@ -160,7 +160,7 @@ Understanding *what* is duplicated clarifies *what* to merge.
 
 **Phase 12 done:** `app/` has no scene graph classes. Engine boot is `jumbalaya-engine.boot`; `app/bootstrap/engine_boot.lua` delegates to it.
 
-**Phase 12 follow-up (2026-09-12):** Stray shell modules folded into target tree (`callbacks/controllers/`, `callbacks/screen_wipe`, `callbacks/profile`, `input/actions`, `bootstrap/app_events`). `jumbalaya-engine/shell.lua` holds the bound Game shell; `app/runtime.lua` delegates to it. Engine `require("app.")` sites down to **6** (`Funcs` + `action_dispatch` only).
+**Phase 12 follow-up (2026-09-12):** Stray shell modules folded into target tree (`callbacks/controllers/`, `callbacks/screen_wipe`, `callbacks/profile`, `input/actions`, `bootstrap/app_events`). `jumbalaya-engine/shell.lua` holds the bound Game shell; `app/runtime.lua` delegates to it. `app/bootstrap/shell_bind.lua` injects `app_events`, `Funcs`, and `action_dispatch` at boot. **`rg 'require\("app\.' packages/` → 0**.
 
 ### 5e. Rules vs glue (`word_game/model/` vs `jumbalaya_core/`)
 
@@ -287,7 +287,7 @@ This is cosmetic reorganisation — same dependency rules, clearer monorepo stor
 
 ```text
 jumbalaya_core          → (nothing in app/ or word_game/)
-jumbalaya-engine        → jumbalaya_core only (no app/ after 10c)
+jumbalaya-engine        → jumbalaya_core only (shell callbacks injected at boot via app/bootstrap/shell_bind)
 word_game/model         → jumbalaya_core, app/runtime (post-11), never word_game/ui/
 word_game/ui            → jumbalaya-engine, word_game/model (facade), app/runtime
 app/                    → word_game/ at boot only; no jumble rules

@@ -36,8 +36,7 @@ require "word_game.ui.cardarea.init"
 
 Dictionary = require "dictionary"
 WORD_GAME = require "word_game"
-local app_events = require("app.bootstrap.app_events")
-require("jumbalaya-engine.shell").bind_app_events(app_events)
+require("app.bootstrap.shell_bind").install()
 
 require "app.callbacks.registry"
 

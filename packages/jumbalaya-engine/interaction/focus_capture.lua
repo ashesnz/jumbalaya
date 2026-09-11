@@ -1,6 +1,5 @@
 return function(InputRouter)
 local shell = require("jumbalaya-engine.shell")
-local Funcs = require("app.callbacks.funcs")
 local function g() return shell.game() end
 
 
@@ -105,9 +104,9 @@ function InputRouter:capture_focused_input(button, input_type, dt)
 				local step = button == 'dpleft' and -0.01 or 0.01
 				local drift = (button == 'dpleft' and -dt or dt) * (self.held_button_times[button] or 0) * 0.6
 				if input_type == 'hold' and (self.held_button_times[button] or 0) > 0.2 then
-					Funcs.dispatch("slider_step", focused.children[1], drift)
+					shell.dispatch_func("slider_step", focused.children[1], drift)
 				elseif input_type == 'press' then
-					Funcs.dispatch("slider_step", focused.children[1], step)
+					shell.dispatch_func("slider_step", focused.children[1], step)
 				end
 				captured = true
 			end

@@ -1,6 +1,5 @@
 
 local shell = require("jumbalaya-engine.shell")
-local Funcs = require("app.callbacks.funcs")
 local function g() return shell.game() end
 return function(Target)
 function LayoutNode:update(dt)
@@ -21,8 +20,8 @@ function LayoutNode:update(dt)
 
 	if self.config and self.config.func then
 		g().ARGS.FUNC_TRACKER[self.config.func] = (g().ARGS.FUNC_TRACKER[self.config.func] or 0) + 1
-		if Funcs.get(self.config.func) then
-			Funcs.dispatch(self.config.func, self)
+		if shell.get_func(self.config.func) then
+			shell.dispatch_func(self.config.func, self)
 		end
 	end
 
@@ -53,8 +52,8 @@ function LayoutNode:click()
 			g().NO_MOD_CURSOR_STACK = true
 		end
 
-		if Funcs.get(self.config.button) then
-			Funcs.dispatch(self.config.button, self)
+		if shell.get_func(self.config.button) then
+			shell.dispatch_func(self.config.button, self)
 		end
 
 		g().NO_MOD_CURSOR_STACK = nil

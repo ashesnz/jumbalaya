@@ -1,6 +1,5 @@
 
 local shell = require("jumbalaya-engine.shell")
-local Funcs = require("app.callbacks.funcs")
 local function g() return shell.game() end
 return function(Target)
 function RetainedPanel:calculate_xywh(node, _T, recalculate, _scale)
@@ -21,7 +20,7 @@ function RetainedPanel:calculate_xywh(node, _T, recalculate, _scale)
 			local scale = node.config.scale or 1
 			if node.config.ref_table and node.config.ref_value then
 				node.config.text = tostring(node.config.ref_table[node.config.ref_value])
-				if node.config.func and not recalculate then Funcs.dispatch(node.config.func, node) end
+				if node.config.func and not recalculate then shell.dispatch_func(node.config.func, node) end
 			end
 			if not node.config.text then node.config.text = '[UI ERROR]' end
 

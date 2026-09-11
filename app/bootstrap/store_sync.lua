@@ -89,6 +89,12 @@ function M.ensure_test_binding()
 	if engine_boot and engine_boot.install then
 		engine_boot.install()
 	end
+	local shell_bind = package.loaded["app.bootstrap.shell_bind"]
+	if shell_bind and shell_bind.install then
+		shell_bind.install()
+	elseif not package.loaded["app.bootstrap.shell_bind"] then
+		require("app.bootstrap.shell_bind").install()
+	end
 	return store
 end
 

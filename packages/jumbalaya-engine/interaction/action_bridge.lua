@@ -1,18 +1,15 @@
---[[ app/core/input/action_bridge.lua - Phase 4 router → typed action dispatch ]]
+--[[ jumbalaya-engine/interaction/action_bridge.lua - router → typed action dispatch ]]
+
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
-
-
-local action_dispatch = require("app.input.action_dispatch")
 
 local M = {}
 
 function M.dispatch(action)
-	action_dispatch.dispatch(action)
+	shell.dispatch_action(action)
 end
 
 function M.dispatch_func(name, extra)
-	return action_dispatch.dispatch_func(name, extra)
+	return shell.dispatch_action_func(name, extra)
 end
 
 function M.attach_router(router)
