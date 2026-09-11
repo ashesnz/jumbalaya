@@ -3,6 +3,7 @@
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
 local store_sync = require("bridge.store_sync")
+local action_dispatch = require("bridge.action_dispatch")
 local word_game = require("word_game")
 
 T.describe("Phase 4 Gameplay Action Dispatch", function()
@@ -11,24 +12,26 @@ T.describe("Phase 4 Gameplay Action Dispatch", function()
 	T.it("dispatches gameplay actions through store and updates state", function()
 		G._store = store_sync.new()
 		word_game._bind_store(G._store)
+		require("app.bootstrap.engine_services_boot").install()
 		word_game.Round.init_run()
 
-		-- Dispatch PLAY_WORD action
 		store_sync.dispatch(G._store, { type = "PLAY_WORD", word = "TEST" })
 		T.assert_true(G.GAME.word_round.played_words.TEST)
 
-		-- Dispatch SHUFFLE_HAND action
 		store_sync.dispatch(G._store, { type = "SHUFFLE_HAND" })
+		T.assert_equal(G.GAME.shuffle_hand_count, 1)
 
-		-- Dispatch JUMBLE_NEXT action
 		store_sync.dispatch(G._store, { type = "JUMBLE_NEXT" })
+		T.assert_equal(G.GAME.last_gameplay_action, "JUMBLE_NEXT")
 
-		-- Dispatch RETURN_PLACEMENT_CARDS action
 		store_sync.dispatch(G._store, { type = "RETURN_PLACEMENT_CARDS" })
+		T.assert_equal(G.GAME.last_gameplay_action, "RETURN_PLACEMENT_CARDS")
 	end)
 
-	T.it("invokes G.FUNCS gameplay callbacks bridging store dispatch", function()
+	T.it("routes G.FUNCS gameplay callbacks through InputService", function()
 		mock_env.reset_game()
+		G._store = store_sync.new()
+		require("app.bootstrap.engine_services_boot").install()
 		package.loaded["app.callbacks.registry"] = nil
 		package.loaded["word_game.ui.callbacks.table_controls"] = nil
 		require("app.callbacks.registry")
@@ -38,10 +41,36 @@ T.describe("Phase 4 Gameplay Action Dispatch", function()
 		T.assert_not_nil(G.FUNCS.play_placement_word)
 		T.assert_not_nil(G.FUNCS.jumble_next)
 
-		-- Callbacks should execute safely without error
+		local before = G.GAME.shuffle_hand_count or 0
 		pcall(function() G.FUNCS.shuffle_hand() end)
-		pcall(function() G.FUNCS.return_placement_cards() end)
-		pcall(function() G.FUNCS.play_placement_word() end)
-		pcall(function() G.FUNCS.jumble_next() end)
+		T.assert_equal(G.GAME.shuffle_hand_count, before + 1)
+	end)
+
+	T.it("dispatches placement word payload via gameplay controller", function()
+		mock_env.reset_game()
+		G.GAME.placement_word = "CAT"
+		G.GAME.placement_word_valid = true
+		G.GAME.word_round = G.GAME.word_round or { played_words = {} }
+
+		action_dispatch.dispatch_func("play_placement_word", { word = "CAT" })
+		T.assert_true(G.GAME.word_round.played_words.CAT)
+	end)
+
+	T.it("emits app actions for menu lifecycle callbacks", function()
+		mock_env.reset_game()
+		local app_events = require("app.services.app_events")
+		local seen = {}
+		app_events.on("APP_RETURN_TO_MENU", function(action)
+			seen[#seen + 1] = action.type
+		end)
+		action_dispatch.dispatch({ type = "APP_RETURN_TO_MENU" })
+		T.assert_equal(seen[1], "APP_RETURN_TO_MENU")
+	end)
+
+	T.it("attaches action dispatch helpers to InputRouter", function()
+		mock_env.reset_game()
+		local router = require("app.core.input.router")
+		T.assert_not_nil(router.dispatch_action)
+		T.assert_not_nil(router.dispatch_func)
 	end)
 end)

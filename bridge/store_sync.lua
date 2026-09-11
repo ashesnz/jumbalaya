@@ -108,6 +108,10 @@ function M.ensure_test_binding()
 		M.sync_from_g(_G.G._store)
 	end
 	M.sync_to_g(_G.G._store)
+	local engine_boot = package.loaded["app.bootstrap.engine_services_boot"]
+	if engine_boot and engine_boot.install then
+		engine_boot.install()
+	end
 	return _G.G._store
 end
 

@@ -12,6 +12,7 @@ function M.install()
 	if WORD_GAME and WORD_GAME._bind_store then
 		WORD_GAME._bind_store(G._store)
 	end
+	require("app.bootstrap.engine_services_boot").install()
 	return G._store
 end
 

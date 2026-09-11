@@ -90,9 +90,17 @@ function M.try_award_stage_clear_bonus(j)
 	return core.try_award_stage_clear_bonus(j, perk_flags(), M.timeline_seconds())
 end
 
+local function clock_now()
+	local engine = WORD_GAME and WORD_GAME.engine and WORD_GAME.engine()
+	if engine and engine.clock then
+		return engine.clock:get_time()
+	end
+	return (G.TIMERS and G.TIMERS.REAL) or 0
+end
+
 function M.compute_word_effects(word, used_cards, j)
 	return core.compute_word_effects(word, used_cards, j, perk_flags(), {
-		now = (G.TIMERS and G.TIMERS.REAL) or 0,
+		now = clock_now(),
 		timeline_seconds = M.timeline_seconds(),
 	})
 end

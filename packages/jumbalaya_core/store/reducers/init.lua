@@ -3,6 +3,7 @@
 local round = require("jumbalaya_core.store.reducers.round")
 local run_state = require("jumbalaya_core.store.reducers.run_state")
 local game = require("jumbalaya_core.store.reducers.game")
+local piles = require("jumbalaya_core.store.reducers.piles")
 
 local M = {}
 
@@ -19,6 +20,7 @@ end
 register(round)
 register(run_state)
 register(game)
+register(piles)
 
 function M.reduce(state, action)
 	if not action or not action.type then return state end

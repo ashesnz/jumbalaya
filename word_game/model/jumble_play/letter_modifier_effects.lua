@@ -8,6 +8,10 @@ local core = require("jumbalaya_core.rules.letter_modifier_effects")
 local M = {}
 
 local function now()
+	local engine = WORD_GAME and WORD_GAME.engine and WORD_GAME.engine()
+	if engine and engine.clock then
+		return engine.clock:get_time()
+	end
 	return (G.TIMERS and G.TIMERS.REAL) or 0
 end
 

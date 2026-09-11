@@ -2,12 +2,18 @@
 	jumbalaya-engine/renderer.lua - Renderer interface and Love2D adapter.
 ]]
 
+local Love2D = require("jumbalaya-engine.adapters.love2d")
+
 ---@class Renderer
 local Renderer = {}
 Renderer.__index = Renderer
 
 function Renderer.new(adapter)
-	return setmetatable({ _adapter = adapter or love.graphics }, Renderer)
+	return setmetatable({ _adapter = adapter or Love2D.renderer() }, Renderer)
+end
+
+function Renderer.love2d()
+	return Renderer.new(Love2D.renderer())
 end
 
 function Renderer:draw_card(view, rect)

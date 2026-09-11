@@ -8,10 +8,14 @@
 	  app.callbacks.run_lifecycle - start_run, go_to_menu, wipe transitions
 	  app.effects                - shared runtime effects (loaded separately in game_boot)
 
-	Word game callbacks (registration only — logic on WORD_GAME_UI modules):
-	  word_game.ui.callbacks.table_controls - shuffle, play, recall, jumble_next
-	  word_game.ui.callbacks.trade            - trade_*
+	Word game callbacks (registration only — logic on controllers):
+	  word_game.ui.controllers.gameplay       - shuffle, play, recall, jumble_next
+	  word_game.ui.controllers.trade          - trade_*
+	  word_game.ui.controllers.sidebar        - sidebar HUD actions
 	  word_game.ui.callbacks.tutorial         - first_play_tutorial_next
+
+	App controllers (Phase 4b — registration in app/callbacks/*):
+	  app.controllers.run_lifecycle, settings, overlays, ui_controls
 
 	Instance-bound sidebar callbacks (registration via sidebar:install()):
 	  word_game.ui.sidebar.funcs            - ensure/rebuild/end_run/classic_stage_next

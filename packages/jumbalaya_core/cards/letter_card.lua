@@ -4,6 +4,26 @@ local DictionaryCards = require("jumbalaya_core.dictionary.cards")
 
 local M = {}
 
+function M.new(id, letter, color_key, pile_id, slot_index, overrides)
+	local card = {
+		id = id or 0,
+		letter = letter or "A",
+		color_key = color_key or "white",
+		pile_id = pile_id or "hand",
+		slot_index = slot_index,
+		ability = {
+			letter = letter or "A",
+			letter_color = color_key or "white",
+		},
+	}
+	if overrides then
+		for k, v in pairs(overrides) do
+			card[k] = v
+		end
+	end
+	return card
+end
+
 function M.tag_ability(card, letter, color)
 	card.ability = card.ability or {}
 	card.ability.letter = letter

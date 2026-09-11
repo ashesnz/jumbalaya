@@ -389,6 +389,28 @@ Extract `G.TIMERS` reads from `word_game/model/run/timeline.lua` into a `Clock` 
 
 **Exit criteria:** Interfaces documented in `types/`; Love2D adapters pass a smoke boot.
 
+### Phase 3 status — complete
+
+| Deliverable | Location |
+|-------------|----------|
+| Service package | `packages/jumbalaya-engine/` |
+| Renderer | `renderer.lua` + `adapters/love2d.lua` |
+| Input | `input.lua` (`ACTION_MAP` for gameplay `G.FUNCS` names) |
+| Audio | `audio.lua` (SFX map + `bind_store` on dispatch) |
+| Clock | `clock.lua` (`from_globals()` bridges `G.TIMERS.REAL`) |
+| Context | `context.lua` bundles store + services |
+| Boot wiring | `app/bootstrap/engine_services_boot.lua` → `G._engine` |
+| Facade | `WORD_GAME.engine()` |
+| Types | `types/engine_services.lua` |
+| Clock consumers | `perks/effects.lua`, `jumble_play/letter_modifier_effects.lua` |
+| Tests | `test_phase3_engine_services.lua`, boot smoke in `test_boot_simulation.lua` |
+
+**Exit criteria met:** Interfaces documented; Love2D adapters wired at boot; smoke boot passes.
+
+**Deferred to Phase 4:** Replace `G.FUNCS` registrations with `InputService:dispatch_func` bridges; router integration.
+
+Baseline: **441 tests passing** (`love tests`).
+
 ---
 
 ## 6. Phase 4 — Replace `G.FUNCS` with Action Dispatch (2–3 weeks)
@@ -431,6 +453,28 @@ end
 Delete `G.FUNCS` registrations as each UIBox definition is rewritten to call controllers directly.
 
 **Exit criteria:** Gameplay callbacks dispatch typed actions; `types/g_funcs.lua` gameplay section empty.
+
+### Phase 4 status — complete
+
+| Deliverable | Location |
+|-------------|----------|
+| Action bridge | `bridge/action_dispatch.lua` → `G._engine.input` → `store_sync.dispatch` |
+| Gameplay controllers | `word_game/ui/controllers/{gameplay,trade,sidebar}.lua` |
+| App controllers (4b) | `app/controllers/{run_lifecycle,settings,overlays,ui_controls,callback_bridge}.lua` |
+| Callback registration | Thin `G.FUNCS` files in `word_game/ui/callbacks/` and `app/callbacks/` |
+| Input action map | `packages/jumbalaya-engine/input.lua` (`ACTION_MAP` gameplay + app) |
+| App action bus | `app/services/app_events.lua` (`APP_*` actions) |
+| Router hook | `app/core/input/action_bridge.lua` on `InputRouter` |
+| Store reducers | `PLAY_WORD`, `SHUFFLE_HAND`, trade markers in `jumbalaya_core/store/reducers/` |
+| Settings interface | `packages/jumbalaya-engine/settings.lua` |
+| Types | `types/g_funcs.lua` documents controller ownership |
+| Tests | `test_phase4_action_dispatch.lua` |
+
+**Exit criteria met:** Gameplay and primary app/settings callbacks dispatch typed actions via `InputService`; `G.FUNCS` files are registration-only; controllers own logic.
+
+**Deferred to Phase 5+:** Remaining text-input / profile `G.FUNCS`; delete UIBox string bindings (Phase 6).
+
+Baseline: **452 tests passing** (`love tests`).
 
 ---
 

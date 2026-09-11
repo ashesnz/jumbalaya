@@ -31,21 +31,32 @@ function M.ROUND_SET_WORD_ROUND(state, action)
 end
 
 function M.PLAY_WORD(state, action)
-	if action.word and state.word_round then
-		core_round.record_word_play(state.word_round, action.word)
+	local word = action.word or state.placement_word
+	if word and word ~= "" and state.word_round then
+		core_round.record_word_play(state.word_round, word)
 	end
+	state.last_gameplay_action = "PLAY_WORD"
 	return state
 end
 
 function M.SHUFFLE_HAND(state, action)
+	state.last_gameplay_action = "SHUFFLE_HAND"
+	state.shuffle_hand_count = (state.shuffle_hand_count or 0) + 1
 	return state
 end
 
 function M.RETURN_PLACEMENT_CARDS(state, action)
+	state.last_gameplay_action = "RETURN_PLACEMENT_CARDS"
 	return state
 end
 
 function M.JUMBLE_NEXT(state, action)
+	state.last_gameplay_action = "JUMBLE_NEXT"
+	return state
+end
+
+function M.CLASSIC_STAGE_NEXT(state, action)
+	state.last_gameplay_action = "CLASSIC_STAGE_NEXT"
 	return state
 end
 

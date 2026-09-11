@@ -41,6 +41,13 @@ function M.new(overrides)
 		points = 0,
 		round = 1,
 		word_round = M.new_word_round(),
+		piles = {
+			hand = {},
+			draw = {},
+			pattern = {},
+			bonus = {},
+			discard = {},
+		},
 	}
 	if overrides then
 		for key, value in pairs(overrides) do

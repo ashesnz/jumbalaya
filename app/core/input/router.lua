@@ -94,6 +94,7 @@ require("app.core.input.pointer")(InputRouter)
 require("app.core.input.focus_eligibility")(InputRouter)
 require("app.core.input.focus_select")(InputRouter)
 require("app.core.input.focus_capture")(InputRouter)
+require("app.core.input.action_bridge").attach_router(InputRouter)
 
 function InputRouter:update(dt)
     self:update_frame(dt)

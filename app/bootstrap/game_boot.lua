@@ -32,7 +32,9 @@ require "word_game.ui.cardarea.init"
 
 Dictionary = require "dictionary"
 WORD_GAME = require "word_game"
+require("app.services.app_events")
 require("app.bootstrap.store_boot").install()
+require("app.bootstrap.engine_services_boot").install()
 
 WORD_GAME_UI = require "word_game.ui.facade.exports"
 WORD_GAME_UI.install()

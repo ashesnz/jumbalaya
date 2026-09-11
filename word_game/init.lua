@@ -33,8 +33,16 @@ function M._bind_store(store)
 	M._store = store
 end
 
+function M._bind_engine(engine)
+	M._engine = engine
+end
+
 function M.store()
 	return M._store or (G and G._store)
+end
+
+function M.engine()
+	return M._engine or (G and G._engine)
 end
 
 function M.state()

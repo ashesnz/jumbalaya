@@ -92,6 +92,8 @@ These tests must pass on every PR while migrating off the Balatro engine pattern
 | `test_save_roundtrip.lua` | Persistence contract |
 | `test_store_sync.lua` | `bridge/store_sync.lua` shim |
 | `test_phase2_store_boot.lua` | Phase 2 store boot, dispatch dual-write, run binding |
+| `test_phase3_engine_services.lua` | Phase 3 engine context, adapters, and boot wiring |
+| `test_phase4_action_dispatch.lua` | Phase 4 G.FUNCS → InputService action dispatch |
 | `test_core_store_dispatch.lua` | `jumbalaya_core` store reducers without `G` |
 | `test_g_funcs_registry.lua` | `G.FUNCS` catalog freeze |
 | `test_core_jumble_rules.lua` | `jumbalaya_core` scoring rules without `G` |

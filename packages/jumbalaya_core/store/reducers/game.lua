@@ -41,4 +41,24 @@ function M.SET_SELECTED_PERK(state, action)
 	return state
 end
 
+function M.TRADE_PICK(state, action)
+	state.last_trade_action = "TRADE_PICK"
+	return state
+end
+
+function M.TRADE_SKIP(state, action)
+	state.last_trade_action = "TRADE_SKIP"
+	return state
+end
+
+function M.TRADE_SKIP_ADD(state, action)
+	state.last_trade_action = "TRADE_SKIP_ADD"
+	return state
+end
+
+function M.TRADE_SKIP_REMOVE(state, action)
+	state.last_trade_action = "TRADE_SKIP_REMOVE"
+	return state
+end
+
 return M

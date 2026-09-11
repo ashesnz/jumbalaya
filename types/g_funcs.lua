@@ -2,12 +2,14 @@
 	types/g_funcs.lua - G.FUNCS string catalog (analyzer-only).
 
 	UIBox binds these names on buttons and widgets. Implementations are
-	**registration only**:
+	**registration only** — logic lives on controllers:
 
-	  G.FUNCS.play_placement_word = WORD_GAME_UI.TableControls.play
+	  Gameplay (Phase 4a): word_game/ui/controllers/gameplay.lua → InputService
+	  Trade (Phase 4a):    word_game/ui/controllers/trade.lua
+	  Sidebar (Phase 4a):  word_game/ui/controllers/sidebar.lua
+	  App (Phase 4b):      app/controllers/{run_lifecycle,settings,overlays,ui_controls}.lua
 
-	Logic lives on WORD_GAME_UI / app callback modules. Model code must not
-	call G.FUNCS (use Presentation or facades).
+	Model code must not call G.FUNCS (use Presentation or facades).
 
 	Runtime bus: G.FUNCS (this catalog), G.GAME (types/game.lua),
 	Presentation (types/presentation.lua).
