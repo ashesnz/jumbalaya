@@ -43,4 +43,20 @@ T.describe("jumbalaya_core round", function()
 		local action = Round.advance_hand(wr)
 		T.assert_equal(action, "win")
 	end)
+
+	T.it("normalizes saved word_round defaults and config labels", function()
+		local wr = { set = 2, hand_index = 1 }
+		Round.normalize_saved_word_round(wr)
+		T.assert_equal(wr.set, 2)
+		T.assert_equal(wr.hand_index, 1)
+		T.assert_equal(wr.target, 400)
+		T.assert_equal(wr.hand_name, "Standard")
+
+		local sparse = {}
+		Round.normalize_saved_word_round(sparse)
+		T.assert_equal(sparse.set, 1)
+		T.assert_equal(sparse.hand_index, 1)
+		T.assert_equal(sparse.target, 25)
+		T.assert_equal(type(sparse.played_words), "table")
+	end)
 end)

@@ -41,6 +41,17 @@ T.describe("jumbalaya_core jumble hand", function()
 		T.assert_almost_equal(m2, 1.2, 0.01)
 	end)
 
+	T.it("clears stale jumble mode on inactive hand coordinates", function()
+		local wr = { mode = "jumble", jumble = { puzzle_index = 1 } }
+		T.assert_true(Hand.clear_if_inactive_hand(wr, 99, 1))
+		T.assert_nil(wr.mode)
+		T.assert_nil(wr.jumble)
+
+		wr = { mode = "jumble", jumble = { puzzle_index = 1 } }
+		T.assert_false(Hand.clear_if_inactive_hand(wr, 1, 1))
+		T.assert_equal(wr.mode, "jumble")
+	end)
+
 	T.it("advances to the next puzzle in the list", function()
 		local puzzles = sample_puzzles()
 		local wr = { set = 1, hand_index = 1, target = 25, jumble = { puzzle_index = 1, puzzle_points = 0, puzzle_words = {} } }

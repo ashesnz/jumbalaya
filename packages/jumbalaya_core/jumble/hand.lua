@@ -15,6 +15,19 @@ function M.is_active_hand(set, hand_index)
 		and hand_index <= round_config.hands_in_set(set)
 end
 
+--- Drop jumble mode when the hand coordinate is outside the active jumble range.
+--- Returns false when the hand is jumble-active (caller should start jumble).
+function M.clear_if_inactive_hand(wr, set, hand_index)
+	if M.is_active_hand(set, hand_index) then
+		return false
+	end
+	if wr and wr.mode == "jumble" then
+		wr.mode = nil
+		wr.jumble = nil
+	end
+	return true
+end
+
 function M.is_active(wr)
 	return wr and wr.mode == "jumble" and wr.jumble ~= nil
 end

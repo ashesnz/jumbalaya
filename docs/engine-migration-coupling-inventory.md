@@ -11,7 +11,7 @@ Post–Phase 9 metrics. Refresh before Phase 10 PRs that claim a grep delta.
 
 | Metric | Post–Phase 9 (2026-09-11) | **Now** | Phase 10 target |
 |--------|---------------------------|---------|-----------------|
-| `love tests` | 487 passed | **488 passed, 0 failed** | stay green |
+| `love tests` | 487 passed | **490 passed, 0 failed** | stay green |
 | `G.` in production (`!tests`, `!devtools`) | 0 | **0** | **0** |
 | `.FUNCS` runtime reads | 0 | **0** | **0** |
 | `CardArea` (app + word_game + bridge + packages) | ~72 | **74** | **0** (10b) |
@@ -25,6 +25,12 @@ Post–Phase 9 metrics. Refresh before Phase 10 PRs that claim a grep delta.
 
 - ✅ `test_save_roundtrip` — fixed via `tests/helpers/save_fs.lua` (in-memory `love.filesystem` overlay; save dir is outside workspace in sandboxed runs).
 - ✅ Production `G.` reads — **0** (prior grep hit was a comment in `packages/jumbalaya_core/init.lua`; reworded).
+
+### Phase 10a-1 `round/` (2026-09-12)
+
+- `normalize_saved_word_round` + `clear_if_inactive_hand` moved to `jumbalaya_core` (+2 `test_core_*` cases).
+- `word_game/model/round/init.lua` slimmed to dispatch + presentation wiring.
+- Run analyzer schema consolidated in `types/store.lua`.
 
 ---
 

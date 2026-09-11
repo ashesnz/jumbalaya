@@ -9,7 +9,7 @@
 	- missing-fields
 	- access-invisible
 
-	Re-enable `inject-field` first once `GameRunState` in types/game.lua is closed
+	Re-enable `inject-field` first once `GameRunState` in types/store.lua is closed
 	(no ad-hoc Game.GAME keys). Then tighten live-node fields on the Game shell or
 	move them behind facade-only accessors.
 

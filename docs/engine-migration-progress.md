@@ -90,7 +90,7 @@ Metrics refreshed **2026-09-12** from repo root. Compare to post–Phase 9 basel
 | Phase | Scope | Status | Notes |
 |-------|-------|--------|-------|
 | **0–9** | Store, engine package, retained UI, `Funcs`, no global `G` | ✅ **Complete** | See [engine-migration.md §3](engine-migration.md#3-completed-migration-phases-09) |
-| **10a** | Glue hygiene — model is wiring only | 🟡 **Not started** | 10 glue modules unchanged |
+| **10a** | Glue hygiene — model is wiring only | 🟡 **In progress** | `round/` done (PR 10a-1); jumble/ + perks/ next |
 | **10b** | Retire `CardArea` dual-write | 🔴 **Blocked / not started** | `pile_sync` still dual-writes; 74 `CardArea` refs |
 | **10c** | Engine extraction — no `app/` imports in packages | 🟡 **Minimal** | 2 imports: `retained_ui/node.lua`, `panel.lua` → `AnimNode` |
 | **10d** | Single state bus | 🟡 **Partial** | Store authoritative at boot; glue still reads `live_game().GAME` in places |
@@ -176,12 +176,18 @@ Work **one PR per row**. Keep `love tests` green after each. Record grep deltas 
 - [x] Eliminate the remaining production `G.` read (was a comment false positive; reworded).
 - [x] Refresh [engine-migration-coupling-inventory.md](engine-migration-coupling-inventory.md) with this snapshot.
 
-### Step 1 — Phase 10a: Glue hygiene (low risk)
+### Step 1 — Phase 10a: Glue hygiene (low risk) 🟡 in progress
 
 1. Pick one glue module per PR (`round/`, then `jumble/`, then `perks/`).
 2. Move any stray rule logic into `jumbalaya_core` + `test_core_*`.
 3. Ensure config re-exports stay one-liners (`word_game/config/gameplay/{round,economy}.lua`).
 4. Fold `types/game.lua` run schema into `types/store.lua` (analyzer-only).
+
+**10a-1 `round/` (done):**
+- `normalize_saved_word_round` → `jumbalaya_core.round` + `test_core_round`
+- `clear_if_inactive_hand` → `jumbalaya_core.jumble.hand` + `test_core_hand`
+- `word_game/model/round/init.lua` uses `game_access.dispatch` only (removed duplicate store_sync dispatch path)
+- Run schema folded into `types/store.lua`; `economy.lua` re-export comment added
 
 **Exit:** Glue file count shrinks or stays flat; no new rule logic in `word_game/model/`.
 

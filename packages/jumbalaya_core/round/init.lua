@@ -61,4 +61,15 @@ function M.start_hand_coords(set, hand_index)
 	return M.new_word_round(set, hand_index)
 end
 
+--- Fill missing coords and config-derived labels on a loaded word_round snapshot.
+function M.normalize_saved_word_round(wr)
+	if not wr then return nil end
+	wr.set = wr.set or 1
+	wr.hand_index = wr.hand_index or 1
+	wr.target = wr.target or round_config.hand_target(wr.set, wr.hand_index)
+	wr.hand_name = wr.hand_name or round_config.hand_name(wr.hand_index, wr.set)
+	wr.played_words = wr.played_words or {}
+	return wr
+end
+
 return M
