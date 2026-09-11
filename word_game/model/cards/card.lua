@@ -138,7 +138,8 @@ function Card:update_alert()
                 self.children.alert:remove()
                 self.children.alert = nil
             elseif not self.config.center.alerted and not self.children.alert and self.config.center.discovered then
-                self.children.alert = LayoutView{
+                local UIViewHost = require("word_game.ui.views.ui_view_host")
+                self.children.alert = UIViewHost.create{
                     definition = build_card_alert(), 
                     config = {align=(self.ability.set == 'Perk' and (self.config.center.order%2)==1) and "tli" or "tri",
                             offset = {x = (self.ability.set == 'Perk' and (self.config.center.order%2)==1) and 0.1 or -0.1, y = 0.1},

@@ -9,9 +9,9 @@ function InputRouter:is_node_focusable(node)
 		and (node.states.hover.can and not self.dragging.target or self.dragging.target == node)
 		and ((not not node.created_on_pause) == (not not G.SETTINGS.paused))
 		and node.states.visible
-		and (not node.LayoutView or node.LayoutView.states.visible) then
+		and (not node.panel or node.panel.states.visible) then
 		if self.screen_keyboard then
-			focusable = node.LayoutView == self.screen_keyboard and not not node.config.button
+			focusable = node.panel == self.screen_keyboard and not not node.config.button
 		else
 			if CardFocus.is_table_card(node) or CardFocus.bonus_stack_contains(node) then
 				if node.states.hover.can and not node.is_mascot then

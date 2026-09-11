@@ -9,7 +9,7 @@ end
 
 function LayoutNode:can_drag()
 	if self.states.drag.can then return self end
-	return self.LayoutView:can_drag()
+	return self.panel:can_drag()
 end
 
 function LayoutNode:draw() end

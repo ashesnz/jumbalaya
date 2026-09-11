@@ -23,7 +23,7 @@ end
 
 local function setup_sidebar_layout_env()
 	mock_env.ensure_engine_globals()
-	require("app.core.ui.panel")
+	require("jumbalaya-engine.retained_ui")
 	G.LANG = G.LANG or {
 		font = {
 			FONT = love.graphics.newFont(12),

@@ -374,8 +374,8 @@ function M.draw()
 	love.graphics.push()
 	if btn.container and btn.translate_container then
 		btn:translate_container()
-	elseif btn.LayoutView and btn.LayoutView.container and btn.LayoutView.translate_container then
-		btn.LayoutView:translate_container()
+	elseif btn.panel and btn.panel.container and btn.panel.translate_container then
+		btn.panel:translate_container()
 	elseif G.ROOM and G.ROOM.translate_container then
 		G.ROOM:translate_container()
 	end

@@ -66,7 +66,7 @@ function InputRouter:capture_focused_input(button, input_type, dt)
 		end
 
 		if args.type == 'tab' and input_type == 'press' then
-			local box = focused.LayoutView
+			local box = focused.panel
 			local proto_choices = box and box:get_group(nil, focused.children[1].children[1].config.group) or {}
 			local choices = {}
 			for _, v in ipairs(proto_choices) do

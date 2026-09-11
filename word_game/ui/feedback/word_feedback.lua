@@ -16,6 +16,7 @@ local Scheduler = require("app.effects.timeline_scheduler")
 local RunMode = facade.run_mode()
 
 local game_access = require("word_game.model.game_access")
+local UIViewHost = require("word_game.ui.views.ui_view_host")
 
 local M = {}
 
@@ -53,7 +54,7 @@ function M.spawn_attention(args)
 		blockable = false,
 		blocking = false,
 		func = function()
-			args.AT = LayoutView{
+			args.AT = UIViewHost.create{
 				T = { args.pos.x, args.pos.y, 0, 0 },
 				definition =
 					{ n = G.UI.ROOT, config = { align = args.cover_align or 'cm', minw = (args.cover and args.cover.T.w or 0.001) + (args.cover_padding or 0), minh = (args.cover and args.cover.T.h or 0.001) + (args.cover_padding or 0), padding = 0.03, r = 0.1, emboss = args.emboss, colour = args.cover_colour }, nodes = {

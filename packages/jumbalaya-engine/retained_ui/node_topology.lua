@@ -9,7 +9,7 @@ function LayoutNode:print_topology(indent)
 		out = out .. ' OBJ:' .. (
 			getmetatable(self.config.object) == CardArea and 'CardArea' or
 			getmetatable(self.config.object) == Card and 'Card' or
-			getmetatable(self.config.object) == LayoutView and 'LayoutView' or
+			getmetatable(self.config.object) == RetainedPanel and 'RetainedPanel' or
 			getmetatable(self.config.object) == Particles and 'Particles' or
 			getmetatable(self.config.object) == FlowText and 'FlowText' or
 			getmetatable(self.config.object) == Sprite and 'Sprite' or

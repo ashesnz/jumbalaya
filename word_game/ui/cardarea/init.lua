@@ -31,7 +31,7 @@ local TYPE_HANDLERS = {
 --- @field cards Card[] list of Card instances currently in this area, in display order
 --- @field selected Card[] subset of `cards` currently selected/selected
 --- @field config table per-instance behaviour config; see `config.type` above
---- @field children { area_uibox: LayoutView|nil, view_deck: LayoutView|nil, [string]: any }
+--- @field children { area_uibox: table|nil, view_deck: table|nil, [string]: any }
 ---@overload fun(...): CardArea
 --- @field emplace fun(self: CardArea, card: Card, location: string|nil, stay_flipped: boolean|nil)
 --- @field set_ranks fun(self: CardArea)

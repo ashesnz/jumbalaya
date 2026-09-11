@@ -8,6 +8,7 @@
 local M = {}
 local Easing = require "app.effects.easing"
 local game_access = require("word_game.model.game_access")
+local UIViewHost = require("word_game.ui.views.ui_view_host")
 
 local active = false
 local overlay_colour = { 0.06, 0.08, 0.12, 0 }
@@ -56,7 +57,7 @@ function M.begin()
 	overlay_colour[4] = 0
 	Easing.value{ref_table = overlay_colour, ref_value = 4, mod = 0.72, timer = "REAL", not_blockable = true, delay = 0.4}
 
-	G.HAND_CLEAR_OVERLAY = LayoutView{
+	G.HAND_CLEAR_OVERLAY = UIViewHost.create{
 		definition = {
 			n = G.UI.ROOT,
 			config = {

@@ -1,4 +1,4 @@
---[[ word_game/ui/sidebar/hud_layout.lua - Sidebar HUD row geometry (no LayoutView) ]]
+--[[ word_game/ui/sidebar/hud_layout.lua - Sidebar HUD row geometry ]]
 
 local felt = require("word_game.ui.layout.felt")
 local TableDeck = require("word_game.ui.table.deck")

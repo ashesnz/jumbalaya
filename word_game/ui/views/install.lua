@@ -36,7 +36,7 @@ function M.install_trade(engine)
 	if not engine or not engine.store then return end
 	local store = engine.store
 	if not M._trade_view then
-		M._trade_view = TradeView.new(store)
+		M._trade_view = TradeView.new({ store = store })
 	else
 		M._trade_view:bind_store(store)
 	end

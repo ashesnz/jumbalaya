@@ -1,5 +1,5 @@
 return function(Target)
-function LayoutView:calculate_xywh(node, _T, recalculate, _scale)
+function RetainedPanel:calculate_xywh(node, _T, recalculate, _scale)
 	node.ARGS.xywh_node_trans = node.ARGS.xywh_node_trans or {}
 	local node_t = node.ARGS.xywh_node_trans
 	local content = {x = 0, y = 0, w = 0, h = 0}

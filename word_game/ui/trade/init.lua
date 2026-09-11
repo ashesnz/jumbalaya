@@ -20,6 +20,7 @@ local trade_draw = require("word_game.ui.trade.draw")
 local trade_animate = require("word_game.ui.trade.animate")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 local views_install = require("word_game.ui.views.install")
+local TradeView = require("word_game.ui.views.trade_view")
 
 local M = {}
 
@@ -179,14 +180,16 @@ rebuild_overlay = function()
 	if host.config.object and host.config.object.remove then
 		host.config.object:remove()
 	end
-	local body_def = trade_definition.marketplace_body_definition(def_ctx())
+	local body_ctx = def_ctx()
+	local body_def = trade_definition.marketplace_body_definition(body_ctx)
 	if prev_body_h and body_def.config then
 		body_def.config.minh = math.max(body_def.config.minh or 0, prev_body_h)
 	end
-	host.config.object = LayoutView{
-		definition = body_def,
-		config = { offset = { x = 0, y = 0 }, align = "cm", parent = host },
-	}
+	host.config.object = TradeView.create_marketplace_body(body_ctx, {
+		offset = { x = 0, y = 0 },
+		align = "cm",
+		parent = host,
+	}, body_def)
 	G.OVERLAY_MENU:recalculate()
 end
 

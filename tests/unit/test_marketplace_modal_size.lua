@@ -63,7 +63,8 @@ T.describe("Marketplace modal size stability on card removal", function()
 		G.GAME.run_state.tokens = 500
 
 		local function body_dimensions()
-			local view = LayoutView({
+			local RetainedUI = require("jumbalaya-engine.retained_ui")
+			local view = RetainedUI.create({
 				definition = trade_ui.definition(),
 				config = { align = "cm" },
 			})

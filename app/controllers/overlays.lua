@@ -1,6 +1,7 @@
 --[[ app/controllers/overlays.lua - Phase 4 overlay menu controller ]]
 
 local Scheduler = require "app.effects.timeline_scheduler"
+local ViewHost = require("jumbalaya-engine.view_host")
 
 local M = {}
 
@@ -8,13 +9,13 @@ function M.switch_tab(e)
 	if not e then return end
 	clear_overlay_infotip()
 
-	local tab_contents = e.LayoutView:find_node_by_id('tab_contents')
+	local tab_contents = e.panel:find_node_by_id('tab_contents')
 	tab_contents.config.object:remove()
-	tab_contents.config.object = LayoutView{
+	tab_contents.config.object = ViewHost.create{
 		definition = e.config.ref_table.tab_definition_function(e.config.ref_table.tab_definition_function_args),
 		config = { offset = { x = 0, y = 0 }, parent = tab_contents, type = 'cm' }
 	}
-	tab_contents.LayoutView:recalculate()
+	tab_contents.panel:recalculate()
 end
 
 function M.show_overlay(args)
@@ -36,7 +37,7 @@ function M.show_overlay(args)
 		no_jiggle = args.config.no_jiggle,
 	}
 	G.OVERLAY_MENU = true
-	G.OVERLAY_MENU = LayoutView{
+	G.OVERLAY_MENU = ViewHost.create{
 		definition = args.definition,
 		config = args.config
 	}

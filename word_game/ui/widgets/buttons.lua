@@ -1,6 +1,7 @@
 --[[ word_game/ui/widgets/buttons.lua - Button and chrome UI builders ]]
 local Scheduler = require "app.effects.timeline_scheduler"
 local Components = require "word_game.ui.widgets.components"
+local UIViewHost = require("word_game.ui.views.ui_view_host")
 
 
 local button_font
@@ -100,7 +101,7 @@ function build_generic_options(args)
             local _infotip_object = G.OVERLAY_MENU:find_node_by_id('overlay_menu_infotip')
             if _infotip_object then
               _infotip_object.config.object:remove()
-              _infotip_object.config.object = LayoutView{
+              _infotip_object.config.object = UIViewHost.create{
                 definition = overlay_infotip(args.infotip),
                 config = {offset = {x=0,y=0}, align = 'bm', parent = _infotip_object}
               }

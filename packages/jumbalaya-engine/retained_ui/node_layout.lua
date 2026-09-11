@@ -75,7 +75,7 @@ function LayoutNode:update_text()
 		end
 		if not self.config.no_recalc and self.config.prev_value
 			and string.len(tostring(self.config.prev_value)) ~= string.len(self.config.text) then
-			self.LayoutView:recalculate()
+			self.panel:recalculate()
 		end
 		self.config.prev_value = self.config.ref_table[self.config.ref_value]
 	end
@@ -95,7 +95,7 @@ function LayoutNode:update_object()
 	if self.config.ref_table and self.config.ref_value
 		and self.config.ref_table[self.config.ref_value] ~= self.config.object then
 		self.config.object = self.config.ref_table[self.config.ref_value]
-		self.LayoutView:recalculate()
+		self.panel:recalculate()
 	end
 
 	if self.config.object then
@@ -122,7 +122,7 @@ function LayoutNode:update_object()
 			self:align(self.parent.T.x - self.config.object.T.x, self.parent.T.y - self.config.object.T.y)
 			self.parent:set_alignments()
 		else
-			self.LayoutView:recalculate()
+			self.panel:recalculate()
 		end
 	end
 end

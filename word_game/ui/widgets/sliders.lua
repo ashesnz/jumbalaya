@@ -1,5 +1,6 @@
 --[[ word_game/ui/widgets/sliders.lua - Tabs, text input, and on-screen keyboard ]]
 local Components = require "word_game.ui.widgets.components"
+local UIViewHost = require("word_game.ui.views.ui_view_host")
 
 function make_tab_strip(args)
   args = args or {}
@@ -50,7 +51,7 @@ function make_tab_strip(args)
       (#args.tabs > 1 and not args.no_shoulders) and {n=G.UI.COLUMN, config={minw = 0.7,align = "cm", colour = G.C.CLEAR,func = 'set_button_pip', focus_args = {button = 'rightshoulder', type = 'none', orientation = 'cm', scale = 0.7, offset = {x = 0.1, y = 0}}}, nodes = {}} or nil,
     }},
     {n=G.UI.ROW, config={align = args.tab_alignment, padding = args.padding or 0.1, no_fill = true, minh = args.tab_h, minw = args.tab_w}, nodes={
-      {n=G.UI.OBJECT, config={id = 'tab_contents', object = LayoutView{definition = args.current.v.tab_definition_function(args.current.v.tab_definition_function_args), config = {offset = {x=0,y=0}}}}}
+      {n=G.UI.OBJECT, config={id = 'tab_contents', object = UIViewHost.create{definition = args.current.v.tab_definition_function(args.current.v.tab_definition_function_args), config = {offset = {x=0,y=0}}}}}
     }},
   }}
 

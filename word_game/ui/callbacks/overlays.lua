@@ -1,6 +1,7 @@
 --[[ word_game/ui/callbacks/overlays.lua - Overlay screen G.FUNCS (stable names) ]]
 
 local game_access = require("word_game.model.game_access")
+local UIViewHost = require("word_game.ui.views.ui_view_host")
 
 local M = {}
 
@@ -49,7 +50,7 @@ function M.install()
 		local _infotip_object = G.OVERLAY_MENU:find_node_by_id('overlay_menu_infotip')
 		if _infotip_object.config.set ~= e.config.ref_table.label then
 			_infotip_object.config.object:remove()
-			_infotip_object.config.object = LayoutView{
+			_infotip_object.config.object = UIViewHost.create{
 				definition = overlay_infotip({e.config.ref_table.warning[1],e.config.ref_table.warning[2],e.config.ref_table.warning[3], lang = e.config.ref_table}),
 				config = {offset = {x=0,y=0}, align = 'bm', parent = _infotip_object}
 			}
@@ -97,7 +98,7 @@ function M.install()
 
 	G.FUNCS.show_infotip = function(e)
 		if e.config.ref_table then
-			e.children.info = LayoutView{
+			e.children.info = UIViewHost.create{
 				definition = {n=G.UI.ROOT, config = {align = 'cm', colour = G.C.CLEAR, padding = 0.02}, nodes=e.config.ref_table},
 				config = {offset = {x=-0.03,y=0}, align = 'cl', parent = e}
 			}

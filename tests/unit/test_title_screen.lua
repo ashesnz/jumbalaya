@@ -183,7 +183,8 @@ local MockEnv = require("tests.helpers.mock_env")
 			}
 		end
 
-		local ui = LayoutView({
+		local RetainedUI = require("jumbalaya-engine.retained_ui")
+		local ui = RetainedUI.create({
 			definition = build_main_menu_buttons(),
 			config = { align = "cm", major = G.ROOM_ATTACH },
 		})
@@ -231,7 +232,8 @@ local MockEnv = require("tests.helpers.mock_env")
 			}
 		end
 
-		local ui = LayoutView({
+		local RetainedUI = require("jumbalaya-engine.retained_ui")
+		local ui = RetainedUI.create({
 			definition = build_main_menu_buttons(),
 			config = { align = "cm", major = G.ROOM_ATTACH },
 		})
@@ -294,7 +296,8 @@ local MockEnv = require("tests.helpers.mock_env")
 			}
 		end
 
-		local ui = LayoutView({
+		local RetainedUI = require("jumbalaya-engine.retained_ui")
+		local ui = RetainedUI.create({
 			definition = build_main_menu_buttons(),
 			config = { align = "cm", major = G.ROOM_ATTACH },
 		})

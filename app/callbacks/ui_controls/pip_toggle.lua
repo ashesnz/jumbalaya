@@ -3,6 +3,7 @@
 
 local Scheduler = require "app.effects.timeline_scheduler"
 local Easing = require "app.effects.easing"
+local ViewHost = require("jumbalaya-engine.view_host")
 
 --Creates a binding pip on this UIE if controller is being used
 --
@@ -10,7 +11,7 @@ local Easing = require "app.effects.easing"
 --**e** Is the UIE that called this function
 G.FUNCS.set_button_pip = function(e)
   if G.INPUT.HID.controller and e.config.focus_args and not e.children.button_pip then
-    e.children.button_pip = LayoutView{
+    e.children.button_pip = ViewHost.create{
       definition = make_bind_pip{button = e.config.focus_args.button, scale = e.config.focus_args.scale},
       config = {
         align= e.config.focus_args.orientation or 'cr',
@@ -36,10 +37,10 @@ G.FUNCS.pulse_node = function(e)
     else
       e.config.colour[4] = 1
     end
-    if e.config.w ~= 0.1 then e.config.w = 0.1; e.LayoutView:recalculate(true) end
+    if e.config.w ~= 0.1 then e.config.w = 0.1; e.panel:recalculate(true) end
   else
     e.config.colour[4] = 0
-    if e.config.w ~= 0 then e.config.w = 0; e.LayoutView:recalculate(true) end
+    if e.config.w ~= 0 then e.config.w = 0; e.panel:recalculate(true) end
   end
 end
 

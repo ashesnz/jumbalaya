@@ -104,6 +104,7 @@ These tests must pass on every PR while migrating off the Balatro engine pattern
 | `test_phase6_3_uibox_retirement.lua` | Phase 6.3 `G.LIVE.UIBOX` retirement and store-backed TABLE_BOARD draw |
 | `test_phase7_bootstrap.lua` | Phase 7 slim bootstrap modules and engine_adapter wiring |
 | `test_phase7_store_authority.lua` | Phase 7 WORD_GAME owns store/engine; G._store/_engine absent |
+| `test_phase8_layoutview_retirement.lua` | Phase 8 PR-8 `app/core/ui/` deleted; retained UI in `jumbalaya-engine` |
 
 Phase 8 adds grep-gated PRs (model `G.GAME` purge, mirror retirement, screen-by-screen LayoutView removal). See [engine-migration.md §12](engine-migration.md#12-phase-8--post-phase-7-retirement-strangler).
 | `test_core_store_dispatch.lua` | `jumbalaya_core` store reducers without `G` |

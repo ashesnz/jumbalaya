@@ -29,7 +29,7 @@ end
 
 --- Elements are hit-testable only while their owning box allows collisions.
 function LayoutNode:collides_with_point(cursor_trans)
-	if self.LayoutView.states.collide.can then
+	if self.panel.states.collide.can then
 		return Node.collides_with_point(self, cursor_trans)
 	end
 	return false
@@ -57,7 +57,7 @@ function LayoutNode:click()
 
 		-- Choice-cycle groups: clear siblings' chosen flag, claim our own.
 		if self.config.choice then
-			local choices = self.LayoutView:get_group(nil, self.config.group)
+			local choices = self.panel:get_group(nil, self.config.group)
 			for _, v in pairs(choices) do
 				if v.config and v.config.choice then v.config.chosen = false end
 			end

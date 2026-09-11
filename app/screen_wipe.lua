@@ -65,7 +65,8 @@ G.FUNCS.wipe_in = function(message, no_card, timefac, alt_colour)
     }}
   end
 
-  G.screenwipe = LayoutView{
+  local ViewHost = require("jumbalaya-engine.view_host")
+  G.screenwipe = ViewHost.create{
     definition =
       {n=G.UI.ROOT, config = {align = "cm", minw =0, minh =0 ,padding = 0.15, r = 0.1, colour = G.C.CLEAR}, nodes={
         {n=G.UI.ROW, config={align = "cm"}, nodes=row_nodes},

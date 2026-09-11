@@ -35,7 +35,7 @@ function M.change_window_cycle_UI()
 			local res_option = enumerate_display_modes(focused_screenmode, focused_display)
 			swap_node.children[1]:remove()
 			swap_node.children[1] = nil
-			swap_node.LayoutView:add_child(
+			swap_node.panel:add_child(
 				Components.cycler({
 					width = 4, scale = 0.8,
 					options = G.SETTINGS.WINDOW.DISPLAYS[focused_display].screen_resolutions.strings,

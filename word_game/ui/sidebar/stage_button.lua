@@ -182,8 +182,8 @@ local function set_label_text(label, text)
 	label.config.prev_value = nil
 	label.config.scale = M.label_scale_for(widget.label_text)
 	if label.update_text then label:update_text() end
-	if label.LayoutView and label.LayoutView.recalculate then
-		label.LayoutView:recalculate()
+	if label.panel and label.panel.recalculate then
+		label.panel:recalculate()
 	end
 end
 

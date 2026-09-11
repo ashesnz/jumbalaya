@@ -49,7 +49,8 @@ local function walk_trade_buttons(node, out)
 end
 
 local function marketplace_action_buttons(trade_ui)
-	local view = LayoutView({
+	local RetainedUI = require("jumbalaya-engine.retained_ui")
+	local view = RetainedUI.create({
 		definition = trade_ui.definition(),
 		config = { align = "cm", major = G.ROOM_ATTACH },
 	})

@@ -21,7 +21,6 @@ require "app.core.platform.display"
 require "app.core.audio.sound"
 require "app.core.util.number_format"
 
-require "app.core.ui.panel"
-require "app.core.ui.container"
+require "jumbalaya-engine.retained_ui"
 require "app.core.graphics.particles"
 require "app.core.graphics.flow_text"

@@ -398,7 +398,7 @@ T.describe("Sidebar deck information", function()
 
 	T.it("sidebar HUD text node reads G.ARGS even when G.GAME is replaced", function()
 		mock_env.ensure_engine_globals()
-		require("app.core.ui.panel")
+		require("jumbalaya-engine.retained_ui")
 		G.LANG = G.LANG or {
 			font = {
 				FONT = love.graphics.newFont(12),

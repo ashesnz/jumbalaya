@@ -1,5 +1,5 @@
 return function(Target)
-function LayoutView:remove()
+function RetainedPanel:remove()
 	if self == G.OVERLAY_MENU then G.REFRESH_ALERTS = true end
 	self.root_node:remove()
 	local registry = self.config and self.config.instance_type and G.LIVE and G.LIVE[self.config.instance_type] or nil
@@ -12,7 +12,7 @@ function LayoutView:remove()
 	AnimNode.remove(self)
 end
 
-function LayoutView:draw()
+function RetainedPanel:draw()
 	-- One draw per frame unless a tutorial overlay forces a redraw.
 	if self.FRAME.RENDER >= G.FRAMES.RENDER
 		and not G.FIRST_PLAY_TUTORIAL_OVERLAY then return end
@@ -41,7 +41,7 @@ end
 
 --- Full relayout from the current definition state. Bumps the major-frame
 --- cache generation so weld offsets recompute against the new geometry.
-function LayoutView:recalculate()
+function RetainedPanel:recalculate()
 	self:calculate_xywh(self.root_node, self.T, true)
 	self.root_node:set_wh()
 	self.root_node:set_alignments()
@@ -52,28 +52,28 @@ function LayoutView:recalculate()
 	G.REFRESH_FRAME_MAJOR_CACHE = (G.REFRESH_FRAME_MAJOR_CACHE > 1 and G.REFRESH_FRAME_MAJOR_CACHE - 1 or nil)
 end
 
-function LayoutView:move(dt)
+function RetainedPanel:move(dt)
 	AnimNode.move(self, dt)
 	AnimNode.move(self.root_node, dt)
 end
 
-function LayoutView:drag(offset)
+function RetainedPanel:drag(offset)
 	AnimNode.drag(self, offset)
 	AnimNode.move(self.root_node, G.real_dt)
 end
 
-function LayoutView:add_child(node, parent)
+function RetainedPanel:add_child(node, parent)
 	self:attach_node(node, parent)
 	self:recalculate()
 end
 
-function LayoutView:set_container(container)
+function RetainedPanel:set_container(container)
 	self.root_node:set_container(container)
 	Node.set_container(self, container)
 end
 
-function LayoutView:print_topology(indent)
-	local out = '| LayoutView | - ID:' .. self.ID .. ' w/h:' .. self.T.w .. '/' .. self.T.h
+function RetainedPanel:print_topology(indent)
+	local out = '| RetainedPanel | - ID:' .. self.ID .. ' w/h:' .. self.T.w .. '/' .. self.T.h
 	out = out .. self.root_node:print_topology(indent or 0)
 	return out
 end

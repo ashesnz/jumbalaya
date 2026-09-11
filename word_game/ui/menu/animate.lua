@@ -4,6 +4,7 @@ local Layout = require "word_game.ui.layout"
 local Easing = require "app.effects.easing"
 local MenuEffects = require "app.effects.menu"
 local Scheduler = require "app.effects.timeline_scheduler"
+local UIViewHost = require("word_game.ui.views.ui_view_host")
 
 require "word_game.ui.menu.title_logo"
 
@@ -133,7 +134,7 @@ function M.open_main_menu(self, change_context)
 		G.REFRESH_ALERTS = true
 		return true
 	end}
-	LayoutView{definition = {n = G.UI.ROOT, config = {align = "cm", colour = G.C.UI.TRANSPARENT_DARK}, nodes = {
+	UIViewHost.create{definition = {n = G.UI.ROOT, config = {align = "cm", colour = G.C.UI.TRANSPARENT_DARK}, nodes = {
 		{n = G.UI.TEXT, config = {text = G.VERSION, scale = 0.3, colour = G.C.UI.TEXT_LIGHT}},
 	}}, config = {align = "tri", offset = {x = 0, y = 0}, major = G.ROOM_ATTACH, bond = "Weak"}}
 end

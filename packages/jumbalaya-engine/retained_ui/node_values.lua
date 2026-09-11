@@ -21,11 +21,11 @@ function LayoutNode:set_values(_T, recalculate)
 		self.states.collide.can = true
 	end
 
-	-- Every element hangs off its LayoutView as a Minor at its layout position.
-	self:set_role{role_type = 'Minor', major = self.LayoutView, offset = {x = _T.x, y = _T.y}, wh_bond = 'Weak', scale_bond = 'Weak'}
+	-- Every element hangs off its RetainedPanel as a Minor at its layout position.
+	self:set_role{role_type = 'Minor', major = self.panel, offset = {x = _T.x, y = _T.y}, wh_bond = 'Weak', scale_bond = 'Weak'}
 
 	if self.config.draw_layer then
-		self.LayoutView.draw_layers[self.config.draw_layer] = self
+		self.panel.draw_layers[self.config.draw_layer] = self
 	end
 
 	if self.config.collideable then self.states.collide.can = true end

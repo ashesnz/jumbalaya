@@ -10,6 +10,7 @@ local Scheduler = require("app.effects.timeline_scheduler")
 local Easing = require("app.effects.easing")
 local dealt_hand = require("word_game.ui.table.dealt_hand")
 local Layout = require("word_game.ui.layout")
+local UIViewHost = require("word_game.ui.views.ui_view_host")
 
 local M = {}
 
@@ -271,7 +272,7 @@ local function apply_step()
 	clear_bubble()
 
 	local bubble_cfg = resolve_bubble_config(step)
-	bubble_ui = LayoutView{
+	bubble_ui = UIViewHost.create{
 		definition = bubble_definition(step.key),
 		config = {
 			align = bubble_cfg.align,
@@ -337,7 +338,7 @@ function M.begin()
 		delay = 0.4,
 	}
 
-	G.FIRST_PLAY_TUTORIAL_OVERLAY = LayoutView{
+	G.FIRST_PLAY_TUTORIAL_OVERLAY = UIViewHost.create{
 		definition = {
 			n = G.UI.ROOT,
 			config = {

@@ -1,4 +1,4 @@
---[[ word_game/ui/sidebar/hud_definition.lua - Sidebar HUD sync helpers (LayoutView retired PR-4) ]]
+--[[ word_game/ui/sidebar/hud_definition.lua - Sidebar HUD sync helpers ]]
 
 local Layout = require("word_game.ui.layout")
 local hud_layout = require("word_game.ui.sidebar.hud_layout")

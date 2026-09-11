@@ -16,9 +16,9 @@ function LayoutNode:draw_self()
 
 	if self.config.button or self.config.button_UIE then
 		-- Accumulate layered parallax down the tree (+ shadow contribution).
-		self.parallax_shift.x = ((self.parent and self.parent ~= self.LayoutView and self.parent.parallax_shift.x) or 0)
+		self.parallax_shift.x = ((self.parent and self.parent ~= self.panel and self.parent.parallax_shift.x) or 0)
 			+ ((self.config.shadow and 0.4 * self.shadow_parallax.x or 0) / G.TILESIZE)
-		self.parallax_shift.y = ((self.parent and self.parent ~= self.LayoutView and self.parent.parallax_shift.y) or 0)
+		self.parallax_shift.y = ((self.parent and self.parent ~= self.panel and self.parent.parallax_shift.y) or 0)
 			+ ((self.config.shadow and 0.4 * self.shadow_parallax.y or 0) / G.TILESIZE)
 
 		-- Pressed-in look: recent click, or hovered/dragged while held.

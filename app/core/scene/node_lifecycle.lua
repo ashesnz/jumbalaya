@@ -3,7 +3,8 @@ return function(Node)
 		if not (self.config and self.config.d_popup) then return end
 		if self.children.d_popup then return end
 
-		self.children.d_popup = LayoutView{
+		local ViewHost = require("jumbalaya-engine.view_host")
+		self.children.d_popup = ViewHost.create{
 			definition = self.config.d_popup,
 			config = self.config.d_popup_config,
 		}
@@ -33,7 +34,8 @@ return function(Node)
 		if self.children.h_popup then return end
 
 		self.config.h_popup_config.instance_type = "POPUP"
-		self.children.h_popup = LayoutView{
+		local ViewHost = require("jumbalaya-engine.view_host")
+		self.children.h_popup = ViewHost.create{
 			definition = self.config.h_popup,
 			config = self.config.h_popup_config,
 		}

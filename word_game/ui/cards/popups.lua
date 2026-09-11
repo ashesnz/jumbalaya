@@ -6,6 +6,7 @@
 ]]
 
 local Easing = require "app.effects.easing"
+local UIViewHost = require("word_game.ui.views.ui_view_host")
 
 function G.DEFINITIONS.card_focus_ui(card)
   local card_width = card.T.w
@@ -16,7 +17,7 @@ function G.DEFINITIONS.card_focus_ui(card)
 
   local t_card_norm = {x = card.T.x + card.T.w/2 - G.ROOM.T.w/2, y = card.T.y + card.T.h/2 - G.ROOM.T.h/2}
 
-  local base_background = LayoutView{
+  local base_background = UIViewHost.create{
     T = {card.VT.x,card.VT.y,0,0},
     definition = 
       (not G.dealt_letters or card.area ~= G.dealt_letters) and {n=G.UI.ROOT, config = {align = 'cm', minw = card_width + 0.3, minh = card.T.h + 0.3, r = 0.1, colour = with_alpha(G.C.BLACK, 0.7), outline_colour = tint(G.C.MUTED_GREY, 0.5), outline = 1.5, line_emboss = 0.8}, nodes={

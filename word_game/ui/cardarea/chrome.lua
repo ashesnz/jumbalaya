@@ -1,5 +1,7 @@
 --[[ word_game/ui/cardarea/chrome.lua - Optional card-count badge UI for card areas ]]
 
+local UIViewHost = require("word_game.ui.views.ui_view_host")
+
 local M = {}
 
 function M.ensure_area_uibox(area)
@@ -15,7 +17,7 @@ function M.ensure_area_uibox(area)
 		{n=G.UI.BOX, config={w = 0.1,h=0.1}}
 	}} or nil
 
-	area.children.area_uibox = LayoutView{
+	area.children.area_uibox = UIViewHost.create{
 		definition =
 			{n=G.UI.ROOT, config = {align = 'cm', colour = G.C.CLEAR}, nodes={
 				{n=G.UI.ROW, config={minw = area.T.w,minh = area.T.h,align = "cm", padding = 0.1, mid = true, r = 0.1, colour = {0,0,0,0.1}, ref_table = area}, nodes={}},

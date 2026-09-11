@@ -12,6 +12,8 @@ local LetterCardView = require("jumbalaya-engine.views.letter_card_view")
 local PileView = require("jumbalaya-engine.views.pile_view")
 local SettingsService = require("jumbalaya-engine.settings")
 local EventBus = require("jumbalaya-engine.event_bus")
+local RetainedUI = require("jumbalaya-engine.retained_ui")
+local ViewHost = require("jumbalaya-engine.view_host")
 
 return {
 	Renderer = Renderer,
@@ -26,4 +28,6 @@ return {
 		LetterCardView = LetterCardView,
 		PileView = PileView,
 	},
+	RetainedUI = RetainedUI,
+	ViewHost = ViewHost,
 }

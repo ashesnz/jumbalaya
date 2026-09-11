@@ -1,14 +1,14 @@
---[[ app/core/ui/panel.lua - retained-mode UI tree container (LayoutView) ]]
+--[[ jumbalaya-engine/retained_ui/panel.lua - retained-mode UI tree container (RetainedPanel) ]]
 
 local AnimNode = require("app.core.scene.animated.init")
 
----@class LayoutView : AnimNode
+---@class RetainedPanel : AnimNode
 ---@field definition table
 ---@field root_node LayoutNode
----@field parent LayoutView|LayoutNode|nil
-LayoutView = AnimNode:derive("LayoutView")
+---@field parent RetainedPanel|LayoutNode|nil
+RetainedPanel = AnimNode:derive("RetainedPanel")
 
-function LayoutView:construct(args)
+function RetainedPanel:construct(args)
 	AnimNode.construct(self, {args.T})
 
 	self.states.drag.can = false
@@ -53,7 +53,7 @@ function LayoutView:construct(args)
 	self.VT.w, self.VT.h = self.T.w, self.T.h
 
 	self.root_node:initialize_VT(true)
-	if getmetatable(self) == LayoutView then
+	if getmetatable(self) == RetainedPanel then
 		if args.config and args.config.instance_type then
 			if G.LIVE and G.LIVE[args.config.instance_type] then
 				table.insert(G.LIVE[args.config.instance_type], self)
@@ -62,10 +62,10 @@ function LayoutView:construct(args)
 	end
 end
 
-require("app.core.ui.panel_tree")(LayoutView)
-require("app.core.ui.panel_layout")(LayoutView)
-require("app.core.ui.panel_lifecycle")(LayoutView)
+require("jumbalaya-engine.retained_ui.panel_tree")(RetainedPanel)
+require("jumbalaya-engine.retained_ui.panel_layout")(RetainedPanel)
+require("jumbalaya-engine.retained_ui.panel_lifecycle")(RetainedPanel)
 
-require("app.core.ui.node")
+require("jumbalaya-engine.retained_ui.node")
 
-return LayoutView
+return RetainedPanel

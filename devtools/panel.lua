@@ -17,7 +17,7 @@ local layout = require "devtools.layout"
 --- @class DebugPanel : Kind
 --- @field game Game
 --- @field ctx DebugContext
---- @field ui LayoutView|nil
+--- @field ui table|nil
 --- @operator call(Game): DebugPanel
 local DebugPanel = Kind:derive("DebugPanel")
 
@@ -75,7 +75,8 @@ function DebugPanel:open()
 	if self:is_open() then return end
 
 	self:register_actions()
-	self.ui = LayoutView{
+	local RetainedUI = require("jumbalaya-engine.retained_ui")
+	self.ui = RetainedUI.create{
 		definition = self:build_definition(),
 		-- tri = top-right inside room; panel width subtracted so it stays on-screen
 		config = {align = 'tri', offset = {x = 6, y = 0.2}, major = G.ROOM_ATTACH, bond = 'Weak'},

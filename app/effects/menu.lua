@@ -1,11 +1,12 @@
 --[[ app/effects/menu.lua - Main menu presentation effects ]]
 
 local Scheduler = require "app.effects.timeline_scheduler"
+local ViewHost = require("jumbalaya-engine.view_host")
 
 local Menu = {}
 
 function Menu.set_main_ui()
-    G.MAIN_MENU_UI = LayoutView{
+    G.MAIN_MENU_UI = ViewHost.create{
         definition = build_main_menu_buttons(),
         config = {
             align = "bmi",
@@ -22,7 +23,7 @@ function Menu.set_main_ui()
             blocking = false,
             func = function()
                 if (not G.F_DISP_USERNAME) or type(G.F_DISP_USERNAME) == 'string' then
-                    G.PROFILE_BUTTON = LayoutView{
+                    G.PROFILE_BUTTON = ViewHost.create{
                         definition = build_profile_button(),
                         config = {align = "bli", offset = {x = -10, y = 0}, major = G.ROOM_ATTACH, bond = 'Weak'},
                     }

@@ -358,6 +358,7 @@ function M.marketplace_body_definition(ctx)
 end
 
 function M.build_overlay_definition(ctx)
+	local TradeView = require("word_game.ui.views.trade_view")
 	return build_generic_options({
 		minw = 12,
 		minh = ctx.modal_minh(),
@@ -368,10 +369,7 @@ function M.build_overlay_definition(ctx)
 		contents = {
 			{ n = G.UI.OBJECT, config = {
 				id = "trade_marketplace_body",
-				object = LayoutView{
-					definition = M.marketplace_body_definition(ctx),
-					config = { offset = { x = 0, y = 0 }, align = "cm" },
-				},
+				object = TradeView.create_marketplace_body(ctx),
 			}},
 		},
 		no_back = true,

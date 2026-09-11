@@ -758,7 +758,7 @@ Layer 1  G.GAME mirror (store_sync.sync_to_g)     ← PR-1 … PR-2
 Layer 2  LayoutView screens (menu last)           ← PR-3 … PR-7
 Layer 3  G.FUNCS string bindings                  ← shrinks with each LayoutView PR
 Layer 4  CardArea / Card scene nodes             ← PR-3 … PR-6 (parallel with views)
-Layer 5  app/core/ui/ + engine_boot class chain  ← PR-8
+Layer 5  engine_boot class chain (retained UI in jumbalaya-engine)  ← PR-8 ✅
 Layer 6  G singleton (globals.lua)               ← PR-9 (last)
 ```
 
@@ -843,66 +843,76 @@ Each PR: `love tests` → `emmylua_check . --severity warn` → manual smoke (§
 
 ---
 
-#### PR-5 — Trade overlay view
+#### PR-5 — Trade overlay view ✅
 
-**Goal:** Marketplace body is a view component, not `G.FUNCS.show_overlay` + LayoutView.
+**Goal:** Marketplace body is a view component, not `G.FUNCS.show_overlay` + LayoutView in `trade/`.
 
 | Action | Files |
 |--------|-------|
-| View | `word_game/ui/views/trade_view.lua`, `word_game/ui/trade/draw.lua` |
-| Remove LayoutView | `word_game/ui/trade/init.lua`, `trade/definition.lua` |
-| Unregister G.FUNCS | `word_game/ui/callbacks/trade.lua`, `ui/controllers/trade.lua` |
+| View host | `word_game/ui/views/trade_view.lua` — `create_marketplace_body()` wraps inner LayoutView in views layer |
+| Remove LayoutView from trade | `word_game/ui/trade/init.lua`, `trade/definition.lua` |
+| Store subscription | `views/install.lua` — `install_trade({ store = store })` |
+| G.FUNCS | `ui/controllers/trade.lua` — `action_dispatch` on pick/skip (registration stays in `callbacks/trade.lua`) |
 
-**Exit:** `rg 'LayoutView\{' word_game/ui/trade` → **0**. Purchase / skip / fly anim work.
+**Exit:** `rg 'LayoutView\{' word_game/ui/trade` → **0**. Outer shell still uses `G.FUNCS.show_overlay`; body `config.object` is `TradeView`.
+
+**Tests:** `test_marketplace_modal_size.lua`, `test_trade_marketplace_affordability.lua`, `test_phase6_2_fx_subscribers.lua`. `love tests` green (480 tests).
 
 **Smoke:** marketplace purchase, modal size stable (`test_marketplace_modal_size.lua`).
 
 ---
 
-#### PR-6 — Table controls (play / shuffle bars)
+#### PR-6 — Table controls (play / shuffle bars) ✅
 
 **Goal:** Replace `G.hand_action_bar` / `G.table_shuffle_bar` LayoutView trees.
 
 | Action | Files |
 |--------|-------|
-| Remove LayoutView | `word_game/ui/table/controls/layout.lua` (lines ~227, ~239) |
-| View or imperative draw | `table/controls/definition.lua`, `animate.lua`, `play_hold_redraw.lua` |
-| G.FUNCS cleanup | `word_game/ui/callbacks/table_controls.lua` — registration only until buttons migrated |
+| View host | `word_game/ui/views/table_controls_view.lua` — `create_play_bar` / `create_shuffle_bar` |
+| Remove LayoutView from controls | `word_game/ui/table/controls/layout.lua` |
+| Button defs unchanged | `table/controls/definition.lua`, `animate.lua`, `play_hold_redraw.lua` |
 
-**Exit:** `rg 'LayoutView\{' word_game/ui/table/controls` → **0**.
+**Exit:** `rg 'LayoutView\{' word_game/ui/table/controls` → **0**. `G.hand_action_bar` / `G.table_shuffle_bar` are `TableControlsView` instances.
+
+**Tests:** `test_play_hold_redraw.lua`, `test_run_lifecycle.lua`. `love tests` green (480 tests).
 
 **Smoke:** play, shuffle, hold-to-redraw (`test_play_hold_redraw.lua`).
 
 ---
 
-#### PR-7 — Overlays, tutorials, popups (then menu last)
+#### PR-7 — Overlays, tutorials, popups (then menu last) ✅
 
 **Goal:** Clear remaining `LayoutView{` sites before menu.
 
 | Action | Files |
 |--------|-------|
+| Generic host | `views/ui_view_host.lua` — `UIViewHost.create` wraps inner `LayoutView` |
 | Tutorials | `tutorial/first_play.lua`, `tutorial/hand_clear_focus.lua` |
 | Overlays | `callbacks/overlays.lua`, `cards/popups.lua`, `feedback/word_feedback.lua` |
 | Widgets | `widgets/buttons.lua`, `widgets/sliders.lua` — infotips |
-| **Menu last** | `menu/animate.lua`, `menu/definition.lua`, `menu/layout.lua` |
+| Card chrome | `cardarea/chrome.lua`, `model/cards/card.lua` — alert badge |
+| **Menu last** | `menu/animate.lua` (version label) |
 
-**Exit:** `rg 'LayoutView\{' word_game` → **0**.
+**Exit:** `rg 'LayoutView\{' word_game` → **0** ✅
 
 **Smoke:** first-play tutorial, settings overlay, title screen (`test_title_screen.lua`).
 
 ---
 
-#### PR-8 — Delete `app/core/ui/` (after zero LayoutView)
+#### PR-8 — Delete `app/core/ui/` (after zero LayoutView) ✅
 
-**Goal:** Remove UIBox engine; keep sprites/tween/audio utilities.
+**Goal:** Remove UIBox engine from `app/core/`; relocate retained UI to `jumbalaya-engine`.
 
 | Action | Files |
 |--------|-------|
-| Delete | `app/core/ui/panel.lua`, `container.lua`, `node_*.lua`, `panel_*.lua` |
-| Keep / move | `app/core/graphics/sprite.lua`, `util/tween.lua` → `packages/jumbalaya-engine/` if needed |
-| Shrink boot | `app/bootstrap/engine_boot.lua` — drop `require "app.core.ui.panel"` chain |
+| Move | `app/core/ui/*` → `packages/jumbalaya-engine/retained_ui/` (`RetainedPanel` class) |
+| Add | `jumbalaya-engine/view_host.lua`, `retained_ui/init.lua` (`create`) |
+| Migrate | `app/effects/menu.lua`, `controllers/overlays.lua`, `screen_wipe.lua`, ui_controls callbacks |
+| Node field | `LayoutNode.LayoutView` → `.panel` across app + engine |
+| Shrink boot | `engine_boot.lua` → `require "jumbalaya-engine.retained_ui"` |
+| Delete | `app/core/ui/` |
 
-**Exit:** `rg 'LayoutView' app word_game` → **0**; `love tests` + full smoke.
+**Exit:** `rg 'LayoutView' app word_game` → **0** ✅; `love tests` + full smoke.
 
 ---
 

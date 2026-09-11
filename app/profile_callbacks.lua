@@ -81,7 +81,7 @@ G.FUNCS.can_delete_profile = function(e)
 end
 
 G.FUNCS.delete_profile = function(e)
-  local warning_text = e.LayoutView:find_node_by_id('warning_text')
+  local warning_text = e.panel:find_node_by_id('warning_text')
   if warning_text.config.colour ~= G.C.WHITE then 
     warning_text:pulse()
     warning_text.config.colour = G.C.WHITE

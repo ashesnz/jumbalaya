@@ -3,6 +3,7 @@
 local felt_layout = require("word_game.ui.layout.felt")
 local facade = require("word_game.ui.facade")
 local definition = require("word_game.ui.table.controls.definition")
+local TableControlsView = require("word_game.ui.views.table_controls_view")
 
 local M = {}
 
@@ -224,30 +225,8 @@ function M.ensure(visible, sync_visibility)
 	local size = definition.button_size()
 	pos_sig = nil
 	locked_anchors = nil
-	G.table_shuffle_bar = LayoutView{
-		definition = {
-			n = G.UI.ROOT,
-			config = { align = "cm", colour = G.C.CLEAR, minw = size, minh = size },
-			nodes = { definition.shuffle_button_def(size) },
-		},
-		config = {
-			align = "cm",
-			major = G.ROOM_ATTACH,
-			offset = { x = 0, y = 0 },
-		},
-	}
-	G.hand_action_bar = LayoutView{
-		definition = {
-			n = G.UI.ROOT,
-			config = { align = "cm", colour = G.C.CLEAR, minw = size, minh = size },
-			nodes = { definition.play_button_def(size) },
-		},
-		config = {
-			align = "cm",
-			major = G.ROOM_ATTACH,
-			offset = { x = 0, y = 0 },
-		},
-	}
+	G.table_shuffle_bar = TableControlsView.create_shuffle_bar(size)
+	G.hand_action_bar = TableControlsView.create_play_bar(size)
 
 	G.table_shuffle_button = G.table_shuffle_bar
 	G.hand_play_button = G.hand_action_bar

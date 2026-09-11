@@ -9,20 +9,23 @@ T.describe("First play tutorial", function()
 	_G.play_sfx = function() end
 
 	local layout_instances = {}
-	local saved_layout_view = _G.LayoutView
-	_G.LayoutView = function(def)
-		local inst = {
-			definition = def.definition,
-			config = def.config,
-			selections = nil,
-			under_overlay = nil,
-			remove = function(self)
-				self.removed = true
-			end,
-		}
-		layout_instances[#layout_instances + 1] = inst
-		return inst
-	end
+	local saved_view_host = package.loaded["jumbalaya-engine.view_host"]
+	package.loaded["jumbalaya-engine.view_host"] = {
+		create = function(def)
+			local inst = {
+				definition = def.definition,
+				config = def.config,
+				selections = nil,
+				under_overlay = nil,
+				remove = function(self)
+					self.removed = true
+				end,
+			}
+			layout_instances[#layout_instances + 1] = inst
+			return inst
+		end,
+	}
+	package.loaded["word_game.ui.views.ui_view_host"] = nil
 
 	local saved_character_speech = package.loaded["word_game.ui.tutorial.character_speech"]
 	local saved_easing = package.loaded["app.effects.easing"]
@@ -177,7 +180,8 @@ T.describe("First play tutorial", function()
 		T.assert_false(G.SETTINGS.first_play_tutorial_complete)
 	end)
 
-	_G.LayoutView = saved_layout_view
+	package.loaded["jumbalaya-engine.view_host"] = saved_view_host
+	package.loaded["word_game.ui.views.ui_view_host"] = nil
 	package.loaded["word_game.ui.tutorial.character_speech"] = saved_character_speech
 	package.loaded["app.effects.easing"] = saved_easing
 end)

@@ -1,6 +1,7 @@
 --[[ app/callbacks/ui_controls/ ]]
 
 local Easing = require "app.effects.easing"
+local ViewHost = require("jumbalaya-engine.view_host")
 
 --||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 --                                         TEXT ENTRY
@@ -38,12 +39,12 @@ G.FUNCS.text_input = function(e)
   local OSkeyboard_e = e.parent.parent.parent
   if G.INPUT.text_capture == e and G.INPUT.HID.controller then
     if not OSkeyboard_e.children.controller_keyboard then 
-      OSkeyboard_e.children.controller_keyboard = LayoutView{
+      OSkeyboard_e.children.controller_keyboard = ViewHost.create{
         definition = make_onscreen_keyboard{backspace_key = true, return_key = true, space_key = false},
         config = {
           align= 'cm',
           offset = {x = 0, y = G.INPUT.text_capture.config.ref_table.keyboard_offset or -4},
-          major = e.LayoutView, parent = OSkeyboard_e}
+          major = e.panel, parent = OSkeyboard_e}
       }
       G.INPUT.screen_keyboard = OSkeyboard_e.children.controller_keyboard
       G.INPUT:shift_context_layer(1)
@@ -57,7 +58,7 @@ G.FUNCS.text_input = function(e)
 end
 
 G.FUNCS.paste_run_seed = function(e)
-  G.INPUT.text_capture = e.LayoutView:find_node_by_id('text_input').children[1].children[1]
+  G.INPUT.text_capture = e.panel:find_node_by_id('text_input').children[1].children[1]
   for i = 1, 8 do
     G.FUNCS.text_field_key({key = 'right'})
   end
@@ -82,7 +83,7 @@ G.FUNCS.focus_text_field = function(e)
 
   --Start by setting the cursor position to the correct location
   TRANSPOSE_TEXT_INPUT(0)
-  e.LayoutView:recalculate(true)
+  e.panel:recalculate(true)
 end
 
 --Handles all key inputs for the hooked text input.
@@ -246,6 +247,6 @@ function TRANSPOSE_TEXT_INPUT(amount)
   end
 
   text.current_position = math.min(position_child-1, string.len(text.ref_table[text.ref_value]))
-  hook.LayoutView:recalculate(true)
+  hook.panel:recalculate(true)
   text.ref_table[text.ref_value] = GET_TEXT_FROM_INPUT()
 end

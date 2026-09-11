@@ -28,7 +28,7 @@ end
 
 --- Walks up the weld chain returning the top Major plus the accumulated
 --- offset (including layered parallax). Cached per frame; invalidated by
---- setting `G.REFRESH_FRAME_MAJOR_CACHE` (e.g. LayoutView recalculation).
+--- setting `G.REFRESH_FRAME_MAJOR_CACHE` (e.g. retained panel recalculation).
 function AnimNode:get_major()
 	if (self.role.role_type ~= 'Major' and self.role.major ~= self)
 		and (self.role.xy_bond ~= 'Weak' and self.role.r_bond ~= 'Weak') then
