@@ -17,8 +17,8 @@ return {
 		DeckFaceColors = require("word_game.config.visuals.deck_face_colors"),
 	},
 	Gameplay = {
-		Round = require("word_game.config.gameplay.round"),
-		Economy = require("word_game.config.gameplay.economy"),
+		Round = require("jumbalaya_core.config.gameplay.round"),
+		Economy = require("jumbalaya_core.config.gameplay.economy"),
 		RunParams = require("word_game.config.gameplay.run_params"),
 	},
 	Perks = require("word_game.config.perks"),

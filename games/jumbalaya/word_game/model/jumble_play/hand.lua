@@ -2,7 +2,7 @@
 
 return function(M)
 local round = require("word_game.model.round")
-local round_config = require("word_game.config.gameplay.round")
+local round_config = require("jumbalaya_core.config.gameplay.round")
 local opening_deal = require("word_game.model.jumble_play.opening_deal")
 local perk_effects = require("word_game.model.perks.effects")
 local state = require("word_game.model.run.state")

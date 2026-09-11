@@ -5,7 +5,7 @@ local function runtime() return GameRT.game() end
 
 local Presentation = require("word_game.model.presentation")
 local LayoutRequest = require("word_game.model.layout.request")
-local round_config = require("word_game.config.gameplay.round")
+local round_config = require("jumbalaya_core.config.gameplay.round")
 local RunMode = require("word_game.model.run.mode")
 local game_access = require("word_game.model.game_access")
 

@@ -10,7 +10,7 @@ local live_game = require("word_game.model.live_game")
 
 local state = require("word_game.model.run.state")
 local game_access = require("word_game.model.game_access")
-local round_config = require("word_game.config.gameplay.round")
+local round_config = require("jumbalaya_core.config.gameplay.round")
 local Timeline = require("word_game.model.run.timeline")
 local perk_math = require("jumbalaya_core.rules.perk_math")
 local core = require("jumbalaya_core.rules.perk_effects")

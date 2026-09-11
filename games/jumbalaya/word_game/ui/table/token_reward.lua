@@ -10,7 +10,7 @@ local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
 local Layout = require("word_game.ui.layout")
-local round_config = require("word_game.config.gameplay.round")
+local round_config = require("jumbalaya_core.config.gameplay.round")
 
 local state = facade.run_state()
 local RunMode = facade.run_mode()

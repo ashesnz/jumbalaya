@@ -11,7 +11,7 @@ local word_feedback = require("word_game.ui.feedback.word_feedback")
 local function bonus_stack_ui()
 	return facade.bonus_stack_ui()
 end
-local round_config = require("word_game.config.gameplay.round")
+local round_config = require("jumbalaya_core.config.gameplay.round")
 
 local RunMode = facade.run_mode()
 

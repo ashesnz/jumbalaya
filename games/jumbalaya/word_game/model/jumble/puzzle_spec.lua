@@ -2,7 +2,7 @@
 
 return function(M)
 local puzzles_cfg = require("word_game.config.jumble")
-local round_config = require("word_game.config.gameplay.round")
+local round_config = require("jumbalaya_core.config.gameplay.round")
 local core = require("jumbalaya_core.jumble.puzzle_spec")
 local game_access = require("word_game.model.game_access")
 

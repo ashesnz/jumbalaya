@@ -1,7 +1,7 @@
 --[[ word_game/model/trade/init.lua - The Card Marketplace: add or remove a card ]]
 
-local economy = require("word_game.config.gameplay.economy")
-local round_config = require("word_game.config.gameplay.round")
+local economy = require("jumbalaya_core.config.gameplay.economy")
+local round_config = require("jumbalaya_core.config.gameplay.round")
 local letter_tiers = require("jumbalaya_core.config.gameplay.letter_tiers")
 local state = require("word_game.model.run.state")
 local game_access = require("word_game.model.game_access")

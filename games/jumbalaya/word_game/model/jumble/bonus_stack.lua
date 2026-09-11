@@ -1,6 +1,6 @@
 --[[ word_game/model/jumble/bonus_stack.lua - Bonus gutter card stack state and scoring ]]
 
-local round_config = require("word_game.config.gameplay.round")
+local round_config = require("jumbalaya_core.config.gameplay.round")
 local core = require("jumbalaya_core.rules.bonus_stack")
 
 local M = {}

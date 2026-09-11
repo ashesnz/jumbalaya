@@ -2,7 +2,7 @@
 
 local layout = require "devtools.layout"
 local game_runtime = require "devtools.runtime"
-local round_config = require "word_game.config.gameplay.round"
+local round_config = require "jumbalaya_core.config.gameplay.round"
 
 local function shell()
 	return game_runtime.game()

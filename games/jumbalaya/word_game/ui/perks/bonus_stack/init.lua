@@ -8,7 +8,7 @@ local layout = require("word_game.ui.perks.bonus_stack.layout")
 local draw = require("word_game.ui.perks.bonus_stack.draw")
 local animate = require("word_game.ui.perks.bonus_stack.animate")
 local LetterPalette = require("word_game.config.visuals.letter_card_palette")
-local round_config = require("word_game.config.gameplay.round")
+local round_config = require("jumbalaya_core.config.gameplay.round")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 
 local function bonus_stack_model()

@@ -7,7 +7,7 @@
 ]]
 
 local Presentation = require("word_game.model.presentation")
-local round_config = require("word_game.config.gameplay.round")
+local round_config = require("jumbalaya_core.config.gameplay.round")
 local game_access = require("word_game.model.game_access")
 
 local M = {}
