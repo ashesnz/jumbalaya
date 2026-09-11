@@ -1,8 +1,6 @@
---[[
-	jumbalaya-engine/view_host.lua - Generic retained-panel host for Phase 8 migration.
-]]
+--[[ jumbalaya-engine/panels/view_host.lua - Thin wrapper around a panel instance ]]
 
-local RetainedUI = require("jumbalaya-engine.retained_ui")
+local Panel = require("jumbalaya-engine.panels.panel")
 
 local ViewHost = {}
 ViewHost.__index = ViewHost
@@ -36,9 +34,9 @@ function ViewHost.wrap(inner)
 	return view
 end
 
---- Create a ViewHost with the same constructor table as RetainedPanel.
+--- Create a ViewHost with the same constructor table as Panel.
 function ViewHost.create(args)
-	return ViewHost.wrap(RetainedUI.create(args))
+	return ViewHost.wrap(Panel(args))
 end
 
 function ViewHost:draw()

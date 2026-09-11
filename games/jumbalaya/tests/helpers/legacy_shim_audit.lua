@@ -15,6 +15,8 @@ local FORBIDDEN_PROXY_FILES = {
 }
 
 local STALE_REQUIRE_PATTERNS = {
+	"jumbalaya%-engine%.retained_ui",
+	"jumbalaya%-engine%.view_host",
 	"word_game%.config%.gameplay%.round",
 	"word_game%.config%.gameplay%.economy",
 	"word_game%.ui%.effects%.timeline_scheduler",

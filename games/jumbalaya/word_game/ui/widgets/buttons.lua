@@ -4,7 +4,7 @@ local function runtime() return GameRT.game() end
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local Components = require "word_game.ui.widgets.components"
-local UIViewHost = require("jumbalaya-engine.view_host")
+local UIViewHost = require("jumbalaya-engine.panels.view_host")
 
 
 local button_font

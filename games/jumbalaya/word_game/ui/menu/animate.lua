@@ -7,7 +7,7 @@ local Layout = require "word_game.ui.layout"
 local Easing = require "word_game.ui.effects.easing"
 local MenuEffects = require "word_game.ui.effects.menu"
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
-local UIViewHost = require("jumbalaya-engine.view_host")
+local UIViewHost = require("jumbalaya-engine.panels.view_host")
 
 require "word_game.ui.menu.title_logo"
 local Funcs = require("app.callbacks.funcs")

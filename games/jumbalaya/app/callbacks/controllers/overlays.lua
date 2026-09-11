@@ -1,7 +1,7 @@
 --[[ app/controllers/overlays.lua - Phase 4 overlay menu controller ]]
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
-local ViewHost = require("jumbalaya-engine.view_host")
+local ViewHost = require("jumbalaya-engine.panels.view_host")
 
 local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end

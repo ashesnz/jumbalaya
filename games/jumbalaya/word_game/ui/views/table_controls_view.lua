@@ -5,7 +5,7 @@
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
-local RetainedUI = require("jumbalaya-engine.retained_ui")
+local Panels = require("jumbalaya-engine.panels")
 
 local TableControlsView = {}
 TableControlsView.__index = TableControlsView
@@ -32,7 +32,7 @@ local function wrap_bar(inner)
 end
 
 function TableControlsView.create_bar(button_def, size, config)
-	local inner = RetainedUI.create({
+	local inner = Panels.create({
 		definition = {
 			n = runtime().UI.ROOT,
 			config = { align = "cm", colour = runtime().C.CLEAR, minw = size, minh = size },

@@ -2,7 +2,7 @@
 	word_game/ui/views/trade_view.lua - Trade overlay store subscription + marketplace body host (Phase 6 / 8).
 ]]
 
-local RetainedUI = require("jumbalaya-engine.retained_ui")
+local Panels = require("jumbalaya-engine.panels")
 
 local TradeView = {}
 TradeView.__index = TradeView
@@ -28,7 +28,7 @@ end
 --- Marketplace body host: wraps retained panel in the views layer.
 function TradeView.create_marketplace_body(ctx, config, definition)
 	local trade_definition = require("word_game.ui.trade.definition")
-	local inner = RetainedUI.create({
+	local inner = Panels.create({
 		definition = definition or trade_definition.marketplace_body_definition(ctx),
 		config = config or { offset = { x = 0, y = 0 }, align = "cm" },
 	})

@@ -33,7 +33,7 @@ Phases 0–13 are **complete** (store, engine package, retained UI, `Funcs` regi
 ```text
 packages/
   jumbalaya_core/               Portable domain: store, rules, jumble, cards, config (headless-testable)
-  jumbalaya-engine/             Portable engine: retained_ui, clock, input, event_bus, views
+  jumbalaya-engine/             Portable engine: panels, scene, clock, input, event_bus, views
 games/jumbalaya/
   app/                          Love2D shell: bootstrap, callbacks, startup, session/persistence
   word_game/                    Runtime glue, presentation, board geometry, config
@@ -52,7 +52,7 @@ _tools/                         Python asset/dev pipelines (not runtime)
 | Why both `app/` and `packages/`? | `app/` **runs** this Love2D game. `packages/` holds **libraries** extracted so rules and engine services can be tested and reused without the full boot chain. |
 | Can we remove `packages/`? | **No** — store, reducers, core rules, retained UI, and `test_core_*` depend on it. |
 | Can we remove `app/`? | **No** — bootstrap, Love2D callbacks, and most of the scene graph still live here. |
-| What is duplicated? | `app/core/` and `packages/jumbalaya-engine/` overlap **during migration** (`retained_ui` already moved; Card/Sprite/input still in `app/core/`). That overlap shrinks over time; do not collapse the trees prematurely. |
+| What is duplicated? | `app/core/` and `packages/jumbalaya-engine/` overlap **during migration** (`panels` already moved; Card/Sprite/input still in `app/core/`). That overlap shrinks over time; do not collapse the trees prematurely. |
 | Dependency direction | `jumbalaya_core` imports nothing from `app/` or `word_game/`. `jumbalaya-engine` may import `app/core/scene/` (e.g. `AnimNode`). `word_game/` imports both. `app/` imports `word_game/` at boot only. |
 
 ### word_game vs jumbalaya_core
@@ -83,19 +83,28 @@ Glue modules are often labeled *"glue over jumbalaya_core"* in their file header
 
 **When adding gameplay logic:** implement the rule in `jumbalaya_core` first (with a `test_core_*` test), then add the thinnest possible glue in `word_game/model/`. Do not duplicate rule logic in `word_game/` — extend core and call it.
 
-**Direct imports (no proxies):** Engine-agnostic tuning → `jumbalaya_core.config.gameplay.*`; timeline scheduling → `jumbalaya-engine.effects.timeline_scheduler`; retained UI host → `jumbalaya-engine.view_host`; stateless helpers → `jumbalaya-engine.util.*` (`colour`, `number_format`, `roll`, `geometry`, `tables`, `pack`, `random`, `tween`). Game-only data (jumble puzzles, visuals, boot flags, `run_params`) stays in `word_game/config/`. `word_game/ui/util/` keeps **game-bound** helpers only (`loc_colour`, `localize`, `game_runtime`) — do not re-wrap engine util modules there. Do not add one-line `return require(...)` shim files or side-effect `require … return true` loaders under `word_game/` (`test_legacy_shims.lua` scans the tree). Allowed exception: `app/bootstrap/engine_boot.lua` delegates to `jumbalaya-engine.boot`.
+**Direct imports (no proxies):** Engine-agnostic tuning → `jumbalaya_core.config.gameplay.*`; timeline scheduling → `jumbalaya-engine.effects.timeline_scheduler`; panel trees → `jumbalaya-engine.panels` (or `jumbalaya-engine.panels.view_host`); stateless helpers → `jumbalaya-engine.util.*` (`colour`, `number_format`, `roll`, `geometry`, `tables`, `pack`, `random`, `tween`). Game-only data (jumble puzzles, visuals, boot flags, `run_params`) stays in `word_game/config/`. `word_game/ui/util/` keeps **game-bound** helpers only (`loc_colour`, `localize`, `game_runtime`) — do not re-wrap engine util modules there. Do not add one-line `return require(...)` shim files or side-effect `require … return true` loaders under `word_game/` (`test_legacy_shims.lua` scans the tree). Allowed exception: `app/bootstrap/engine_boot.lua` delegates to `jumbalaya-engine.boot`.
 
 **Model→UI event flow (unidirectional):** UI input → `store:dispatch` (core reducer) → model glue emits `Presentation.emit` → handlers in `word_game/ui/presentation/install.lua` update HUD/FX. Store-backed **views** (`word_game/ui/views/*`) may `store:subscribe` only to bump render revision — not to fan out side effects. Do not poll model state each frame to refresh HUD; emit presentation events when domain state changes. UIBox `Funcs.dispatch` is for shell/widgets only (overlays, profile), not model notifications.
 
 **Card / pile state (Phase 10):** Authoritative **table layout** is `store.piles` (`MOVE_CARD` / `ADD_CARD_TO_PILE` reducers in `jumbalaya_core`). **Run deck membership** is `G.letter_inventory` (live `Card` instances). **CardPile hosts** (`dealt_letters`, `draw_pile`, `pattern_row.area`) are presentation + input targets — mutate during drag/deal, then `word_game.model.piles.sync_hosts_to_store` or `piles.move_card`. `word_game/model/` must not import `ui/cardarea/`; `ui/cardarea/` must not import gameplay rules. Use `TableAreas` selectors for pile reads in model glue.
 
-### UI foundation versus word-game UI
+### UI stack: engine panels vs word-game UI
 
-These layers serve different purposes and should not be merged:
+These layers are **not** duplicates — they sit at different levels:
 
-- `packages/jumbalaya-engine/retained_ui/` — reusable panel/node scene graph (`RetainedPanel`, layout, hit testing, focus). Moved from `app/core/ui/` in Phase 8 PR-8.
-- `app/core/scene/` + `app/core/graphics/` — lower-level scene nodes (`AnimNode`, `Sprite`, particles, `DynaText`).
-- `word_game/ui/` — Jumbalaya screens: HUD, cards, menus, overlays, TABLE_BOARD layout.
+| Layer | Path | Role |
+|-------|------|------|
+| Scene graph | `jumbalaya-engine/scene/` | `Node`, `AnimNode` — transforms, parenting, motion |
+| Panel tree | `jumbalaya-engine/panels/` | Declarative HUD trees (`Panel`, `LayoutNode`, `ViewHost`) — layout, hit testing, buttons from definition tables |
+| Store views | `jumbalaya-engine/views/` | Headless render helpers (`PileView`, `LetterCardView`) |
+| Game presentation | `word_game/ui/` | Jumbalaya screens: sidebar, table board, trade, play FX, card chrome |
+
+**`jumbalaya-engine/panels`** is the reusable **engine widget framework** (formerly `retained_ui`). You build trees with `runtime().UI.ROOT` / `ROW` / `BUTTON` definitions and `Panels.create` or `Panels.ViewHost.create`. It knows nothing about jumble rules, tokens, or puzzles.
+
+**`word_game/ui`** is **game-specific presentation**: where panels are placed, what they show, and how they react to `Presentation.emit` / store state. Example: `word_game/ui/sidebar/` defines the right-hand HUD; `word_game/ui/views/sidebar_view.lua` subscribes to the store and relayouts panel nodes.
+
+**`Card` / `CardArea`** (`word_game/ui/cardarea/`) are a third presentation path for draggable letter tiles — scene-graph hosts, not panel definitions. Table layout authority is still `store.piles` (see Phase 10).
 
 Dependency direction: `word_game/ui/` → `jumbalaya-engine` + `app/core/` → never reverse into gameplay rules.
 
@@ -378,7 +387,7 @@ engine_boot → runtime_boot (Game(), store, facade) → store_boot → presenta
 The inheritance order is contractual:
 
 ```text
-Object → Node → EaseNode/AnimNode → Sprite, Card, CardArea, RetainedPanel
+Object → Node → EaseNode/AnimNode → Sprite, Card, CardArea, Panel
 ```
 
 Additional rules:

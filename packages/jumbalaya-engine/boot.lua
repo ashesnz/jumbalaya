@@ -26,7 +26,7 @@ function M.install()
 	number_format = NumberFormat.number_format
 	score_number_scale = NumberFormat.score_number_scale
 
-	require "jumbalaya-engine.retained_ui"
+	require "jumbalaya-engine.panels"
 	require "jumbalaya-engine.graphics.particles"
 	require "jumbalaya-engine.graphics.flow_text"
 end

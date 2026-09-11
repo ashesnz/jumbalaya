@@ -19,7 +19,7 @@ local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 local RunMode = facade.run_mode()
 
 local game_access = require("word_game.model.game_access")
-local UIViewHost = require("jumbalaya-engine.view_host")
+local UIViewHost = require("jumbalaya-engine.panels.view_host")
 
 local M = {}
 

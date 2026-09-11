@@ -13,7 +13,7 @@ local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 local Easing = require("word_game.ui.effects.easing")
 local dealt_hand = require("word_game.ui.table.dealt_hand")
 local Layout = require("word_game.ui.layout")
-local UIViewHost = require("jumbalaya-engine.view_host")
+local UIViewHost = require("jumbalaya-engine.panels.view_host")
 
 local M = {}
 

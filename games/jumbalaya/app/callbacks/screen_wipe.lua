@@ -71,7 +71,7 @@ Funcs.register("wipe_in",  function(message, no_card, timefac, alt_colour)
     }}
   end
 
-  local ViewHost = require("jumbalaya-engine.view_host")
+  local ViewHost = require("jumbalaya-engine.panels.view_host")
   g().screenwipe = ViewHost.create{
     definition =
       {n=g().UI.ROOT, config = {align = "cm", minw =0, minh =0 ,padding = 0.15, r = 0.1, colour = g().C.CLEAR}, nodes={

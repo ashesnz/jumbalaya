@@ -13,7 +13,7 @@ Roguelike **jumble** word game on Love2D/Lua. Active loop: fill **pattern puzzle
 ```text
 packages/
   jumbalaya_core/        Engine-agnostic rules, store, reducers (headless-testable)
-  jumbalaya-engine/      Custom engine: boot, scene, graphics, interaction, sound, retained_ui, views
+  jumbalaya-engine/      Custom engine: boot, scene, graphics, interaction, sound, panels, views
 games/jumbalaya/
   app/                   Love2D shell: bootstrap, callbacks, startup, runtime, session/persistence/platform
   word_game/             Game layer (model, ui, board, config)
@@ -140,7 +140,7 @@ Tests that need rules only call `play_jumble_word`; tests that need full FX call
 - Files/dirs/locals: `snake_case`; classes/globals: `PascalCase`
 - **Devtools:** Lua modules under `games/jumbalaya/devtools/` use `snake_case` (`debug_button.lua`, `sections/stage.lua`). Locale files use BCP47 tags (`localization/en-us.lua`). Python one-off scripts belong in `_tools/`, not `devtools/`.
 - UI binds UIBox `func` strings — move implementations, not registration names when refactoring (`Funcs.register` keeps the name stable)
-- Class chain: `Object → Node → EaseNode/AnimNode → Sprite, RetainedPanel, Card, CardArea`
+- Class chain: `Object → Node → EaseNode/AnimNode → Sprite, Panel, Card, CardArea`
 - `Card` model class loads in `app/bootstrap/game_boot.lua`; presentation mixins install via `word_game/ui/cards/bind.lua` (tests: `mock_env.ensure_card_class()`)
 
 ## Dev flags

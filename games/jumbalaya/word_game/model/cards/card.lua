@@ -38,7 +38,7 @@
 ---@field remove_from_deck fun(self: Card, from_debuff: boolean|nil)
 local live_game = require("word_game.model.live_game")
 local CardRegistry = require("word_game.model.cards.registry")
-local UIViewHost = require("jumbalaya-engine.view_host")
+local UIViewHost = require("jumbalaya-engine.panels.view_host")
 local Deck = require("word_game.model.cards.deck")
 
 Card = EaseNode:derive("Card")

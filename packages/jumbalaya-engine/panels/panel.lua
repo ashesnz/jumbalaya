@@ -1,4 +1,4 @@
---[[ jumbalaya-engine/retained_ui/panel.lua - retained-mode UI tree container (RetainedPanel) ]]
+--[[ jumbalaya-engine/panels/panel.lua - Declarative panel tree container (Panel) ]]
 
 local AnimNode = require("jumbalaya-engine.scene.animated.init")
 
@@ -65,10 +65,10 @@ function RetainedPanel:construct(args)
 	end
 end
 
-require("jumbalaya-engine.retained_ui.panel_tree")(RetainedPanel)
-require("jumbalaya-engine.retained_ui.panel_layout")(RetainedPanel)
-require("jumbalaya-engine.retained_ui.panel_lifecycle")(RetainedPanel)
+require("jumbalaya-engine.panels.panel_tree")(RetainedPanel)
+require("jumbalaya-engine.panels.panel_layout")(RetainedPanel)
+require("jumbalaya-engine.panels.panel_lifecycle")(RetainedPanel)
 
-require("jumbalaya-engine.retained_ui.node")
+require("jumbalaya-engine.panels.node")
 
 return RetainedPanel

@@ -76,8 +76,8 @@ function DebugPanel:open()
 	if self:is_open() then return end
 
 	self:register_actions()
-	local RetainedUI = require("jumbalaya-engine.retained_ui")
-	self.ui = RetainedUI.create{
+	local Panels = require("jumbalaya-engine.panels")
+	self.ui = Panels.create{
 		definition = self:build_definition(),
 		-- tri = top-right inside room; panel width subtracted so it stays on-screen
 		config = {align = 'tri', offset = {x = 6, y = 0.2}, major = self.game.ROOM_ATTACH, bond = 'Weak'},

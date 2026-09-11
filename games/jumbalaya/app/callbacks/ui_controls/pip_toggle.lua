@@ -2,7 +2,7 @@
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local Easing = require "word_game.ui.effects.easing"
-local ViewHost = require("jumbalaya-engine.view_host")
+local ViewHost = require("jumbalaya-engine.panels.view_host")
 
 local BridgeRuntime = require("app.runtime")
 local Funcs = require("app.callbacks.funcs")

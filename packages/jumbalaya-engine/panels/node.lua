@@ -21,13 +21,13 @@ function LayoutNode:construct(parent, new_UIBox, new_ui_kind, config)
 	self.content_dimensions = {w = 0, h = 0}
 end
 
-require("jumbalaya-engine.retained_ui.node_values")(LayoutNode)
-require("jumbalaya-engine.retained_ui.node_topology")(LayoutNode)
-require("jumbalaya-engine.retained_ui.node_draw")(LayoutNode)
-require("jumbalaya-engine.retained_ui.node_layout")(LayoutNode)
-require("jumbalaya-engine.retained_ui.node_vertices")(LayoutNode)
-require("jumbalaya-engine.retained_ui.node_render_content")(LayoutNode)
-require("jumbalaya-engine.retained_ui.node_render_decor")(LayoutNode)
-require("jumbalaya-engine.retained_ui.node_interaction")(LayoutNode)
+require("jumbalaya-engine.panels.node_values")(LayoutNode)
+require("jumbalaya-engine.panels.node_topology")(LayoutNode)
+require("jumbalaya-engine.panels.node_draw")(LayoutNode)
+require("jumbalaya-engine.panels.node_layout")(LayoutNode)
+require("jumbalaya-engine.panels.node_vertices")(LayoutNode)
+require("jumbalaya-engine.panels.node_render_content")(LayoutNode)
+require("jumbalaya-engine.panels.node_render_decor")(LayoutNode)
+require("jumbalaya-engine.panels.node_interaction")(LayoutNode)
 
 return LayoutNode
