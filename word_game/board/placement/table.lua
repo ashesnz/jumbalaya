@@ -16,6 +16,7 @@
 
 local PlacementContext = require "word_game.board.placement.context"
 local Kind = require "app.core.object"
+local game_access = require("word_game.model.game_access")
 local layout = require "word_game.board.placement.layout"
 local draw = require "word_game.board.placement.draw"
 local snap = require "word_game.board.placement.snap"
@@ -124,7 +125,7 @@ function PlacementTable:draw_run_pass(game)
 	for _, v in pairs(game.LIVE.CARD) do
 		if v.area == self.area
 			and (not v.parent and v ~= controller.dragging.target and v ~= controller.focused.target)
-			and not (game.GAME and game.GAME.inspecting_card == v) then
+			and not (game_access.get() and game_access.get().inspecting_card == v) then
 			love.graphics.push()
 			v:translate_container()
 			v:draw()

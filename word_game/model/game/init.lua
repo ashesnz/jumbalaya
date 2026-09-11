@@ -9,12 +9,13 @@ Game = Kind:derive("Game")
 function Game:construct()
 	require("bridge.runtime").bind_game(self)
 	self:define_constants()
-	require("app.bootstrap.store_boot").install()
 end
 
 function Game:prep_stage(new_stage, new_state, new_game_obj)
 	for k in pairs(self.INPUT.locks) do self.INPUT.locks[k] = nil end
-	if new_game_obj then self.GAME = self:init_game_object() end
+	if new_game_obj then
+		require("word_game.model.run.scope").bind_snapshot(self:init_game_object())
+	end
 	self.STAGE = new_stage or self.STAGES.MAIN_MENU
 	self.STATE = new_state or self.STATES.MENU
 	self.STATE_COMPLETE = false

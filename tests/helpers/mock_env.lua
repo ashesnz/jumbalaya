@@ -372,7 +372,7 @@ end
 --- Bind a game snapshot as the authoritative store state (Phase 8 PR-2).
 function M.publish_game(game_table)
 	if not game_table then return end
-	G.GAME = game_table
+	_G.WORD_GAME = require("word_game")
 	local store_sync = require("bridge.store_sync")
 	store_sync.ensure_test_binding()
 	local store = require("bridge.runtime").store()
@@ -381,10 +381,13 @@ function M.publish_game(game_table)
 		store:patch({
 			piles = { hand = {}, draw = {}, pattern = {}, bonus = {}, discard = {} },
 		})
+		G.GAME = store:get()
+	else
+		G.GAME = game_table
 	end
 end
 
---- Re-bind the store after direct G.GAME mutation in a test.
+--- Re-bind the store after direct G.GAME field mutation in a test.
 function M.sync_game()
 	if G.GAME then
 		M.publish_game(G.GAME)

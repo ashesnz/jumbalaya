@@ -115,8 +115,9 @@ function Game:start_run(args)
     end
     self.STORED_RUN = nil
 
-    local viewed_back = self.GAME and self.GAME.viewed_back
-    local selected_back_name = self.GAME and self.GAME.selected_back and self.GAME.selected_back.name
+    local prior = game_access.get()
+    local viewed_back = prior and prior.viewed_back
+    local selected_back_name = prior and prior.selected_back and prior.selected_back.name
 
     self:teardown_run_ui()
 
@@ -139,10 +140,11 @@ function Game:start_run(args)
         or 'Alpha Deck'
     selected_back = deck_center_from_name(selected_back)
     local game_table = saveTable and saveTable.GAME or self:init_game_object()
-    self.GAME = RunScope.begin_run(game_table, { from_save = saveTable ~= nil })
-    self.GAME.modifiers = self.GAME.modifiers or {}
-    self.GAME.selected_back = WORD_GAME.Back.new(selected_back)
-    self.GAME.selected_back_key = selected_back
+    RunScope.begin_run(game_table, { from_save = saveTable ~= nil })
+    local run = game_access.get()
+    run.modifiers = run.modifiers or {}
+    run.selected_back = WORD_GAME.Back.new(selected_back)
+    run.selected_back_key = selected_back
 
     if ease_background_colour and self.C and self.C.GREEN then
         ease_background_colour { new_colour = self.C.GREEN, contrast = 1 }
@@ -152,13 +154,13 @@ function Game:start_run(args)
     self.C.UI_MULTIPLIER[1], self.C.UI_MULTIPLIER[2], self.C.UI_MULTIPLIER[3], self.C.UI_MULTIPLIER[4] = self.C.RED[1], self.C.RED[2], self.C.RED[3], self.C.RED[4]
 
     if not saveTable then 
-        self.GAME.selected_back:apply_to_run()
+        run.selected_back:apply_to_run()
     end
 
     if not saveTable then
-        if args.seed then self.GAME.seeded = true end
+        if args.seed then run.seeded = true end
         local run_mode = RunMode.resolve_for_new_run(args.run_mode)
-        self.GAME.run_mode = run_mode
+        run.run_mode = run_mode
         if args.run_mode then
             RunMode.set_preferred(run_mode)
         end
@@ -168,11 +170,11 @@ function Game:start_run(args)
             + memory_entropy
         math.randomseed(runtime_entropy)
         math.random()
-        self.GAME.seed_streams.seed = args.seed or random_code(8, runtime_entropy)
+        run.seed_streams.seed = args.seed or random_code(8, runtime_entropy)
     end
 
-    for k, v in pairs(self.GAME.seed_streams) do if v == 0 then self.GAME.seed_streams[k] = hash_text(k..self.GAME.seed_streams.seed) end end
-    self.GAME.seed_streams.hashed_seed = hash_text(self.GAME.seed_streams.seed)
+    for k, v in pairs(run.seed_streams) do if v == 0 then run.seed_streams[k] = hash_text(k..run.seed_streams.seed) end end
+    run.seed_streams.hashed_seed = hash_text(run.seed_streams.seed)
 
     self:queue_settings_write()
     self.INPUT.locks.load = true
@@ -215,7 +217,7 @@ function Game:start_run(args)
         0, 0,
         CAI.usable_W,
         CAI.usable_H, 
-        {card_limit = self.GAME.starting_params.usable_slots, type = 'usable', selection_limit = 1})
+        {card_limit = run.starting_params.usable_slots, type = 'usable', selection_limit = 1})
 
     self.pattern_row:create_area(CAI.placement_W, CAI.placement_H)
     self.pattern_row:setup()
@@ -231,7 +233,7 @@ function Game:start_run(args)
     self.dealt_letters = CardPile(
         0, 0,
         CAI.hand_W,CAI.hand_H,
-        {card_limit = self.GAME.starting_params.hand_size, type = 'hand', selection_limit = 1})
+        {card_limit = run.starting_params.hand_size, type = 'hand', selection_limit = 1})
 
     self.letter_inventory = {}
 

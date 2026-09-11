@@ -1,4 +1,4 @@
---[[ word_game/model/game_access.lua - Read/write game snapshot via store (Phase 8) ]]
+--[[ word_game/model/game_access.lua - Read/write game snapshot via store (Phase 10d) ]]
 
 local store_sync = require("bridge.store_sync")
 local runtime = require("bridge.runtime")
@@ -14,7 +14,7 @@ function M.get()
 	if s then
 		return s:get()
 	end
-	return store_sync.legacy_mirror_get()
+	return nil
 end
 
 function M.word_round()
@@ -23,25 +23,22 @@ function M.word_round()
 end
 
 function M.dispatch(action)
-	local game = M.get()
-	if not game or not action then return game end
 	local s = store()
-	if s then
-		return store_sync.dispatch(s, action)
+	if not s or not action then
+		return M.get()
 	end
-	local reducers = require("jumbalaya_core.store.reducers.init")
-	reducers.reduce(game, action)
-	return game
+	return store_sync.dispatch(s, action)
 end
 
 function M.patch(fields)
 	local s = store()
-	if s and fields then
-		return store_sync.dispatch(s, { type = "GAME_PATCH", patch = fields })
+	if not s or not fields then
+		return M.get()
 	end
-	return store_sync.legacy_mirror_patch(fields)
+	return store_sync.dispatch(s, { type = "GAME_PATCH", patch = fields })
 end
 
+--- In-place mutation of the live store snapshot (same table as store:get()).
 function M.mutate(fn)
 	local game = M.get()
 	if not game or not fn then return game end

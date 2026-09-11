@@ -93,7 +93,7 @@ Metrics refreshed **2026-09-12** from repo root. Compare to post–Phase 9 basel
 | **10a** | Glue hygiene — model is wiring only | 🟡 **In progress** | `round/` done (PR 10a-1); jumble/ + perks/ next |
 | **10b** | Retire `CardArea` dual-write | ✅ **Complete** | `pile_sync` deleted; store-authoritative piles; `CardPile` hosts drag only |
 | **10c** | Engine extraction — no `app/` imports in packages | ✅ **Complete** | `Kind`, scene graph, draw helpers in `jumbalaya-engine/`; `app/core/*` shims |
-| **10d** | Single state bus | 🟡 **Partial** | Store authoritative at boot; glue still reads `live_game().GAME` in places |
+| **10d** | Single state bus | ✅ **Complete** | `game_access` store-only; `legacy_mirror_*` / `sync_from_g` removed |
 | **11** | Dissolve `bridge/` folder | ⬜ **Planned** | After 10b–10d |
 | **12** | Shrink `app/` to shell only | ⬜ **Planned** | After 10c |
 
@@ -126,10 +126,10 @@ Understanding *what* is duplicated clarifies *what* to merge.
 | Read path | Status |
 |-----------|--------|
 | `WORD_GAME.store()` / `game_access.get()` | ✅ Preferred — authoritative |
-| `live_game().GAME` / `shell.GAME` | ⚠️ Legacy parallel reads in glue and UI |
-| `bridge/store_sync.legacy_mirror_*` | ⚠️ Test-only escape hatch |
+| `live_game().GAME` / `shell.GAME` | Shell pointer only (synced at bind/teardown; not read in glue/UI) |
+| `game_access.get()` / `dispatch()` | ✅ Store-only |
 
-**Fix (Phase 10d):** All new code uses `game_access`; remove mirror helpers when tests use bound store.
+**Phase 10d done:** Store created at boot via `store_boot`; tests bind through `mock_env.publish_game`. Shell `GAME` pointer synced only at run bind/teardown for legacy save/boot paths.
 
 ### 5c. Card piles (CardArea vs store / PileView)
 

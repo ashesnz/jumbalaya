@@ -31,14 +31,14 @@ T.describe("Run lifecycle (RunScope)", function()
 		T.assert_nil(shell().ARGS.pending_layout, "Pending layout should clear between runs")
 	end)
 
-	T.it("teardown clears Game.GAME mirror and marks the run inactive", function()
+	T.it("teardown resets store snapshot and marks the run inactive", function()
 		local store = runtime.store()
-		store_sync.bind_run(store, { deck_left_count = 0 })
-		shell().GAME = store:get()
+		store_sync.bind_run(store, { deck_left_count = 0, word_round = { set = 9, hand_index = 1 } })
 		shell().RUN = { generation = 1, active = true }
 		RunScope.teardown()
-		T.assert_nil(shell().GAME, "Teardown should clear the legacy mirror")
+		T.assert_nil(shell().GAME, "Teardown should clear shell GAME pointer")
 		T.assert_equal(shell().RUN.active, false, "Teardown should mark the run inactive")
+		T.assert_equal(game_access.get().word_round.set, 1, "Store should reset to default snapshot")
 	end)
 
 	T.it("begin_run assigns a fresh table and bumps generation", function()

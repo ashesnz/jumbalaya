@@ -440,7 +440,8 @@ T.describe("Bonus cards", function()
 		G.dealt_letters = { cards = {}, remove_card = function() end }
 		G.pattern_row = { area = { cards = {}, hard_set_cards = function() end } }
 		deck_mod.populate_jumble_deck()
-		T.assert_equal(#G.draw_pile.cards, 1)
+		local TableAreas = require("word_game.model.table_areas")
+		T.assert_equal(#TableAreas.draw_cards(), 1)
 	end)
 
 	T.it("persists promoted boss cards into stage 1-4", function()

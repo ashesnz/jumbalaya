@@ -81,7 +81,10 @@ function M.open_main_menu(self, change_context)
 	end
 
 	self:prep_stage(runtime().STAGES.MAIN_MENU, runtime().STATES.MENU, true)
-	self.GAME.selected_back = WORD_GAME.Back.new(runtime().LETTERS.centers.deck_alpha)
+	local game_access = require("word_game.model.game_access")
+	game_access.mutate(function(game)
+		game.selected_back = WORD_GAME.Back.new(runtime().LETTERS.centers.deck_alpha)
+	end)
 
 	if Funcs.get("change_shadows") and runtime().SETTINGS and runtime().SETTINGS.GRAPHICS then
 		Funcs.dispatch("change_shadows", {to_key = runtime().SETTINGS.GRAPHICS.shadows == "On" and 1 or 2})

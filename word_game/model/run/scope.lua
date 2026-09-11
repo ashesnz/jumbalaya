@@ -119,7 +119,22 @@ function M.teardown()
 		local CoreStore = require("jumbalaya_core.store")
 		store_sync.replace(store, CoreStore.default_state())
 	end
-	store_sync.clear_g_mirror()
+	live_game().GAME = nil
+end
+
+--- Bind a snapshot without starting a full run (e.g. main menu deck preview).
+function M.bind_snapshot(game_table)
+	if type(game_table) ~= "table" then
+		error("RunScope.bind_snapshot requires a game table")
+	end
+	local store = BridgeRuntime.store()
+	if not store then
+		error("RunScope.bind_snapshot requires WORD_GAME.store()")
+	end
+	store_sync.bind_run(store, game_table)
+	local state = game_access.get()
+	live_game().GAME = state
+	return state
 end
 
 function M.init_new_run_state()
@@ -153,7 +168,9 @@ function M.begin_run(game_table, opts)
 	if not opts.from_save then
 		M.init_new_run_state()
 	end
-	return game_access.get()
+	local state = game_access.get()
+	live_game().GAME = state
+	return state
 end
 
 function M.assign_game(game_table, opts)

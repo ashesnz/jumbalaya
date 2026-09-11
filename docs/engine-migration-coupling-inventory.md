@@ -112,6 +112,7 @@ Must pass on every PR. Full list: [testing.md](testing.md#engine-migration-ci-ga
 | Live `Card` / `CardArea` nodes | `word_game/ui/cardarea/`, deck dealing | 10b |
 | `pile_sync` dual-write | `bridge/pile_sync.lua` | 10b |
 | `app/core/scene` imported by engine | — | **0** (10c: `jumbalaya-engine.scene`) |
+| `store_sync.legacy_mirror_*` / `sync_from_g` | — | **removed** (10d) |
 | Glue modules (rules already in core) | `word_game/model/*` | 10a |
 | `Game.GAME` + store parallel reads | Various glue | 10d |
 | Test `mock_env` `_G.G` stub | `tests/helpers/mock_env.lua` | optional cleanup |

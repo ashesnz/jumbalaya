@@ -1,10 +1,9 @@
 --[[
-	bridge/store_sync.lua - Phase 8 store bridge (run snapshot on Game.GAME).
+	bridge/store_sync.lua - Phase 10d store bridge (run snapshot via WORD_GAME.store).
 
 	Contract:
 	- The store owns run snapshot state.
 	- New code uses WORD_GAME.store() / game_access.
-	- legacy_mirror_* helpers remain for headless tests without a bound store.
 ]]
 
 local CoreStore = require("jumbalaya_core.store")
@@ -37,45 +36,8 @@ function M.patch(store, patch)
 	store:patch(patch)
 end
 
---- Retired in PR-2: store is authoritative; no Game.GAME mirror write path.
+--- Retired: store is authoritative; no Game.GAME mirror write path.
 function M.sync_to_g(_store) end
-
---- Clear run snapshot on the live Game shell (bridge-only).
-function M.clear_g_mirror()
-	local shell = runtime.game()
-	if shell then
-		shell.GAME = nil
-	end
-end
-
---- Legacy mirror read when store is not bound (headless tests; bridge-only).
-function M.legacy_mirror_get()
-	local shell = runtime.game()
-	if shell then
-		return shell.GAME
-	end
-	return nil
-end
-
---- Legacy mirror patch when store is not bound (headless tests; bridge-only).
----@param fields table
-function M.legacy_mirror_patch(fields)
-	local game_state = M.legacy_mirror_get()
-	if not game_state or not fields then return game_state end
-	for key, value in pairs(fields) do
-		game_state[key] = value
-	end
-	return game_state
-end
-
---- Bootstrap helper: adopt live Game.GAME table into store (tests / one-time boot).
----@param store table
-function M.sync_from_g(store)
-	local shell = runtime.game()
-	if shell and shell.GAME then
-		store:replace(shell.GAME)
-	end
-end
 
 ---@param store table
 ---@param fn fun(state: table)
@@ -112,7 +74,7 @@ function M.restore_snapshot(store, snapshot)
 	store:replace(snapshot.GAME or snapshot)
 end
 
---- Headless tests: create store, bind WORD_GAME.
+--- Headless tests: ensure store is bound to WORD_GAME.
 function M.ensure_test_binding()
 	local shell = runtime.game()
 	if not shell then return nil end
@@ -123,9 +85,6 @@ function M.ensure_test_binding()
 		if word_game and word_game._bind_store then
 			word_game._bind_store(store)
 		end
-	end
-	if shell.GAME then
-		M.sync_from_g(store)
 	end
 	if shell.dealt_letters or shell.draw_pile then
 		require("word_game.model.piles").sync_hosts_to_store(store)

@@ -28,10 +28,9 @@ T.describe("store_sync shim", function()
 		T.assert_nil(G.GAME)
 	end)
 
-	T.it("sync_from_g adopts legacy G.GAME", function()
-		G.GAME = { tokens = 7 }
+	T.it("bind_run adopts a game table snapshot", function()
 		local store = store_sync.new()
-		store_sync.sync_from_g(store)
+		store_sync.bind_run(store, { tokens = 7 })
 		T.assert_equal(store_sync.get_state(store).tokens, 7)
 	end)
 
