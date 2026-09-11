@@ -17,28 +17,21 @@ function snapshot_for_action(action)
 	G.action = nil
 end
 
---- Collects every CardArea's serialized state plus game metadata and flags a
---- pending run write.
+--- Collects store state plus game metadata and flags a pending run write.
 function queue_run_snapshot()
 	if G.F_NO_SAVING == true then return end
-	local card_areas = {}
-	for name, value in pairs(G) do
-		if type(value) == "table" and value.is_kind and value:is_kind(CardArea) then
-			local serialized = value:save()
-			if serialized then card_areas[name] = serialized end
-		end
-	end
+	local store_state = G._store and G._store:get() or { GAME = G.GAME }
 
 	G.ARGS.run_snapshot = save_safe_clone{
-		cardAreas = card_areas,
+		store = store_state,
 		GAME = G.GAME,
 		STATE = G.STATE,
 		ACTION = G.action,
-		BACK = G.GAME.selected_back:save(),
+		BACK = G.GAME.selected_back and G.GAME.selected_back.save and G.GAME.selected_back:save() or nil,
 		VERSION = G.VERSION,
 	}
 	local persist = persistence()
-	if persist and persist.RunSave then
+	if persist and persist.RunSave and persist.RunSave.append_pattern_row_snapshot then
 		persist.RunSave.append_pattern_row_snapshot(G.ARGS.run_snapshot)
 	end
 
