@@ -4,6 +4,10 @@
 
 local M = {}
 
+local Engine = require("jumbalaya-engine")
+local Renderer = Engine.Renderer
+local PileView = Engine.Views.PileView
+
 local placement_snap = require("word_game.board.placement.snap")
 local modifier_feedback = require("word_game.ui.feedback.modifier_feedback")
 placement_snap.bind_modifier_feedback(function(card)
@@ -186,24 +190,40 @@ function M.draw_board(game)
 end
 
 function M.should_draw_sidebar_deck()
-	if not G.draw_pile then return false end
 	if boss_sequence_active() then return false end
 	if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
 		return true
 	end
+	if G._store then
+		local state = G._store:get()
+		if state.piles and state.piles.draw then
+			return #state.piles.draw >= 0
+		end
+	end
+	if not G.draw_pile then return false end
 	return #G.draw_pile.cards > 0
 end
 
 function M.draw_hand_pass(game)
 	if M.should_draw_sidebar_deck() then
 		love.graphics.push()
-		G.draw_pile:translate_container()
+		if G.draw_pile then
+			G.draw_pile:translate_container()
+		end
 		if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
 			WORD_GAME_UI.TableDeck.draw(G.draw_pile)
-		else
+		elseif G.draw_pile then
 			G.draw_pile:draw()
 		end
 		love.graphics.pop()
+	end
+
+	if G._store then
+		local state = G._store:get()
+		if state.piles and state.piles.hand and #state.piles.hand > 0 and (not G.dealt_letters or #G.dealt_letters.cards == 0) then
+			local pile_view = PileView.new("hand", state.piles.hand, { x = 0, y = 0, w = 5, h = 1 })
+			pile_view:draw(Renderer.love2d())
+		end
 	end
 
 	if not G.dealt_letters or #G.dealt_letters.cards == 0 then
