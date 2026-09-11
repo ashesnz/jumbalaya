@@ -107,7 +107,11 @@ function M.ensure_test_binding()
 	if _G.G.GAME then
 		M.sync_from_g(_G.G._store)
 	end
-	M.sync_to_g(_G.G._store)
+	if _G.G.dealt_letters or _G.G.draw_pile then
+		require("bridge.pile_sync").sync_areas_to_store(_G.G._store)
+	else
+		M.sync_to_g(_G.G._store)
+	end
 	local engine_boot = package.loaded["app.bootstrap.engine_services_boot"]
 	if engine_boot and engine_boot.install then
 		engine_boot.install()

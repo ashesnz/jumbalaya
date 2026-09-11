@@ -94,6 +94,11 @@ These tests must pass on every PR while migrating off the Balatro engine pattern
 | `test_phase2_store_boot.lua` | Phase 2 store boot, dispatch dual-write, run binding |
 | `test_phase3_engine_services.lua` | Phase 3 engine context, adapters, and boot wiring |
 | `test_phase4_action_dispatch.lua` | Phase 4 G.FUNCS → InputService action dispatch |
+| `test_phase5_1_cards_piles.lua` | Phase 5.1 LetterCard data, pile reducers, engine views |
+| `test_phase5_2_table_areas.lua` | Phase 5.2 TableAreas selectors and save aliases |
+| `test_phase5_3_snap.lua` | Phase 5.3 Snap placement `MOVE_CARD` dispatch |
+| `test_phase5_4_persistence.lua` | Phase 5.4 store-based run save/restore |
+| `test_phase5_pile_sync.lua` | Phase 5 pile dual-write bridge |
 | `test_core_store_dispatch.lua` | `jumbalaya_core` store reducers without `G` |
 | `test_g_funcs_registry.lua` | `G.FUNCS` catalog freeze |
 | `test_core_jumble_rules.lua` | `jumbalaya_core` scoring rules without `G` |

@@ -157,6 +157,8 @@ return function(context)
 			{ letter_card_id = G.letter_card_id }
 		)
 		M.tag_card(card, letter, color)
+		card.id = G.letter_card_id
+		card.pile_id = card.pile_id or "draw"
 		G.letter_inventory = G.letter_inventory or {}
 		G.letter_inventory[#G.letter_inventory + 1] = card
 		return card

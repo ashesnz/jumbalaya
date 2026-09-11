@@ -188,10 +188,11 @@ function M.place_in_row(session, card)
 	jumble.assign_card_to_blank(slot_i, card, insert_pos)
 	card:set_card_area(area)
 
-	if G._store then
+	local card_id = card.id or card.letter_card_id
+	if G._store and card_id then
 		store_sync.dispatch(G._store, {
 			type = "MOVE_CARD",
-			card_id = card.id,
+			card_id = card_id,
 			from_pile = card.pile_id or (from_bonus and "bonus") or "hand",
 			to_pile = "pattern",
 			slot_index = slot_i
@@ -231,10 +232,11 @@ function M.return_to_hand(session, card)
 	if dealt.snap_VT then dealt:snap_VT() end
 	if dealt.hard_set_cards then dealt:hard_set_cards() end
 
-	if G._store then
+	local card_id = card.id or card.letter_card_id
+	if G._store and card_id then
 		store_sync.dispatch(G._store, {
 			type = "MOVE_CARD",
-			card_id = card.id,
+			card_id = card_id,
 			from_pile = card.pile_id or "pattern",
 			to_pile = "hand"
 		})

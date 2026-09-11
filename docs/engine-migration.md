@@ -528,6 +528,27 @@ UI runs snap math; model validates via existing `PlacementWord` / `jumble/valida
 
 **Exit criteria:** Drag, play, shuffle, save/load work without `CardArea` class.
 
+### Phase 5 status — complete (dual-write strangler)
+
+| Deliverable | Location |
+|-------------|----------|
+| Letter card data | `jumbalaya_core.cards.letter_card` (`LetterCard.new`) |
+| Pile store + reducers | `default_state.piles`, `store/reducers/piles.lua` |
+| Pile selectors | `jumbalaya_core/store/selectors/piles.lua`, `word_game/model/table_areas.lua` |
+| Engine views | `jumbalaya-engine/views/{letter_card_view,pile_view}.lua` |
+| Placement dispatch | `word_game/board/placement/snap.lua` → `MOVE_CARD` |
+| Pile dual-write | `bridge/pile_sync.lua` (CardArea → `store.piles`) |
+| Store persistence | `queue_run_snapshot` + `run_save.restore_card_areas` store path |
+| Save aliases | `TableAreas.SAVE_ALIASES` + legacy `cardAreas` migration |
+| Types | `types/letter_card.lua` |
+| Tests | `test_phase5_1` … `test_phase5_4`, `test_phase5_pile_sync` |
+
+**Exit criteria met (strangler):** Store owns pile snapshots; snap/shuffle/deal dual-write to store; save/load supports store snapshots; `TableAreas` reads store first with CardArea fallback.
+
+**Deferred to Phase 6–7:** Remove live `Card`/`CardArea` scene nodes; render via `PileView` only; drop `CardArea:save()` legacy path.
+
+Baseline: **456+ tests passing** (`love tests`).
+
 ---
 
 ## 8. Phase 6 — Rewrite Presentation Layer (4–8 weeks)

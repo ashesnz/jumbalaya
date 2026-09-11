@@ -7,6 +7,7 @@ return function(context)
 	local hand_size_cfg = require("word_game.model.hand_size")
 	local pile_counts = require("jumbalaya_core.cards.pile_counts")
 	local game_access = require("word_game.model.game_access")
+	local pile_sync = require("bridge.pile_sync")
 	local needs_vowel = context.needs_vowel
 	local take_letter_from_deck = context.take_letter_from_deck
 
@@ -39,6 +40,7 @@ return function(context)
 		G.ARGS = G.ARGS or {}
 		G.ARGS.deck_left_count = count
 		game_access.patch({ deck_left_count = count })
+		pile_sync.sync_areas_to_store()
 	end
 
 	M.DEAL_DELAY = 0.14

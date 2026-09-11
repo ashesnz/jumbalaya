@@ -7,7 +7,7 @@ Jumbalaya uses a small application shell around the Love2D engine and a separate
 
 New code should use the package style. Existing global APIs should only be changed through a dedicated migration so load order and string-based callbacks remain stable.
 
-### Engine migration (Phase 4 complete — Phase 5 next)
+### Engine migration (Phase 5 complete — Phase 6 next)
 
 Roadmap: [engine-migration.md](engine-migration.md). Phase 0 coupling baseline: [engine-migration-coupling-inventory.md](engine-migration-coupling-inventory.md).
 
@@ -32,6 +32,7 @@ packages/jumbalaya-engine/ Engine service interfaces + Love2D adapters (Phase 3)
 app/controllers/           Phase 4 G.FUNCS controllers (run lifecycle, settings, overlays)
 word_game/ui/controllers/  Phase 4 gameplay/trade/sidebar controllers
 bridge/action_dispatch.lua Phase 4 unified action dispatch shim
+bridge/pile_sync.lua       Phase 5 CardArea → store.piles dual-write
 app/core/                Rendering, input, scene graph, UI classes, and shared engine helpers
 word_game/
   board/                 jumble pattern row — placement/, jumble/, bonus/
