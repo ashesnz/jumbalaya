@@ -12,9 +12,9 @@ T.describe("Full Game Boot & Run Simulation", function()
 		local orig_getOS = love.system.getOS
 		love.system.getOS = function() return "iOS" end
 
-		require("app.core.util.tables")
-		require("app.core.util.geometry")
-		require("app.core.object")
+		require("jumbalaya-engine.util.tables")
+		require("jumbalaya-engine.util.geometry")
+		require("jumbalaya-engine.object")
 		_G.HEX = _G.HEX or function(hex)
 			return { 1, 1, 1, 1 }
 		end

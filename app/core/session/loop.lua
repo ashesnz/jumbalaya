@@ -4,7 +4,7 @@
 
 local save_queue = require "app.core.session.loop.save_queue"
 local debug_overlay = require "app.core.session.loop.debug_overlay"
-local Runtime = require "app.effects.runtime"
+local Runtime = require "word_game.ui.effects.runtime"
 local Updaters = require "app.core.session.updaters"
 
 function Game:update(dt)

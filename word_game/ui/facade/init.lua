@@ -91,7 +91,7 @@ function M.bonus_stack_ui()
 end
 
 function M.dissolve_fx()
-	return load("app.effects.dissolve_fx")
+	return load("word_game.ui.effects.dissolve_fx")
 end
 
 function M.busy()

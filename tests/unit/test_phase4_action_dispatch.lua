@@ -74,7 +74,7 @@ T.describe("Phase 4 Gameplay Action Dispatch", function()
 
 	T.it("attaches action dispatch helpers to InputRouter", function()
 		mock_env.reset_game()
-		local router = require("app.core.input.router")
+		local router = require("jumbalaya-engine.interaction.router")
 		T.assert_not_nil(router.dispatch_action)
 		T.assert_not_nil(router.dispatch_func)
 	end)

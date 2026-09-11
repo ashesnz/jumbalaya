@@ -12,11 +12,11 @@ T.describe("SpriteAnimator lifecycle", function()
 		G.ANIMATIONS = {}
 		G.ANIMATION_FPS = 10
 		G.ANIM_SHEETS = {}
-		require("app.core.util.tables")
-		require("app.core.object")
-		require("app.core.scene.animated.init")
-		require("app.core.graphics.sprite")
-		require("app.core.graphics.sprite_animator")
+		require("jumbalaya-engine.util.tables")
+		require("jumbalaya-engine.object")
+		require("jumbalaya-engine.scene.animated.init")
+		require("jumbalaya-engine.graphics.sprite")
+		require("jumbalaya-engine.graphics.sprite_animator")
 
 		local atlas = {
 			px = 4, py = 4, frames = 0,

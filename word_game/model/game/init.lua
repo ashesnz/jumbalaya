@@ -2,7 +2,7 @@
 	word_game/model/game/init.lua - Game class and stage prep.
 ]]
 
-local Kind = require("app.core.object")
+local Kind = require("jumbalaya-engine.object")
 
 Game = Kind:derive("Game")
 

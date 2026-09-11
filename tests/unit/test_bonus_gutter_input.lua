@@ -101,7 +101,7 @@ T.describe("bonus gutter input", function()
 		card.bonus_card = true
 		G.HIT_ORDER = { G.ROOM, card }
 
-		local InputRouter = require("app.core.input.router")
+		local InputRouter = require("jumbalaya-engine.interaction.router")
 		local input = InputRouter()
 		G.INPUT = input
 		input:set_HID_flags("touch")

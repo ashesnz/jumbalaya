@@ -2,7 +2,7 @@
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
-local Scheduler = require "app.effects.timeline_scheduler"
+local Scheduler = require "word_game.ui.effects.timeline_scheduler"
 local Components = require "word_game.ui.widgets.components"
 local UIViewHost = require("word_game.ui.views.ui_view_host")
 

@@ -6,7 +6,7 @@
 	  app.callbacks.window       - display, resolution, vsync, graphics
 	  app.callbacks.overlays     - overlay menus, tabs, collection screens
 	  app.callbacks.run_lifecycle - start_run, go_to_menu, wipe transitions
-	  app.effects                - shared runtime effects (loaded separately in game_boot)
+	  word_game.ui.effects                - shared runtime effects (loaded separately in game_boot)
 
 	Word game callbacks (registration only — logic on controllers):
 	  word_game.ui.controllers.gameplay       - shuffle, play, recall, jumble_next

@@ -6,7 +6,7 @@ local function runtime() return GameRT.game() end
 local facade = require("word_game.ui.facade")
 local widgets = require("word_game.ui.widgets")
 local state = facade.run_state()
-local Easing = require("app.effects.easing")
+local Easing = require("word_game.ui.effects.easing")
 
 local M = {}
 

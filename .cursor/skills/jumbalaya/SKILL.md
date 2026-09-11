@@ -26,9 +26,10 @@ description: >-
 ## Package boundaries
 
 ```text
-app/               Love2D shell: bootstrap, lifecycle, app/core/ scene graph
+app/               Love2D shell: bootstrap, callbacks, startup, runtime, session/persistence/platform
 packages/jumbalaya_core/   Pure rules + store (headless test_core_*)
-packages/jumbalaya-engine/ Engine services + retained_ui
+packages/jumbalaya-engine/ Custom engine: boot, scene, graphics, interaction, sound, retained_ui
+word_game/ui/effects/      Game-specific runtime FX (was app/effects/)
 app/runtime.lua, app/callbacks/funcs.lua, app/bootstrap/store_sync.lua  (was bridge/)
 word_game/config/  Game tuning; round/economy re-export core
 word_game/model/   Runtime glue over jumbalaya_core — not duplicate rules

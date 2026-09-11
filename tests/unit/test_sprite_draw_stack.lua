@@ -7,10 +7,10 @@ T.describe("Sprite draw transform cleanup", function()
 
 	T.it("pops projected transform when rendering fails", function()
 		MockEnv.setup()
-		require("app.core.util.tables")
-		require("app.core.object")
-		require("app.core.scene.animated.init")
-		require("app.core.graphics.sprite")
+		require("jumbalaya-engine.util.tables")
+		require("jumbalaya-engine.object")
+		require("jumbalaya-engine.scene.animated.init")
+		require("jumbalaya-engine.graphics.sprite")
 
 		local depth = 0
 		local old_push = love.graphics.push

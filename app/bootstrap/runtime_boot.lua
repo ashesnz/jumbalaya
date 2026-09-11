@@ -18,7 +18,7 @@ require "word_game.ui.cards.popups"
 require "word_game.ui.feedback.word_feedback"
 require "word_game.ui.overlays"
 
-require "app.effects"
+require "word_game.ui.effects"
 require "word_game.ui.cards.tooltip"
 
 local InputActions = require "app.input_actions"

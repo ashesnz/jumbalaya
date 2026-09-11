@@ -14,7 +14,7 @@ local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
 local ComicBurst = require("word_game.ui.feedback.comic_burst")
-local Scheduler = require("app.effects.timeline_scheduler")
+local Scheduler = require("word_game.ui.effects.timeline_scheduler")
 
 local RunMode = facade.run_mode()
 

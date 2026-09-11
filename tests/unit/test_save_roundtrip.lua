@@ -11,13 +11,13 @@ T.describe("save round-trip", function()
 	require("word_game.model.game")
 	require("word_game.model.cards.definitions")
 	require("word_game.ui.cardarea.init")
-	local pack = require("app.core.util.pack")
+	local pack = require("jumbalaya-engine.util.pack")
 	require("app.core.persistence.save")
 	pack_to_source = pack.pack_to_source
 	unpack_source = pack.unpack_source
 	read_save_payload = pack.read_save_payload
 	write_save_file = pack.write_save_file
-	save_safe_clone = require("app.core.util.tables").save_safe_clone
+	save_safe_clone = require("jumbalaya-engine.util.tables").save_safe_clone
 
 	G.HIGHLIGHT_H = G.HIGHLIGHT_H or 0.2
 	G.VERSION = G.VERSION or "test"
@@ -105,7 +105,7 @@ T.describe("save round-trip", function()
 	end)
 
 	T.it("save_safe_clone replaces live engine objects then pack/unpack round-trips", function()
-		local Kind = require("app.core.object")
+		local Kind = require("jumbalaya-engine.object")
 		local live = CardPile(0, 0, 1, 1, { type = "deck" })
 		T.assert_true(live:is_kind(Kind))
 		local cloned = save_safe_clone({

@@ -1,6 +1,6 @@
 --[[ app/callbacks/ui_controls/ ]]
 
-local Easing = require "app.effects.easing"
+local Easing = require "word_game.ui.effects.easing"
 local ViewHost = require("jumbalaya-engine.view_host")
 
 local BridgeRuntime = require("app.runtime")

@@ -11,17 +11,20 @@ Roguelike **jumble** word game on Love2D/Lua. Active loop: fill **pattern puzzle
 ## Repository layout
 
 ```text
-app/                     Bootstrap, lifecycle, input, persistence, engine (app/core/)
-  bootstrap/             engine_adapter → engine_boot, runtime_boot, store_boot, presentation_boot
+app/                     Love2D shell: bootstrap, callbacks, startup, runtime, session/persistence/platform
+  bootstrap/             engine_adapter → engine_boot (delegates to jumbalaya-engine.boot), runtime_boot, store_boot
   startup/               profile, window, dealing, assets, menu_boot
   callbacks/             App-level Funcs.register installers (settings, window, run lifecycle)
+  core/session/          lifecycle, loop (Love2D frame glue)
+  core/persistence/      save queue + disk worker
+  core/platform/         window, display
 app/runtime.lua          Game shell accessor (was bridge/runtime)
 app/callbacks/funcs.lua  UIBox string callback registry (was bridge/funcs_registry)
 app/bootstrap/store_sync.lua  Store factory + test binding (was bridge/store_sync)
 app/input/action_dispatch.lua  Typed action dispatch (was bridge/action_dispatch)
 packages/
   jumbalaya_core/        Engine-agnostic rules, store, reducers (headless-testable)
-  jumbalaya-engine/      Clock, input, event bus, retained_ui, views
+  jumbalaya-engine/      Custom engine: boot, scene, graphics, interaction, sound, retained_ui, views
 word_game/
   config/                Static tuning; gameplay/round + economy re-export jumbalaya_core
   model/                 Runtime glue over jumbalaya_core (no root-level modules)

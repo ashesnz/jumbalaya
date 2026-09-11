@@ -2,8 +2,8 @@
 
 local live_game = require("word_game.model.live_game")
 
-local Scheduler = require "app.effects.timeline_scheduler"
-local CardMotion = require "app.effects.card_motion"
+local Scheduler = require "word_game.ui.effects.timeline_scheduler"
+local CardMotion = require "word_game.ui.effects.card_motion"
 local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 local game_access = require("word_game.model.game_access")
 

@@ -4,7 +4,7 @@
 
 local T = require("tests.framework")
 local MockEnv = require("tests.helpers.mock_env")
-local Runtime = require("app.effects.runtime")
+local Runtime = require("word_game.ui.effects.runtime")
 
 T.describe("Platform and Globals Initialization", function()
 	local orig_getOS = love.system and love.system.getOS
@@ -16,9 +16,9 @@ T.describe("Platform and Globals Initialization", function()
 	end
 
 	-- Ensure engine helpers, Kind and Game exist
-	require("app.core.util.tables")
-	require("app.core.util.geometry")
-	require("app.core.object")
+	require("jumbalaya-engine.util.tables")
+	require("jumbalaya-engine.util.geometry")
+	require("jumbalaya-engine.object")
 	require("word_game.model.game")
 
 	-- Load globals definition
@@ -68,8 +68,8 @@ T.describe("Platform and Globals Initialization", function()
 	end)
 
 	T.it("ensures mix_audio and update_canvas_juice run safely during early startup", function()
-		require("app.core.audio.sound")
-		require("app.effects")
+		require("jumbalaya-engine.sound.sound")
+		require("word_game.ui.effects")
 
 		_G.G = setmetatable({}, Game)
 		_G.G:define_constants()

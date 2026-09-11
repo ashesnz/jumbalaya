@@ -95,7 +95,7 @@ Metrics refreshed **2026-09-12** from repo root. Compare to post–Phase 9 basel
 | **10c** | Engine extraction — no `app/` imports in packages | ✅ **Complete** | `Kind`, scene graph, draw helpers in `jumbalaya-engine/`; `app/core/*` shims |
 | **10d** | Single state bus | ✅ **Complete** | `game_access` store-only; `legacy_mirror_*` / `sync_from_g` removed |
 | **11** | Dissolve `bridge/` folder | ✅ **Complete** | `app/runtime`, `app/callbacks/funcs`, `app/input/action_dispatch`, `app/bootstrap/store_sync`; `event_bridge` inlined |
-| **12** | Shrink `app/` to shell only | ⬜ **Planned** | After 10c |
+| **12** | Shrink `app/` to shell only | ✅ **Complete** | Engine code in `jumbalaya-engine/`; game FX in `word_game/ui/effects/`; `app/core` = session + persistence + platform only |
 
 **Overall Phase 10 estimate:** ~15–20% complete (foundation done; consolidation work largely ahead).
 
@@ -141,19 +141,24 @@ Understanding *what* is duplicated clarifies *what* to merge.
 
 **Phase 10b complete:** Store-authoritative resting piles; `CardPile` hosts drag/focus only. `word_game/ui/cardarea/` remains until interaction ports to engine views.
 
-### 5d. Scene graph (`app/core/` vs `jumbalaya-engine/`)
+### 5d. Engine vs shell (`app/core/` vs `jumbalaya-engine/`)
 
 | Location | Contents |
 |----------|----------|
-| `jumbalaya-engine/scene/` | `Node`, `AnimNode`, animated motion (was `app/core/scene/`) |
-| `jumbalaya-engine/object.lua` | `Kind` class system (was `app/core/object.lua`) |
-| `jumbalaya-engine/graphics/` | `draw`, `node_transform`, `hit_order`, `polygons` |
-| `app/core/graphics/` | `Sprite`, particles, `DynaText`, draw helpers |
-| `app/core/input/` | Router, focus, pointer, gamepad |
-| `packages/jumbalaya-engine/retained_ui/` | Panels, layout, hit testing (depends on `app` `AnimNode`) |
-| `packages/jumbalaya-engine/` | Clock, input service, EventBus, views |
+| `jumbalaya-engine/boot.lua` | Engine load order (`Engine.Boot.install()`) — custom engine entry point |
+| `jumbalaya-engine/scene/` | `Node`, `AnimNode`, animated motion |
+| `jumbalaya-engine/object.lua` | `Kind` class system |
+| `jumbalaya-engine/graphics/` | `Sprite`, particles, `FlowText`, draw helpers |
+| `jumbalaya-engine/interaction/` | Router, focus, pointer, gamepad (was `app/core/input/`) |
+| `jumbalaya-engine/sound/` | Audio worker, mixer, main-thread API (was `app/core/audio/`) |
+| `jumbalaya-engine/util/` | tween, geometry, colour, pack, … (was `app/core/util/`) |
+| `jumbalaya-engine/retained_ui/` | Panels, layout, hit testing |
+| `word_game/ui/effects/` | Game-specific FX (easing, card_motion, dissolve, …; was `app/effects/`) |
+| `app/core/session/` | Love2D frame loop glue |
+| `app/core/persistence/` | Save queue + disk worker |
+| `app/core/platform/` | Window, display |
 
-**Phase 10c done:** Scene graph + draw helpers live in `jumbalaya-engine/`. `app/core/scene/`, `object.lua`, and moved graphics modules are thin re-export shims for legacy requires.
+**Phase 12 done:** `app/` has no scene graph classes. Engine boot is `jumbalaya-engine.boot`; `app/bootstrap/engine_boot.lua` delegates to it.
 
 ### 5e. Rules vs glue (`word_game/model/` vs `jumbalaya_core/`)
 

@@ -6,8 +6,8 @@
 	  register(panel)  - bind button actions
 	  build(panel)     - return a layout.section() node
 ]]
-local Kind = require "app.core.object"
-local Scheduler = require "app.effects.timeline_scheduler"
+local Kind = require "jumbalaya-engine.object"
+local Scheduler = require "word_game.ui.effects.timeline_scheduler"
 
 
 local DebugContext = require "devtools.context"

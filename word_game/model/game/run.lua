@@ -6,7 +6,7 @@ local live_game = require("word_game.model.live_game")
 
 local LayoutRequest = require("word_game.model.layout.request")
 local Presentation = require("word_game.model.presentation")
-local Scheduler = require "app.effects.timeline_scheduler"
+local Scheduler = require "word_game.ui.effects.timeline_scheduler"
 local RunScope = require "word_game.model.run.scope"
 local RunMode = require "word_game.model.run.mode"
 local game_access = require "word_game.model.game_access"

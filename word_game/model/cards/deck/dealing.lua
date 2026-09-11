@@ -2,7 +2,7 @@
 local live_game = require("word_game.model.live_game")
 
 
-local Scheduler = require "app.effects.timeline_scheduler"
+local Scheduler = require "word_game.ui.effects.timeline_scheduler"
 return function(context)
 	local M = context.module
 	local LayoutRequest = require("word_game.model.layout.request")

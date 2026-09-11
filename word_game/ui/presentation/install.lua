@@ -16,9 +16,9 @@ function M.install(ui, domain)
 	ui = ui or rawget(_G, "WORD_GAME_UI") or {}
 	domain = domain or rawget(_G, "WORD_GAME") or {}
 	local Layout = ui.Layout
-	local Scheduler = require("app.effects.timeline_scheduler")
+	local Scheduler = require("word_game.ui.effects.timeline_scheduler")
 	local backgrounds = require("word_game.ui.layout.backgrounds")
-	local CardFocus = require("app.core.input.card_focus")
+	local CardFocus = require("jumbalaya-engine.interaction.card_focus")
 	local TableAreas = require("word_game.model.table_areas")
 	local Funcs = require("app.callbacks.funcs")
 

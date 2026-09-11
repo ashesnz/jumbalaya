@@ -15,7 +15,7 @@
 ]]
 
 local PlacementContext = require "word_game.board.placement.context"
-local Kind = require "app.core.object"
+local Kind = require "jumbalaya-engine.object"
 local game_access = require("word_game.model.game_access")
 local layout = require "word_game.board.placement.layout"
 local draw = require "word_game.board.placement.draw"

@@ -9,8 +9,8 @@ T.describe("Phase 9 no G singleton", function()
 		_G.G = nil
 		BridgeRuntime.bind_game(nil)
 
-		require("app.core.util.tables")
-		require("app.core.object")
+		require("jumbalaya-engine.util.tables")
+		require("jumbalaya-engine.object")
 		require("word_game.model.game")
 		require("word_game.model.game.globals")
 

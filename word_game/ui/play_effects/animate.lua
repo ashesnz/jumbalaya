@@ -11,7 +11,7 @@ local bonus_stack_ui = facade.bonus_stack_ui()
 local card_fly_off = require("word_game.ui.play_effects.card_fly_off")
 local jumble_fixed_letters = require("word_game.ui.table.jumble_fixed_letters")
 local round_config = require("word_game.config.gameplay.round")
-local Easing = require "app.effects.easing"
+local Easing = require "word_game.ui.effects.easing"
 local definition = require("word_game.ui.play_effects.definition")
 local boss_word_intro = require("word_game.ui.play_effects.boss_word_intro")
 

@@ -89,12 +89,12 @@ end)
 
 T.describe("sprite shader uniform contract", function()
 	T.it("only sends dissolve_wipe to the dissolve shader", function()
-		local src = io.open("app/core/graphics/sprite_shader.lua", "r"):read("*a")
+		local src = io.open("packages/jumbalaya-engine/graphics/sprite_shader.lua", "r"):read("*a")
 		T.assert_not_nil(src:match("if _shader == 'dissolve'"), "dissolve_wipe must be dissolve-only")
 	end)
 
 	T.it("sends gold_seal time in a separate pcall from G.TIMERS.REAL", function()
-		local src = io.open("app/core/graphics/sprite_shader.lua", "r"):read("*a")
+		local src = io.open("packages/jumbalaya-engine/graphics/sprite_shader.lua", "r"):read("*a")
 		T.assert_not_nil(src:match("if _shader == 'gold_seal' then"),
 			"gold_seal clock must be sent even if earlier uniforms fail")
 		T.assert_not_nil(src:match("sh:send%('time', clock%)"),
@@ -194,7 +194,7 @@ T.describe("bonus card gold visuals", function()
 	end)
 
 	T.it("gold transform rematerializes as a shimmer bonus card before flying to the gutter", function()
-		local DissolveFX = require("app.effects.dissolve_fx")
+		local DissolveFX = require("word_game.ui.effects.dissolve_fx")
 		local orig_run = DissolveFX.run
 		local gold_before_fly = false
 		local shimmer_before_fly = false
@@ -323,7 +323,7 @@ T.describe("bonus card gold visuals", function()
 
 	T.it("shader gold_seal and time uniforms advance between frames", function()
 		mock_env.ensure_engine_globals()
-		require("app.core.graphics.sprite")
+		require("jumbalaya-engine.graphics.sprite")
 
 		G.CANVAS_SCALE = 1
 		G.TILESCALE = 1

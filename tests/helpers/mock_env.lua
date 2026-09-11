@@ -67,20 +67,20 @@ function M.ensure_engine_globals()
 	G.C.GREEN = G.C.GREEN or { 0, 1, 0, 1 }
 	G.SHADERS = G.SHADERS or {}
 
-	require("app.core.util.colour") -- installs colour_from_hex and friends
+	require("jumbalaya-engine.util.colour") -- installs colour_from_hex and friends
 	_G.ease_background_colour = _G.ease_background_colour or function() end
 	_G.push_node_transform = _G.push_node_transform or function() end
 	_G.track_hit_target = _G.track_hit_target or function() end
 	_G.teardown_tree = _G.teardown_tree or function() end
 
-	require("app.core.object")
-	require("app.core.util.tables")
-	require("app.core.util.tween")
-	require("app.core.scene.node")
-	require("app.core.scene.animated.init")
-	require("app.core.graphics.sprite")
-	require("app.core.graphics.sprite_animator")
-	require("app.core.input.router")
+	require("jumbalaya-engine.object")
+	require("jumbalaya-engine.util.tables")
+	require("jumbalaya-engine.util.tween")
+	require("jumbalaya-engine.scene.node")
+	require("jumbalaya-engine.scene.animated.init")
+	require("jumbalaya-engine.graphics.sprite")
+	require("jumbalaya-engine.graphics.sprite_animator")
+	require("jumbalaya-engine.interaction.router")
 end
 
 --- Load the real Card class plus presentation mixins (sprites, draw, tooltips).

@@ -3,7 +3,7 @@
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
-local Easing = require "app.effects.easing"
+local Easing = require "word_game.ui.effects.easing"
 local Components = require "word_game.ui.widgets.components"
 local game_access = require("word_game.model.game_access")
 

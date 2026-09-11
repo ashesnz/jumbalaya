@@ -2,8 +2,8 @@
 local live_game = require("word_game.model.live_game")
 
 
-local Scheduler = require "app.effects.timeline_scheduler"
-local CardMotion = require "app.effects.card_motion"
+local Scheduler = require "word_game.ui.effects.timeline_scheduler"
+local CardMotion = require "word_game.ui.effects.card_motion"
 local hand_size_cfg = require("word_game.model.hand_size")
 
 return function(context)

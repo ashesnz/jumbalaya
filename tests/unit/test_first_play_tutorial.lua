@@ -28,14 +28,14 @@ T.describe("First play tutorial", function()
 	package.loaded["word_game.ui.views.ui_view_host"] = nil
 
 	local saved_character_speech = package.loaded["word_game.ui.tutorial.character_speech"]
-	local saved_easing = package.loaded["app.effects.easing"]
+	local saved_easing = package.loaded["word_game.ui.effects.easing"]
 	package.loaded["word_game.ui.tutorial.character_speech"] = {
 		bubble_definition = function()
 			return { n = G.UI.ROOT, config = { align = "cm" }, nodes = {} }
 		end,
 		pop_bubble = function() end,
 	}
-	package.loaded["app.effects.easing"] = {
+	package.loaded["word_game.ui.effects.easing"] = {
 		value = function() end,
 	}
 	package.loaded["word_game.ui.tutorial.first_play"] = nil
@@ -183,5 +183,5 @@ T.describe("First play tutorial", function()
 	package.loaded["jumbalaya-engine.view_host"] = saved_view_host
 	package.loaded["word_game.ui.views.ui_view_host"] = nil
 	package.loaded["word_game.ui.tutorial.character_speech"] = saved_character_speech
-	package.loaded["app.effects.easing"] = saved_easing
+	package.loaded["word_game.ui.effects.easing"] = saved_easing
 end)

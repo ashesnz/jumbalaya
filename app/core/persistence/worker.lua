@@ -20,8 +20,8 @@ require 'love.filesystem'
 
 if love.system.getOS() == 'OS X' then jit.off() end
 
-require "app.core.object"
-require "app.core.util.pack"
+require "jumbalaya-engine.object"
+require "jumbalaya-engine.util.pack"
 
 local inbound = love.thread.getChannel("disk_write_queue")
 

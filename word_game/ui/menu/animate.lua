@@ -4,9 +4,9 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local Layout = require "word_game.ui.layout"
-local Easing = require "app.effects.easing"
-local MenuEffects = require "app.effects.menu"
-local Scheduler = require "app.effects.timeline_scheduler"
+local Easing = require "word_game.ui.effects.easing"
+local MenuEffects = require "word_game.ui.effects.menu"
+local Scheduler = require "word_game.ui.effects.timeline_scheduler"
 local UIViewHost = require("word_game.ui.views.ui_view_host")
 
 require "word_game.ui.menu.title_logo"
