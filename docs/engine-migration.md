@@ -920,16 +920,24 @@ Each PR: `love tests` → `emmylua_check . --severity warn` → manual smoke (§
 
 **Goal:** `rg '\bG\.'` zero in production; lifecycle on `RuntimeContext` + Love2D adapter.
 
+| Sub-PR | Focus | Status |
+|--------|-------|--------|
+| **PR-9a** | Runtime shell + session layer (`bridge/runtime.lua`, `lifecycle.lua`, `loop.lua`, save_queue) | ✅ |
+| **PR-9b** | `app/startup.lua`, input, persistence callbacks | pending |
+| **PR-9c** | `word_game/ui/` presentation purge | pending |
+| **PR-9d** | `word_game/model/` + delete `globals.lua` / `G = Game()` | pending |
+| **PR-9e** | Retire `G.FUNCS` + `types/g_funcs.lua` | pending |
+
 | Action | Files |
 |--------|-------|
-| Introduce runtime shell | Expand `bridge/runtime.lua` — `STATE`, `STAGE`, `SETTINGS`, `ROOM`, dimensions |
-| Migrate lifecycle | `app/core/session/lifecycle.lua`, `loop.lua`, `app/startup.lua` |
-| Delete | `word_game/model/game/globals.lua` (`G = Game()`), remaining `engine_boot` class chain |
+| Runtime shell | `bridge/runtime.lua` — `bind_game`, `game()`, `state()`, `stage()`, `settings()` |
+| Session migrate | `app/core/session/lifecycle.lua`, `loop.lua`, `loop/save_queue.lua`, `loop/debug_overlay.lua` |
+| Delete (final) | `word_game/model/game/globals.lua` (`G = Game()`), remaining `engine_boot` class chain |
 | Types | `types/game.lua` → fold into `types/store.lua`; delete `types/g_funcs.lua` when `G.FUNCS` gone |
 
 **Exit:** `rg '\bG\.' --glob '*.lua' -g '!tests/**' -g '!devtools/**'` → **0**.
 
-**Tests:** `test_phase8_no_g_singleton.lua` (boot without `G = Game()`).
+**Tests:** `test_phase9_runtime_shell.lua`; final `test_phase9_no_g_singleton.lua` (boot without `G = Game()`).
 
 ---
 

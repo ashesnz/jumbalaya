@@ -7,7 +7,7 @@ function M.state_col(_state)
 end
 
 function M.draw(game)
-	if _RELEASE_MODE or G.video_control or not G.F_VERBOSE then
+	if _RELEASE_MODE or game.video_control or not game.F_VERBOSE then
 		return
 	end
 
@@ -16,12 +16,12 @@ function M.draw(game)
 	local fps = love.timer.getFPS()
 	love.graphics.print("Current FPS: " .. fps, 10, 10)
 
-	if G.check and G.SETTINGS.perf_mode then
+	if game.check and game.SETTINGS.perf_mode then
 		local section_h = 30
 		local resolution = 60 * section_h
 		local poll_w = 1
 		local v_off = 100
-		for a, b in ipairs({G.check.update, G.check.draw}) do
+		for a, b in ipairs({game.check.update, game.check.draw}) do
 			for k, v in ipairs(b.checkpoint_list) do
 				love.graphics.setColor(0, 0, 0, 0.2)
 				love.graphics.rectangle('fill', 12, 20 + v_off, poll_w + poll_w * #v.trend, -section_h + 5)

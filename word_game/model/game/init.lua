@@ -9,6 +9,7 @@ Game = Kind:derive("Game")
 function Game:construct()
 	---@diagnostic disable-next-line: global-in-non-module
 	G = self
+	require("bridge.runtime").bind_game(self)
 	self:define_constants()
 	require("app.bootstrap.store_boot").install()
 end
