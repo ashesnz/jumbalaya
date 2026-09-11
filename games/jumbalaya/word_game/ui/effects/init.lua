@@ -5,6 +5,6 @@ return {
     card_motion = require "word_game.ui.effects.card_motion",
     menu = require "word_game.ui.effects.menu",
     runtime = require "word_game.ui.effects.runtime",
-    scheduler = require "word_game.ui.effects.timeline_scheduler",
+    scheduler = require "jumbalaya-engine.effects.timeline_scheduler",
     status_text = require "word_game.ui.effects.status_text",
 }

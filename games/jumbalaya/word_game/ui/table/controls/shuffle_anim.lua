@@ -3,7 +3,7 @@
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
-local Scheduler = require "word_game.ui.effects.timeline_scheduler"
+local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local game_access = require("word_game.model.game_access")
 local piles = require("word_game.model.piles")
 local runtime = require("app.runtime")

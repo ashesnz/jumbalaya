@@ -1,6 +1,6 @@
 --[[ app/callbacks/ui_controls/ ]]
 
-local Scheduler = require "word_game.ui.effects.timeline_scheduler"
+local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local Easing = require "word_game.ui.effects.easing"
 local ViewHost = require("jumbalaya-engine.view_host")
 

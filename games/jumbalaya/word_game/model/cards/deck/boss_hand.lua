@@ -2,7 +2,7 @@
 
 local live_game = require("word_game.model.live_game")
 
-local Scheduler = require "word_game.ui.effects.timeline_scheduler"
+local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local CardMotion = require "word_game.ui.effects.card_motion"
 local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 local game_access = require("word_game.model.game_access")

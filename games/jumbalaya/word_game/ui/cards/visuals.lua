@@ -5,7 +5,7 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 
-local Scheduler = require "word_game.ui.effects.timeline_scheduler"
+local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local DissolveFX = require "word_game.ui.effects.dissolve_fx"
 local LetterFaces = require "word_game.ui.cards.letter_faces"
 local LetterPalette = require "word_game.config.visuals.letter_card_palette"

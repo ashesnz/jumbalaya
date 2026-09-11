@@ -7,7 +7,7 @@
 	  build(panel)     - return a layout.section() node
 ]]
 local Kind = require "jumbalaya-engine.object"
-local Scheduler = require "word_game.ui.effects.timeline_scheduler"
+local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 
 
 local DebugContext = require "devtools.context"

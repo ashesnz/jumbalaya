@@ -3,7 +3,7 @@
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
-local UIViewHost = require("word_game.ui.views.ui_view_host")
+local UIViewHost = require("jumbalaya-engine.view_host")
 
 local M = {}
 

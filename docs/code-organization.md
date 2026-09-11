@@ -83,7 +83,7 @@ Glue modules are often labeled *"glue over jumbalaya_core"* in their file header
 
 **When adding gameplay logic:** implement the rule in `jumbalaya_core` first (with a `test_core_*` test), then add the thinnest possible glue in `word_game/model/`. Do not duplicate rule logic in `word_game/` — extend core and call it.
 
-**Config imports:** Engine-agnostic tuning (`round`, `economy`, hand targets, token costs) lives in `jumbalaya_core/config/` — require `jumbalaya_core.config.gameplay.*` directly from model glue and tests. Game-only data (jumble puzzles, visuals, boot flags, `run_params`) stays in `word_game/config/`. Do not add one-line re-export proxy files.
+**Direct imports (no proxies):** Engine-agnostic tuning → `jumbalaya_core.config.gameplay.*`; timeline scheduling → `jumbalaya-engine.effects.timeline_scheduler`; retained UI host → `jumbalaya-engine.view_host`; number formatting → `jumbalaya-engine.util.number_format`. Game-only data (jumble puzzles, visuals, boot flags, `run_params`) stays in `word_game/config/`. Do not add one-line `return require(...)` shim files or side-effect `require … return true` loaders under `word_game/` (`test_legacy_shims.lua` scans the tree). Allowed exception: `app/bootstrap/engine_boot.lua` delegates to `jumbalaya-engine.boot`.
 
 ### UI foundation versus word-game UI
 

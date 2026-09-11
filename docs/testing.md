@@ -93,7 +93,7 @@ These tests must pass on every PR. See [code-organization.md](code-organization.
 | **Store / access** | `test_store_sync.lua`, `test_game_access.lua`, `test_piles.lua` | Store binding, `game_access`, pile hosts |
 | **UI / table** | `test_table_board.lua`, `test_sidebar_stage_button.lua`, `test_timeline_timer.lua`, … | HUD, fuse, table rendering |
 | **Persistence** | `test_save_roundtrip.lua` | Save/load contract |
-| **Boot / policy** | `test_boot_simulation.lua`, `test_g_funcs_registry.lua`, `test_store_state_catalog.lua`, `test_facade_boundaries.lua`, `test_core_purity.lua` | Startup smoke, Funcs/UI bindings, run-state catalog, facade imports, core headless isolation |
+| **Boot / policy** | `test_boot_simulation.lua`, `test_g_funcs_registry.lua`, `test_store_state_catalog.lua`, `test_facade_boundaries.lua`, `test_core_purity.lua`, `test_legacy_shims.lua` | Startup smoke, Funcs/UI bindings, run-state catalog, facade imports, core isolation, proxy-file scan |
 
 ## CI
 

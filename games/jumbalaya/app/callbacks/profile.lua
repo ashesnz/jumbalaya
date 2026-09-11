@@ -3,7 +3,7 @@
 --Determines if there is a valid save file to load and continue from main menu
 --**e** Is the UIE that called this function
 
-local Scheduler = require "word_game.ui.effects.timeline_scheduler"
+local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 
 local BridgeRuntime = require("app.runtime")
 local Funcs = require("app.callbacks.funcs")

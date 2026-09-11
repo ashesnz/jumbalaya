@@ -7,7 +7,7 @@
 	Knows nothing about Card — works for any Moveable-style node.
 ]]
 
-local Scheduler = require "word_game.ui.effects.timeline_scheduler"
+local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 
 local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end

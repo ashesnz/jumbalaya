@@ -6,8 +6,8 @@ local function runtime() return GameRT.game() end
 local Layout = require "word_game.ui.layout"
 local Easing = require "word_game.ui.effects.easing"
 local MenuEffects = require "word_game.ui.effects.menu"
-local Scheduler = require "word_game.ui.effects.timeline_scheduler"
-local UIViewHost = require("word_game.ui.views.ui_view_host")
+local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
+local UIViewHost = require("jumbalaya-engine.view_host")
 
 require "word_game.ui.menu.title_logo"
 local Funcs = require("app.callbacks.funcs")
