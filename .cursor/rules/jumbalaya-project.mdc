@@ -40,7 +40,7 @@ Agent docs: `AGENTS.md`, `.cursor/skills/jumbalaya/SKILL.md`
 
 ## Active vs legacy
 
-Jumble mode is the player experience (`word_game/model/jumble/`, `word_game/model/jumble_play/`). Legacy AP/plays/discards code may remain but is not active — do not extend it unless asked. Right-hand HUD is `word_game/ui/sidebar/` (`WORD_GAME_UI.Sidebar`) — not vault.
+Jumble mode is the player experience (`word_game/model/jumble/`, `word_game/model/jumble_play/`). Legacy AP/plays/discards loop code has been removed. Right-hand HUD is `word_game/ui/sidebar/` (`WORD_GAME_UI.Sidebar`) — not vault.
 
 ## Verification
 

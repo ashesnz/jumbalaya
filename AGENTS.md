@@ -52,7 +52,7 @@ Canonical game tree: `games/jumbalaya/` (`app/`, `word_game/`, …). Shared pack
 
 ## Active vs legacy
 
-**Jumble mode** is the player experience (`word_game/model/jumble/`, `word_game/model/jumble_play/`). Legacy AP/plays/discards code may remain but is **not active** — do not extend it unless asked.
+**Jumble mode** is the player experience (`word_game/model/jumble/`, `word_game/model/jumble_play/`). Legacy AP/plays/discards loop code has been removed — do not reintroduce open-board playability rerolls, `current_hand` stubs, or consumable `usables` piles.
 
 Removed / renamed (do not reintroduce):
 

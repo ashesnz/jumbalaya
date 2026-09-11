@@ -75,19 +75,12 @@ function Game:init_game_object()
             furthest_round = {label = 'Round', amt = 0},
             cards_discarded = {label = 'Cards Discarded', amt = 0},
         },
-        tile_usage = {},
         modifiers = {},
         starting_params = require("word_game.config.gameplay.run_params").get(),
         round = 0,
         seed_streams = {},
         starting_deck_size = 12,
         points = 0,
-        current_round = {
-            current_hand = {
-                points = 0,
-                mult = 0,
-            },
-        },
     }
 end
 
@@ -215,20 +208,9 @@ function Game:start_run(args)
         deck_H = 0.95*self.CARD_H,
         hand_W = get_hand_area_width(hand_size),
         hand_H = 0.95*self.CARD_H,
-        play_W = math.min(5, hand_size)*self.CARD_W + 0.3*self.CARD_W,
-        play_H = 0.95*self.CARD_H,
         placement_W = self.pattern_row:area_width(),
         placement_H = self.pattern_row:area_height(),
-        usable_W = 2.3*self.CARD_W,
-        usable_H = 0.95*self.CARD_H
     }
-
-
-    self.usables = CardPile(
-        0, 0,
-        CAI.usable_W,
-        CAI.usable_H, 
-        {card_limit = run.starting_params.usable_slots, type = 'usable', selection_limit = 1})
 
     self.pattern_row:create_area(CAI.placement_W, CAI.placement_H)
     self.pattern_row:setup()
@@ -266,9 +248,6 @@ function Game:start_run(args)
 
     Presentation.emit("sidebar_ensure")
     apply_run_layout()
-    if self.usables then
-        self.usables.states.visible = false
-    end
 
     if saveTable then
         restore_card_areas(saveTable)

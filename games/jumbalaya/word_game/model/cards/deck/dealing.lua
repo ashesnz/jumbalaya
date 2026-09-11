@@ -67,7 +67,6 @@ return function(context)
 		local need = math.max(0, target_size - M.held_count())
 		local function finish()
 			M.ensure_vowel_in_hand()
-			M.ensure_playable_held()
 			M.commit_pile_hosts({ "hand", "draw" })
 			if on_complete then on_complete() end
 		end
@@ -116,7 +115,6 @@ return function(context)
 			live_game().dealt_letters:emplace(card)
 		end
 		M.ensure_vowel_in_hand()
-		M.ensure_playable_held()
 		if live_game().dealt_letters then
 			M.sanitize_hand()
 			while M.held_count() < target_size do
@@ -125,7 +123,6 @@ return function(context)
 				live_game().dealt_letters:emplace(card)
 			end
 			M.ensure_vowel_in_hand()
-			M.ensure_playable_held()
 			live_game().dealt_letters:set_ranks()
 			live_game().dealt_letters:relayout()
 			M.commit_pile_hosts({ "hand", "draw" })

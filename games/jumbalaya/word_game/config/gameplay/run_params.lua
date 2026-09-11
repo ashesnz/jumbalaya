@@ -8,7 +8,6 @@ local M = {}
 function M.get()
 	return {
 		hand_size = hand_size.get(),
-		usable_slots = 2,
 	}
 end
 

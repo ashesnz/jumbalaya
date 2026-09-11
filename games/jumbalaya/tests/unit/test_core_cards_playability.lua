@@ -20,16 +20,8 @@ T.describe("jumbalaya_core cards playability", function()
 		T.assert_equal(consonants, 1)
 	end)
 
-	T.it("prioritizes vowels for swap rerolls at equal letter index", function()
-		local vowel = { ability = { letter = "A" }, base = { letter_index = 5 } }
-		local consonant = { ability = { letter = "Z" }, base = { letter_index = 5 } }
-		T.assert_true(Playability.swap_priority(vowel) > Playability.swap_priority(consonant))
-	end)
-
-	T.it("builds trial letter multisets for swap checks", function()
-		local trial = Playability.trial_letter_swap({ C = 1, A = 1 }, "A", "T")
-		T.assert_equal(trial.C, 1)
-		T.assert_nil(trial.A)
-		T.assert_equal(trial.T, 1)
+	T.it("treats unowned cards as not in the draw pile", function()
+		local card = { area = { id = "hand" }, ability = { letter = "A" } }
+		T.assert_false(Playability.deck_owns(card, draw_pile))
 	end)
 end)

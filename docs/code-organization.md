@@ -246,7 +246,7 @@ Runtime hand size (`WORD_GAME.HandSize.get()`) glue lives in `word_game/model/ha
 | `cards/` | Letter-card definitions, `Card` class, `deck/` dealing |
 | `perks/` | Glue over `jumbalaya_core` perk registry and effects |
 | `feedback/` | Model-layer attention text queue (drained by `word_feedback`) |
-| `persistence/` | Run save/restore (`run_save`), profile progress writes |
+| `persistence/` | Run save/restore (`run_save`), save schema version (`save_schema`), profile progress writes |
 
 ### Cards (`word_game/model/cards/`)
 

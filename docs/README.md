@@ -2,7 +2,7 @@
 
 Jumbalaya is a roguelike word game built on Love2D. You solve **jumble puzzles** under time pressure, bank **points × multiplier** scores, and clear **24 stages** (8 sets × 3 hands) to win the match.
 
-The game pivoted from an open Scrabble-like placement loop to a **pattern jumble** mode with timeline pressure, tokens, vouchers, and run modifiers. Legacy AP/plays/discards code still exists in the repo but is not the active player experience.
+The game pivoted from an open Scrabble-like placement loop to a **pattern jumble** mode with timeline pressure, tokens, vouchers, and run modifiers. Legacy AP/plays/discards loop code has been removed; jumble mode is the only active player experience.
 
 ## How to read these docs
 

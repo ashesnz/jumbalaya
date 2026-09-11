@@ -65,12 +65,11 @@
 ---@field pseudorandom table|nil
 ---@field seed_streams { seed: string, hashed_seed: number }|nil
 ---@field starting_deck_size number|nil
----@field starting_params { hand_size: number, usable_slots: number }|nil
+---@field starting_params { hand_size: number, usable_slots: number|nil }|nil
 ---@field points number|nil
 ---@field round number|nil
 ---@field round_scores table<string, { amt: number }>|nil
 ---@field modifiers table<string, boolean>|nil
----@field current_round table|nil
 ---@field deck_alpha { pos: { x: number, y: number } }|nil
 ---@field deck_left_count number|nil
 ---
