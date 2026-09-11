@@ -7,14 +7,20 @@
 	word_game/ui/layout/backgrounds.lua).
 ]]
 
+local BridgeRuntime = require("bridge.runtime")
 local Layout = require "word_game.ui.layout"
 
+local function game()
+	return BridgeRuntime.game()
+end
+
 function get_play_area_rect()
+	local g = game()
 	return {
 		x = 0.8,
 		y = 2.0,
-		w = G.TILE_W - 1.6,
-		h = G.TILE_H - 3.5,
+		w = g.TILE_W - 1.6,
+		h = g.TILE_H - 3.5,
 	}
 end
 
@@ -22,14 +28,16 @@ function get_table_board_sidebar_frac()
 	if WORD_GAME_UI.Layout then
 		return WORD_GAME_UI.Layout.sidebar_frac()
 	end
-	return (G.TABLE_BOARD_SIDEBAR_WIDTH or 3.0) / (G.TILE_W or 20)
+	local g = game()
+	return (g.TABLE_BOARD_SIDEBAR_WIDTH or 3.0) / (g.TILE_W or 20)
 end
 
 function get_table_board_sidebar_width()
 	if WORD_GAME_UI.Layout then
 		return WORD_GAME_UI.Layout.sidebar_width()
 	end
-	return G.TABLE_BOARD_SIDEBAR_WIDTH or 3.0
+	local g = game()
+	return g.TABLE_BOARD_SIDEBAR_WIDTH or 3.0
 end
 
 function get_side_panel_inner_width()
@@ -49,21 +57,24 @@ function get_table_felt_rect()
 	if WORD_GAME_UI.Layout then
 		return WORD_GAME_UI.Layout.felt_rect()
 	end
+	local g = game()
 	return {
 		x = 0.8,
 		y = 2.0,
-		w = G.TILE_W - 1.6,
-		h = G.TILE_H - 3.5,
+		w = g.TILE_W - 1.6,
+		h = g.TILE_H - 3.5,
 	}
 end
 
 function apply_run_layout()
-	if G.STAGE == G.STAGES.RUN and G.dealt_letters then
+	local g = game()
+	if g.STAGE == g.STAGES.RUN and g.dealt_letters then
 		Layout.set_screen_positions()
 	end
 end
 
 function get_hand_area_width(hand_size)
-	local spacing = G.HAND_CARD_SPACING or 0.78
-	return G.CARD_W + math.max(hand_size - 1, 0) * G.CARD_W * spacing
+	local g = game()
+	local spacing = g.HAND_CARD_SPACING or 0.78
+	return g.CARD_W + math.max(hand_size - 1, 0) * g.CARD_W * spacing
 end

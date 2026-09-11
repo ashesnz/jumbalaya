@@ -1,71 +1,93 @@
 -- LÖVE input callbacks. InputController owns input state and UI focus resolution.
 
+local BridgeRuntime = require("bridge.runtime")
+
+local function game()
+	return BridgeRuntime.game()
+end
+
 ---@param key string
 function love.keypressed(key)
-	if not _RELEASE_MODE and G.keybind_mapping[key] then
-		love.gamepadpressed(G.INPUT.keyboard_controller, G.keybind_mapping[key])
+	local g = game()
+	if not g then return end
+	if not _RELEASE_MODE and g.keybind_mapping[key] then
+		love.gamepadpressed(g.INPUT.keyboard_controller, g.keybind_mapping[key])
 	else
-		G.INPUT:set_HID_flags("mouse")
-		G.INPUT:key_press(key)
+		g.INPUT:set_HID_flags("mouse")
+		g.INPUT:key_press(key)
 	end
 end
 
 ---@param key string
 function love.keyreleased(key)
-	if not _RELEASE_MODE and G.keybind_mapping[key] then
-		love.gamepadreleased(G.INPUT.keyboard_controller, G.keybind_mapping[key])
+	local g = game()
+	if not g then return end
+	if not _RELEASE_MODE and g.keybind_mapping[key] then
+		love.gamepadreleased(g.INPUT.keyboard_controller, g.keybind_mapping[key])
 	else
-		G.INPUT:set_HID_flags("mouse")
-		G.INPUT:key_release(key)
+		g.INPUT:set_HID_flags("mouse")
+		g.INPUT:key_release(key)
 	end
 end
 
 function love.gamepadpressed(joystick, button)
-	button = G.button_mapping[button] or button
-	G.INPUT:set_gamepad(joystick)
-	G.INPUT:set_HID_flags("button", button)
-	G.INPUT:button_press(button)
+	local g = game()
+	if not g then return end
+	button = g.button_mapping[button] or button
+	g.INPUT:set_gamepad(joystick)
+	g.INPUT:set_HID_flags("button", button)
+	g.INPUT:button_press(button)
 end
 
 function love.gamepadreleased(joystick, button)
-	button = G.button_mapping[button] or button
-	G.INPUT:set_gamepad(joystick)
-	G.INPUT:set_HID_flags("button", button)
-	G.INPUT:button_release(button)
+	local g = game()
+	if not g then return end
+	button = g.button_mapping[button] or button
+	g.INPUT:set_gamepad(joystick)
+	g.INPUT:set_HID_flags("button", button)
+	g.INPUT:button_release(button)
 end
 
 ---@param button number
 ---@param touch boolean|nil
 function love.mousepressed(x, y, button, touch)
-	G.INPUT:set_HID_flags(touch and "touch" or "mouse")
+	local g = game()
+	if not g then return end
+	g.INPUT:set_HID_flags(touch and "touch" or "mouse")
 	if button == 1 then
-		G.INPUT:queue_L_cursor_press(x, y)
+		g.INPUT:queue_L_cursor_press(x, y)
 	elseif button == 2 then
-		G.INPUT:queue_R_cursor_press(x, y)
+		g.INPUT:queue_R_cursor_press(x, y)
 	end
 end
 
 function love.mousereleased(x, y, button)
+	local g = game()
+	if not g then return end
 	if button == 1 then
-		G.INPUT:L_cursor_release(x, y)
+		g.INPUT:L_cursor_release(x, y)
 	end
 end
 
 function love.mousemoved()
-	G.INPUT.last_touch_time = G.INPUT.last_touch_time or -1
+	local g = game()
+	if not g then return end
+	g.INPUT.last_touch_time = g.INPUT.last_touch_time or -1
 	if next(love.touch.getTouches()) ~= nil then
-		G.INPUT.last_touch_time = G.TIMERS.UPTIME
+		g.INPUT.last_touch_time = g.TIMERS.UPTIME
 	end
 
-	local recently_touched = G.INPUT.last_touch_time > G.TIMERS.UPTIME - 0.2
-	G.INPUT:set_HID_flags(recently_touched and "touch" or "mouse")
+	local recently_touched = g.INPUT.last_touch_time > g.TIMERS.UPTIME - 0.2
+	g.INPUT:set_HID_flags(recently_touched and "touch" or "mouse")
 end
 
 --- Ignore small analog-stick drift when selecting the active input device.
 function love.joystickaxis(joystick, _, value)
+	local g = game()
+	if not g then return end
 	if math.abs(value) > 0.2 and joystick:isGamepad() then
-		G.INPUT:set_gamepad(joystick)
-		G.INPUT:set_HID_flags("axis")
+		g.INPUT:set_gamepad(joystick)
+		g.INPUT:set_HID_flags("axis")
 	end
 end
 

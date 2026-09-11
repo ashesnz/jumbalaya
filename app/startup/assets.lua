@@ -156,7 +156,7 @@ function Game:set_render_settings()
 		self.TEXTURE_ATLASES[self.asset_images[i].name].py = self.asset_images[i].py
 	end
 
-	for _, v in pairs(G.LIVE.SPRITE) do
+	for _, v in pairs(self.LIVE.SPRITE) do
 		v:reset()
 	end
 

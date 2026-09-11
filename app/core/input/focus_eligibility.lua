@@ -1,13 +1,16 @@
 return function(InputRouter)
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 local CardFocus = require("app.core.input.card_focus")
 
 function InputRouter:is_node_focusable(node)
 	local focusable = false
-	if node.T.y > G.ROOM.T.h + 3 then return false end
+	if node.T.y > g().ROOM.T.h + 3 then return false end
 
 	if not node.REMOVED and not node.under_overlay
 		and (node.states.hover.can and not self.dragging.target or self.dragging.target == node)
-		and ((not not node.created_on_pause) == (not not G.SETTINGS.paused))
+		and ((not not node.created_on_pause) == (not not g().SETTINGS.paused))
 		and node.states.visible
 		and (not node.panel or node.panel.states.visible) then
 		if self.screen_keyboard then

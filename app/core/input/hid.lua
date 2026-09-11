@@ -1,4 +1,7 @@
 return function(InputRouter)
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 function InputRouter:set_HID_flags(HID_type, button)
 	if HID_type == 'axis' then
 		self.HID.controller = true
@@ -34,9 +37,9 @@ function InputRouter:set_cursor_position()
 	end
 
 	self.cursor_position.x, self.cursor_position.y = love.mouse.getPosition()
-	G.POINTER.T.x = self.cursor_position.x / (G.TILESCALE * G.TILESIZE)
-	G.POINTER.T.y = self.cursor_position.y / (G.TILESCALE * G.TILESIZE)
-	G.POINTER.VT.x = G.POINTER.T.x
-	G.POINTER.VT.y = G.POINTER.T.y
+	g().POINTER.T.x = self.cursor_position.x / (g().TILESCALE * g().TILESIZE)
+	g().POINTER.T.y = self.cursor_position.y / (g().TILESCALE * g().TILESIZE)
+	g().POINTER.VT.x = g().POINTER.T.x
+	g().POINTER.VT.y = g().POINTER.T.y
 end
 end

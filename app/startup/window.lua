@@ -15,18 +15,18 @@ function Game:init_window(reset)
 		w=self.WINDOW_TRANSFORM.w*self.TILESIZE*self.TILESCALE,
 		h=self.WINDOW_TRANSFORM.h*self.TILESIZE*self.TILESCALE,
 		orig_ratio = self.WINDOW_TRANSFORM.w*self.TILESIZE*self.TILESCALE/(self.WINDOW_TRANSFORM.h*self.TILESIZE*self.TILESCALE)}
-	G.SETTINGS.QUEUED_CHANGE = G.SETTINGS.QUEUED_CHANGE or {}
-	G.SETTINGS.QUEUED_CHANGE.screenmode = G.SETTINGS.WINDOW.screenmode
+	self.SETTINGS.QUEUED_CHANGE = self.SETTINGS.QUEUED_CHANGE or {}
+	self.SETTINGS.QUEUED_CHANGE.screenmode = self.SETTINGS.WINDOW.screenmode
 
 	local os_name = love.system.getOS()
 	if os_name == 'iOS' or os_name == 'Android' then
 		local Window = require "app.core.platform.window"
 		Window.sync_resize()
-		G.SETTINGS.QUEUED_CHANGE = {}
+		self.SETTINGS.QUEUED_CHANGE = {}
 		return
 	end
 
-	G.FUNCS.apply_window_changes(true)
+	self.FUNCS.apply_window_changes(true)
 	local Window = require "app.core.platform.window"
 	Window.sync_resize()
 end

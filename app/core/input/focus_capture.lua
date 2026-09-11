@@ -1,4 +1,7 @@
 return function(InputRouter)
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 function InputRouter:capture_focused_input(button, input_type, dt)
 	local captured = false
 	local focused = self.focused.target
@@ -42,13 +45,13 @@ function InputRouter:capture_focused_input(button, input_type, dt)
 	end
 
 	-- Overlay shoulder buttons hijack L/R for tab strips and option cycles.
-	if G.OVERLAY_MENU and not self.screen_keyboard and input_type == 'press'
+	if g().OVERLAY_MENU and not self.screen_keyboard and input_type == 'press'
 		and (button == 'leftshoulder' or button == 'rightshoulder') then
-		if G.OVERLAY_MENU:find_node_by_id('tab_shoulders') then
-			focused = G.OVERLAY_MENU:find_node_by_id('tab_shoulders')
+		if g().OVERLAY_MENU:find_node_by_id('tab_shoulders') then
+			focused = g().OVERLAY_MENU:find_node_by_id('tab_shoulders')
 			extern_button = true
 		end
-		local cycle = G.OVERLAY_MENU:find_node_by_id('cycle_shoulders')
+		local cycle = g().OVERLAY_MENU:find_node_by_id('cycle_shoulders')
 		if cycle then
 			focused = cycle.children[1]
 			extern_button = true
@@ -100,16 +103,16 @@ function InputRouter:capture_focused_input(button, input_type, dt)
 				local step = button == 'dpleft' and -0.01 or 0.01
 				local drift = (button == 'dpleft' and -dt or dt) * (self.held_button_times[button] or 0) * 0.6
 				if input_type == 'hold' and (self.held_button_times[button] or 0) > 0.2 then
-					G.FUNCS.slider_step(focused.children[1], drift)
+					g().FUNCS.slider_step(focused.children[1], drift)
 				elseif input_type == 'press' then
-					G.FUNCS.slider_step(focused.children[1], step)
+					g().FUNCS.slider_step(focused.children[1], step)
 				end
 				captured = true
 			end
 		end
 	end
 
-	if captured then G.VIBRATION = G.VIBRATION + 1 end
+	if captured then g().VIBRATION = g().VIBRATION + 1 end
 	return captured
 end
 

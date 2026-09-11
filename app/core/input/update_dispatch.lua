@@ -1,4 +1,7 @@
 local EffectsScheduler = require("app.effects.timeline_scheduler")
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 
 return function(InputRouter)
 function InputRouter:update_dispatch(dt)
@@ -23,7 +26,7 @@ function InputRouter:update_dispatch(dt)
 	-- Click (word-game hook: cinematic dialogue may swallow the click).
 	if not self.clicked.handled then
 		local clicked = self.clicked.target
-		if G.consume_board_click and G.consume_board_click() then
+		if g().consume_board_click and g().consume_board_click() then
 			self.clicked.handled = true
 		elseif clicked then
 			clicked:click()
@@ -63,7 +66,7 @@ function InputRouter:update_dispatch(dt)
 					mode = 'delayed',
 					blockable = false,
 					blocking = false,
-					delay = G.MIN_HOVER_TIME,
+					delay = g().MIN_HOVER_TIME,
 					func = function()
 						if self.hovering.target and target_id == self.hovering.target.ID then
 							self.hovering.target:hover()

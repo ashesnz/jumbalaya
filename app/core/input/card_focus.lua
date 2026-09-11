@@ -1,4 +1,7 @@
 --[[ app/core/input/card_focus.lua - Optional TABLE_BOARD card-focus hooks (installed at boot) ]]
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 
 local M = {
 	hooks = {},
@@ -26,7 +29,7 @@ end
 function M.hand_area()
 	local fn = M.hooks.hand_area
 	if fn then return fn() end
-	for _, value in pairs(G) do
+	for _, value in pairs(g()) do
 		if type(value) == "table" and value.is_kind and value:is_kind(CardArea)
 			and value.config and value.config.type == 'hand' then
 			return value

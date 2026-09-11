@@ -1,4 +1,7 @@
 return function(InputRouter)
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 function InputRouter:button_press_update(button, dt)
 	if self.locks.frame then return end
 	self.held_button_times[button] = 0
@@ -12,23 +15,23 @@ function InputRouter:button_press_update(button, dt)
 		if button == "dpright" then self:navigate_focus('R') end
 	end
 
-	if ((self.locked) and not G.SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
+	if ((self.locked) and not g().SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
 	self.frame_buttonpress = true
 
 	local registry = self.button_registry[button]
 	if registry and registry[1] and not registry[1].node.under_overlay then
 		registry[1].click = true
 	else
-		if button == 'start' and G.STATE == G.STATES.SPLASH then
-			G:discard_run()
-			G:open_main_menu()
+		if button == 'start' and g().STATE == g().STATES.SPLASH then
+			g():discard_run()
+			g():open_main_menu()
 		end
 		if button == "a" then
 			-- Focused sliders handle their own activation in pure-controller mode.
 			local focused_args = self.focused.target and self.focused.target.config
 				and self.focused.target.config.focus_args
 			if not (focused_args and focused_args.type == 'slider'
-				and not G.INPUT.HID.mouse and not G.INPUT.HID.axis_cursor) then
+				and not self.HID.mouse and not self.HID.axis_cursor) then
 				self:L_cursor_press()
 			end
 		end
@@ -44,7 +47,7 @@ function InputRouter:button_press_update(button, dt)
 end
 
 function InputRouter:button_hold_update(button, dt)
-	if ((self.locked) and not G.SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
+	if ((self.locked) and not g().SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
 	self.frame_buttonpress = true
 
 	if self.held_button_times[button] then
@@ -85,7 +88,7 @@ function InputRouter:key_press_update(key, dt)
 		elseif key == "capslock" then
 			self.capslock = not self.capslock
 		else
-			G.FUNCS.text_field_key{
+			g().FUNCS.text_field_key{
 				e = self.text_capture,
 				key = key,
 				caps = self.held_keys["lshift"] or self.held_keys["rshift"],
@@ -95,17 +98,17 @@ function InputRouter:key_press_update(key, dt)
 	end
 
 	if key == "escape" then
-		if G.STATE == G.STATES.SPLASH then
-			G:discard_run()
-			G:open_main_menu()
-		elseif not G.OVERLAY_MENU then
-			G.FUNCS:options()
-		elseif not G.OVERLAY_MENU.config.no_esc then
-			G.FUNCS:exit_overlay_menu()
+		if g().STATE == g().STATES.SPLASH then
+			g():discard_run()
+			g():open_main_menu()
+		elseif not g().OVERLAY_MENU then
+			g().FUNCS:options()
+		elseif not g().OVERLAY_MENU.config.no_esc then
+			g().FUNCS:exit_overlay_menu()
 		end
 	end
 
-	if ((self.locked) and not G.SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
+	if ((self.locked) and not g().SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
 	self.frame_buttonpress = true
 	self.held_key_times[key] = 0
 
@@ -115,8 +118,8 @@ function InputRouter:key_press_update(key, dt)
 end
 
 function InputRouter:key_hold_update(key, dt)
-	if ((self.locked) and not G.SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
-	if self.held_key_times[key] and key == "r" and not G.SETTINGS.paused then
+	if ((self.locked) and not g().SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
+	if self.held_key_times[key] and key == "r" and not g().SETTINGS.paused then
 		if self.held_key_times[key] > 0.7 then
 			if InputRouter._input_actions then
 				InputRouter._input_actions.key_hold(self, key, dt)
@@ -128,7 +131,7 @@ function InputRouter:key_hold_update(key, dt)
 end
 
 function InputRouter:key_release_update(key, dt)
-	if ((self.locked) and not G.SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
+	if ((self.locked) and not g().SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
 	self.frame_buttonpress = true
 	if InputRouter._input_actions then
 		InputRouter._input_actions.key_release(self, key)

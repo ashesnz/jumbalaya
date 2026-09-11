@@ -52,7 +52,9 @@ function M.finalize(game)
 end
 
 function M.draw_overlay()
-	if not G or not G.F_ATLAS_DEBUG_OVERLAY or not G.ATLAS_DEBUG_REPORT then return end
+	local BridgeRuntime = require("bridge.runtime")
+	local game = BridgeRuntime.game()
+	if not game or not game.F_ATLAS_DEBUG_OVERLAY or not game.ATLAS_DEBUG_REPORT then return end
 	if not love.graphics then return end
 	local font = love.graphics.getFont()
 	local line_h = font:getHeight() * 0.22
@@ -60,7 +62,7 @@ function M.draw_overlay()
 	love.graphics.setColor(0, 0, 0, 0.72)
 	love.graphics.rectangle("fill", 4, 4, 520, line_h * (#M.lines + 1) + 8)
 	love.graphics.setColor(0.3, 1, 0.4, 1)
-	love.graphics.print(G.ATLAS_DEBUG_REPORT, 8, 8, 0, 0.22, 0.22)
+	love.graphics.print(game.ATLAS_DEBUG_REPORT, 8, 8, 0, 0.22, 0.22)
 	love.graphics.pop()
 end
 

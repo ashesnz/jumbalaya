@@ -1,4 +1,7 @@
 return function(InputRouter)
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 function InputRouter:cull_registry()
 	for _, registry in pairs(self.button_registry) do
 		for i = #registry, 1, -1 do
@@ -15,7 +18,7 @@ function InputRouter:add_to_registry(node, registry)
 	self.button_registry[registry] = self.button_registry[registry] or {}
 	table.insert(self.button_registry[registry], 1, {
 		node = node,
-		menu = (not not G.OVERLAY_MENU) or (not not G.SETTINGS.paused),
+		menu = (not not g().OVERLAY_MENU) or (not not g().SETTINGS.paused),
 	})
 end
 
@@ -26,9 +29,9 @@ function InputRouter:process_registry()
 		for i = 1, #registry do
 			local entry = registry[i]
 			if entry.click and entry.node.click then
-				local in_bounds = entry.node.T.x > -2 and entry.node.T.x < G.ROOM.T.w + 2
-					and entry.node.T.y > -2 and entry.node.T.y < G.ROOM.T.h + 2
-				if entry.menu == (not not G.OVERLAY_MENU) and in_bounds then
+				local in_bounds = entry.node.T.x > -2 and entry.node.T.x < g().ROOM.T.w + 2
+					and entry.node.T.y > -2 and entry.node.T.y < g().ROOM.T.h + 2
+				if entry.menu == (not not g().OVERLAY_MENU) and in_bounds then
 					entry.node:click()
 				end
 				entry.click = nil

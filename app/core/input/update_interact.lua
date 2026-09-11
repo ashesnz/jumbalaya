@@ -1,6 +1,9 @@
 return function(InputRouter)
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 function InputRouter:update_interact(dt)
-	self:get_cursor_collision(G.POINTER.T)
+	self:get_cursor_collision(g().POINTER.T)
 	self:update_focus()
 	self:set_cursor_hover()
 	if self.deferred_press then
@@ -39,8 +42,8 @@ function InputRouter:update_interact(dt)
 		if self.press_state.target then
 			-- Respect per-node click timeout (scaled by game speed).
 			local down = self.press_state.target
-			if not down.click_timeout or down.click_timeout * G.TIME_SCALE > self.release_state.time - self.press_state.time then
-				if point_distance(self.press_state.T, self.release_state.T) < G.MIN_CLICK_DIST then
+			if not down.click_timeout or down.click_timeout * g().TIME_SCALE > self.release_state.time - self.press_state.time then
+				if point_distance(self.press_state.T, self.release_state.T) < g().MIN_CLICK_DIST then
 					if down.states.click.can then
 						self.clicked.target = down
 						self.clicked.handled = false

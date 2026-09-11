@@ -7,49 +7,59 @@
 	format and delegates domain work through the facade.
 ]]
 
+local BridgeRuntime = require("bridge.runtime")
+
 local function persistence()
 	return rawget(_G, "WORD_GAME") and WORD_GAME.Persistence
 end
 
+local function game()
+	return BridgeRuntime.game()
+end
+
 function snapshot_for_action(action)
-	G.action = action
+	local g = game()
+	if not g then return end
+	g.action = action
 	queue_run_snapshot()
-	G.action = nil
+	g.action = nil
 end
 
 --- Collects store state plus game metadata and flags a pending run write.
 function queue_run_snapshot()
-	if G.F_NO_SAVING == true then return end
-	local runtime = require("bridge.runtime")
-	local store = runtime.store()
+	local g = game()
+	if not g or g.F_NO_SAVING == true then return end
+	local store = BridgeRuntime.store()
 	local store_state = store and store:get()
 	if not store_state then return end
 
-	G.ARGS.run_snapshot = save_safe_clone{
+	g.ARGS.run_snapshot = save_safe_clone{
 		store = store_state,
-		STATE = G.STATE,
-		ACTION = G.action,
+		STATE = g.STATE,
+		ACTION = g.action,
 		BACK = store_state.selected_back and store_state.selected_back.save and store_state.selected_back:save() or nil,
-		VERSION = G.VERSION,
+		VERSION = g.VERSION,
 	}
 	local persist = persistence()
 	if persist and persist.RunSave and persist.RunSave.append_pattern_row_snapshot then
-		persist.RunSave.append_pattern_row_snapshot(G.ARGS.run_snapshot)
+		persist.RunSave.append_pattern_row_snapshot(g.ARGS.run_snapshot)
 	end
 
-	G.WRITE_FLAGS = G.WRITE_FLAGS or {}
-	G.WRITE_FLAGS.run = true
-	G.WRITE_FLAGS.update_queued = true
+	g.WRITE_FLAGS = g.WRITE_FLAGS or {}
+	g.WRITE_FLAGS.run = true
+	g.WRITE_FLAGS.update_queued = true
 end
 
 --- Deletes the stored run for the active profile, both on disk and in memory.
 function delete_saved_run()
-	local profile_id = (G.SETTINGS and G.SETTINGS.profile) or 1
+	local g = game()
+	if not g then return end
+	local profile_id = (g.SETTINGS and g.SETTINGS.profile) or 1
 	love.filesystem.remove(profile_id..'/save.acs')
-	G.STORED_RUN = nil
-	if G.WRITE_FLAGS then G.WRITE_FLAGS.run = nil end
-	if G.DISK_WORKER and G.DISK_WORKER.channel then
-		G.DISK_WORKER.channel:push({
+	g.STORED_RUN = nil
+	if g.WRITE_FLAGS then g.WRITE_FLAGS.run = nil end
+	if g.DISK_WORKER and g.DISK_WORKER.channel then
+		g.DISK_WORKER.channel:push({
 			op = 'purge',
 			profile_num = profile_id,
 		})
@@ -82,7 +92,7 @@ function Game:discard_run()
 	end
 
 	if self.ROOM then
-		teardown_tree(G.STAGE_OBJECTS[G.STAGE])
+		teardown_tree(self.STAGE_OBJECTS[self.STAGE])
 		if self.buttons then self.buttons:remove(); self.buttons = nil end
 		if self.deck_preview then self.deck_preview:remove(); self.deck_preview = nil end
 		if self.MAIN_MENU_UI then self.MAIN_MENU_UI:remove(); self.MAIN_MENU_UI = nil end
@@ -94,21 +104,21 @@ function Game:discard_run()
 			self.pattern_row.area = nil
 		end
 		if self.OVERLAY_MENU then self.OVERLAY_MENU:remove(); self.OVERLAY_MENU = nil end
-		for key, value in pairs(G) do
+		for key, value in pairs(self) do
 			if (type(value) == "table") and value.is_kind and value:is_kind(CardArea) then
-				G[key] = nil
+				self[key] = nil
 			end
 		end
-		G.LIVE.CARD = {}
-		G.LIVE.CARDAREA = {}
+		self.LIVE.CARD = {}
+		self.LIVE.CARDAREA = {}
 	end
-	G.VIEWING_DECK = nil
-	G.TIMELINE:flush()
-	G.INPUT:shift_context_layer(-1000)
-	G.INPUT.focus_cursor_stack = {}
-	G.INPUT.focus_cursor_stack_level = 1
+	self.VIEWING_DECK = nil
+	self.TIMELINE:flush()
+	self.INPUT:shift_context_layer(-1000)
+	self.INPUT.focus_cursor_stack = {}
+	self.INPUT.focus_cursor_stack_level = 1
 
-	G.STATE = -1
+	self.STATE = -1
 end
 
 --- Flags a progress write (delegates UDA assembly to WORD_GAME.Persistence).
@@ -120,15 +130,15 @@ function Game:queue_progress_write()
 end
 
 function Game:queue_settings_write()
-	G.ARGS.settings_payload = G.SETTINGS
-	G.WRITE_FLAGS = G.WRITE_FLAGS or {}
-	G.WRITE_FLAGS.settings = true
-	G.WRITE_FLAGS.update_queued = true
+	self.ARGS.settings_payload = self.SETTINGS
+	self.WRITE_FLAGS = self.WRITE_FLAGS or {}
+	self.WRITE_FLAGS.settings = true
+	self.WRITE_FLAGS.update_queued = true
 end
 
 function Game:queue_metrics_write()
-	G.ARGS.metrics_payload = G.METRICS
-	G.WRITE_FLAGS = G.WRITE_FLAGS or {}
-	G.WRITE_FLAGS.metrics = true
-	G.WRITE_FLAGS.update_queued = true
+	self.ARGS.metrics_payload = self.METRICS
+	self.WRITE_FLAGS = self.WRITE_FLAGS or {}
+	self.WRITE_FLAGS.metrics = true
+	self.WRITE_FLAGS.update_queued = true
 end
