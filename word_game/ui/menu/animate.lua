@@ -138,9 +138,12 @@ function M.open_main_menu(self, change_context)
 		runtime().REFRESH_ALERTS = true
 		return true
 	end}
-	UIViewHost.create{definition = {n = runtime().UI.ROOT, config = {align = "cm", colour = runtime().C.UI.TRANSPARENT_DARK}, nodes = {
-		{n = runtime().UI.TEXT, config = {text = runtime().VERSION, scale = 0.3, colour = runtime().C.UI.TEXT_LIGHT}},
-	}}, config = {align = "tri", offset = {x = 0, y = 0}, major = runtime().ROOM_ATTACH, bond = "Weak"}}
+	runtime().MAIN_MENU_VERSION_UI = UIViewHost.create{
+		definition = {n = runtime().UI.ROOT, config = {align = "cm", colour = runtime().C.UI.TRANSPARENT_DARK}, nodes = {
+			{n = runtime().UI.TEXT, config = {text = runtime().VERSION, scale = 0.3, colour = runtime().C.UI.TEXT_LIGHT}},
+		}},
+		config = {align = "tri", offset = {x = 0, y = 0}, major = runtime().ROOM_ATTACH, bond = "Weak"},
+	}
 end
 
 return M

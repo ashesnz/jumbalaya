@@ -184,6 +184,20 @@ function M.draw_hud()
 	end
 end
 
+local function draw_action_bar(bar)
+	if not bar or bar.REMOVED then return end
+	love.graphics.push()
+	bar:translate_container()
+	bar:draw()
+	love.graphics.pop()
+end
+
+function M.draw_table_controls()
+	if not M.is_active() then return end
+	draw_action_bar(runtime().table_shuffle_bar)
+	draw_action_bar(runtime().hand_action_bar)
+end
+
 function M.draw_board(game)
 	if game.pattern_row then
 		ensure_placement_pattern_overlay(game.pattern_row)
@@ -199,6 +213,7 @@ function M.draw_board(game)
 			game.pattern_row:draw_run_pass(game)
 		end
 		M.draw_hand_pass(game)
+		M.draw_table_controls()
 	end
 	local bonus_stack_ui = WORD_GAME_UI.BonusStackUI
 	if bonus_stack_ui and bonus_stack_ui.draw_pass then

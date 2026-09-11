@@ -160,10 +160,23 @@ function Game:render_board_pass()
 	end
 end
 
---- Menu pass: the active overlay menu (unless being dragged), the marketplace
---- trade layer, and the devtools panel. Runs even when the background is hidden.
+--- Menu pass: title-screen panels, the active overlay menu (unless being
+--- dragged), the marketplace trade layer, and the devtools panel. Runs even
+--- when the background is hidden.
 function Game:render_menu_pass()
 	local show_background = (not self.OVERLAY_MENU) or (not self.F_HIDE_BG)
+
+	if self.STAGE == self.STAGES.MAIN_MENU then
+		if self.MAIN_MENU_UI and not self.MAIN_MENU_UI.REMOVED then
+			draw_with_container(self.MAIN_MENU_UI)
+		end
+		if self.PROFILE_BUTTON and not self.PROFILE_BUTTON.REMOVED then
+			draw_with_container(self.PROFILE_BUTTON)
+		end
+		if self.MAIN_MENU_VERSION_UI and not self.MAIN_MENU_VERSION_UI.REMOVED then
+			draw_with_container(self.MAIN_MENU_VERSION_UI)
+		end
+	end
 
 	if self.OVERLAY_MENU and self.OVERLAY_MENU ~= self.INPUT.dragging.target then
 		if WORD_GAME_UI.TradeUI and WORD_GAME_UI.TradeUI.backdrop_pass then
