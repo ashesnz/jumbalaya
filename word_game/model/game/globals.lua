@@ -4,7 +4,7 @@
 	Everything the game reads/writes at runtime - feature flags, settings,
 	render scale, colours, instance registries (LIVE.*), state machine enums,
 	table layout constants, etc. - lives on the Game instance bound via
-	bridge/runtime.lua. This function is called once during boot
+	app/runtime.lua. This function is called once during boot
 	(Game:launch() in app/startup.lua) to set all of that up.
 
 ]]
@@ -163,4 +163,4 @@ function Game:define_constants()
 end
 
 -- Game singleton is constructed from app/bootstrap/runtime_boot.lua after this
--- module loads (Game:construct binds bridge/runtime.lua).
+-- module loads (Game:construct binds app/runtime.lua).

@@ -3,7 +3,7 @@
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
 local game_access = require("word_game.model.game_access")
-local store_sync = require("bridge.store_sync")
+local store_sync = require("app.bootstrap.store_sync")
 local Store = require("jumbalaya_core.store")
 local word_game = require("word_game")
 

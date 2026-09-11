@@ -55,7 +55,7 @@ function WordSidebar:ensure()
 		return nil
 	end
 	if runtime().STAGE ~= runtime().STAGES.RUN then return end
-	local BridgeRuntime = require("bridge.runtime")
+	local BridgeRuntime = require("app.runtime")
 	local engine = BridgeRuntime.engine()
 	if engine then
 		views_install.install_sidebar(engine)

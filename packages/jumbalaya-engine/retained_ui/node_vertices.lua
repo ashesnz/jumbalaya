@@ -1,5 +1,5 @@
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 return function(Target)
 local function rounded_rect_vertices(w, h, radius, ext_up, segs)

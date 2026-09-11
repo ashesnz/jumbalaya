@@ -1,6 +1,6 @@
 --[[ devtools/runtime.lua - Live Game shell accessor for devtools. ]]
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 
 local M = {}
 

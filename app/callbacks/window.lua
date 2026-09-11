@@ -2,7 +2,7 @@
 
 local Bridge = require("app.controllers.callback_bridge")
 local Settings = require("app.controllers.settings")
-local Funcs = require("bridge.funcs_registry")
+local Funcs = require("app.callbacks.funcs")
 
 Funcs.register("change_vsync", Bridge.wrap("change_vsync", Settings.change_vsync))
 Funcs.register("change_screen_resolution", Bridge.wrap("change_screen_resolution", Settings.change_screen_resolution))

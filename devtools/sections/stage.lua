@@ -8,7 +8,7 @@ local function shell()
 	return game_runtime.game()
 end
 local opening_deal = require "word_game.model.jumble_play.opening_deal"
-local Funcs = require("bridge.funcs_registry")
+local Funcs = require("app.callbacks.funcs")
 
 -- Stage 1-3 boss word with two revealed letters → seven gutter bonus cards on 1-4.
 local DEBUG_BOSS_WORD = "VEGETABLE"

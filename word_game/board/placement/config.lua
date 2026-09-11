@@ -1,5 +1,5 @@
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 --[[
 	word_game.board.placement.config - Tunable constants for the placement row.

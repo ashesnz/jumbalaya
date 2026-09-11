@@ -2,8 +2,8 @@
 
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
-local Funcs = require("bridge.funcs_registry")
-local BridgeRuntime = require("bridge.runtime")
+local Funcs = require("app.callbacks.funcs")
+local BridgeRuntime = require("app.runtime")
 
 local function shell()
 	return BridgeRuntime.game()

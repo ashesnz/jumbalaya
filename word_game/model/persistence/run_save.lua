@@ -4,8 +4,8 @@ local live_game = require("word_game.model.live_game")
 
 local TableAreas = require("word_game.model.table_areas")
 local game_access = require("word_game.model.game_access")
-local store_sync = require("bridge.store_sync")
-local BridgeRuntime = require("bridge.runtime")
+local store_sync = require("app.bootstrap.store_sync")
+local BridgeRuntime = require("app.runtime")
 
 local M = {}
 

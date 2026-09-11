@@ -7,7 +7,7 @@ local Kind = require("app.core.object")
 Game = Kind:derive("Game")
 
 function Game:construct()
-	require("bridge.runtime").bind_game(self)
+	require("app.runtime").bind_game(self)
 	self:define_constants()
 end
 

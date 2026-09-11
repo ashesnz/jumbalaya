@@ -1,6 +1,6 @@
 --[[ app/core/session/loop/save_queue.lua - flushes pending write flags to disk ]]
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 
 local M = {}
 

@@ -30,7 +30,7 @@ if os_name == "iOS" or os_name == "Android" then
 end
 
 require "app.bootstrap"
-math.randomseed(require("bridge.runtime").game().SEED)
+math.randomseed(require("app.runtime").game().SEED)
 
 require "app.core.session.lifecycle"
 require "app.input"

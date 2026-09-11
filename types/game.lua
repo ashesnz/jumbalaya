@@ -1,9 +1,9 @@
 --[[
 	types/game.lua - Live run state on Game.GAME (analyzer-only).
 
-	Runtime bus (live state on the Game shell via bridge/runtime.lua):
+	Runtime bus (live state on the Game shell via app/runtime.lua):
 	- **Game.GAME** — authoritative run snapshot; domain modules read/write through their owner.
-	- **UIBox callbacks** — string handlers via bridge/funcs_registry.lua (catalog: types/funcs.lua).
+	- **UIBox callbacks** — string handlers via app/callbacks/funcs.lua (catalog: types/funcs.lua).
 	- **Presentation** — model→UI notify (contract: types/presentation.lua).
 
 	Cross-package API:

@@ -4,8 +4,8 @@ local Scheduler = require "app.effects.timeline_scheduler"
 local Easing = require "app.effects.easing"
 local ViewHost = require("jumbalaya-engine.view_host")
 
-local BridgeRuntime = require("bridge.runtime")
-local Funcs = require("bridge.funcs_registry")
+local BridgeRuntime = require("app.runtime")
+local Funcs = require("app.callbacks.funcs")
 local function g() return BridgeRuntime.game() end
 
 Funcs.register("set_button_pip", function(e)

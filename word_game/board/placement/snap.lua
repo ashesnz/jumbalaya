@@ -6,10 +6,10 @@ local shimmer = require "word_game.board.placement.shimmer"
 local BonusStack = require "word_game.model.jumble.bonus_stack"
 local Presentation = require "word_game.model.presentation"
 local TableAreas = require "word_game.model.table_areas"
-local store_sync = require "bridge.store_sync"
-local runtime = require "bridge.runtime"
+local store_sync = require "app.bootstrap.store_sync"
+local runtime = require "app.runtime"
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 
 local function placement_word()

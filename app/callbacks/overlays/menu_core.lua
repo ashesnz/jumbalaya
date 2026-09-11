@@ -2,7 +2,7 @@
 
 local Bridge = require("app.controllers.callback_bridge")
 local Overlays = require("app.controllers.overlays")
-local Funcs = require("bridge.funcs_registry")
+local Funcs = require("app.callbacks.funcs")
 
 Funcs.register("switch_tab", Overlays.switch_tab)
 Funcs.register("show_overlay", Bridge.wrap("show_overlay", Overlays.show_overlay))

@@ -1,7 +1,7 @@
 --[[ word_game/ui/callbacks/table_controls.lua - Table control FUNCS registration ]]
 
 local Gameplay = require("word_game.ui.controllers.gameplay")
-local Funcs = require("bridge.funcs_registry")
+local Funcs = require("app.callbacks.funcs")
 
 Funcs.register("shuffle_hand", Gameplay.shuffle_hand)
 Funcs.register("return_placement_cards", Gameplay.return_placement_cards)

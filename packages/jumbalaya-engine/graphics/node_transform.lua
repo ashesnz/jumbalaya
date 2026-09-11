@@ -1,5 +1,5 @@
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 function push_node_transform(moveable, scale, rotate, offset, _)
 	love.graphics.push()

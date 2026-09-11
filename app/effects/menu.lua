@@ -3,7 +3,7 @@
 local Scheduler = require "app.effects.timeline_scheduler"
 local ViewHost = require("jumbalaya-engine.view_host")
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 
 local Menu = {}

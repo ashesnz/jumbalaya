@@ -1,7 +1,7 @@
 --[[ word_game/ui/trade/init.lua - The Card Marketplace overlay ]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
-local Funcs = require("bridge.funcs_registry")
+local Funcs = require("app.callbacks.funcs")
 local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
@@ -148,8 +148,8 @@ end
 local cannot_afford_anything = M.cannot_afford_anything
 
 open_overlay = function()
-	local runtime = require("bridge.runtime")
-	local Funcs = require("bridge.funcs_registry")
+	local runtime = require("app.runtime")
+	local Funcs = require("app.callbacks.funcs")
 	local engine = runtime.engine()
 	if engine then
 		views_install.install_trade(engine)

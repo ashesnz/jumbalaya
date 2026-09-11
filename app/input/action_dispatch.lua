@@ -1,7 +1,7 @@
---[[ bridge/action_dispatch.lua - Phase 7 unified action dispatch via engine InputService ]]
+--[[ app/input/action_dispatch.lua - Unified action dispatch via engine InputService ]]
 
-local store_sync = require("bridge.store_sync")
-local runtime = require("bridge.runtime")
+local store_sync = require("app.bootstrap.store_sync")
+local runtime = require("app.runtime")
 
 local M = {}
 

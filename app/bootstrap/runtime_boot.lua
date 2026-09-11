@@ -23,7 +23,7 @@ require "word_game.ui.cards.tooltip"
 
 local InputActions = require "app.input_actions"
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 InputController._input_actions = InputActions
 

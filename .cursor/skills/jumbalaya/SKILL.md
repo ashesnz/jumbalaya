@@ -29,7 +29,7 @@ description: >-
 app/               Love2D shell: bootstrap, lifecycle, app/core/ scene graph
 packages/jumbalaya_core/   Pure rules + store (headless test_core_*)
 packages/jumbalaya-engine/ Engine services + retained_ui
-bridge/            runtime.lua, funcs_registry.lua, store_sync.lua
+app/runtime.lua, app/callbacks/funcs.lua, app/bootstrap/store_sync.lua  (was bridge/)
 word_game/config/  Game tuning; round/economy re-export core
 word_game/model/   Runtime glue over jumbalaya_core — not duplicate rules
 word_game/board/   Row snap/geometry — no UI imports at require time

@@ -1,5 +1,5 @@
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 return function(Target)
 function RetainedPanel:find_node_by_id(id, node)

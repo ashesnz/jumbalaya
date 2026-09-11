@@ -184,7 +184,7 @@ function M.animate(hand, on_complete)
 			hand:snap_VT()
 			hand:hard_set_cards()
 			set_animating(false)
-			local runtime = require("bridge.runtime")
+			local runtime = require("app.runtime")
 			local store = runtime.store()
 			if store then
 				require("word_game.model.piles").release_static_chrome(store, { "hand" })

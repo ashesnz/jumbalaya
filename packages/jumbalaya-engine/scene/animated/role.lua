@@ -1,5 +1,5 @@
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 return function(AnimNode)
 --- Horizontal shadow parallax based on room-relative position.

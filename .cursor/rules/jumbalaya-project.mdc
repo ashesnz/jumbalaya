@@ -16,7 +16,7 @@ Roguelike **jumble** word game on Love2D/Lua. Active loop: fill **pattern puzzle
 | `app/` | Bootstrap, lifecycle, input, persistence, engine (`app/core/`) |
 | `packages/jumbalaya_core/` | Portable rules + store (no Love2D) |
 | `packages/jumbalaya-engine/` | Engine services + retained UI |
-| `bridge/` | `runtime.lua`, `funcs_registry.lua`, `store_sync.lua` |
+| `app/runtime.lua`, `app/callbacks/funcs.lua`, `app/bootstrap/store_sync.lua` | Shell accessor, UIBox callbacks, store factory (was `bridge/`) |
 | `word_game/` | Runtime glue, presentation, board (`config/`, `model/`, `ui/`) |
 | `word_game/ui/sidebar/` | Right-hand HUD — use **sidebar** not vault |
 | `tests/` | Headless suite — `love tests` |

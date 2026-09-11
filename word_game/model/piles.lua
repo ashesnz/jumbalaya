@@ -1,6 +1,6 @@
 --[[ word_game/model/piles.lua - Store-authoritative pile sync (Phase 10b) ]]
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local game_access = require("word_game.model.game_access")
 
 local M = {}

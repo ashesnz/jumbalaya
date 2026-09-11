@@ -29,7 +29,7 @@ function M.resolve(play_module, opts)
 	end
 
 	Presentation.emit("PLAY_RESOLVED", result)
-	local runtime = require("bridge.runtime")
+	local runtime = require("app.runtime")
 	local engine = runtime.engine()
 	if engine and WORD_GAME_UI then
 		local fx_subscribers = require("word_game.ui.fx_subscribers")

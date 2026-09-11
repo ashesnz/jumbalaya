@@ -1,6 +1,6 @@
 
-local BridgeRuntime = require("bridge.runtime")
-local Funcs = require("bridge.funcs_registry")
+local BridgeRuntime = require("app.runtime")
+local Funcs = require("app.callbacks.funcs")
 local function g() return BridgeRuntime.game() end
 return function(Target)
 function RetainedPanel:calculate_xywh(node, _T, recalculate, _scale)

@@ -1,7 +1,7 @@
 --[[ word_game/model/game_access.lua - Read/write game snapshot via store (Phase 10d) ]]
 
-local store_sync = require("bridge.store_sync")
-local runtime = require("bridge.runtime")
+local store_sync = require("app.bootstrap.store_sync")
+local runtime = require("app.runtime")
 
 local M = {}
 

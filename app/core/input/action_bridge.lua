@@ -1,9 +1,9 @@
 --[[ app/core/input/action_bridge.lua - Phase 4 router → typed action dispatch ]]
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 
 
-local action_dispatch = require("bridge.action_dispatch")
+local action_dispatch = require("app.input.action_dispatch")
 
 local M = {}
 

@@ -7,7 +7,7 @@
 	format and delegates domain work through the facade.
 ]]
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 
 local function persistence()
 	return rawget(_G, "WORD_GAME") and WORD_GAME.Persistence

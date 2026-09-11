@@ -1,6 +1,6 @@
 --[[ app/startup/profile.lua - Profile load and localization setup ]]
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 
 local DEFAULT_PROFILE = {
 	career_stats = { c_wins = 0 },

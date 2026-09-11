@@ -1,6 +1,6 @@
 -- LÖVE lifecycle callbacks and the custom frame loop.
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 
 --- Custom replacement for LÖVE's default `love.run`.
 --- Adds an FPS cap and coalesces mouse-press events so only the last press in

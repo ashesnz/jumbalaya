@@ -23,7 +23,7 @@ end
 
 local function get_store_state(state)
 	if state then return state end
-	local BridgeRuntime = require("bridge.runtime")
+	local BridgeRuntime = require("app.runtime")
 	local store = BridgeRuntime.store()
 	if store then
 		return store:get()

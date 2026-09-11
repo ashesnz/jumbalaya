@@ -33,7 +33,7 @@ end
 --- Register a button handler with the DT_ prefix.
 function DebugPanel:action(name, fn)
 	local panel = self
-	local Funcs = require("bridge.funcs_registry")
+	local Funcs = require("app.callbacks.funcs")
 	Funcs.register("DT_" .. name, function()
 		fn(panel.ctx, panel)
 	end)

@@ -6,8 +6,8 @@ local letter_tiers = require("jumbalaya_core.config.gameplay.letter_tiers")
 local state = require("word_game.model.run.state")
 local game_access = require("word_game.model.game_access")
 local deck = require("word_game.model.cards.deck")
-local store_sync = require("bridge.store_sync")
-local runtime = require("bridge.runtime")
+local store_sync = require("app.bootstrap.store_sync")
+local runtime = require("app.runtime")
 local LetterPalette = require("word_game.config.visuals.letter_card_palette")
 
 local M = {}

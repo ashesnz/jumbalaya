@@ -1,6 +1,14 @@
 --[[ app/bootstrap/presentation_boot.lua - Phase 7 presentation facade boot ]]
 
+local Presentation = require("word_game.model.presentation")
+
 local M = {}
+
+--- Wire Presentation.emit to the engine EventBus.
+function M.bind_engine_events(engine)
+	if not engine or not engine.events then return end
+	Presentation.bind_events(engine.events)
+end
 
 function M.install()
 	WORD_GAME_UI = require "word_game.ui.facade.exports"

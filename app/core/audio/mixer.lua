@@ -1,5 +1,5 @@
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 --[[
 	app/core/audio/mixer.lua - the mixing engine behind both audio runtimes.

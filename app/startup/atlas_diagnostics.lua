@@ -52,7 +52,7 @@ function M.finalize(game)
 end
 
 function M.draw_overlay()
-	local BridgeRuntime = require("bridge.runtime")
+	local BridgeRuntime = require("app.runtime")
 	local game = BridgeRuntime.game()
 	if not game or not game.F_ATLAS_DEBUG_OVERLAY or not game.ATLAS_DEBUG_REPORT then return end
 	if not love.graphics then return end

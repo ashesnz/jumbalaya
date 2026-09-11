@@ -1,8 +1,5 @@
 --[[
-local BridgeRuntime = require("bridge.runtime")
-local function g() return BridgeRuntime.game() end
-
-	app/callbacks/registry.lua - Central registry of g().FUNCS callback modules.
+	app/callbacks/registry.lua - Central registry of UIBox callback modules.
 
 	App callbacks (loaded via app.callbacks.settings before WORD_GAME):
 	  app.callbacks.ui_controls  - buttons, toggles, sliders, option cycles

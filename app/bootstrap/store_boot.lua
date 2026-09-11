@@ -1,6 +1,6 @@
 --[[ app/bootstrap/store_boot.lua - Instantiate store and bind WORD_GAME (Phase 10d) ]]
 
-local store_sync = require("bridge.store_sync")
+local store_sync = require("app.bootstrap.store_sync")
 
 local M = {}
 

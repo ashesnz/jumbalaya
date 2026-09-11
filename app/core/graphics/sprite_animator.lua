@@ -1,5 +1,5 @@
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 --[[ app/core/graphics/sprite_animator.lua - strip-frame animation (GfxAnimator) ]]
 

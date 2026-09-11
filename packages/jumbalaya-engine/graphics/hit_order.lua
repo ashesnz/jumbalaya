@@ -1,5 +1,5 @@
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 function reset_hit_order()
 	g().HIT_ORDER = clear_table(g().HIT_ORDER)

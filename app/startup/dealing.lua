@@ -7,7 +7,7 @@
 	word_game/ui/layout/backgrounds.lua).
 ]]
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local Layout = require "word_game.ui.layout"
 
 local function game()

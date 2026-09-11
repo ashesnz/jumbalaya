@@ -5,7 +5,7 @@ local mock_env = require("tests.helpers.mock_env")
 local Store = require("jumbalaya_core.store")
 local Engine = require("jumbalaya-engine")
 local word_game = require("word_game")
-local runtime = require("bridge.runtime")
+local runtime = require("app.runtime")
 
 T.describe("Phase 7 Store Authority", function()
 	mock_env.reset_game()

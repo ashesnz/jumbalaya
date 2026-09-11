@@ -1,5 +1,5 @@
 --[[
-	bridge/funcs_registry.lua - UIBox string callback registry (Phase 9e).
+	app/callbacks/funcs.lua - UIBox string callback registry.
 
 	Handlers are module-scoped; retained UI dispatches via Funcs.dispatch(name, ...).
 	Catalog for analyzers: types/funcs.lua

@@ -10,7 +10,7 @@
 local MIXER = require("app.core.audio.mixer")
 local game_access = require("word_game.model.game_access")
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 
 -- Reused request records: keeps per-frame allocation at zero.

@@ -56,7 +56,7 @@ local MockEnv = require("tests.helpers.mock_env")
 
 		local game = Game()
 		game:define_constants()
-		local Funcs = require("bridge.funcs_registry")
+		local Funcs = require("app.callbacks.funcs")
 		T.assert_not_nil(Funcs.get("show_overlay"), "Callback registry must be initialized before menu loading")
 		game:set_render_settings()
 

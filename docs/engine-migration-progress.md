@@ -51,9 +51,9 @@ A common instinct is to put `packages/`, `word_game/`, and `app/` into a single 
 
 ---
 
-## 3. Do you still need `bridge/`?
+## 3. `bridge/` (dissolved — Phase 11)
 
-**Short answer:** The **folder** is temporary; several **concerns** are permanent.
+**Short answer:** The **folder** is gone; several **concerns** live under `app/` now.
 
 | Module | Role today | Long-term home | Retire? |
 |--------|------------|----------------|---------|
@@ -64,7 +64,7 @@ A common instinct is to put `packages/`, `word_game/`, and `app/` into a single 
 | `action_dispatch.lua` | Input action → store / engine input | `app/input/` or `jumbalaya-engine/input` | Move |
 | `event_bridge.lua` | `Presentation.emit` → `EventBus` | `app/bootstrap/presentation_boot.lua` (inline) | Inline |
 
-`bridge/` was introduced to break circular dependencies during the strangler migration (Phases 0–9). ~150 files still `require("bridge.*")`. Once Phase 10b–10d land and `jumbalaya-engine` no longer imports `app/`, the package can be **dissolved** (Phase 11 below) — but `runtime` and `Funcs` APIs remain under new paths.
+`bridge/` was dissolved in Phase 11 (2026-09-12). `runtime` and `Funcs` APIs remain under `app/runtime.lua` and `app/callbacks/funcs.lua`; `jumbalaya-engine` still imports `app.runtime` for shell access (Phase 12 may inject context instead).
 
 ---
 
@@ -82,7 +82,7 @@ Metrics refreshed **2026-09-12** from repo root. Compare to post–Phase 9 basel
 | Glue modules (`glue over` in `word_game/model/`) | 10 | **10** | shrink |
 | `test_core_*` files | 14 | **14** | grow with rules |
 | `Funcs.register` sites | ~59 | **59** | stable catalog |
-| `bridge/` require sites | — | **194** | 0 (dissolve folder) |
+| `bridge/` require sites | — | **0** (folder dissolved) | 0 |
 | `pile_sync` active | yes | **deleted** (`word_game/model/piles.lua`, chrome always on) | deleted |
 
 ### Phase completion
@@ -94,7 +94,7 @@ Metrics refreshed **2026-09-12** from repo root. Compare to post–Phase 9 basel
 | **10b** | Retire `CardArea` dual-write | ✅ **Complete** | `pile_sync` deleted; store-authoritative piles; `CardPile` hosts drag only |
 | **10c** | Engine extraction — no `app/` imports in packages | ✅ **Complete** | `Kind`, scene graph, draw helpers in `jumbalaya-engine/`; `app/core/*` shims |
 | **10d** | Single state bus | ✅ **Complete** | `game_access` store-only; `legacy_mirror_*` / `sync_from_g` removed |
-| **11** | Dissolve `bridge/` folder | ⬜ **Planned** | After 10b–10d |
+| **11** | Dissolve `bridge/` folder | ✅ **Complete** | `app/runtime`, `app/callbacks/funcs`, `app/input/action_dispatch`, `app/bootstrap/store_sync`; `event_bridge` inlined |
 | **12** | Shrink `app/` to shell only | ⬜ **Planned** | After 10c |
 
 **Overall Phase 10 estimate:** ~15–20% complete (foundation done; consolidation work largely ahead).

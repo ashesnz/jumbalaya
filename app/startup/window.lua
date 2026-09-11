@@ -2,7 +2,7 @@
 	app/startup/window.lua - Viewport and window initialization.
 ]]
 
-local Funcs = require("bridge.funcs_registry")
+local Funcs = require("app.callbacks.funcs")
 
 function Game:init_window(reset)
 	self.ROOM_PADDING_H= 0.7

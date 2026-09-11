@@ -2,7 +2,7 @@
 
 local Scheduler = require "app.effects.timeline_scheduler"
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 
 local Easing = {}

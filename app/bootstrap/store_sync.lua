@@ -1,14 +1,10 @@
 --[[
-	bridge/store_sync.lua - Phase 10d store bridge (run snapshot via WORD_GAME.store).
-
-	Contract:
-	- The store owns run snapshot state.
-	- New code uses WORD_GAME.store() / game_access.
+	app/bootstrap/store_sync.lua - Store factory and test binding helpers.
 ]]
 
 local CoreStore = require("jumbalaya_core.store")
 local default_state = require("jumbalaya_core.store.default_state")
-local runtime = require("bridge.runtime")
+local runtime = require("app.runtime")
 
 local M = {}
 

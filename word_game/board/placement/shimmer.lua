@@ -3,7 +3,7 @@
 local config = require "word_game.board.placement.config"
 local layout = require "word_game.board.placement.layout"
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 
 local M = {}

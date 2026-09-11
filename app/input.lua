@@ -1,6 +1,6 @@
 -- LÖVE input callbacks. InputController owns input state and UI focus resolution.
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 
 local function game()
 	return BridgeRuntime.game()

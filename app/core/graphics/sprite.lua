@@ -1,6 +1,6 @@
 --[[ app/core/graphics/sprite.lua - textured atlas quad (GfxSprite) ]]
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 
 GfxSprite = AnimNode:derive("GfxSprite")

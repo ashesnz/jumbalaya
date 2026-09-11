@@ -1,5 +1,5 @@
 --[[
-	bridge/runtime.lua - Phase 7/9 runtime service accessors (store, engine, game shell).
+	app/runtime.lua - Runtime service accessors (store, engine, game shell).
 ]]
 
 local M = {}

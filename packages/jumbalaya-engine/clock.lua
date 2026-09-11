@@ -1,5 +1,5 @@
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 --[[
 	jumbalaya-engine/clock.lua - Clock / timers service for testable time.
 ]]

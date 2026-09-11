@@ -2,7 +2,7 @@
 
 local game_access = require("word_game.model.game_access")
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 
 local M = {}

@@ -3,8 +3,8 @@
 local Easing = require "app.effects.easing"
 local ViewHost = require("jumbalaya-engine.view_host")
 
-local BridgeRuntime = require("bridge.runtime")
-local Funcs = require("bridge.funcs_registry")
+local BridgeRuntime = require("app.runtime")
+local Funcs = require("app.callbacks.funcs")
 local function g() return BridgeRuntime.game() end
 
 --||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||

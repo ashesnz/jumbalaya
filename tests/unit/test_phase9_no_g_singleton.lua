@@ -1,7 +1,7 @@
 --[[ tests/unit/test_phase9_no_g_singleton.lua - PR-9 final: no global G singleton ]]
 
 local T = require("tests.framework")
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local mock_env = require("tests.helpers.mock_env")
 
 T.describe("Phase 9 no G singleton", function()

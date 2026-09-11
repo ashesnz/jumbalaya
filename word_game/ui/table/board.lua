@@ -8,7 +8,7 @@ local function runtime() return GameRT.game() end
 local M = {}
 
 local views_install = require("word_game.ui.views.install")
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 
 local placement_snap = require("word_game.board.placement.snap")
 local modifier_feedback = require("word_game.ui.feedback.modifier_feedback")

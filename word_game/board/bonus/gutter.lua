@@ -2,7 +2,7 @@
 
 local BonusStack = require("word_game.model.jumble.bonus_stack")
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 
 local M = {}

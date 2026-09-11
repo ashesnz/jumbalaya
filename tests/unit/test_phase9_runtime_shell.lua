@@ -2,7 +2,7 @@
 
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 
 T.describe("Phase 9 runtime shell", function()
 	mock_env.reset_game()

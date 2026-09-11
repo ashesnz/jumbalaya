@@ -4,7 +4,7 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local SidebarController = require("word_game.ui.controllers.sidebar")
-local Funcs = require("bridge.funcs_registry")
+local Funcs = require("app.callbacks.funcs")
 
 return function(sidebar)
 	local bindings = SidebarController.bind(sidebar)

@@ -23,7 +23,7 @@ local snap = require "word_game.board.placement.snap"
 local shimmer = require "word_game.board.placement.shimmer"
 local jumble_geometry = require "word_game.board.jumble.geometry"
 
-local BridgeRuntime = require("bridge.runtime")
+local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 
 --- @class PlacementTable

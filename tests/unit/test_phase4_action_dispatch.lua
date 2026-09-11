@@ -2,9 +2,9 @@
 
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
-local store_sync = require("bridge.store_sync")
-local action_dispatch = require("bridge.action_dispatch")
-local Funcs = require("bridge.funcs_registry")
+local store_sync = require("app.bootstrap.store_sync")
+local action_dispatch = require("app.input.action_dispatch")
+local Funcs = require("app.callbacks.funcs")
 local word_game = require("word_game")
 
 T.describe("Phase 4 Gameplay Action Dispatch", function()

@@ -1,7 +1,7 @@
 --[[
 	types/funcs.lua - UIBox string callback catalog (analyzer-only).
 
-	Handlers register via bridge/funcs_registry.lua (Funcs.register).
+	Handlers register via app/callbacks/funcs.lua (Funcs.register).
 	Retained UI dispatches with Funcs.dispatch(name, ...).
 
 	Model code must not call Funcs directly (use Presentation or facades).

@@ -10,7 +10,7 @@ local Scheduler = require "app.effects.timeline_scheduler"
 local UIViewHost = require("word_game.ui.views.ui_view_host")
 
 require "word_game.ui.menu.title_logo"
-local Funcs = require("bridge.funcs_registry")
+local Funcs = require("app.callbacks.funcs")
 
 local M = {}
 

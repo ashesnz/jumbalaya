@@ -17,7 +17,7 @@ function M.ensure_engine_globals()
 	package.path = "./?.lua;./?/init.lua;" .. package.path
 
 	_G.G = _G.G or {}
-	require("bridge.runtime").bind_game(_G.G)
+	require("app.runtime").bind_game(_G.G)
 	_G.WORD_GAME = _G.WORD_GAME or {}
 	_G.WORD_GAME_UI = _G.WORD_GAME_UI or {}
 	G.SETTINGS = G.SETTINGS or {
@@ -373,9 +373,9 @@ end
 function M.publish_game(game_table)
 	if not game_table then return end
 	_G.WORD_GAME = require("word_game")
-	local store_sync = require("bridge.store_sync")
+	local store_sync = require("app.bootstrap.store_sync")
 	store_sync.ensure_test_binding()
-	local store = require("bridge.runtime").store()
+	local store = require("app.runtime").store()
 	if store then
 		store_sync.bind_run(store, game_table)
 		store:patch({
@@ -396,7 +396,7 @@ end
 
 --- Clear store pile snapshots so host-only test setups stay authoritative.
 function M.clear_store_piles()
-	local store = require("bridge.runtime").store()
+	local store = require("app.runtime").store()
 	if store then
 		store:patch({
 			piles = { hand = {}, draw = {}, pattern = {}, bonus = {}, discard = {} },

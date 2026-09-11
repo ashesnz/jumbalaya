@@ -3,7 +3,7 @@
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
-local action_dispatch = require("bridge.action_dispatch")
+local action_dispatch = require("app.input.action_dispatch")
 
 local M = {}
 

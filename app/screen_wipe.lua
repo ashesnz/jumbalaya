@@ -1,8 +1,8 @@
 -- Application screen transitions and their particle effects.
 local Scheduler = require "app.effects.timeline_scheduler"
 
-local BridgeRuntime = require("bridge.runtime")
-local Funcs = require("bridge.funcs_registry")
+local BridgeRuntime = require("app.runtime")
+local Funcs = require("app.callbacks.funcs")
 local function g() return BridgeRuntime.game() end
 
 local function sync_screen_wipe_card()
