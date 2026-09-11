@@ -378,6 +378,9 @@ function M.publish_game(game_table)
 	local store = require("bridge.runtime").store()
 	if store then
 		store_sync.bind_run(store, game_table)
+		store:patch({
+			piles = { hand = {}, draw = {}, pattern = {}, bonus = {}, discard = {} },
+		})
 	end
 end
 

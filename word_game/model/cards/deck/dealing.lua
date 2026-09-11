@@ -9,28 +9,25 @@ return function(context)
 	local hand_size_cfg = require("word_game.model.hand_size")
 	local pile_counts = require("jumbalaya_core.cards.pile_counts")
 	local game_access = require("word_game.model.game_access")
-	local pile_sync = require("bridge.pile_sync")
+	local piles = require("word_game.model.piles")
+	local TableAreas = require("word_game.model.table_areas")
 	local needs_vowel = context.needs_vowel
 	local take_letter_from_deck = context.take_letter_from_deck
 
 	local function placement_count()
-		local area = live_game().pattern_row and live_game().pattern_row.area
-		return (area and area.cards and #area.cards) or 0
+		return pile_counts.placement_count(TableAreas.pattern_cards())
 	end
 
 	function M.held_count()
-		return pile_counts.held_count(
-			live_game().dealt_letters and live_game().dealt_letters.cards,
-			(live_game().pattern_row and live_game().pattern_row.area and live_game().pattern_row.area.cards)
-		)
+		return pile_counts.held_count(TableAreas.hand_cards(), TableAreas.pattern_cards())
 	end
 
 	function M.hand_card_count()
-		return pile_counts.hand_card_count(live_game().dealt_letters and live_game().dealt_letters.cards)
+		return pile_counts.hand_card_count(TableAreas.hand_cards())
 	end
 
 	function M.draw_pile_count()
-		return pile_counts.draw_pile_count(live_game().draw_pile and live_game().draw_pile.cards)
+		return pile_counts.draw_pile_count(TableAreas.draw_cards())
 	end
 
 	function M.cards_left()
@@ -42,10 +39,12 @@ return function(context)
 		live_game().ARGS = live_game().ARGS or {}
 		live_game().ARGS.deck_left_count = count
 		game_access.patch({ deck_left_count = count })
-		pile_sync.sync_areas_to_store()
-		if pile_sync.chrome_release_enabled() then
-			pile_sync.release_static_chrome()
-		end
+	end
+
+	function M.commit_pile_hosts(pile_ids)
+		piles.sync_hosts_to_store()
+		piles.release_static_chrome(nil, pile_ids)
+		M.sync_deck_count_display()
 	end
 
 	M.DEAL_DELAY = 0.14
@@ -124,6 +123,7 @@ return function(context)
 			M.ensure_playable_held()
 			live_game().dealt_letters:set_ranks()
 			live_game().dealt_letters:relayout()
+			M.commit_pile_hosts({ "hand", "draw" })
 		end
 	end
 end

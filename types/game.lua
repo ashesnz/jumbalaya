@@ -17,16 +17,16 @@
 	- **letter_inventory** — live letter cards for the run; **letter_card_id** — next instance id.
 	- Set progress: **Game.GAME.word_round.set** only.
 
-	TABLE_BOARD CardArea instances (prefer `WORD_GAME.Deck` / `Board` accessors in new code):
+	TABLE_BOARD CardPile instances (prefer `WORD_GAME.Deck` / `Board` accessors in new code):
 	- **dealt_letters** — player's dealt row (was hand)
 	- **draw_pile** — draw stack (was deck)
 	- **recycle_stash** — recycle / fly-off stash (was discard)
-	- **pattern_row** — pattern row controller; `.area` is the placement CardArea
+	- **pattern_row** — pattern row controller; `.area` is the placement CardPile
 
 	Adding fields — **do not grow the Game shell ad hoc**:
 	- **Run state** → Game.GAME only. New feature needs a facade method + owned field on
 	  `GameRunState` in types/store.lua (declare owner there) or it does not ship.
-	- **Live scene nodes** (CardArea, UIBox, overlays) may stay on the Game shell as engine/runtime
+	- **Live scene nodes** (CardPile, UIBox, overlays) may stay on the Game shell as engine/runtime
 	  wiring; prefer `WORD_GAME.Deck` / `Board` accessors over new top-level names.
 	- **Letter definitions** → LETTERS via `word_game/model/cards/registry.lua`, not
 	  ad-hoc globals. `app/core/` must not reference jumble, letters, or card faces.
@@ -76,7 +76,7 @@
 
 ---@class WordGameTableDeck
 ---@field uses_table_draw fun(): boolean
----@field draw fun(area: CardArea)
+---@field draw fun(area: CardPile)
 ---@field show_info fun()
 
 ---@class WordGameCardInspect
@@ -125,7 +125,7 @@
 ---@field UIBOX UIPanel[]
 ---@field POPUP any[]
 ---@field CARD Card[]
----@field CARDAREA CardArea[]
+---@field CARDPILE CardPile[]
 ---@field ALERT any[]
 
 ---@class GameThreadManager
@@ -189,10 +189,10 @@
 ---@field GAME GameRunState Live run snapshot — field owners in types/store.lua
 ---@field ROOM SceneNode
 ---@field ROOM_ATTACH EaseNode
----@field dealt_letters CardArea|nil Player's dealt letter row
----@field draw_pile CardArea|nil Draw pile (sidebar stack)
----@field recycle_stash CardArea|nil Played / fly-off recycle stash (off-screen)
----@field pattern_row PlacementTable|nil Pattern row controller (`.area` is the CardArea)
+---@field dealt_letters CardPile|nil Player's dealt letter row
+---@field draw_pile CardPile|nil Draw pile (sidebar stack)
+---@field recycle_stash CardPile|nil Played / fly-off recycle stash (off-screen)
+---@field pattern_row PlacementTable|nil Pattern row controller (`.area` is the CardPile)
 ---@field hand_action_bar UIPanel|nil
 ---@field table_shuffle_bar UIPanel|nil
 ---@field hand_play_button UIPanel|nil
@@ -202,7 +202,7 @@
 ---@field TIMELINE table|nil
 ---@field OVERLAY_MENU UIPanel|nil
 ---@field RUN { active: boolean }|nil
----@field view_deck CardArea[]|nil
+---@field view_deck CardPile[]|nil
 ---@field VIEWING_DECK any
 ---@field deck_preview any
 ---@field real_dt number

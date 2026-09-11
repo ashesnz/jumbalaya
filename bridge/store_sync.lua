@@ -128,7 +128,7 @@ function M.ensure_test_binding()
 		M.sync_from_g(store)
 	end
 	if shell.dealt_letters or shell.draw_pile then
-		require("bridge.pile_sync").sync_areas_to_store(store)
+		require("word_game.model.piles").sync_hosts_to_store(store)
 	end
 	local engine_boot = package.loaded["app.bootstrap.engine_services_boot"]
 	if engine_boot and engine_boot.install then

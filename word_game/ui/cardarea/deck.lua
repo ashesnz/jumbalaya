@@ -1,5 +1,5 @@
 --[[
-	word_game/ui/cardarea/deck.lua - Deck CardArea type behaviour.
+	word_game/ui/cardarea/deck.lua - Deck CardPile type behaviour.
 ]]
 
 local GameRT = require("word_game.ui.util.game_runtime")

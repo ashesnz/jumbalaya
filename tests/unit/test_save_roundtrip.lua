@@ -1,4 +1,4 @@
---[[ tests/unit/test_save_roundtrip.lua - Card / CardArea / pack save contract ]]
+--[[ tests/unit/test_save_roundtrip.lua - Card / CardPile / pack save contract ]]
 
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
@@ -74,8 +74,8 @@ T.describe("save round-trip", function()
 		T.assert_equal(restored.letter_card_id, 7)
 	end)
 
-	T.it("CardArea:save / load and restore_card_areas rebuild the hand", function()
-		G.dealt_letters = CardArea(0, 0, 8, 2, { type = "hand", card_limit = 7, selection_limit = 1 })
+	T.it("CardPile:save / load and restore_card_areas rebuild the hand", function()
+		G.dealt_letters = CardPile(0, 0, 8, 2, { type = "hand", card_limit = 7, selection_limit = 1 })
 		G.dealt_letters:emplace(make_letter("C", 1))
 		G.dealt_letters:emplace(make_letter("A", 2))
 		T.assert_equal(#G.dealt_letters.cards, 2)
@@ -93,25 +93,20 @@ T.describe("save round-trip", function()
 		local loaded = unpack_source(source)
 
 		G.draw_pile, G.recycle_stash, G.pattern_row = nil, nil, nil
-		G.dealt_letters = CardArea(0, 0, 8, 2, { type = "hand", card_limit = 7, selection_limit = 1 })
+		G.dealt_letters = CardPile(0, 0, 8, 2, { type = "hand", card_limit = 7, selection_limit = 1 })
 		restore_card_areas(loaded)
-		T.assert_equal(#G.dealt_letters.cards, 2)
-		T.assert_equal(G.dealt_letters.cards[1].ability.letter, "C")
-		T.assert_equal(G.dealt_letters.cards[2].ability.letter, "A")
-		T.assert_equal(G.dealt_letters.cards[1].letter_card_id, 1)
-		T.assert_equal(G.dealt_letters.cards[2].letter_card_id, 2)
-		local indexed = 0
-		for _, card in ipairs(G.dealt_letters.cards) do
-			if card.letter_card_id then
-				indexed = indexed + 1
-			end
-		end
-		T.assert_equal(indexed, 2)
+		local TableAreas = require("word_game.model.table_areas")
+		local hand = TableAreas.hand_cards()
+		T.assert_equal(#hand, 2)
+		T.assert_equal(hand[1].ability.letter, "C")
+		T.assert_equal(hand[2].ability.letter, "A")
+		T.assert_equal(hand[1].letter_card_id, 1)
+		T.assert_equal(hand[2].letter_card_id, 2)
 	end)
 
 	T.it("save_safe_clone replaces live engine objects then pack/unpack round-trips", function()
 		local Kind = require("app.core.object")
-		local live = CardArea(0, 0, 1, 1, { type = "deck" })
+		local live = CardPile(0, 0, 1, 1, { type = "deck" })
 		T.assert_true(live:is_kind(Kind))
 		local cloned = save_safe_clone({
 			GAME = { chips = 42, word_round = { puzzle_index = 3 } },
@@ -176,7 +171,7 @@ T.describe("save round-trip", function()
 			BonusStackUI = { on_hand_start = function() end },
 		})
 
-		G.dealt_letters = CardArea(0, 0, 8, 2, { type = "hand", card_limit = 7, selection_limit = 1 })
+		G.dealt_letters = CardPile(0, 0, 8, 2, { type = "hand", card_limit = 7, selection_limit = 1 })
 		local path = jumble_fixture.write_temp("test_jumble_hand_save.acs", write_save_file, make_letter("R", 9):save())
 		local loaded = jumble_fixture.read_temp(path, read_save_payload, unpack_source)
 		T.assert_not_nil(loaded)
@@ -189,8 +184,10 @@ T.describe("save round-trip", function()
 		T.assert_equal(wr.set, 2)
 		T.assert_equal(wr.jumble.total_score, 18)
 		T.assert_equal(game.timeline_seconds, 60, "restore_from_save resets fuse via timeline_reset")
-		T.assert_equal(#G.dealt_letters.cards, 1)
-		T.assert_equal(G.dealt_letters.cards[1].ability.letter, "R")
+		local TableAreas = require("word_game.model.table_areas")
+		local hand = TableAreas.hand_cards()
+		T.assert_equal(#hand, 1)
+		T.assert_equal(hand[1].ability.letter, "R")
 		love.filesystem.remove(path)
 	end)
 end)

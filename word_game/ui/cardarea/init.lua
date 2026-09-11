@@ -1,5 +1,5 @@
 --[[
-	word_game/ui/cardarea/init.lua - `CardArea`: a region that owns and lays out `Card` instances.
+	word_game/ui/cardarea/init.lua - `CardPile`: a region that owns and lays out `Card` instances.
 
 	One class, many roles: `self.config.type` (e.g. 'hand', 'deck',
 	'discard', 'shop', 'placement', 'usable', 'perk', 'title')
@@ -30,27 +30,27 @@ local TYPE_HANDLERS = {
 	placement = placement,
 }
 
---- @class (partial) CardArea : EaseNode
+--- @class (partial) CardPile : EaseNode
 --- @field cards Card[] list of Card instances currently in this area, in display order
 --- @field selected Card[] subset of `cards` currently selected/selected
 --- @field config table per-instance behaviour config; see `config.type` above
 --- @field children { area_uibox: table|nil, view_deck: table|nil, [string]: any }
----@overload fun(...): CardArea
---- @field emplace fun(self: CardArea, card: Card, location: string|nil, stay_flipped: boolean|nil)
---- @field set_ranks fun(self: CardArea)
---- @field relayout fun(self: CardArea)
---- @field remove_card fun(self: CardArea, card: Card|nil, discarded_only: boolean|nil): Card|nil
---- @field remove_selection fun(self: CardArea, card: Card, force: boolean|nil)
---- @field can_select fun(self: CardArea, card: Card): boolean
---- @field add_selection fun(self: CardArea, card: Card, silent: boolean|nil)
---- @field clear_selection fun(self: CardArea)
---- @field sort fun(self: CardArea, method: string|nil)
---- @field shuffle fun(self: CardArea, _seed: string|nil)
---- @field hard_set_cards fun(self: CardArea)
---- @field draw_card_from fun(self: CardArea, area: CardArea, stay_flipped: boolean|nil, discarded_only: boolean|nil): boolean|nil
---- @field save fun(self: CardArea): table|nil
---- @field load fun(self: CardArea, cardAreaTable: table)
-CardArea = EaseNode:derive("CardArea")
+---@overload fun(...): CardPile
+--- @field emplace fun(self: CardPile, card: Card, location: string|nil, stay_flipped: boolean|nil)
+--- @field set_ranks fun(self: CardPile)
+--- @field relayout fun(self: CardPile)
+--- @field remove_card fun(self: CardPile, card: Card|nil, discarded_only: boolean|nil): Card|nil
+--- @field remove_selection fun(self: CardPile, card: Card, force: boolean|nil)
+--- @field can_select fun(self: CardPile, card: Card): boolean
+--- @field add_selection fun(self: CardPile, card: Card, silent: boolean|nil)
+--- @field clear_selection fun(self: CardPile)
+--- @field sort fun(self: CardPile, method: string|nil)
+--- @field shuffle fun(self: CardPile, _seed: string|nil)
+--- @field hard_set_cards fun(self: CardPile)
+--- @field draw_card_from fun(self: CardPile, area: CardPile, stay_flipped: boolean|nil, discarded_only: boolean|nil): boolean|nil
+--- @field save fun(self: CardPile): table|nil
+--- @field load fun(self: CardPile, cardAreaTable: table)
+CardPile = EaseNode:derive("CardPile")
 
 local function table_board()
 	return runtime().STATE == runtime().STATES.TABLE_BOARD
@@ -81,8 +81,8 @@ end
 ---   `selection_limit` (number, default 5) - max cards selectable at once;
 ---   `card_limit` (number, default 52) - max cards this area can hold;
 ---   `card_w` (number, default `runtime().CARD_W`) - card width override;
----   `sort` (string, default 'desc') - default `CardArea:sort` method.
-function CardArea:construct(X, Y, W, H, config)
+---   `sort` (string, default 'desc') - default `CardPile:sort` method.
+function CardPile:construct(X, Y, W, H, config)
 	EaseNode.construct(self, X, Y, W, H)
 
 	self.states.drag.can = false
@@ -105,8 +105,8 @@ function CardArea:construct(X, Y, W, H, config)
 	self.config.lr_padding = config.lr_padding or 0.1
 	self.shuffle_amt = 0
 
-	if getmetatable(self) == CardArea then
-		table.insert(runtime().LIVE.CARDAREA, self)
+	if getmetatable(self) == CardPile then
+		table.insert(runtime().LIVE.CARDPILE, self)
 	end
 end
 
@@ -117,7 +117,7 @@ end
 --- @param card table the Card instance to add
 --- @param location string|nil 'front' to insert at index 1
 --- @param stay_flipped boolean|nil if true, don't auto-flip a face-down card
-function CardArea:emplace(card, location, stay_flipped)
+function CardPile:emplace(card, location, stay_flipped)
 	if table_board() and card and card.bonus_card and (self == runtime().dealt_letters or self == runtime().draw_pile) then
 		local origin_slot, origin_insert
 		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.slot_for_card then
@@ -159,7 +159,7 @@ end
 --- @param card table|nil specific card to remove; if nil, an implicit choice is made
 --- @param discarded_only boolean|nil if true (and `card` is nil), only consider discarded cards
 --- @return table|nil card the removed card, or nil if none matched
-function CardArea:remove_card(card, discarded_only)
+function CardPile:remove_card(card, discarded_only)
 	if not self.cards then return end
 
 	local candidates = self.cards
@@ -209,19 +209,19 @@ end
 --- cards only (no companion/usable/shop multi-select via d-pad).
 --- @param card table the card being considered (currently unused, kept for API shape)
 --- @return boolean can_select
-function CardArea:can_select(card)
+function CardPile:can_select(card)
 	return selection.can_select(self, card, TYPE_HANDLERS)
 end
 
-function CardArea:add_selection(card, silent)
+function CardPile:add_selection(card, silent)
 	return selection.add_selection(self, card, silent, TYPE_HANDLERS)
 end
 
-function CardArea:remove_selection(card, force)
+function CardPile:remove_selection(card, force)
 	return selection.remove_selection(self, card, force)
 end
 
-function CardArea:clear_selection()
+function CardPile:clear_selection()
 	return selection.clear_selection(self)
 end
 
@@ -229,7 +229,7 @@ end
 --- per-card drag/collide/click ability based on this area's type - e.g. only
 --- the top deck card is draggable, 'shop'/'usable' cards can't be dragged
 --- once placed.
-function CardArea:set_ranks()
+function CardPile:set_ranks()
 	local handler = type_handler(self)
 	for k, card in ipairs(self.cards) do
 		card.slot = k
@@ -253,13 +253,13 @@ function CardArea:set_ranks()
 end
 
 --- @param dt number seconds since last frame
-function CardArea:move(dt)
+function CardPile:move(dt)
 	EaseNode.move(self, dt)
 	self:relayout()
 end
 
 --- @param dt number seconds since last frame
-function CardArea:update(dt)
+function CardPile:update(dt)
 	if self == runtime().dealt_letters then
 		for k, v in pairs(self.cards) do
 			if v.ability.forced_selection and not self.selected[1] then
@@ -282,7 +282,7 @@ end
 --- before selected ones (so selected cards render on top), discard only
 --- bothers drawing cards that have visibly animated away from the pile
 --- center, and hand/title/perk areas just draw in order.
-function CardArea:draw()
+function CardPile:draw()
 	if not self.states.visible then return end
 	if not self.cards then return end
 	if runtime().VIEWING_DECK and (self==runtime().draw_pile or self==runtime().dealt_letters) then return end
@@ -334,13 +334,13 @@ function CardArea:draw()
 	end
 end
 
-function CardArea:relayout()
+function CardPile:relayout()
 	relayout_mod.relayout(self, face_down_in_pile)
 end
 
 --- Immediately (no tween) sets this area's transform and repositions/snaps
 --- its cards to match, bypassing the normal smoothed movement.
-function CardArea:hard_set_T(X, Y, W, H)
+function CardPile:hard_set_T(X, Y, W, H)
 	local x = (X or self.T.x)
 	local y = (Y or self.T.y)
 	local w = (W or self.T.w)
@@ -353,7 +353,7 @@ end
 
 --- Immediately snaps every card's transform to its current target position
 --- (no animation), used after `hard_set_T` or on load.
-function CardArea:hard_set_cards()
+function CardPile:hard_set_cards()
 	if not self.cards then return end
 	for k, card in pairs(self.cards) do
 		card:hard_set_T()
@@ -365,14 +365,14 @@ end
 --- (`shuffle_seeded`/`advance_seed`), so shuffles are reproducible from a seed
 --- rather than using `math.random` directly.
 --- @param _seed string|nil shuffle seed suffix (default 'shuffle')
-function CardArea:shuffle(_seed)
+function CardPile:shuffle(_seed)
 	shuffle_seeded(self.cards, advance_seed(_seed or 'shuffle'))
 	self:set_ranks()
 end
 
 --- Sorts `self.cards` in place by the given method (or the last-used one).
 --- @param method string|nil one of 'desc'|'asc'|'color desc'|'color asc'|'order'
-function CardArea:sort(method)
+function CardPile:sort(method)
 	self.config.sort = method or self.config.sort
 	if self.config.sort == 'desc' then
 		table.sort(self.cards, function (a, b) return a:get_nominal() > b:get_nominal() end )
@@ -390,12 +390,12 @@ end
 --- Moves a card from `area` into this area (e.g. deck -> hand). Respects
 --- this area's card limit unless it's the deck or hand. Applies
 --- "stay flipped" modifier-driven "stay flipped" (face-down draw) rules.
---- @param area table source CardArea
+--- @param area table source CardPile
 --- @param stay_flipped boolean|nil force the drawn card to stay face-down
 --- @param discarded_only boolean|nil only draw from already-discarded cards in `area`
 --- @return boolean|nil success true if a card was moved
-function CardArea:draw_card_from(area, stay_flipped, discarded_only)
-	if area:is_kind(CardArea) then
+function CardPile:draw_card_from(area, stay_flipped, discarded_only)
+	if area:is_kind(CardPile) then
 		if #self.cards < self.config.card_limit or self == runtime().draw_pile or self == runtime().dealt_letters then
 			local card = area:remove_card(nil, discarded_only)
 			if card then
@@ -412,7 +412,7 @@ end
 --- Click handler for area-level clicks (not individual cards) - currently
 --- only meaningful for the deck (opens deck info) and opponent deck
 --- (triggers opponent draw).
-function CardArea:click()
+function CardPile:click()
 	if self == runtime().draw_pile then
 		if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
 			WORD_GAME_UI.TableDeck.show_info()
@@ -420,7 +420,7 @@ function CardArea:click()
 	end
 end
 
-function CardArea:release(dragged)
+function CardPile:release(dragged)
 	local handler = type_handler(self)
 	if handler and handler.release then
 		handler.release(self, dragged)
@@ -429,7 +429,7 @@ end
 
 --- Serializes this area's cards and config for save-game persistence.
 --- @return table|nil save_data {cards = {...}, config = self.config}
-function CardArea:save()
+function CardPile:save()
 	if not self.cards then return end
 	local cardAreaTable = {
 		cards = {},
@@ -445,8 +445,8 @@ end
 --- Restores this area's cards/config from save data produced by `:save()`.
 --- Rebuilds every `Card` instance from scratch rather than mutating existing
 --- ones.
---- @param cardAreaTable table save data as produced by `CardArea:save`
-function CardArea:load(cardAreaTable)
+--- @param cardAreaTable table save data as produced by `CardPile:save`
+function CardPile:load(cardAreaTable)
 
 	teardown_tree(self.cards or {})
 	self.cards = {}
@@ -471,8 +471,8 @@ function CardArea:load(cardAreaTable)
 end
 
 --- Tears down this area: removes all cards/children, unregisters from
---- `runtime().LIVE.CARDAREA`, then calls the base `EaseNode:remove`.
-function CardArea:remove()
+--- `runtime().LIVE.CARDPILE`, then calls the base `EaseNode:remove`.
+function CardPile:remove()
 	local handler = type_handler(self)
 	if handler and handler.on_remove then
 		handler.on_remove(self)
@@ -481,12 +481,12 @@ function CardArea:remove()
 	self.cards = nil
 	teardown_tree(self.children or {})
 	self.children = nil
-	for k, v in pairs(runtime().LIVE.CARDAREA) do
+	for k, v in pairs(runtime().LIVE.CARDPILE) do
 		if v == self then
-			table.remove(runtime().LIVE.CARDAREA, k)
+			table.remove(runtime().LIVE.CARDPILE, k)
 		end
 	end
 	EaseNode.remove(self)
 end
 
-return CardArea
+return CardPile

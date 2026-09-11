@@ -187,8 +187,7 @@ function M.animate(hand, on_complete)
 			local runtime = require("bridge.runtime")
 			local store = runtime.store()
 			if store then
-				local pile_sync = require("bridge.pile_sync")
-				pile_sync.release_static_chrome(store, { "hand" })
+				require("word_game.model.piles").release_static_chrome(store, { "hand" })
 			end
 			if on_complete then on_complete() end
 			return true

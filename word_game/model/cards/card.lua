@@ -11,7 +11,7 @@
 ---@field ability CardAbility
 ---@field base table
 ---@field config table
----@field area CardArea|nil
+---@field area CardPile|nil
 ---@field selected boolean
 ---@field letter_card_id number|nil
 ---@field children table
@@ -29,7 +29,7 @@
 ---@field get_nominal fun(self: Card, mod: string|nil): number
 ---@field get_id fun(self: Card): number
 ---@field get_original_letter fun(self: Card): any
----@field set_card_area fun(self: Card, area: CardArea)
+---@field set_card_area fun(self: Card, area: CardPile)
 ---@field remove_from_area fun(self: Card)
 ---@field align fun(self: Card)
 ---@field load fun(self: Card, cardTable: table)

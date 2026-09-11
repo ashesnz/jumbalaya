@@ -30,7 +30,7 @@ function M.hand_area()
 	local fn = M.hooks.hand_area
 	if fn then return fn() end
 	for _, value in pairs(g()) do
-		if type(value) == "table" and value.is_kind and value:is_kind(CardArea)
+		if type(value) == "table" and value.is_kind and value:is_kind(CardPile)
 			and value.config and value.config.type == 'hand' then
 			return value
 		end

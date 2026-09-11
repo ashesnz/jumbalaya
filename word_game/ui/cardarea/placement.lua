@@ -1,5 +1,5 @@
 --[[
-	word_game/ui/cardarea/placement.lua - Placement/jumble CardArea type behaviour.
+	word_game/ui/cardarea/placement.lua - Placement/jumble CardPile type behaviour.
 ]]
 
 local GameRT = require("word_game.ui.util.game_runtime")

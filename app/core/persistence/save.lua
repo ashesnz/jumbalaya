@@ -106,12 +106,12 @@ function Game:discard_run()
 		end
 		if self.OVERLAY_MENU then self.OVERLAY_MENU:remove(); self.OVERLAY_MENU = nil end
 		for key, value in pairs(self) do
-			if (type(value) == "table") and value.is_kind and value:is_kind(CardArea) then
+			if (type(value) == "table") and value.is_kind and value:is_kind(CardPile) then
 				self[key] = nil
 			end
 		end
 		self.LIVE.CARD = {}
-		self.LIVE.CARDAREA = {}
+		self.LIVE.CARDPILE = {}
 	end
 	self.VIEWING_DECK = nil
 	self.TIMELINE:flush()

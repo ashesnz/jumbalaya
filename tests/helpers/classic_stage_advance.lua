@@ -29,11 +29,11 @@ function M.setup_card_areas()
 	mock_env.ensure_card_class()
 	require("word_game.ui.cardarea.init")
 
-	G.draw_pile = CardArea(0, 0, 1, 1, { type = "deck", card_limit = 52 })
-	G.dealt_letters = CardArea(0, 0, 7, 1, { type = "hand", card_limit = 7 })
-	G.recycle_stash = CardArea(0, 0, 1, 1, { type = "discard", card_limit = 500 })
+	G.draw_pile = CardPile(0, 0, 1, 1, { type = "deck", card_limit = 52 })
+	G.dealt_letters = CardPile(0, 0, 7, 1, { type = "hand", card_limit = 7 })
+	G.recycle_stash = CardPile(0, 0, 1, 1, { type = "discard", card_limit = 500 })
 	G.pattern_row = {
-		area = CardArea(0, 0, 5, 1, { type = "play" }),
+		area = CardPile(0, 0, 5, 1, { type = "play" }),
 		on_remove_card = function() end,
 		relayout = function() end,
 		apply_screen_position = function() end,

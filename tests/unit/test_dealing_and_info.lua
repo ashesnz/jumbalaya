@@ -42,7 +42,8 @@ T.describe("Card Dealing & Hand Capacity (word_game.model.cards.deck)", function
 		end
 		deck.populate_starting_deck()
 		deck.create_letter_card = create_letter_card
-		T.assert_equal(#G.draw_pile.cards, 12, "Starter population should create twelve cards")
+		local TableAreas = require("word_game.model.table_areas")
+		T.assert_equal(#TableAreas.draw_cards(), 12, "Starter population should create twelve cards")
 		local letters = {}
 		for _, card in ipairs(G.draw_pile.cards) do letters[card.ability.letter] = (letters[card.ability.letter] or 0) + 1 end
 		T.assert_equal(letters.E, 2, "Shuffling should preserve all starter cards")
@@ -64,7 +65,8 @@ T.describe("Card Dealing & Hand Capacity (word_game.model.cards.deck)", function
 		deck.populate_jumble_deck()
 		deck.populate_jumble_deck()
 		deck.create_letter_card = create_letter_card
-		T.assert_equal(#G.draw_pile.cards, 12, "Jumble deck should stay at twelve cards after repopulation")
+		local TableAreas = require("word_game.model.table_areas")
+		T.assert_equal(#TableAreas.draw_cards(), 12, "Jumble deck should stay at twelve cards after repopulation")
 		T.assert_equal(G.GAME.deck_left_count, 12, "Deck count display should match the live deck size")
 	end)
 
@@ -387,7 +389,8 @@ T.describe("Sidebar deck information", function()
 
 		deck.deal_jumble_hand()
 		deck.sync_deck_count_display()
-		local expected = #G.draw_pile.cards
+		local TableAreas = require("word_game.model.table_areas")
+		local expected = #TableAreas.draw_cards()
 		T.assert_equal(G.ARGS.deck_left_count, expected,
 			"HUD counter should match the physical draw pile after dealing")
 		T.assert_equal(G.GAME.deck_left_count, expected,
@@ -490,8 +493,9 @@ T.describe("Sidebar deck information", function()
 
 		T.assert_true(deck.try_jumble_reshuffle_and_deal())
 		T.assert_equal(#G.recycle_stash.cards, 0, "Discard pile should be empty after recycle")
-		T.assert_equal(#G.dealt_letters.cards, 7, "Player should receive a full hand of seven cards")
-		T.assert_equal(#G.draw_pile.cards, 5, "Remaining cards should stay in the deck")
+		local TableAreas = require("word_game.model.table_areas")
+		T.assert_equal(#TableAreas.hand_cards(), 7, "Player should receive a full hand of seven cards")
+		T.assert_equal(#TableAreas.draw_cards(), 5, "Remaining cards should stay in the deck")
 		T.assert_equal(deck.cards_left(), 5, "Cards left should match the physical draw pile")
 
 		WORD_GAME.Jumble = orig_jumble

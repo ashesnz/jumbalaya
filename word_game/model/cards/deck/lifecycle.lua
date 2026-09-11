@@ -7,7 +7,7 @@ return function(context)
 	local deck_config = require("jumbalaya_core.cards.deck_config")
 	local core_letter_card = require("jumbalaya_core.cards.letter_card")
 	local game_access = require("word_game.model.game_access")
-	local pile_sync = require("bridge.pile_sync")
+	local piles = require("word_game.model.piles")
 
 	M.STARTING_LETTERS = deck_config.STARTING_LETTERS
 
@@ -32,8 +32,9 @@ return function(context)
 		live_game().draw_pile.config.card_limit = #M.STARTING_LETTERS
 		M.shuffle_deck()
  	if live_game().draw_pile.hard_set_T then live_game().draw_pile:hard_set_T() end
+		piles.sync_hosts_to_store()
+		piles.release_static_chrome(nil, { "draw" })
 		M.sync_deck_count_display()
-		pile_sync.sync_areas_to_store()
 	end
 
 	 function M.draft_letter(letter, color)

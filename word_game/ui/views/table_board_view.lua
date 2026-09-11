@@ -1,5 +1,5 @@
 --[[
-	word_game/ui/views/table_board_view.lua - TABLE_BOARD store-backed pile rendering (Phase 6 / 8).
+	word_game/ui/views/table_board_view.lua - TABLE_BOARD store-backed pile rendering (Phase 6 / 10b).
 ]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
@@ -12,7 +12,7 @@ local TableAreas = require("word_game.model.table_areas")
 local TableBoardView = {}
 TableBoardView.__index = TableBoardView
 
-local PILE_AREAS = {
+local PILE_HOSTS = {
 	hand = "dealt_letters",
 	draw = "draw_pile",
 	pattern = "pattern_row",
@@ -49,8 +49,8 @@ function TableBoardView:state()
 	return self._state or (self.store and self.store:get())
 end
 
-function TableBoardView:legacy_area(pile_id)
-	local key = PILE_AREAS[pile_id]
+function TableBoardView:legacy_host(pile_id)
+	local key = PILE_HOSTS[pile_id]
 	if not key or not runtime() then return nil end
 	if pile_id == "pattern" then
 		local row = runtime().pattern_row
@@ -70,18 +70,6 @@ function TableBoardView:interaction_cards()
 		out[controller.focused.target] = true
 	end
 	return out
-end
-
-function TableBoardView:legacy_area_empty(pile_id)
-	local area = self:legacy_area(pile_id)
-	if not area or not area.cards then return true end
-	local interacting = self:interaction_cards()
-	for _, card in ipairs(area.cards) do
-		if card and not card.REMOVED and not interacting[card] then
-			return false
-		end
-	end
-	return true
 end
 
 local PILE_SELECTORS = {
@@ -109,9 +97,9 @@ function TableBoardView:should_render_pile_from_store(pile_id)
 	if not pile or #pile == 0 then return false end
 	if pile_id == "draw" and WORD_GAME_UI and WORD_GAME_UI.TableDeck
 		and WORD_GAME_UI.TableDeck.uses_table_draw() then
-		return self:legacy_area_empty("draw")
+		return true
 	end
-	return self:legacy_area_empty(pile_id)
+	return true
 end
 
 function TableBoardView:should_render_hand_from_store()

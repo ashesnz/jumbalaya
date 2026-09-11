@@ -211,7 +211,7 @@ function Game:start_run(args)
     }
 
 
-    self.usables = CardArea(
+    self.usables = CardPile(
         0, 0,
         CAI.usable_W,
         CAI.usable_H, 
@@ -220,15 +220,15 @@ function Game:start_run(args)
     self.pattern_row:create_area(CAI.placement_W, CAI.placement_H)
     self.pattern_row:setup()
 
-    self.recycle_stash = CardArea(
+    self.recycle_stash = CardPile(
         0, 0,
         CAI.discard_W,CAI.discard_H,
         {card_limit = 500, type = 'discard'})
-    self.draw_pile = CardArea(
+    self.draw_pile = CardPile(
         0, 0,
         CAI.deck_W,CAI.deck_H, 
         {card_limit = 12, type = 'deck'})
-    self.dealt_letters = CardArea(
+    self.dealt_letters = CardPile(
         0, 0,
         CAI.hand_W,CAI.hand_H,
         {card_limit = self.GAME.starting_params.hand_size, type = 'hand', selection_limit = 1})

@@ -116,7 +116,7 @@ function Game:define_constants()
         SPRITE = {},
         POPUP = {},
         CARD = {},
-        CARDAREA = {},
+        CARDPILE = {},
         ALERT = {}
     }
     self.ANIM_SHEETS = {}

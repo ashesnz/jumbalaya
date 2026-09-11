@@ -3,7 +3,7 @@
 
 	Config file: `.emmyrc.json` at repo root.
 
-	While the Game shell still carries live scene nodes (CardArea, overlays), these
+	While the Game shell still carries live scene nodes (CardPile, overlays), these
 	diagnostics stay disabled in `.emmyrc.json` → `diagnostics.disable`:
 	- inject-field
 	- missing-fields

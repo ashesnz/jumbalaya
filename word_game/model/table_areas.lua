@@ -31,48 +31,47 @@ local function get_store_state(state)
 	return nil
 end
 
--- Store selectors
-function M.hand_cards(state)
+local function pile_or_host(state, pile_id, host_cards_fn)
 	local s = get_store_state(state)
-	if s and s.piles then
-		return s.piles.hand
+	if s and s.piles and s.piles[pile_id] and #s.piles[pile_id] > 0 then
+		return s.piles[pile_id]
 	end
-	return live_game() and live_game().dealt_letters and live_game().dealt_letters.cards or {}
+	return host_cards_fn()
+end
+
+-- Store selectors (prefer non-empty store piles; fall back to live hosts for headless tests)
+function M.hand_cards(state)
+	return pile_or_host(state, "hand", function()
+		return live_game() and live_game().dealt_letters and live_game().dealt_letters.cards or {}
+	end)
 end
 
 function M.draw_cards(state)
-	local s = get_store_state(state)
-	if s and s.piles then
-		return s.piles.draw
-	end
-	return live_game() and live_game().draw_pile and live_game().draw_pile.cards or {}
+	return pile_or_host(state, "draw", function()
+		return live_game() and live_game().draw_pile and live_game().draw_pile.cards or {}
+	end)
 end
 
 function M.recycle_cards(state)
-	local s = get_store_state(state)
-	if s and s.piles then
-		return s.piles.discard
-	end
-	return live_game() and live_game().recycle_stash and live_game().recycle_stash.cards or {}
+	return pile_or_host(state, "discard", function()
+		return live_game() and live_game().recycle_stash and live_game().recycle_stash.cards or {}
+	end)
 end
 
 function M.pattern_cards(state)
-	local s = get_store_state(state)
-	if s and s.piles then
-		return s.piles.pattern
-	end
-	return live_game() and live_game().pattern_row and live_game().pattern_row.area and live_game().pattern_row.area.cards or {}
+	return pile_or_host(state, "pattern", function()
+		return live_game() and live_game().pattern_row and live_game().pattern_row.area
+			and live_game().pattern_row.area.cards or {}
+	end)
 end
 
 function M.bonus_cards(state)
-	local s = get_store_state(state)
-	if s and s.piles then
-		return s.piles.bonus
-	end
-	return live_game() and live_game().bonus_stack and live_game().bonus_stack.cards or {}
+	return pile_or_host(state, "bonus", function()
+		return live_game() and live_game().bonus_stack and live_game().bonus_stack.cards or {}
+	end)
 end
 
--- Legacy accessors for backwards compatibility with CardArea expectations
+-- Legacy accessors for backwards compatibility with CardPile expectations
 function M.dealt_letters()
 	if live_game() and live_game().dealt_letters then return live_game().dealt_letters end
 	return {

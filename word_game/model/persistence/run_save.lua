@@ -9,6 +9,27 @@ local BridgeRuntime = require("bridge.runtime")
 
 local M = {}
 
+local function materialize_saved_card(cdata)
+	if not cdata then return nil end
+	if Card and cdata.state and getmetatable(cdata) ~= Card then
+		local shell = live_game()
+		local card = Card(
+			0, 0,
+			shell.CARD_W, shell.CARD_H,
+			shell.LETTERS.faces.empty,
+			shell.LETTERS.centers.letter_base,
+			{
+				bypass_discovery_center = true,
+				bypass_discovery_ui = true,
+				bypass_lock = true,
+			}
+		)
+		card:load(cdata)
+		return card
+	end
+	return cdata
+end
+
 function M.rebuild_card_inventory()
 	live_game().letter_inventory = {}
 	local seen = {}
@@ -59,28 +80,17 @@ function M.restore_card_areas(save_table)
 			end
 			if data and data.cards then
 				for _, cdata in ipairs(data.cards) do
-					local card = {
+					local card = materialize_saved_card(cdata) or {
 						id = cdata.state and cdata.state.letter_card_id or 0,
 						letter = cdata.state and cdata.state.ability and cdata.state.ability.letter or "A",
 						pile_id = pile_name,
 						ability = cdata.state and cdata.state.ability or {},
 						config = cdata.refs or {},
 					}
-					if cdata.state then
-						for k, v in pairs(cdata.state) do card[k] = v end
+					if card and not card.pile_id then
+						card.pile_id = pile_name
 					end
 					table.insert(store_piles[pile_name], card)
-				end
-			end
-			if key == "pattern_row" then
-				local row = TableAreas.pattern_row()
-				if row and row.area and row.area.load then
-					row.area:load(data)
-				end
-			else
-				local area = live_game()[key]
-				if area and area.load then
-					area:load(data)
 				end
 			end
 		end

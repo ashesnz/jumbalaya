@@ -1,15 +1,15 @@
 --[[
 	word_game.board.placement.table - Session controller for the placement row.
 
-	Owns the placement CardArea. Subsystems (layout, draw, snap) are stateless
+	Owns the placement CardPile. Subsystems (layout, draw, snap) are stateless
 	modules that receive `self` as their session.
 
 	Lifecycle (called from Game):
 	  PlacementTable(game)  -> construct with Game reference
-	  :create_area(w, h)    -> instantiate CardArea during start_run
+	  :create_area(w, h)    -> instantiate CardPile during start_run
 	  :setup()              -> reset row state at run start
-	  :draw_shadows()       -> called from CardArea:draw
-	  :relayout()           -> called from CardArea:relayout
+	  :draw_shadows()       -> called from CardPile:draw
+	  :relayout()           -> called from CardPile:relayout
 	  :try_snap_card(card)  -> called from Card:stop_drag
 	  :draw_run_pass(game)  -> board draw pass (area + placed cards)
 ]]
@@ -28,7 +28,7 @@ local function g() return BridgeRuntime.game() end
 --- @class PlacementTable
 --- @field game Game
 --- @field ctx PlacementContext
---- @field area CardArea|nil
+--- @field area CardPile|nil
 --- @field draw_pattern_overlay fun(session)|nil UI hook for fixed-letter tiles
 local PlacementTable = Kind:derive("PlacementTable")
 
@@ -41,7 +41,7 @@ function PlacementTable:construct(game)
 	self.jumble_geometry = jumble_geometry
 end
 
---- Create the CardArea if it does not exist yet (during start_run).
+--- Create the CardPile if it does not exist yet (during start_run).
 --- @param w number area width in room units
 --- @param h number area height in room units
 function PlacementTable:create_area(w, h)
@@ -54,7 +54,7 @@ function PlacementTable:create_area(w, h)
 		return self.area
 	end
 
-	self.area = CardArea(
+	self.area = CardPile(
 		0, 0, w, h,
 		{
 			card_limit = self.ctx:card_limit(),

@@ -36,7 +36,7 @@ function M.state(wr)
 	return wr and wr.jumble
 end
 
---- Apply a resolved puzzle to jumble state (no CardArea / presentation side effects).
+--- Apply a resolved puzzle to jumble state (no CardPile / presentation side effects).
 ---@param hooks table|nil { on_puzzle_start: fun(j, wr), on_puzzle_applied: fun(j, wr) }
 function M.apply_puzzle(wr, puzzle, hooks)
 	local j = wr and wr.jumble

@@ -1,5 +1,5 @@
 --[[
-	word_game/ui/cardarea/discard.lua - Invisible recycle-pile CardArea behaviour.
+	word_game/ui/cardarea/discard.lua - Invisible recycle-pile CardPile behaviour.
 
 	runtime().recycle_stash holds played/discarded cards for deck recycling. Voucher discard
 	uses dissolve-on-voucher; this pile is never shown as a bin sprite.
