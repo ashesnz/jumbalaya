@@ -2,9 +2,11 @@ return function(Target)
 function LayoutView:remove()
 	if self == G.OVERLAY_MENU then G.REFRESH_ALERTS = true end
 	self.root_node:remove()
-	local registry = G.LIVE[self.config.instance_type or 'UIBOX']
-	for k, v in pairs(registry) do
-		if v == self then table.remove(registry, k) end
+	local registry = self.config and self.config.instance_type and G.LIVE and G.LIVE[self.config.instance_type] or nil
+	if registry then
+		for k, v in pairs(registry) do
+			if v == self then table.remove(registry, k) end
+		end
 	end
 	teardown_tree(self.children)
 	AnimNode.remove(self)

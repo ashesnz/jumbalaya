@@ -54,10 +54,10 @@ function LayoutView:construct(args)
 
 	self.root_node:initialize_VT(true)
 	if getmetatable(self) == LayoutView then
-		if args.config.instance_type then -- e.g. 'POPUP' for hover/drag popups
-			table.insert(G.LIVE[args.config.instance_type], self)
-		else
-			table.insert(G.LIVE.UIBOX, self)
+		if args.config and args.config.instance_type then
+			if G.LIVE and G.LIVE[args.config.instance_type] then
+				table.insert(G.LIVE[args.config.instance_type], self)
+			end
 		end
 	end
 end

@@ -104,14 +104,6 @@ function M.draw_spotlight_overlay(game, overlay)
 		WORD_GAME_UI.TokenReward.draw_pass()
 	end
 	if overlay.redraw_attention then
-		for k, v in pairs(game.LIVE.UIBOX) do
-			if v.spawn_attention and v ~= game.debug_tools and v ~= game.online_leaderboard then
-				love.graphics.push()
-				v:translate_container()
-				v:draw()
-				love.graphics.pop()
-			end
-		end
 		if WORD_GAME_UI.FloatUpText then
 			WORD_GAME_UI.FloatUpText.draw_pass()
 		end
@@ -266,14 +258,6 @@ end
 
 function M.draw_attention_passes(game)
 	if hand_clear_focus_active() then return end
-	for k, v in pairs(game.LIVE.UIBOX) do
-		if v.spawn_attention and v ~= game.debug_tools and v ~= game.online_leaderboard then
-			love.graphics.push()
-			v:translate_container()
-			v:draw()
-			love.graphics.pop()
-		end
-	end
 	if WORD_GAME_UI.FloatUpText then
 		WORD_GAME_UI.FloatUpText.draw_pass()
 	end

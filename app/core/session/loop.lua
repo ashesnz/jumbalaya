@@ -136,13 +136,6 @@ function Game:render_board_pass()
 	if not show_background then return end
 
 	perf_checkpoint('primitives', 'draw')
-	for _, panel in pairs(self.LIVE.UIBOX) do
-		local is_special = panel.flop_overlay or panel.spawn_attention or panel.parent
-			or panel == self.OVERLAY_MENU or panel == self.screenwipe
-			or panel == self.FIRST_PLAY_TUTORIAL_OVERLAY
-			or panel == self.debug_tools or panel == self.online_leaderboard
-		if not is_special then draw_with_container(panel) end
-	end
 	perf_checkpoint('panels', 'draw')
 
 	if G.STAGE == G.STAGES.RUN and G.STATE == G.STATES.TABLE_BOARD and WORD_GAME_UI and WORD_GAME_UI.TableBoard then

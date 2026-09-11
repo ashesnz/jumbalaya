@@ -32,7 +32,6 @@ function M.ensure_engine_globals()
 		NODE = {},
 		TRANSFORM = {},
 		SPRITE = {},
-		UIBOX = {},
 		POPUP = {},
 		CARD = {},
 		CARDAREA = {},

@@ -116,7 +116,6 @@ function Game:define_constants()
         NODE = {},
         TRANSFORM = {},
         SPRITE = {},
-        UIBOX = {},
         POPUP = {},
         CARD = {},
         CARDAREA = {},
