@@ -96,8 +96,9 @@ Metrics refreshed **2026-09-12** from repo root. Compare to post–Phase 9 basel
 | **10d** | Single state bus | ✅ **Complete** | `game_access` store-only; `legacy_mirror_*` / `sync_from_g` removed |
 | **11** | Dissolve `bridge/` folder | ✅ **Complete** | `app/runtime`, `app/callbacks/funcs`, `app/input/action_dispatch`, `app/bootstrap/store_sync`; `event_bridge` inlined |
 | **12** | Shrink `app/` to shell only | ✅ **Complete** | Engine code in `jumbalaya-engine/`; game FX in `word_game/ui/effects/`; `app/core` = session + persistence + platform only |
+| **13** | Optional `games/jumbalaya/` layout | ⬜ **Deferred** | Prerequisites met (Phases 10–12); do when adding a second game or splitting the monorepo |
 
-**Overall Phase 10 estimate:** ~15–20% complete (foundation done; consolidation work largely ahead).
+**Overall Phase 10–12:** ✅ complete. Phase 13 is cosmetic only.
 
 ### Step 0 complete (2026-09-12)
 
@@ -265,9 +266,13 @@ Everything else (`core/scene`, `core/graphics`, `core/input`, `core/audio`, `eff
 
 **Exit:** `app/` has no scene graph classes; `jumbalaya-engine` is the custom engine entry point.
 
-### Step 7 — Optional repo layout (future, not urgent)
+### Step 7 — Optional repo layout (Phase 13 — deferred)
 
-Only consider after Phases 10–12 are complete:
+**Status:** Prerequisites met (Phases 10–12 ✅). **Not started** — cosmetic only; same `require()` module names and dependency rules.
+
+**Trigger:** Add a second Love2D game under `games/`, or publish `packages/` as shared engine/core without the Jumbalaya game tree.
+
+#### Target tree
 
 ```text
 packages/
@@ -275,11 +280,50 @@ packages/
   jumbalaya-engine/
 games/
   jumbalaya/
-    app/          # thin shell
-    word_game/    # game layer
+    main.lua          # Love2D entry (move from repo root)
+    conf.lua
+    app/              # thin shell
+    word_game/        # game layer
+    resources/        # assets (move from repo root)
+    dictionary/
+    devtools/
+    tests/
+    types/            # game/analyzer types
 ```
 
-This is cosmetic reorganisation — same dependency rules, clearer monorepo story for a second game.
+Repo root keeps: `packages/`, `docs/`, `_tools/`, `.github/`, agent config. Optional thin root `main.lua` that only sets `package.path` and `require`s `games.jumbalaya.bootstrap` if you want `love .` from root during transition.
+
+#### What changes (mechanical)
+
+| Area | Change |
+|------|--------|
+| `package.path` | Add `./games/jumbalaya/?.lua;./games/jumbalaya/?/init.lua;` before `./packages/…` in `main.lua` and `tests/runner.lua` |
+| `require()` strings | **Unchanged** — still `app.*`, `word_game.*`, `jumbalaya-engine.*` |
+| Love launch | `love games/jumbalaya` (or `love games/jumbalaya tests`) |
+| Thread paths | `love.thread.newThread('packages/jumbalaya-engine/sound/manager.lua')` — already package-relative; `app/core/persistence/worker.lua` → `games/jumbalaya/app/core/persistence/worker.lua` in `startup.lua` |
+| `io.open` in tests | Paths like `resources/shaders/…` → `games/jumbalaya/resources/shaders/…` (or run tests with CWD = game dir) |
+| CI | `.github/workflows/tests.yml`: `love games/jumbalaya tests` |
+| Docs / agents | `AGENTS.md`, `.cursor/rules/`, skills — path table only |
+
+#### What does *not* change
+
+- `jumbalaya_core` / `jumbalaya-engine` package boundaries
+- `shell_bind` injection, `WORD_GAME` / `WORD_GAME_UI` facades
+- Headless test logic (only discovery paths / `package.path`)
+
+#### Suggested PR sequence (when you do it)
+
+1. **PR-A** — Create `games/jumbalaya/`, `git mv` game dirs, fix `package.path` + `conf.lua` + thread/fs paths; `love games/jumbalaya tests` green.
+2. **PR-B** — Update docs, CI, agent rules; optional root shim `main.lua` for one release cycle.
+3. **PR-C** — Remove root shim; document `love games/jumbalaya` as canonical.
+
+#### Exit
+
+```sh
+love games/jumbalaya tests
+rg 'require\("app\.' packages/    # → 0 (unchanged)
+test -d games/jumbalaya/app && test -d packages/jumbalaya-engine
+```
 
 ---
 

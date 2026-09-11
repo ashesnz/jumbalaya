@@ -66,10 +66,10 @@ function Game:launch()
 	self:init_window()
 
 	if self.F_SOUND_THREAD and love.filesystem and love.filesystem.getInfo
-		and love.filesystem.getInfo('packages/jumbalaya-engine/sound/manager.lua') then
+		and love.filesystem.getInfo('../../packages/jumbalaya-engine/sound/manager.lua') then
 		boot_stage('window init', 'audio worker')
 		self.AUDIO_WORKER = {
-			thread = love.thread.newThread('packages/jumbalaya-engine/sound/manager.lua'),
+			thread = love.thread.newThread('../../packages/jumbalaya-engine/sound/manager.lua'),
 			channel = love.thread.getChannel('alpha_audio_in'),
 			log = love.thread.getChannel('alpha_audio_log'),
 		}

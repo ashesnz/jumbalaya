@@ -1,7 +1,6 @@
---[[
-	conf.lua - LÖVE reads this before creating the window.
-	Keep window/title defaults in word_game/config/boot/runtime.lua.
-]]
+--[[ Root shim — prefer: love games/jumbalaya ]]
+
+package.path = "./packages/?.lua;./packages/?/init.lua;./games/jumbalaya/?.lua;./games/jumbalaya/?/init.lua;" .. package.path
 
 function love.conf(t)
 	require("word_game.config.boot.runtime").love_conf(t)

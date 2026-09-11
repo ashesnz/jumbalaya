@@ -14,7 +14,9 @@ end
 
 --- Load real engine classes (AnimNode, Sprite, etc.) so tests never use stub moveables.
 function M.ensure_engine_globals()
-	package.path = "./?.lua;./?/init.lua;" .. package.path
+	if not package.loaded["bootstrap_paths"] then
+		require("bootstrap_paths").install()
+	end
 
 	_G.G = _G.G or {}
 	require("app.runtime").bind_game(_G.G)
@@ -186,26 +188,34 @@ function M.setup()
 		pause = function() end,
 	}
 
+	-- Force headless stubs (game source mounts resources/; Love may expose real draw APIs).
+	local noop = function() end
 	love.graphics = love.graphics or {}
-	love.graphics.push = love.graphics.push or function() end
-	love.graphics.pop = love.graphics.pop or function() end
-	love.graphics.scale = love.graphics.scale or function() end
-	love.graphics.translate = love.graphics.translate or function() end
-	love.graphics.rotate = love.graphics.rotate or function() end
-	love.graphics.clear = love.graphics.clear or function() end
-	love.graphics.setColor = love.graphics.setColor or function() end
-	love.graphics.getColor = love.graphics.getColor or function() return 1, 1, 1, 1 end
-	love.graphics.setShader = love.graphics.setShader or function() end
-	love.graphics.getShader = love.graphics.getShader or function() return nil end
-	love.graphics.setBlendMode = love.graphics.setBlendMode or function() end
-	love.graphics.getBlendMode = love.graphics.getBlendMode or function()
-		return "alpha", "alphamultiply"
-	end
-	love.graphics.setCanvas = love.graphics.setCanvas or function() end
-	love.graphics.getCanvas = love.graphics.getCanvas or function() return nil end
-	love.graphics.newCanvas = love.graphics.newCanvas or function(w, h)
+	love.graphics.push = noop
+	love.graphics.pop = noop
+	love.graphics.scale = noop
+	love.graphics.translate = noop
+	love.graphics.rotate = noop
+	love.graphics.clear = noop
+	love.graphics.setColor = noop
+	love.graphics.getColor = function() return 1, 1, 1, 1 end
+	love.graphics.setShader = noop
+	love.graphics.getShader = function() return nil end
+	love.graphics.newText = function(_font, text)
 		return {
-			setFilter = function() end,
+			getWidth = function() return #(text or "") * 10 end,
+			getHeight = function() return 20 end,
+			set = noop,
+			draw = noop,
+		}
+	end
+	love.graphics.setBlendMode = noop
+	love.graphics.getBlendMode = function() return "alpha", "alphamultiply" end
+	love.graphics.setCanvas = noop
+	love.graphics.getCanvas = function() return nil end
+	love.graphics.newCanvas = function(w, h)
+		return {
+			setFilter = noop,
 			getDimensions = function() return w or 20, h or 11 end,
 			getWidth = function() return w or 20 end,
 			getHeight = function() return h or 11 end,
@@ -213,25 +223,25 @@ function M.setup()
 			getPixelWidth = function() return w or 20 end,
 		}
 	end
-	love.graphics.draw = love.graphics.draw or function() end
-	love.graphics.rectangle = love.graphics.rectangle or function() end
-	love.graphics.circle = love.graphics.circle or function() end
-	love.graphics.arc = love.graphics.arc or function() end
-	love.graphics.line = love.graphics.line or function() end
-	love.graphics.polygon = love.graphics.polygon or function() end
-	love.graphics.print = love.graphics.print or function() end
-	love.graphics.printf = love.graphics.printf or function() end
-	love.graphics.newQuad = love.graphics.newQuad or function(x, y, w, h, sw, sh) return { x = x, y = y, w = w, h = h } end
-	love.graphics.newFont = love.graphics.newFont or function()
+	love.graphics.draw = noop
+	love.graphics.rectangle = noop
+	love.graphics.circle = noop
+	love.graphics.arc = noop
+	love.graphics.line = noop
+	love.graphics.polygon = noop
+	love.graphics.print = noop
+	love.graphics.printf = noop
+	love.graphics.newQuad = function(x, y, w, h) return { x = x, y = y, w = w, h = h } end
+	love.graphics.newFont = function()
 		return {
 			getWidth = function(_, str) return #(str or "") * 10 end,
 			getHeight = function() return 20 end,
-			setFilter = function() end,
+			setFilter = noop,
 		}
 	end
-	love.graphics.setFont = love.graphics.setFont or function() end
-	love.graphics.getFont = love.graphics.getFont or function() return love.graphics.newFont() end
-	love.graphics.isActive = love.graphics.isActive or function() return true end
+	love.graphics.setFont = noop
+	love.graphics.getFont = function() return love.graphics.newFont() end
+	love.graphics.isActive = function() return true end
 	love.graphics.getPixelDimensions = love.graphics.getPixelDimensions or function()
 		return 1280, 720
 	end
@@ -263,9 +273,6 @@ function M.setup()
 			remove = function(self) end,
 		}
 	end
-
-	-- Ensure root package paths are set
-	package.path = "./?.lua;./?/init.lua;" .. package.path
 
 	package.preload["dictionary.words_set"] = package.preload["dictionary.words_set"] or function()
 		return {

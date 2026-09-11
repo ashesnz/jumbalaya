@@ -4,7 +4,7 @@
 
 local M = {}
 
-local SCAN_ROOTS = { "app", "word_game" }
+local SCAN_ROOTS = {}
 local SKIP_PATH_PREFIXES = { "devtools/" }
 
 local function should_scan(path)
@@ -18,7 +18,13 @@ end
 
 local function list_lua_files()
 	local files = {}
-	local handle = io.popen('find app word_game -name "*.lua" -type f 2>/dev/null')
+	local paths = require("bootstrap_paths").resolve()
+	local find_cmd = string.format(
+		'find %s/app %s/word_game -name "*.lua" -type f 2>/dev/null',
+		paths.game_root,
+		paths.game_root
+	)
+	local handle = io.popen(find_cmd)
 	if not handle then
 		return files
 	end
@@ -34,7 +40,8 @@ end
 
 --- Parse GameFuncName entries from types/funcs.lua.
 function M.load_catalog()
-	local file = io.open("types/funcs.lua", "r")
+	local paths = require("bootstrap_paths").resolve()
+	local file = io.open(paths.game_root .. "/types/funcs.lua", "r")
 	if not file then
 		return {}
 	end

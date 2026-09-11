@@ -7,7 +7,7 @@ local M = {}
 local function discover_test_modules()
 	local modules = {}
 	local files
-	for _, dir in ipairs({ "unit", "tests/unit" }) do
+	for _, dir in ipairs({ "tests/unit", "unit", "games/jumbalaya/tests/unit" }) do
 		local listing = love.filesystem.getDirectoryItems(dir)
 		if listing and #listing > 0 then
 			files = listing
@@ -25,9 +25,7 @@ local function discover_test_modules()
 end
 
 function M.run()
-	package.path = "./packages/?.lua;./packages/?/init.lua;"
-		.. "./?.lua;./?/init.lua;"
-		.. package.path
+	require("bootstrap_paths").install()
 
 	local MockEnv = require("tests.helpers.mock_env")
 	MockEnv.ensure_engine_globals()

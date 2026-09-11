@@ -26,7 +26,7 @@ jobs:
           echo "$(dirname "$love_bin")" >> "$GITHUB_PATH"
           "$love_bin" --version | grep -F "${LOVE_VERSION}"
       - name: Run headless suite
-        run: love tests
+        run: love games/jumbalaya tests
 
   emmylua-check:
     runs-on: ubuntu-latest

@@ -1,6 +1,6 @@
---[[ tests/conf.lua
-     Headless test configuration for Love2D.
-]]
+--[[ Root shim — prefer: love games/jumbalaya/tests ]]
+
+package.path = "./packages/?.lua;./packages/?/init.lua;./games/jumbalaya/?.lua;./games/jumbalaya/?/init.lua;" .. package.path
 
 function love.conf(t)
 	t.window = nil

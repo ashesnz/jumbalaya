@@ -1,13 +1,11 @@
---[[ tests/main.lua
-     Entry point for running unit tests via `love tests`.
-]]
+--[[ Root shim — prefer: love games/jumbalaya tests ]]
 
 function love.load()
-	local runner = require("tests.runner")
-	local success = runner.run()
+	print("Redirecting to games/jumbalaya test suite...")
+	local ok = os.execute('love "games/jumbalaya" tests')
 	if love.event and love.event.quit then
-		love.event.quit(success and 0 or 1)
+		love.event.quit(ok and 0 or 1)
 	else
-		os.exit(success and 0 or 1)
+		os.exit(ok and 0 or 1)
 	end
 end

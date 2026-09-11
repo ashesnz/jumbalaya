@@ -2,9 +2,10 @@
 
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
+local paths = require("bootstrap_paths").resolve()
 
 local function read_shader_source()
-	local file = io.open("resources/shaders/gold_seal.fs", "r")
+	local file = io.open(paths.game_root .. "/resources/shaders/gold_seal.fs", "r")
 	T.assert_not_nil(file, "gold_seal.fs should exist")
 	local src = file:read("*a")
 	file:close()
@@ -89,12 +90,12 @@ end)
 
 T.describe("sprite shader uniform contract", function()
 	T.it("only sends dissolve_wipe to the dissolve shader", function()
-		local src = io.open("packages/jumbalaya-engine/graphics/sprite_shader.lua", "r"):read("*a")
+		local src = io.open(paths.repo_root .. "/packages/jumbalaya-engine/graphics/sprite_shader.lua", "r"):read("*a")
 		T.assert_not_nil(src:match("if _shader == 'dissolve'"), "dissolve_wipe must be dissolve-only")
 	end)
 
 	T.it("sends gold_seal time in a separate pcall from G.TIMERS.REAL", function()
-		local src = io.open("packages/jumbalaya-engine/graphics/sprite_shader.lua", "r"):read("*a")
+		local src = io.open(paths.repo_root .. "/packages/jumbalaya-engine/graphics/sprite_shader.lua", "r"):read("*a")
 		T.assert_not_nil(src:match("if _shader == 'gold_seal' then"),
 			"gold_seal clock must be sent even if earlier uniforms fail")
 		T.assert_not_nil(src:match("sh:send%('time', clock%)"),

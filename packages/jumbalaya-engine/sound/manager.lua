@@ -25,6 +25,13 @@ require "love.system"
 
 if love.system.getOS() == 'OS X' then jit.off() end
 
+local root = love.filesystem.getSource()
+package.path = root .. "/../../packages/?.lua;"
+	.. root .. "/../../packages/?/init.lua;"
+	.. root .. "/?.lua;"
+	.. root .. "/?/init.lua;"
+	.. package.path
+
 local MIXER = require("jumbalaya-engine.sound.mixer")
 
 local log_channel = love.thread.getChannel('alpha_audio_log')

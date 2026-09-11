@@ -21,7 +21,11 @@ local function parse_bool(raw)
 end
 
 local function load_dotenv()
-	local file = io.open(".env", "r")
+	local file
+	for _, path in ipairs({ ".env", "../.env", "../../.env" }) do
+		file = io.open(path, "r")
+		if file then break end
+	end
 	if not file then return end
 	for line in file:lines() do
 		local trimmed = trim(line)

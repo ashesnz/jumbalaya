@@ -3,9 +3,9 @@
 local M = {}
 
 function M.setup_package_path()
-	package.path = "./packages/?.lua;./packages/?/init.lua;"
-		.. "./?.lua;./?/init.lua;"
-		.. package.path
+	if not package.loaded["bootstrap_paths"] then
+		require("bootstrap_paths").install()
+	end
 end
 
 return M
