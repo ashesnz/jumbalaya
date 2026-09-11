@@ -2,49 +2,52 @@
 
 local Scheduler = require "app.effects.timeline_scheduler"
 
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 local StatusText = {}
 
 local STATUS_DEFINITIONS = {
     debuff = {
         sound = 'cancel',
         amount = 1,
-        colour = function() return G.C.RED end,
+        colour = function() return g().C.RED end,
         text = function() return localize('term_debuffed') end,
         config = {scale = 0.6},
     },
     points = {
         sound = 'card_tick',
-        colour = function() return G.C.POINTS end,
+        colour = function() return g().C.POINTS end,
         text = function(amount) return localize{type = 'variable', key = 'a_chips', vars = {amount}} end,
         delay = 0.6,
     },
     mult = {
         sound = 'multhit1',
-        colour = function() return G.C.MULTIPLIER end,
+        colour = function() return g().C.MULTIPLIER end,
         text = function(amount) return localize{type = 'variable', key = 'a_mult', vars = {amount}} end,
         config = {type = 'fade', scale = 0.7},
     },
     x_mult = {
         sound = 'multhit2',
         volume = 0.7,
-        colour = function() return G.C.XMULT end,
+        colour = function() return g().C.XMULT end,
         text = function(amount) return localize{type = 'variable', key = 'a_xmult', vars = {amount}} end,
         config = {type = 'fade', scale = 0.7},
     },
     h_mult = {
         sound = 'multhit1',
-        colour = function() return G.C.MULTIPLIER end,
+        colour = function() return g().C.MULTIPLIER end,
         text = function(amount) return localize{type = 'variable', key = 'a_mult', vars = {amount}} end,
         config = {type = 'fade', scale = 0.7},
     },
     dollars = {
         sound = 'coin3',
-        colour = function() return G.C.MONEY end,
+        colour = function() return g().C.MONEY end,
         text = function(amount) return localize("$") .. tostring(amount) end,
     },
     swap = {
         sound = 'generic1',
-        colour = function() return G.C.PURPLE end,
+        colour = function() return g().C.PURPLE end,
         text = function() return localize('term_swapped_ex') end,
     },
 }
@@ -59,10 +62,10 @@ local function copy_config(config)
 end
 
 local function position_for(card)
-    local position = {align = 'bm', y = 0.15 * G.CARD_H}
-    if card.area == G.dealt_letters
+    local position = {align = 'bm', y = 0.15 * g().CARD_H}
+    if card.area == g().dealt_letters
         or (card.area and card.area.config.type == 'placement') or card.is_mascot then
-        position.y = -0.05 * G.CARD_H
+        position.y = -0.05 * g().CARD_H
         position.align = 'tm'
     end
     return position
@@ -72,18 +75,18 @@ local function extra_definition(extra)
     local sound = extra.sound or extra.edition and 'foil2'
         or extra.mult_mod and 'multhit1' or extra.Xmult_mod and 'multhit2' or 'generic1'
     local config = {type = 'fall', scale = 0.7}
-    local colour = extra.colour or G.C.FILTER
+    local colour = extra.colour or g().C.FILTER
     if extra.edition then
-        colour = G.C.DARK_FINISH
+        colour = g().C.DARK_FINISH
     elseif extra.mult_mod or extra.Xmult_mod then
-        colour = G.C.MULTIPLIER
+        colour = g().C.MULTIPLIER
     end
     if extra.chip_mod then
-        colour = G.C.POINTS
+        colour = g().C.POINTS
     elseif extra.comic_burst then
         config.scale = extra.scale or 0.85
     elseif extra.swap then
-        colour = G.C.PURPLE
+        colour = g().C.PURPLE
     end
 
     return {
@@ -148,7 +151,7 @@ function StatusText.show(options)
         play_sfx(definition.sound, 0.8 + percent * 0.2, definition.volume)
         if not extra.no_bounce then
             card:pulse(0.6, 0.1)
-            G.ROOM.jiggle = G.ROOM.jiggle + 0.7
+            g().ROOM.jiggle = g().ROOM.jiggle + 0.7
         end
     end
 

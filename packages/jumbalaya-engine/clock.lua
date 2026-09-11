@@ -1,3 +1,6 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 --[[
 	jumbalaya-engine/clock.lua - Clock / timers service for testable time.
 ]]

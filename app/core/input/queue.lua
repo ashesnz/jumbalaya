@@ -2,6 +2,7 @@ return function(InputRouter)
 local BridgeRuntime = require("bridge.runtime")
 local function g() return BridgeRuntime.game() end
 
+
 function InputRouter:key_press(key)
 	self.pressed_keys[key] = true
 	self.held_keys[key] = true

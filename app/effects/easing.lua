@@ -2,6 +2,9 @@
 
 local Scheduler = require "app.effects.timeline_scheduler"
 
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 local Easing = {}
 
 function Easing.value(options)
@@ -40,7 +43,7 @@ end
 function Easing.background_colour(options)
     if not options.new_colour then return end
 
-    for key, colour in pairs(G.C.BACKGROUND) do
+    for key, colour in pairs(g().C.BACKGROUND) do
         if key == 'C' or key == 'L' or key == 'D' then
             if options.special_colour and options.tertiary_colour then
                 local colour_key = key == 'L' and 'new_colour'
@@ -66,9 +69,9 @@ function Easing.background_colour(options)
 
     if options.contrast then
         Easing.value{
-            ref_table = G.C.BACKGROUND,
+            ref_table = g().C.BACKGROUND,
             ref_value = 'contrast',
-            mod = options.contrast - G.C.BACKGROUND.contrast,
+            mod = options.contrast - g().C.BACKGROUND.contrast,
             delay = 0.6,
             not_blockable = true,
         }

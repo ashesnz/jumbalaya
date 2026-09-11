@@ -2,6 +2,7 @@ return function(InputRouter)
 local BridgeRuntime = require("bridge.runtime")
 local function g() return BridgeRuntime.game() end
 
+
 function InputRouter:get_cursor_collision(cursor_trans)
 	self.collision_list = clear_table(self.collision_list)
 	self.nodes_at_cursor = clear_table(self.nodes_at_cursor)

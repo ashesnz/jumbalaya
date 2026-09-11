@@ -69,6 +69,12 @@ function M.scan_registrations()
 		for name in contents:gmatch("function%s+runtime%(%)%.FUNCS%.([%w_]+)%s*%(") do
 			names[name] = names[name] or path
 		end
+		for name in contents:gmatch('Funcs%.register%("([%w_]+)"') do
+			names[name] = names[name] or path
+		end
+		for name in contents:gmatch("g%(%)%.FUNCS%.([%w_]+)%s*=") do
+			names[name] = names[name] or path
+		end
 		end
 	end
 	return names

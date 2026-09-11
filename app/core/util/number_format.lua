@@ -1,13 +1,16 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 --[[
 	app/core/util/number_format.lua - compact number formatting and UI scale helpers.
 ]]
 
 function number_format(value)
-	G.E_SWITCH_POINT = G.E_SWITCH_POINT or 100000000000
+	g().E_SWITCH_POINT = g().E_SWITCH_POINT or 100000000000
 	if not value or type(value) ~= "number" then
 		return value or ""
 	end
-	if value >= G.E_SWITCH_POINT then
+	if value >= g().E_SWITCH_POINT then
 		local scientific = string.format("%.4g", value)
 		local exponent = math.floor(math.log(tonumber(scientific), 10))
 		return string.format("%.3f", scientific / (10 ^ exponent)) .. "e" .. exponent
@@ -24,8 +27,8 @@ function number_format(value)
 end
 
 function score_number_scale(scale, amount)
-	G.E_SWITCH_POINT = G.E_SWITCH_POINT or 100000000000
-	if type(amount) ~= "number" or amount >= G.E_SWITCH_POINT then
+	g().E_SWITCH_POINT = g().E_SWITCH_POINT or 100000000000
+	if type(amount) ~= "number" or amount >= g().E_SWITCH_POINT then
 		return 0.7 * (scale or 1)
 	end
 	if amount >= 1000000 then

@@ -73,6 +73,7 @@ T.describe("Platform and Globals Initialization", function()
 
 		_G.G = setmetatable({}, Game)
 		_G.G:define_constants()
+		require("bridge.runtime").bind_game(_G.G)
 		_G.G.TIMERS = { REAL = 0 }
 		_G.G.ARGS = {}
 

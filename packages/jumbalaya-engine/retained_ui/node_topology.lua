@@ -1,7 +1,10 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 return function(Target)
 function LayoutNode:print_topology(indent)
 	local uit_name = '????'
-	for k, v in pairs(G.UI) do
+	for k, v in pairs(g().UI) do
 		if v == self.ui_kind then uit_name = '' .. k end
 	end
 	local out = '\n' .. string.rep('  ', indent or 0) .. '| ' .. uit_name .. ' | - ID:' .. self.ID .. ' w/h:' .. self.T.w .. '/' .. self.T.h
@@ -37,7 +40,7 @@ function LayoutNode:initialize_VT()
 
 	self.VT.w, self.VT.h = self.T.w, self.T.h
 
-	if self.ui_kind == G.UI.TEXT then self:update_text() end
+	if self.ui_kind == g().UI.TEXT then self:update_text() end
 	if self.config.object then
 		if not self.config.no_role then
 			if self.config.object.hard_set_T then

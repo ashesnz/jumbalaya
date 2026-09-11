@@ -2,6 +2,7 @@ return function(InputRouter)
 local BridgeRuntime = require("bridge.runtime")
 local function g() return BridgeRuntime.game() end
 
+
 local CardFocus = require("app.core.input.card_focus")
 
 function InputRouter:update_focus(dir)

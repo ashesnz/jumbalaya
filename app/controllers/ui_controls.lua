@@ -2,20 +2,23 @@
 
 local Bridge = require("app.controllers.callback_bridge")
 
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 local M = {}
 
 local function drag_slider_impl(e)
 	local c = e.children[1]
 	e.states.drag.can = true
 	c.states.drag.can = true
-	if G.INPUT and G.INPUT.dragging.target
-		and (G.INPUT.dragging.target == e or G.INPUT.dragging.target == c) then
+	if g().INPUT and g().INPUT.dragging.target
+		and (g().INPUT.dragging.target == e or g().INPUT.dragging.target == c) then
 		local rt = c.config.ref_table
-		rt.ref_table[rt.ref_value] = math.min(rt.max, math.max(rt.min, rt.min + (rt.max - rt.min) * (G.POINTER.T.x - e.parent.T.x - G.ROOM.T.x) / e.T.w))
+		rt.ref_table[rt.ref_value] = math.min(rt.max, math.max(rt.min, rt.min + (rt.max - rt.min) * (g().POINTER.T.x - e.parent.T.x - g().ROOM.T.x) / e.T.w))
 		rt.text = string.format("%." .. tostring(rt.decimal_places) .. "f", rt.ref_table[rt.ref_value])
 		c.T.w = (rt.ref_table[rt.ref_value] - rt.min) / (rt.max - rt.min) * rt.w
 		c.config.w = c.T.w
-		if rt.callback then G.FUNCS[rt.callback](rt) end
+		if rt.callback then g().FUNCS[rt.callback](rt) end
 	end
 end
 
@@ -61,11 +64,11 @@ function M.cycle_option(e)
 
 	local new_pip = e.panel:find_node_by_id('pip_' .. e.config.ref_table.current_option, e.parent.parent)
 
-	if old_pip then old_pip.config.colour = G.C.BLACK end
-	if new_pip then new_pip.config.colour = G.C.WHITE end
+	if old_pip then old_pip.config.colour = g().C.BLACK end
+	if new_pip then new_pip.config.colour = g().C.WHITE end
 
 	if e.config.ref_table.opt_callback then
-		G.FUNCS[e.config.ref_table.opt_callback]{
+		g().FUNCS[e.config.ref_table.opt_callback]{
 			from_val = from_val,
 			to_val = to_val,
 			from_key = from_key,

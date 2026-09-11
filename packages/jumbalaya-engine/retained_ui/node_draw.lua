@@ -1,6 +1,9 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 return function(Target)
 function LayoutNode:pulse(amount, rot_amt)
-	if self.ui_kind == G.UI.OBJECT then
+	if self.ui_kind == g().UI.OBJECT then
 		if self.config.object then self.config.object:pulse(amount, rot_amt) end
 	else
 		AnimNode.pulse(self, amount, rot_amt)

@@ -1,3 +1,6 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 --[[ app/core/graphics/sprite_util.lua - shared helpers for GfxSprite mixins ]]
 
 local M = {}
@@ -17,8 +20,8 @@ function M.atlas_dimensions(atlas)
 end
 
 function M.shader_for(name)
-	if not G.SHADERS then return nil end
-	return G.SHADERS[name] or G.SHADERS.dissolve
+	if not g().SHADERS then return nil end
+	return g().SHADERS[name] or g().SHADERS.dissolve
 end
 
 return M

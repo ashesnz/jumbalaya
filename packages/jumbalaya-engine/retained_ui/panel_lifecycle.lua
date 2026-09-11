@@ -1,8 +1,11 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 return function(Target)
 function RetainedPanel:remove()
-	if self == G.OVERLAY_MENU then G.REFRESH_ALERTS = true end
+	if self == g().OVERLAY_MENU then g().REFRESH_ALERTS = true end
 	self.root_node:remove()
-	local registry = self.config and self.config.instance_type and G.LIVE and G.LIVE[self.config.instance_type] or nil
+	local registry = self.config and self.config.instance_type and g().LIVE and g().LIVE[self.config.instance_type] or nil
 	if registry then
 		for k, v in pairs(registry) do
 			if v == self then table.remove(registry, k) end
@@ -14,9 +17,9 @@ end
 
 function RetainedPanel:draw()
 	-- One draw per frame unless a tutorial overlay forces a redraw.
-	if self.FRAME.RENDER >= G.FRAMES.RENDER
-		and not G.FIRST_PLAY_TUTORIAL_OVERLAY then return end
-	self.FRAME.RENDER = G.FRAMES.RENDER
+	if self.FRAME.RENDER >= g().FRAMES.RENDER
+		and not g().FIRST_PLAY_TUTORIAL_OVERLAY then return end
+	self.FRAME.RENDER = g().FRAMES.RENDER
 
 	-- Regular children first (popups/alerts excluded)...
 	for k, v in pairs(self.children) do
@@ -47,9 +50,9 @@ function RetainedPanel:recalculate()
 	self.root_node:set_alignments()
 	self.T.w = self.root_node.T.w
 	self.T.h = self.root_node.T.h
-	G.REFRESH_FRAME_MAJOR_CACHE = (G.REFRESH_FRAME_MAJOR_CACHE or 0) + 1
+	g().REFRESH_FRAME_MAJOR_CACHE = (g().REFRESH_FRAME_MAJOR_CACHE or 0) + 1
 	self.root_node:initialize_VT()
-	G.REFRESH_FRAME_MAJOR_CACHE = (G.REFRESH_FRAME_MAJOR_CACHE > 1 and G.REFRESH_FRAME_MAJOR_CACHE - 1 or nil)
+	g().REFRESH_FRAME_MAJOR_CACHE = (g().REFRESH_FRAME_MAJOR_CACHE > 1 and g().REFRESH_FRAME_MAJOR_CACHE - 1 or nil)
 end
 
 function RetainedPanel:move(dt)
@@ -59,7 +62,7 @@ end
 
 function RetainedPanel:drag(offset)
 	AnimNode.drag(self, offset)
-	AnimNode.move(self.root_node, G.real_dt)
+	AnimNode.move(self.root_node, g().real_dt)
 end
 
 function RetainedPanel:add_child(node, parent)

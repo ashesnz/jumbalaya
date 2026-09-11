@@ -1,5 +1,9 @@
 return function(GfxSprite)
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 local sprite_util = require("app.core.graphics.sprite_util")
+
 --- Draws just this quad into the current (possibly shader-bound) pass.
 function GfxSprite:draw_self(overlay)
 	if not self.states.visible then return end
@@ -53,7 +57,7 @@ end
 
 function GfxSprite:draw_projected_texture(target)
 	love.graphics.scale(self:projection_scale(target))
-	love.graphics.setColor(G.OVERLAY_TINT or G.C.WHITE)
+	love.graphics.setColor(g().OVERLAY_TINT or g().C.WHITE)
 	love.graphics.draw(
 		self.atlas.image, self.sprite,
 		self:projection_offset(target), 0, 0,
@@ -78,8 +82,8 @@ end
 
 function GfxSprite:remove()
 	if self.video then self.video:release() end
-	sprite_util.unregister_instance(G.ANIMATIONS, self)
-	sprite_util.unregister_instance(G.LIVE and G.LIVE.SPRITE, self)
+	sprite_util.unregister_instance(g().ANIMATIONS, self)
+	sprite_util.unregister_instance(g().LIVE and g().LIVE.SPRITE, self)
 	AnimNode.remove(self)
 end
 end

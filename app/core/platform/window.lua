@@ -1,3 +1,6 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 -- Window callbacks, mobile landscape lock, and viewport reconstruction.
 
 local Window = {}
@@ -64,8 +67,8 @@ function Window.lock_landscape_orientation()
 	end
 
 	local vsync = 1
-	if G and G.SETTINGS and G.SETTINGS.WINDOW and G.SETTINGS.WINDOW.vsync ~= nil then
-		vsync = G.SETTINGS.WINDOW.vsync
+	if g() and g().SETTINGS and g().SETTINGS.WINDOW and g().SETTINGS.WINDOW.vsync ~= nil then
+		vsync = g().SETTINGS.WINDOW.vsync
 	end
 
 	love.window.setMode(LANDSCAPE_W, LANDSCAPE_H, {
@@ -85,7 +88,7 @@ function Window.apply_mobile_window()
 		return nil, nil
 	end
 
-	if G and G.ROOM_PADDING_W then
+	if g() and g().ROOM_PADDING_W then
 		return Window.sync_resize()
 	end
 	return LANDSCAPE_W, LANDSCAPE_H
@@ -116,12 +119,12 @@ function love.resize(width, height)
 		end
 	end
 
-	local tile_w = G.TILE_W or 20
-	local tile_h = G.TILE_H or 11.5
-	local pad_w = G.ROOM_PADDING_W or 1
-	local pad_h = G.ROOM_PADDING_H or 0.7
+	local tile_w = g().TILE_W or 20
+	local tile_h = g().TILE_H or 11.5
+	local pad_w = g().ROOM_PADDING_W or 1
+	local pad_h = g().ROOM_PADDING_H or 0.7
 
-	G.WINDOW_TRANSFORM = {
+	g().WINDOW_TRANSFORM = {
 		x = 0,
 		y = 0,
 		w = tile_w + 2 * pad_w,
@@ -129,30 +132,30 @@ function love.resize(width, height)
 		real_window_w = width,
 		real_window_h = height,
 	}
-	G.CANVAS_SCALE = 1
+	g().CANVAS_SCALE = 1
 
 	local os_name = love.system and love.system.getOS and love.system.getOS() or ""
 	local canvas_opts = (os_name == "iOS" or os_name == "Android") and { type = "2d" }
 		or { type = "2d", readable = true }
 
-	G.CANVAS = love.graphics.newCanvas(
-		width * G.CANVAS_SCALE,
-		height * G.CANVAS_SCALE,
+	g().CANVAS = love.graphics.newCanvas(
+		width * g().CANVAS_SCALE,
+		height * g().CANVAS_SCALE,
 		canvas_opts
 	)
-	G.CANVAS:setFilter("linear", "linear")
+	g().CANVAS:setFilter("linear", "linear")
 
-	if not G.ROOM then
+	if not g().ROOM then
 		return
 	end
 
 	refit_viewport(width, height)
-	if G.buttons then
-		G.buttons:recalculate()
+	if g().buttons then
+		g().buttons:recalculate()
 	end
-	if G.STAGE == G.STAGES.RUN and G.STATE == G.STATES.TABLE_BOARD then
+	if g().STAGE == g().STAGES.RUN and g().STATE == g().STATES.TABLE_BOARD then
 		apply_run_layout()
-	elseif G.STAGE == G.STAGES.MAIN_MENU and layout_main_menu then
+	elseif g().STAGE == g().STAGES.MAIN_MENU and layout_main_menu then
 		layout_main_menu()
 	end
 end
@@ -166,7 +169,7 @@ function love.displayrotated(_index, orientation)
 	end
 	if orientation == "portrait" or orientation == "portraitflipped" then
 		Window.lock_landscape_orientation()
-		if G and G.ROOM_PADDING_W then
+		if g() and g().ROOM_PADDING_W then
 			Window.sync_resize()
 		end
 	end

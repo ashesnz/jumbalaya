@@ -8,6 +8,7 @@ local Scheduler = require("app.effects.timeline_scheduler")
 local CardMotion = require("app.effects.card_motion")
 local play_effects = require("word_game.ui.play_effects")
 local game_access = require("word_game.model.game_access")
+local Funcs = require("bridge.funcs_registry")
 
 local feedback = facade.feedback()
 

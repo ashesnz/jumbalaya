@@ -2,6 +2,7 @@ return function(InputRouter)
 local BridgeRuntime = require("bridge.runtime")
 local function g() return BridgeRuntime.game() end
 
+
 function InputRouter:cull_registry()
 	for _, registry in pairs(self.button_registry) do
 		for i = #registry, 1, -1 do

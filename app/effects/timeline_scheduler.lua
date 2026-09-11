@@ -1,15 +1,18 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 --[[
-	app/effects/timeline_scheduler.lua - G.TIMELINE tween scheduling for runtime effects.
+	app/effects/timeline_scheduler.lua - g().TIMELINE tween scheduling for runtime effects.
 
 	Thin conveniences over the global timeline: each helper stamps the tween
-	mode, hands the options table to Tween(), and files it on G.TIMELINE.
+	mode, hands the options table to Tween(), and files it on g().TIMELINE.
 ]]
 
 local Scheduler = {}
 
 function Scheduler.add(options)
 	local tween = Tween(options.event or options)
-	G.TIMELINE:enqueue(tween, options.lane, options.urgent)
+	g().TIMELINE:enqueue(tween, options.lane, options.urgent)
 	return tween
 end
 

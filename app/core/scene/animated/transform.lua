@@ -1,5 +1,9 @@
 return function(AnimNode)
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 local Node = require("app.core.scene.node")
+
 --- Teleports both transforms to (X, Y, W, H) and kills all velocity.
 function AnimNode:hard_set_T(X, Y, W, H)
 	self.T.x, self.T.y, self.T.w, self.T.h = X, Y, W, H
@@ -26,8 +30,8 @@ function AnimNode:drag(offset)
 		self.ARGS.drag_translation = self.ARGS.drag_translation or {}
 		local p = self.ARGS.drag_cursor_trans
 		local t = self.ARGS.drag_translation
-		p.x = G.INPUT.cursor_position.x / (G.TILESCALE * G.TILESIZE)
-		p.y = G.INPUT.cursor_position.y / (G.TILESCALE * G.TILESIZE)
+		p.x = g().INPUT.cursor_position.x / (g().TILESCALE * g().TILESIZE)
+		p.y = g().INPUT.cursor_position.y / (g().TILESCALE * g().TILESIZE)
 
 		t.x, t.y = -self.container.T.w / 2, -self.container.T.h / 2
 		shift_point(p, t)

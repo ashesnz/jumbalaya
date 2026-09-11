@@ -1,3 +1,6 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 --[[
 	app/core/graphics/flow_text.lua - animated per-letter text (FlowText).
 
@@ -41,7 +44,7 @@ function FlowText:construct(config)
 	self.reveal_speed = config.pop_in_rate or 2.5
 	self.hop_rate = config.bump_rate or 3.1
 	self.hop_height = config.bump_amount or 1
-	self.font = config.font or G.LANG.font
+	self.font = config.font or g().LANG.font
 
 	if config.string and type(config.string) ~= 'table' then config.string = {config.string} end
 	self.string = (config.string and type(config.string) == 'table' and config.string[1]) or {'JUMBALAYA'}
@@ -50,8 +53,8 @@ function FlowText:construct(config)
 		x = self.font.TEXT_OFFSET.x * self.scale + (config.x_offset or 0),
 		y = self.font.TEXT_OFFSET.y * self.scale + (config.y_offset or 0),
 	}
-	self.colours = config.colours or {G.C.RED}
-	self.shown_at = G.TIMERS.REAL
+	self.colours = config.colours or {g().C.RED}
+	self.shown_at = g().TIMERS.REAL
 	self.silent = config.silent
 
 	self.start_pop_in = config.pop_in
@@ -92,7 +95,7 @@ function FlowText:construct(config)
 		scale_bond = 'Weak',
 	}
 
-	if getmetatable(self) == FlowText then table.insert(G.LIVE.TRANSFORM, self) end
+	if getmetatable(self) == FlowText then table.insert(g().LIVE.TRANSFORM, self) end
 end
 
 function FlowText:update(dt)
@@ -139,7 +142,7 @@ function FlowText:update_text(first_pass)
 					self.config.pop_in = nil
 				else
 					self.config.pop_in = self.config.pop_in or 0
-					self.shown_at = G.TIMERS.REAL
+					self.shown_at = g().TIMERS.REAL
 				end
 
 				self.strings[k].string = v
@@ -159,20 +162,20 @@ function FlowText:update_text(first_pass)
 					}
 					self.strings[k].letters[index] = letter
 
-					local tx = self.font.FONT:getWidth(c) * self.scale * part_scale * G.TILESCALE * self.font.FONTSCALE
-						+ 2.7 * (self.config.spacing or 0) * G.TILESCALE * self.font.FONTSCALE
-					local ty = self.font.FONT:getHeight(c) * self.scale * part_scale * G.TILESCALE * self.font.FONTSCALE * self.font.TEXT_HEIGHT_SCALE
+					local tx = self.font.FONT:getWidth(c) * self.scale * part_scale * g().TILESCALE * self.font.FONTSCALE
+						+ 2.7 * (self.config.spacing or 0) * g().TILESCALE * self.font.FONTSCALE
+					local ty = self.font.FONT:getHeight(c) * self.scale * part_scale * g().TILESCALE * self.font.FONTSCALE * self.font.TEXT_HEIGHT_SCALE
 
 					letter.offset = old_letter and old_letter.offset or {x = 0, y = 0}
-					letter.dims = {x = tx / (self.font.FONTSCALE * G.TILESCALE), y = ty / (self.font.FONTSCALE * G.TILESCALE)}
+					letter.dims = {x = tx / (self.font.FONTSCALE * g().TILESCALE), y = ty / (self.font.FONTSCALE * g().TILESCALE)}
 					letter.pop_in = first_pass and (old_letter and old_letter.pop_in or (self.config.pop_in and 0 or 1)) or 1
 					letter.prefix = index <= part_a and outer_colour or nil
 					letter.suffix = index > part_b and outer_colour or nil
 					letter.colour = inner_colour or nil
 					if k > 1 then letter.pop_in = 0 end -- background strings start hidden
 
-					width = width + tx / (G.TILESIZE * G.TILESCALE)
-					height = math.max(ty / (G.TILESIZE * G.TILESCALE), height)
+					width = width + tx / (g().TILESIZE * g().TILESCALE)
+					height = math.max(ty / (g().TILESIZE * g().TILESCALE), height)
 					index = index + 1
 				end
 
@@ -215,7 +218,7 @@ end
 --- Begins (or schedules) the reveal-out animation of the active string.
 function FlowText:pop_out(pop_out_timer)
 	self.config.pop_out = pop_out_timer or 1
-	self.fade_started_at = G.TIMERS.REAL + (self.pop_delay or 0)
+	self.fade_started_at = g().TIMERS.REAL + (self.pop_delay or 0)
 end
 
 --- Replays the reveal animation of the active string from zero.
@@ -223,7 +226,7 @@ function FlowText:pop_in(pop_in_timer)
 	self.reset_pop_in = true
 	self.config.pop_out = nil
 	self.config.pop_in = pop_in_timer or 0
-	self.shown_at = G.TIMERS.REAL
+	self.shown_at = g().TIMERS.REAL
 
 	for _, letter in ipairs(self.strings[self.active_string].letters) do
 		letter.pop_in = 0
@@ -244,14 +247,14 @@ function FlowText:align_letters()
 		end
 		self.config.pop_in = 0.1
 		self.config.pop_out = nil
-		self.shown_at = G.TIMERS.REAL
+		self.shown_at = g().TIMERS.REAL
 	end
 
 	local focused = self.strings[self.active_string]
 	local letter_count = #focused.letters
 	local mid = 0.5 * (letter_count + 1)
 	self.string = focused.string
-	local now = G.TIMERS.REAL
+	local now = g().TIMERS.REAL
 
 	for k, letter in ipairs(focused.letters) do
 		if self.config.pop_out then
@@ -272,7 +275,7 @@ function FlowText:align_letters()
 			-- Rising edge plays a pitched tick (skip offscreen / thin out long strings).
 			if prev_pop_in <= 0 and letter.pop_in > 0 and not self.silent
 				and (#self.string < 10 or k % 2 == 0) then
-				if not (self.T.x > G.ROOM.T.w + 2 or self.T.y > G.ROOM.T.h + 2
+				if not (self.T.x > g().ROOM.T.w + 2 or self.T.y > g().ROOM.T.h + 2
 					or self.T.x < -2 or self.T.y < -2) then
 					play_sfx('hover_card', 0.45 + 0.05 * math.random() + (0.3 / #self.string) * k + (self.config.pitch_shift or 0))
 				end
@@ -326,7 +329,7 @@ function FlowText:align_letters()
 		if self.config.float then
 			-- Two incommensurate cosine drifts, phase-shifted by the golden angle.
 			letter.offset.y = math.sqrt(self.scale)
-				* (2 + (self.font.FONTSCALE / G.TILESIZE) * 1500
+				* (2 + (self.font.FONTSCALE / g().TILESIZE) * 1500
 					* (math.cos(2.6 * now + k * GOLDEN_ANGLE)
 						+ 0.3 * math.sin(4.3 * now + k * 1.618)))
 				+ 60 * (letter.scale - 1)
@@ -356,7 +359,7 @@ function FlowText:pulse(amt)
 	self.config.pulse = {
 		speed = 40,
 		width = 2.5,
-		start = G.TIMERS.REAL,
+		start = g().TIMERS.REAL,
 		amount = amt or 0.2,
 		silent = false,
 	}
@@ -373,9 +376,9 @@ function FlowText:draw()
 	if self.shadow then
 		push_node_transform(self, 1)
 		love.graphics.translate(
-			focused.W_offset + self.text_offset.x * self.font.FONTSCALE / G.TILESIZE,
-			focused.H_offset + self.text_offset.y * self.font.FONTSCALE / G.TILESIZE)
-		if self.config.spacing then love.graphics.translate(self.config.spacing * self.font.FONTSCALE / G.TILESIZE, 0) end
+			focused.W_offset + self.text_offset.x * self.font.FONTSCALE / g().TILESIZE,
+			focused.H_offset + self.text_offset.y * self.font.FONTSCALE / g().TILESIZE)
+		if self.config.spacing then love.graphics.translate(self.config.spacing * self.font.FONTSCALE / g().TILESIZE, 0) end
 		if self.config.shadow_colour then
 			love.graphics.setColor(self.config.shadow_colour)
 		else
@@ -385,44 +388,44 @@ function FlowText:draw()
 			local real_pop_in = self.config.min_cycle_time == 0 and 1 or letter.pop_in
 			love.graphics.draw(
 				letter.letter,
-				0.5 * (letter.dims.x - letter.offset.x) * self.font.FONTSCALE / G.TILESIZE - self.shadow_parallax.x * self.scale / G.TILESIZE,
-				0.5 * letter.dims.y * self.font.FONTSCALE / G.TILESIZE - self.shadow_parallax.y * self.scale / G.TILESIZE,
+				0.5 * (letter.dims.x - letter.offset.x) * self.font.FONTSCALE / g().TILESIZE - self.shadow_parallax.x * self.scale / g().TILESIZE,
+				0.5 * letter.dims.y * self.font.FONTSCALE / g().TILESIZE - self.shadow_parallax.y * self.scale / g().TILESIZE,
 				letter.r or 0,
-				real_pop_in * self.scale * self.font.FONTSCALE / G.TILESIZE,
-				real_pop_in * self.scale * self.font.FONTSCALE / G.TILESIZE,
+				real_pop_in * self.scale * self.font.FONTSCALE / g().TILESIZE,
+				real_pop_in * self.scale * self.font.FONTSCALE / g().TILESIZE,
 				0.5 * letter.dims.x / self.scale,
 				0.5 * letter.dims.y / self.scale)
-			love.graphics.translate(letter.dims.x * self.font.FONTSCALE / G.TILESIZE, 0)
+			love.graphics.translate(letter.dims.x * self.font.FONTSCALE / g().TILESIZE, 0)
 		end
 		love.graphics.pop()
 	end
 
 	push_node_transform(self, 1)
 	love.graphics.translate(
-		focused.W_offset + self.text_offset.x * self.font.FONTSCALE / G.TILESIZE,
-		focused.H_offset + self.text_offset.y * self.font.FONTSCALE / G.TILESIZE)
-	if self.config.spacing then love.graphics.translate(self.config.spacing * self.font.FONTSCALE / G.TILESIZE, 0) end
+		focused.W_offset + self.text_offset.x * self.font.FONTSCALE / g().TILESIZE,
+		focused.H_offset + self.text_offset.y * self.font.FONTSCALE / g().TILESIZE)
+	if self.config.spacing then love.graphics.translate(self.config.spacing * self.font.FONTSCALE / g().TILESIZE, 0) end
 
 	-- Normalized shadow direction shared by all letters this frame.
 	self.ARGS.draw_shadow_norm = self.ARGS.draw_shadow_norm or {}
 	local shadow_norm = self.ARGS.draw_shadow_norm
 	local parallax_len = math.sqrt(self.shadow_parallax.y^2 + self.shadow_parallax.x^2)
-	shadow_norm.x = self.shadow_parallax.x / parallax_len * self.font.FONTSCALE / G.TILESIZE
-	shadow_norm.y = self.shadow_parallax.y / parallax_len * self.font.FONTSCALE / G.TILESIZE
+	shadow_norm.x = self.shadow_parallax.x / parallax_len * self.font.FONTSCALE / g().TILESIZE
+	shadow_norm.y = self.shadow_parallax.y / parallax_len * self.font.FONTSCALE / g().TILESIZE
 
 	for k, letter in ipairs(focused.letters) do
 		local real_pop_in = self.config.min_cycle_time == 0 and 1 or letter.pop_in
 		love.graphics.setColor(letter.prefix or letter.suffix or letter.colour or self.colours[k % #self.colours + 1])
 		love.graphics.draw(
 			letter.letter,
-			0.5 * (letter.dims.x - letter.offset.x) * self.font.FONTSCALE / G.TILESIZE + shadow_norm.x,
-			0.5 * (letter.dims.y - letter.offset.y) * self.font.FONTSCALE / G.TILESIZE + shadow_norm.y,
+			0.5 * (letter.dims.x - letter.offset.x) * self.font.FONTSCALE / g().TILESIZE + shadow_norm.x,
+			0.5 * (letter.dims.y - letter.offset.y) * self.font.FONTSCALE / g().TILESIZE + shadow_norm.y,
 			letter.r or 0,
-			real_pop_in * letter.scale * self.scale * self.font.FONTSCALE / G.TILESIZE,
-			real_pop_in * letter.scale * self.scale * self.font.FONTSCALE / G.TILESIZE,
+			real_pop_in * letter.scale * self.scale * self.font.FONTSCALE / g().TILESIZE,
+			real_pop_in * letter.scale * self.scale * self.font.FONTSCALE / g().TILESIZE,
 			0.5 * letter.dims.x / self.scale,
 			0.5 * letter.dims.y / self.scale)
-		love.graphics.translate(letter.dims.x * self.font.FONTSCALE / G.TILESIZE, 0)
+		love.graphics.translate(letter.dims.x * self.font.FONTSCALE / g().TILESIZE, 0)
 	end
 	love.graphics.pop()
 

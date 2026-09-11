@@ -2,6 +2,7 @@ return function(InputRouter)
 local BridgeRuntime = require("bridge.runtime")
 local function g() return BridgeRuntime.game() end
 
+
 function InputRouter:shift_context_layer(delta)
 	if delta == 1 then
 		self.cursor_context.stack[self.cursor_context.layer] = {

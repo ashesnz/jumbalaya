@@ -1,8 +1,11 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 return function(AnimNode)
 --- Quick squash-and-stretch pulse (the classic "card bounce").
 function AnimNode:pulse(amount, rot_amt)
 	amount = amount or 0.4
-	local start_time = G.TIMERS.REAL
+	local start_time = g().TIMERS.REAL
 	self.bounce = {
 		scale = 0,
 		scale_amt = amount,
@@ -22,8 +25,8 @@ function AnimNode:speech_pop()
 		scale_amt = 0.22,
 		r = 0,
 		r_amt = 0.055,
-		start_time = G.TIMERS.REAL,
-		end_time = G.TIMERS.REAL + 0.52,
+		start_time = g().TIMERS.REAL,
+		end_time = g().TIMERS.REAL + 0.52,
 	}
 end
 
@@ -32,13 +35,13 @@ function AnimNode:advance_bounce(dt)
 	local bounce = self.bounce
 	if not bounce or bounce.handled_elsewhere then return end
 
-	if bounce.end_time < G.TIMERS.REAL then
+	if bounce.end_time < g().TIMERS.REAL then
 		self.bounce = nil
 		return
 	end
 
 	if bounce.kind == "speech" then
-		local u = (G.TIMERS.REAL - bounce.start_time) / (bounce.end_time - bounce.start_time)
+		local u = (g().TIMERS.REAL - bounce.start_time) / (bounce.end_time - bounce.start_time)
 		if u >= 1 then
 			self.bounce = nil
 		else
@@ -48,8 +51,8 @@ function AnimNode:advance_bounce(dt)
 			bounce.r = bounce.r_amt * (2 ^ (-7.4 * u)) * math.sin(u * 6.4)
 		end
 	else
-		local elapsed = G.TIMERS.REAL - bounce.start_time
-		local remaining_frac = (bounce.end_time - G.TIMERS.REAL) / (bounce.end_time - bounce.start_time)
+		local elapsed = g().TIMERS.REAL - bounce.start_time
+		local remaining_frac = (bounce.end_time - g().TIMERS.REAL) / (bounce.end_time - bounce.start_time)
 		bounce.scale = bounce.scale_amt * math.sin(44 * elapsed) * math.max(0, remaining_frac^2.5)
 		bounce.r = bounce.r_amt * math.sin(36 * elapsed) * math.max(0, remaining_frac^1.5)
 	end

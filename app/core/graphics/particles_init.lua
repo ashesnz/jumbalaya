@@ -1,3 +1,6 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 return function(ParticleEmitter)
 -- Shape palette available to emitters. Each particle picks one at birth;
 -- render draws discs, diamonds, triangles, or rings accordingly.
@@ -49,7 +52,7 @@ function ParticleEmitter:construct(X, Y, W, H, config)
 	self.spawned_this_frame_cap = 24
 
 	self.timer_type = (self.created_on_pause and 'REAL') or config.timer_type or 'REAL'
-	self.last_tick = G.TIMERS[self.timer_type]
+	self.last_tick = g().TIMERS[self.timer_type]
 	self.lifespan = config.lifespan or 1
 	self.fade_alpha = 0
 	self.speed = config.speed or 1
@@ -63,7 +66,7 @@ function ParticleEmitter:construct(X, Y, W, H, config)
 
 	self.particles = {}
 	self.scale = config.scale or 1
-	self.colours = config.colours or {G.C.BACKGROUND.D}
+	self.colours = config.colours or {g().C.BACKGROUND.D}
 
 	-- Prewarm: rewind the clock and simulate history so the field starts full.
 	if config.initialize then
@@ -75,6 +78,6 @@ function ParticleEmitter:construct(X, Y, W, H, config)
 		end
 	end
 
-	if getmetatable(self) == Particles then table.insert(G.LIVE.TRANSFORM, self) end
+	if getmetatable(self) == Particles then table.insert(g().LIVE.TRANSFORM, self) end
 end
 end

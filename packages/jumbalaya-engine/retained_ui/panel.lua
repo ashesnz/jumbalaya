@@ -2,6 +2,9 @@
 
 local AnimNode = require("app.core.scene.animated.init")
 
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 ---@class RetainedPanel : AnimNode
 ---@field definition table
 ---@field root_node LayoutNode
@@ -55,8 +58,8 @@ function RetainedPanel:construct(args)
 	self.root_node:initialize_VT(true)
 	if getmetatable(self) == RetainedPanel then
 		if args.config and args.config.instance_type then
-			if G.LIVE and G.LIVE[args.config.instance_type] then
-				table.insert(G.LIVE[args.config.instance_type], self)
+			if g().LIVE and g().LIVE[args.config.instance_type] then
+				table.insert(g().LIVE[args.config.instance_type], self)
 			end
 		end
 	end

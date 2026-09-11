@@ -2,6 +2,7 @@ return function(InputRouter)
 local BridgeRuntime = require("bridge.runtime")
 local function g() return BridgeRuntime.game() end
 
+
 function InputRouter:set_gamepad(_gamepad)
 	if self.GAMEPAD.object == _gamepad then return end
 

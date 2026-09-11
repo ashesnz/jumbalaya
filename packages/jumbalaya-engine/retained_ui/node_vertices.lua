@@ -1,3 +1,6 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 return function(Target)
 local function rounded_rect_vertices(w, h, radius, ext_up, segs)
 	radius = math.max(1, radius or 8)
@@ -48,18 +51,18 @@ function LayoutNode:draw_pixellated_rect(_type, _parallax, _emboss, _progress)
 			parallax = _parallax,
 		}
 
-		local ext_up = self.config.ext_up and self.config.ext_up * G.TILESIZE or 0
+		local ext_up = self.config.ext_up and self.config.ext_up * g().TILESIZE or 0
 		local totw, toth, vertices
 		if self.config.speech_tail then
-			totw = self.VT.w * G.TILESIZE
-			toth = (self.VT.h + math.abs(ext_up) / G.TILESIZE) * G.TILESIZE
+			totw = self.VT.w * g().TILESIZE
+			toth = (self.VT.h + math.abs(ext_up) / g().TILESIZE) * g().TILESIZE
 			local radius = math.min(totw * 0.5 - 1, toth * 0.5 - 1,
-				math.max(10, (self.config.r or 0.22) * G.TILESIZE))
+				math.max(10, (self.config.r or 0.22) * g().TILESIZE))
 			vertices = rounded_rect_vertices(totw, toth, radius, ext_up, 8)
 		else
-			totw, toth = self.VT.w * G.TILESIZE, (self.VT.h + math.abs(ext_up) / G.TILESIZE) * G.TILESIZE
+			totw, toth = self.VT.w * g().TILESIZE, (self.VT.h + math.abs(ext_up) / g().TILESIZE) * g().TILESIZE
 			local radius = math.min(totw * 0.5 - 1, toth * 0.5 - 1,
-				math.max(1, (self.config.r or 0.22) * G.TILESIZE))
+				math.max(1, (self.config.r or 0.22) * g().TILESIZE))
 			vertices = rounded_rect_vertices(totw, toth, radius, ext_up, 16)
 		end
 
@@ -80,7 +83,7 @@ function LayoutNode:draw_pixellated_rect(_type, _parallax, _emboss, _progress)
 			end
 			if k % 2 == 0 then
 				self.pixellated_rect.shadow.vertices[k] = v - self.shadow_parallax.y * _parallax
-				if _emboss then self.pixellated_rect.emboss.vertices[k] = v + _emboss * G.TILESIZE end
+				if _emboss then self.pixellated_rect.emboss.vertices[k] = v + _emboss * g().TILESIZE end
 			else
 				self.pixellated_rect.shadow.vertices[k] = v - self.shadow_parallax.x * _parallax
 				if _emboss then self.pixellated_rect.emboss.vertices[k] = v end

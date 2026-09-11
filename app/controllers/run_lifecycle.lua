@@ -2,22 +2,25 @@
 
 local game_access = require("word_game.model.game_access")
 
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 local M = {}
 
 function M.notify_then_start_run(e)
-	G.OVERLAY_MENU:remove()
-	G.OVERLAY_MENU = nil
+	g().OVERLAY_MENU:remove()
+	g().OVERLAY_MENU = nil
 	M.begin_run(e)
 end
 
 function M.begin_run(e, args)
-	G.SETTINGS.paused = false
+	g().SETTINGS.paused = false
 	if e and e.config.id == 'restart_button' then game_access.patch({ viewed_back = nil }) end
-	G.TIMELINE:flush()
-	G:queue_during_wipe(function()
-		G:discard_run()
-		G:start_run(args)
-		G:start_gameplay_board()
+	g().TIMELINE:flush()
+	g():queue_during_wipe(function()
+		g():discard_run()
+		g():start_run(args)
+		g():start_gameplay_board()
 	end)
 end
 
@@ -30,16 +33,16 @@ function M.begin_time_run(e)
 end
 
 function M.return_to_menu(e)
-	G:queue_wipe_transition({
+	g():queue_wipe_transition({
 		function()
-			G:discard_run()
+			g():discard_run()
 			return true
 		end,
 		{
 			blockable = true,
 			blocking = false,
 			func = function()
-				G:open_main_menu('game')
+				g():open_main_menu('game')
 				return true
 			end,
 		},

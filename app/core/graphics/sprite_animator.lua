@@ -1,3 +1,6 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 --[[ app/core/graphics/sprite_animator.lua - strip-frame animation (GfxAnimator) ]]
 
 GfxAnimator = GfxSprite:derive("GfxAnimator")
@@ -6,14 +9,14 @@ SpriteAnimator = GfxAnimator
 function GfxAnimator:construct(X, Y, W, H, new_sprite_atlas, sprite_pos)
 	GfxSprite.construct(self, X, Y, W, H, new_sprite_atlas, sprite_pos)
 	self.offset = {x = 0, y = 0}
-	self.animation_clock = G.TIMERS.REAL
+	self.animation_clock = g().TIMERS.REAL
 
 	-- Unlike plain sprites, animators always join both registries.
-	G.ANIMATIONS = G.ANIMATIONS or {}
-	G.LIVE = G.LIVE or {}
-	G.LIVE.SPRITE = G.LIVE.SPRITE or {}
-	table.insert(G.ANIMATIONS, self)
-	table.insert(G.LIVE.SPRITE, self)
+	g().ANIMATIONS = g().ANIMATIONS or {}
+	g().LIVE = g().LIVE or {}
+	g().LIVE.SPRITE = g().LIVE.SPRITE or {}
+	table.insert(g().ANIMATIONS, self)
+	table.insert(g().LIVE.SPRITE, self)
 end
 
 function GfxAnimator:rescale()
@@ -21,7 +24,7 @@ function GfxAnimator:rescale()
 end
 
 function GfxAnimator:reset()
-	self.atlas = (G.ANIM_SHEETS and G.ANIM_SHEETS[self.atlas.name]) or self.atlas
+	self.atlas = (g().ANIM_SHEETS and g().ANIM_SHEETS[self.atlas.name]) or self.atlas
 	self:configure_frames(self.animation.x, self.animation.y)
 end
 
@@ -47,7 +50,7 @@ function GfxAnimator:configure_frames(column, row)
 	self.image_dims = {image_width, image_height}
 	self.sprite = love.graphics.newQuad(
 		0, height * self.animation.y, width, height, image_width, image_height)
-	self.animation_clock = G.TIMERS.REAL
+	self.animation_clock = g().TIMERS.REAL
 end
 
 function GfxAnimator:texture_descriptor()
@@ -79,8 +82,8 @@ function GfxAnimator:set_frame_viewport(frame)
 end
 
 function GfxAnimator:advance_frame()
-	local elapsed = math.max(0, G.TIMERS.REAL - self.animation_clock)
-	local rate = math.max(0, tonumber(G.ANIMATION_FPS) or 0)
+	local elapsed = math.max(0, g().TIMERS.REAL - self.animation_clock)
+	local rate = math.max(0, tonumber(g().ANIMATION_FPS) or 0)
 	local new_frame = self:frame_at_time(elapsed, rate, self.current_animation.frames)
 	if new_frame ~= self.current_animation.current then
 		self.current_animation.current = new_frame
@@ -97,7 +100,7 @@ function GfxAnimator:update_float_motion(now)
 end
 
 function GfxAnimator:animate()
-	local now = G.TIMERS.REAL
+	local now = g().TIMERS.REAL
 	self:advance_frame()
 	self:update_float_motion(now)
 end

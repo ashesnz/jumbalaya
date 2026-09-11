@@ -1,5 +1,9 @@
 return function(GfxSprite)
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 local sprite_util = require("app.core.graphics.sprite_util")
+
 --- Replaces the render pipeline with an ordered list of shader passes.
 --- Each step: `{shader=, shadow_height=, send={{name=, val=|func=|ref_table=+ref_value=}}, no_tilt=, other_obj=, ms, mr, mx, my}`
 function GfxSprite:define_draw_steps(draw_step_definitions)
@@ -41,10 +45,10 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 
 	if custom_shader then
 		-- Caller-driven mode: send exactly the uniforms the step listed.
-		if _send and G.SHADERS and G.SHADERS[_shader] then
+		if _send and g().SHADERS and g().SHADERS[_shader] then
 			for _, uniform in ipairs(_send) do
 				pcall(function()
-					G.SHADERS[_shader]:send(uniform.name,
+					g().SHADERS[_shader]:send(uniform.name,
 						uniform.val or (uniform.func and uniform.func()) or uniform.ref_table[uniform.ref_value])
 				end)
 			end
@@ -55,15 +59,15 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 			self.ARGS.prep_shader = self.ARGS.prep_shader or {}
 			self.ARGS.prep_shader.cursor_pos = self.ARGS.prep_shader.cursor_pos or {}
 			self.ARGS.prep_shader.cursor_pos[1] =
-				draw_major.tilt_var and draw_major.tilt_var.mx * G.CANVAS_SCALE
-				or (G.INPUT and G.INPUT.cursor_position and G.INPUT.cursor_position.x * G.CANVAS_SCALE or 0)
+				draw_major.tilt_var and draw_major.tilt_var.mx * g().CANVAS_SCALE
+				or (g().INPUT and g().INPUT.cursor_position and g().INPUT.cursor_position.x * g().CANVAS_SCALE or 0)
 			self.ARGS.prep_shader.cursor_pos[2] =
-				draw_major.tilt_var and draw_major.tilt_var.my * G.CANVAS_SCALE
-				or (G.INPUT and G.INPUT.cursor_position and G.INPUT.cursor_position.y * G.CANVAS_SCALE or 0)
+				draw_major.tilt_var and draw_major.tilt_var.my * g().CANVAS_SCALE
+				or (g().INPUT and g().INPUT.cursor_position and g().INPUT.cursor_position.y * g().CANVAS_SCALE or 0)
 
 			pcall(function()
 				sh:send('mouse_screen_pos', self.ARGS.prep_shader.cursor_pos)
-				sh:send('screen_scale', G.TILESCALE * G.TILESIZE * (draw_major.mouse_damping or 1) * G.CANVAS_SCALE)
+				sh:send('screen_scale', g().TILESCALE * g().TILESIZE * (draw_major.mouse_damping or 1) * g().CANVAS_SCALE)
 				sh:send('hovering', ((_shadow_height and not tilt_shadow) or _no_tilt) and 0
 					or (draw_major.hover_tilt or 0) * (tilt_shadow or 1))
 				sh:send('dissolve', math.abs(draw_major.dissolve or 0))
@@ -75,12 +79,12 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 				-- earlier uniform cannot leave the shimmer clock stuck at 0.
 				if _shader ~= 'gold_seal' then
 					local id_phase = 123.33412 * ((tonumber(draw_major.ID) or 0) / 1.14212) % 3000
-					sh:send('time', id_phase + (G.TIMERS and G.TIMERS.REAL or 0))
+					sh:send('time', id_phase + (g().TIMERS and g().TIMERS.REAL or 0))
 				end
 				sh:send('texture_details', self:texture_descriptor())
 				sh:send('image_details', self:image_dimensions())
-				sh:send('burn_colour_1', draw_major.dissolve_colours and draw_major.dissolve_colours[1] or G.C.CLEAR)
-				sh:send('burn_colour_2', draw_major.dissolve_colours and draw_major.dissolve_colours[2] or G.C.CLEAR)
+				sh:send('burn_colour_1', draw_major.dissolve_colours and draw_major.dissolve_colours[1] or g().C.CLEAR)
+				sh:send('burn_colour_2', draw_major.dissolve_colours and draw_major.dissolve_colours[2] or g().C.CLEAR)
 				sh:send('shadow', (not not _shadow_height))
 				if _shader ~= 'gold_seal' and _send then
 					sh:send(_shader, _send)
@@ -89,7 +93,7 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 			-- Own pcall: still animates if texture_details / burn_colour send failed.
 			if _shader == 'gold_seal' then
 				pcall(function()
-					local clock = (G.TIMERS and G.TIMERS.REAL) or 0
+					local clock = (g().TIMERS and g().TIMERS.REAL) or 0
 					sh:send('time', clock)
 					sh:send('gold_seal', clock, clock, 0, 1)
 				end)

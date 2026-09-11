@@ -2,6 +2,7 @@ return function(InputRouter)
 local BridgeRuntime = require("bridge.runtime")
 local function g() return BridgeRuntime.game() end
 
+
 function InputRouter:update_interact(dt)
 	self:get_cursor_collision(g().POINTER.T)
 	self:update_focus()

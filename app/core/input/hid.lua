@@ -2,6 +2,7 @@ return function(InputRouter)
 local BridgeRuntime = require("bridge.runtime")
 local function g() return BridgeRuntime.game() end
 
+
 function InputRouter:set_HID_flags(HID_type, button)
 	if HID_type == 'axis' then
 		self.HID.controller = true

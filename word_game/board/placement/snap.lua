@@ -9,6 +9,9 @@ local TableAreas = require "word_game.model.table_areas"
 local store_sync = require "bridge.store_sync"
 local runtime = require "bridge.runtime"
 
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 local function placement_word()
 	return (WORD_GAME and WORD_GAME.PlacementWord)
 		or require("word_game.model.jumble.placement_word")
@@ -53,8 +56,8 @@ end
 function M.point_in_hand(x, y)
 	local dealt = TableAreas.dealt_letters()
 	if not dealt or not dealt.T then return false end
-	local pad_x = (G.CARD_W or 1) * 0.15
-	local pad_y = (G.CARD_H or 1.4) * 0.2
+	local pad_x = (g().CARD_W or 1) * 0.15
+	local pad_y = (g().CARD_H or 1.4) * 0.2
 	return x >= dealt.T.x - pad_x
 		and x <= dealt.T.x + dealt.T.w + pad_x
 		and y >= dealt.T.y - pad_y

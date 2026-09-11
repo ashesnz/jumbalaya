@@ -1,5 +1,9 @@
 return function(GfxSprite)
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 local sprite_util = require("app.core.graphics.sprite_util")
+
 --- Recomputes the projection scale after a resize.
 function GfxSprite:refresh_scale()
 	self.scale_mag = math.min(self.scale.x / self.T.w, self.scale.y / self.T.h)
@@ -7,7 +11,7 @@ end
 
 --- Rebinds the atlas by name (after hot-reload / texture-scaling change).
 function GfxSprite:reset()
-	self.atlas = (G.TEXTURE_ATLASES and G.TEXTURE_ATLASES[self.atlas.name]) or self.atlas
+	self.atlas = (g().TEXTURE_ATLASES and g().TEXTURE_ATLASES[self.atlas.name]) or self.atlas
 	self:set_sprite_pos(self.sprite_pos)
 end
 
@@ -58,7 +62,7 @@ end
 
 --- Draws the quad (or video frame) centered in the pushed transform.
 function GfxSprite:draw_texture(overlay)
-	love.graphics.setColor(overlay or G.OVERLAY_TINT or G.C.WHITE)
+	love.graphics.setColor(overlay or g().OVERLAY_TINT or g().C.WHITE)
 
 	if self.video then
 		self.video_dims = self.video_dims or {

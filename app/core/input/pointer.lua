@@ -2,6 +2,7 @@ return function(InputRouter)
 local BridgeRuntime = require("bridge.runtime")
 local function g() return BridgeRuntime.game() end
 
+
 local function tile_xy(screen_x, screen_y)
 	local units = g().TILESCALE * g().TILESIZE
 	return screen_x / units, screen_y / units

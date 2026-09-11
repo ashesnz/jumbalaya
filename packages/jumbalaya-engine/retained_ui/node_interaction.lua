@@ -1,14 +1,17 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 return function(Target)
 function LayoutNode:update(dt)
-	G.ARGS.FUNC_TRACKER = G.ARGS.FUNC_TRACKER or {}
+	g().ARGS.FUNC_TRACKER = g().ARGS.FUNC_TRACKER or {}
 
 	-- button_delay parks the real handler aside for a cooldown window while
 	-- drawing a progress fill.
 	if self.config.button_delay then
 		self.config.button_temp = self.config.button or self.config.button_temp
 		self.config.button = nil
-		self.config.button_delay_progress = (G.TIMERS.REAL - self.config.button_delay_start) / self.config.button_delay
-		if G.TIMERS.REAL >= self.config.button_delay_end then self.config.button_delay = nil end
+		self.config.button_delay_progress = (g().TIMERS.REAL - self.config.button_delay_start) / self.config.button_delay
+		if g().TIMERS.REAL >= self.config.button_delay_end then self.config.button_delay = nil end
 	end
 	if self.config.button_temp and not self.config.button_delay then
 		self.config.button = self.config.button_temp
@@ -16,14 +19,14 @@ function LayoutNode:update(dt)
 	if self.button_clicked then self.button_clicked = nil end
 
 	if self.config and self.config.func then
-		G.ARGS.FUNC_TRACKER[self.config.func] = (G.ARGS.FUNC_TRACKER[self.config.func] or 0) + 1
-		if G.FUNCS and G.FUNCS[self.config.func] then
-			G.FUNCS[self.config.func](self)
+		g().ARGS.FUNC_TRACKER[self.config.func] = (g().ARGS.FUNC_TRACKER[self.config.func] or 0) + 1
+		if g().FUNCS and g().FUNCS[self.config.func] then
+			g().FUNCS[self.config.func](self)
 		end
 	end
 
-	if self.ui_kind == G.UI.TEXT then self:update_text() end
-	if self.ui_kind == G.UI.OBJECT then self:update_object() end
+	if self.ui_kind == g().UI.TEXT then self:update_text() end
+	if self.ui_kind == g().UI.OBJECT then self:update_object() end
 	Node.update(self, dt)
 end
 
@@ -38,22 +41,22 @@ end
 function LayoutNode:click()
 	-- Debounced, visible, non-overlayed, non-disabled buttons only.
 	if self.config.button
-		and (not self.last_clicked or self.last_clicked + 0.1 < G.TIMERS.REAL)
+		and (not self.last_clicked or self.last_clicked + 0.1 < g().TIMERS.REAL)
 		and self.states.visible and not self.under_overlay and not self.disable_button then
 		if self.config.one_press then self.disable_button = true end
-		self.last_clicked = G.TIMERS.REAL
+		self.last_clicked = g().TIMERS.REAL
 
 		-- The overlay back button also pops the cursor-context stack.
 		if self.config.id == 'overlay_menu_back_button' then
-			G.INPUT:shift_context_layer(-1)
-			G.NO_MOD_CURSOR_STACK = true
+			g().INPUT:shift_context_layer(-1)
+			g().NO_MOD_CURSOR_STACK = true
 		end
 
-		if G.FUNCS and G.FUNCS[self.config.button] then
-			G.FUNCS[self.config.button](self)
+		if g().FUNCS and g().FUNCS[self.config.button] then
+			g().FUNCS[self.config.button](self)
 		end
 
-		G.NO_MOD_CURSOR_STACK = nil
+		g().NO_MOD_CURSOR_STACK = nil
 
 		-- Choice-cycle groups: clear siblings' chosen flag, claim our own.
 		if self.config.choice then
@@ -66,7 +69,7 @@ function LayoutNode:click()
 
 		play_sfx('button', 1, 0.3)
 		if not self.config.no_jiggle then
-			G.ROOM.jiggle = G.ROOM.jiggle + 0.5
+			g().ROOM.jiggle = g().ROOM.jiggle + 0.5
 		end
 		self.button_clicked = true
 	end
@@ -97,8 +100,8 @@ function LayoutNode:remove()
 		self.config.object = nil
 	end
 
-	if self == G.INPUT.text_capture then
-		G.INPUT.text_capture = nil
+	if self == g().INPUT.text_capture then
+		g().INPUT.text_capture = nil
 	end
 
 	teardown_tree(self.children)
@@ -109,7 +112,7 @@ end
 function LayoutNode:hover()
 	if self.config and self.config.on_demand_tooltip then
 		self.config.h_popup = make_tooltip(self.config.on_demand_tooltip)
-		local below = self.T.y > G.ROOM.T.h / 2
+		local below = self.T.y > g().ROOM.T.h / 2
 		self.config.h_popup_config = {
 			align = below and 'tm' or 'bm',
 			offset = {x = 0, y = below and -0.1 or 0.1},
@@ -120,7 +123,7 @@ function LayoutNode:hover()
 		self.config.h_popup = make_tooltip(self.config.tooltip)
 		self.config.h_popup_config = {align = "tm", offset = {x = 0, y = -0.1}, parent = self}
 	end
-	if self.config.detailed_tooltip and G.INPUT.HID.pointer then
+	if self.config.detailed_tooltip and g().INPUT.HID.pointer then
 		self.config.h_popup = build_detailed_tooltip(self.config.detailed_tooltip)
 		self.config.h_popup_config = {align = "tm", offset = {x = 0, y = -0.1}, parent = self}
 	end

@@ -22,6 +22,9 @@ local snap = require "word_game.board.placement.snap"
 local shimmer = require "word_game.board.placement.shimmer"
 local jumble_geometry = require "word_game.board.jumble.geometry"
 
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 --- @class PlacementTable
 --- @field game Game
 --- @field ctx PlacementContext
@@ -121,7 +124,7 @@ function PlacementTable:draw_run_pass(game)
 	for _, v in pairs(game.LIVE.CARD) do
 		if v.area == self.area
 			and (not v.parent and v ~= controller.dragging.target and v ~= controller.focused.target)
-			and not (G.GAME and G.GAME.inspecting_card == v) then
+			and not (game.GAME and game.GAME.inspecting_card == v) then
 			love.graphics.push()
 			v:translate_container()
 			v:draw()

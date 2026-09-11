@@ -20,6 +20,7 @@ function M.install(ui, domain)
 	local backgrounds = require("word_game.ui.layout.backgrounds")
 	local CardFocus = require("app.core.input.card_focus")
 	local TableAreas = require("word_game.model.table_areas")
+local Funcs = require("bridge.funcs_registry")
 
 	CardFocus.install({
 		hand_area = TableAreas.dealt_letters,

@@ -1,3 +1,6 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 return function(Target)
 function RetainedPanel:find_node_by_id(id, node)
 	node = node or self.root_node
@@ -65,11 +68,11 @@ function RetainedPanel:attach_node(node, parent)
 
 	-- An embedded object that itself carries the button shouldn't compete
 	-- for clicks with the element wrapping it.
-	if node.n and node.n == G.UI.OBJECT and ui_e.config.button then
+	if node.n and node.n == g().UI.OBJECT and ui_e.config.button then
 		ui_e.config.object.states.click.can = false
 	end
 
-	if (node.n and node.n == G.UI.COLUMN or node.n == G.UI.ROW or node.n == G.UI.ROOT) and node.nodes then
+	if (node.n and node.n == g().UI.COLUMN or node.n == g().UI.ROW or node.n == g().UI.ROOT) and node.nodes then
 		for _, v in ipairs(node.nodes) do
 			self:attach_node(v, ui_e)
 		end

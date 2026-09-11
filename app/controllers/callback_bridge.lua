@@ -1,6 +1,10 @@
---[[ app/controllers/callback_bridge.lua - Phase 4 G.FUNCS → action dispatch wrapper ]]
+--[[ app/controllers/callback_bridge.lua - Phase 4 g().FUNCS → action dispatch wrapper ]]
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 
 local action_dispatch = require("bridge.action_dispatch")
+
 
 local M = {}
 

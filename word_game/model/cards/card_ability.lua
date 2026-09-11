@@ -1,13 +1,14 @@
 -- Card identity and deck membership.
-local live_game = require("word_game.model.live_game")
+local CardRegistry = require("word_game.model.cards.registry")
 
 
 ---@class (partial) Card : EaseNode
 
 function Card:apply_center(center, initial, delay_sprites)
+    if not center then return end
     local old_center = self.config.center
     self.config.center = center
-    for key, prototype in pairs(live_game().LETTERS.centers) do
+    for key, prototype in pairs(CardRegistry.centers() or {}) do
         if center == prototype then self.config.center_key = key end
     end
 

@@ -1,8 +1,11 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 return function(AnimNode)
 --- Horizontal shadow parallax based on room-relative position.
 function AnimNode:calculate_parallax()
-	if not G.ROOM then return end
-	self.shadow_parallax.x = (self.T.x + self.T.w / 2 - G.ROOM.T.w / 2) / (G.ROOM.T.w / 2) * 1.2
+	if not g().ROOM then return end
+	self.shadow_parallax.x = (self.T.x + self.T.w / 2 - g().ROOM.T.w / 2) / (g().ROOM.T.w / 2) * 1.2
 end
 
 --- Merges `args` over the current role. Offsets are accepted only as tables
@@ -28,11 +31,11 @@ end
 
 --- Walks up the weld chain returning the top Major plus the accumulated
 --- offset (including layered parallax). Cached per frame; invalidated by
---- setting `G.REFRESH_FRAME_MAJOR_CACHE` (e.g. retained panel recalculation).
+--- setting `g().REFRESH_FRAME_MAJOR_CACHE` (e.g. retained panel recalculation).
 function AnimNode:get_major()
 	if (self.role.role_type ~= 'Major' and self.role.major ~= self)
 		and (self.role.xy_bond ~= 'Weak' and self.role.r_bond ~= 'Weak') then
-		if not self.FRAME.MAJOR or G.REFRESH_FRAME_MAJOR_CACHE then
+		if not self.FRAME.MAJOR or g().REFRESH_FRAME_MAJOR_CACHE then
 			self.FRAME.MAJOR = clear_table(self.FRAME.MAJOR)
 			local parent_major = self.role.major:get_major()
 			self.FRAME.MAJOR.major = parent_major.major

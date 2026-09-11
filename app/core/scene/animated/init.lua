@@ -2,6 +2,9 @@
 
 local Node = require("app.core.scene.node")
 
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 ---@class AnimNode : Node
 AnimNode = Node:derive("AnimNode")
 EaseNode = AnimNode
@@ -50,9 +53,9 @@ function AnimNode:construct(X, Y, W, H)
 	self.shadow_height = 0.2
 	self:calculate_parallax()
 
-	table.insert(G.TRANSFORMS, self)
+	table.insert(g().TRANSFORMS, self)
 	if getmetatable(self) == AnimNode then
-		table.insert(G.LIVE.TRANSFORM, self)
+		table.insert(g().LIVE.TRANSFORM, self)
 	end
 end
 
@@ -62,7 +65,7 @@ function AnimNode:draw()
 end
 
 function AnimNode:remove()
-	for _, registry in ipairs({ G.TRANSFORMS, G.LIVE.TRANSFORM }) do
+	for _, registry in ipairs({ g().TRANSFORMS, g().LIVE.TRANSFORM }) do
 		for k, v in ipairs(registry) do
 			if v == self then
 				table.remove(registry, k)

@@ -112,6 +112,7 @@ function Game:define_constants()
 
     self.ARGS = {}
     self.FUNCS = {}
+    require("bridge.funcs_registry").install(self)
     self.LIVE = {
         NODE = {},
         TRANSFORM = {},
@@ -164,7 +165,5 @@ function Game:define_constants()
     }}
 end
 
--- The one and only Game instance. Everything else in the codebase reaches
--- game state through this global (`G.STATE`, `G.C`, `G.LIVE.CARD`, etc.).
----@type Game
-G = Game()
+-- Game singleton is constructed from app/bootstrap/runtime_boot.lua after this
+-- module loads (Game:construct still sets G = self during the Phase 9 strangler).

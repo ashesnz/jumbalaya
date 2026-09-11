@@ -2,6 +2,9 @@
 
 local Kind = require("app.core.object")
 
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 ---@class Node : Kind
 Node = Kind:derive("Node")
 
@@ -24,12 +27,12 @@ function Node:construct(args)
 	self.CT = self.T
 	self.click_offset = { x = 0, y = 0 }
 	self.hover_offset = { x = 0, y = 0 }
-	self.created_on_pause = G.SETTINGS.paused
+	self.created_on_pause = g().SETTINGS.paused
 	self.REMOVED = false
 
-	G.ID = G.ID or 1
-	self.ID = G.ID
-	G.ID = G.ID + 1
+	g().ID = g().ID or 1
+	self.ID = g().ID
+	g().ID = g().ID + 1
 
 	self.FRAME = { RENDER = -1, TRANSFORM = -1 }
 	self.states = {
@@ -42,14 +45,14 @@ function Node:construct(args)
 		release_on = { can = true, is = false },
 	}
 
-	self.container = args.container or G.ROOM
+	self.container = args.container or g().ROOM
 	self.children = self.children or {}
 
 	if getmetatable(self) == Node then
-		table.insert(G.LIVE.NODE, self)
+		table.insert(g().LIVE.NODE, self)
 	end
-	if not G.STAGE_OBJECT_INTERRUPT then
-		table.insert(G.STAGE_OBJECTS[G.STAGE], self)
+	if not g().STAGE_OBJECT_INTERRUPT then
+		table.insert(g().STAGE_OBJECTS[g().STAGE], self)
 	end
 end
 

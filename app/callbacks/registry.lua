@@ -1,5 +1,8 @@
 --[[
-	app/callbacks/registry.lua - Central registry of G.FUNCS callback modules.
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
+	app/callbacks/registry.lua - Central registry of g().FUNCS callback modules.
 
 	App callbacks (loaded via app.callbacks.settings before WORD_GAME):
 	  app.callbacks.ui_controls  - buttons, toggles, sliders, option cycles
@@ -29,4 +32,5 @@ local word_game_callbacks = {
 
 for _, name in ipairs(word_game_callbacks) do
 	require(name)
+
 end

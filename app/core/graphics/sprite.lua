@@ -1,5 +1,8 @@
 --[[ app/core/graphics/sprite.lua - textured atlas quad (GfxSprite) ]]
 
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 GfxSprite = AnimNode:derive("GfxSprite")
 Sprite = GfxSprite
 
@@ -16,7 +19,7 @@ function GfxSprite:construct(X, Y, W, H, new_sprite_atlas, sprite_pos)
 		self.zoom = true
 		self.sprite_pos = sprite_pos or {x = 0, y = 0}
 		self.states.visible = false
-		if getmetatable(self) == GfxSprite then table.insert(G.LIVE.SPRITE, self) end
+		if getmetatable(self) == GfxSprite then table.insert(g().LIVE.SPRITE, self) end
 		return
 	end
 
@@ -26,11 +29,12 @@ function GfxSprite:construct(X, Y, W, H, new_sprite_atlas, sprite_pos)
 
 	self:set_sprite_pos(sprite_pos)
 
-	if getmetatable(self) == GfxSprite then table.insert(G.LIVE.SPRITE, self) end
+	if getmetatable(self) == GfxSprite then table.insert(g().LIVE.SPRITE, self) end
 end
 
 require("app.core.graphics.sprite_texture")(GfxSprite)
 require("app.core.graphics.sprite_shader")(GfxSprite)
 require("app.core.graphics.sprite_draw")(GfxSprite)
+
 
 return GfxSprite

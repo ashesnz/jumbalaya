@@ -1,3 +1,6 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 --[[
 	app/core/util/scheduler.lua - the timeline: lanes of scheduled tweens.
 
@@ -16,9 +19,9 @@ function Scheduler:construct()
 		badges = {},
 		misc = {},
 	}
-	self.cadence_clock = G.TIMERS.REAL
+	self.cadence_clock = g().TIMERS.REAL
 	self.cadence_step = 1 / 60
-	self.last_tick_at = G.TIMERS.REAL
+	self.last_tick_at = g().TIMERS.REAL
 end
 
 --- Files a Tween onto a lane ('base' by default); non-Tweens are dropped.
@@ -75,8 +78,8 @@ function Scheduler:advance(dt, forced)
 		local blocked = false
 		local i = 1
 		while i <= #lane do
-			G.ARGS.timeline_tick = G.ARGS.timeline_tick or {}
-			local results = G.ARGS.timeline_tick
+			g().ARGS.timeline_tick = g().ARGS.timeline_tick or {}
+			local results = g().ARGS.timeline_tick
 			results.blocking, results.completed, results.time_done, results.pause_skip = false, false, false, false
 
 			if not blocked or not lane[i].blockable then lane[i]:tick(results) end

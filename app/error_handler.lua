@@ -1,3 +1,6 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 --[[
 	Crash fallback UI and opt-in mail to support@jumbalaya.co.
 
@@ -52,7 +55,7 @@ end
 
 local function report_body(message)
 	local file, function_line, trace = relevant_trace(message)
-	local version = (G and G.VERSION) or VERSION or "?"
+	local version = (G and g().VERSION) or VERSION or "?"
 	local body = "Jumbalaya crash report\n"
 		.. "version: " .. tostring(version) .. "\n"
 		.. "file: " .. tostring(file) .. "\n"
@@ -66,7 +69,7 @@ local function report_body(message)
 end
 
 function M.crash_mailto_url(message)
-	local subject = "Jumbalaya crash (" .. tostring((G and G.VERSION) or VERSION or "?") .. ")"
+	local subject = "Jumbalaya crash (" .. tostring((G and g().VERSION) or VERSION or "?") .. ")"
 	return "mailto:" .. SUPPORT_EMAIL
 		.. "?subject=" .. encode_mailto(subject)
 		.. "&body=" .. encode_mailto(report_body(message))
@@ -74,10 +77,10 @@ end
 
 function M.crash_reports_opted_in()
 	return G
-		and G.SETTINGS
-		and G.SETTINGS.crashreports
+		and g().SETTINGS
+		and g().SETTINGS.crashreports
 		and _RELEASE_MODE
-		and G.F_CRASH_REPORTS
+		and g().F_CRASH_REPORTS
 		and true
 		or false
 end
@@ -157,7 +160,7 @@ end
 
 ---@param message any
 function love.errhand(message)
-	if G and G.F_NO_ERROR_HAND then
+	if g() and g().F_NO_ERROR_HAND then
 		return
 	end
 
@@ -192,7 +195,7 @@ function love.errhand(message)
 	love.audio.stop()
 	love.graphics.reset()
 	love.graphics.setNewFont("resources/fonts/Outfit-Bold.ttf", 20)
-	love.graphics.setBackgroundColor(G and G.C and G.C.BLACK or { 0, 0, 0, 1 })
+	love.graphics.setBackgroundColor(G and g().C and g().C.BLACK or { 0, 0, 0, 1 })
 	love.graphics.setColor(255, 255, 255, 255)
 	love.graphics.clear(love.graphics.getBackgroundColor())
 	love.graphics.origin()

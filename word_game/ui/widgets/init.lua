@@ -6,6 +6,7 @@
 ]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
+local Funcs = require("bridge.funcs_registry")
 local function runtime() return GameRT.game() end
 
 local M = {}

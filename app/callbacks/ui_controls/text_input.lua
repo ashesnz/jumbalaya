@@ -3,6 +3,10 @@
 local Easing = require "app.effects.easing"
 local ViewHost = require("jumbalaya-engine.view_host")
 
+local BridgeRuntime = require("bridge.runtime")
+local Funcs = require("bridge.funcs_registry")
+local function g() return BridgeRuntime.game() end
+
 --||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 --                                         TEXT ENTRY
 --||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
@@ -12,10 +16,10 @@ local ViewHost = require("jumbalaya-engine.view_host")
 ---@param e table
 --
 --[e is the UI Element that calls this update function, contains ARGS in e.config.ref_table]
-G.FUNCS.key_button = function(e)
+Funcs.register("key_button",  function(e)
   local args = e.config.ref_table
-  if args.key then G.INPUT:key_press_update(args.key) end
-end
+  if args.key then g().INPUT:key_press_update(args.key) end
+end)
 
 --Modifies the text input to show the current text value being modified. Shows the prompt text if\
 --the text input area is not hooked. Also modifies the UIE colour to show the hooked/non hooked colour\
@@ -24,9 +28,9 @@ end
 ---@param e table
 --
 --[e is the UI Element that calls this update function, contains ARGS in e.config.ref_table]
-G.FUNCS.text_input = function(e)
+Funcs.register("text_input",  function(e)
   local args =e.config.ref_table
-  if G.INPUT.text_capture == e then
+  if g().INPUT.text_capture == e then
     e.parent.parent.config.colour = args.hooked_colour
     args.current_prompt_text = ''
     args.current_position_text = args.position_text
@@ -37,72 +41,72 @@ G.FUNCS.text_input = function(e)
   end
 
   local OSkeyboard_e = e.parent.parent.parent
-  if G.INPUT.text_capture == e and G.INPUT.HID.controller then
+  if g().INPUT.text_capture == e and g().INPUT.HID.controller then
     if not OSkeyboard_e.children.controller_keyboard then 
       OSkeyboard_e.children.controller_keyboard = ViewHost.create{
         definition = make_onscreen_keyboard{backspace_key = true, return_key = true, space_key = false},
         config = {
           align= 'cm',
-          offset = {x = 0, y = G.INPUT.text_capture.config.ref_table.keyboard_offset or -4},
+          offset = {x = 0, y = g().INPUT.text_capture.config.ref_table.keyboard_offset or -4},
           major = e.panel, parent = OSkeyboard_e}
       }
-      G.INPUT.screen_keyboard = OSkeyboard_e.children.controller_keyboard
-      G.INPUT:shift_context_layer(1)
+      g().INPUT.screen_keyboard = OSkeyboard_e.children.controller_keyboard
+      g().INPUT:shift_context_layer(1)
     end
   elseif OSkeyboard_e.children.controller_keyboard then
     OSkeyboard_e.children.controller_keyboard:remove()
     OSkeyboard_e.children.controller_keyboard = nil
-    G.INPUT.screen_keyboard = nil
-    G.INPUT:shift_context_layer(-1)
+    g().INPUT.screen_keyboard = nil
+    g().INPUT:shift_context_layer(-1)
   end
-end
+end)
 
-G.FUNCS.paste_run_seed = function(e)
-  G.INPUT.text_capture = e.panel:find_node_by_id('text_input').children[1].children[1]
+Funcs.register("paste_run_seed",  function(e)
+  g().INPUT.text_capture = e.panel:find_node_by_id('text_input').children[1].children[1]
   for i = 1, 8 do
-    G.FUNCS.text_field_key({key = 'right'})
+    g().FUNCS.text_field_key({key = 'right'})
   end
   for i = 1, 8 do
-      G.FUNCS.text_field_key({key = 'backspace'})
+      g().FUNCS.text_field_key({key = 'backspace'})
   end
-  local clipboard = (G.F_LOCAL_CLIPBOARD and G.CLIPBOARD or love.system.getClipboardText()) or ''
+  local clipboard = (g().F_LOCAL_CLIPBOARD and g().CLIPBOARD or love.system.getClipboardText()) or ''
   for i = 1, #clipboard do
     local c = clipboard:sub(i,i)
-    G.FUNCS.text_field_key({key = c})
+    g().FUNCS.text_field_key({key = c})
   end
-  G.FUNCS.text_field_key({key = 'return'})
-end
+  g().FUNCS.text_field_key({key = 'return'})
+end)
 
 --When clicked, hooks the text input defined by e->1->1, which should be the text input UIE
 --
 ---@param e table
 --
 --[e is the UI Element that calls this click function]
-G.FUNCS.focus_text_field = function(e)
-  G.INPUT.text_capture = e.children[1].children[1]
+Funcs.register("focus_text_field",  function(e)
+  g().INPUT.text_capture = e.children[1].children[1]
 
   --Start by setting the cursor position to the correct location
   TRANSPOSE_TEXT_INPUT(0)
   e.panel:recalculate(true)
-end
+end)
 
 --Handles all key inputs for the hooked text input.
 --
 ---@param args {key: string, caps: boolean}
 --**key** the key being pressed\
 --**caps** if the key should be capitalized
-G.FUNCS.text_field_key = function(args)
+Funcs.register("text_field_key",  function(args)
   args = args or {}
 
   if args.key == '[' or args.key == ']' then return end
   if args.key == '0' then args.key = 'o' end
 
   --shortcut to hook config
-  local hook_config = G.INPUT.text_capture.config.ref_table
+  local hook_config = g().INPUT.text_capture.config.ref_table
   hook_config.orig_colour = hook_config.orig_colour or deep_clone(hook_config.colour)
 
   args.key = args.key or '%'
-  args.caps = args.caps or G.INPUT.capslock or hook_config.all_caps --capitalize if caps lock or hook requires
+  args.caps = args.caps or g().INPUT.capslock or hook_config.all_caps --capitalize if caps lock or hook requires
 
   --Some special keys need to be mapped accordingly before passing through the corpus
   local keymap = {
@@ -113,7 +117,7 @@ G.FUNCS.text_field_key = function(args)
     right = 'RIGHT',
     left = 'LEFT'
   }
-  local hook = G.INPUT.text_capture
+  local hook = g().INPUT.text_capture
   local corpus = '123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'..(hook.config.ref_table.extended_corpus and " 0!$&()<>?:{}+-=,.[]_" or '')
   
   if hook.config.ref_table.extended_corpus then 
@@ -151,11 +155,11 @@ G.FUNCS.text_field_key = function(args)
     if hook.config.ref_table.callback then hook.config.ref_table.callback() end
     hook.parent.parent.config.colour = hook_config.colour
     local temp_colour = deep_clone(hook_config.orig_colour)
-    hook_config.colour[1] = G.C.WHITE[1]
-    hook_config.colour[2] = G.C.WHITE[2]
-    hook_config.colour[3] = G.C.WHITE[3]
+    hook_config.colour[1] = g().C.WHITE[1]
+    hook_config.colour[2] = g().C.WHITE[2]
+    hook_config.colour[3] = g().C.WHITE[3]
     Easing.colour{old_colour = hook_config.colour, new_colour = temp_colour}
-    G.INPUT.text_capture = nil
+    g().INPUT.text_capture = nil
   elseif args.key == 'LEFT' then --Move cursor position to the left
     TRANSPOSE_TEXT_INPUT(-1)
   elseif args.key == 'RIGHT' then --Move cursor position to the right
@@ -170,12 +174,12 @@ G.FUNCS.text_field_key = function(args)
     }
     TRANSPOSE_TEXT_INPUT(1)
   end
-end
+end)
 
---Helper function for G.FUNCS.text_field_key
+--Helper function for g().FUNCS.text_field_key
 function GET_TEXT_FROM_INPUT()
   local new_text = ''
-  local hook = G.INPUT.text_capture
+  local hook = g().INPUT.text_capture
   for i = 1, #hook.children do
     if hook.children[i].config and hook.children[i].config.id:sub(1, 7) == 'letter_' and hook.children[i].config.text ~= '' then
       new_text = new_text..hook.children[i].config.text
@@ -184,7 +188,7 @@ function GET_TEXT_FROM_INPUT()
   return new_text
 end
 
---Helper function for G.FUNCS.text_field_key
+--Helper function for g().FUNCS.text_field_key
 --
 ---@param args {letter: string, text_table: table, pos: number, delete: boolean}
 --**letter** the letter being pressed\
@@ -219,15 +223,15 @@ function MODIFY_TEXT_INPUT(args)
   end
 end
 
---Helper function for G.FUNCS.text_field_key\
+--Helper function for g().FUNCS.text_field_key\
 --Moves the cursor left or right. Typing a key, deleting or backspacing also counts\
 --as a cursor move, since empty strings are used to fill the hook
 --
 ---@param amount number
 function TRANSPOSE_TEXT_INPUT(amount)
   local position_child = nil
-  local hook = G.INPUT.text_capture
-  local text = G.INPUT.text_capture.config.ref_table.text
+  local hook = g().INPUT.text_capture
+  local text = g().INPUT.text_capture.config.ref_table.text
   for i = 1, #hook.children do
     if hook.children[i].config then
      if hook.children[i].config.id == 'position' then

@@ -4,21 +4,25 @@
 --**e** Is the UIE that called this function
 
 local Scheduler = require "app.effects.timeline_scheduler"
+
+local BridgeRuntime = require("bridge.runtime")
+local Funcs = require("bridge.funcs_registry")
+local function g() return BridgeRuntime.game() end
 ---@param e table
-G.FUNCS.can_resume_run = function(e)
+Funcs.register("can_resume_run",  function(e)
   if e.config.func then --refers to this function, or 'can_resume_run', so this doesn't run repeatedly
     local _can_continue = nil
-    local savefile = love.filesystem.getInfo(G.SETTINGS.profile..'/'..'save.acs')
+    local savefile = love.filesystem.getInfo(g().SETTINGS.profile..'/'..'save.acs')
     if savefile == nil then
-        e.config.colour = G.C.UI.BACKGROUND_INACTIVE
+        e.config.colour = g().C.UI.BACKGROUND_INACTIVE
         e.config.button = nil
     else
-      if not G.STORED_RUN then
-        G.STORED_RUN = read_save_payload(G.SETTINGS.profile..'/'..'save.acs')
-        if G.STORED_RUN ~= nil then G.STORED_RUN = unpack_source(G.STORED_RUN) end
+      if not g().STORED_RUN then
+        g().STORED_RUN = read_save_payload(g().SETTINGS.profile..'/'..'save.acs')
+        if g().STORED_RUN ~= nil then g().STORED_RUN = unpack_source(g().STORED_RUN) end
       end
-      if not G.STORED_RUN.VERSION or G.STORED_RUN.VERSION < '0.9.2' then
-        e.config.colour = G.C.UI.BACKGROUND_INACTIVE
+      if not g().STORED_RUN.VERSION or g().STORED_RUN.VERSION < '0.9.2' then
+        e.config.colour = g().C.UI.BACKGROUND_INACTIVE
         e.config.button = nil
       else
         _can_continue = true
@@ -27,64 +31,64 @@ G.FUNCS.can_resume_run = function(e)
     e.config.func = nil
     return _can_continue
   end
-end
+end)
 
-G.FUNCS.can_load_profile = function(e)
-  if G.SETTINGS.profile == G.focused_profile then
-      e.config.colour = G.C.UI.BACKGROUND_INACTIVE
+Funcs.register("can_load_profile",  function(e)
+  if g().SETTINGS.profile == g().focused_profile then
+      e.config.colour = g().C.UI.BACKGROUND_INACTIVE
       e.config.button = nil
   else
-    e.config.colour = G.C.BLUE
+    e.config.colour = g().C.BLUE
     e.config.button = 'load_profile'
   end
-end
+end)
 
-G.FUNCS.load_profile = function(delete_prof_data)
-  G.STORED_RUN = nil
-  G:queue_wipe_transition({
+Funcs.register("load_profile",  function(delete_prof_data)
+  g().STORED_RUN = nil
+  g():queue_wipe_transition({
     function()
-      G:discard_run()
+      g():discard_run()
       local _name = nil
-      if G.PROFILES[G.focused_profile].name and G.PROFILES[G.focused_profile].name ~= '' then
-        _name = G.PROFILES[G.focused_profile].name
+      if g().PROFILES[g().focused_profile].name and g().PROFILES[g().focused_profile].name ~= '' then
+        _name = g().PROFILES[g().focused_profile].name
       end
-      if delete_prof_data then G.PROFILES[G.focused_profile] = {} end
-      G.DISCOVER_TALLIES = nil
-      G.PROGRESS = nil
-      G:load_profile(G.focused_profile)
-      G.PROFILES[G.focused_profile].name = _name
-      G:load_card_definitions()
+      if delete_prof_data then g().PROFILES[g().focused_profile] = {} end
+      g().DISCOVER_TALLIES = nil
+      g().PROGRESS = nil
+      g():load_profile(g().focused_profile)
+      g().PROFILES[g().focused_profile].name = _name
+      g():load_card_definitions()
       return true
     end,
     {
       blockable = true,
       blocking = false,
       func = function()
-        G:open_main_menu()
-        G.WRITE_FLAGS.force = true
+        g():open_main_menu()
+        g().WRITE_FLAGS.force = true
         return true
       end,
     },
   }, { flush_timeline = true })
-end
+end)
 
-G.FUNCS.can_delete_profile = function(e)
-  G.CHECK_PROFILE_DATA = G.CHECK_PROFILE_DATA or love.filesystem.getInfo(G.focused_profile..'/'..'profile.acs')
-  if (not G.CHECK_PROFILE_DATA) or e.config.disable_button then
-      G.CHECK_PROFILE_DATA = false
-      e.config.colour = G.C.UI.BACKGROUND_INACTIVE
+Funcs.register("can_delete_profile",  function(e)
+  g().CHECK_PROFILE_DATA = g().CHECK_PROFILE_DATA or love.filesystem.getInfo(g().focused_profile..'/'..'profile.acs')
+  if (not g().CHECK_PROFILE_DATA) or e.config.disable_button then
+      g().CHECK_PROFILE_DATA = false
+      e.config.colour = g().C.UI.BACKGROUND_INACTIVE
       e.config.button = nil
   else
-    e.config.colour = G.C.RED
+    e.config.colour = g().C.RED
     e.config.button = 'delete_profile'
   end
-end
+end)
 
-G.FUNCS.delete_profile = function(e)
+Funcs.register("delete_profile",  function(e)
   local warning_text = e.panel:find_node_by_id('warning_text')
-  if warning_text.config.colour ~= G.C.WHITE then 
+  if warning_text.config.colour ~= g().C.WHITE then 
     warning_text:pulse()
-    warning_text.config.colour = G.C.WHITE
+    warning_text.config.colour = g().C.WHITE
     warning_text.config.shadow = true
     e.config.disable_button = true
     Scheduler.add{mode = 'delayed', delay = 0.06, blockable = false, blocking = false, func = function()
@@ -95,19 +99,19 @@ G.FUNCS.delete_profile = function(e)
 
     play_sfx('generic1', 1, 0.4)
   else
-    love.filesystem.remove(G.focused_profile..'/'..'profile.acs')
-    love.filesystem.remove(G.focused_profile..'/'..'save.acs')
-    love.filesystem.remove(G.focused_profile..'/'..'meta.acs')
-    love.filesystem.remove(G.focused_profile..'')
-    G.STORED_RUN = nil
-    G.DISCOVER_TALLIES = nil
-    G.PROGRESS = nil
-    G.PROFILES[G.focused_profile] = {}
-    if G.focused_profile == G.SETTINGS.profile then
-        G.FUNCS.load_profile(true)
+    love.filesystem.remove(g().focused_profile..'/'..'profile.acs')
+    love.filesystem.remove(g().focused_profile..'/'..'save.acs')
+    love.filesystem.remove(g().focused_profile..'/'..'meta.acs')
+    love.filesystem.remove(g().focused_profile..'')
+    g().STORED_RUN = nil
+    g().DISCOVER_TALLIES = nil
+    g().PROGRESS = nil
+    g().PROFILES[g().focused_profile] = {}
+    if g().focused_profile == g().SETTINGS.profile then
+        g().FUNCS.load_profile(true)
     else
-      local tab_but = G.OVERLAY_MENU:find_node_by_id('tab_but_'..G.focused_profile)
-      G.FUNCS.switch_tab(tab_but)
+      local tab_but = g().OVERLAY_MENU:find_node_by_id('tab_but_'..g().focused_profile)
+      g().FUNCS.switch_tab(tab_but)
     end
   end
-end
+end)

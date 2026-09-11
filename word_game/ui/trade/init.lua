@@ -148,6 +148,7 @@ local cannot_afford_anything = M.cannot_afford_anything
 
 open_overlay = function()
 	local runtime = require("bridge.runtime")
+local Funcs = require("bridge.funcs_registry")
 	local engine = runtime.engine()
 	if engine then
 		views_install.install_trade(engine)

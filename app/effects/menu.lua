@@ -3,40 +3,43 @@
 local Scheduler = require "app.effects.timeline_scheduler"
 local ViewHost = require("jumbalaya-engine.view_host")
 
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 local Menu = {}
 
 function Menu.set_main_ui()
-    G.MAIN_MENU_UI = ViewHost.create{
+    g().MAIN_MENU_UI = ViewHost.create{
         definition = build_main_menu_buttons(),
         config = {
             align = "bmi",
             offset = {x = 0, y = main_menu_bottom_offset()},
-            major = G.ROOM_ATTACH,
+            major = g().ROOM_ATTACH,
             bond = 'Weak',
         },
     }
     layout_main_menu()
 
-    if G.F_PROFILE_BUTTON then
+    if g().F_PROFILE_BUTTON then
         Scheduler.add{
             blockable = false,
             blocking = false,
             func = function()
-                if (not G.F_DISP_USERNAME) or type(G.F_DISP_USERNAME) == 'string' then
-                    G.PROFILE_BUTTON = ViewHost.create{
+                if (not g().F_DISP_USERNAME) or type(g().F_DISP_USERNAME) == 'string' then
+                    g().PROFILE_BUTTON = ViewHost.create{
                         definition = build_profile_button(),
-                        config = {align = "bli", offset = {x = -10, y = 0}, major = G.ROOM_ATTACH, bond = 'Weak'},
+                        config = {align = "bli", offset = {x = -10, y = 0}, major = g().ROOM_ATTACH, bond = 'Weak'},
                     }
-                    G.PROFILE_BUTTON.alignment.offset.x = 0
-                    G.PROFILE_BUTTON:align_to_major()
+                    g().PROFILE_BUTTON.alignment.offset.x = 0
+                    g().PROFILE_BUTTON:align_to_major()
                     return true
                 end
             end,
         }
     end
 
-    if G.INPUT and G.MAIN_MENU_UI and G.MAIN_MENU_UI:find_node_by_id('main_menu_classic') then
-        G.INPUT:snap_to{node = G.MAIN_MENU_UI:find_node_by_id('main_menu_classic')}
+    if g().INPUT and g().MAIN_MENU_UI and g().MAIN_MENU_UI:find_node_by_id('main_menu_classic') then
+        g().INPUT:snap_to{node = g().MAIN_MENU_UI:find_node_by_id('main_menu_classic')}
     end
 end
 

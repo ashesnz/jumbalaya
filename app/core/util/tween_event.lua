@@ -1,3 +1,6 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 --[[
 	app/core/util/tween_event.lua - one entry on the timeline (Tween).
 
@@ -32,7 +35,7 @@ function Tween:construct(config)
 	self.delay = config.delay or 0
 	self.persistent = config.persistent
 	-- Tweens born mid-pause must ride the wall clock to make progress.
-	self.born_paused = config.pause_force or G.SETTINGS.paused
+	self.born_paused = config.pause_force or g().SETTINGS.paused
 	self.timer = config.timer or (self.born_paused and 'REAL') or 'TOTAL'
 
 	if self.mode == 'tween' then
@@ -57,7 +60,7 @@ end
 
 -- Wall-clock selector: tweens pick REAL time when they must move during pause.
 local function clock(tween)
-	return G.TIMERS[tween.timer]
+	return g().TIMERS[tween.timer]
 end
 
 ------------------------------------------------------------------------
@@ -129,7 +132,7 @@ function Tween:tick(results)
 	results.blocking, results.completed = self.blocking, self.finished
 
 	-- Frozen mid-pause (unless the tween itself was born during pause).
-	if self.born_paused == false and G.SETTINGS.paused then
+	if self.born_paused == false and g().SETTINGS.paused then
 		results.pause_skip = true
 		return
 	end

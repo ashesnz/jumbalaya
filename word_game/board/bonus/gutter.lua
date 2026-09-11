@@ -2,21 +2,24 @@
 
 local BonusStack = require("word_game.model.jumble.bonus_stack")
 
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 local M = {}
 
 M.LEFT_WINDOW_MARGIN = 0.14
 M.STACK_Y_LIFT_PX = 20
 
 local function window_left_x()
-	return -((G.ROOM and G.ROOM.T and G.ROOM.T.x) or 0)
+	return -((g().ROOM and g().ROOM.T and g().ROOM.T.x) or 0)
 end
 
 --- Timeline HUD anchor; uses the last rect published by layout, else placement geometry.
 local function timeline_rect()
-	if G.ARGS and G.ARGS.timeline_rect then
-		return G.ARGS.timeline_rect
+	if g().ARGS and g().ARGS.timeline_rect then
+		return g().ARGS.timeline_rect
 	end
-	local pt = G.pattern_row
+	local pt = g().pattern_row
 	if pt and pt.area and pt.area.T then
 		local t = pt.area.T
 		return { x = t.x, y = t.y - t.h, w = t.w, h = t.h * 0.5 }
@@ -26,8 +29,8 @@ end
 
 function M.stack_y_lift()
 	local dim_ok, dim = pcall(require, "word_game.config.layout.dimensions")
-	local tile = G.TILESIZE or (dim_ok and dim.TILESIZE) or 20
-	local scale = G.TILESCALE or (dim_ok and dim.TILESCALE) or 1
+	local tile = g().TILESIZE or (dim_ok and dim.TILESIZE) or 20
+	local scale = g().TILESCALE or (dim_ok and dim.TILESCALE) or 1
 	local px_per_tile = tile * scale
 	if px_per_tile <= 0 then
 		px_per_tile = (dim_ok and dim.CANVAS_TILE_PX) or 73
@@ -37,8 +40,8 @@ end
 
 function M.stack_layout()
 	local timer = timeline_rect()
-	local card_w = G.CARD_W or 1
-	local card_h = G.CARD_H or 1.4
+	local card_w = g().CARD_W or 1
+	local card_h = g().CARD_H or 1.4
 	local margin_x = M.LEFT_WINDOW_MARGIN
 	local margin_y = math.max(0.10, card_h * 0.08)
 	local lift = M.stack_y_lift()
@@ -100,9 +103,9 @@ function M.return_card(card)
 		end
 	end
 	if card.area then
-		if G.pattern_row and card.area == G.pattern_row.area
-			and G.pattern_row.on_remove_card then
-			G.pattern_row:on_remove_card(card)
+		if g().pattern_row and card.area == g().pattern_row.area
+			and g().pattern_row.on_remove_card then
+			g().pattern_row:on_remove_card(card)
 		end
 		if card.area.remove_card then
 			card.area:remove_card(card)
@@ -130,7 +133,7 @@ function M.gutter_pixels(layout)
 	local pad_y = math.max(0.35, layout.card_h * 0.25)
 	local top = layout.label_y - layout.card_h * 0.45
 	local bottom = layout.y + (count - 1) * layout.step_y + layout.card_h + pad_y
-	local ts = G.TILESCALE * G.TILESIZE
+	local ts = g().TILESCALE * g().TILESIZE
 	return layout.x * ts - pad_x * ts,
 		top * ts,
 		(layout.card_w + pad_x * 2) * ts,

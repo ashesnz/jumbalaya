@@ -2,6 +2,9 @@
 	jumbalaya-engine/input.lua - InputService interface and Love2D adapter.
 ]]
 
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 ---@class InputService
 local InputService = {}
 InputService.__index = InputService
@@ -39,9 +42,9 @@ end
 
 function InputService:on_pointer_down(x, y)
 	local result = { hit = false, x = x, y = y }
-	if G and G.INPUT and G.INPUT.hover_state and G.INPUT.hover_state.target then
+	if g() and g().INPUT and g().INPUT.hover_state and g().INPUT.hover_state.target then
 		result.hit = true
-		result.target = G.INPUT.hover_state.target
+		result.target = g().INPUT.hover_state.target
 	end
 	return result
 end
@@ -61,6 +64,7 @@ function InputService:on_action(action)
 	end
 	if self._store then
 		require("bridge.store_sync").dispatch(self._store, action)
+
 	end
 end
 

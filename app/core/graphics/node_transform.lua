@@ -1,6 +1,9 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 function push_node_transform(moveable, scale, rotate, offset, _)
 	love.graphics.push()
-	love.graphics.scale(G.TILESCALE * G.TILESIZE)
+	love.graphics.scale(g().TILESCALE * g().TILESIZE)
 	local parallax = moveable.parallax_shift
 		or (moveable.parent and moveable.parent.parallax_shift)
 		or {x = 0, y = 0}

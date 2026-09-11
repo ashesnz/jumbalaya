@@ -1,8 +1,11 @@
 --[[
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 	app/core/audio/manager.lua - audio worker thread.
 
 	Runs as a love.thread (started from app/startup.lua when
-	`G.F_SOUND_THREAD` is on). Preloads every .ogg under resources/sounds,
+	`g().F_SOUND_THREAD` is on). Preloads every .ogg under resources/sounds,
 	reports progress over the 'alpha_audio_log' channel, then serves requests
 	from 'alpha_audio_in' forever. All pooling/mixing lives in the shared
 	mixer module; this file is just the transport loop.
@@ -18,6 +21,7 @@
 require "love.audio"
 require "love.sound"
 require "love.system"
+
 
 if love.system.getOS() == 'OS X' then jit.off() end
 

@@ -2,6 +2,7 @@ return function(InputRouter)
 local BridgeRuntime = require("bridge.runtime")
 local function g() return BridgeRuntime.game() end
 
+
 function InputRouter:handle_axis_buttons()
 	for _, v in pairs(self.axis_buttons) do
 		if v.previous ~= '' and (v.current == '' or v.previous ~= v.current) then

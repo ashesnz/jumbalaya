@@ -1,12 +1,15 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 return function(AnimNode)
 local MWM
 --- Per-frame entry point. Frame-gated so repeated calls in one frame are free;
 --- Majors integrate their own VT, Minors follow their major, Glued copies it.
 function AnimNode:move(dt)
-	if self.FRAME.TRANSFORM >= G.FRAMES.TRANSFORM then return end
+	if self.FRAME.TRANSFORM >= g().FRAMES.TRANSFORM then return end
 	self.FRAME.MAJOR = nil
-	self.FRAME.TRANSFORM = G.FRAMES.TRANSFORM
-	if not self.created_on_pause and G.SETTINGS.paused then return end
+	self.FRAME.TRANSFORM = g().FRAMES.TRANSFORM
+	if not self.created_on_pause and g().SETTINGS.paused then return end
 
 	self:align_to_major()
 
@@ -14,7 +17,7 @@ function AnimNode:move(dt)
 	if self.role.role_type == 'Glued' then
 		if self.role.major then self:glue_to_major(self.role.major) end
 	elseif self.role.role_type == 'Minor' and self.role.major then
-		if self.role.major.FRAME.TRANSFORM < G.FRAMES.TRANSFORM then self.role.major:move(dt) end
+		if self.role.major.FRAME.TRANSFORM < g().FRAMES.TRANSFORM then self.role.major:move(dt) end
 		self.STATIONARY = self.role.major.STATIONARY
 		-- Weak bonds and transient effects force a full recompute even when
 		-- the major reports itself stationary.

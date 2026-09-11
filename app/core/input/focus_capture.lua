@@ -1,6 +1,8 @@
 return function(InputRouter)
 local BridgeRuntime = require("bridge.runtime")
+local Funcs = require("bridge.funcs_registry")
 local function g() return BridgeRuntime.game() end
+
 
 function InputRouter:capture_focused_input(button, input_type, dt)
 	local captured = false

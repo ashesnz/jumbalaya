@@ -37,6 +37,7 @@
 ---@field add_to_deck fun(self: Card, from_debuff: boolean|nil)
 ---@field remove_from_deck fun(self: Card, from_debuff: boolean|nil)
 local live_game = require("word_game.model.live_game")
+local CardRegistry = require("word_game.model.cards.registry")
 
 Card = EaseNode:derive("Card")
 
@@ -161,7 +162,7 @@ local function face_key(definition)
 	if type(definition) ~= "table" then return nil end
 	local cached = face_keys[definition]
 	if cached then return cached end
-	for key, def in pairs(live_game().LETTERS.faces or {}) do
+	for key, def in pairs(CardRegistry.faces() or {}) do
 		face_keys[def] = key
 	end
 	return face_keys[definition]
@@ -332,9 +333,9 @@ function Card:load(saved)
 
     self.config = {
         center_key = saved.refs.center,
-        center = live_game().LETTERS.centers[saved.refs.center],
+        center = CardRegistry.centers() and CardRegistry.centers()[saved.refs.center],
         card_key = saved.refs.card,
-        card = live_game().LETTERS.faces[saved.refs.card],
+        card = CardRegistry.faces() and CardRegistry.faces()[saved.refs.card],
     }
     self.params = saved.params
 

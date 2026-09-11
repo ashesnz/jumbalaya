@@ -5,6 +5,7 @@
 require "word_game.model.game"
 require "word_game.model.cards"
 require "word_game.model.game.globals"
+Game()
 require "word_game.ui.util.colour"
 require "word_game.ui.util.localize"
 require "word_game.model.persistence.progress"
@@ -21,6 +22,9 @@ require "app.effects"
 require "word_game.ui.cards.tooltip"
 
 local InputActions = require "app.input_actions"
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 InputController._input_actions = InputActions
 
 require "app.screen_wipe"
@@ -38,7 +42,7 @@ require "app.callbacks.registry"
 
 DEVTOOLS = require "devtools"
 
-G.consume_board_click = function()
+g().consume_board_click = function()
 	local ui = WORD_GAME_UI
 	if ui and ui.FirstPlayTutorial and ui.FirstPlayTutorial.consume_click() then
 		return true
@@ -93,7 +97,7 @@ Updaters.register('post_input', 'card_inspect', function(game, dt)
 	end
 end)
 Updaters.register('post_input', 'word_feedback_queue', function()
-	if G.ARGS and G.ARGS.word_feedback_queue then
+	if g().ARGS and g().ARGS.word_feedback_queue then
 		require("word_game.ui.feedback.word_feedback").flush_pending()
 	end
 end)

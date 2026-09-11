@@ -4,17 +4,27 @@ local live_game = require("word_game.model.live_game")
 
 local M = {}
 
+local shared_letters = nil
+
 function M.ensure()
-	if not live_game() then return nil end
-	if not live_game().LETTERS then
-		live_game().LETTERS = {
-			faces = {},
-			centers = {},
-			center_pools = {},
-			locked = {},
-		}
+	local game = live_game()
+	if not game then return nil end
+	if not game.LETTERS then
+		if shared_letters then
+			game.LETTERS = shared_letters
+		else
+			game.LETTERS = {
+				faces = {},
+				centers = {},
+				center_pools = {},
+				locked = {},
+			}
+			shared_letters = game.LETTERS
+		end
+	elseif not shared_letters then
+		shared_letters = game.LETTERS
 	end
-	return live_game().LETTERS
+	return game.LETTERS
 end
 
 function M.faces()

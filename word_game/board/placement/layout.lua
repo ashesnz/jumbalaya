@@ -3,6 +3,9 @@
 local config = require "word_game.board.placement.config"
 local jumble_geometry = require "word_game.board.jumble.geometry"
 
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 local M = {}
 
 function M.area_width(ctx)
@@ -27,11 +30,11 @@ function M.apply_screen_position(session)
 
 	local j = WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.state
 		and WORD_GAME.Jumble.state()
-	if jumble_geometry.is_boss_row(j) and G.dealt_letters then
+	if jumble_geometry.is_boss_row(j) and g().dealt_letters then
 		local gap = math.max(0.28, ctx:card_h() * 0.22)
-		area.T.y = G.dealt_letters.T.y - area.T.h - gap
-	elseif jumble_geometry.span_active() and G.dealt_letters then
-		area.T.y = jumble_geometry.anchor_y(felt, area.T.h, G.dealt_letters.T.y)
+		area.T.y = g().dealt_letters.T.y - area.T.h - gap
+	elseif jumble_geometry.span_active() and g().dealt_letters then
+		area.T.y = jumble_geometry.anchor_y(felt, area.T.h, g().dealt_letters.T.y)
 	else
 		area.T.y = felt.y + pad_y
 	end
@@ -44,14 +47,14 @@ end
 ---@return number px, number py, number pw, number ph canvas pixels (inside room translate_container)
 function M.card_pixels(card)
 	local t = card.VT or card.T
-	local ts = G.TILESCALE * G.TILESIZE
+	local ts = g().TILESCALE * g().TILESIZE
 	return t.x * ts, t.y * ts, t.w * ts, t.h * ts
 end
 
 ---@return number px, number py, number pw, number ph canvas pixels (inside room translate_container)
 function M.row_pixels(session)
 	local area = session.area
-	local ts = G.TILESCALE * G.TILESIZE
+	local ts = g().TILESCALE * g().TILESIZE
 	return area.T.x * ts, area.T.y * ts, area.T.w * ts, area.T.h * ts
 end
 

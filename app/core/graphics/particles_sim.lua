@@ -1,5 +1,9 @@
 return function(ParticleEmitter)
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
+
 local Scheduler = require("app.effects.timeline_scheduler")
+
 
 --- Spawns one particle. Records carry velocity components, a per-particle
 --- lifespan, and a geometry choice — deliberately unlike the old uniform
@@ -41,11 +45,11 @@ end
 --- Emission pass: refill the spawn-credit budget from elapsed time, then
 --- spend credits. Bursts may exceed `max` while burst allowance remains.
 function ParticleEmitter:update(dt)
-	local now = G.TIMERS[self.timer_type]
+	local now = g().TIMERS[self.timer_type]
 	local elapsed = now - (self.last_tick or now)
 	self.last_tick = now
 
-	if G.SETTINGS.paused and not self.created_on_pause then return end
+	if g().SETTINGS.paused and not self.created_on_pause then return end
 
 	self.emit_credit = math.min(self.emit_credit + elapsed * self.rate, self.max_debt)
 
@@ -65,11 +69,11 @@ end
 --- A particle dies of old age (past its own `life`) instead of relying on a
 --- scale sign flip.
 function ParticleEmitter:move(dt)
-	if G.SETTINGS.paused and not self.created_on_pause then return end
+	if g().SETTINGS.paused and not self.created_on_pause then return end
 
 	AnimNode.move(self, dt)
 
-	if self.timer_type ~= 'REAL' then dt = dt * G.TIME_SCALE end
+	if self.timer_type ~= 'REAL' then dt = dt * g().TIME_SCALE end
 	local damp = math.max(0, 1 - 1.4 * dt)
 
 	for i = #self.particles, 1, -1 do

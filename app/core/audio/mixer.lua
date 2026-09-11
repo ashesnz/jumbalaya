@@ -1,3 +1,6 @@
+
+local BridgeRuntime = require("bridge.runtime")
+local function g() return BridgeRuntime.game() end
 --[[
 	app/core/audio/mixer.lua - the mixing engine behind both audio runtimes.
 
@@ -14,7 +17,7 @@
 	  born_paused  started while an overlay was up
 	  state_tag    game state the sound was triggered from
 
-	Requests are plain records; `settings` always carries G.SETTINGS.SOUND.
+	Requests are plain records; `settings` always carries g().SETTINGS.SOUND.
 ]]
 
 local MIXER = {}

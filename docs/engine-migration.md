@@ -926,7 +926,7 @@ Each PR: `love tests` → `emmylua_check . --severity warn` → manual smoke (§
 | **PR-9b** | `app/startup.lua`, input, persistence callbacks | ✅ |
 | **PR-9c** | `word_game/ui/` presentation purge | ✅ |
 | **PR-9d** | `word_game/model/` purge off `G` | ✅ |
-| **PR-9d′** | Delete `globals.lua` / `G = Game()` (after `app/` + `board/` purge) | pending |
+| **PR-9d′** | `app/` + `board/` + engine purge; move `Game()` boot out of `globals.lua` | ✅ |
 | **PR-9e** | Retire `G.FUNCS` + `types/g_funcs.lua` | pending |
 
 #### PR-9d — `word_game/model/` purge ✅
@@ -942,7 +942,18 @@ Each PR: `love tests` → `emmylua_check . --severity warn` → manual smoke (§
 
 **Exit:** `rg '\bG[.:\[]' word_game/model` → **0** (comments only in `globals.lua`) ✅; **486 tests** ✅
 
-**Remaining for PR-9d′:** fold `define_constants` boot into `Game:construct` / runtime shell, then delete `G = Game()` line and migrate `word_game/board/`, `app/`, engine scene graph off `G`.
+#### PR-9d′ — `app/` + `board/` + engine purge ✅
+
+| Action | Files |
+|--------|-------|
+| Migrate | `app/` (76 files), `word_game/board/` (6), `packages/jumbalaya-engine/` (retained_ui, input, clock) — `G.` → `g()` via `BridgeRuntime.game()` |
+| FUNCS registry | `bridge/funcs_registry.lua` — `Funcs.register` + `install` on `define_constants` (survives fresh `Game()` in tests) |
+| Boot | `G = Game()` removed from `globals.lua`; `Game()` called from `runtime_boot.lua` |
+| Skip-title | `menu_boot.lua` — direct `start_run` (no wipe) when skipping title screen |
+
+**Exit:** `rg '\bG[.:\[]' app word_game/board packages/jumbalaya-engine` → **0** runtime reads ✅; **486 tests** ✅
+
+**Remaining for PR-9:** retire `G = self` in `Game:construct` and `_G.G` fallback in `bridge/runtime.lua` once scene graph is fully injected.
 
 | Action | Files |
 |--------|-------|

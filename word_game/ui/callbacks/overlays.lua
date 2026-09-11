@@ -1,37 +1,38 @@
---[[ word_game/ui/callbacks/overlays.lua - Overlay screen runtime().FUNCS (stable names) ]]
+--[[ word_game/ui/callbacks/overlays.lua - Overlay screen FUNCS (stable names) ]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local game_access = require("word_game.model.game_access")
 local UIViewHost = require("word_game.ui.views.ui_view_host")
+local Funcs = require("bridge.funcs_registry")
 
 local M = {}
 
 function M.install()
-	runtime().FUNCS.open_options = function(e)
+	Funcs.register("open_options", function(e)
 		runtime().SETTINGS.paused = true
 		runtime().FUNCS.show_overlay{
 			definition = build_options(),
 		}
-	end
+	end)
 
-	runtime().FUNCS.open_settings = function(e, instant)
+	Funcs.register("open_settings", function(e, instant)
 		runtime().SETTINGS.paused = true
 		runtime().FUNCS.show_overlay{
 			definition = build_settings(),
 			config = {offset = {x=0,y=instant and 0 or 10}}
 		}
-	end
+	end)
 
-	runtime().FUNCS.language_selection = function(e)
+	Funcs.register("language_selection", function(e)
 		runtime().SETTINGS.paused = true
 		runtime().FUNCS.show_overlay{
 			definition = runtime().DEFINITIONS.language_selector(),
 		}
-	end
+	end)
 
-	runtime().FUNCS.profile_select = function(e)
+	Funcs.register("profile_select", function(e)
 		runtime().SETTINGS.paused = true
 		runtime().focused_profile = runtime().SETTINGS.profile
 
@@ -43,13 +44,13 @@ function M.install()
 		runtime().FUNCS.show_overlay{
 			definition = runtime().DEFINITIONS.profile_select(),
 		}
-	end
+	end)
 
-	runtime().FUNCS.quit = function(e)
+	Funcs.register("quit", function(e)
 		love.event.quit()
-	end
+	end)
 
-	runtime().FUNCS.warn_lang = function(e)
+	Funcs.register("warn_lang", function(e)
 		local _infotip_object = runtime().OVERLAY_MENU:find_node_by_id('overlay_menu_infotip')
 		if _infotip_object.config.set ~= e.config.ref_table.label then
 			_infotip_object.config.object:remove()
@@ -65,12 +66,12 @@ function M.install()
 
 			Scheduler.add{mode = 'delayed', delay = 0.35, blockable = false, blocking = false, func = function()
 				e.config.disable_button = nil;return true end}
-				e.config.button = 'change_lang'
+			e.config.button = 'change_lang'
 			play_sfx('generic1', 1, 0.4)
 		end
-	end
+	end)
 
-	runtime().FUNCS.change_lang = function(e)
+	Funcs.register("change_lang", function(e)
 		local lang = e.config.ref_table
 		if not lang or lang == runtime().LANG then
 			runtime().FUNCS.close_overlay()
@@ -86,9 +87,9 @@ function M.install()
 				end,
 			}, { flush_timeline = true })
 		end
-	end
+	end)
 
-	runtime().FUNCS.copy_run_seed = function(e)
+	Funcs.register("copy_run_seed", function(e)
 		local game = game_access.get()
 		local seed = game and game.seed_streams and game.seed_streams.seed
 		if not seed then return end
@@ -97,9 +98,9 @@ function M.install()
 		else
 			love.system.setClipboardText(seed)
 		end
-	end
+	end)
 
-	runtime().FUNCS.show_infotip = function(e)
+	Funcs.register("show_infotip", function(e)
 		if e.config.ref_table then
 			e.children.info = UIViewHost.create{
 				definition = {n=runtime().UI.ROOT, config = {align = 'cm', colour = runtime().C.CLEAR, padding = 0.02}, nodes=e.config.ref_table},
@@ -108,7 +109,7 @@ function M.install()
 			e.children.info:align_to_major()
 			e.config.ref_table = nil
 		end
-	end
+	end)
 end
 
 return M
