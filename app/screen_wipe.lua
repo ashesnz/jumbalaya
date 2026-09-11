@@ -139,16 +139,16 @@ Funcs.register("wipe_out",  function()
 end)
 
 function Game:queue_during_wipe(fn)
-  g().FUNCS.wipe_in()
+  Funcs.dispatch("wipe_in")
   fn()
-  g().FUNCS.wipe_out()
+  Funcs.dispatch("wipe_out")
 end
 
 function Game:queue_wipe_transition(steps, opts)
   opts = opts or {}
   if opts.flush_timeline and g().TIMELINE then g().TIMELINE:flush() end
   if opts.pause then g().SETTINGS.paused = true end
-  g().FUNCS.wipe_in(opts.message, opts.no_card, opts.timefac, opts.alt_colour)
+  Funcs.dispatch("wipe_in", opts.message, opts.no_card, opts.timefac, opts.alt_colour)
   for _, step in ipairs(steps or {}) do
     local fn = type(step) == "function" and step or step.func
     Scheduler.add{
@@ -160,7 +160,7 @@ function Game:queue_wipe_transition(steps, opts)
       end,
     }
   end
-  g().FUNCS.wipe_out()
+  Funcs.dispatch("wipe_out")
 end
 
 return true

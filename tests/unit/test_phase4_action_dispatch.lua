@@ -4,6 +4,7 @@ local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
 local store_sync = require("bridge.store_sync")
 local action_dispatch = require("bridge.action_dispatch")
+local Funcs = require("bridge.funcs_registry")
 local word_game = require("word_game")
 
 T.describe("Phase 4 Gameplay Action Dispatch", function()
@@ -29,7 +30,7 @@ T.describe("Phase 4 Gameplay Action Dispatch", function()
 		T.assert_equal(store:get().last_gameplay_action, "RETURN_PLACEMENT_CARDS")
 	end)
 
-	T.it("routes G.FUNCS gameplay callbacks through InputService", function()
+	T.it("routes gameplay callbacks through InputService", function()
 		mock_env.reset_game()
 		local store = store_sync.new()
 		word_game._bind_store(store)
@@ -38,13 +39,13 @@ T.describe("Phase 4 Gameplay Action Dispatch", function()
 		package.loaded["word_game.ui.callbacks.table_controls"] = nil
 		require("app.callbacks.registry")
 
-		T.assert_not_nil(G.FUNCS.shuffle_hand)
-		T.assert_not_nil(G.FUNCS.return_placement_cards)
-		T.assert_not_nil(G.FUNCS.play_placement_word)
-		T.assert_not_nil(G.FUNCS.jumble_next)
+		T.assert_not_nil(Funcs.get("shuffle_hand"))
+		T.assert_not_nil(Funcs.get("return_placement_cards"))
+		T.assert_not_nil(Funcs.get("play_placement_word"))
+		T.assert_not_nil(Funcs.get("jumble_next"))
 
 		local before = store:get().shuffle_hand_count or 0
-		pcall(function() G.FUNCS.shuffle_hand() end)
+		pcall(function() Funcs.dispatch("shuffle_hand") end)
 		T.assert_equal(store:get().shuffle_hand_count, before + 1)
 	end)
 

@@ -1,26 +1,34 @@
 --[[
-	bridge/funcs_registry.lua - Register G.FUNCS handlers and re-bind on new Game instances.
+	bridge/funcs_registry.lua - UIBox string callback registry (Phase 9e).
+
+	Handlers are module-scoped; retained UI dispatches via Funcs.dispatch(name, ...).
+	Catalog for analyzers: types/funcs.lua
 ]]
 
-local BridgeRuntime = require("bridge.runtime")
-
 local M = {}
-local pending = {}
+
+local handlers = {}
 
 function M.register(name, fn)
-	pending[name] = fn
-	local game = BridgeRuntime.game()
-	if game and game.FUNCS then
-		game.FUNCS[name] = fn
+	handlers[name] = fn
+end
+
+function M.unregister(name)
+	handlers[name] = nil
+end
+
+function M.get(name)
+	return handlers[name]
+end
+
+function M.dispatch(name, ...)
+	local fn = handlers[name]
+	if fn then
+		return fn(...)
 	end
 end
 
-function M.install(game)
-	if not game then return end
-	game.FUNCS = game.FUNCS or {}
-	for name, fn in pairs(pending) do
-		game.FUNCS[name] = fn
-	end
-end
+---@deprecated kept for callers that still invoke install after define_constants
+function M.install(_game) end
 
 return M

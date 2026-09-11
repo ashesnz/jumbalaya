@@ -57,7 +57,7 @@ function M.key_hold(controller, key, dt)
         g().run_setup_seed = game and game.seeded
         g().forced_seed, g().setup_seed = nil, nil
         if game and game.seeded then g().forced_seed = game.seed_streams.seed end
-        if g().STAGE == g().STAGES.RUN and g().FUNCS.begin_run then g().FUNCS.begin_run() end
+        if g().STAGE == g().STAGES.RUN and Funcs.get("begin_run") then Funcs.dispatch("begin_run") end
         g().forced_seed = nil
     end
 end

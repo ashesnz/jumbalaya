@@ -26,7 +26,8 @@ function Game:init_window(reset)
 		return
 	end
 
-	self.FUNCS.apply_window_changes(true)
+	Funcs.dispatch("apply_window_changes", true)
 	local Window = require "app.core.platform.window"
+local Funcs = require("bridge.funcs_registry")
 	Window.sync_resize()
 end

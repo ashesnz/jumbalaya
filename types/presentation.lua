@@ -2,7 +2,7 @@
 	types/presentation.lua - Presentation bus contract (analyzer-only).
 
 	Model→UI one-way notifications registered at boot in
-	word_game/ui/presentation/install.lua. Unlike G.FUNCS (see types/g_funcs.lua),
+	word_game/ui/presentation/install.lua. Unlike UIBox callbacks (see types/funcs.lua),
 	there is no enumerated event catalog — event names are plain strings.
 ]]
 

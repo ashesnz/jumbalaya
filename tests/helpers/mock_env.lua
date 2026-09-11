@@ -128,7 +128,6 @@ function M.setup()
 	G.STATES = G.STATES or { TABLE_BOARD = 1, MENU = 2 }
 	G.STAGES = G.STAGES or { RUN = 1, MAIN_MENU = 2 }
 	G.DEFINITIONS = G.DEFINITIONS or {}
-	G.FUNCS = G.FUNCS or {}
 	G.GAME = G.GAME or {}
 	G.TIMERS = G.TIMERS or { REAL = 0, TOTAL = 0, UPTIME = 0, BACKGROUND = 0 }
 	G.ROOM = G.ROOM or { T = { x = 0, y = 0, w = 20, h = 11 }, jiggle = 0 }

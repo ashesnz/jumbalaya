@@ -10,6 +10,7 @@ local Layout = require("word_game.ui.layout")
 local table_discard = require("word_game.ui.perks.discard_bin")
 local game_access = require("word_game.model.game_access")
 local action_dispatch = require("bridge.action_dispatch")
+local Funcs = require("bridge.funcs_registry")
 
 local function run_mode()
 	return facade.run_mode()
@@ -350,9 +351,9 @@ function M.consume_click(mx, my, rect)
 	if not widget.visible then return false end
 	if not M.point_in_button(rect, mx, my) then return false end
 	local action = widget.button_action
-	if action and runtime().FUNCS and runtime().FUNCS[action] then
+	if action and Funcs.get(action) then
 		action_dispatch.dispatch_func(action)
-		runtime().FUNCS[action]()
+		Funcs.dispatch(action)
 		return true
 	end
 	return M.press()

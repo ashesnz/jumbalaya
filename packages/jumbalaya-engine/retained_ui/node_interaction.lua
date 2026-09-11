@@ -1,5 +1,6 @@
 
 local BridgeRuntime = require("bridge.runtime")
+local Funcs = require("bridge.funcs_registry")
 local function g() return BridgeRuntime.game() end
 return function(Target)
 function LayoutNode:update(dt)
@@ -20,8 +21,8 @@ function LayoutNode:update(dt)
 
 	if self.config and self.config.func then
 		g().ARGS.FUNC_TRACKER[self.config.func] = (g().ARGS.FUNC_TRACKER[self.config.func] or 0) + 1
-		if g().FUNCS and g().FUNCS[self.config.func] then
-			g().FUNCS[self.config.func](self)
+		if Funcs.get(self.config.func) then
+			Funcs.dispatch(self.config.func, self)
 		end
 	end
 
@@ -52,8 +53,8 @@ function LayoutNode:click()
 			g().NO_MOD_CURSOR_STACK = true
 		end
 
-		if g().FUNCS and g().FUNCS[self.config.button] then
-			g().FUNCS[self.config.button](self)
+		if Funcs.get(self.config.button) then
+			Funcs.dispatch(self.config.button, self)
 		end
 
 		g().NO_MOD_CURSOR_STACK = nil

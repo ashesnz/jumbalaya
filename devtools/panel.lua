@@ -30,12 +30,13 @@ function DebugPanel:construct(game)
 	registry.load_defaults()
 end
 
---- Register a button handler on G.FUNCS with the DT_ prefix.
+--- Register a button handler with the DT_ prefix.
 function DebugPanel:action(name, fn)
 	local panel = self
-	G.FUNCS["DT_" .. name] = function()
+	local Funcs = require("bridge.funcs_registry")
+	Funcs.register("DT_" .. name, function()
 		fn(panel.ctx, panel)
-	end
+	end)
 end
 
 function DebugPanel:set_label(key, text)

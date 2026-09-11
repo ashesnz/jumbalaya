@@ -1,18 +1,10 @@
 --[[
-	types/g_funcs.lua - G.FUNCS string catalog (analyzer-only).
+	types/funcs.lua - UIBox string callback catalog (analyzer-only).
 
-	UIBox binds these names on buttons and widgets. Implementations are
-	**registration only** — logic lives on controllers:
+	Handlers register via bridge/funcs_registry.lua (Funcs.register).
+	Retained UI dispatches with Funcs.dispatch(name, ...).
 
-	  Gameplay (Phase 4a): word_game/ui/controllers/gameplay.lua → InputService
-	  Trade (Phase 4a):    word_game/ui/controllers/trade.lua
-	  Sidebar (Phase 4a):  word_game/ui/controllers/sidebar.lua
-	  App (Phase 4b):      app/controllers/{run_lifecycle,settings,overlays,ui_controls}.lua
-
-	Model code must not call G.FUNCS (use Presentation or facades).
-
-	Runtime bus: G.FUNCS (this catalog), G.GAME (types/game.lua),
-	Presentation (types/presentation.lua).
+	Model code must not call Funcs directly (use Presentation or facades).
 ]]
 
 ---@meta
@@ -77,7 +69,6 @@
 ---| "classic_stage_next"
 ---| "first_play_tutorial_next"
 
---- UIBox input dispatch on G. String keys only — see GameFuncName.
 ---@class GameFuncs
 ---@field [GameFuncName] fun(...: any)
 ---@field [string] fun(...: any)

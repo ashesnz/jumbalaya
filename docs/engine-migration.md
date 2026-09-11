@@ -927,7 +927,7 @@ Each PR: `love tests` → `emmylua_check . --severity warn` → manual smoke (§
 | **PR-9c** | `word_game/ui/` presentation purge | ✅ |
 | **PR-9d** | `word_game/model/` purge off `G` | ✅ |
 | **PR-9d′** | `app/` + `board/` + engine purge; move `Game()` boot out of `globals.lua` | ✅ |
-| **PR-9e** | Retire `G.FUNCS` + `types/g_funcs.lua` | pending |
+| **PR-9e** | Retire `G.FUNCS` + `types/g_funcs.lua` | ✅ |
 
 #### PR-9d — `word_game/model/` purge ✅
 
@@ -947,20 +947,31 @@ Each PR: `love tests` → `emmylua_check . --severity warn` → manual smoke (§
 | Action | Files |
 |--------|-------|
 | Migrate | `app/` (76 files), `word_game/board/` (6), `packages/jumbalaya-engine/` (retained_ui, input, clock) — `G.` → `g()` via `BridgeRuntime.game()` |
-| FUNCS registry | `bridge/funcs_registry.lua` — `Funcs.register` + `install` on `define_constants` (survives fresh `Game()` in tests) |
+| FUNCS registry | `bridge/funcs_registry.lua` — `Funcs.register` (module-scoped; see PR-9e) |
 | Boot | `G = Game()` removed from `globals.lua`; `Game()` called from `runtime_boot.lua` |
 | Skip-title | `menu_boot.lua` — direct `start_run` (no wipe) when skipping title screen |
 
 **Exit:** `rg '\bG[.:\[]' app word_game/board packages/jumbalaya-engine` → **0** runtime reads ✅; **486 tests** ✅
 
-**Remaining for PR-9:** retire `G = self` in `Game:construct` and `_G.G` fallback in `bridge/runtime.lua` once scene graph is fully injected.
+#### PR-9e — Retire `G.FUNCS` ✅
+
+| Action | Files |
+|--------|-------|
+| Registry | `bridge/funcs_registry.lua` — module-scoped `register` / `get` / `dispatch` / `unregister` |
+| Engine | `jumbalaya-engine/retained_ui/*` — dispatch via `Funcs.dispatch` (not `game.FUNCS`) |
+| Callers | app + word_game — `Funcs.dispatch("name", ...)` replaces `g().FUNCS.name` |
+| Types | `types/funcs.lua` catalog; **deleted** `types/g_funcs.lua` |
+| Tests | `test_g_funcs_registry.lua` + `g_funcs_audit.lua` scan `Funcs.register` |
+
+**Exit:** `rg '\.FUNCS\b' app word_game packages` → **0** runtime reads ✅; **486 tests** ✅
+
+**Remaining for PR-9 (final):** retire `G = self` in `Game:construct` and `_G.G` fallback in `bridge/runtime.lua` once scene graph is fully injected.
 
 | Action | Files |
 |--------|-------|
 | Runtime shell | `bridge/runtime.lua` — `bind_game`, `game()`, `state()`, `stage()`, `settings()` |
-| Session migrate | `app/core/session/lifecycle.lua`, `loop.lua`, `loop/save_queue.lua`, `loop/debug_overlay.lua` |
-| Delete (final) | `word_game/model/game/globals.lua` (`G = Game()`), remaining `engine_boot` class chain |
-| Types | `types/game.lua` → fold into `types/store.lua`; delete `types/g_funcs.lua` when `G.FUNCS` gone |
+| Delete (final) | `G = self` in `Game:construct`; `_G.G` fallback in `bridge/runtime.lua` |
+| Types | `types/game.lua` → fold into `types/store.lua` |
 
 **Exit:** `rg '\bG\.' --glob '*.lua' -g '!tests/**' -g '!devtools/**'` → **0**.
 

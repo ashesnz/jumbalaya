@@ -3,8 +3,7 @@
 
 	Runtime bus (live state stays on G):
 	- **G.GAME** — authoritative run snapshot; domain modules read/write through their owner.
-	- **G.FUNCS** — UI input callbacks by string name (catalog: types/g_funcs.lua).
-	  Logic lives on WORD_GAME_UI / app modules; G.FUNCS names are registration only.
+	- **UIBox callbacks** — string handlers via bridge/funcs_registry.lua (catalog: types/funcs.lua).
 	- **Presentation** — model→UI notify (contract: types/presentation.lua).
 
 	Cross-package API:
@@ -285,7 +284,6 @@
 ---@field save_settings fun(self: Game)
 ---@field C table
 ---@field UIT table
----@field FUNCS GameFuncs UI input bus — string names in types/g_funcs.lua
 ---@field ARGS table
 ---@field I GameInstanceTables
 ---@field TIMERS GameTimers

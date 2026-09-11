@@ -12,6 +12,7 @@
 ]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
+local Funcs = require("bridge.funcs_registry")
 local function runtime() return GameRT.game() end
 
 local Components = {}
@@ -28,19 +29,17 @@ Components.CHROME = CHROME
 local action_seq = 0
 local registered_actions = {}
 
---- Removes generated runtime().FUNCS handlers (overlay menus, cyclers with closures).
+--- Removes generated Funcs handlers (overlay menus, cyclers with closures).
 function Components.clear_dynamic_actions()
-	if runtime() and runtime().FUNCS then
-		for name in pairs(registered_actions) do
-			runtime().FUNCS[name] = nil
-		end
+	for name in pairs(registered_actions) do
+		Funcs.unregister(name)
 	end
 	registered_actions = {}
 	action_seq = 0
 end
 
 --- Turns an action spec into an engine callback name. Functions are
---- registered as generated runtime().FUNCS entries so closures work as handlers;
+--- registered as generated Funcs entries so closures work as handlers;
 --- strings pass through untouched.
 ---@param action function|string|nil
 ---@param fallback string|nil
@@ -55,7 +54,7 @@ local function resolve_action(action, fallback, action_id)
 			action_seq = action_seq + 1
 			name = "__component_action_" .. action_seq
 		end
-		runtime().FUNCS[name] = function(node) action(node) end
+		Funcs.register(name, function(node) action(node) end)
 		registered_actions[name] = true
 		return name
 	end

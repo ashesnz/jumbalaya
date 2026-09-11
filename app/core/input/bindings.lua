@@ -90,11 +90,11 @@ function InputRouter:key_press_update(key, dt)
 		elseif key == "capslock" then
 			self.capslock = not self.capslock
 		else
-			g().FUNCS.text_field_key{
+			Funcs.dispatch("text_field_key", {
 				e = self.text_capture,
 				key = key,
 				caps = self.held_keys["lshift"] or self.held_keys["rshift"],
-			}
+			})
 		end
 		return
 	end
@@ -104,9 +104,9 @@ function InputRouter:key_press_update(key, dt)
 			g():discard_run()
 			g():open_main_menu()
 		elseif not g().OVERLAY_MENU then
-			g().FUNCS:options()
+			Funcs.dispatch("open_options")
 		elseif not g().OVERLAY_MENU.config.no_esc then
-			g().FUNCS:exit_overlay_menu()
+			Funcs.dispatch("close_overlay")
 		end
 	end
 

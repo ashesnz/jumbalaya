@@ -1,5 +1,6 @@
 
 local BridgeRuntime = require("bridge.runtime")
+local Funcs = require("bridge.funcs_registry")
 local function g() return BridgeRuntime.game() end
 return function(Target)
 function LayoutNode:set_values(_T, recalculate)
@@ -115,7 +116,7 @@ function LayoutNode:set_values(_T, recalculate)
 	-- Run func hooks immediately where they configure rather than animate.
 	if self.config and self.config.func
 		and (((self.config.button_UIE or self.config.button) and self.config.func ~= 'set_button_pip') or self.config.insta_func) then
-		g().FUNCS[self.config.func](self)
+		Funcs.dispatch(self.config.func, self)
 	end
 end
 end

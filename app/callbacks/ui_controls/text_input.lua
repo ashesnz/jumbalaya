@@ -64,17 +64,17 @@ end)
 Funcs.register("paste_run_seed",  function(e)
   g().INPUT.text_capture = e.panel:find_node_by_id('text_input').children[1].children[1]
   for i = 1, 8 do
-    g().FUNCS.text_field_key({key = 'right'})
+    Funcs.dispatch("text_field_key", {key = 'right'})
   end
   for i = 1, 8 do
-      g().FUNCS.text_field_key({key = 'backspace'})
+      Funcs.dispatch("text_field_key", {key = 'backspace'})
   end
   local clipboard = (g().F_LOCAL_CLIPBOARD and g().CLIPBOARD or love.system.getClipboardText()) or ''
   for i = 1, #clipboard do
     local c = clipboard:sub(i,i)
-    g().FUNCS.text_field_key({key = c})
+    Funcs.dispatch("text_field_key", {key = c})
   end
-  g().FUNCS.text_field_key({key = 'return'})
+  Funcs.dispatch("text_field_key", {key = 'return'})
 end)
 
 --When clicked, hooks the text input defined by e->1->1, which should be the text input UIE

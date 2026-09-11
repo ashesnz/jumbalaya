@@ -81,7 +81,7 @@ end
 
 function M.open(definition, no_esc)
 	runtime().SETTINGS.paused = true
-	runtime().FUNCS.show_overlay({ definition = definition, config = { no_esc = no_esc } })
+	Funcs.dispatch("show_overlay", { definition = definition, config = { no_esc = no_esc } })
 end
 
 return M

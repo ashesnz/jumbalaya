@@ -105,9 +105,9 @@ function InputRouter:capture_focused_input(button, input_type, dt)
 				local step = button == 'dpleft' and -0.01 or 0.01
 				local drift = (button == 'dpleft' and -dt or dt) * (self.held_button_times[button] or 0) * 0.6
 				if input_type == 'hold' and (self.held_button_times[button] or 0) > 0.2 then
-					g().FUNCS.slider_step(focused.children[1], drift)
+					Funcs.dispatch("slider_step", focused.children[1], drift)
 				elseif input_type == 'press' then
-					g().FUNCS.slider_step(focused.children[1], step)
+					Funcs.dispatch("slider_step", focused.children[1], step)
 				end
 				captured = true
 			end

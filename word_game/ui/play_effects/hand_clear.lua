@@ -186,8 +186,8 @@ function M.install(play_module)
 	end
 
 	function play_module.continue_after_dealer()
-		if runtime().FUNCS and runtime().FUNCS.close_overlay then
-			runtime().FUNCS.close_overlay()
+		if Funcs.get("close_overlay") then
+			Funcs.dispatch("close_overlay")
 		end
 		if runtime().SETTINGS then
 			runtime().SETTINGS.paused = false

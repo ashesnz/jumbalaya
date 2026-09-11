@@ -1,6 +1,7 @@
 --[[ word_game/ui/trade/init.lua - The Card Marketplace overlay ]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
+local Funcs = require("bridge.funcs_registry")
 local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
@@ -157,7 +158,7 @@ local Funcs = require("bridge.funcs_registry")
 	if WORD_GAME_UI.PlayHoldRedraw and WORD_GAME_UI.PlayHoldRedraw.reset then
 		WORD_GAME_UI.PlayHoldRedraw.reset()
 	end
-	runtime().FUNCS.show_overlay({
+	Funcs.dispatch("show_overlay", {
 		definition = M.definition(),
 		config = { no_esc = true, offset = { x = 0, y = modal_offset_y() }, no_jiggle = true },
 	})
@@ -220,16 +221,16 @@ local function close_menu()
 	session = nil
 	trade_fly.clear()
 	trade_animate.clear()
-	if runtime().FUNCS.close_overlay then
-		runtime().FUNCS.close_overlay()
+	if Funcs.get("close_overlay") then
+		Funcs.dispatch("close_overlay")
 	end
 end
 
 local function continue_run()
 	offer = nil
 	session = nil
-	if runtime().FUNCS.close_overlay then
-		runtime().FUNCS.close_overlay()
+	if Funcs.get("close_overlay") then
+		Funcs.dispatch("close_overlay")
 	end
 	if WORD_GAME and WORD_GAME.Play then
 		WORD_GAME.Play.continue_after_dealer()

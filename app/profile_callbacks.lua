@@ -108,10 +108,10 @@ Funcs.register("delete_profile",  function(e)
     g().PROGRESS = nil
     g().PROFILES[g().focused_profile] = {}
     if g().focused_profile == g().SETTINGS.profile then
-        g().FUNCS.load_profile(true)
+        Funcs.dispatch("load_profile", true)
     else
       local tab_but = g().OVERLAY_MENU:find_node_by_id('tab_but_'..g().focused_profile)
-      g().FUNCS.switch_tab(tab_but)
+      Funcs.dispatch("switch_tab", tab_but)
     end
   end
 end)

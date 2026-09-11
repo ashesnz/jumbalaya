@@ -3,6 +3,7 @@
 local layout = require "devtools.layout"
 local round_config = require "word_game.config.gameplay.round"
 local opening_deal = require "word_game.model.jumble_play.opening_deal"
+local Funcs = require("bridge.funcs_registry")
 
 -- Stage 1-3 boss word with two revealed letters → seven gutter bonus cards on 1-4.
 local DEBUG_BOSS_WORD = "VEGETABLE"
@@ -54,8 +55,8 @@ local function jump_to_hand(ctx, set, hand_index)
 		G.GAME.word_score_animating = false
 		G.GAME.hand_redraw_animating = false
 	end
-	if G.FUNCS.close_overlay then
-		G.FUNCS.close_overlay()
+	if Funcs.get("close_overlay") then
+		Funcs.dispatch("close_overlay")
 	end
 	if WORD_GAME_UI.PlayHoldRedraw and WORD_GAME_UI.PlayHoldRedraw.reset then
 		WORD_GAME_UI.PlayHoldRedraw.reset()

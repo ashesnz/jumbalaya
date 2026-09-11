@@ -111,8 +111,6 @@ function Game:define_constants()
     self.STATE_COMPLETE = false
 
     self.ARGS = {}
-    self.FUNCS = {}
-    require("bridge.funcs_registry").install(self)
     self.LIVE = {
         NODE = {},
         TRANSFORM = {},

@@ -2,6 +2,7 @@
 
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
+local Funcs = require("bridge.funcs_registry")
 
 local function cleanup_wipe()
 	if G.screenwipe and G.screenwipe.remove then
@@ -54,7 +55,7 @@ end
 T.describe("Screen wipe loading bubble", function()
 	T.it("creates a visible centered card for the default new-run wipe", function()
 		boot_for_wipe()
-		G.FUNCS.wipe_in()
+		Funcs.dispatch("wipe_in")
 		T.assert_not_nil(G.screenwipe, "wipe_in must create the loading overlay")
 		T.assert_not_nil(G.screenwipecard, "wipe_in must create the loading card")
 		T.assert_true(G.screenwipecard.states.visible, "loading card must stay visible")
@@ -70,7 +71,7 @@ T.describe("Screen wipe loading bubble", function()
 
 	T.it("omits the card only when no_card is requested", function()
 		boot_for_wipe()
-		G.FUNCS.wipe_in(nil, true)
+		Funcs.dispatch("wipe_in", nil, true)
 		T.assert_not_nil(G.screenwipe)
 		T.assert_nil(G.screenwipecard, "no_card wipes must not spawn a loading card")
 	end)
@@ -85,7 +86,7 @@ T.describe("Screen wipe loading bubble", function()
 		G.start_run = function() end
 		G.start_gameplay_board = function() end
 
-		G.FUNCS.begin_run()
+		Funcs.dispatch("begin_run")
 		T.assert_not_nil(G.screenwipecard, "begin_run wipe must show the loading card")
 		local found = false
 		for _, card in ipairs(G.LIVE.CARD or {}) do

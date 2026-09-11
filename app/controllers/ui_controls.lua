@@ -3,6 +3,7 @@
 local Bridge = require("app.controllers.callback_bridge")
 
 local BridgeRuntime = require("bridge.runtime")
+local Funcs = require("bridge.funcs_registry")
 local function g() return BridgeRuntime.game() end
 
 local M = {}
@@ -18,7 +19,7 @@ local function drag_slider_impl(e)
 		rt.text = string.format("%." .. tostring(rt.decimal_places) .. "f", rt.ref_table[rt.ref_value])
 		c.T.w = (rt.ref_table[rt.ref_value] - rt.min) / (rt.max - rt.min) * rt.w
 		c.config.w = c.T.w
-		if rt.callback then g().FUNCS[rt.callback](rt) end
+		if rt.callback then Funcs.dispatch(rt.callback, rt) end
 	end
 end
 
@@ -68,13 +69,13 @@ function M.cycle_option(e)
 	if new_pip then new_pip.config.colour = g().C.WHITE end
 
 	if e.config.ref_table.opt_callback then
-		g().FUNCS[e.config.ref_table.opt_callback]{
+		Funcs.dispatch(e.config.ref_table.opt_callback, {
 			from_val = from_val,
 			to_val = to_val,
 			from_key = from_key,
 			to_key = to_key,
 			cycle_config = e.config.ref_table
-		}
+		})
 	end
 end
 

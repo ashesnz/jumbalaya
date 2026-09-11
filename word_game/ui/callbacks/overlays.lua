@@ -12,24 +12,24 @@ local M = {}
 function M.install()
 	Funcs.register("open_options", function(e)
 		runtime().SETTINGS.paused = true
-		runtime().FUNCS.show_overlay{
+		Funcs.dispatch("show_overlay", {
 			definition = build_options(),
-		}
+		})
 	end)
 
 	Funcs.register("open_settings", function(e, instant)
 		runtime().SETTINGS.paused = true
-		runtime().FUNCS.show_overlay{
+		Funcs.dispatch("show_overlay", {
 			definition = build_settings(),
 			config = {offset = {x=0,y=instant and 0 or 10}}
-		}
+		})
 	end)
 
 	Funcs.register("language_selection", function(e)
 		runtime().SETTINGS.paused = true
-		runtime().FUNCS.show_overlay{
+		Funcs.dispatch("show_overlay", {
 			definition = runtime().DEFINITIONS.language_selector(),
-		}
+		})
 	end)
 
 	Funcs.register("profile_select", function(e)
@@ -41,9 +41,9 @@ function M.install()
 		end
 		runtime():load_profile(runtime().focused_profile)
 
-		runtime().FUNCS.show_overlay{
+		Funcs.dispatch("show_overlay", {
 			definition = runtime().DEFINITIONS.profile_select(),
-		}
+		})
 	end)
 
 	Funcs.register("quit", function(e)
@@ -74,7 +74,7 @@ function M.install()
 	Funcs.register("change_lang", function(e)
 		local lang = e.config.ref_table
 		if not lang or lang == runtime().LANG then
-			runtime().FUNCS.close_overlay()
+			Funcs.dispatch("close_overlay")
 		else
 			runtime().SETTINGS.language = lang.key
 			runtime():set_language()

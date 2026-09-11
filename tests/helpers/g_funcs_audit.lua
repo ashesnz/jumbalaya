@@ -1,5 +1,5 @@
 --[[ tests/helpers/g_funcs_audit.lua
-     Static audit for G.FUNCS catalog compliance (engine migration Phase 0).
+     Static audit for UIBox callback catalog compliance (engine migration).
 ]]
 
 local M = {}
@@ -32,9 +32,9 @@ local function list_lua_files()
 	return files
 end
 
---- Parse GameFuncName entries from types/g_funcs.lua.
+--- Parse GameFuncName entries from types/funcs.lua.
 function M.load_catalog()
-	local file = io.open("types/g_funcs.lua", "r")
+	local file = io.open("types/funcs.lua", "r")
 	if not file then
 		return {}
 	end
@@ -48,39 +48,24 @@ function M.load_catalog()
 	return catalog
 end
 
---- Collect G.FUNCS names assigned in production source.
+--- Collect callback names registered in production source.
 function M.scan_registrations()
 	local names = {}
 	for _, path in ipairs(list_lua_files()) do
 		local file = io.open(path, "r")
 		if file then
-		local contents = file:read("*a")
-		file:close()
+			local contents = file:read("*a")
+			file:close()
 
-		for name in contents:gmatch("G%.FUNCS%.([%w_]+)%s*=") do
-			names[name] = names[name] or path
-		end
-		for name in contents:gmatch("function%s+G%.FUNCS%.([%w_]+)%s*%(") do
-			names[name] = names[name] or path
-		end
-		for name in contents:gmatch("runtime%(%)%.FUNCS%.([%w_]+)%s*=") do
-			names[name] = names[name] or path
-		end
-		for name in contents:gmatch("function%s+runtime%(%)%.FUNCS%.([%w_]+)%s*%(") do
-			names[name] = names[name] or path
-		end
-		for name in contents:gmatch('Funcs%.register%("([%w_]+)"') do
-			names[name] = names[name] or path
-		end
-		for name in contents:gmatch("g%(%)%.FUNCS%.([%w_]+)%s*=") do
-			names[name] = names[name] or path
-		end
+			for name in contents:gmatch('Funcs%.register%("([%w_]+)"') do
+				names[name] = names[name] or path
+			end
 		end
 	end
 	return names
 end
 
---- Registrations in source that are not listed in types/g_funcs.lua.
+--- Registrations in source that are not listed in types/funcs.lua.
 function M.unlisted_registrations()
 	local catalog = M.load_catalog()
 	local registered = M.scan_registrations()

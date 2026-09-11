@@ -306,11 +306,11 @@ local Funcs = require("bridge.funcs_registry")
 		elseif type(build_game_over) == "function" then
 			overlay_def = build_game_over()
 		end
-		if overlay_def and runtime().FUNCS and runtime().FUNCS.show_overlay then
-			runtime().FUNCS.show_overlay{
+		if overlay_def and Funcs.get("show_overlay") then
+			Funcs.dispatch("show_overlay", {
 				definition = overlay_def,
 				config = { no_esc = true },
-			}
+			})
 		end
 	end)
 
