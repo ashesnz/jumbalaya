@@ -70,17 +70,17 @@ Prefer `mock_env.reset_game()` at the top of a `describe` block. Tests that call
 
 | File | Covers |
 |------|--------|
-| `test_jumble_patterns.lua` | Pattern validation, slots, geometry |
+| `test_core_jumble_patterns.lua` | Pattern validation, slots (headless) |
 | `test_jumble_scoring.lua` | Scoring, odometer, targets |
 | `test_jumble_play_flow.lua` | Play flow, marketplace, stage files |
+| `test_classic_run_mode.lua` | Classic run loop and stage progression |
+| `test_classic_stage_advance_deal.lua` | Next → marketplace → deal on stage advance |
 | `test_table_discard.lua` | Sidebar discard bin, `max_fills()`, game-over |
 | `test_sidebar_stage_button.lua` | Sidebar End Run / Next button |
 | `test_timeline_timer.lua` | Fuse bar |
-| `test_save_roundtrip.lua` | Card/area save, disk round-trip, jumble hand restore fixture |
-| `test_voucher_tokens.lua` | Perk stamp rolls |
-| `test_hand_shuffle.lua` | Shuffle/play buttons |
+| `test_save_roundtrip.lua` | Save/load round-trip, jumble hand restore |
 | `test_play_hold_redraw.lua` | Hold-to-redraw |
-| `test_layout.lua` | Sidebar HUD geometry and fixed width |
+| `test_play_resolution.lua` | Play cinematics and score resolution |
 
 ## CI gate (representative)
 
@@ -111,4 +111,4 @@ love tests
 emmylua_check . --severity warn
 ```
 
-Headless coverage also includes `test_token_reward_fly.lua`, `test_marketplace_purchase_deal.lua`, and an end-to-end hold-redraw case in `test_play_hold_redraw.lua`. Smoke-test full animated flows in-game when touching UI flow.
+Smoke-test title screen, score banner animations, and token fly in-game when touching those UI flows — those paths no longer have dedicated unit tests.

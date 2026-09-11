@@ -88,6 +88,23 @@ T.describe("Card marketplace offers (word_game.model.trade)", function()
 		T.assert_true(trade.item_in_deck(item), "Sync should keep deck bindings current")
 	end)
 
+	T.it("reports affordability through can_afford_action", function()
+		local trade_ui = require("word_game.ui.trade")
+		G.GAME = G.GAME or {}
+		G.GAME.run_state = { tokens = 22, perks = {}, trade_used_this_hand = false }
+		G.RUN = G.RUN or {}
+		G.RUN.active = true
+		local session_state = { add_cost_bonus = 10 }
+		T.assert_true(trade_ui.can_afford_action("add", session_state))
+		T.assert_true(trade_ui.can_afford_action("remove", session_state))
+		T.assert_false(trade_ui.can_afford_action("modifier", session_state))
+
+		G.GAME.run_state.tokens = 2
+		T.assert_false(trade_ui.can_afford_action("add", session_state))
+		T.assert_false(trade_ui.can_afford_action("remove", session_state))
+		T.assert_false(trade_ui.can_afford_action("modifier", session_state))
+	end)
+
 	T.it("counts every live copy of a letter in the deck", function()
 		G.letter_inventory = {}
 		local cards = {}
