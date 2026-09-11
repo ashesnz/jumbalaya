@@ -15,8 +15,10 @@ The first-play welcome tutorial can be skipped while developing.
 Set `SKIP_TUTORIAL` in your shell or in a local `.env` file (copy from [`.env.example`](.env.example)). Shell environment variables take precedence over `.env`.
 
 ```bash
-SKIP_TUTORIAL=1 love .
+SKIP_TUTORIAL=1 love games/jumbalaya
 ```
+
+Root shims (`love .`, `love tests`) still work during transition.
 
 Or in `.env`:
 

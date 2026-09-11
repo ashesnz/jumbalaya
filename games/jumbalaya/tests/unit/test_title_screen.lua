@@ -81,6 +81,9 @@ local MockEnv = require("tests.helpers.mock_env")
 		require("word_game.model.game.globals")
 		require("app.startup")
 
+		_G.read_save_payload = function() return nil end
+		_G.unpack_source = function(payload) return payload end
+
 		-- Test with skip_title_screen = true
 		local game = Game()
 		game:define_constants()

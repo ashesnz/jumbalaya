@@ -11,40 +11,20 @@ Roguelike **jumble** word game on Love2D/Lua. Active loop: fill **pattern puzzle
 ## Repository layout
 
 ```text
-app/                     Love2D shell: bootstrap, callbacks, startup, runtime, session/persistence/platform
-  bootstrap/             engine_adapter → engine_boot (delegates to jumbalaya-engine.boot), runtime_boot, store_boot
-  startup/               profile, window, dealing, assets, menu_boot
-  callbacks/             App-level Funcs.register installers (settings, window, run lifecycle)
-  core/session/          lifecycle, loop (Love2D frame glue)
-  core/persistence/      save queue + disk worker
-  core/platform/         window, display
-app/runtime.lua          Game shell accessor (was bridge/runtime)
-app/callbacks/funcs.lua  UIBox string callback registry (was bridge/funcs_registry)
-app/bootstrap/store_sync.lua  Store factory + test binding (was bridge/store_sync)
-app/input/action_dispatch.lua  Typed action dispatch (was bridge/action_dispatch)
 packages/
   jumbalaya_core/        Engine-agnostic rules, store, reducers (headless-testable)
   jumbalaya-engine/      Custom engine: boot, scene, graphics, interaction, sound, retained_ui, views
-word_game/
-  config/                Static tuning; gameplay/round + economy re-export jumbalaya_core
-  model/                 Runtime glue over jumbalaya_core (no root-level modules)
-    game/                Game class + globals.lua (define_constants)
-    run/                 Run state, scope, mode, match end, input lock
-    round/               Set/hand progression
-    trade/               Marketplace model
-    jumble/              Puzzle mode (slots, validation, bonus_stack, placement_word)
-    jumble_play/         Play evaluation and hand-clear orchestration
-    cards/               Card domain and deck/
-    perks/               Perk registry and effects
-    feedback/            Model→UI attention text queue
-    persistence/         Run save/restore and profile progress writes
-  board/                 Jumble pattern row — placement/, jumble/, bonus/ subpackages
-  ui/                    TABLE_BOARD presentation, layouts, controls, overlays
-devtools/                Development-only tools (stage jump, word hints)
-dictionary/              Offline word validation
-tests/                   Headless suite — `love tests`
+games/jumbalaya/
+  app/                   Love2D shell: bootstrap, callbacks, startup, runtime, session/persistence/platform
+  word_game/             Game layer (model, ui, board, config)
+  resources/             Assets, shaders, sounds, fonts
+  tests/                 Headless suite — `love games/jumbalaya tests`
+  main.lua / conf.lua    Love2D entry (canonical)
+  devtools/              Development-only tools (stage jump, word hints)
+  dictionary/            Offline word validation
+  types/                 Analyzer-only type catalogs
+tests/                   Root shim — `love tests` (forwards to games/jumbalaya suite)
 _tools/                  Python asset pipelines (not runtime) — do not edit for gameplay
-resources/               Assets, shaders, sounds, fonts
 AlphaCardsBackup/        Legacy card-engine reference — do not edit
 ```
 

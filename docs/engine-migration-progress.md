@@ -96,7 +96,7 @@ Metrics refreshed **2026-09-12** from repo root. Compare to post–Phase 9 basel
 | **10d** | Single state bus | ✅ **Complete** | `game_access` store-only; `legacy_mirror_*` / `sync_from_g` removed |
 | **11** | Dissolve `bridge/` folder | ✅ **Complete** | `app/runtime`, `app/callbacks/funcs`, `app/input/action_dispatch`, `app/bootstrap/store_sync`; `event_bridge` inlined |
 | **12** | Shrink `app/` to shell only | ✅ **Complete** | Engine code in `jumbalaya-engine/`; game FX in `word_game/ui/effects/`; `app/core` = session + persistence + platform only |
-| **13** | Optional `games/jumbalaya/` layout | ⬜ **Deferred** | Prerequisites met (Phases 10–12); do when adding a second game or splitting the monorepo |
+| **13** | Optional `games/jumbalaya/` layout | ✅ **Complete** | `games/jumbalaya/{app,word_game,resources,tests,…}`; shared `packages/` at repo root |
 
 **Overall Phase 10–12:** ✅ complete. Phase 13 is cosmetic only.
 
@@ -266,11 +266,11 @@ Everything else (`core/scene`, `core/graphics`, `core/input`, `core/audio`, `eff
 
 **Exit:** `app/` has no scene graph classes; `jumbalaya-engine` is the custom engine entry point.
 
-### Step 7 — Optional repo layout (Phase 13 — deferred)
+### Step 7 — Optional repo layout (Phase 13 — complete)
 
-**Status:** Prerequisites met (Phases 10–12 ✅). **Not started** — cosmetic only; same `require()` module names and dependency rules.
+**Status:** ✅ Complete (2026-09-12). Cosmetic monorepo layout; same `require()` module names and dependency rules.
 
-**Trigger:** Add a second Love2D game under `games/`, or publish `packages/` as shared engine/core without the Jumbalaya game tree.
+**Run:** `love games/jumbalaya` (game) · `love games/jumbalaya tests` (suite) · root shims `love .` / `love tests` still work.
 
 #### Target tree
 

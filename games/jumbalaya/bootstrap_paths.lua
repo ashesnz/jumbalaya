@@ -15,7 +15,10 @@ function M.resolve()
 	if ends_with(source, "/tests") or ends_with(source, "\\tests") then
 		test_root = source
 		local parent = source:match("^(.+)[/\\]tests$")
-		if love.filesystem.getInfo(parent .. "/games/jumbalaya/main.lua") then
+		local game_main = parent .. "/games/jumbalaya/main.lua"
+		local has_game_layout = (love.filesystem and love.filesystem.getInfo(game_main))
+			or (io.open(game_main, "r") ~= nil)
+		if has_game_layout then
 			game_root = parent .. "/games/jumbalaya"
 			repo_root = parent
 		else

@@ -7,11 +7,26 @@ local M = {}
 local function discover_test_modules()
 	local modules = {}
 	local files
-	for _, dir in ipairs({ "tests/unit", "unit", "games/jumbalaya/tests/unit" }) do
+	for _, dir in ipairs({ "tests/unit", "unit" }) do
 		local listing = love.filesystem.getDirectoryItems(dir)
 		if listing and #listing > 0 then
 			files = listing
 			break
+		end
+	end
+	if not files or #files == 0 then
+		local paths = require("bootstrap_paths").resolve()
+		local handle = io.popen(string.format(
+			'find %s/tests/unit -name "test_*.lua" -type f 2>/dev/null',
+			paths.game_root
+		))
+		if handle then
+			files = {}
+			for line in handle:lines() do
+				local name = line:match("([^/]+)$")
+				if name then files[#files + 1] = name end
+			end
+			handle:close()
 		end
 	end
 	files = files or {}

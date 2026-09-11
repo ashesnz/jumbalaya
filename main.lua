@@ -1,8 +1,23 @@
---[[ Root shim — prefer: love games/jumbalaya ]]
+--[[ Root shim — prefer: love games/jumbalaya  |  love games/jumbalaya tests ]]
 
 io.stdout:setvbuf("no")
 
 require("bootstrap_paths").install()
+
+local game_args = love.arg and love.arg.parseGameArguments and love.arg.parseGameArguments(arg) or {}
+for _, token in ipairs(game_args) do
+	if token == "tests" then
+		function love.load()
+			local ok = require("tests.runner").run()
+			if love.event and love.event.quit then
+				love.event.quit(ok and 0 or 1)
+			else
+				os.exit(ok and 0 or 1)
+			end
+		end
+		return
+	end
+end
 
 local runtime_config = require "word_game.config.boot.runtime"
 _RELEASE_MODE = runtime_config.RELEASE_MODE

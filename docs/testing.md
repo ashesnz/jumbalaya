@@ -7,17 +7,19 @@ Jumbalaya includes a headless unit testing framework built on Love2D.
 Run the test suite directly from the terminal:
 
 ```sh
-love tests
+love games/jumbalaya tests
 ```
+
+Root shim: `love tests` or `love . tests` (same suite).
 
 The test runner runs headlessly (without opening a display window) and outputs formatted test results to the terminal with standard exit codes (`0` for all passed, `1` for failures).
 
 ## Test Directory Structure
 
 ```text
-tests/
+games/jumbalaya/tests/
 ├── conf.lua                  # Headless Love2D config (disables window/audio/graphics)
-├── main.lua                  # Entry point for `love tests`
+├── main.lua                  # Legacy entry (use `love games/jumbalaya tests`)
 ├── runner.lua                # Auto-discovers and runs tests/unit/test_*.lua
 ├── framework.lua             # Test assertions (`describe`, `it`, `assert_equal`, etc.)
 ├── helpers/
