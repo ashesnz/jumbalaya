@@ -84,13 +84,13 @@ Prefer `mock_env.reset_game()` at the top of a `describe` block. Tests that call
 
 ## CI gate (representative)
 
-These tests must pass on every PR. See [engine-migration.md](engine-migration.md).
+These tests must pass on every PR. See [code-organization.md](code-organization.md) for package boundaries and freeze policy.
 
 | Tier | Files | Role |
 |------|-------|------|
 | **Core rules** | `test_core_*.lua` | `jumbalaya_core` headless — no Love2D boot |
 | **Gameplay** | `test_jumble_*.lua`, `test_play_resolution.lua`, `test_classic_run_mode.lua`, … | Jumble loop, scoring, marketplace |
-| **Store / access** | `test_store_sync.lua`, `test_game_access.lua`, `test_piles.lua` | Store shim, `game_access`, pile sync |
+| **Store / access** | `test_store_sync.lua`, `test_game_access.lua`, `test_piles.lua` | Store binding, `game_access`, pile hosts |
 | **UI / table** | `test_table_board.lua`, `test_sidebar_stage_button.lua`, `test_timeline_timer.lua`, … | HUD, fuse, table rendering |
 | **Persistence** | `test_save_roundtrip.lua` | Save/load contract |
 | **Boot** | `test_boot_simulation.lua`, `test_g_funcs_registry.lua` | Startup smoke, Funcs catalog freeze |

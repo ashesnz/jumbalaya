@@ -132,6 +132,7 @@ Tests that need rules only call `play_jumble_word`; tests that need full FX call
 - Dot paths from repo root: `require "word_game.ui.sidebar.init"`
 - Package folders use `init.lua`; most modules `local M = {}` … `return M`
 - Files/dirs/locals: `snake_case`; classes/globals: `PascalCase`
+- **Devtools:** Lua modules under `games/jumbalaya/devtools/` use `snake_case` (`debug_button.lua`, `sections/stage.lua`). Locale files use BCP47 tags (`localization/en-us.lua`). Python one-off scripts belong in `_tools/`, not `devtools/`.
 - UI binds UIBox `func` strings — move implementations, not registration names when refactoring (`Funcs.register` keeps the name stable)
 - Class chain: `Object → Node → EaseNode/AnimNode → Sprite, RetainedPanel, Card, CardArea`
 - `Card` model class loads in `app/bootstrap/game_boot.lua`; presentation mixins install via `word_game/ui/cards/bind.lua` (tests: `mock_env.ensure_card_class()`)

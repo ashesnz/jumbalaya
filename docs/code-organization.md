@@ -17,9 +17,6 @@ Shell wiring (`app/runtime.lua`, `app/callbacks/funcs.lua`, `app/bootstrap/store
 
 Phases 0–13 are **complete** (store, engine package, retained UI, `Funcs` registry, no global `G`, `games/jumbalaya/` layout). **Phase 10a** (glue hygiene) continues incrementally.
 
-- Guide: [engine-migration.md](engine-migration.md)
-- Grep snapshot: [engine-migration-coupling-inventory.md](engine-migration-coupling-inventory.md)
-
 **Freeze policy (ongoing):**
 
 - No new run-state keys without a declared owner in `types/game.lua` **and** a store field / reducer in `jumbalaya_core`.
@@ -130,9 +127,9 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 
 | Concern | Access |
 |---------|--------|
-| Game shell (settings, scene nodes, timers) | `bridge/runtime.lua` → `BridgeRuntime.game()` |
+| Game shell (settings, scene nodes, timers) | `app/runtime.lua` → `jumbalaya-engine.shell` |
 | Run snapshot | `WORD_GAME.store()` / `game_access.get()` on `Game.GAME` |
-| UIBox string callbacks | `bridge/funcs_registry.lua` → `Funcs.dispatch("name", …)` |
+| UIBox string callbacks | `app/callbacks/funcs.lua` → `Funcs.dispatch("name", …)` |
 | Model → UI notify | `Presentation.emit` (contract: `types/presentation.lua`) |
 
 **Stop growing ad hoc state:** every new feature ships with a **facade method + owned run-state field** (declared in `types/game.lua`) or it does not land. Callback string names are registration only; logic lives on `WORD_GAME_UI` / app modules.
@@ -369,7 +366,7 @@ Reasonable exceptions: generated data, localization tables, `types/`, cohesive i
 engine_boot → runtime_boot (Game(), store, facade) → store_boot → presentation_boot
 ```
 
-`Game()` is constructed in `runtime_boot.lua`; `Game:construct` binds `bridge/runtime.lua`. There is no global `G` singleton.
+`Game()` is constructed in `runtime_boot.lua`; `app/runtime.lua` delegates to `jumbalaya-engine.shell`. There is no global `G` singleton.
 
 The inheritance order is contractual:
 
@@ -380,11 +377,11 @@ Object → Node → EaseNode/AnimNode → Sprite, Card, CardArea, RetainedPanel
 Additional rules:
 
 - `jumbalaya_core` never imports `app/`, `word_game/`, or Love2D.
-- `word_game/model/` may import `jumbalaya_core` and `bridge/`; never import `word_game/ui/` at module top level.
-- `word_game/ui/` → `app/core/` + `jumbalaya-engine` — never reverse.
+- `word_game/model/` may import `jumbalaya_core` and `app/runtime`; never import `word_game/ui/` at module top level.
+- `word_game/ui/` → `jumbalaya-engine` + `word_game/model` (facade) — never reverse.
 - Prefer facade methods (`WORD_GAME.*`, `WORD_GAME_UI.*`) across package boundaries.
 - Jumble snap/layout must not import UI modules; UI may import model/config.
-- Two schedulers exist by design: `app/core/util/scheduler.lua` (tween lanes) and `app/effects/timeline_scheduler.lua` (timeline wrapper).
+- Two schedulers exist by design: engine tween lanes (`jumbalaya-engine`) and `jumbalaya-engine/effects/timeline_scheduler.lua` (timeline wrapper).
 
 ---
 
@@ -397,7 +394,7 @@ emmylua_check . --severity warn   # CI blocks on errors only — see testing.md
 
 Key test tiers:
 
-- **Integration:** `test_jumble_play_flow.lua`, `test_save_roundtrip.lua`, `test_phase9_*`
+- **Integration:** `test_jumble_play_flow.lua`, `test_save_roundtrip.lua`, `test_game_access.lua`
 - **Core rules (no boot):** `test_core_jumble_rules.lua`, `test_core_play_evaluate.lua`, …
 - **Callback catalog:** `test_g_funcs_registry.lua`
 
