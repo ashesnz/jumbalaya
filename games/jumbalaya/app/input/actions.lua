@@ -1,8 +1,7 @@
 -- Application and development keyboard actions.
 
-local game_access = require("word_game.model.game_access")
-
 local BridgeRuntime = require("app.runtime")
+local function game_access() return BridgeRuntime.game_access() end
 local Funcs = require("app.callbacks.funcs")
 local function g() return BridgeRuntime.game() end
 
@@ -52,8 +51,9 @@ function M.key_hold(controller, key, dt)
         g():queue_settings_write()
         controller.held_key_times[key] = nil
         g().SETTINGS.current_setup = 'New Run'
-        local game = game_access.get()
-        game_access.patch({ viewed_back = nil })
+        local access = game_access()
+        local game = access and access.get()
+        if access then access.patch({ viewed_back = nil }) end
         g().run_setup_seed = game and game.seeded
         g().forced_seed, g().setup_seed = nil, nil
         if game and game.seeded then g().forced_seed = game.seed_streams.seed end

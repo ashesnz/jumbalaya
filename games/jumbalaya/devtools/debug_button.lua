@@ -2,8 +2,12 @@
 	devtools/debug_button.lua - Temporary on-screen toggle for the debug panel.
 ]]
 
-local Layout = require("word_game.ui.layout")
 local game_runtime = require("devtools.runtime")
+
+local function hud_bottom_y()
+	local ui = rawget(_G, "WORD_GAME_UI")
+	return ui and ui.Layout and ui.Layout.hud_bottom_y()
+end
 
 local function shell()
 	return game_runtime.game()
@@ -25,7 +29,7 @@ local HINT_LABEL_SCALE = 0.24
 local HINT_ROW_WIDTH = 8.4
 
 local function hint_offset_y()
-	return Layout.hud_bottom_y()
+	return hud_bottom_y()
 end
 
 local function held_cards()

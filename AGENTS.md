@@ -39,7 +39,8 @@ Canonical game tree: `games/jumbalaya/` (`app/`, `word_game/`, …). Shared pack
 - `word_game/board/` — snap/geometry only; no UI imports at require time (fixed-letter overlay wired from `ui/table/board.lua`)
 - `app/` → `word_game/` at boot only; no jumble rules; `app/core/` = session + persistence + platform only
 - Cross-package access: `WORD_GAME` and `WORD_GAME_UI` facades. Inside `word_game/model/`, hoist sibling requires to module scope; use `jumble/bonus_return` when model code must return bonus cards to the gutter.
-- **Runtime bus:** Game shell via `jumbalaya-engine.shell` (`app/runtime.lua` delegates); run snapshot via `WORD_GAME.store()` / `game_access.get()`; UIBox strings via `Funcs.dispatch`. Shell injection: `app/bootstrap/shell_bind.lua`. **Every new feature:** facade method + owned run-state field in `types/store.lua`, or it does not ship.
+- **Runtime bus:** Game shell via `jumbalaya-engine.shell` (`app/runtime.lua` delegates); run snapshot via `WORD_GAME.store()` / `WORD_GAME.GameAccess` / `runtime.game_access()`; UIBox strings via `Funcs.dispatch`. Shell injection: `app/bootstrap/shell_bind.lua`. **Every new feature:** facade method + owned run-state field in `types/store.lua`, or it does not ship (`test_store_state_catalog.lua`).
+- **Facade imports:** `app/` (except bootstrap wiring), `devtools/`, and new `word_game/ui/` code must not deep-require `word_game.model.*` — use `WORD_GAME`, `WORD_GAME_UI`, `word_game.ui.facade`, or `runtime.game_access()` (`test_facade_boundaries.lua`).
 - **Rules vs glue:** pure gameplay logic in `packages/jumbalaya_core/` (+ `test_core_*`); `word_game/model/` is runtime glue only.
 - Config = data; model glue = wiring; ui = presentation — keep separated
 - Bootstrap load order in `app/bootstrap.lua` only; `Game()` in `runtime_boot.lua` (no global `G` singleton)

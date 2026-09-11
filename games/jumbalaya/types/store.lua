@@ -109,6 +109,18 @@
 ---@field token_reward_busy boolean|nil
 ---@field card_fly_off_busy boolean|nil
 ---@field play_hold_redraw_busy boolean|nil
+---
+--- Owner: ui/table/controls/animate.lua
+---@field hand_layout_settle number|nil
+---
+--- Owner: ui/perks/stamp/*
+---@field pending_stamp_perk table|nil
+---
+--- Owner: ui/cards/inspect.lua
+---@field inspecting_card Card|nil
+---
+--- Owner: app/input/actions.lua, app/callbacks/controllers/run_lifecycle.lua
+---@field viewed_back any|nil
 ---@field [string] any
 
 ---@class PileState

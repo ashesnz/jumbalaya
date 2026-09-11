@@ -81,4 +81,8 @@ function M.word_round()
 	end
 end
 
+function M.game_access()
+	return _game_access
+end
+
 return M

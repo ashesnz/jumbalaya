@@ -98,6 +98,14 @@ function M.busy()
 	return (WORD_GAME and WORD_GAME.Busy) or load("word_game.model.run.busy")
 end
 
+function M.game_access()
+	return (WORD_GAME and WORD_GAME.GameAccess) or load("word_game.model.game_access")
+end
+
+function M.presentation()
+	return load("word_game.model.presentation")
+end
+
 function M.updaters()
 	return load("app.core.session.updaters")
 end

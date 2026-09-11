@@ -1,8 +1,7 @@
 --[[ app/controllers/run_lifecycle.lua - Phase 4 run start / menu return controller ]]
 
-local game_access = require("word_game.model.game_access")
-
 local BridgeRuntime = require("app.runtime")
+local function game_access() return BridgeRuntime.game_access() end
 local function g() return BridgeRuntime.game() end
 
 local M = {}
@@ -15,7 +14,7 @@ end
 
 function M.begin_run(e, args)
 	g().SETTINGS.paused = false
-	if e and e.config.id == 'restart_button' then game_access.patch({ viewed_back = nil }) end
+	if e and e.config.id == 'restart_button' then game_access().patch({ viewed_back = nil }) end
 	g().TIMELINE:flush()
 	g():queue_during_wipe(function()
 		g():discard_run()

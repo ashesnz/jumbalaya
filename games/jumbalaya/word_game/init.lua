@@ -27,6 +27,7 @@ local M = {
 	BonusStack = require("word_game.model.jumble.bonus_stack"),
 	VoucherDiscard = require("word_game.model.perks.voucher_discard"),
 	Persistence = require("word_game.model.persistence"),
+	GameAccess = require("word_game.model.game_access"),
 }
 
 function M._bind_store(store)

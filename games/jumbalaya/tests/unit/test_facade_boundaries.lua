@@ -1,0 +1,16 @@
+--[[ tests/unit/test_facade_boundaries.lua - Facade import boundary freeze ]]
+
+local T = require("tests.framework")
+local audit = require("tests.helpers.facade_boundary_audit")
+
+T.describe("facade import boundaries", function()
+	T.it("app/ and devtools/ do not deep-require word_game.* (bootstrap wiring exempt)", function()
+		local violations = audit.shell_boundary_violations()
+		T.assert_equal(#violations, 0, "boundary violations: " .. table.concat(violations, ", "))
+	end)
+
+	T.it("word_game/ui/ does not add new deep word_game.model.* imports outside allowlist", function()
+		local violations = audit.ui_model_boundary_violations()
+		T.assert_equal(#violations, 0, "ui model violations: " .. table.concat(violations, ", "))
+	end)
+end)

@@ -51,4 +51,9 @@ function M.settings()
 	return game and game.SETTINGS
 end
 
+--- Bound run snapshot accessor (wired in app/bootstrap/shell_bind.lua).
+function M.game_access()
+	return shell.game_access()
+end
+
 return M

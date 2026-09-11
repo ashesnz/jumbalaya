@@ -19,8 +19,9 @@ Phases 0–13 are **complete** (store, engine package, retained UI, `Funcs` regi
 
 **Freeze policy (ongoing):**
 
-- No new run-state keys without a declared owner in `types/game.lua` **and** a store field / reducer in `jumbalaya_core`.
+- No new run-state keys without a declared owner in `types/store.lua` **and** a reducer/default in `jumbalaya_core` — enforced by `tests/unit/test_store_state_catalog.lua`.
 - No new UIBox callback names without an entry in `types/funcs.lua` — enforced by `tests/unit/test_g_funcs_registry.lua`.
+- No new deep `word_game.model.*` / `word_game.ui.*` requires across `app/` (bootstrap wiring exempt), `devtools/`, or `word_game/ui/` (grandfathered allowlist) — enforced by `tests/unit/test_facade_boundaries.lua`.
 - New features ship via `WORD_GAME` / `WORD_GAME_UI` facade methods; model code uses `Presentation.emit`, not `Funcs.dispatch`.
 - Store authority lives on `WORD_GAME.store()` / `game_access`; `app/bootstrap/store_sync.lua` creates the store and binds runs at boot.
 
