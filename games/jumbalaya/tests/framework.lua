@@ -37,6 +37,10 @@ end
 
 M.test = M.it
 
+function M.fail(msg)
+	error(msg or "fail", 2)
+end
+
 function M.assert_true(cond, msg)
 	if not cond then
 		error(msg or "Expected condition to be true, got false/nil", 2)
