@@ -1,19 +1,12 @@
 -- Card identity, presentation, and area primitives for the letter deck.
 return function(context)
 	local M = context.module
-
-	local function letter_for_index(index)
-		return string.char(string.byte("A") + index - 1)
-	end
-
-	context.letter_for_index = letter_for_index
+	local core_identity = require("jumbalaya_core.cards.identity")
+	local core_letter_card = require("jumbalaya_core.cards.letter_card")
+	local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 
 	function M.front_key(letter, color)
-		if type(letter) ~= "string" or #letter < 1 then return nil end
-		if color ~= "red" and color ~= "black" and color ~= "modified" and color ~= "gold" then
-			color = "black"
-		end
-		return color .. "_" .. letter:sub(1, 1):upper()
+		return core_identity.front_key(letter, color)
 	end
 
 	function M.front(letter, color)
@@ -21,48 +14,26 @@ return function(context)
 		return key and G.LETTERS.faces and G.LETTERS.faces[key] or nil
 	end
 
-	local function control_for_letter(letter, color)
-		return {
-			key = M.front_key(letter, color),
-			letter = letter,
-			letter_color = color,
-		}
-	end
-
 	function M.control_for_letter(letter, color)
-		return control_for_letter(letter, color)
+		return core_identity.control_for_letter(letter, color)
 	end
 
 	function M.letter_from_id(letter_id)
-		if type(letter_id) ~= "number" or letter_id < 1 or letter_id > 26 then return nil end
-		return letter_for_index(letter_id)
+		return core_identity.letter_from_id(letter_id)
 	end
 
 	function M.color_from_card(card)
-		if card and card.ability and card.ability.modified == true then
-			local LetterPalette = require "word_game.config.visuals.letter_card_palette"
-			return LetterPalette.MODIFIED_FACE_COLOR
-		end
-		if card and card.ability and card.ability.letter_color then
-			return card.ability.letter_color
-		end
-		if card and card.config and card.config.card and card.config.card.color then
-			return card.config.card.color
-		end
-		if card and card.base and card.base.color then
-			return card.base.color
-		end
-		return "black"
+		return core_letter_card.color_from_card(card, {
+			modified_color = LetterPalette.MODIFIED_FACE_COLOR,
+		})
 	end
 
 	function M.tag_card(card, letter, color)
-		card.ability.letter = letter
-		card.ability.letter_color = color
+		core_letter_card.tag_ability(card, letter, color)
 	end
 
 	function M.is_letter_card(card)
-		local letter = card and card.ability and card.ability.letter
-		return type(letter) == "string" and #letter == 1
+		return core_identity.is_letter_card(card)
 	end
 
 	function M.restore_letter_face(card)
@@ -132,10 +103,8 @@ return function(context)
 	end
 
 	function M.iter_cards(fn)
-		for _, card in ipairs(G.letter_inventory or {}) do
-			if card and not card.REMOVED then
-				fn(card)
-			end
+		for _, card in ipairs(core_letter_card.collect_active_cards(G.letter_inventory)) do
+			fn(card)
 		end
 	end
 

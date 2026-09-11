@@ -4,6 +4,7 @@ local state = require("word_game.model.run.state")
 local round_config = require("word_game.config.gameplay.round")
 local Dictionary = require("dictionary")
 local Timeline = require("word_game.model.run.timeline")
+local perk_math = require("jumbalaya_core.rules.perk_math")
 
 local M = {}
 
@@ -27,30 +28,27 @@ function M.has(id)
 	return state.has_perk(id)
 end
 
+local function perk_flags()
+	return {
+		combo_starter = M.has("combo_starter"),
+		combo_master = M.has("combo_master"),
+	}
+end
+
 function M.round_multi(value)
-	return math.floor(value * 10 + 0.5) / 10
+	return perk_math.round_multi(value)
 end
 
 function M.starting_puzzle_multi()
-	if M.has("combo_starter") then return 1.2 end
-	return 1.0
+	return perk_math.starting_puzzle_multi(perk_flags())
 end
 
 function M.combo_step()
-	if M.has("combo_master") then return 0.3 end
-	return 0.2
+	return perk_math.combo_step(perk_flags())
 end
 
 function M.puzzle_multi_for_word_count(count)
-	count = count or 0
-	if count < 1 then
-		return M.round_multi(M.starting_puzzle_multi())
-	end
-	local base = M.starting_puzzle_multi()
-	if count < 2 then
-		return M.round_multi(base)
-	end
-	return M.round_multi(base + (count - 1) * M.combo_step())
+	return perk_math.puzzle_multi_for_word_count(count, perk_flags())
 end
 
 function M.hand_size_bonus()

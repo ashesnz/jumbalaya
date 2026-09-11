@@ -22,6 +22,7 @@
 ]]
 
 local Dictionary = {}
+local card_helpers = require("jumbalaya_core.dictionary.cards")
 
 local loaded = false
 local words_set
@@ -31,44 +32,8 @@ local signature_set = {}
 local MIN_LEN = 3
 local MAX_LEN = 8
 
-local function letter_from_id(rank_id)
-	if WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.letter_from_id then
-		return WORD_GAME.Deck.letter_from_id(rank_id)
-	end
-	if type(rank_id) == "number" and rank_id >= 1 and rank_id <= 26 then
-		return string.char(64 + rank_id)
-	end
-end
-
-function Dictionary.letter_from_card(card)
-	if card and card.ability and card.ability.letter then
-		return card.ability.letter
-	end
-	if card and card.config and card.config.card and card.config.card.letter then
-		return card.config.card.letter
-	end
-	if not card or not card.base then return nil end
-	local value = card.base.value
-	if type(value) == "string" and #value == 1 then
-		return value:upper()
-	end
-	local id = card.base.id
-	if not id then return nil end
-	return letter_from_id(id)
-end
-
-function Dictionary.color_from_card(card)
-	if card and card.ability and card.ability.letter_color then
-		return card.ability.letter_color
-	end
-	if card and card.config and card.config.card and card.config.card.color then
-		return card.config.card.color
-	end
-	if card and card.base and card.base.color then
-		return card.base.color
-	end
-	return "black"
-end
+Dictionary.letter_from_card = card_helpers.letter_from_card
+Dictionary.color_from_card = card_helpers.color_from_card
 
 local function trie_insert(word)
 	local node = trie_root
@@ -135,27 +100,8 @@ function Dictionary.is_valid(word)
 	return words_set[word] == true
 end
 
-function Dictionary.counts_from_cards(cards)
-	local counts = {}
-	for _, card in ipairs(cards or {}) do
-		local letter = Dictionary.letter_from_card(card)
-		if letter then
-			counts[letter] = (counts[letter] or 0) + 1
-		end
-	end
-	return counts
-end
-
-function Dictionary.word_from_cards(cards)
-	local parts = {}
-	for _, card in ipairs(cards or {}) do
-		local letter = Dictionary.letter_from_card(card)
-		if letter then
-			parts[#parts + 1] = letter
-		end
-	end
-	return table.concat(parts)
-end
+Dictionary.counts_from_cards = card_helpers.counts_from_cards
+Dictionary.word_from_cards = card_helpers.word_from_cards
 
 local function copy_counts(counts)
 	local out = {}
@@ -288,18 +234,7 @@ function Dictionary.can_play_from_cards(cards)
 	return Dictionary.has_playable_word(Dictionary.counts_from_cards(cards))
 end
 
-function Dictionary.is_vowel_letter(letter)
-	return letter == "A" or letter == "E" or letter == "I" or letter == "O" or letter == "U"
-end
-
-function Dictionary.hand_has_vowel(cards)
-	for _, card in ipairs(cards or {}) do
-		local letter = Dictionary.letter_from_card(card)
-		if Dictionary.is_vowel_letter(letter) then
-			return true
-		end
-	end
-	return false
-end
+Dictionary.is_vowel_letter = card_helpers.is_vowel_letter
+Dictionary.hand_has_vowel = card_helpers.hand_has_vowel
 
 return Dictionary

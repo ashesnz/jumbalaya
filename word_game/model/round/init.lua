@@ -1,27 +1,20 @@
---[[ word_game/model/round/init.lua - Set / hand controller ]]
-local Scheduler = require "app.effects.timeline_scheduler"
-
+--[[ word_game/model/round/init.lua - Set / hand controller (G glue over jumbalaya_core) ]]
 
 local round_config = require("word_game.config.gameplay.round")
-local RunMode = require("word_game.model.run.mode")
 local state = require("word_game.model.run.state")
 local Presentation = require("word_game.model.presentation")
+local core_round = require("jumbalaya_core.round")
 
 local M = {}
 
 function M.init_run()
 	state.get()
-	G.GAME.word_round = {
-		set = 1,
-		hand_index = 1,
-		target = round_config.hand_target(1, 1),
-		played_words = {},
-	}
-	G.GAME.voucher_discards_used = 0
-	G.GAME.discard_bin_count = 0
+	G.GAME.word_round = core_round.new_word_round(1, 1)
+	for key, value in pairs(core_round.run_reset_fields()) do
+		G.GAME[key] = value
+	end
 	M.start_hand(1, 1)
 end
-
 
 function M.restore_from_save()
 	state.get()
@@ -45,13 +38,8 @@ function M.start_hand(set, hand_index)
 		rs.trade_used_this_hand = false
 	end
 
-	G.GAME.word_round = G.GAME.word_round or {}
-	local wr = G.GAME.word_round
-	wr.set = set
-	wr.hand_index = hand_index
-	wr.target = round_config.hand_target(set, hand_index)
-	wr.hand_name = round_config.hand_name(hand_index, set)
-	wr.played_words = {}
+	local wr = core_round.start_hand_coords(set, hand_index)
+	G.GAME.word_round = wr
 
 	local jumble = require("word_game.model.jumble")
 	if jumble.is_active_hand(set, hand_index) then
@@ -65,43 +53,37 @@ function M.start_hand(set, hand_index)
 end
 
 function M.is_word_played(word)
-	if not word or word == "" then return false end
-	word = string.upper(word)
 	local wr = G.GAME and G.GAME.word_round
-	return wr and wr.played_words and wr.played_words[word]
+	return core_round.is_word_played(wr, word)
 end
 
 function M.record_word_play(word)
-	if not word or word == "" then return end
-	word = string.upper(word)
 	local wr = G.GAME and G.GAME.word_round
-	if wr then
-		wr.played_words = wr.played_words or {}
-		wr.played_words[word] = true
-	end
+	core_round.record_word_play(wr, word)
 end
 
 function M.is_final_hand()
 	local wr = G.GAME and G.GAME.word_round
-	if not wr then return false end
-	return wr.set >= round_config.SETS_TO_WIN
-		and wr.hand_index >= round_config.hands_in_set(wr.set)
+	return core_round.is_final_hand(wr)
 end
 
 function M.advance_hand()
 	local wr = G.GAME and G.GAME.word_round
 	if not wr then return "none" end
 
-	if wr.hand_index >= round_config.hands_in_set(wr.set) then
-		if wr.set >= round_config.SETS_TO_WIN then
-			return "win"
-		end
-		M.start_hand(wr.set + 1, 1)
+	local action, next_set, next_hand = core_round.advance_hand(wr)
+	if action == "win" then
+		return "win"
+	end
+	if action == "next_set" then
+		M.start_hand(next_set, next_hand)
 		return "next_set"
 	end
-
-	M.start_hand(wr.set, wr.hand_index + 1)
-	return "next"
+	if action == "next" then
+		M.start_hand(next_set, next_hand)
+		return "next"
+	end
+	return "none"
 end
 
 function M.reset_timeline()

@@ -25,7 +25,9 @@ local function discover_test_modules()
 end
 
 function M.run()
-	package.path = "./?.lua;./?/init.lua;" .. package.path
+	package.path = "./packages/?.lua;./packages/?/init.lua;"
+		.. "./?.lua;./?/init.lua;"
+		.. package.path
 
 	local MockEnv = require("tests.helpers.mock_env")
 	MockEnv.ensure_engine_globals()

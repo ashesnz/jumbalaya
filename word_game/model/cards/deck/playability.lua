@@ -2,9 +2,10 @@
 return function(context)
 	local M = context.module
 	local hand_size_cfg = require("word_game.model.hand_size")
+	local core_playability = require("jumbalaya_core.cards.playability")
 
 	local function deck_owns(card)
-		return card and (not card.area or card.area == G.draw_pile)
+		return core_playability.deck_owns(card, G.draw_pile)
 	end
 
 	local function card_letter(card)
@@ -21,21 +22,7 @@ return function(context)
 	M.deck_owns = deck_owns
 
 	function M.deck_letter_counts()
-		local vowels = 0
-		local consonants = 0
-		for _, card in ipairs(G.draw_pile and G.draw_pile.cards or {}) do
-			if deck_owns(card) then
-				local letter = card_letter(card)
-				if letter then
-					if Dictionary.is_vowel_letter(letter) then
-						vowels = vowels + 1
-					else
-						consonants = consonants + 1
-					end
-				end
-			end
-		end
-		return vowels, consonants
+		return core_playability.deck_letter_counts(G.draw_pile and G.draw_pile.cards, G.draw_pile)
 	end
 
 	local function placement_cards()
@@ -79,13 +66,7 @@ return function(context)
 	end
 
 	local function swap_priority(card)
-		local letter = card_letter(card)
-		if not letter then return 0 end
-		local letter_index = card and card.base and card.base.letter_index or 0
-		if Dictionary.is_vowel_letter(letter) then
-			return 50 + letter_index
-		end
-		return letter_index
+		return core_playability.swap_priority(card)
 	end
 
 	local function deck_pool_cards()
@@ -182,13 +163,7 @@ return function(context)
 				for _, dcard in ipairs(pool) do
 					local dletter = card_letter(dcard)
 					if dletter then
-						local trial = {}
-						for letter, n in pairs(base) do
-							trial[letter] = n
-						end
-						trial[hletter] = (trial[hletter] or 0) - 1
-						if trial[hletter] <= 0 then trial[hletter] = nil end
-						trial[dletter] = (trial[dletter] or 0) + 1
+						local trial = core_playability.trial_letter_swap(base, hletter, dletter)
 						if Dictionary.has_playable_word(trial) then
 							if swap_held_with_deck(hcard, dcard) then
 								align_held()

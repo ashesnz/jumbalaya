@@ -22,7 +22,8 @@ tests/
 ├── framework.lua             # Test assertions (`describe`, `it`, `assert_equal`, etc.)
 ├── helpers/
 │   ├── mock_env.lua          # Shared game globals and mock environment
-│   └── g_funcs_audit.lua     # G.FUNCS catalog static audit (migration)
+│   ├── g_funcs_audit.lua     # G.FUNCS catalog static audit (migration)
+│   └── core_env.lua          # jumbalaya_core package.path bootstrap
 └── unit/
     └── test_*.lua            # One file per feature area (auto-discovered)
 ```
@@ -91,6 +92,16 @@ These tests must pass on every PR while migrating off the Balatro engine pattern
 | `test_save_roundtrip.lua` | Persistence contract |
 | `test_store_sync.lua` | `bridge/store_sync.lua` shim |
 | `test_g_funcs_registry.lua` | `G.FUNCS` catalog freeze |
+| `test_core_jumble_rules.lua` | `jumbalaya_core` scoring rules without `G` |
+| `test_core_jumble_patterns.lua` | `jumbalaya_core` pattern/slot validation without `G` |
+| `test_core_hand.lua` | `jumbalaya_core` hand lifecycle without `G` |
+| `test_core_round.lua` | `jumbalaya_core` round reducers without `G` |
+| `test_core_dictionary_cards.lua` | `jumbalaya_core` dictionary card letter helpers without `G` |
+| `test_core_cards_identity.lua` | `jumbalaya_core` card face keys and letter-card detection without `G` |
+| `test_core_cards_letter_modifiers.lua` | `jumbalaya_core` per-letter modifier data without `G` |
+| `test_core_cards_playability.lua` | `jumbalaya_core` deck playability helpers without `G` |
+| `test_core_cards_deck_config.lua` | `jumbalaya_core` starting deck and trade letter weights without `G` |
+| `test_core_cards_letter_card.lua` | `jumbalaya_core` letter card data, sort, and inventory filters without `G` |
 
 ## CI
 

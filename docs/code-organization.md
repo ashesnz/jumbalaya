@@ -27,6 +27,7 @@ app/                     Application bootstrap, startup, lifecycle, persistence,
   bootstrap/             engine_boot.lua + game_boot.lua (loaded by bootstrap.lua)
   startup/               profile, window, dealing, assets, menu_boot
 bridge/                  Migration shims (store_sync.lua — store ↔ G.GAME mirror)
+packages/jumbalaya_core/ Engine-agnostic domain library (Phase 1+)
 app/core/                Rendering, input, scene graph, UI classes, and shared engine helpers
 word_game/
   board/                 jumble pattern row — placement/, jumble/, bonus/

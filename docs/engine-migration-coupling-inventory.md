@@ -25,7 +25,7 @@ Related: [engine-migration.md](engine-migration.md) (full roadmap), [code-organi
 
 | Check | Result |
 |-------|--------|
-| `love tests` | **372 passed** (0 failed) |
+| `love tests` | **385 passed** (0 failed) |
 | `emmylua_check . --severity warn` | Run locally (CI uses error severity) |
 
 ### Migration CI gate tests
@@ -42,6 +42,8 @@ These suites must stay green through every migration phase:
 | `test_save_roundtrip.lua` | Save/load, jumble hand restore |
 | `test_store_sync.lua` | Store ↔ `G.GAME` shim contract |
 | `test_g_funcs_registry.lua` | `G.FUNCS` catalog freeze |
+| `test_core_jumble_rules.lua` | Core scoring without `G` |
+| `test_core_jumble_patterns.lua` | Core patterns/slots without `G` |
 
 ---
 
@@ -157,7 +159,7 @@ Tests: `tests/unit/test_store_sync.lua`.
 - [x] `G.FUNCS` catalog freeze enforced by `test_g_funcs_registry.lua`
 - [x] Global growth freeze documented in `code-organization.md`
 - [x] Migration CI gate tests listed in `testing.md`
-- [x] `love tests` baseline green (372 tests)
+- [x] `love tests` baseline green (385 tests)
 
 ---
 

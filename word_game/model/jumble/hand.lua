@@ -1,4 +1,4 @@
---[[ word_game/model/jumble/hand.lua - Jumble hand lifecycle, timer, and puzzle progression ]]
+--[[ word_game/model/jumble/hand.lua - Jumble hand lifecycle (G glue over jumbalaya_core) ]]
 
 return function(M)
 local Timeline = require("word_game.model.run.timeline")
@@ -8,41 +8,38 @@ local bonus_return = require("word_game.model.jumble.bonus_return")
 local round_config = require("word_game.config.gameplay.round")
 local jumble_rules = require("word_game.model.jumble_play.jumble_rules")
 local Presentation = require("word_game.model.presentation")
+local core_hand = require("jumbalaya_core.jumble.hand")
+
+local function puzzle_hooks()
+	return {
+		on_puzzle_start = function(j, wr)
+			modifier_effects.reset_puzzle_state(j)
+			perk_effects.on_puzzle_start(j, wr)
+		end,
+		on_puzzle_applied = function()
+			Presentation.emit("puzzle_applied")
+		end,
+	}
+end
 
 function M.is_active_hand(set, hand_index)
-	set = set or (G.GAME and G.GAME.word_round and G.GAME.word_round.set) or 1
-	hand_index = hand_index or (G.GAME and G.GAME.word_round and G.GAME.word_round.hand_index) or 1
-	return set >= 1 and set <= round_config.SETS_TO_WIN and hand_index >= 1
-		and hand_index <= round_config.hands_in_set(set)
+	return core_hand.is_active_hand(set, hand_index)
 end
 
 function M.is_active()
 	local wr = G.GAME and G.GAME.word_round
-	return wr and wr.mode == "jumble" and wr.jumble ~= nil
+	return core_hand.is_active(wr)
 end
 
 function M.state()
 	local wr = G.GAME and G.GAME.word_round
-	return wr and wr.jumble
+	return core_hand.state(wr)
 end
 
 function M.apply_puzzle(wr, puzzle)
+	core_hand.apply_puzzle(wr, puzzle, puzzle_hooks())
+
 	local j = wr.jumble
-	if not j or not puzzle then return end
-	puzzle = M.resolve_puzzle(puzzle)
-	j.puzzle = puzzle
-	j.pattern = M.display_pattern(puzzle)
-	j.solved = false
-	j.bonus_available = false
-	j.bonus_card_id = nil
-	j.puzzle_points = 0
-	j.puzzle_words = {}
-	j.slots = M.parse_slots(puzzle)
-	modifier_effects.reset_puzzle_state(j)
-	perk_effects.on_puzzle_start(j, wr)
-
-	Presentation.emit("puzzle_applied")
-
 	local area = G.pattern_row and G.pattern_row.area
 	if area and area.cards then
 		for i = #area.cards, 1, -1 do
@@ -58,7 +55,7 @@ function M.apply_puzzle(wr, puzzle)
 			end
 		end
 		if area.config then
-			area.config.card_limit = M.blank_count(j.slots, puzzle)
+			area.config.card_limit = M.blank_count(j.slots, j.puzzle)
 		end
 		if G.pattern_row then
 			G.pattern_row:relayout()
@@ -74,32 +71,17 @@ end
 function M.load_puzzle(wr, index)
 	local set = wr and wr.set
 	local hand = wr and wr.hand_index
-	local list = M.puzzles(set, hand)
-	if #list == 0 then return end
-	local j = wr.jumble
-	j.puzzle_index = ((index - 1) % #list) + 1
-	M.apply_puzzle(wr, list[j.puzzle_index])
+	core_hand.load_puzzle(wr, index, M.puzzles(set, hand))
 end
 
 function M.start_hand(wr)
-	wr.mode = "jumble"
-	wr.target = wr.target or 20
 	modifier_effects.reset_stage_state(wr)
-	wr.jumble = {
-		total_score = 0,
-		puzzle_index = 1,
-		solved = false,
-		bonus_available = false,
-		bonus_card_id = nil,
-		puzzle_points = 0,
-		puzzle_multi = 1.0,
-		puzzle_words = {},
-		boss_word_active = false,
-	}
-
-	Presentation.emit("score_banner_jumble_hand_start")
-
-	M.load_puzzle(wr, 1)
+	core_hand.start_hand(wr, {
+		on_stage_start = function()
+			Presentation.emit("score_banner_jumble_hand_start")
+		end,
+		puzzle_list = M.puzzles(wr.set, wr.hand_index),
+	})
 end
 
 function M.start_boss_word(wr)
@@ -107,36 +89,21 @@ function M.start_boss_word(wr)
 end
 
 function M.prepare_boss_word(wr)
-	if not wr or not round_config.is_boss_word_hand(wr.set, wr.hand_index) or not wr.jumble then return false end
-	local boss = M.boss_puzzle(wr.set, wr.hand_index)
-	if not boss then return false end
-	wr.jumble.pending_boss = boss
-	wr.jumble.boss_puzzle_hidden = true
-	wr.jumble.boss_word_active = false
+	if not core_hand.prepare_boss_word(wr, M.boss_puzzle(wr.set, wr.hand_index)) then
+		return false
+	end
 	if wr.jumble.slots then
-		M.clear_blank_cards(wr.jumble.slots)
 		M.sync_placement_cards(wr.jumble.slots)
 	end
-	wr.jumble.slots = nil
-	wr.jumble.pattern = nil
 	return true
 end
 
 function M.reveal_boss_puzzle(wr)
-	if not wr or not round_config.is_boss_word_hand(wr.set, wr.hand_index) or not wr.jumble then return false end
-	local boss = wr.jumble.pending_boss
-	if not boss then return false end
-	wr.jumble.pending_boss = nil
-	wr.jumble.boss_puzzle_hidden = false
-	wr.jumble.boss_word_active = true
-	wr.jumble.puzzle_phase_complete = true
-	wr.jumble.solved = false
-	wr.jumble.puzzle_points = 0
-	wr.jumble.puzzle_multi = 1.0
-	wr.jumble.puzzle_words = {}
-	M.apply_puzzle(wr, boss)
-	Presentation.emit("boss_puzzle_revealed")
-	return true
+	local ok = core_hand.reveal_boss_puzzle(wr, puzzle_hooks())
+	if ok then
+		Presentation.emit("boss_puzzle_revealed")
+	end
+	return ok
 end
 
 function M.begin_boss_word(wr, on_complete)
@@ -172,31 +139,20 @@ function M.record_puzzle_word(word, opts)
 	if not j then return 0, 0, 1.0, 1.0 end
 	local wr = G.GAME and G.GAME.word_round
 	local used_cards = opts.used_cards
-	local old_pts = j.puzzle_points or 0
-	local old_multi = j.puzzle_multi or 1.0
-	j.puzzle_words = j.puzzle_words or {}
-	table.insert(j.puzzle_words, word)
-	local score = jumble_rules.compute_word_score(j, word, used_cards, {
-		old_pts = old_pts,
-		old_multi = old_multi,
-		word_count = #j.puzzle_words,
+	local score_opts = jumble_rules.build_score_opts(j, word, used_cards, {
 		wr = wr,
 		apply_time_penalty = true,
+		old_pts = j.puzzle_points or 0,
+		old_multi = j.puzzle_multi or 1.0,
+		word_count = #(j.puzzle_words or {}) + 1,
 	})
-	local new_pts = score.new_pts
-	local new_multi = score.new_multi
-
-	j.puzzle_points = new_pts
-	j.puzzle_multi = new_multi
-	j.solved = true
-	return old_pts, new_pts, old_multi, new_multi
+	return core_hand.record_puzzle_word(j, word, score_opts)
 end
 
 function M.time_left()
 	return Timeline.seconds_remaining()
 end
 
---- Returns true when the run fuse has expired (Time Run / boss countdown).
 function M.update_timer()
 	local remaining = Timeline.seconds_remaining()
 	if remaining == math.huge then return false end
@@ -210,6 +166,6 @@ end
 
 function M.advance_puzzle(wr)
 	if not wr or not wr.jumble then return end
-	M.load_puzzle(wr, wr.jumble.puzzle_index + 1)
+	core_hand.advance_puzzle(wr, M.puzzles(wr.set, wr.hand_index))
 end
 end

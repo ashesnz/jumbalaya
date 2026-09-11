@@ -1,9 +1,10 @@
---[[ word_game/model/jumble_play/jumble_rules.lua - Pure jumble play logic (no UI) ]]
+--[[ word_game/model/jumble_play/jumble_rules.lua - Jumble play logic (G glue over jumbalaya_core) ]]
 
 local InputLock = require("word_game.model.run.input_lock")
 local RunMode = require("word_game.model.run.mode")
 local state = require("word_game.model.run.state")
 local invariant = require("word_game.model.invariant")
+local core = require("jumbalaya_core.rules.jumble")
 
 local M = {}
 
@@ -12,83 +13,69 @@ local bonus_stack = require("word_game.model.jumble.bonus_stack")
 local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
 local perk_effects = require("word_game.model.perks.effects")
 
-function M.placed_count(slots)
-	local count = 0
-	for _, slot in ipairs(slots or {}) do
-		if slot.kind == "blank" and slot.card then
-			count = count + 1
-		elseif slot.kind == "span" and slot.cards then
-			count = count + #slot.cards
-		end
-	end
-	return count
+local function run_mode_id()
+	return RunMode.is_classic() and "classic" or "time_run"
 end
 
-function M.collect_used_cards(slots)
-	local used = {}
-	for _, slot in ipairs(slots or {}) do
-		if slot.kind == "blank" and slot.card then
-			used[#used + 1] = slot.card
-		elseif slot.kind == "span" then
-			for _, card in ipairs(slot.cards or {}) do
-				used[#used + 1] = card
-			end
-		end
-	end
-	return used
-end
-
-function M.round_target()
-	return (G.GAME and G.GAME.word_round and G.GAME.word_round.target) or 20
-end
-
-function M.score_remaining(total_score, target)
-	return math.max(0, target - total_score)
-end
-
-function M.puzzle_total(j)
-	local pts = j.puzzle_points or 0
-	local multi = j.puzzle_multi or 1.0
-	return math.floor(pts * multi)
-end
-
---- Shared word-scoring pipeline for preview and commit paths.
-function M.compute_word_score(j, word, used_cards, opts)
-	opts = opts or {}
-	if not j or not word then return nil end
-	local wr = opts.wr or (G.GAME and G.GAME.word_round)
-	local old_pts = opts.old_pts or j.puzzle_points or 0
-	local old_multi = opts.old_multi or j.puzzle_multi or 1.0
-	local word_count = opts.word_count or (#(j.puzzle_words or {}) + 1)
-
-	local effects = modifier_effects.apply_word_effects(word, used_cards, j, wr)
-	if opts.apply_time_penalty then
-		perk_effects.apply_time_bank_penalty_on_word(j)
-	end
-	local word_pts = #word + (effects.bonus_points or 0)
-	word_pts = word_pts + bonus_stack.bonus_points_for(used_cards)
-	local committed = M.committed_before_word(j, old_pts, old_multi)
-	word_pts = M.scale_post_target_points(j, word_pts, committed)
-	word_pts = perk_effects.apply_point_multiplier(word_pts, effects.point_multiplier)
-	local new_pts = old_pts + word_pts
-	local new_multi = perk_effects.puzzle_multi_for_word_count(word_count)
-	new_multi = modifier_effects.apply_next_word_floor(new_multi, j)
-	new_multi = modifier_effects.apply_combo_bonus(new_multi, effects.combo_bonus)
-	new_multi = math.floor((new_multi + (effects.bonus_multi or 0)) * 10 + 0.5) / 10
+local function perk_flags()
 	return {
-		effects = effects,
-		old_pts = old_pts,
-		new_pts = new_pts,
-		old_multi = old_multi,
-		new_multi = new_multi,
+		combo_starter = perk_effects.has("combo_starter"),
+		combo_master = perk_effects.has("combo_master"),
 	}
 end
 
-function M.preview_puzzle_total_after_word(j, word, used_cards)
-	if not j or not word then return M.puzzle_total(j) end
-	local score = M.compute_word_score(j, word, used_cards)
-	if not score then return M.puzzle_total(j) end
-	return math.floor(score.new_pts * score.new_multi)
+local function word_round_ref(wr)
+	return wr or (G.GAME and G.GAME.word_round)
+end
+
+M.placed_count = core.placed_count
+M.collect_used_cards = core.collect_used_cards
+M.score_remaining = core.score_remaining
+M.puzzle_total = core.puzzle_total
+M.committed_before_word = core.committed_before_word
+M.committed_earned = core.committed_earned
+M.total_with_puzzle = core.total_with_puzzle
+M.word_points = core.word_points
+
+function M.round_target(wr)
+	return core.round_target(word_round_ref(wr))
+end
+
+local function score_opts_for_word(j, word, used_cards, opts)
+	opts = opts or {}
+	local wr = word_round_ref(opts.wr)
+	return {
+		wr = wr,
+		run_mode = run_mode_id(),
+		used_cards = used_cards,
+		effects = opts.effects or modifier_effects.apply_word_effects(word, used_cards, j, wr),
+		bonus_points_for = bonus_stack.bonus_points_for,
+		perks = opts.perks or perk_flags(),
+		word_count = opts.word_count or (#(j.puzzle_words or {}) + 1),
+		old_pts = opts.old_pts,
+		old_multi = opts.old_multi,
+		apply_time_penalty = opts.apply_time_penalty,
+		on_time_penalty = perk_effects.apply_time_bank_penalty_on_word,
+		apply_point_multiplier = function(pts, effects)
+			return perk_effects.apply_point_multiplier(pts, effects and effects.point_multiplier)
+		end,
+		apply_next_word_floor = modifier_effects.apply_next_word_floor,
+		apply_combo_bonus = function(multi, effects)
+			return modifier_effects.apply_combo_bonus(multi, effects and effects.combo_bonus)
+		end,
+	}
+end
+
+function M.build_score_opts(j, word, used_cards, opts)
+	return score_opts_for_word(j, word, used_cards, opts)
+end
+
+function M.compute_word_score(j, word, used_cards, opts)
+	return core.compute_word_score(j, word, used_cards, score_opts_for_word(j, word, used_cards, opts))
+end
+
+function M.preview_puzzle_total_after_word(j, word, used_cards, opts)
+	return core.preview_puzzle_total_after_word(j, word, used_cards, score_opts_for_word(j, word, used_cards, opts))
 end
 
 local function placement_preview_word(j)
@@ -114,32 +101,19 @@ end
 
 function M.remaining_to_target(j, target)
 	target = target or M.round_target()
-	return M.score_remaining(M.projected_stage_score(j), target)
+	return core.remaining_to_target(j, target, M.placement_preview_got(j))
 end
 
-function M.committed_earned(j)
-	if not j then return 0 end
-	return (j.total_score or 0) + M.puzzle_total(j)
-end
-
-function M.committed_before_word(j, old_pts, old_multi)
-	if not j then return 0 end
-	return (j.total_score or 0) + math.floor((old_pts or 0) * (old_multi or 1.0))
-end
-
---- Classic mode: once the stage target is met, further scoring is doubled.
 function M.post_target_active(j, committed)
-	if not RunMode.is_classic() or not j then return false end
-	committed = committed or M.committed_earned(j)
-	return committed >= M.round_target()
+	return core.post_target_active(run_mode_id(), j, committed, M.round_target())
 end
 
 function M.post_target_multiplier(j, committed)
-	return M.post_target_active(j, committed) and 2 or 1
+	return core.post_target_multiplier(run_mode_id(), j, committed, M.round_target())
 end
 
 function M.scale_post_target_points(j, points, committed)
-	return points * M.post_target_multiplier(j, committed)
+	return core.scale_post_target_points(run_mode_id(), j, points, committed, M.round_target())
 end
 
 function M.placement_preview_got(j)
@@ -153,22 +127,7 @@ end
 
 function M.score_breakdown(j, target)
 	target = target or M.round_target()
-	local earned = M.committed_earned(j)
-	local got = M.placement_preview_got(j)
-	local remaining = M.score_remaining(earned + got, target)
-	return {
-		earned = earned,
-		got = got,
-		remaining = remaining,
-	}
-end
-
-function M.total_with_puzzle(j, pts, multi)
-	return (j.total_score or 0) + math.floor(pts * multi)
-end
-
-function M.word_points(pts, multi)
-	return math.floor(pts * multi)
+	return core.score_breakdown(j, target, M.placement_preview_got(j))
 end
 
 function M.play_blocked(j)

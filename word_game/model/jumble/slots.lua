@@ -1,8 +1,17 @@
---[[ word_game/model/jumble/slots.lua - Placement row slot model and card assignment ]]
+--[[ word_game/model/jumble/slots.lua - Placement row slots (G glue over jumbalaya_core) ]]
 
 return function(M)
 
 local bonus_return = require("word_game.model.jumble.bonus_return")
+local core = require("jumbalaya_core.jumble.slots")
+local topology = require("jumbalaya_core.jumble.slot_topology")
+
+local function letter_fn(card)
+	if Dictionary then
+		return Dictionary.letter_from_card(card)
+	end
+	return card and card.ability and card.ability.letter
+end
 
 local function geometry(session)
 	if session and session.jumble_geometry then
@@ -12,186 +21,20 @@ local function geometry(session)
 	return pt and pt.jumble_geometry
 end
 
-local function parse_rigid_slots(pattern)
-	local slots = {}
-	for i = 1, #pattern do
-		local ch = pattern:sub(i, i)
-		if ch == "_" then
-			slots[#slots + 1] = { kind = "blank", index = i, card = nil }
-		else
-			slots[#slots + 1] = { kind = "fixed", index = i, letter = ch }
-		end
-	end
-	return slots
-end
-
-local function parse_span_slots(puzzle)
-	local pre = puzzle.prefix or ""
-	local suf = puzzle.suffix or ""
-	local min_before, min_after, max_before, max_after, min_hand, max_hand = M.span_limits(puzzle)
-	local slots = {}
-	if puzzle.prefix then
-		slots[#slots + 1] = { kind = "fixed", index = 1, anchor = "prefix", letter = puzzle.prefix }
-	end
-	if puzzle.center then
-		slots[#slots + 1] = {
-			kind = "span",
-			side = "before",
-			index = #slots + 1,
-			cards = {},
-			min = min_before,
-			max = max_before,
-		}
-		slots[#slots + 1] = {
-			kind = "fixed",
-			index = #slots + 1,
-			anchor = "center",
-			letter = puzzle.center,
-			pin_index = puzzle.pin_index,
-		}
-		slots[#slots + 1] = {
-			kind = "span",
-			side = "after",
-			index = #slots + 1,
-			cards = {},
-			min = min_after,
-			max = max_after,
-		}
-	else
-		slots[#slots + 1] = {
-			kind = "span",
-			index = #slots + 1,
-			cards = {},
-			min = min_hand,
-			max = max_hand,
-		}
-	end
-	if puzzle.suffix then
-		slots[#slots + 1] = {
-			kind = "fixed",
-			index = #slots + 1,
-			anchor = "suffix",
-			letter = puzzle.suffix,
-		}
-	end
-	return slots
-end
-
-local function parse_slots(puzzle)
-	if puzzle.kind == "span" then
-		return parse_span_slots(puzzle)
-	end
-	return parse_rigid_slots(puzzle.pattern)
-end
-
-function M.parse_slots(puzzle)
-	return parse_slots(puzzle)
-end
-
-function M.span_slot(slots)
-	local before, after, single, before_i, after_i, single_i = M.span_parts(slots)
-	if single then return single, single_i end
-	if before then return before, before_i end
-	if after then return after, after_i end
-	return nil, nil
-end
-
-function M.blank_count(slots, puzzle)
-	if puzzle and puzzle.kind == "span" then
-		if puzzle.center then
-			local before, after = M.span_parts(slots)
-			return (before and before.max or 0) + (after and after.max or 0)
-		end
-		local _, _, single = M.span_parts(slots)
-		return single and single.max or 0
-	end
-	local n = 0
-	for _, slot in ipairs(slots or {}) do
-		if slot.kind == "blank" then
-			n = n + 1
-		end
-	end
-	return n
-end
+M.parse_slots = core.parse_slots
+M.span_slot = core.span_slot
+M.blank_count = core.blank_count
+M.clear_blank_cards = core.clear_blank_cards
 
 function M.build_word(slots)
-	if not slots then return "" end
-	local chars = {}
-	for _, slot in ipairs(slots) do
-		if slot.kind == "fixed" then
-			for i = 1, #slot.letter do
-				chars[#chars + 1] = slot.letter:sub(i, i)
-			end
-		elseif slot.kind == "span" then
-			for _, card in ipairs(slot.cards or {}) do
-				if Dictionary then
-					local letter = Dictionary.letter_from_card(card)
-					if letter then
-						chars[#chars + 1] = letter
-					end
-				end
-			end
-		elseif slot.card and Dictionary then
-			local letter = Dictionary.letter_from_card(slot.card)
-			if letter then
-				chars[#chars + 1] = letter
-			end
-		else
-			return ""
-		end
-	end
-	return table.concat(chars)
+	return core.build_word(slots, letter_fn)
 end
 
---- Word formed by fixed letters and placed cards; skips empty blanks (placement HUD preview).
 function M.build_placement_preview_word(slots)
-	if not slots then return "" end
-	local chars = {}
-	for _, slot in ipairs(slots) do
-		if slot.kind == "fixed" then
-			for i = 1, #slot.letter do
-				chars[#chars + 1] = slot.letter:sub(i, i)
-			end
-		elseif slot.kind == "span" then
-			for _, card in ipairs(slot.cards or {}) do
-				if Dictionary then
-					local letter = Dictionary.letter_from_card(card)
-					if letter then
-						chars[#chars + 1] = letter
-					end
-				end
-			end
-		elseif slot.kind == "blank" then
-			if slot.card and Dictionary then
-				local letter = Dictionary.letter_from_card(slot.card)
-				if letter then
-					chars[#chars + 1] = letter
-				end
-			end
-		end
-	end
-	return table.concat(chars)
+	return core.build_placement_preview_word(slots, letter_fn)
 end
 
-function M.all_blanks_filled(slots, puzzle)
-	if puzzle and puzzle.kind == "span" then
-		if puzzle.center then
-			local before, after = M.span_parts(slots)
-			if not before or not after then return false end
-			return #(before.cards or {}) >= (before.min or 0)
-				and #(after.cards or {}) >= (after.min or 0)
-		end
-		local _, _, single = M.span_parts(slots)
-		if not single then return false end
-		return #(single.cards or {}) >= (single.min or 1)
-	end
-	for _, slot in ipairs(slots or {}) do
-		if slot.kind == "blank" and not slot.card then
-			return false
-		end
-	end
-	return true
-end
+M.all_blanks_filled = core.all_blanks_filled
 
 function M.sync_placement_cards(slots)
 	local area = G.pattern_row and G.pattern_row.area
@@ -209,31 +52,21 @@ function M.sync_placement_cards(slots)
 	area:hard_set_cards()
 end
 
-function M.clear_blank_cards(slots)
-	for _, slot in ipairs(slots or {}) do
-		if slot.kind == "blank" then
-			slot.card = nil
-		elseif slot.kind == "span" then
-			slot.cards = {}
-		end
-	end
-end
-
 function M.blank_slot_index_for_x(session, x)
 	local j = M.state()
 	if not j or not j.slots then return nil end
 	local geo = geometry(session)
 	if not geo then return nil end
 	if j.puzzle and j.puzzle.kind == "span" then
-		local before, after, single, before_i, after_i, single_i = M.span_parts(j.slots)
+		local before, after, single, before_i, after_i, single_i = topology.span_parts(j.slots)
 		if j.puzzle.center and before and after then
-			local center_idx = M.center_slot_index(j, #(before.cards or {}))
+			local center_idx = topology.center_slot_index(j, #(before.cards or {}))
 			local before_limit = math.min(before.max or 0, center_idx - 1 - #(j.puzzle.prefix or ""))
 			local after_limit = after.max or 0
 			if #(before.cards or {}) >= before_limit and #(after.cards or {}) >= after_limit then
 				return nil
 			end
-			local active_len = geo.span_active_len(j)
+			local active_len = topology.span_active_len(j)
 			local centers = geo.span_centers(session, active_len)
 			local center_end_idx = center_idx + #(j.puzzle.center or "") - 1
 			local center_mid = (centers[center_idx] + (centers[center_end_idx] or centers[center_idx])) / 2
@@ -259,7 +92,7 @@ function M.blank_slot_index_for_x(session, x)
 		if #(span.cards or {}) >= (span.max or 0) then
 			return nil
 		end
-		local active_len = geo.span_active_len(j)
+		local active_len = topology.span_active_len(j)
 		local centers = geo.span_centers(session, active_len)
 		local puzzle = j.puzzle
 		local card_start = #(puzzle.prefix or "") + 1
@@ -302,9 +135,9 @@ function M.first_empty_blank()
 	if not j then return nil end
 	if j.puzzle and j.puzzle.kind == "span" then
 		if j.puzzle.center then
-			local before, after, _, before_i, after_i = M.span_parts(j.slots)
+			local before, after, _, before_i, after_i = topology.span_parts(j.slots)
 			if not before or not after then return nil end
-			local center_idx = M.center_slot_index(j, #(before.cards or {}))
+			local center_idx = topology.center_slot_index(j, #(before.cards or {}))
 			local before_limit = math.min(before.max or 0, center_idx - 1 - #(j.puzzle.prefix or ""))
 			if before and #(before.cards or {}) < before_limit then
 				return before_i
@@ -365,9 +198,9 @@ function M.assign_card_to_blank(slot_index, card, insert_pos)
 	local slot = j.slots[slot_index]
 	if not slot then return false end
 	if j.puzzle and j.puzzle.kind == "span" and j.puzzle.center then
-		local before, after, _, before_i, after_i = M.span_parts(j.slots)
+		local before, after, _, before_i, after_i = topology.span_parts(j.slots)
 		if before and after and (slot_index == before_i or slot_index == after_i) then
-			local center_idx = M.center_slot_index(j, #(before.cards or {}))
+			local center_idx = topology.center_slot_index(j, #(before.cards or {}))
 			local before_limit = math.min(before.max or 0, center_idx - 1 - #(j.puzzle.prefix or ""))
 			local after_limit = after.max or 0
 			if slot_index == before_i and #(before.cards or {}) >= before_limit then

@@ -1,5 +1,5 @@
 --[[
-	bridge/store_sync.lua - Phase 0 store ↔ G.GAME compatibility shim.
+	bridge/store_sync.lua - Phase 0–2 store ↔ G.GAME compatibility shim.
 
 	Contract (engine migration Phase 0–2):
 	- The store owns run snapshot state during migration.
@@ -7,76 +7,60 @@
 	- New code should use store APIs; do not write G.GAME directly once a
 	  module has been migrated to dispatch through the store.
 
-	Replaced by packages/jumbalaya-core/store in Phase 1+.
+	Delegates to jumbalaya_core.Store; mirrors onto G.GAME for legacy readers.
 ]]
+
+local CoreStore = require("jumbalaya_core.store")
+local default_state = require("jumbalaya_core.store.default_state")
 
 local M = {}
 
----@class GameStore
----@field _state table
----@field _subscribers fun(state: table)[]
-
----@return GameStore
+---@return table store GameStore instance with G sync hooks
 function M.new(initial)
-	return {
-		_state = initial or {},
-		_subscribers = {},
-	}
+	local store = CoreStore.new(initial or default_state.new())
+	return store
 end
 
----@param store GameStore
+---@param store table
 ---@return table
 function M.get_state(store)
-	return store._state
+	return store:get()
 end
 
----@param store GameStore
+---@param store table
 ---@param state table
 function M.replace(store, state)
-	store._state = state
+	store:replace(state)
 	M.sync_to_g(store)
-	M._notify(store)
 end
 
---- Shallow-merge keys from patch into store state.
----@param store GameStore
+---@param store table
 ---@param patch table
 function M.patch(store, patch)
-	for key, value in pairs(patch) do
-		store._state[key] = value
-	end
+	store:patch(patch)
 	M.sync_to_g(store)
-	M._notify(store)
 end
 
 --- Mirror store state onto G.GAME for legacy modules.
 ---@param store GameStore
 function M.sync_to_g(store)
 	if _G.G then
-		_G.G.GAME = store._state
+		_G.G.GAME = store:get()
 	end
 end
 
 --- Bootstrap helper: adopt the current G.GAME table as store state.
---- Use only at boot or in tests bridging legacy setup code.
----@param store GameStore
+---@param store table
 function M.sync_from_g(store)
 	if _G.G and _G.G.GAME then
-		store._state = _G.G.GAME
+		store:replace(_G.G.GAME)
 	end
 end
 
----@param store GameStore
+---@param store table
 ---@param fn fun(state: table)
 function M.subscribe(store, fn)
-	store._subscribers[#store._subscribers + 1] = fn
-end
-
----@param store GameStore
-function M._notify(store)
-	for _, fn in ipairs(store._subscribers) do
-		fn(store._state)
-	end
+	store:subscribe(fn)
 end
 
 return M

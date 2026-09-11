@@ -11,6 +11,7 @@ return function(context)
 	local voucher_discard = require("word_game.model.perks.voucher_discard")
 	local Presentation = require("word_game.model.presentation")
 	local deal_boss_hand = require("word_game.model.cards.deck.boss_hand")(M, context)
+	local core_letter_card = require("jumbalaya_core.cards.letter_card")
 
 	function M.is_jumble_deck()
 		local wr = G.GAME and G.GAME.word_round
@@ -60,7 +61,7 @@ return function(context)
 		end
 		reset_deck_pile()
 		for _, card in ipairs(G.letter_inventory) do
-			if card and not card.REMOVED and not card.boss_temp and not card.bonus_card then
+			if core_letter_card.is_jumble_draw_candidate(card) then
 				if card.remove_from_area then
 					card:remove_from_area()
 				end
@@ -133,7 +134,7 @@ return function(context)
 		local cards = {}
 		if G.dealt_letters and G.dealt_letters.cards then
 			for _, card in ipairs(G.dealt_letters.cards) do
-				if not card.boss_temp and not card.bonus_card then
+				if core_letter_card.returns_to_draw_pile(card) then
 					cards[#cards + 1] = card
 				end
 			end

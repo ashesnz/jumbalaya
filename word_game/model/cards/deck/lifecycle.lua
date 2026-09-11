@@ -2,9 +2,10 @@
 return function(context)
 	local M = context.module
 	local LetterPalette = require "word_game.config.visuals.letter_card_palette"
-	local common_letters = { A = true, E = true, I = true, O = true, U = true, L = true, N = true, S = true, T = true, R = true }
+	local deck_config = require("jumbalaya_core.cards.deck_config")
+	local core_letter_card = require("jumbalaya_core.cards.letter_card")
 
-	M.STARTING_LETTERS = { "E", "E", "A", "A", "I", "O", "T", "S", "R", "Y", "N", "C" }
+	M.STARTING_LETTERS = deck_config.STARTING_LETTERS
 
 	function M.shuffle_deck()
 		if not G.draw_pile or not G.draw_pile.cards then return end
@@ -72,16 +73,8 @@ return function(context)
 	end
 
 	function M.common_weighted_letter()
-		-- Weight common tier 4× vs the rest so The Trade feels like coverage.
-		local bag = {}
-		for i = 1, 26 do
-			local letter = string.char(string.byte("A") + i - 1)
-			local n = common_letters[letter] and 4 or 1
-			for _ = 1, n do
-				bag[#bag + 1] = letter
-			end
-		end
-		local letter = bag[seeded_random("trade_letter", 1, #bag)]
+		local bag = deck_config.weighted_letter_bag()
+		local letter = deck_config.pick_weighted_letter(bag, seeded_random("trade_letter", 1, #bag))
 		local color = (seeded_random("trade_color", 1, 2) == 1) and "red" or "black"
 		return letter, color
 	end
@@ -91,15 +84,6 @@ return function(context)
 		M.iter_cards(function(card)
 			out[#out + 1] = card
 		end)
-		table.sort(out, function(a, b)
-			local la = (a.ability and a.ability.letter) or ""
-			local lb = (b.ability and b.ability.letter) or ""
-			if la == lb then
-				return (a.ability and a.ability.letter_color or "")
-					< (b.ability and b.ability.letter_color or "")
-			end
-			return la < lb
-		end)
-		return out
+		return core_letter_card.sort_deck_cards(out)
 	end
 end

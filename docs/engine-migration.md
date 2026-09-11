@@ -181,6 +181,35 @@ Baseline: **372 tests passing** (`love tests`). Store shim is **not wired at boo
 
 ## 3. Phase 1 — Extract `jumbalaya-core` (2–4 weeks)
 
+### Phase 1 status — in progress (slice 3 complete)
+
+| Deliverable | Location |
+|-------------|----------|
+| Core package | `packages/jumbalaya_core/` |
+| Store + default state | `packages/jumbalaya_core/store/` |
+| Round config (canonical) | `packages/jumbalaya_core/config/gameplay/round.lua` |
+| Pure jumble rules + perk math | `packages/jumbalaya_core/rules/` |
+| Jumble patterns + slots + validation | `packages/jumbalaya_core/jumble/` |
+| Hand lifecycle + round reducers | `packages/jumbalaya_core/jumble/hand.lua`, `packages/jumbalaya_core/round/` |
+| Dictionary card helpers | `packages/jumbalaya_core/dictionary/cards.lua` |
+| Test fixtures | `packages/jumbalaya_core/fixtures/` |
+| Legacy re-export | `word_game/config/gameplay/round.lua` → core |
+| G glue layers | `word_game/model/jumble_play/jumble_rules.lua`, `word_game/model/jumble/*`, `word_game/model/round/init.lua` |
+| Core-first tests | `tests/unit/test_core_*.lua` (rules, patterns, hand, round, dictionary cards) |
+| Package path | `main.lua`, `tests/runner.lua` |
+
+**Done (slice 1):** dictionary re-export, round config, jumble scoring rules, perk multiplier math, store skeleton.
+
+**Done (slice 2):** `slot_topology`, `puzzle_spec`, `slots`, `validation` extracted to core; word_game jumble modules are thin G glue.
+
+**Done (slice 3):** `jumble/hand.lua`, `round/init.lua` reducers, dictionary letter helpers; `build_score_opts` passes `used_cards` through to core scoring.
+
+**In progress (slice 4):** cards/deck logic split — `LetterCard` data vs `Card` scene node. Pure card helpers live in `packages/jumbalaya_core/cards/` (`identity`, `letter_modifiers`, `playability`, `deck_config`, `letter_card`).
+
+Baseline: **412 tests passing** (`love tests`).
+
+---
+
 Goal: a Love2D-free Lua package that runs `love tests` (or plain `lua` with a tiny runner) for all rule tests.
 
 ### Step 1.1 — Create package layout
