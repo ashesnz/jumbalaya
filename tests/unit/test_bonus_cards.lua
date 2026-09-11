@@ -8,9 +8,12 @@ T.describe("Bonus cards", function()
 	local bonus_stack = require("word_game.ui.perks.bonus_stack")
 	local jumble = require("word_game.model.jumble")
 
+	local game_access = require("word_game.model.game_access")
+
 	local function layout_globals()
-		G.GAME = G.GAME or {}
-		G.GAME.word_round = { jumble = { boss_word_active = true } }
+		game_access.mutate(function(g)
+			g.word_round = { mode = "jumble", jumble = { boss_word_active = true } }
+		end)
 		G.TILE_W = 20
 		G.TILE_H = 11.5
 		G.CARD_W = 2
@@ -77,16 +80,22 @@ T.describe("Bonus cards", function()
 	end
 
 	local function mock_jumble(slots)
-		G.GAME = G.GAME or {}
-		G.GAME.word_round = G.GAME.word_round or {}
-		G.GAME.word_round.jumble = {
-			slots = slots,
-			puzzle = { min = 3, max = 7 },
-		}
+		game_access.mutate(function(g)
+			g.word_round = {
+				mode = "jumble",
+				jumble = {
+					slots = slots,
+					puzzle = { min = 3, max = 7 },
+				},
+			}
+		end)
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.Jumble = {
 			is_active = function() return true end,
-			state = function() return G.GAME.word_round.jumble end,
+			state = function()
+				local wr = game_access.word_round()
+				return wr and wr.jumble
+			end,
 			slot_for_card = jumble.slot_for_card,
 			remove_card_from_blanks = jumble.remove_card_from_blanks,
 			assign_card_to_blank = jumble.assign_card_to_blank,
@@ -167,7 +176,9 @@ T.describe("Bonus cards", function()
 			slots = {},
 			puzzle = { boss_word = "VEGETABLE" },
 		}
-		G.GAME.word_round = { set = 1, hand_index = 3, jumble = j }
+		game_access.mutate(function(g)
+			g.word_round = { mode = "jumble", set = 1, hand_index = 3, jumble = j }
+		end)
 
 		play_effects.present_boss_word_success({
 			clear_blank_cards = function() end,
@@ -273,7 +284,9 @@ T.describe("Bonus cards", function()
 			puzzle = { boss_word = "VEGETABLE" },
 			boss_word_active = true,
 		}
-		G.GAME.word_round = { set = 1, hand_index = 3, jumble = j }
+		game_access.mutate(function(g)
+			g.word_round = { mode = "jumble", set = 1, hand_index = 3, jumble = j }
+		end)
 
 		WORD_GAME_UI.Layout = {
 			update_all = function()
@@ -402,7 +415,9 @@ T.describe("Bonus cards", function()
 				puzzle = { span = { "C", "T" }, min = 3, max = 7, kind = "span" },
 			},
 		}
-		G.GAME.word_round = wr
+		game_access.mutate(function(g)
+			g.word_round = wr
+		end)
 		local bonus = mock_card("A", 0, 0)
 		bonus.bonus_card = true
 		local _, new_pts = jumble.record_puzzle_word("CAT", { used_cards = { bonus } })
@@ -687,7 +702,7 @@ T.describe("Bonus cards", function()
 
 	T.it("awards a random perk when the last bonus gutter card is consumed", function()
 		bonus_stack.clear()
-		G.GAME = G.GAME or {}
+		game_access.mutate(function() end)
 		G.STATE = (G.STATES and G.STATES.TABLE_BOARD) or 1
 		G.STATES = G.STATES or { TABLE_BOARD = 1 }
 		local played

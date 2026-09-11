@@ -51,11 +51,6 @@ function M.restore_from_save()
 	wr.hand_index = wr.hand_index or 1
 	wr.target = wr.target or round_config.hand_target(wr.set, wr.hand_index)
 	wr.hand_name = wr.hand_name or round_config.hand_name(wr.hand_index, wr.set)
-	local store = runtime.store()
-	if store then
-		store_sync.sync_from_g(store)
-		store_sync.sync_to_g(store)
-	end
 	Presentation.emit("round_restore_from_save", wr)
 end
 

@@ -5,6 +5,7 @@
 ]]
 
 local round_config = require("word_game.config.gameplay.round")
+local game_access = require("word_game.model.game_access")
 local Roll = require("word_game.ui.util.roll")
 
 local M = {}
@@ -37,12 +38,12 @@ local function label_font(px)
 end
 
 local function game_set()
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	return wr and wr.set or 1
 end
 
 local function game_hand()
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	return wr and wr.hand_index or 1
 end
 

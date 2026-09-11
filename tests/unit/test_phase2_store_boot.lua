@@ -11,7 +11,7 @@ T.describe("Phase 2 Store Integration", function()
 	T.it("wires store in mock_env and binds WORD_GAME", function()
 		T.assert_not_nil(word_game.store())
 		T.assert_nil(G._store)
-		T.assert_equal(word_game.state(), G.GAME)
+		T.assert_not_nil(word_game.state())
 	end)
 
 	T.it("dual-writes round init and start_hand via dispatch", function()
@@ -31,7 +31,6 @@ T.describe("Phase 2 Store Integration", function()
 		local store = store_sync.new()
 		local game_table = { points = 5, word_round = { set = 2, hand_index = 3, played_words = {} } }
 		store_sync.bind_run(store, game_table)
-		T.assert_equal(G.GAME, game_table)
 		T.assert_equal(store:get(), game_table)
 	end)
 

@@ -50,7 +50,7 @@ function M.state()
 	if store then
 		return store:get()
 	end
-	return G and G.GAME
+	return nil
 end
 
 return M

@@ -16,7 +16,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 	T.it("is disabled until unlocked later in the run", function()
 		T.assert_false(PlayHoldRedraw.enabled(), "hold redraw should stay off for now")
 		G.STATE = G.STATES.TABLE_BOARD
-		G.GAME = { word_score_animating = false, hand_redraw_animating = false }
+		mock_env.publish_game({ word_score_animating = false, hand_redraw_animating = false })
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME_UI.TableControls = WORD_GAME_UI.TableControls or {}
 		WORD_GAME_UI.TableControls.play_button_uie = function()
@@ -39,12 +39,12 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 
 	T.it("can_hold respects game state and active animations", function()
 		G.STATE = G.STATES.TABLE_BOARD
-		G.GAME = {
+		mock_env.publish_game({
 			word_score_animating = false,
 			hand_redraw_animating = false,
 			seed_streams = { seed = "TEST", hashed_seed = 0 },
 			word_round = { jumble = { redraws_remaining = 1 } },
-		}
+		})
 
 		local mock_btn = {
 			states = { visible = true },
@@ -73,12 +73,12 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 
 	T.it("end-to-end hold redraw discards the hand and deals seven replacements", function()
 		G.STATE = G.STATES.TABLE_BOARD
-		G.GAME = {
+		mock_env.publish_game({
 			word_score_animating = false,
 			hand_redraw_animating = false,
 			seed_streams = { seed = "TEST", hashed_seed = 0 },
 			word_round = { jumble = { redraws_remaining = 1 } },
-		}
+		})
 
 		local mock_btn = {
 			states = { visible = true, collide = { is = true }, hover = { is = true } },
@@ -153,12 +153,12 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 
 	T.it("tracks hold state and triggers redraw at 5 seconds", function()
 		G.STATE = G.STATES.TABLE_BOARD
-		G.GAME = {
+		mock_env.publish_game({
 			word_score_animating = false,
 			hand_redraw_animating = false,
 			seed_streams = { seed = "TEST", hashed_seed = 0 },
 			word_round = { jumble = { redraws_remaining = 1 } },
-		}
+		})
 
 		local mock_btn = {
 			states = { visible = true, collide = { is = true }, hover = { is = true } },
@@ -253,12 +253,12 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 	T.it("differentiates quick clicks from cancelled holds", function()
 		PlayHoldRedraw.reset()
 		G.STATE = G.STATES.TABLE_BOARD
-		G.GAME = {
+		mock_env.publish_game({
 			word_score_animating = false,
 			hand_redraw_animating = false,
 			seed_streams = { seed = "TEST", hashed_seed = 0 },
 			word_round = { jumble = { redraws_remaining = 1 } },
-		}
+		})
 
 		local mock_btn = {
 			states = { visible = true, collide = { is = true }, hover = { is = true } },
@@ -382,12 +382,12 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 	T.it("restores card drag and input states when redraw completes", function()
 		PlayHoldRedraw.reset()
 		G.STATE = G.STATES.TABLE_BOARD
-		G.GAME = {
+		mock_env.publish_game({
 			word_score_animating = false,
 			hand_redraw_animating = false,
 			seed_streams = { seed = "TEST", hashed_seed = 0 },
 			word_round = { jumble = { redraws_remaining = 1 } },
-		}
+		})
 
 		local mock_btn = {
 			states = { visible = true, collide = { is = true }, hover = { is = true } },

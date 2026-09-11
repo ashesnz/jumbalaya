@@ -8,6 +8,7 @@
 local facade = require("word_game.ui.facade")
 local felt = require("word_game.ui.layout.felt")
 local round_config = require("word_game.config.gameplay.round")
+local game_access = require("word_game.model.game_access")
 local Odometer = require("word_game.ui.widgets.odometer")
 local perk_voucher = require("word_game.ui.perks.shared.voucher")
 
@@ -90,21 +91,22 @@ function M.on_unlock()
 end
 
 local function read_discards_used()
-	if G.GAME and G.GAME.voucher_discards_used ~= nil then
-		discards_used_count = G.GAME.voucher_discards_used
-	elseif G.GAME and G.GAME.discard_bin_count ~= nil then
+	local game = game_access.get()
+	if game and game.voucher_discards_used ~= nil then
+		discards_used_count = game.voucher_discards_used
+	elseif game and game.discard_bin_count ~= nil then
 		-- Legacy save field from the old bin UI.
-		discards_used_count = G.GAME.discard_bin_count
+		discards_used_count = game.discard_bin_count
 	end
 	return discards_used_count
 end
 
 local function write_discards_used(count)
 	discards_used_count = math.max(0, count or 0)
-	if G.GAME then
-		G.GAME.voucher_discards_used = discards_used_count
-		G.GAME.discard_bin_count = discards_used_count
-	end
+	game_access.patch({
+		voucher_discards_used = discards_used_count,
+		discard_bin_count = discards_used_count,
+	})
 end
 
 function M.reset()

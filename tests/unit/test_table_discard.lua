@@ -13,8 +13,9 @@ local function discard_bin_imprint()
 end
 
 local function setup_unlocked_voucher_discard()
-	G.GAME = G.GAME or {}
-	G.GAME.run_state = { perks = { "discard_bin" } }
+	MockEnv.publish_game({
+		run_state = { perks = { "discard_bin" } },
+	})
 	G.RUN = { active = true }
 	G.STATE = G.STATES.TABLE_BOARD
 	G.STAGE = G.STAGES.RUN
@@ -98,7 +99,7 @@ T.describe("table discard bin", function()
 	T.it("counts discards left down from 2 to 0 with odometer rolls when voucher discard is unlocked", function()
 		local table_discard = require("word_game.ui.perks.discard_bin")
 		table_discard.reset()
-		G.GAME = { run_state = { perks = { "discard_bin" } } }
+		MockEnv.publish_game({ run_state = { perks = { "discard_bin" } } })
 		G.RUN = { active = true }
 		T.assert_equal(table_discard.discards_left(), 2)
 
@@ -127,7 +128,7 @@ T.describe("table discard bin", function()
 
 	T.it("rejects discards once the voucher allowance is used up", function()
 		local table_discard = require("word_game.ui.perks.discard_bin")
-		G.GAME = { run_state = { perks = { "discard_bin" } } }
+		MockEnv.publish_game({ run_state = { perks = { "discard_bin" } } })
 		G.RUN = { active = true }
 		G.STATE = G.STATES.TABLE_BOARD
 		table_discard.reset()
@@ -147,7 +148,7 @@ T.describe("table discard bin", function()
 	T.it("shows End Run on the table board while voucher discard is disabled", function()
 		local table_discard = require("word_game.ui.perks.discard_bin")
 		table_discard.reset()
-		G.GAME = { run_state = { perks = {} } }
+		MockEnv.publish_game({ run_state = { perks = {} } })
 		G.RUN = { active = true }
 		G.STATE = G.STATES.TABLE_BOARD
 		G.STAGE = G.STAGES.RUN
@@ -163,12 +164,13 @@ T.describe("table discard bin", function()
 		local table_discard = require("word_game.ui.perks.discard_bin")
 		G.STATES.GAME_OVER = 4
 		table_discard.reset()
-		G.GAME = G.GAME or {}
-		G.GAME.run_state = { match_over = false, match_won = false }
-		G.GAME.word_score_animating = false
-		G.GAME.hand_redraw_animating = false
-		G.GAME.hand_shuffle_animating = false
-		G.GAME.placement_recall_animating = false
+		MockEnv.publish_game({
+			run_state = { match_over = false, match_won = false },
+			word_score_animating = false,
+			hand_redraw_animating = false,
+			hand_shuffle_animating = false,
+			placement_recall_animating = false,
+		})
 		G.RUN = { active = true }
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME_UI.PlayHoldRedraw = { is_animating = function() return false end }
@@ -176,8 +178,9 @@ T.describe("table discard bin", function()
 		G.STATE_COMPLETE = true
 		T.assert_true(table_discard.end_run())
 		T.assert_equal(G.STATE, G.STATES.GAME_OVER)
-		T.assert_equal(G.GAME.run_state.match_over, true)
-		T.assert_equal(G.GAME.run_state.match_won, false)
+		local game_access = require("word_game.model.game_access")
+		T.assert_equal(game_access.get().run_state.match_over, true)
+		T.assert_equal(game_access.get().run_state.match_won, false)
 		T.assert_equal(G.STATE_COMPLETE, false)
 		MockEnv.reset_game()
 	end)
@@ -185,7 +188,7 @@ T.describe("table discard bin", function()
 	T.it("accepts drops on the discard_bin voucher imprint", function()
 		local table_discard = require("word_game.ui.perks.discard_bin")
 		local rect = { x = 170, y = 90, w = 80, h = 40 }
-		G.GAME = { run_state = { perks = { "discard_bin" } } }
+		MockEnv.publish_game({ run_state = { perks = { "discard_bin" } } })
 		G.RUN = { active = true }
 		G.STATE = G.STATES.TABLE_BOARD
 		G.TILESCALE = 1
@@ -210,11 +213,11 @@ T.describe("table discard bin", function()
 		G.TIMELINE = nil
 		G.TILESCALE = 1
 		G.TILESIZE = 1
-		G.GAME = {
+		MockEnv.publish_game({
 			word_round = { mode = "jumble" },
 			word_score_animating = false,
 			hand_redraw_animating = false,
-		}
+		})
 		G.CARD_W = 1
 		G.CARD_H = 1.4
 		G.dealt_letters = { cards = {} }
@@ -236,7 +239,7 @@ T.describe("table discard bin", function()
 		MockEnv.setup()
 		local table_discard = require("word_game.ui.perks.discard_bin")
 		local deck = require("word_game.model.cards.deck")
-		G.GAME = { run_state = { perks = { "discard_bin" } }, word_round = { mode = "jumble" } }
+		MockEnv.publish_game({ run_state = { perks = { "discard_bin" } }, word_round = { mode = "jumble" } })
 		G.RUN = { active = true }
 		table_discard.reset()
 
@@ -323,11 +326,11 @@ T.describe("table discard bin", function()
 		G.TIMELINE = nil
 		G.TILESCALE = 1
 		G.TILESIZE = 1
-		G.GAME = {
+		MockEnv.publish_game({
 			word_round = { mode = "jumble" },
 			word_score_animating = false,
 			hand_redraw_animating = false,
-		}
+		})
 		G.CARD_W = 1
 		G.CARD_H = 1.4
 		G.dealt_letters = { cards = {} }
@@ -350,7 +353,7 @@ T.describe("table discard bin", function()
 		MockEnv.setup()
 		local table_discard = require("word_game.ui.perks.discard_bin")
 		local deck = require("word_game.model.cards.deck")
-		G.GAME = { run_state = { perks = { "discard_bin" } }, word_round = { mode = "jumble" } }
+		MockEnv.publish_game({ run_state = { perks = { "discard_bin" } }, word_round = { mode = "jumble" } })
 		G.RUN = { active = true }
 		table_discard.reset()
 		table_discard.record_discard()

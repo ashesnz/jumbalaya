@@ -356,7 +356,26 @@ function M.reset_game()
 		},
 	}
 	G.ARGS = G.ARGS or {}
-	require("bridge.store_sync").ensure_test_binding()
+	M.publish_game(G.GAME)
+end
+
+--- Bind a game snapshot as the authoritative store state (Phase 8 PR-2).
+function M.publish_game(game_table)
+	if not game_table then return end
+	G.GAME = game_table
+	local store_sync = require("bridge.store_sync")
+	store_sync.ensure_test_binding()
+	local store = require("bridge.runtime").store()
+	if store then
+		store_sync.bind_run(store, game_table)
+	end
+end
+
+--- Re-bind the store after direct G.GAME mutation in a test.
+function M.sync_game()
+	if G.GAME then
+		M.publish_game(G.GAME)
+	end
 end
 
 function M.teardown_boot_pollution()

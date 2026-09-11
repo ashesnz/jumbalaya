@@ -10,27 +10,29 @@ T.describe("Phase 4 Gameplay Action Dispatch", function()
 	mock_env.reset_game()
 
 	T.it("dispatches gameplay actions through store and updates state", function()
-		G._store = store_sync.new()
-		word_game._bind_store(G._store)
+		local store = store_sync.new()
+		word_game._bind_store(store)
 		require("app.bootstrap.engine_services_boot").install()
 		word_game.Round.init_run()
 
-		store_sync.dispatch(G._store, { type = "PLAY_WORD", word = "TEST" })
-		T.assert_true(G.GAME.word_round.played_words.TEST)
+		store_sync.dispatch(store, { type = "PLAY_WORD", word = "TEST" })
+		local state = store:get()
+		T.assert_true(state.word_round.played_words.TEST)
 
-		store_sync.dispatch(G._store, { type = "SHUFFLE_HAND" })
-		T.assert_equal(G.GAME.shuffle_hand_count, 1)
+		store_sync.dispatch(store, { type = "SHUFFLE_HAND" })
+		T.assert_equal(store:get().shuffle_hand_count, 1)
 
-		store_sync.dispatch(G._store, { type = "JUMBLE_NEXT" })
-		T.assert_equal(G.GAME.last_gameplay_action, "JUMBLE_NEXT")
+		store_sync.dispatch(store, { type = "JUMBLE_NEXT" })
+		T.assert_equal(store:get().last_gameplay_action, "JUMBLE_NEXT")
 
-		store_sync.dispatch(G._store, { type = "RETURN_PLACEMENT_CARDS" })
-		T.assert_equal(G.GAME.last_gameplay_action, "RETURN_PLACEMENT_CARDS")
+		store_sync.dispatch(store, { type = "RETURN_PLACEMENT_CARDS" })
+		T.assert_equal(store:get().last_gameplay_action, "RETURN_PLACEMENT_CARDS")
 	end)
 
 	T.it("routes G.FUNCS gameplay callbacks through InputService", function()
 		mock_env.reset_game()
-		G._store = store_sync.new()
+		local store = store_sync.new()
+		word_game._bind_store(store)
 		require("app.bootstrap.engine_services_boot").install()
 		package.loaded["app.callbacks.registry"] = nil
 		package.loaded["word_game.ui.callbacks.table_controls"] = nil
@@ -41,19 +43,21 @@ T.describe("Phase 4 Gameplay Action Dispatch", function()
 		T.assert_not_nil(G.FUNCS.play_placement_word)
 		T.assert_not_nil(G.FUNCS.jumble_next)
 
-		local before = G.GAME.shuffle_hand_count or 0
+		local before = store:get().shuffle_hand_count or 0
 		pcall(function() G.FUNCS.shuffle_hand() end)
-		T.assert_equal(G.GAME.shuffle_hand_count, before + 1)
+		T.assert_equal(store:get().shuffle_hand_count, before + 1)
 	end)
 
 	T.it("dispatches placement word payload via gameplay controller", function()
 		mock_env.reset_game()
-		G.GAME.placement_word = "CAT"
-		G.GAME.placement_word_valid = true
-		G.GAME.word_round = G.GAME.word_round or { played_words = {} }
+		mock_env.publish_game({
+			placement_word = "CAT",
+			placement_word_valid = true,
+			word_round = { played_words = {} },
+		})
 
 		action_dispatch.dispatch_func("play_placement_word", { word = "CAT" })
-		T.assert_true(G.GAME.word_round.played_words.CAT)
+		T.assert_true(word_game.store():get().word_round.played_words.CAT)
 	end)
 
 	T.it("emits app actions for menu lifecycle callbacks", function()

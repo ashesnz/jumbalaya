@@ -178,11 +178,13 @@ T.describe("save round-trip", function()
 		T.assert_not_nil(loaded)
 		jumble_fixture.apply_loaded(loaded, restore_card_areas, round.restore_from_save)
 
-		local wr = G.GAME.word_round
+		local game_access = require("word_game.model.game_access")
+		local game = game_access.get()
+		local wr = game and game.word_round
 		T.assert_equal(wr.mode, "jumble")
 		T.assert_equal(wr.set, 2)
 		T.assert_equal(wr.jumble.total_score, 18)
-		T.assert_equal(G.GAME.timeline_seconds, 60, "restore_from_save resets fuse via timeline_reset")
+		T.assert_equal(game.timeline_seconds, 60, "restore_from_save resets fuse via timeline_reset")
 		T.assert_equal(#G.dealt_letters.cards, 1)
 		T.assert_equal(G.dealt_letters.cards[1].ability.letter, "R")
 		love.filesystem.remove(path)

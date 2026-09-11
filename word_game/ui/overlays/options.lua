@@ -1,9 +1,11 @@
 --[[ word_game/ui/overlays/options.lua - Pause menu and settings overlays ]]
 local Scheduler = require "app.effects.timeline_scheduler"
 local Components = require "word_game.ui.widgets.components"
+local game_access = require("word_game.model.game_access")
 
 
 function build_options()  
+  local game = game_access.get()
   local current_seed = nil
   local restart = nil
   local main_menu = nil
@@ -25,9 +27,9 @@ function build_options()
       }},
       {n=G.UI.COLUMN, config={align = "cm", padding = 0, minh = 0.8}, nodes={
         {n=G.UI.COLUMN, config={align = "cm", padding = 0, minh = 0.8}, nodes={
-          {n=G.UI.ROW, config={align = "cm", r = 0.1, colour = G.GAME.seeded and G.C.RED or G.C.BLACK, minw = 1.8, minh = 0.5, padding = 0.1, emboss = 0.05}, nodes={
+          {n=G.UI.ROW, config={align = "cm", r = 0.1, colour = game and game.seeded and G.C.RED or G.C.BLACK, minw = 1.8, minh = 0.5, padding = 0.1, emboss = 0.05}, nodes={
             {n=G.UI.COLUMN, config={align = "cm"}, nodes={
-              {n=G.UI.TEXT, config={ text = tostring(G.GAME.seed_streams.seed), scale = 0.43, colour = G.C.UI.TEXT_LIGHT, shadow = true}}
+              {n=G.UI.TEXT, config={ text = tostring(game and game.seed_streams and game.seed_streams.seed or ""), scale = 0.43, colour = G.C.UI.TEXT_LIGHT, shadow = true}}
             }}
           }}
         }}
@@ -40,7 +42,7 @@ function build_options()
 
   local t = build_generic_options({ contents = {
       settings,
-      G.GAME.seeded and current_seed or nil,
+      game and game.seeded and current_seed or nil,
       restart,
       main_menu,
     }})

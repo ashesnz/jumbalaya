@@ -13,6 +13,7 @@ local perk_cfg = require("word_game.config.perks")
 local stamp_grid = require("word_game.ui.perks.stamp.grid")
 local stamp_puff = require("word_game.ui.perks.stamp.puff")
 local widgets = require("word_game.ui.widgets")
+local game_access = require("word_game.model.game_access")
 local definition = require("word_game.ui.perks.stamp.definition")
 local draw = require("word_game.ui.perks.stamp.draw")
 local animate = require("word_game.ui.perks.stamp.animate")
@@ -117,9 +118,9 @@ end
 
 function M.queue(entry)
 	if not entry or not entry.id then return false end
-	if not G.GAME then return false end
+	if not game_access.get() then return false end
 	local resolved = perk_cfg.by_id(entry.id) or entry
-	G.GAME.pending_stamp_perk = definition.copy_perk(resolved)
+	game_access.patch({ pending_stamp_perk = definition.copy_perk(resolved) })
 	return true
 end
 

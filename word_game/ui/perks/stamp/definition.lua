@@ -6,6 +6,7 @@ require("word_game.ui.perks.shared.voucher_sprite")
 
 local perk_model = facade.perks_registry()
 local run_state = facade.run_state()
+local game_access = require("word_game.model.game_access")
 
 local M = {}
 
@@ -75,9 +76,10 @@ end
 
 function M.resolve_stamp_perk(perk_entry)
 	if perk_entry then return M.copy_perk(perk_entry) end
-	if G.GAME and G.GAME.pending_stamp_perk then
-		local pending = M.copy_perk(G.GAME.pending_stamp_perk)
-		G.GAME.pending_stamp_perk = nil
+	local game = game_access.get()
+	if game and game.pending_stamp_perk then
+		local pending = M.copy_perk(game.pending_stamp_perk)
+		game_access.patch({ pending_stamp_perk = nil })
 		return pending
 	end
 	return perk_model.roll_stamp_perk()

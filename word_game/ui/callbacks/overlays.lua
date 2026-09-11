@@ -1,5 +1,7 @@
 --[[ word_game/ui/callbacks/overlays.lua - Overlay screen G.FUNCS (stable names) ]]
 
+local game_access = require("word_game.model.game_access")
+
 local M = {}
 
 function M.install()
@@ -83,10 +85,13 @@ function M.install()
 	end
 
 	G.FUNCS.copy_run_seed = function(e)
+		local game = game_access.get()
+		local seed = game and game.seed_streams and game.seed_streams.seed
+		if not seed then return end
 		if G.F_LOCAL_CLIPBOARD then
-			G.CLIPBOARD = G.GAME.seed_streams.seed
+			G.CLIPBOARD = seed
 		else
-			love.system.setClipboardText(G.GAME.seed_streams.seed)
+			love.system.setClipboardText(seed)
 		end
 	end
 

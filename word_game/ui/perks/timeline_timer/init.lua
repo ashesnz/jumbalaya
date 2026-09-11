@@ -6,6 +6,7 @@
 ]]
 
 local facade = require("word_game.ui.facade")
+local game_access = require("word_game.model.game_access")
 local StageLabel = require("word_game.ui.score_banner.stage_label")
 local timer_layout = require("word_game.ui.perks.timeline_timer.layout")
 local timer_draw = require("word_game.ui.perks.timeline_timer.draw")
@@ -145,15 +146,17 @@ function M.is_progress_mode()
 end
 
 local function mirror_classic_to_game()
-	if not G or not G.GAME then return end
+	if not game_access.get() then return end
 	if not M.is_progress_mode() then return end
-	G.GAME.timeline_goal_reached = M.goal_reached == true
-	G.GAME.timeline_progress_target = M.progress_target
+	game_access.patch({
+		timeline_goal_reached = M.goal_reached == true,
+		timeline_progress_target = M.progress_target,
+	})
 end
 
 function M.sync_from_model()
-	if not G or not G.GAME then return end
-	local g = G.GAME
+	local g = game_access.get()
+	if not g then return end
 	if g.timeline_duration then
 		M.TOTAL_DURATION = g.timeline_duration
 	end
@@ -255,7 +258,7 @@ end
 function M.sync_progress()
 	if not M.is_progress_mode() then return end
 	if M.frozen_for_reward or M.score_roll then return end
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	local j = wr and wr.jumble
 	local target = math.max(1, (wr and wr.target) or M.progress_target or 1)
 	local banked = (j and j.total_score) or 0
@@ -373,7 +376,7 @@ function M.reset(duration)
 	M.slide_boost_t = 0
 	M.display_combo = 0
 	M.score_roll = nil
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	M.progress_target = math.max(1, (wr and wr.target) or 1)
 	M.sync_progress()
 	mirror_classic_to_game()
@@ -460,9 +463,9 @@ function M.freeze_reward_display(token_amount)
 end
 
 function M.set_time(time_seconds)
-	if WORD_GAME and WORD_GAME.Timeline and G and G.GAME then
-		local cap = G.GAME.timeline_duration or M.TOTAL_DURATION
-		G.GAME.timeline_seconds = math.max(0, math.min(cap, time_seconds or cap))
+	if WORD_GAME and WORD_GAME.Timeline and game_access.get() then
+		local cap = game_access.get().timeline_duration or M.TOTAL_DURATION
+		game_access.patch({ timeline_seconds = math.max(0, math.min(cap, time_seconds or cap)) })
 		sync_from_model()
 	else
 		M.time_remaining = math.max(0, math.min(M.TOTAL_DURATION, time_seconds or M.TOTAL_DURATION))

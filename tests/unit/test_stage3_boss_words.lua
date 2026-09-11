@@ -159,11 +159,11 @@ T.describe("Stage 1-3 boss words", function()
 
 	T.it("uses the full window width for boss play column layout", function()
 		local felt = require("word_game.ui.layout.felt")
-		G.GAME = {
+		mock_env.publish_game({
 			word_round = {
 				jumble = { boss_word_active = true },
 			},
-		}
+		})
 		G.TILE_W = 20
 		G.ROOM = { T = { x = 0, y = 0, w = 20, h = 11.5 } }
 		local boss_col = felt.play_column()
@@ -174,11 +174,11 @@ T.describe("Stage 1-3 boss words", function()
 
 	T.it("keeps hand felt on the normal play column during boss sequence", function()
 		local felt = require("word_game.ui.layout.felt")
-		G.GAME = {
+		mock_env.publish_game({
 			word_round = {
 				jumble = { boss_word_active = true },
 			},
-		}
+		})
 		G.TILE_W = 20
 		G.TILE_H = 11.5
 		G.ROOM = { T = { x = 0, y = 0, w = 20, h = 11.5 } }
@@ -194,11 +194,11 @@ T.describe("Stage 1-3 boss words", function()
 	T.it("stacks boss word cards below the timer with half-card overlap", function()
 		local layout = require("word_game.ui.layout.placement")
 		local bonus_stack_ui = require("word_game.ui.perks.bonus_stack")
-		G.GAME = {
+		mock_env.publish_game({
 			word_round = {
 				jumble = { boss_word_active = true },
 			},
-		}
+		})
 		G.TILE_W = 20
 		G.TILE_H = 11.5
 		G.CARD_W = 2
@@ -272,16 +272,16 @@ T.describe("Stage 1-3 boss words", function()
 		local InputLock = require("word_game.model.run.input_lock")
 		local play_effects = require("word_game.ui.play_effects")
 
-		G.GAME = {
+		mock_env.publish_game({
 			word_score_animating = true,
 			hand_redraw_animating = false,
 			hand_shuffle_animating = false,
 			placement_recall_animating = false,
-		}
-		G.GAME.word_round = {
-			mode = "jumble",
-			jumble = { boss_word_active = true, boss_puzzle_hidden = false },
-		}
+			word_round = {
+				mode = "jumble",
+				jumble = { boss_word_active = true, boss_puzzle_hidden = false },
+			},
+		})
 
 		local hand_card = {
 			ability = { letter = "A", set = "Default" },

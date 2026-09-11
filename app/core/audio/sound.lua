@@ -8,6 +8,7 @@
 ]]
 
 local MIXER = require("app.core.audio.mixer")
+local game_access = require("word_game.model.game_access")
 
 -- Reused request records: keeps per-frame allocation at zero.
 local play_request, mix_request, retag_request = {}, {}, {}
@@ -69,13 +70,15 @@ function mix_audio(dt)
 	-- Score intensity feeds the ambient fire/organ beds.
 	G.SETTINGS.ambient_control = G.SETTINGS.ambient_control or {}
 	G.ARGS.score_intensity = G.ARGS.score_intensity or {}
-	local hand = G.GAME and G.GAME.current_round and G.GAME.current_round.current_hand
+	local game = game_access.get()
+	local hand = game and game.current_round and game.current_round.current_hand
 	if not hand or type(hand.points) ~= 'number' or type(hand.mult) ~= 'number' then
 		G.ARGS.score_intensity.earned_score = 0
 	else
 		G.ARGS.score_intensity.earned_score = hand.points * hand.mult
 	end
-	G.ARGS.score_intensity.required_score = (G.GAME and G.GAME.word_round and G.GAME.word_round.target) or 0
+	local wr = game_access.word_round()
+	G.ARGS.score_intensity.required_score = (wr and wr.target) or 0
 	local intensity = G.ARGS.score_intensity
 	intensity.flames = math.min(1, (G.STAGE == G.STAGES.RUN and 1 or 0) *
 		((G.ARGS.chip_flames and (G.ARGS.chip_flames.real_intensity + G.ARGS.chip_flames.change)) or 0) / 10)

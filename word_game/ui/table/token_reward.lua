@@ -12,6 +12,7 @@ local round_config = require("word_game.config.gameplay.round")
 local state = facade.run_state()
 local RunMode = facade.run_mode()
 local Busy = facade.busy()
+local game_access = require("word_game.model.game_access")
 
 local M = {}
 
@@ -60,7 +61,7 @@ local function room_translate()
 end
 
 function M.is_eligible()
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	if not wr then return false end
 	if RunMode.is_classic() then
 		return true
@@ -69,7 +70,8 @@ function M.is_eligible()
 end
 
 local function banked_score()
-	local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
+	local wr = game_access.word_round()
+	local j = wr and wr.jumble
 	return (j and j.total_score) or 0
 end
 
@@ -345,7 +347,7 @@ end
 
 function M.draw_pass()
 	if not active and #flyers == 0 then return end
-	if not G.GAME or not G.ROOM then return end
+	if not game_access.get() or not G.ROOM then return end
 	if G.STATE ~= G.STATES.TABLE_BOARD then return end
 
 	M.update(math.min(0.05, love.timer and love.timer.getDelta() or 0.016))

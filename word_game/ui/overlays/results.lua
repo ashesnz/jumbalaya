@@ -2,6 +2,7 @@
 
 local Easing = require "app.effects.easing"
 local Components = require "word_game.ui.widgets.components"
+local game_access = require("word_game.model.game_access")
 
 function build_win()
   local show_win_cta = false
@@ -132,7 +133,8 @@ end
 
 
 function build_round_scores_row(score, text_colour)
-  local label = G.GAME.round_scores[score] and localize('hdr_score_'..score) or ''
+  local game = game_access.get()
+  local label = game and game.round_scores[score] and localize('hdr_score_'..score) or ''
   local check_high_score = false
   local score_tab = {}
   local label_w, score_w, h = ({hand=true})[score] and 3.5 or 2.9, ({hand=true})[score] and 3.5 or 1, 0.5
@@ -142,7 +144,7 @@ function build_round_scores_row(score, text_colour)
     check_high_score = true
     label = 'Set'
     score_tab = {
-      {n=G.UI.OBJECT, config={object = FlowText({string = {number_format((G.GAME.word_round and G.GAME.word_round.set) or 0)}, colours = {text_colour or G.C.FILTER},shadow = true, float = true, scale = 0.45})}},
+      {n=G.UI.OBJECT, config={object = FlowText({string = {number_format((game and game.word_round and game.word_round.set) or 0)}, colours = {text_colour or G.C.FILTER},shadow = true, float = true, scale = 0.45})}},
     }
   end
   if score == 'furthest_round' then 
@@ -150,7 +152,7 @@ function build_round_scores_row(score, text_colour)
     check_high_score = true
     label = localize('term_round')
     score_tab = {
-      {n=G.UI.OBJECT, config={object = FlowText({string = {number_format(G.GAME.round)}, colours = {text_colour or G.C.FILTER},shadow = true, float = true, scale = 0.45})}},
+      {n=G.UI.OBJECT, config={object = FlowText({string = {number_format(game and game.round or 0)}, colours = {text_colour or G.C.FILTER},shadow = true, float = true, scale = 0.45})}},
     }
   end
   if score == 'seed' then 
@@ -158,7 +160,7 @@ function build_round_scores_row(score, text_colour)
     score_w = 1.9
     label = localize('term_seed')
     score_tab = {
-      {n=G.UI.OBJECT, config={object = FlowText({string = {G.GAME.seed_streams.seed}, colours = {text_colour or G.C.WHITE},shadow = true, float = true, scale = 0.45})}},
+      {n=G.UI.OBJECT, config={object = FlowText({string = {game and game.seed_streams and game.seed_streams.seed or ""}, colours = {text_colour or G.C.WHITE},shadow = true, float = true, scale = 0.45})}},
     }
   end
 
@@ -173,12 +175,12 @@ function build_round_scores_row(score, text_colour)
         {n=G.UI.OBJECT, config={w=0.3,h=0.3 , object = chip_sprite}}
       }},
       {n=G.UI.COLUMN, config={align = "cm"}, nodes={
-        {n=G.UI.OBJECT, config={object = FlowText({string = {number_format(G.GAME.round_scores[score].amt)}, colours = {text_colour or G.C.RED},shadow = true, float = true, scale = math.min(0.6, score_number_scale(1.2, G.GAME.round_scores[score].amt))})}},
+        {n=G.UI.OBJECT, config={object = FlowText({string = {number_format(game.round_scores[score].amt)}, colours = {text_colour or G.C.RED},shadow = true, float = true, scale = math.min(0.6, score_number_scale(1.2, game.round_scores[score].amt))})}},
       }},
     }
-  elseif G.GAME.round_scores[score] and not score_tab[1] then 
+  elseif game and game.round_scores[score] and not score_tab[1] then 
     score_tab = {
-      {n=G.UI.OBJECT, config={object = FlowText({string = {number_format(G.GAME.round_scores[score].amt)}, colours = {text_colour or G.C.FILTER},shadow = true, float = true, scale = score_number_scale(0.6, G.GAME.round_scores[score].amt)})}},
+      {n=G.UI.OBJECT, config={object = FlowText({string = {number_format(game.round_scores[score].amt)}, colours = {text_colour or G.C.FILTER},shadow = true, float = true, scale = score_number_scale(0.6, game.round_scores[score].amt)})}},
     }
   end
   return {n=G.UI.ROW, config={align = "cm", padding = 0.05, r = 0.1, colour = shade(G.C.MUTED_GREY, 0.1), emboss = 0.05, func = check_high_score and 'high_score_alert' or nil, id = score}, nodes={
@@ -186,7 +188,7 @@ function build_round_scores_row(score, text_colour)
         {n=G.UI.TEXT, config={text = label, scale = label_scale, colour = G.C.UI.TEXT_LIGHT, shadow = true}},
     }},
     {n=G.UI.COLUMN, config={align = "cr"}, nodes={
-      {n=G.UI.COLUMN, config={align = "cm", minh = h, r = 0.1, minw = score_w, colour = (score == 'seed' and G.GAME.seeded) and G.C.RED or G.C.BLACK, emboss = 0.05}, nodes={
+      {n=G.UI.COLUMN, config={align = "cm", minh = h, r = 0.1, minw = score_w, colour = (score == 'seed' and game and game.seeded) and G.C.RED or G.C.BLACK, emboss = 0.05}, nodes={
         {n=G.UI.COLUMN, config={align = "cm", padding = 0.05, r = 0.1, minw = score_w}, nodes=score_tab},
       }}
     }},

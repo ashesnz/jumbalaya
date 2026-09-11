@@ -15,6 +15,8 @@ local Scheduler = require("app.effects.timeline_scheduler")
 
 local RunMode = facade.run_mode()
 
+local game_access = require("word_game.model.game_access")
+
 local M = {}
 
 local INVALID_WORD_TEXT = "Not a valid word!"
@@ -134,7 +136,7 @@ end
 local function hand_dealt_metrics()
 	if not G.dealt_letters then return nil end
 
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	local locked = wr and wr.jumble and wr.jumble.locked_hand_layout
 	local left, right, top, bottom
 

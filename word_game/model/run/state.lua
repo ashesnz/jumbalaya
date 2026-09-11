@@ -1,4 +1,4 @@
---[[ word_game/model/run/state.lua - Match-long run state on G.GAME.run_state ]]
+--[[ word_game/model/run/state.lua - Match-long run state on game snapshot run_state ]]
 
 local perks_cfg = require("word_game.config.perks")
 local core_run_state = require("jumbalaya_core.store.run_state")
@@ -12,7 +12,7 @@ function M.new()
 	return core_run_state.new()
 end
 
---- Migrates legacy save field `G.GAME.alpha` → `run_state` once per load.
+--- Migrates legacy save field `alpha` → `run_state` once per load.
 function M.migrate_legacy_field(game)
 	if not game or type(game) ~= "table" then return end
 	if game.run_state then
@@ -25,12 +25,7 @@ function M.migrate_legacy_field(game)
 	end
 end
 
-local function sync_store()
-	local store = runtime.store()
-	if store and G and G.GAME then
-		store_sync.sync_to_g(store)
-	end
-end
+local function sync_store() end
 
 function M.get()
 	local game = game_access.get()

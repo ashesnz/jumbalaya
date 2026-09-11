@@ -9,6 +9,7 @@
 local facade = require("word_game.ui.facade")
 local Layout = require("word_game.ui.layout")
 local table_discard = require("word_game.ui.perks.discard_bin")
+local game_access = require("word_game.model.game_access")
 
 local function run_mode()
 	return facade.run_mode()
@@ -270,7 +271,7 @@ function M.update(dt)
 end
 
 local function commit_pending_score()
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	local j = wr and wr.jumble
 	if not j then return 0 end
 	local pending = 0

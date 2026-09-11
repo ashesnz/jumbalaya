@@ -4,6 +4,7 @@ local Presentation = require("word_game.model.presentation")
 local LayoutRequest = require("word_game.model.layout.request")
 local round_config = require("word_game.config.gameplay.round")
 local RunMode = require("word_game.model.run.mode")
+local game_access = require("word_game.model.game_access")
 
 local M = {}
 
@@ -143,7 +144,7 @@ function M.install(ui, domain)
 
 	Presentation.on("timeline_reset", function()
 		if not ui.TimelineTimer then return end
-		local wr = G.GAME and G.GAME.word_round
+		local wr = game_access.word_round()
 		if RunMode.is_classic() then
 			if domain.Timeline and domain.Timeline.clear_boss_override then
 				domain.Timeline.clear_boss_override()
@@ -192,7 +193,8 @@ function M.install(ui, domain)
 	end)
 
 	Presentation.on("jumble_hud_refresh", function()
-		local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
+		local wr = game_access.word_round()
+		local j = wr and wr.jumble
 		if not j or not ui.ScoreBanner then return end
 		local hud = ui.ScoreBanner.state()
 		hud.to_go_label = "SCORE"
@@ -237,7 +239,7 @@ function M.install(ui, domain)
 
 	Presentation.on("hand_started", function(set, hand_index)
 		Presentation.emit("bonus_stack_on_hand_start", set, hand_index)
-		local wr = G.GAME and G.GAME.word_round
+		local wr = game_access.word_round()
 		if wr then
 			Presentation.emit("score_banner_reset", wr.target)
 		end

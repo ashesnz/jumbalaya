@@ -61,7 +61,6 @@ function M.sync_areas_to_store(store)
 	local piles = M.collect_piles()
 	if not piles then return end
 	store:patch({ piles = piles })
-	store_sync.sync_to_g(store)
 end
 
 return M

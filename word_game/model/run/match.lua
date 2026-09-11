@@ -10,13 +10,8 @@ function M.end_run(opts)
 	if type(delete_saved_run) == "function" then
 		delete_saved_run()
 	end
-	if WORD_GAME and WORD_GAME.store() and game_access.get() then
+	if game_access.get() then
 		game_access.dispatch({ type = "RUN_MATCH_END", won = opts.won })
-	elseif G and G.GAME then
-		state.migrate_legacy_field(G.GAME)
-		G.GAME.run_state = G.GAME.run_state or {}
-		G.GAME.run_state.match_over = true
-		G.GAME.run_state.match_won = opts.won and true or false
 	end
 	if G.SETTINGS then
 		G.SETTINGS.paused = true

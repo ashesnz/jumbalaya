@@ -1,5 +1,7 @@
 --[[ app/controllers/run_lifecycle.lua - Phase 4 run start / menu return controller ]]
 
+local game_access = require("word_game.model.game_access")
+
 local M = {}
 
 function M.notify_then_start_run(e)
@@ -10,7 +12,7 @@ end
 
 function M.begin_run(e, args)
 	G.SETTINGS.paused = false
-	if e and e.config.id == 'restart_button' then G.GAME.viewed_back = nil end
+	if e and e.config.id == 'restart_button' then game_access.patch({ viewed_back = nil }) end
 	G.TIMELINE:flush()
 	G:queue_during_wipe(function()
 		G:discard_run()

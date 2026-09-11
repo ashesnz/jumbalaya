@@ -163,7 +163,6 @@ end
 function M.evaluate_play(jumble, j)
 	invariant.check(jumble ~= nil, "evaluate_play requires jumble module")
 	invariant.check(j ~= nil, "evaluate_play requires jumble state")
-	store_sync.adopt_current_g_game()
 	local wr = game_access.word_round()
 	local result = core_play.evaluate(j, wr, {
 		play_blocked = M.play_blocked,

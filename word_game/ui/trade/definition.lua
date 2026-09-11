@@ -1,6 +1,7 @@
 --[[ word_game/ui/trade/definition.lua - Marketplace UIBox node builders ]]
 
 local facade = require("word_game.ui.facade")
+local game_access = require("word_game.model.game_access")
 
 local function trade_model()
 	return facade.trade()
@@ -22,7 +23,7 @@ local MODIFIER_LINE_CHARS = 38
 local TOKEN_COIN_W = 0.24
 
 local function make_face_card(item, w, h)
-	if not G.GAME or not G.LETTERS.faces or not deck_model().letter_center() then
+	if not game_access.get() or not G.LETTERS.faces or not deck_model().letter_center() then
 		return nil
 	end
 	if not item or not item.letter then return nil end

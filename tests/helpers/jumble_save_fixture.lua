@@ -60,7 +60,8 @@ end
 
 --- Apply unpacked save onto live G (card areas + round restore).
 function M.apply_loaded(loaded, restore_card_areas, round_restore)
-	G.GAME = loaded.GAME
+	local mock_env = require("tests.helpers.mock_env")
+	mock_env.publish_game(loaded.GAME)
 	G.STATE = loaded.STATE
 	if restore_card_areas then
 		restore_card_areas(loaded)

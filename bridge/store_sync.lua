@@ -1,10 +1,10 @@
 --[[
-	bridge/store_sync.lua - Phase 7 store ↔ G.GAME compatibility shim.
+	bridge/store_sync.lua - Phase 8 store bridge (G.GAME mirror retired in PR-2).
 
 	Contract:
 	- The store owns run snapshot state.
-	- G.GAME is a read mirror for legacy UI/engine code until G is retired.
-	- New code uses WORD_GAME.store() / game_access; do not write G.GAME directly.
+	- New code uses WORD_GAME.store() / game_access.
+	- legacy_mirror_* helpers remain for headless tests without a bound store.
 ]]
 
 local CoreStore = require("jumbalaya_core.store")
@@ -13,7 +13,7 @@ local runtime = require("bridge.runtime")
 
 local M = {}
 
----@return table store GameStore instance with G sync hooks
+---@return table store GameStore instance
 function M.new(initial)
 	local store = CoreStore.new(initial or default_state.new())
 	return store
@@ -29,25 +29,44 @@ end
 ---@param state table
 function M.replace(store, state)
 	store:replace(state)
-	M.sync_to_g(store)
 end
 
 ---@param store table
 ---@param patch table
 function M.patch(store, patch)
 	store:patch(patch)
-	M.sync_to_g(store)
 end
 
---- Mirror store state onto G.GAME for legacy modules.
----@param store GameStore
-function M.sync_to_g(store)
+--- Retired in PR-2: store is authoritative; no G.GAME mirror.
+function M.sync_to_g(_store) end
+
+--- Clear legacy G.GAME slot on run teardown (bridge-only).
+function M.clear_g_mirror()
 	if _G.G then
-		_G.G.GAME = store:get()
+		_G.G.GAME = nil
 	end
 end
 
---- Bootstrap helper: adopt the current G.GAME table as store state.
+--- Legacy mirror read when store is not bound (headless tests; bridge-only).
+function M.legacy_mirror_get()
+	if _G.G then
+		return _G.G.GAME
+	end
+	return nil
+end
+
+--- Legacy mirror patch when store is not bound (headless tests; bridge-only).
+---@param fields table
+function M.legacy_mirror_patch(fields)
+	local game = M.legacy_mirror_get()
+	if not game or not fields then return game end
+	for key, value in pairs(fields) do
+		game[key] = value
+	end
+	return game
+end
+
+--- Bootstrap helper: adopt legacy G.GAME table into store (tests / one-time boot).
 ---@param store table
 function M.sync_from_g(store)
 	if _G.G and _G.G.GAME then
@@ -61,13 +80,12 @@ function M.subscribe(store, fn)
 	store:subscribe(fn)
 end
 
---- Dispatch a store action and mirror onto G.GAME.
+--- Dispatch a store action.
 ---@param store table
 ---@param action table
 ---@return table state
 function M.dispatch(store, action)
 	store:dispatch(action)
-	M.sync_to_g(store)
 	return store:get()
 end
 
@@ -77,22 +95,21 @@ end
 ---@return table state
 function M.bind_run(store, game_table)
 	store:replace(game_table)
-	M.sync_to_g(store)
 	return store:get()
 end
 
---- When legacy code assigns a fresh G.GAME table, adopt it into the store.
----@param store table|nil
-function M.adopt_current_g_game(store)
-	store = store or runtime.store()
-	if not store or not _G.G or not _G.G.GAME then return end
-	if store:get() ~= _G.G.GAME then
-		M.sync_from_g(store)
-		M.sync_to_g(store)
-	end
+--- Retired in PR-2.
+function M.adopt_current_g_game(_store) end
+
+--- Replace store from a saved snapshot.
+---@param store table
+---@param snapshot table
+function M.restore_snapshot(store, snapshot)
+	if not store or not snapshot then return end
+	store:replace(snapshot.GAME or snapshot)
 end
 
---- Headless tests: create store, bind WORD_GAME, mirror G.GAME.
+--- Headless tests: create store, bind WORD_GAME.
 function M.ensure_test_binding()
 	if not _G.G then return nil end
 	local word_game = package.loaded["word_game"]
@@ -108,8 +125,6 @@ function M.ensure_test_binding()
 	end
 	if _G.G.dealt_letters or _G.G.draw_pile then
 		require("bridge.pile_sync").sync_areas_to_store(store)
-	else
-		M.sync_to_g(store)
 	end
 	local engine_boot = package.loaded["app.bootstrap.engine_services_boot"]
 	if engine_boot and engine_boot.install then

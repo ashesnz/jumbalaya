@@ -8,6 +8,7 @@
 local facade = require("word_game.ui.facade")
 local effects = require("word_game.ui.play_effects")
 local Presentation = require("word_game.model.presentation")
+local game_access = require("word_game.model.game_access")
 
 local RunMode = facade.run_mode()
 
@@ -47,14 +48,15 @@ function M.resolve(play_module, opts)
 		else
 			effects.show_puzzle_bank_feedback(result.puzzle_total)
 			opts.instant = opts.instant ~= false
-			effects.present_jumble_next(WORD_GAME and WORD_GAME.Jumble, G.GAME.word_round, opts)
+			effects.present_jumble_next(WORD_GAME and WORD_GAME.Jumble, game_access.word_round(), opts)
 		end
 		return result
 	end
 
+	local wr = game_access.word_round()
 	effects.present_word_play_after_cards(
 		WORD_GAME and WORD_GAME.Jumble,
-		G.GAME and G.GAME.word_round and G.GAME.word_round.jumble,
+		wr and wr.jumble,
 		result,
 		play_module.on_hand_cleared,
 		opts.on_complete

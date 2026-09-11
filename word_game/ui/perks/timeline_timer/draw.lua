@@ -1,13 +1,14 @@
 --[[ word_game/ui/perks/timeline_timer/draw.lua - timeline HUD render pass ]]
 
 local Layout = require("word_game.ui.layout")
+local game_access = require("word_game.model.game_access")
 local StageLabel = require("word_game.ui.score_banner.stage_label")
 
 local M = {}
 
 function M.draw(timer, layout)
 	if not love or not love.graphics or not love.graphics.polygon then return end
-	if not G.GAME or not G.ROOM then return end
+	if not game_access.get() or not G.ROOM then return end
 	if G.STATE ~= G.STATES.TABLE_BOARD then return end
 	local vis = timer.intro_visible
 	if vis == nil then vis = 1 end

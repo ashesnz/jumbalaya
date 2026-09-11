@@ -6,6 +6,7 @@
 ]]
 
 local Layout = require("word_game.ui.layout")
+local game_access = require("word_game.model.game_access")
 local fonts = require("word_game.ui.score_banner.fonts")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 
@@ -348,7 +349,7 @@ local function draw_banner(banner, stack, img_w, img_h)
 end
 
 function M.draw()
-	if not M.is_active() or not G.GAME or not G.ROOM then return end
+	if not M.is_active() or not game_access.get() or not G.ROOM then return end
 	if G.STATE ~= G.STATES.TABLE_BOARD then return end
 
 	local stack = stack_layout_pixels()

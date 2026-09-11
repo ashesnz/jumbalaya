@@ -3,6 +3,7 @@
 ]]
 
 local Layout = require("word_game.ui.layout")
+local game_access = require("word_game.model.game_access")
 local Roll = require("word_game.ui.util.roll")
 local felt_layout = require("word_game.ui.layout.felt")
 local fonts = require("word_game.ui.score_banner.fonts")
@@ -94,7 +95,7 @@ local function draw_rolling_digit(cx, cy, from_val, to_val, roll, font, scale, c
 end
 
 function M.draw(sb)
-	if not G.GAME or not G.ROOM then return end
+	if not game_access.get() or not G.ROOM then return end
 	if G.STATE ~= G.STATES.TABLE_BOARD then return end
 
 	local dt = math.min(0.05, love.timer.getDelta())
@@ -104,7 +105,8 @@ function M.draw(sb)
 	-- The points x multi readout belongs to the normal HUD; when the sidebar
 	-- sidebar is hidden for the boss sequence, it hides along with it. Only
 	-- an explicit boss banner ("BOSS WORD") renders during the sequence.
-	local hud_early = G.GAME and G.GAME.word_hud
+	local game = game_access.get()
+	local hud_early = game and game.word_hud
 	local mode_early = hud_early and hud_early.banner_mode or "normal"
 	if mode_early ~= "boss_prep" and mode_early ~= "boss_word"
 		and not boss_word_announce.is_active()
@@ -150,7 +152,7 @@ function M.draw(sb)
 	local mult_cx = layout.mult_cx
 	local radius = layout.radius
 
-	local hud = G.GAME and G.GAME.word_hud
+	local hud = game and game.word_hud
 	local banner_mode = hud and hud.banner_mode or "normal"
 	if banner_mode == "boss_prep" or banner_mode == "boss_word"
 		or boss_word_announce.is_active() then

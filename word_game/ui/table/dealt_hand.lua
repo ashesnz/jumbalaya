@@ -4,6 +4,7 @@ local M = {}
 
 local felt_layout = require("word_game.ui.layout.felt")
 local facade = require("word_game.ui.facade")
+local game_access = require("word_game.model.game_access")
 
 local HAND_BOTTOM_MARGIN = 0.25
 
@@ -20,7 +21,7 @@ end
 
 function M.apply_screen_position()
 	if not G.dealt_letters then return end
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	local locked = wr and wr.jumble and wr.jumble.locked_hand_layout
 	if locked then
 		G.dealt_letters.T.x = locked.x

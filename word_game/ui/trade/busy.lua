@@ -1,4 +1,4 @@
---[[ word_game/ui/trade/busy.lua - Push trade animation busy flag to G.GAME ]]
+--[[ word_game/ui/trade/busy.lua - Push trade animation busy flag via Busy model ]]
 
 local Busy = require("word_game.model.run.busy")
 

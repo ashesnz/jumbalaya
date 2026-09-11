@@ -3,6 +3,7 @@
 ]]
 
 local Layout = require("word_game.ui.layout")
+local game_access = require("word_game.model.game_access")
 local facade = require("word_game.ui.facade")
 local Roll = require("word_game.ui.util.roll")
 local fonts = require("word_game.ui.score_banner.fonts")
@@ -245,7 +246,7 @@ end
 
 function M.sync_points_to_get_preview(animate, opts)
 	if M.hide_points_to_get then return end
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	local j = wr and wr.jumble
 	local rules = facade.jumble_rules()
 	local target = (wr and wr.target) or rules.round_target()

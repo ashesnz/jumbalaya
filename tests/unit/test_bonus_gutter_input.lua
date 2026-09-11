@@ -3,9 +3,15 @@
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
 
+local game_access = require("word_game.model.game_access")
+
 local function layout_globals()
-	G.GAME = G.GAME or {}
-	G.GAME.word_round = { jumble = { boss_word_active = true, puzzle = { min = 3, max = 7 } } }
+	game_access.mutate(function(g)
+		g.word_round = {
+			mode = "jumble",
+			jumble = { boss_word_active = true, puzzle = { min = 3, max = 7 } },
+		}
+	end)
 	G.TILE_W = 20
 	G.TILE_H = 11.5
 	G.CARD_W = 2
@@ -138,14 +144,22 @@ T.describe("bonus gutter input", function()
 		}
 		bonus_stack.promote_to_bonus({ card })
 		local slots = { { kind = "blank", card = nil } }
-		G.GAME.word_round.jumble = {
-			slots = slots,
-			puzzle = { min = 3, max = 7 },
-		}
+		game_access.mutate(function(g)
+			g.word_round = {
+				mode = "jumble",
+				jumble = {
+					slots = slots,
+					puzzle = { min = 3, max = 7 },
+				},
+			}
+		end)
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.Jumble = {
 			is_active = function() return true end,
-			state = function() return G.GAME.word_round.jumble end,
+			state = function()
+				local wr = game_access.word_round()
+				return wr and wr.jumble
+			end,
 			slot_for_card = jumble.slot_for_card,
 			remove_card_from_blanks = jumble.remove_card_from_blanks,
 			assign_card_to_blank = jumble.assign_card_to_blank,

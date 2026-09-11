@@ -4,6 +4,7 @@ local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
 local snap = require("word_game.board.placement.snap")
 local Store = require("jumbalaya_core.store")
+local word_game = require("word_game")
 
 T.describe("Phase 5.3 Snap & Placement Store Integration", function()
 	mock_env.reset_game()
@@ -28,7 +29,7 @@ T.describe("Phase 5.3 Snap & Placement Store Integration", function()
 
 	T.it("place_in_row dispatches MOVE_CARD to store and updates card pile_id", function()
 		local store = Store.new()
-		G._store = store
+		word_game._bind_store(store)
 
 		local card = make_card(100, "A", "hand")
 		store:dispatch({ type = "ADD_CARD_TO_PILE", pile_id = "hand", card = card, slot_index = 1 })
@@ -70,13 +71,12 @@ T.describe("Phase 5.3 Snap & Placement Store Integration", function()
 		T.assert_equal(#state.piles.pattern, 1)
 		T.assert_equal(state.piles.pattern[1].id, 100)
 
-		G._store = nil
 		WORD_GAME.Jumble = nil
 	end)
 
 	T.it("return_to_hand dispatches MOVE_CARD back to hand pile in store", function()
 		local store = Store.new()
-		G._store = store
+		word_game._bind_store(store)
 
 		local card = make_card(101, "B", "pattern")
 		store:dispatch({ type = "ADD_CARD_TO_PILE", pile_id = "pattern", card = card, slot_index = 1 })
@@ -118,7 +118,6 @@ T.describe("Phase 5.3 Snap & Placement Store Integration", function()
 		T.assert_equal(#state.piles.hand, 1)
 		T.assert_equal(state.piles.hand[1].id, 101)
 
-		G._store = nil
 		G.dealt_letters = nil
 		WORD_GAME.Jumble = nil
 	end)

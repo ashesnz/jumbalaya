@@ -22,14 +22,14 @@ function queue_run_snapshot()
 	if G.F_NO_SAVING == true then return end
 	local runtime = require("bridge.runtime")
 	local store = runtime.store()
-	local store_state = store and store:get() or { GAME = G.GAME }
+	local store_state = store and store:get()
+	if not store_state then return end
 
 	G.ARGS.run_snapshot = save_safe_clone{
 		store = store_state,
-		GAME = G.GAME,
 		STATE = G.STATE,
 		ACTION = G.action,
-		BACK = G.GAME.selected_back and G.GAME.selected_back.save and G.GAME.selected_back:save() or nil,
+		BACK = store_state.selected_back and store_state.selected_back.save and store_state.selected_back:save() or nil,
 		VERSION = G.VERSION,
 	}
 	local persist = persistence()

@@ -6,6 +6,7 @@ local draw = require("word_game.ui.perks.stamp.draw")
 local stamp_puff = require("word_game.ui.perks.stamp.puff")
 local table_discard = require("word_game.ui.perks.discard_bin")
 local perk_cfg = require("word_game.config.perks")
+local game_access = require("word_game.model.game_access")
 
 local state = facade.run_state()
 local perk_model = facade.perks_registry()
@@ -242,7 +243,8 @@ function M.update(dt)
 	stamp_puff.update(dt)
 
 	if not anim or anim.debug then
-		if not anim and G.GAME and G.GAME.pending_stamp_perk and ctx.play_pending then
+		local game = game_access.get()
+		if not anim and game and game.pending_stamp_perk and ctx.play_pending then
 			ctx.play_pending()
 		end
 	end

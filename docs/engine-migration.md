@@ -631,6 +631,27 @@ Delete `engine_boot.lua` Balatro class chain.
 
 **Exit criteria:** `rg '\bG\.' --glob '*.lua'` returns only test fixtures or zero hits in production code.
 
+### Phase 7 status — complete (strangler)
+
+| Deliverable | Location |
+|-------------|----------|
+| Slim bootstrap orchestration | `app/bootstrap.lua` → `engine_adapter.lua` |
+| Runtime shell split | `app/bootstrap/runtime_boot.lua` (domain + updaters) |
+| Presentation boot split | `app/bootstrap/presentation_boot.lua` |
+| Store authority on WORD_GAME | `WORD_GAME.store()` / `WORD_GAME.engine()` — no `G._store` / `G._engine` |
+| Runtime accessors | `bridge/runtime.lua` |
+| Store boot (Phase 7) | `app/bootstrap/store_boot.lua` binds `WORD_GAME` only |
+| game_access via runtime | `word_game/model/game_access.lua` |
+| Migrated callers | model, bridge, UI modules use `bridge.runtime` |
+| Types | `types/store.lua` (store schema) |
+| Tests | `test_phase7_bootstrap`, `test_phase7_store_authority` |
+
+**Exit criteria met (strangler):** Bootstrap restructured; store and engine owned by `WORD_GAME`; `G._store` / `G._engine` removed; `G.GAME` remains a read mirror via `store_sync.sync_to_g` for legacy UI/engine.
+
+**Deferred (post-Phase 7):** Remove `G` singleton and `app/core/` scene graph; delete `engine_boot.lua` class chain; retire `G.GAME` mirror; remove remaining `LayoutView` / `CardArea` live nodes.
+
+Baseline: **471+ tests passing** (`love tests`).
+
 ---
 
 ## 10. Validation Checklist (run at every phase)
@@ -676,19 +697,264 @@ flowchart TD
     P5b[Phase 5b: pile state in store]
     P4b[Phase 4b: settings/menu G.FUNCS]
     P6[Phase 6: UIBox → view components]
-    P7[Phase 7: delete G + app/core scene graph]
+    P7[Phase 7: store on WORD_GAME + slim bootstrap]
+    P8[Phase 8: retire G mirror, UIBox, CardArea, G]
 
     P0 --> P1 --> P2 --> P3
     P3 --> P4a --> P5a --> P5b
     P3 --> P4b
-    P5b --> P6 --> P7
+    P5b --> P6 --> P7 --> P8
 ```
 
 Each PR should be mergeable independently. **Never** land a PR that breaks `love tests`.
 
 ---
 
-## 12. Risk Register
+## 12. Phase 8 — Post-Phase 7 Retirement (strangler)
+
+Phase 7 moved store/engine authority to `WORD_GAME`. Phase 8 removes the remaining legacy layers **bottom-up**: mirror first, screens next, scene graph last, `G` singleton last.
+
+### 12.1 Principles (do not break live game)
+
+1. **Additive first** — new view/store path runs alongside the old path; delete old path only when tests + smoke pass.
+2. **Single writer** — store reducers + `game_access` own mutations; `G.GAME` becomes read-only, then absent.
+3. **One concern per PR** — if a PR changes button clicks, card drag, and save format together, split it.
+4. **Freeze growth** — no new `G.GAME` keys, `G.FUNCS` names, or `LayoutView` trees without a Phase 8 removal plan.
+5. **Grep gates** — track baselines down each PR; CI can fail on *increases* before you fail on *zero*.
+
+### 12.2 Baseline inventory (2026-09-11)
+
+Run from repo root. Record new totals in your PR description when a gate moves.
+
+```sh
+# Model must not read G.GAME (target: 0)
+rg -c '\bG\.GAME\b' word_game/model --glob '*.lua'
+
+# LayoutView construction sites in presentation (target: 0)
+rg 'LayoutView\{' word_game --glob '*.lua'
+
+# G.FUNCS registrations and dispatches (target: 0 in production)
+rg -c 'G\.FUNCS' word_game app --glob '*.lua' -g '!tests/**'
+
+# CardArea live usage (target: 0 outside tests + save migration)
+rg -c 'CardArea' word_game app bridge --glob '*.lua' -g '!tests/**'
+
+# Full G coupling (target: 0 in production; tests/devtools exempt)
+rg -c '\bG\.' --glob '*.lua' -g '!tests/**' -g '!devtools/**'
+```
+
+| Metric | Baseline | Phase 8 target |
+|--------|----------|----------------|
+| `G.GAME` in `word_game/model/` | **23** hits / 6 files | **0** |
+| `LayoutView{` in `word_game/` | **17** sites / 14 files | **0** |
+| `G.FUNCS` in `word_game/` + `app/` | **~134** hits | **0** (or registry-only) |
+| `CardArea` in `word_game/` + `app/` + `bridge/` | **~70** hits | **0** (save compat via store snapshots) |
+| `G.` in production (excl. tests, devtools) | **~3300** hits | **0** |
+
+### 12.3 Layer removal order
+
+```text
+Layer 1  G.GAME mirror (store_sync.sync_to_g)     ← PR-1 … PR-2
+Layer 2  LayoutView screens (menu last)           ← PR-3 … PR-7
+Layer 3  G.FUNCS string bindings                  ← shrinks with each LayoutView PR
+Layer 4  CardArea / Card scene nodes             ← PR-3 … PR-6 (parallel with views)
+Layer 5  app/core/ui/ + engine_boot class chain  ← PR-8
+Layer 6  G singleton (globals.lua)               ← PR-9 (last)
+```
+
+### 12.4 PR checklist (merge independently)
+
+Each PR: `love tests` → `emmylua_check . --severity warn` → manual smoke (§10).
+
+#### PR-1 — Model `G.GAME` purge ✅
+
+**Goal:** `word_game/model/` never reads `G.GAME`; mirror may still exist for UI.
+
+| Action | Files (priority) |
+|--------|------------------|
+| Replace `G.GAME` reads | `run/scope.lua`, `game/run.lua`, `run/match.lua`, `run/state.lua`, `persistence/run_save.lua` |
+| Bridge-only mirror helpers | `bridge/store_sync.lua` (`legacy_mirror_get`, `legacy_mirror_patch`, `clear_g_mirror`, `restore_snapshot`) |
+| Store-only model access | `game_access.lua` — no `G.GAME` literals; adopt/sync via bridge |
+| Add CI gate | `tests/unit/test_phase8_model_no_g_game.lua` — `rg '\bG\.GAME\b' word_game/model` → 0 |
+
+**Exit:** `rg '\bG\.GAME\b' word_game/model` → **0**. `love tests` green (474 tests).
+
+**Tests:** `test_phase8_model_no_g_game.lua`; `test_run_lifecycle.lua` updated for store teardown.
+
+---
+
+#### PR-2 — Retire `G.GAME` mirror ✅
+
+**Goal:** `store_sync.sync_to_g` no-op; UI reads via `game_access` / `WORD_GAME.state()`.
+
+| Action | Files |
+|--------|-------|
+| Migrate UI readers | All `word_game/ui/**` — `game_access.get()` / `word_round()` / `patch()` / `mutate()` |
+| Migrate app readers | `app/core/persistence/save.lua`, `input_actions.lua`, `random.lua`, `sound.lua` |
+| No-op mirror | `bridge/store_sync.lua` — `sync_to_g` / `adopt_current_g_game` are empty stubs |
+| Remove model sync | `jumble/hand.lua`, `jumble_play/jumble.lua`, `round/init.lua`, `run/state.lua` |
+| Persistence | `queue_run_snapshot` writes `store:get()` only (no duplicate `GAME` field) |
+
+**Exit:** `rg '\bG\.GAME\b' word_game/ui app` → **0** in production paths. `love tests` green (476 tests).
+
+**Tests:** `test_store_sync.lua`, `test_phase8_model_no_g_game.lua` (mirror no-op gate); `mock_env.publish_game()` for store binding in tests.
+
+**Smoke:** save mid-hand, reload, score/timeline/fuse match.
+
+---
+
+#### PR-3 — TABLE_BOARD: full store render + shrink CardArea
+
+**Goal:** Hand/draw/pattern piles render from `store.piles` + `PileView`; CardArea only for drag overlay.
+
+| Action | Files |
+|--------|-------|
+| Expand view | `word_game/ui/views/table_board_view.lua`, `word_game/ui/table/board.lua` |
+| Input → store | `word_game/board/placement/snap.lua` (already dispatches `MOVE_CARD`) |
+| Dual-write shrink | `bridge/pile_sync.lua` — store authoritative; CardArea follows store on deal/shuffle |
+| Retire chrome | `word_game/ui/cardarea/hand.lua`, `deck.lua` draw paths when store path covers them |
+
+**Exit:** Empty `G.dealt_letters.cards` path is default in tests; drag still works in manual smoke.
+
+**Tests:** extend `test_phase6_1_table_board.lua`; `test_phase5_pile_sync.lua`.
+
+---
+
+#### PR-4 — Sidebar HUD view
+
+**Goal:** Replace `G.SIDEBAR_HUD` LayoutView column with store-subscribed view.
+
+| Action | Files |
+|--------|-------|
+| View component | `word_game/ui/views/sidebar_view.lua` (expand from passive subscriber) |
+| Remove LayoutView | `word_game/ui/sidebar/init.lua` (`LayoutView({` ~line 82), `hud_definition.lua` |
+| Stage button | `word_game/ui/sidebar/stage_button.lua` — draw via Renderer or slim widget, not UIBox child |
+| Callbacks | `sidebar/funcs.lua`, `sidebar/callbacks.lua` — `action_dispatch` only |
+
+**Exit:** `rg 'LayoutView\{' word_game/ui/sidebar` → **0**. End Run / deck count / stamps visible.
+
+**Smoke:** sidebar deck count, End Run, voucher discard, stage advance.
+
+---
+
+#### PR-5 — Trade overlay view
+
+**Goal:** Marketplace body is a view component, not `G.FUNCS.show_overlay` + LayoutView.
+
+| Action | Files |
+|--------|-------|
+| View | `word_game/ui/views/trade_view.lua`, `word_game/ui/trade/draw.lua` |
+| Remove LayoutView | `word_game/ui/trade/init.lua`, `trade/definition.lua` |
+| Unregister G.FUNCS | `word_game/ui/callbacks/trade.lua`, `ui/controllers/trade.lua` |
+
+**Exit:** `rg 'LayoutView\{' word_game/ui/trade` → **0**. Purchase / skip / fly anim work.
+
+**Smoke:** marketplace purchase, modal size stable (`test_marketplace_modal_size.lua`).
+
+---
+
+#### PR-6 — Table controls (play / shuffle bars)
+
+**Goal:** Replace `G.hand_action_bar` / `G.table_shuffle_bar` LayoutView trees.
+
+| Action | Files |
+|--------|-------|
+| Remove LayoutView | `word_game/ui/table/controls/layout.lua` (lines ~227, ~239) |
+| View or imperative draw | `table/controls/definition.lua`, `animate.lua`, `play_hold_redraw.lua` |
+| G.FUNCS cleanup | `word_game/ui/callbacks/table_controls.lua` — registration only until buttons migrated |
+
+**Exit:** `rg 'LayoutView\{' word_game/ui/table/controls` → **0**.
+
+**Smoke:** play, shuffle, hold-to-redraw (`test_play_hold_redraw.lua`).
+
+---
+
+#### PR-7 — Overlays, tutorials, popups (then menu last)
+
+**Goal:** Clear remaining `LayoutView{` sites before menu.
+
+| Action | Files |
+|--------|-------|
+| Tutorials | `tutorial/first_play.lua`, `tutorial/hand_clear_focus.lua` |
+| Overlays | `callbacks/overlays.lua`, `cards/popups.lua`, `feedback/word_feedback.lua` |
+| Widgets | `widgets/buttons.lua`, `widgets/sliders.lua` — infotips |
+| **Menu last** | `menu/animate.lua`, `menu/definition.lua`, `menu/layout.lua` |
+
+**Exit:** `rg 'LayoutView\{' word_game` → **0**.
+
+**Smoke:** first-play tutorial, settings overlay, title screen (`test_title_screen.lua`).
+
+---
+
+#### PR-8 — Delete `app/core/ui/` (after zero LayoutView)
+
+**Goal:** Remove UIBox engine; keep sprites/tween/audio utilities.
+
+| Action | Files |
+|--------|-------|
+| Delete | `app/core/ui/panel.lua`, `container.lua`, `node_*.lua`, `panel_*.lua` |
+| Keep / move | `app/core/graphics/sprite.lua`, `util/tween.lua` → `packages/jumbalaya-engine/` if needed |
+| Shrink boot | `app/bootstrap/engine_boot.lua` — drop `require "app.core.ui.panel"` chain |
+
+**Exit:** `rg 'LayoutView' app word_game` → **0**; `love tests` + full smoke.
+
+---
+
+#### PR-9 — Retire `G` singleton + `engine_boot` scene graph (last)
+
+**Goal:** `rg '\bG\.'` zero in production; lifecycle on `RuntimeContext` + Love2D adapter.
+
+| Action | Files |
+|--------|-------|
+| Introduce runtime shell | Expand `bridge/runtime.lua` — `STATE`, `STAGE`, `SETTINGS`, `ROOM`, dimensions |
+| Migrate lifecycle | `app/core/session/lifecycle.lua`, `loop.lua`, `app/startup.lua` |
+| Delete | `word_game/model/game/globals.lua` (`G = Game()`), remaining `engine_boot` class chain |
+| Types | `types/game.lua` → fold into `types/store.lua`; delete `types/g_funcs.lua` when `G.FUNCS` gone |
+
+**Exit:** `rg '\bG\.' --glob '*.lua' -g '!tests/**' -g '!devtools/**'` → **0**.
+
+**Tests:** `test_phase8_no_g_singleton.lua` (boot without `G = Game()`).
+
+---
+
+### 12.5 Per-PR verification template
+
+Copy into each Phase 8 PR description:
+
+```markdown
+## Phase 8 PR-__ : ____
+
+### Grep delta
+- G.GAME in model: __ → __
+- LayoutView{: __ → __
+- G.FUNCS: __ → __
+- CardArea: __ → __
+
+### Automated
+- [ ] love tests
+- [ ] emmylua_check . --severity warn
+
+### Manual smoke
+- [ ] Boot → menu → start run
+- [ ] Play / invalid word / hand clear
+- [ ] Shuffle / hold-to-redraw
+- [ ] Fuse expiry / trade / perk stamp
+- [ ] Save/load mid-hand / End Run
+```
+
+### 12.6 What not to do in Phase 8
+
+| Don't | Why |
+|-------|-----|
+| Delete `G` before LayoutView and CardArea are gone | Instant boot crash |
+| Turn off `sync_to_g` before UI reads `WORD_GAME.state()` | Stale HUD scores, timeline, trade |
+| Move tweens/FX into store reducers | Animation timing regressions |
+| Big-bang menu + table + trade in one PR | Unreviewable; high rollback cost |
+| Remove `types/g_funcs.lua` while UIBox buttons still bind strings | Runtime nil `G.FUNCS.*` |
+
+---
+
+## 13. Risk Register
 
 | Risk | Mitigation |
 |------|------------|
@@ -696,12 +962,12 @@ Each PR should be mergeable independently. **Never** land a PR that breaks `love
 | Animation timing regressions | Keep `play_effects/` on UI side; don't move tweens into reducers |
 | Circular requires | Core never imports engine; engine imports core only |
 | Scope explosion | Migrate TABLE_BOARD first; menu/settings last |
-| Dual-state bugs | Single writer rule: reducers own state, `G.GAME` is read-only mirror until Phase 7 |
+| Dual-state bugs | Single writer rule: reducers own state, `G.GAME` is read-only mirror until Phase 8 PR-1 completes |
 | Card drag feel | Port snap math verbatim from `board/placement/snap.lua` before rewriting |
 
 ---
 
-## 13. What You Can Skip / Defer
+## 14. What You Can Skip / Defer
 
 - **Legacy AP/plays/discards** — do not migrate; delete with old UI if encountered.
 - **`AlphaCardsBackup/`** — reference only, never port.
@@ -710,7 +976,7 @@ Each PR should be mergeable independently. **Never** land a PR that breaks `love
 
 ---
 
-## 14. First Concrete Week (start here)
+## 15. First Concrete Week (start here — Phase 0; historical)
 
 1. Create `packages/jumbalaya-core/` with `init.lua` + `store/default_state.lua` copied from `types/game.lua` schema.
 2. Move `dictionary/` and `jumble_play/jumble_rules.lua`; parameterize `get_target(wr)`.

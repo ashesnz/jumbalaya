@@ -37,14 +37,14 @@ T.describe("play resolution", function()
 			shown = err
 		end
 
-		G.GAME = { word_round = base_wr(), word_score_animating = false }
+		mock_env.publish_game({ word_round = base_wr(), word_score_animating = false })
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.Jumble = require("word_game.model.jumble")
 
 		local result = resolution.resolve(play)
 		T.assert_not_nil(result)
 		T.assert_equal(result.kind, "invalid")
-		T.assert_equal(G.GAME.word_round.jumble.puzzle_index, 1)
+		T.assert_equal(base_wr().jumble.puzzle_index, 1)
 		T.assert_not_nil(shown)
 
 		effects.show_validation_error = orig
@@ -64,7 +64,7 @@ T.describe("play resolution", function()
 		wr.jumble.solved = true
 		wr.jumble.puzzle_points = 4
 		wr.jumble.puzzle_multi = 1.2
-		G.GAME = { word_round = wr, word_score_animating = false, run_mode = "time_run" }
+		mock_env.publish_game({ word_round = wr, word_score_animating = false, run_mode = "time_run" })
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.Jumble = require("word_game.model.jumble")
 		WORD_GAME.Play = play
@@ -88,10 +88,10 @@ T.describe("play resolution", function()
 			return { kind = "invalid", err = "blocked" }
 		end
 
-		G.GAME = {
+		mock_env.publish_game({
 			word_round = base_wr(),
 			word_score_animating = true,
-		}
+		})
 		WORD_GAME = WORD_GAME or {}
 		WORD_GAME.Play = play
 		WORD_GAME_UI = WORD_GAME_UI or {}
@@ -100,7 +100,7 @@ T.describe("play resolution", function()
 		placement.try_play()
 		T.assert_false(resolved, "busy table should not call resolve")
 
-		G.GAME.word_score_animating = false
+		require("word_game.model.game_access").patch({ word_score_animating = false })
 		placement.try_play()
 		T.assert_true(resolved, "idle table should call resolve")
 

@@ -35,9 +35,9 @@ T.describe("Phase 5.2 TableAreas Selectors & Save Aliases", function()
 		T.assert_equal(#draw_cards, 0)
 	end)
 
-	T.it("selects pile cards via G._store when state parameter is omitted", function()
+	T.it("selects pile cards via WORD_GAME.store when state parameter is omitted", function()
 		local store = Store.new()
-		G._store = store
+		require("word_game")._bind_store(store)
 		local card = LetterCard.new(20, "B", "red", "draw", 1)
 		store:dispatch({ type = "ADD_CARD_TO_PILE", pile_id = "draw", card = card })
 
@@ -45,6 +45,5 @@ T.describe("Phase 5.2 TableAreas Selectors & Save Aliases", function()
 		T.assert_equal(#draw_cards, 1)
 		T.assert_equal(draw_cards[1].id, 20)
 
-		G._store = nil
 	end)
 end)

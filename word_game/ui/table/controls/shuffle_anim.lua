@@ -1,6 +1,7 @@
 --[[ word_game/ui/table/controls/shuffle_anim.lua - Smooth riffle shuffle animation for the hand ]]
 
 local Scheduler = require "app.effects.timeline_scheduler"
+local game_access = require("word_game.model.game_access")
 
 local M = {}
 
@@ -24,9 +25,7 @@ end
 
 local function set_animating(active)
 	animating = active
-	if G.GAME then
-		G.GAME.hand_shuffle_animating = active
-	end
+	game_access.patch({ hand_shuffle_animating = active })
 end
 
 local function capture_layout(hand)

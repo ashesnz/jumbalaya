@@ -3,6 +3,7 @@
 local M = {}
 
 local facade = require("word_game.ui.facade")
+local game_access = require("word_game.model.game_access")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 local function bonus_stack_ui()
 	return facade.bonus_stack_ui()
@@ -37,7 +38,7 @@ end
 
 function M.triggers_boss_word(result)
 	if not result or not result.cleared then return false end
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	local j = wr and wr.jumble
 	return wr and round_config.is_boss_word_hand(wr.set, wr.hand_index)
 		and j and not j.boss_word_active and not j.boss_word_staging
@@ -115,9 +116,7 @@ function M.show_validation_error(err)
 end
 
 function M.set_word_score_animating(active)
-	if G.GAME then
-		G.GAME.word_score_animating = active
-	end
+	game_access.patch({ word_score_animating = active })
 	-- deal_boss_hand and other sequences call set_ranks while this flag is still
 	-- true, which leaves drag.can false until ranks are refreshed.
 	if not active
@@ -180,7 +179,7 @@ function M.restore_boss_layout(opts)
 	if not opts.keep_bonus_stack then
 		bonus_stack_ui().clear()
 	end
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	if wr and wr.jumble then
 		wr.jumble.locked_hand_layout = nil
 	end

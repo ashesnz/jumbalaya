@@ -1,6 +1,7 @@
 --[[ word_game/ui/table/controls/placement_recall_anim.lua - Slide placement-row cards back to hand ]]
 
 local Scheduler = require "app.effects.timeline_scheduler"
+local game_access = require("word_game.model.game_access")
 local domain = require "word_game.ui.facade"
 
 local M = {}
@@ -22,9 +23,7 @@ end
 
 local function set_animating(active)
 	animating = active
-	if G.GAME then
-		G.GAME.placement_recall_animating = active
-	end
+	game_access.patch({ placement_recall_animating = active })
 end
 
 local function placement_area()
@@ -37,7 +36,7 @@ end
 
 local function sync_placement_from_jumble()
 	if not (WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active()) then return end
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	local slots = wr and wr.jumble and wr.jumble.slots
 	if slots and WORD_GAME.Jumble.sync_placement_cards then
 		WORD_GAME.Jumble.sync_placement_cards(slots)
@@ -46,7 +45,7 @@ end
 
 local function clear_jumble_slots()
 	if not (WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active()) then return end
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	local slots = wr and wr.jumble and wr.jumble.slots
 	if slots and WORD_GAME.Jumble.clear_blank_cards then
 		WORD_GAME.Jumble.clear_blank_cards(slots)
@@ -213,7 +212,7 @@ local function finish_recall()
 	end
 
 	if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active() then
-		local wr = G.GAME and G.GAME.word_round
+		local wr = game_access.word_round()
 		local slots = wr and wr.jumble and wr.jumble.slots
 		if slots and WORD_GAME.Jumble.sync_placement_cards then
 			WORD_GAME.Jumble.sync_placement_cards(slots)

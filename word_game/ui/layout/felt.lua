@@ -2,6 +2,8 @@
 	word_game/ui/layout/felt.lua - Play column, felt, panel, and HUD metrics.
 ]]
 
+local game_access = require("word_game.model.game_access")
+
 local M = {}
 
 M.HUD_TOP_FRAC = 0.015
@@ -40,7 +42,8 @@ function M.window_width_tiles()
 end
 
 function M.is_boss_sequence()
-	local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
+	local wr = game_access.word_round()
+	local j = wr and wr.jumble
 	if not j then return false end
 	return j.boss_word_active or j.boss_word_staging or j.boss_puzzle_hidden
 end

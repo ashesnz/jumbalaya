@@ -1,5 +1,7 @@
 -- Application and development keyboard actions.
 
+local game_access = require("word_game.model.game_access")
+
 local M = {}
 
 function M.key_press(controller, key)
@@ -46,10 +48,11 @@ function M.key_hold(controller, key, dt)
         G:queue_settings_write()
         controller.held_key_times[key] = nil
         G.SETTINGS.current_setup = 'New Run'
-        G.GAME.viewed_back = nil
-        G.run_setup_seed = G.GAME.seeded
+        local game = game_access.get()
+        game_access.patch({ viewed_back = nil })
+        G.run_setup_seed = game and game.seeded
         G.forced_seed, G.setup_seed = nil, nil
-        if G.GAME.seeded then G.forced_seed = G.GAME.seed_streams.seed end
+        if game and game.seeded then G.forced_seed = game.seed_streams.seed end
         if G.STAGE == G.STAGES.RUN and G.FUNCS.begin_run then G.FUNCS.begin_run() end
         G.forced_seed = nil
     end

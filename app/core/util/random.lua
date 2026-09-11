@@ -1,7 +1,9 @@
+local game_access = require("word_game.model.game_access")
+
 --[[
 	app/core/util/random.lua - seeded streams and general randomness.
 
-	Gameplay rolls flow through named streams kept in `G.GAME.seed_streams`,
+	Gameplay rolls flow through named streams kept in the game snapshot's `seed_streams`,
 	so a run started under a given seed replays identically. The numeric
 	constants below double as part of that replay contract: altering one
 	alters every roll that follows it.
@@ -88,7 +90,9 @@ end
 function advance_seed(key)
 	if key == 'seed' then return math.random() end
 
-	local streams = G.GAME.seed_streams
+	local game = game_access.get()
+	if not game then return math.random() end
+	local streams = game.seed_streams
 	if not streams[key] then
 		streams[key] = hash_text(key .. (streams.seed or ''))
 	end

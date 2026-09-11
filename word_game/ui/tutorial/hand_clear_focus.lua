@@ -7,6 +7,7 @@
 
 local M = {}
 local Easing = require "app.effects.easing"
+local game_access = require("word_game.model.game_access")
 
 local active = false
 local overlay_colour = { 0.06, 0.08, 0.12, 0 }
@@ -46,8 +47,8 @@ function M.begin()
 	if not G.ROOM_ATTACH then return end
 
 	active = true
-	if G.GAME then
-		G.GAME.word_score_animating = true
+	if game_access.get() then
+		game_access.patch({ word_score_animating = true })
 	end
 	G.under_overlay = true
 	stop_drag()

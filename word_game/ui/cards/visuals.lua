@@ -6,6 +6,7 @@ local Scheduler = require "app.effects.timeline_scheduler"
 local DissolveFX = require "app.effects.dissolve_fx"
 local LetterFaces = require "word_game.ui.cards.letter_faces"
 local LetterPalette = require "word_game.config.visuals.letter_card_palette"
+local game_access = require("word_game.model.game_access")
 
 -- Sets whose body sprite doubles as the letter-tile face. Letter cards render
 -- as a tinted frame (center) plus a shared glyph layer (front).
@@ -101,8 +102,10 @@ function Card:set_sprites(_center, _front)
 		if not self.children.back then
 			local back_atlas = G.TEXTURE_ATLASES["playing_back"] or G.TEXTURE_ATLASES["centers"]
 			local default_back = G.LETTERS.centers and G.LETTERS.centers['deck_alpha']
+			local game = game_access.get()
+			local game_back_pos = game and game[self.back] and game[self.back].pos
 			local back_pos = G.TEXTURE_ATLASES["playing_back"] and {x = 0, y = 0}
-				or (self.params.bypass_back or (self.letter_card_id and G.GAME and G.GAME[self.back] and G.GAME[self.back].pos)
+				or (self.params.bypass_back or (self.letter_card_id and game_back_pos)
 				or (default_back and default_back.pos) or {x = 0, y = 0})
 			self.children.back = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, back_atlas, back_pos)
 			self.children.back.states.hover = self.states.hover

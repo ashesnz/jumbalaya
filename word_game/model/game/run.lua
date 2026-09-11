@@ -7,6 +7,7 @@ local Presentation = require("word_game.model.presentation")
 local Scheduler = require "app.effects.timeline_scheduler"
 local RunScope = require "word_game.model.run.scope"
 local RunMode = require "word_game.model.run.mode"
+local game_access = require "word_game.model.game_access"
 
 --- Tear down run-scoped UI and caches (delegates to RunScope).
 function Game:teardown_run_ui()
@@ -25,7 +26,7 @@ function Game:start_gameplay_board()
         G.debug_panel:close()
     end
 
-    G.GAME.round = 1
+    game_access.patch({ round = 1 })
 
     G.STATE = G.STATES.TABLE_BOARD
     G.STATE_COMPLETE = true
@@ -136,8 +137,7 @@ function Game:start_run(args)
         or 'Alpha Deck'
     selected_back = deck_center_from_name(selected_back)
     local game_table = saveTable and saveTable.GAME or self:init_game_object()
-    RunScope.begin_run(game_table, { from_save = saveTable ~= nil })
-    self.GAME = G.GAME
+    self.GAME = RunScope.begin_run(game_table, { from_save = saveTable ~= nil })
     self.GAME.modifiers = self.GAME.modifiers or {}
     self.GAME.selected_back = WORD_GAME.Back.new(selected_back)
     self.GAME.selected_back_key = selected_back

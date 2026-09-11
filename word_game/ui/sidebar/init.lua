@@ -8,6 +8,7 @@ local StageLabel = require("word_game.ui.score_banner.stage_label")
 local sidebar_callbacks = require("word_game.ui.sidebar.callbacks")
 local table_discard = require("word_game.ui.perks.discard_bin")
 local views_install = require("word_game.ui.views.install")
+local game_access = require("word_game.model.game_access")
 
 local function deck_mod()
 	return facade.deck()
@@ -118,9 +119,11 @@ function WordSidebar:refresh()
 end
 
 function WordSidebar:clear_hand()
-	if G.GAME and G.GAME.word_round then
-		G.GAME.word_round.played_words = {}
-	end
+	game_access.mutate(function(g)
+		if g.word_round then
+			g.word_round.played_words = {}
+		end
+	end)
 end
 
 --- UIBox registration target (`ensure_table_board_sidebar`).

@@ -5,13 +5,14 @@ local mock_env = require("tests.helpers.mock_env")
 local pile_sync = require("bridge.pile_sync")
 local Store = require("jumbalaya_core.store")
 local pile_selectors = require("jumbalaya_core.store.selectors.piles")
+local word_game = require("word_game")
 
 T.describe("Phase 5 Pile Sync Bridge", function()
 	mock_env.reset_game()
 
 	T.it("snapshots live CardArea cards into store piles", function()
 		local store = Store.new()
-		G._store = store
+		word_game._bind_store(store)
 
 		G.dealt_letters = {
 			cards = {
@@ -34,7 +35,6 @@ T.describe("Phase 5 Pile Sync Bridge", function()
 		T.assert_equal(state.piles.hand[1].id, 1)
 		T.assert_equal(state.piles.hand[1].pile_id, "hand")
 
-		G._store = nil
 	end)
 
 	T.it("ensure_test_binding syncs piles when table areas exist", function()
@@ -49,7 +49,7 @@ T.describe("Phase 5 Pile Sync Bridge", function()
 		G.pattern_row = { area = { cards = {} } }
 
 		require("bridge.store_sync").ensure_test_binding()
-		T.assert_equal(#G._store:get().piles.hand, 1)
-		T.assert_equal(G._store:get().piles.hand[1].ability.letter, "Z")
+		T.assert_equal(#word_game.store():get().piles.hand, 1)
+		T.assert_equal(word_game.store():get().piles.hand[1].ability.letter, "Z")
 	end)
 end)

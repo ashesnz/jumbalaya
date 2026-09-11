@@ -5,6 +5,7 @@
 ]]
 
 local facade = require("word_game.ui.facade")
+local game_access = require("word_game.model.game_access")
 local fonts = require("word_game.ui.score_banner.fonts")
 local jumble = require("word_game.ui.score_banner.jumble")
 local draw = require("word_game.ui.score_banner.draw")
@@ -18,19 +19,20 @@ M.title_font = fonts.title_font
 M.bubble_font = fonts.bubble_font
 
 function M.state()
-	if not G.GAME then
+	local game = game_access.get()
+	if not game then
 		return { remaining = 0, target = 0, to_go_label = LABEL_NEED }
 	end
-	G.GAME.word_hud = G.GAME.word_hud or {
+	game.word_hud = game.word_hud or {
 		remaining = 0,
 		target = 0,
 		to_go_label = LABEL_NEED,
 	}
-	return G.GAME.word_hud
+	return game.word_hud
 end
 
 function M.actual_remaining()
-	local wr = G.GAME and G.GAME.word_round
+	local wr = game_access.word_round()
 	local target = wr and wr.target or 0
 	local j = wr and wr.jumble
 	if j then
@@ -75,7 +77,8 @@ end
 function M.snap_to_actual()
 	local hud = M.state()
 	hud.remaining = M.actual_remaining()
-	hud.target = (G.GAME.word_round and G.GAME.word_round.target) or hud.target or 0
+	local wr = game_access.word_round()
+	hud.target = (wr and wr.target) or hud.target or 0
 	M.sync_label(hud)
 end
 

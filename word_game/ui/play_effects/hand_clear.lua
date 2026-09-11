@@ -4,6 +4,7 @@ local facade = require("word_game.ui.facade")
 local Scheduler = require("app.effects.timeline_scheduler")
 local CardMotion = require("app.effects.card_motion")
 local play_effects = require("word_game.ui.play_effects")
+local game_access = require("word_game.model.game_access")
 
 local feedback = facade.feedback()
 
@@ -78,7 +79,7 @@ local function handle_after_clear(play_module, opts, outcome)
 		return
 	end
 	if outcome == "boss_bonus_hand" then
-		local wr = G.GAME.word_round
+		local wr = game_access.word_round()
 		local bonus_stack = WORD_GAME_UI.BonusStackUI
 		if bonus_stack and bonus_stack.finalize_for_bonus_hand then
 			bonus_stack.finalize_for_bonus_hand(wr)
@@ -106,7 +107,7 @@ local function handle_after_clear(play_module, opts, outcome)
 		return
 	end
 	if outcome == "boss_next" then
-		local wr = G.GAME.word_round
+		local wr = game_access.word_round()
 		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.begin_boss_word then
 			WORD_GAME.Jumble.begin_boss_word(wr, function()
 				set_score_animating(false)
@@ -127,7 +128,7 @@ function M.install(play_module)
 	function play_module.on_hand_cleared(opts)
 		opts = opts or {}
 		play_module.prepare_hand_clear(opts)
-		if G.GAME then
+		if game_access.get() then
 			set_score_animating(true)
 		end
 
@@ -227,7 +228,7 @@ function M.install(play_module)
 		opts = opts or {}
 		play_effects.present_jumble_next(
 			WORD_GAME and WORD_GAME.Jumble,
-			G.GAME and G.GAME.word_round,
+			game_access.word_round(),
 			opts
 		)
 	end

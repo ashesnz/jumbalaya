@@ -5,6 +5,7 @@ local hand_shuffle_anim = require("word_game.ui.table.controls.shuffle_anim")
 local hand_placement_recall_anim = require("word_game.ui.table.controls.placement_recall_anim")
 
 local InputLock = facade.input_lock()
+local game_access = require("word_game.model.game_access")
 
 local M = {}
 
@@ -66,7 +67,7 @@ function M.recall_placement_cards(opts)
 		end
 	end
 	if jumble_active() then
-		local wr = G.GAME and G.GAME.word_round
+		local wr = game_access.word_round()
 		if wr and wr.jumble and wr.jumble.slots then
 			WORD_GAME.Jumble.clear_blank_cards(wr.jumble.slots)
 			WORD_GAME.Jumble.sync_placement_cards(wr.jumble.slots)
@@ -114,20 +115,19 @@ function M.stabilize_table_board(visible, buttons_present, sync)
 	end
 	M.stabilize()
 	layout().snap_hand_container()
-	if G.GAME and InputLock.is_table_busy() then return end
-	local settle = G.GAME and G.GAME.hand_layout_settle or 0
+	if game_access.get() and InputLock.is_table_busy() then return end
+	local game = game_access.get()
+	local settle = game and game.hand_layout_settle or 0
 	if settle > 0 or layout().hand_position_drift() then
 		layout().snap_hand_cards()
-		if settle > 0 and G.GAME then
-			G.GAME.hand_layout_settle = settle - 1
+		if settle > 0 then
+			game_access.patch({ hand_layout_settle = settle - 1 })
 		end
 	end
 end
 
 function M.mark_layout_settle(frames)
-	if G.GAME then
-		G.GAME.hand_layout_settle = frames or 4
-	end
+	game_access.patch({ hand_layout_settle = frames or 4 })
 end
 
 function M.is_animating()

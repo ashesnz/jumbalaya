@@ -5,6 +5,8 @@
 	the foreground. Move past a threshold while held: cancel inspect and drag.
 ]]
 
+local game_access = require("word_game.model.game_access")
+
 local M = {}
 
 M.HOLD_DELAY = 0.22
@@ -152,9 +154,9 @@ function M.update(dt)
 			peek_card = nil
 		end
 	end
-	if G.GAME then
-		G.GAME.inspecting_card = (peek_card and peek > 0.01) and peek_card or nil
-	end
+	game_access.patch({
+		inspecting_card = (peek_card and peek > 0.01) and peek_card or nil,
+	})
 end
 
 function M.draw_foreground()

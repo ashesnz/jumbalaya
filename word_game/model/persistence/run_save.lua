@@ -2,6 +2,7 @@
 
 local TableAreas = require("word_game.model.table_areas")
 local game_access = require("word_game.model.game_access")
+local store_sync = require("bridge.store_sync")
 local runtime = require("bridge.runtime")
 
 local M = {}
@@ -42,10 +43,7 @@ function M.restore_card_areas(save_table)
 	if save_table.store then
 		local store = runtime.store()
 		if store then
-			store:replace(save_table.store)
-		end
-		if save_table.store.GAME and _G.G then
-			_G.G.GAME = save_table.store.GAME
+			store_sync.restore_snapshot(store, save_table.store)
 		end
 	elseif save_table.cardAreas then
 		local store_piles = { hand = {}, draw = {}, pattern = {}, bonus = {}, discard = {} }
@@ -98,7 +96,7 @@ function M.append_pattern_row_snapshot(snapshot)
 		snapshot.store = store:get()
 	else
 		snapshot.store = {
-			GAME = G.GAME,
+			GAME = game_access.get(),
 			piles = {
 				hand = TableAreas.hand_cards(),
 				draw = TableAreas.draw_cards(),

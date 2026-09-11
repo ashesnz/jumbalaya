@@ -9,6 +9,7 @@ local facade = require("word_game.ui.facade")
 local InputLock = facade.input_lock()
 local perk_effects = facade.perks_effects()
 local Busy = facade.busy()
+local game_access = require("word_game.model.game_access")
 
 
 local M = {}
@@ -121,9 +122,7 @@ end
 local function set_animating(on)
 	animating = on
 	Busy.set("play_hold_redraw_busy", on)
-	if G.GAME then
-		G.GAME.hand_redraw_animating = on and true or false
-	end
+	game_access.patch({ hand_redraw_animating = on and true or false })
 end
 
 function M.reset()
@@ -244,7 +243,8 @@ local function trigger_redraw()
 		reset_hold()
 		return
 	end
-	local j = G.GAME and G.GAME.word_round and G.GAME.word_round.jumble
+	local wr = game_access.word_round()
+	local j = wr and wr.jumble
 	if not perk_effects.consume_redraw(j) then
 		reset_hold()
 		return

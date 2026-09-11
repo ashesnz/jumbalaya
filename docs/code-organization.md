@@ -7,7 +7,9 @@ Jumbalaya uses a small application shell around the Love2D engine and a separate
 
 New code should use the package style. Existing global APIs should only be changed through a dedicated migration so load order and string-based callbacks remain stable.
 
-### Engine migration (Phase 6 complete — Phase 7 next)
+### Engine migration (Phase 7 complete — Phase 8 next)
+
+Post-Phase 7 retirement plan (grep baselines, PR sequence): [engine-migration.md §12](engine-migration.md#12-phase-8--post-phase-7-retirement-strangler).
 
 Roadmap: [engine-migration.md](engine-migration.md). Phase 0 coupling baseline: [engine-migration-coupling-inventory.md](engine-migration-coupling-inventory.md).
 
@@ -16,7 +18,7 @@ Roadmap: [engine-migration.md](engine-migration.md). Phase 0 coupling baseline: 
 - No new `G.GAME` keys without a declared owner in `types/game.lua` **and** a planned store field in the migration roadmap.
 - No new `G.FUNCS` names without an entry in `types/g_funcs.lua` — enforced by `tests/unit/test_g_funcs_registry.lua`.
 - New features ship via `WORD_GAME` / `WORD_GAME_UI` facade methods; model code uses `Presentation.emit`, not `G.FUNCS`.
-- Store shim (`bridge/store_sync.lua`) is the compatibility contract until Phase 7 removes `G.GAME`.
+- Store authority lives on `WORD_GAME.store()`; `bridge/store_sync.lua` mirrors onto `G.GAME` for legacy UI/engine code.
 
 ---
 
@@ -24,9 +26,9 @@ Roadmap: [engine-migration.md](engine-migration.md). Phase 0 coupling baseline: 
 
 ```text
 app/                     Application bootstrap, startup, lifecycle, persistence, and callbacks
-  bootstrap/             engine_boot.lua + game_boot.lua (loaded by bootstrap.lua)
+  bootstrap/             engine_adapter.lua orchestrates engine_boot, runtime_boot, store_boot, presentation_boot
   startup/               profile, window, dealing, assets, menu_boot
-bridge/                  Migration shims (store_sync.lua — store ↔ G.GAME mirror)
+bridge/                  Migration shims (runtime.lua, store_sync.lua — store ↔ G.GAME mirror)
 packages/jumbalaya_core/ Engine-agnostic domain library (Phase 1+)
 packages/jumbalaya-engine/ Engine service interfaces + Love2D adapters (Phase 3)
 app/controllers/           Phase 4 G.FUNCS controllers (run lifecycle, settings, overlays)

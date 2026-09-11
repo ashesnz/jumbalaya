@@ -1,4 +1,4 @@
---[[ word_game/model/game_access.lua - Read/write game snapshot via store (Phase 7) ]]
+--[[ word_game/model/game_access.lua - Read/write game snapshot via store (Phase 8) ]]
 
 local store_sync = require("bridge.store_sync")
 local runtime = require("bridge.runtime")
@@ -12,12 +12,9 @@ end
 function M.get()
 	local s = store()
 	if s then
-		if G and G.GAME and G.GAME ~= s:get() then
-			store_sync.adopt_current_g_game(s)
-		end
 		return s:get()
 	end
-	return G and G.GAME
+	return store_sync.legacy_mirror_get()
 end
 
 function M.word_round()
@@ -42,23 +39,13 @@ function M.patch(fields)
 	if s and fields then
 		return store_sync.dispatch(s, { type = "GAME_PATCH", patch = fields })
 	end
-	local game = G and G.GAME
-	if game and fields then
-		for key, value in pairs(fields) do
-			game[key] = value
-		end
-	end
-	return game
+	return store_sync.legacy_mirror_patch(fields)
 end
 
 function M.mutate(fn)
 	local game = M.get()
 	if not game or not fn then return game end
 	fn(game)
-	local s = store()
-	if s then
-		store_sync.sync_to_g(s)
-	end
 	return game
 end
 

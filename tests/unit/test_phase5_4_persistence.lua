@@ -5,6 +5,7 @@ local mock_env = require("tests.helpers.mock_env")
 local Store = require("jumbalaya_core.store")
 local run_save = require("word_game.model.persistence.run_save")
 require("app.core.persistence.save")
+local word_game = require("word_game")
 
 T.describe("Phase 5.4 Store-based Persistence", function()
 	mock_env.reset_game()
@@ -22,7 +23,7 @@ T.describe("Phase 5.4 Store-based Persistence", function()
 				discard = {},
 			}
 		})
-		G._store = store
+		word_game._bind_store(store)
 		G.ARGS = {}
 
 		queue_run_snapshot()
@@ -32,13 +33,12 @@ T.describe("Phase 5.4 Store-based Persistence", function()
 		T.assert_equal(#G.ARGS.run_snapshot.store.piles.hand, 1)
 		T.assert_equal(G.ARGS.run_snapshot.store.piles.hand[1].letter, "A")
 
-		G._store = nil
 		G.ARGS = nil
 	end)
 
 	T.it("restores card areas / piles from store state snapshot", function()
 		local store = Store.new()
-		G._store = store
+		word_game._bind_store(store)
 
 		local snapshot = {
 			store = {
@@ -64,7 +64,6 @@ T.describe("Phase 5.4 Store-based Persistence", function()
 		T.assert_equal(state.piles.hand[1].letter, "X")
 		T.assert_equal(#G.letter_inventory, 2)
 
-		G._store = nil
 		G.letter_inventory = nil
 	end)
 end)

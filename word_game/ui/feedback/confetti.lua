@@ -7,6 +7,8 @@
 
 local Layout = require("word_game.ui.layout")
 
+local game_access = require("word_game.model.game_access")
+
 local M = {}
 
 local COLOURS = {
@@ -175,7 +177,7 @@ local function paint_shape(p, ts)
 end
 
 function M.draw()
-	if not G.GAME or not G.ROOM then return end
+	if not game_access.get() or not G.ROOM then return end
 	if G.STATE ~= G.STATES.TABLE_BOARD then return end
 	if #pieces == 0 and rain_left <= 0 then return end
 

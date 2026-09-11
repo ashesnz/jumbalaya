@@ -1,9 +1,10 @@
---[[ word_game/model/run/scope.lua - Run lifecycle boundary for G.GAME and run caches.
+--[[ word_game/model/run/scope.lua - Run lifecycle boundary for store and run caches.
 
 	Every new run must pass through this module so stale UI bindings, module
 	caches, and G.ARGS mirrors cannot leak across runs.
 ]]
 
+local game_access = require("word_game.model.game_access")
 local store_sync = require("bridge.store_sync")
 local runtime = require("bridge.runtime")
 
@@ -40,7 +41,7 @@ end
 
 function M.is_active()
 	local run = G.RUN
-	return run and run.active and G.GAME ~= nil
+	return run and run.active and game_access.get() ~= nil
 end
 
 function M.with_generation(gen, fn)
@@ -116,16 +117,13 @@ function M.teardown()
 		local CoreStore = require("jumbalaya_core.store")
 		store_sync.replace(store, CoreStore.default_state())
 	end
-	G.GAME = nil
+	store_sync.clear_g_mirror()
 end
 
 function M.init_new_run_state()
-	local run_state = require("word_game.model.run.state")
 	local store = runtime.store()
 	if store then
 		store_sync.dispatch(store, { type = "RUN_STATE_INIT" })
-	else
-		G.GAME.run_state = run_state.new()
 	end
 end
 
@@ -134,26 +132,26 @@ function M.begin_run(game_table, opts)
 	if type(game_table) ~= "table" then
 		error("RunScope.begin_run requires a game table")
 	end
-	if not opts.from_save and G.GAME ~= nil and G.GAME == game_table then
-		error("RunScope.begin_run requires a fresh G.GAME table for new runs")
+	local current = game_access.get()
+	if not opts.from_save and current ~= nil and current == game_table then
+		error("RunScope.begin_run requires a fresh run table for new runs")
 	end
 	M.reset_args()
 	local run_state_mod = require("word_game.model.run.state")
 	run_state_mod.migrate_legacy_field(game_table)
 	game_table.run_generation = M.generation()
 	local store = runtime.store()
-	if store then
-		store_sync.bind_run(store, game_table)
-	else
-		G.GAME = game_table
+	if not store then
+		error("RunScope.begin_run requires WORD_GAME.store()")
 	end
+	store_sync.bind_run(store, game_table)
 	local run = ensure_run_table()
 	run.active = true
 	run.from_save = opts.from_save or false
 	if not opts.from_save then
 		M.init_new_run_state()
 	end
-	return G.GAME
+	return game_access.get()
 end
 
 function M.assign_game(game_table, opts)
