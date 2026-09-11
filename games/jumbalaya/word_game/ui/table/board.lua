@@ -76,8 +76,6 @@ function M.update(game, dt)
 						play_effects.present_end_jumble_sidebar()
 					end
 				end
-			else
-				WORD_GAME.Jumble.refresh_hud()
 			end
 		end
 	if WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.update then

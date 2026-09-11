@@ -48,7 +48,7 @@ Canonical game tree: `games/jumbalaya/` (`app/`, `word_game/`, …). Shared pack
 - **Rules vs glue:** pure gameplay logic in `packages/jumbalaya_core/` (+ `test_core_*`); `word_game/model/` is runtime glue only.
 - Config = data; model glue = wiring; ui = presentation — keep separated
 - Bootstrap load order in `app/bootstrap.lua` only; `Game()` in `runtime_boot.lua` (no global `G` singleton)
-- Model requests layout via `Layout.request_refresh()` / `Presentation.emit` — not UI modules or `Funcs.dispatch`. Presentation contract: `types/presentation.lua`.
+- Model requests layout via `Layout.request_refresh()` / `Presentation.emit` — not UI modules or `Funcs.dispatch`. Presentation contract: `types/presentation.lua`. Handlers live in `word_game/ui/presentation/install.lua`; store-backed views subscribe for render revision only.
 
 ## Active vs legacy
 

@@ -197,16 +197,17 @@ function M.install(ui, domain)
 	end)
 
 	Presentation.on("jumble_hud_refresh", function()
-		local wr = game_access.word_round()
-		local j = wr and wr.jumble
-		if not j or not ui.ScoreBanner then return end
-		local hud = ui.ScoreBanner.state()
-		hud.to_go_label = "SCORE"
-		hud.remaining = j.total_score or 0
-		if ui.ScoreBanner.sync_points_to_get_preview then
-			ui.ScoreBanner.sync_points_to_get_preview(false)
+		if ui.ScoreBanner and ui.ScoreBanner.snap_to_actual then
+			ui.ScoreBanner.snap_to_actual()
 		end
-		Presentation.emit("timeline_sync_progress")
+	end)
+
+	Presentation.on("PLAY_RESOLVED", function(result)
+		if not result or result.kind == "invalid" then return end
+		if ui.ScoreBanner and ui.ScoreBanner.sync_points_to_get_preview then
+			ui.ScoreBanner.sync_points_to_get_preview(true)
+		end
+		Presentation.emit("jumble_hud_refresh")
 	end)
 
 	Presentation.on("puzzle_applied", function()

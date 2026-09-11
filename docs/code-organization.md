@@ -85,6 +85,8 @@ Glue modules are often labeled *"glue over jumbalaya_core"* in their file header
 
 **Direct imports (no proxies):** Engine-agnostic tuning → `jumbalaya_core.config.gameplay.*`; timeline scheduling → `jumbalaya-engine.effects.timeline_scheduler`; retained UI host → `jumbalaya-engine.view_host`; stateless helpers → `jumbalaya-engine.util.*` (`colour`, `number_format`, `roll`, `geometry`, `tables`, `pack`, `random`, `tween`). Game-only data (jumble puzzles, visuals, boot flags, `run_params`) stays in `word_game/config/`. `word_game/ui/util/` keeps **game-bound** helpers only (`loc_colour`, `localize`, `game_runtime`) — do not re-wrap engine util modules there. Do not add one-line `return require(...)` shim files or side-effect `require … return true` loaders under `word_game/` (`test_legacy_shims.lua` scans the tree). Allowed exception: `app/bootstrap/engine_boot.lua` delegates to `jumbalaya-engine.boot`.
 
+**Model→UI event flow (unidirectional):** UI input → `store:dispatch` (core reducer) → model glue emits `Presentation.emit` → handlers in `word_game/ui/presentation/install.lua` update HUD/FX. Store-backed **views** (`word_game/ui/views/*`) may `store:subscribe` only to bump render revision — not to fan out side effects. Do not poll model state each frame to refresh HUD; emit presentation events when domain state changes. UIBox `Funcs.dispatch` is for shell/widgets only (overlays, profile), not model notifications.
+
 ### UI foundation versus word-game UI
 
 These layers serve different purposes and should not be merged:
