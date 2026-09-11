@@ -14,8 +14,11 @@ Roguelike **jumble** word game on Love2D/Lua. Active loop: fill **pattern puzzle
 | Path | Role |
 |------|------|
 | `app/` | Bootstrap, lifecycle, input, persistence, engine (`app/core/`) |
-| `word_game/` | Domain: `config/`, `model/`, `board/`, `ui/` |
-| `word_game/ui/sidebar/` | Right-hand HUD package (stamps, deck, End Run) — use **sidebar** not vault |
+| `packages/jumbalaya_core/` | Portable rules + store (no Love2D) |
+| `packages/jumbalaya-engine/` | Engine services + retained UI |
+| `bridge/` | `runtime.lua`, `funcs_registry.lua`, `store_sync.lua` |
+| `word_game/` | Runtime glue, presentation, board (`config/`, `model/`, `ui/`) |
+| `word_game/ui/sidebar/` | Right-hand HUD — use **sidebar** not vault |
 | `tests/` | Headless suite — `love tests` |
 | `dictionary/` | Offline word validation |
 | `_tools/` | Python asset pipelines (not runtime) |
@@ -26,15 +29,17 @@ Agent docs: `AGENTS.md`, `.cursor/skills/jumbalaya/SKILL.md`
 
 ## Dependency rules
 
-- `word_game/ui/` → `app/core/` — never reverse
-- `word_game/board/` — snap/geometry only (`placement/`, `jumble/`, `bonus/`); no UI imports at require time
-- Cross-package: use `WORD_GAME` (domain) and `WORD_GAME_UI` (presentation); model/board emit via `Presentation`, never `G.FUNCS` or UI modules
-- Config = data; model = rules/state; ui = presentation — keep separated
-- Bootstrap load order lives in `app/bootstrap.lua` only; globals (`G`, `Card`, `LayoutView`) exist after boot
+- `jumbalaya_core` → nothing in `app/` or `word_game/`
+- `word_game/model/` → `jumbalaya_core` for rules; glue via `live_game()` / store — not a second copy of logic
+- `word_game/ui/` → `app/core/` + `jumbalaya-engine` — never reverse
+- `word_game/board/` — snap/geometry only; no UI imports at require time
+- Cross-package: `WORD_GAME` + `WORD_GAME_UI` facades; model emits via `Presentation`, not `Funcs.dispatch`
+- Runtime: `BridgeRuntime.game()` (shell), `WORD_GAME.store()` (run snapshot), `Funcs.dispatch` (UIBox strings)
+- Bootstrap: `app/bootstrap.lua` only; `Game()` in `runtime_boot.lua` — no global `G` singleton
 
 ## Active vs legacy
 
-Jumble mode is the player experience (`word_game/model/jumble/`, `word_game/model/jumble_play/`). Legacy AP/plays/discards code may remain but is not active — do not extend it unless asked. Right-hand HUD is `word_game/ui/sidebar/` (`WORD_GAME_UI.Sidebar`, `G.SIDEBAR_HUD`) — not vault.
+Jumble mode is the player experience (`word_game/model/jumble/`, `word_game/model/jumble_play/`). Legacy AP/plays/discards code may remain but is not active — do not extend it unless asked. Right-hand HUD is `word_game/ui/sidebar/` (`WORD_GAME_UI.Sidebar`) — not vault.
 
 ## Verification
 

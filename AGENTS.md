@@ -12,13 +12,17 @@ Roguelike **jumble** word game on Love2D/Lua. Active loop: fill **pattern puzzle
 
 ```text
 app/                     Bootstrap, lifecycle, input, persistence, engine (app/core/)
-  bootstrap/             engine_boot.lua + game_boot.lua (loaded by bootstrap.lua)
+  bootstrap/             engine_adapter → engine_boot, runtime_boot, store_boot, presentation_boot
   startup/               profile, window, dealing, assets, menu_boot
-  callbacks/             App-level G.FUNCS (settings, window, run lifecycle)
+  callbacks/             App-level Funcs.register installers (settings, window, run lifecycle)
+bridge/                  runtime.lua, funcs_registry.lua, store_sync.lua, pile_sync.lua
+packages/
+  jumbalaya_core/        Engine-agnostic rules, store, reducers (headless-testable)
+  jumbalaya-engine/      Clock, input, event bus, retained_ui, views
 word_game/
-  config/                Static tuning (boot/, layout/, visuals/, gameplay/, perks/, jumble/)
-  model/                 Gameplay rules and state (no root-level modules)
-    game/                Game class + globals.lua (G singleton)
+  config/                Static tuning; gameplay/round + economy re-export jumbalaya_core
+  model/                 Runtime glue over jumbalaya_core (no root-level modules)
+    game/                Game class + globals.lua (define_constants)
     run/                 Run state, scope, mode, match end, input lock
     round/               Set/hand progression
     trade/               Marketplace model
@@ -43,10 +47,12 @@ AlphaCardsBackup/        Legacy card-engine reference — do not edit
 - `word_game/ui/` → `app/core/` — **never** reverse
 - `word_game/board/` — snap/geometry only; no UI imports at require time (fixed-letter overlay wired from `ui/table/board.lua`)
 - Cross-package access: use `WORD_GAME` (domain, `word_game/init.lua`) and `WORD_GAME_UI` (presentation, `word_game/ui/facade/exports.lua`). Inside `word_game/model/`, hoist sibling requires to module scope; use `jumble/bonus_return` when model code must return bonus cards to the gutter.
-- **Live state stays on `G`:** `G.GAME` (run snapshot) and `G.FUNCS` (UIBox strings) are the runtime bus. **Every new feature:** facade method + owned `G.GAME` field in `types/game.lua`, or it does not ship. `G.FUNCS` = registration only; logic on `WORD_GAME_UI` / app modules. `app/core/` must not know jumble or letter faces — see `word_game/model/cards/` and `word_game/model/persistence/`.
-- Config = data; model = rules/state; ui = presentation — keep separated
-- Bootstrap load order lives in `app/bootstrap.lua` only; globals (`G`, `Card`, `LayoutView`) exist after boot
-- Model requests layout via `Layout.request_refresh()` / `Presentation.emit` — not UI modules or `G.FUNCS`. Presentation contract: `types/presentation.lua` (one handler per event, `on` overwrites, emit is notify-not-query).
+- **Runtime bus:** Game shell via `bridge/runtime.lua` (`BridgeRuntime.game()`); run snapshot via `WORD_GAME.store()` / `game_access.get()`; UIBox strings via `bridge/funcs_registry.lua` (`Funcs.dispatch`). **Every new feature:** facade method + owned run-state field in `types/game.lua`, or it does not ship.
+- **Rules vs glue:** pure gameplay logic goes in `packages/jumbalaya_core/` (+ `test_core_*`); `word_game/model/` is runtime glue only — do not duplicate core rules.
+- `jumbalaya_core` never imports `app/`, `word_game/`, or Love2D. `app/core/` must not know jumble or letter faces.
+- Config = data; model glue = wiring; ui = presentation — keep separated
+- Bootstrap load order lives in `app/bootstrap.lua` only; `Game()` is constructed in `runtime_boot.lua` (no global `G` singleton)
+- Model requests layout via `Layout.request_refresh()` / `Presentation.emit` — not UI modules or `Funcs.dispatch`. Presentation contract: `types/presentation.lua`.
 
 ## Active vs legacy
 
@@ -113,11 +119,11 @@ sidebar/
   hud_definition.lua HUD tree + relayout
   layout.lua         Column geometry: sidebar_rect, deck_rect, update_sidebar_attach
   stage_button.lua   End Run / Next button animation
-  funcs.lua          G.FUNCS: ensure_table_board_sidebar, end_run_from_sidebar
+  funcs.lua          Funcs.register handlers: ensure_table_board_sidebar, end_run_from_sidebar
   callbacks.lua      Thin install wrapper
 ```
 
-Globals: `G.SIDEBAR_HUD`, `G.SIDEBAR_ATTACH`. Layout helpers are re-exported on `WORD_GAME_UI.Layout` (`sidebar_rect`, `sidebar_height`, etc.). `Sidebar.sync_visibility()` shows/hides the HUD column; play/shuffle buttons sync via `WORD_GAME_UI.TableControls.sync()` (not the sidebar API).
+Layout helpers are re-exported on `WORD_GAME_UI.Layout` (`sidebar_rect`, `sidebar_height`, etc.). `Sidebar.sync_visibility()` shows/hides the HUD column; play/shuffle buttons sync via `WORD_GAME_UI.TableControls.sync()` (not the sidebar API).
 
 ### Play resolution split
 
@@ -135,8 +141,8 @@ Tests that need rules only call `play_jumble_word`; tests that need full FX call
 - Dot paths from repo root: `require "word_game.ui.sidebar.init"`
 - Package folders use `init.lua`; most modules `local M = {}` … `return M`
 - Files/dirs/locals: `snake_case`; classes/globals: `PascalCase`
-- UI binds `G.FUNCS.*` by string — move implementations, not registration names when refactoring
-- Class chain: `Object → Node → EaseNode/Moveable → Sprite, LayoutView, Card, CardArea`
+- UI binds UIBox `func` strings — move implementations, not registration names when refactoring (`Funcs.register` keeps the name stable)
+- Class chain: `Object → Node → EaseNode/AnimNode → Sprite, RetainedPanel, Card, CardArea`
 - `Card` model class loads in `app/bootstrap/game_boot.lua`; presentation mixins install via `word_game/ui/cards/bind.lua` (tests: `mock_env.ensure_card_class()`)
 
 ## Dev flags

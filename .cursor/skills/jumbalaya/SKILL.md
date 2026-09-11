@@ -26,12 +26,17 @@ description: >-
 ## Package boundaries
 
 ```text
-app/core/          Engine: G, Card, LayoutView, input, audio, persistence
-word_game/config/  Static tuning — boot/, layout/, visuals/, gameplay/, perks/, jumble/
-word_game/model/   Rules and state — no root modules; use run/, round/, jumble/, etc.
-word_game/board/   Row snap/geometry — placement/, jumble/, bonus/ (no UI imports at require time)
+app/               Love2D shell: bootstrap, lifecycle, app/core/ scene graph
+packages/jumbalaya_core/   Pure rules + store (headless test_core_*)
+packages/jumbalaya-engine/ Engine services + retained_ui
+bridge/            runtime.lua, funcs_registry.lua, store_sync.lua
+word_game/config/  Game tuning; round/economy re-export core
+word_game/model/   Runtime glue over jumbalaya_core — not duplicate rules
+word_game/board/   Row snap/geometry — no UI imports at require time
 word_game/ui/      Presentation — may import model/config
 ```
+
+**Rules vs glue:** new gameplay logic → `jumbalaya_core` + `test_core_*` first; `word_game/model/` wires it to `live_game()` / store / Card instances.
 
 ### `word_game/ui/` subpackages (no root-level modules — use these paths)
 
@@ -47,7 +52,7 @@ word_game/ui/      Presentation — may import model/config
 | `ui/sidebar/` | Right-hand HUD |
 | `ui/layout/`, `ui/score_banner/`, `ui/perks/`, etc. | As named |
 
-Cross-package: `WORD_GAME` (domain, `word_game/init.lua`) and `WORD_GAME_UI` (presentation, `word_game/ui/facade/exports.lua`). Tests and `app/` should use those facades, not deep `word_game.model.*` requires unless testing internals. Model code emits via `word_game.model.presentation`; it must not call `WORD_GAME_UI` or `G.FUNCS`.
+Cross-package: `WORD_GAME` (domain) and `WORD_GAME_UI` (presentation). Tests and `app/` should use those facades, not deep `word_game.model.*` requires unless testing internals. Model code emits via `Presentation`; it must not call `WORD_GAME_UI` or `Funcs.dispatch`.
 
 ## Sidebar (right-hand HUD)
 
@@ -61,7 +66,7 @@ All right-column HUD code lives in `word_game/ui/sidebar/`. Use **sidebar** nami
 | Attach node | `G.SIDEBAR_ATTACH` |
 | Column geometry | `WORD_GAME_UI.Layout.sidebar_rect`, `sidebar_height`, `update_sidebar_attach` (implemented in `sidebar/layout.lua`, re-exported via `layout/init.lua`) |
 | End Run button | `WORD_GAME_UI.SidebarStageButton` in `sidebar/stage_button.lua` |
-| Table controls | `WORD_GAME_UI.TableControls` in `table/controls/`; G.FUNCS in `callbacks/table_controls.lua` |
+| Table controls | `WORD_GAME_UI.TableControls` in `table/controls/`; handlers in `callbacks/table_controls.lua` |
 
 Do **not** use vault naming (`G.VAULT_HUD`, `VaultStageButton`, `layout/vault.lua`, etc.).
 
@@ -96,7 +101,7 @@ love tests
 
 ## Refactor checklist
 
-1. Keep `G.FUNCS` string names stable unless updating all UI definitions that reference them
+1. Keep UIBox `func` string names stable unless updating all UI definitions that reference them (`Funcs.register`)
 2. Re-export geometry on `WORD_GAME.Layout` if moving sidebar layout helpers
 3. Update `word_game/init.lua` facade exports when adding cross-package APIs
 4. Run `love tests`; for structural changes also run `emmylua_check . --severity warn` locally (CI runs error severity — see `docs/testing.md`)

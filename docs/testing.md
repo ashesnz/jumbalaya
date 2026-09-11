@@ -22,7 +22,7 @@ tests/
 ├── framework.lua             # Test assertions (`describe`, `it`, `assert_equal`, etc.)
 ├── helpers/
 │   ├── mock_env.lua          # Shared game globals and mock environment
-│   ├── g_funcs_audit.lua     # G.FUNCS catalog static audit (migration)
+│   ├── g_funcs_audit.lua     # Funcs.register catalog static audit
 │   └── core_env.lua          # jumbalaya_core package.path bootstrap
 └── unit/
     └── test_*.lua            # One file per feature area (auto-discovered)
@@ -35,12 +35,14 @@ tests/
 `tests/helpers/mock_env.lua` provides:
 
 - `ensure_engine_globals()` — loads real `Card`, `Sprite`, `AnimNode`, etc.
-- `reset_game()` — preferred per-suite reset: `G.GAME`, `G.pattern_row`, layout stubs, bonus-stack/fly-off state
+- `reset_game()` — preferred per-suite reset: binds `BridgeRuntime.game()`, seeds run state, layout stubs, bonus-stack/fly-off state
 - `setup()` — low-level globals only; called by `reset_game()`, avoid at describe level unless booting a custom shell (e.g. screen-wipe tests)
 - `install_hand_clear(play_module)` — mirrors `game_boot` wiring for `Play.on_hand_cleared` / `continue_after_dealer`
 - `teardown_boot_pollution()` — alias for `reset_game()`
 
-Prefer `mock_env.reset_game()` at the top of a `describe` block. When mocking `G.draw_pile`, keep `G.letter_inventory` and `G.draw_pile.cards` as **separate tables** (production does not alias them).
+Prefer `mock_env.reset_game()` at the top of a `describe` block. Tests that call `Game()` should use `BridgeRuntime.game()` (or the returned instance), not a stale global `G` stub. When mocking draw piles, keep `letter_inventory` and `draw_pile.cards` as **separate tables** (production does not alias them).
+
+**Core rule tests** (`test_core_*.lua`) call `jumbalaya_core` directly via `tests/helpers/core_env.lua` — no `mock_env.ensure_engine_globals()` needed.
 
 ## Adding New Tests
 
@@ -93,7 +95,7 @@ These tests must pass on every PR while migrating off the Balatro engine pattern
 | `test_store_sync.lua` | `bridge/store_sync.lua` shim |
 | `test_phase2_store_boot.lua` | Phase 2 store boot, dispatch dual-write, run binding |
 | `test_phase3_engine_services.lua` | Phase 3 engine context, adapters, and boot wiring |
-| `test_phase4_action_dispatch.lua` | Phase 4 G.FUNCS → InputService action dispatch |
+| `test_phase4_action_dispatch.lua` | Phase 4 Funcs → InputService action dispatch |
 | `test_phase5_1_cards_piles.lua` | Phase 5.1 LetterCard data, pile reducers, engine views |
 | `test_phase5_2_table_areas.lua` | Phase 5.2 TableAreas selectors and save aliases |
 | `test_phase5_3_snap.lua` | Phase 5.3 Snap placement `MOVE_CARD` dispatch |
@@ -104,14 +106,12 @@ These tests must pass on every PR while migrating off the Balatro engine pattern
 | `test_phase6_3_uibox_retirement.lua` | Phase 6.3 `G.LIVE.UIBOX` retirement and store-backed TABLE_BOARD draw |
 | `test_phase7_bootstrap.lua` | Phase 7 slim bootstrap modules and engine_adapter wiring |
 | `test_phase7_store_authority.lua` | Phase 7 WORD_GAME owns store/engine; G._store/_engine absent |
-| `test_phase8_layoutview_retirement.lua` | Phase 8 PR-8 `app/core/ui/` deleted; retained UI in `jumbalaya-engine` |
-| `test_phase9_runtime_shell.lua` | Phase 9 PR-9a `bridge/runtime` game shell + session layer off `G.` |
-| PR-9c exit | `rg '\\bG[.:\\[]' word_game/ui` → **0** (uses `word_game/ui/util/game_runtime.lua`) |
-
-Phase 8 adds grep-gated PRs (model `G.GAME` purge, mirror retirement, screen-by-screen LayoutView removal). See [engine-migration.md §12](engine-migration.md#12-phase-8--post-phase-7-retirement-strangler).
-| `test_core_store_dispatch.lua` | `jumbalaya_core` store reducers without `G` |
-| `test_g_funcs_registry.lua` | `G.FUNCS` catalog freeze |
-| `test_core_jumble_rules.lua` | `jumbalaya_core` scoring rules without `G` |
+| `test_phase8_layoutview_retirement.lua` | Phase 8 PR-8 retained UI in `jumbalaya-engine` |
+| `test_phase9_runtime_shell.lua` | Phase 9 `bridge/runtime` game shell + session layer |
+| `test_phase9_no_g_singleton.lua` | Phase 9 `Game()` does not assign global `G` |
+| `test_core_store_dispatch.lua` | `jumbalaya_core` store reducers without boot |
+| `test_g_funcs_registry.lua` | `types/funcs.lua` catalog freeze |
+| `test_core_jumble_rules.lua` | `jumbalaya_core` scoring rules without boot |
 | `test_core_jumble_patterns.lua` | `jumbalaya_core` pattern/slot validation without `G` |
 | `test_core_hand.lua` | `jumbalaya_core` hand lifecycle without `G` |
 | `test_core_round.lua` | `jumbalaya_core` round reducers without `G` |

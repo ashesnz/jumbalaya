@@ -1,1 +1,30 @@
-Steam not available — running without Steam integration
+=== Jumbalaya Error ===
+app/startup/window.lua:29: attempt to index global 'Funcs' (a nil value)
+
+stack traceback:
+	app/error_handler.lua:171: in function 'handler'
+	[love "boot.lua"]:352: in function '__index'
+	app/startup/window.lua:29: in function 'init_window'
+	app/startup.lua:66: in function 'launch'
+	app/core/session/lifecycle.lua:75: in function 'load'
+	app/core/session/lifecycle.lua:10: in function <app/core/session/lifecycle.lua:9>
+	[C]: in function 'xpcall'
+	[love "boot.lua"]:368: in function <[love "boot.lua"]:355>
+	[C]: in function 'xpcall'
+	[love "boot.lua"]:377: in function <[love "boot.lua"]:344>
+=== Jumbalaya Error ===
+app/startup/window.lua:29: attempt to index global 'Funcs' (a nil value)
+
+stack traceback:
+	app/error_handler.lua:171: in function 'handler'
+	[love "boot.lua"]:352: in function '__index'
+	app/startup/window.lua:29: in function 'init_window'
+	app/startup.lua:66: in function 'launch'
+	app/core/session/lifecycle.lua:75: in function 'load'
+	app/core/session/lifecycle.lua:10: in function <app/core/session/lifecycle.lua:9>
+	[C]: in function 'xpcall'
+	[love "boot.lua"]:368: in function <[love "boot.lua"]:355>
+	[C]: in function 'xpcall'
+	[love "boot.lua"]:377: in function <[love "boot.lua"]:344>
+
+Error log saved to: /Users/ashwin/Library/Application Support/LOVE/Jumbalaya/error.log
