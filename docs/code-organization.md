@@ -87,6 +87,8 @@ Glue modules are often labeled *"glue over jumbalaya_core"* in their file header
 
 **Model→UI event flow (unidirectional):** UI input → `store:dispatch` (core reducer) → model glue emits `Presentation.emit` → handlers in `word_game/ui/presentation/install.lua` update HUD/FX. Store-backed **views** (`word_game/ui/views/*`) may `store:subscribe` only to bump render revision — not to fan out side effects. Do not poll model state each frame to refresh HUD; emit presentation events when domain state changes. UIBox `Funcs.dispatch` is for shell/widgets only (overlays, profile), not model notifications.
 
+**Card / pile state (Phase 10):** Authoritative **table layout** is `store.piles` (`MOVE_CARD` / `ADD_CARD_TO_PILE` reducers in `jumbalaya_core`). **Run deck membership** is `G.letter_inventory` (live `Card` instances). **CardPile hosts** (`dealt_letters`, `draw_pile`, `pattern_row.area`) are presentation + input targets — mutate during drag/deal, then `word_game.model.piles.sync_hosts_to_store` or `piles.move_card`. `word_game/model/` must not import `ui/cardarea/`; `ui/cardarea/` must not import gameplay rules. Use `TableAreas` selectors for pile reads in model glue.
+
 ### UI foundation versus word-game UI
 
 These layers serve different purposes and should not be merged:

@@ -1,12 +1,21 @@
 --[[
 	word_game/model/piles.lua - Store-authoritative pile sync for CardPile hosts.
 
-	Core: jumbalaya_core.store.selectors.piles (snapshot shape)
-	Store: patches piles on store; hydrates dealt_letters / draw_pile / pattern_row hosts
-	Presentation: none — CardArea relayout triggered by callers
+	Authoritative table layout lives in `store.piles` (plain card records with
+	id / pile_id / slot_index / ability). CardPile hosts (`dealt_letters`,
+	`draw_pile`, `pattern_row.area`) are presentation/interaction targets;
+	mutate hosts during animation, then `sync_hosts_to_store` or `move_card`.
+
+	Run deck membership (`G.letter_inventory`) is separate: it tracks every live
+	letter Card instance in the run; pile placement is always `store.piles`.
+
+	Core: jumbalaya_core.store.reducers.piles + selectors.piles
+	Store: patches piles; hydrates hosts from store snapshots
+	Presentation: none — CardPile relayout triggered by callers
 ]]
 
 local BridgeRuntime = require("app.runtime")
+local store_sync = require("app.bootstrap.store_sync")
 
 local M = {}
 
@@ -75,6 +84,27 @@ local function interaction_cards()
 		out[shell.INPUT.focused.target] = true
 	end
 	return out
+end
+
+--- Dispatch a core MOVE_CARD action and mirror pile_id on a live Card (presentation).
+--- Gameplay ownership changes must go through the store reducer, not card.area alone.
+function M.move_card(opts)
+	if type(opts) ~= "table" then return end
+	local card_id = opts.card_id or (opts.card and (opts.card.id or opts.card.letter_card_id))
+	local store = opts.store or BridgeRuntime.store()
+	if store and card_id and opts.to_pile then
+		store_sync.dispatch(store, {
+			type = "MOVE_CARD",
+			card_id = card_id,
+			from_pile = opts.from_pile,
+			to_pile = opts.to_pile,
+			slot_index = opts.slot_index,
+		})
+	end
+	if opts.card and opts.to_pile then
+		opts.card.pile_id = opts.to_pile
+		opts.card.slot_index = opts.slot_index
+	end
 end
 
 function M.collect_piles()

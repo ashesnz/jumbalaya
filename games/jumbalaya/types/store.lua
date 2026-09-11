@@ -122,12 +122,22 @@
 ---@field viewed_back any|nil
 ---@field [string] any
 
+--- Plain-table card records for table layout (authoritative pile membership).
+--- Live Love2D `Card` instances may mirror `pile_id` for presentation; gameplay
+--- reads piles via `TableAreas.*` / `jumbalaya_core.store.selectors.piles`.
+---@class PileCard
+---@field id number
+---@field pile_id "hand"|"draw"|"pattern"|"bonus"|"discard"|string
+---@field slot_index number|nil
+---@field ability table
+---@field [string] any
+
 ---@class PileState
----@field hand table[]
----@field draw table[]
----@field pattern table[]
----@field bonus table[]
----@field discard table[]
+---@field hand PileCard[]
+---@field draw PileCard[]
+---@field pattern PileCard[]
+---@field bonus PileCard[]
+---@field discard PileCard[]
 
 ---@class GameStoreState : GameRunState
 ---@field word_round WordRound

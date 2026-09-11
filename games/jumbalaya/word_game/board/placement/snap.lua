@@ -6,7 +6,6 @@ local shimmer = require "word_game.board.placement.shimmer"
 local BonusStack = require "word_game.model.jumble.bonus_stack"
 local Presentation = require "word_game.model.presentation"
 local TableAreas = require "word_game.model.table_areas"
-local store_sync = require "app.bootstrap.store_sync"
 local runtime = require "app.runtime"
 
 local BridgeRuntime = require("app.runtime")
@@ -192,20 +191,14 @@ function M.place_in_row(session, card)
 	jumble.assign_card_to_blank(slot_i, card, insert_pos)
 	card:set_card_area(area)
 
-	local card_id = card.id or card.letter_card_id
-	local store = runtime.store()
-	if store and card_id then
-		store_sync.dispatch(store, {
-			type = "MOVE_CARD",
-			card_id = card_id,
-			from_pile = card.pile_id or (from_bonus and "bonus") or "hand",
-			to_pile = "pattern",
-			slot_index = slot_i
-		})
-	else
-		card.pile_id = "pattern"
-		card.slot_index = slot_i
-	end
+	local piles = require("word_game.model.piles")
+	piles.move_card({
+		card = card,
+		card_id = card.id or card.letter_card_id,
+		from_pile = card.pile_id or (from_bonus and "bonus") or "hand",
+		to_pile = "pattern",
+		slot_index = slot_i,
+	})
 
 	shimmer.start_card(session, card)
 	jumble_geometry.relayout(session)
@@ -237,19 +230,13 @@ function M.return_to_hand(session, card)
 	if dealt.snap_VT then dealt:snap_VT() end
 	if dealt.hard_set_cards then dealt:hard_set_cards() end
 
-	local card_id = card.id or card.letter_card_id
-	local store = runtime.store()
-	if store and card_id then
-		store_sync.dispatch(store, {
-			type = "MOVE_CARD",
-			card_id = card_id,
-			from_pile = card.pile_id or "pattern",
-			to_pile = "hand"
-		})
-	else
-		card.pile_id = "hand"
-		card.slot_index = nil
-	end
+	local piles = require("word_game.model.piles")
+	piles.move_card({
+		card = card,
+		card_id = card.id or card.letter_card_id,
+		from_pile = card.pile_id or "pattern",
+		to_pile = "hand",
+	})
 
 	jumble_geometry.relayout(session)
 	session.area:hard_set_cards()

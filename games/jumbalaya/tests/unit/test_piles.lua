@@ -57,6 +57,22 @@ T.describe("Store piles", function()
 		T.assert_equal(G.dealt_letters.cards[1], dragging)
 	end)
 
+	T.it("move_card updates store piles through the core reducer", function()
+		local store = Store.new({
+			piles = {
+				hand = { { id = 5, ability = { letter = "R" }, pile_id = "hand" } },
+				draw = {},
+				pattern = {},
+				bonus = {},
+				discard = {},
+			},
+		})
+		word_game._bind_store(store)
+		piles.move_card({ card_id = 5, from_pile = "hand", to_pile = "draw" })
+		T.assert_equal(#pile_selectors.hand_cards(store:get()), 0)
+		T.assert_equal(#pile_selectors.draw_cards(store:get()), 1)
+	end)
+
 	T.it("ensure_test_binding syncs piles when table hosts exist", function()
 		mock_env.reset_game()
 		G.dealt_letters = {

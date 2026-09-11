@@ -49,6 +49,7 @@ Canonical game tree: `games/jumbalaya/` (`app/`, `word_game/`, …). Shared pack
 - Config = data; model glue = wiring; ui = presentation — keep separated
 - Bootstrap load order in `app/bootstrap.lua` only; `Game()` in `runtime_boot.lua` (no global `G` singleton)
 - Model requests layout via `Layout.request_refresh()` / `Presentation.emit` — not UI modules or `Funcs.dispatch`. Presentation contract: `types/presentation.lua`. Handlers live in `word_game/ui/presentation/install.lua`; store-backed views subscribe for render revision only.
+- **Pile ownership:** `store.piles` is authoritative for hand/draw/pattern/bonus/discard layout (`word_game/model/piles.lua`, `MOVE_CARD` reducer). `G.letter_inventory` tracks run deck Card instances. CardPile hosts are presentation-only — sync via `piles.sync_hosts_to_store` / `piles.move_card` after host mutations (`test_pile_boundaries.lua`).
 
 ## Active vs legacy
 
