@@ -355,7 +355,12 @@ function M.reset_game()
 			played_words = {},
 		},
 	}
+	G.STATE = nil
 	G.ARGS = G.ARGS or {}
+	local ok_views, views_install = pcall(require, "word_game.ui.views.install")
+	if ok_views and views_install.reset then
+		views_install.reset()
+	end
 	M.publish_game(G.GAME)
 end
 

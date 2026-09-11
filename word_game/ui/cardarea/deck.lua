@@ -43,8 +43,15 @@ function M.relayout(self)
 	end
 end
 
+local function store_renders_draw()
+	local board = WORD_GAME_UI and WORD_GAME_UI.TableBoard
+	local view = board and board.table_board_view and board.table_board_view()
+	return view and view:should_render_draw_from_store()
+end
+
 function M.draw_layer(self, v, draw_card_layer)
 	if self.config.type ~= 'deck' then return end
+	if self == G.draw_pile and store_renders_draw() then return end
 	if self == G.draw_pile and WORD_GAME_UI.TableDeck
 		and WORD_GAME_UI.TableDeck.uses_table_draw() then
 		if v == 'card' then

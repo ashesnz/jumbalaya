@@ -184,7 +184,17 @@ end
 function M.draw_board(game)
 	if game.pattern_row then
 		ensure_placement_pattern_overlay(game.pattern_row)
-		game.pattern_row:draw_run_pass(game)
+		local table_view = M.ensure_store_subscription()
+		if table_view and table_view:should_render_pattern_from_store() then
+			love.graphics.push()
+			if game.pattern_row.area then
+				game.pattern_row.area:translate_container()
+			end
+			table_view:draw_pattern()
+			love.graphics.pop()
+		else
+			game.pattern_row:draw_run_pass(game)
+		end
 		M.draw_hand_pass(game)
 	end
 	local bonus_stack_ui = WORD_GAME_UI.BonusStackUI
@@ -223,17 +233,20 @@ function M.draw_hand_pass(game)
 			table_view:draw_draw_pile()
 		elseif WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
 			WORD_GAME_UI.TableDeck.draw(G.draw_pile)
-		elseif G.draw_pile then
+		elseif G.draw_pile and not draw_from_store then
 			G.draw_pile:draw()
 		end
 		love.graphics.pop()
 	end
 
 	if hand_from_store and table_view then
+		love.graphics.push()
+		if G.dealt_letters then
+			G.dealt_letters:translate_container()
+		end
 		table_view:draw_hand()
-	elseif not G.dealt_letters or #G.dealt_letters.cards == 0 then
-		-- still draw bonus stack card overlays below
-	else
+		love.graphics.pop()
+	elseif G.dealt_letters and not hand_from_store and #G.dealt_letters.cards > 0 then
 		love.graphics.push()
 		G.dealt_letters:translate_container()
 		G.dealt_letters:draw()

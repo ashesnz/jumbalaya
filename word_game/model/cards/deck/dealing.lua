@@ -41,6 +41,9 @@ return function(context)
 		G.ARGS.deck_left_count = count
 		game_access.patch({ deck_left_count = count })
 		pile_sync.sync_areas_to_store()
+		if pile_sync.chrome_release_enabled() then
+			pile_sync.release_static_chrome()
+		end
 	end
 
 	M.DEAL_DELAY = 0.14

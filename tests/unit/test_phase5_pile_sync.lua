@@ -37,6 +37,68 @@ T.describe("Phase 5 Pile Sync Bridge", function()
 
 	end)
 
+	T.it("chrome_release_enabled requires TABLE_BOARD state and installed TableBoardView", function()
+		G.STATE = G.STATES.TABLE_BOARD
+		T.assert_false(pile_sync.chrome_release_enabled())
+
+		local Engine = require("jumbalaya-engine")
+		local views_install = require("word_game.ui.views.install")
+		local store = Store.new()
+		word_game._bind_store(store)
+		views_install.install_table_board(Engine.Context.new({ store = store }))
+		T.assert_true(pile_sync.chrome_release_enabled())
+		views_install.reset()
+		T.assert_false(pile_sync.chrome_release_enabled())
+	end)
+
+	T.it("release_static_chrome snapshots then clears resting CardArea cards", function()
+		local store = Store.new({
+			piles = { hand = {}, draw = {}, pattern = {}, bonus = {}, discard = {} },
+		})
+		word_game._bind_store(store)
+
+		local resting = { letter_card_id = 1, ability = { letter = "A" }, REMOVED = nil }
+		local dragging = { letter_card_id = 2, ability = { letter = "B" }, REMOVED = nil }
+		G.dealt_letters = { cards = { resting, dragging } }
+		G.draw_pile = { cards = {} }
+		G.recycle_stash = { cards = {} }
+		G.pattern_row = { area = { cards = {} } }
+		G.INPUT = { dragging = { target = dragging }, focused = { target = nil } }
+
+		pile_sync.release_static_chrome(store, { "hand" })
+		local state = store:get()
+		T.assert_equal(#pile_selectors.hand_cards(state), 2)
+		T.assert_equal(#G.dealt_letters.cards, 1)
+		T.assert_equal(G.dealt_letters.cards[1], dragging)
+	end)
+
+	T.it("sync_store_to_areas rebuilds CardArea from store piles", function()
+		local store = Store.new({
+			piles = {
+				hand = {
+					{ id = 5, letter_card_id = 5, ability = { letter = "Q" }, pile_id = "hand", slot_index = 1 },
+				},
+				draw = {},
+				pattern = {},
+				bonus = {},
+				discard = {},
+			},
+		})
+		word_game._bind_store(store)
+
+		local card = { letter_card_id = 5, ability = { letter = "Q" }, REMOVED = nil }
+		G.letter_inventory = { card }
+		G.dealt_letters = { cards = {}, set_ranks = function() end, relayout = function() end }
+		G.draw_pile = { cards = {} }
+		G.recycle_stash = { cards = {} }
+		G.pattern_row = { area = { cards = {} } }
+
+		pile_sync.sync_store_pile_to_area(store, "hand")
+		T.assert_equal(#G.dealt_letters.cards, 1)
+		T.assert_equal(G.dealt_letters.cards[1], card)
+		T.assert_equal(G.dealt_letters.cards[1].pile_id, "hand")
+	end)
+
 	T.it("ensure_test_binding syncs piles when table areas exist", function()
 		mock_env.reset_game()
 		G.dealt_letters = {

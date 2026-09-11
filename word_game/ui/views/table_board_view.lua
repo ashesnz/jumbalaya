@@ -1,5 +1,5 @@
 --[[
-	word_game/ui/views/table_board_view.lua - TABLE_BOARD store-backed pile rendering (Phase 6).
+	word_game/ui/views/table_board_view.lua - TABLE_BOARD store-backed pile rendering (Phase 6 / 8).
 ]]
 
 local Engine = require("jumbalaya-engine")
@@ -8,6 +8,12 @@ local TableAreas = require("word_game.model.table_areas")
 
 local TableBoardView = {}
 TableBoardView.__index = TableBoardView
+
+local PILE_AREAS = {
+	hand = "dealt_letters",
+	draw = "draw_pile",
+	pattern = "pattern_row",
+}
 
 function TableBoardView.new(opts)
 	opts = opts or {}
@@ -36,6 +42,87 @@ function TableBoardView:revision()
 	return self._revision or 0
 end
 
+function TableBoardView:state()
+	return self._state or (self.store and self.store:get())
+end
+
+function TableBoardView:legacy_area(pile_id)
+	local key = PILE_AREAS[pile_id]
+	if not key or not G then return nil end
+	if pile_id == "pattern" then
+		local row = G.pattern_row
+		return row and row.area
+	end
+	return G[key]
+end
+
+function TableBoardView:interaction_cards()
+	local out = {}
+	local controller = G and G.INPUT
+	if not controller then return out end
+	if controller.dragging and controller.dragging.target then
+		out[controller.dragging.target] = true
+	end
+	if controller.focused and controller.focused.target then
+		out[controller.focused.target] = true
+	end
+	return out
+end
+
+function TableBoardView:legacy_area_empty(pile_id)
+	local area = self:legacy_area(pile_id)
+	if not area or not area.cards then return true end
+	local interacting = self:interaction_cards()
+	for _, card in ipairs(area.cards) do
+		if card and not card.REMOVED and not interacting[card] then
+			return false
+		end
+	end
+	return true
+end
+
+local PILE_SELECTORS = {
+	hand = TableAreas.hand_cards,
+	draw = TableAreas.draw_cards,
+	pattern = TableAreas.pattern_cards,
+	discard = TableAreas.recycle_cards,
+	bonus = TableAreas.bonus_cards,
+}
+
+function TableBoardView:pile_cards(pile_id, state)
+	state = state or self:state()
+	if not state then return {} end
+	local selector = PILE_SELECTORS[pile_id]
+	if selector then
+		return selector(state)
+	end
+	return state.piles and state.piles[pile_id] or {}
+end
+
+function TableBoardView:should_render_pile_from_store(pile_id)
+	local state = self:state()
+	if not state or not state.piles then return false end
+	local pile = state.piles[pile_id]
+	if not pile or #pile == 0 then return false end
+	if pile_id == "draw" and WORD_GAME_UI and WORD_GAME_UI.TableDeck
+		and WORD_GAME_UI.TableDeck.uses_table_draw() then
+		return self:legacy_area_empty("draw")
+	end
+	return self:legacy_area_empty(pile_id)
+end
+
+function TableBoardView:should_render_hand_from_store()
+	return self:should_render_pile_from_store("hand")
+end
+
+function TableBoardView:should_render_draw_from_store()
+	return self:should_render_pile_from_store("draw")
+end
+
+function TableBoardView:should_render_pattern_from_store()
+	return self:should_render_pile_from_store("pattern")
+end
+
 function TableBoardView:hand_rect()
 	if G and G.dealt_letters and G.dealt_letters.T then
 		return G.dealt_letters.T
@@ -54,57 +141,49 @@ function TableBoardView:draw_pile_rect()
 	return { x = 0, y = 0, w = 1, h = 1, card_w = 1, card_h = 1 }
 end
 
-function TableBoardView:legacy_hand_empty()
-	if not G or not G.dealt_letters or not G.dealt_letters.cards then
-		return true
+function TableBoardView:pattern_rect()
+	if G and G.pattern_row and G.pattern_row.area and G.pattern_row.area.T then
+		return G.pattern_row.area.T
 	end
-	return #G.dealt_letters.cards == 0
+	return { x = 0, y = 0, w = 8, h = 1, card_w = 1, card_h = 1 }
 end
 
-function TableBoardView:should_render_hand_from_store()
-	local state = self._state or (self.store and self.store:get())
-	if not state or not state.piles then return false end
-	local hand = state.piles.hand
-	if not hand or #hand == 0 then return false end
-	return self:legacy_hand_empty()
+function TableBoardView:decorate_rect(rect)
+	rect.card_w = rect.card_w or (G and G.CARD_W) or 1
+	rect.card_h = rect.card_h or (G and G.CARD_H) or 1
+	return rect
 end
 
-function TableBoardView:should_render_draw_from_store()
-	local state = self._state or (self.store and self.store:get())
-	if not state or not state.piles then return false end
-	local draw = state.piles.draw
-	if not draw then return false end
-	if WORD_GAME_UI and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
-		return true
-	end
-	if not G or not G.draw_pile or not G.draw_pile.cards then
-		return #draw > 0
-	end
-	return #G.draw_pile.cards == 0 and #draw > 0
+function TableBoardView:draw_pile(pile_id, rect, renderer)
+	local cards = self:pile_cards(pile_id)
+	if not cards or #cards == 0 then return end
+	rect = self:decorate_rect(rect or {})
+	local pile_view = PileView.new(pile_id, cards, rect)
+	pile_view:draw(renderer or self.renderer)
 end
 
 function TableBoardView:draw_hand(renderer)
-	local state = self._state or (self.store and self.store:get())
-	if not state then return end
-	local hand = TableAreas.hand_cards(state)
-	if not hand or #hand == 0 then return end
-	local rect = self:hand_rect()
-	rect.card_w = rect.card_w or (G and G.CARD_W) or 1
-	rect.card_h = rect.card_h or (G and G.CARD_H) or 1
-	local pile_view = PileView.new("hand", hand, rect)
-	pile_view:draw(renderer or self.renderer)
+	self:draw_pile("hand", self:hand_rect(), renderer)
 end
 
 function TableBoardView:draw_draw_pile(renderer)
-	local state = self._state or (self.store and self.store:get())
-	if not state then return end
-	local draw = TableAreas.draw_cards(state)
-	if not draw or #draw == 0 then return end
-	local rect = self:draw_pile_rect()
-	rect.card_w = rect.card_w or (G and G.CARD_W) or 1
-	rect.card_h = rect.card_h or (G and G.CARD_H) or 1
-	local pile_view = PileView.new("draw", draw, rect)
-	pile_view:draw(renderer or self.renderer)
+	self:draw_pile("draw", self:draw_pile_rect(), renderer)
+end
+
+function TableBoardView:draw_pattern(renderer)
+	self:draw_pile("pattern", self:pattern_rect(), renderer)
+end
+
+function TableBoardView:draw_static_piles(renderer)
+	if self:should_render_hand_from_store() then
+		self:draw_hand(renderer)
+	end
+	if self:should_render_draw_from_store() then
+		self:draw_draw_pile(renderer)
+	end
+	if self:should_render_pattern_from_store() then
+		self:draw_pattern(renderer)
+	end
 end
 
 return TableBoardView

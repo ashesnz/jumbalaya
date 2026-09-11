@@ -803,7 +803,7 @@ Each PR: `love tests` → `emmylua_check . --severity warn` → manual smoke (§
 
 ---
 
-#### PR-3 — TABLE_BOARD: full store render + shrink CardArea
+#### PR-3 — TABLE_BOARD: full store render + shrink CardArea ✅
 
 **Goal:** Hand/draw/pattern piles render from `store.piles` + `PileView`; CardArea only for drag overlay.
 
@@ -811,12 +811,14 @@ Each PR: `love tests` → `emmylua_check . --severity warn` → manual smoke (§
 |--------|-------|
 | Expand view | `word_game/ui/views/table_board_view.lua`, `word_game/ui/table/board.lua` |
 | Input → store | `word_game/board/placement/snap.lua` (already dispatches `MOVE_CARD`) |
-| Dual-write shrink | `bridge/pile_sync.lua` — store authoritative; CardArea follows store on deal/shuffle |
-| Retire chrome | `word_game/ui/cardarea/hand.lua`, `deck.lua` draw paths when store path covers them |
+| Dual-write shrink | `bridge/pile_sync.lua` — `release_static_chrome`, `sync_store_to_areas`, `chrome_release_enabled` |
+| Retire chrome | `word_game/ui/cardarea/hand.lua`, `deck.lua`, `placement.lua` skip draw when store path active |
+| Deal/shuffle hooks | `model/cards/deck/dealing.lua`, `ui/table/controls/shuffle_anim.lua` |
+| Test hygiene | `tests/helpers/mock_env.lua` — reset `G.STATE` and `views_install` per suite |
 
-**Exit:** Empty `G.dealt_letters.cards` path is default in tests; drag still works in manual smoke.
+**Exit:** Empty `G.dealt_letters.cards` path is default when `TableBoardView` is installed; CardArea retains drag/focus cards only.
 
-**Tests:** extend `test_phase6_1_table_board.lua`; `test_phase5_pile_sync.lua`.
+**Tests:** `test_phase6_1_table_board.lua` (pattern pile); `test_phase5_pile_sync.lua` (`release_static_chrome`, `sync_store_pile_to_area`). `love tests` green (479 tests).
 
 ---
 

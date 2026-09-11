@@ -47,6 +47,26 @@ T.describe("Phase 6.1 TableBoard Store Subscription & Renderer", function()
 		T.assert_true(drawn)
 	end)
 
+	T.it("prefers store pattern pile when legacy pattern area is empty", function()
+		local store = Store.new({
+			piles = {
+				hand = {},
+				draw = {},
+				pattern = { { id = 3, letter = "C", pile_id = "pattern" } },
+				bonus = {},
+				discard = {},
+			},
+		})
+		local engine = Engine.Context.new({ store = store })
+		word_game._bind_store(store)
+		word_game._bind_engine(engine)
+		G.pattern_row = { area = { cards = {}, T = { x = 0, y = 0, w = 8, h = 1 } } }
+
+		views_install.install_table_board(engine)
+		local table_view = BoardUI.table_board_view()
+		T.assert_true(table_view:should_render_pattern_from_store())
+	end)
+
 	T.it("prefers store draw pile when legacy draw pile is empty", function()
 		local store = Store.new({
 			piles = {

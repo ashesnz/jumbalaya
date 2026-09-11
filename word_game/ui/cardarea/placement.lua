@@ -40,8 +40,15 @@ function M.draw_shadows(self)
 	end
 end
 
+local function store_renders_pattern()
+	local board = WORD_GAME_UI and WORD_GAME_UI.TableBoard
+	local view = board and board.table_board_view and board.table_board_view()
+	return view and view:should_render_pattern_from_store()
+end
+
 function M.draw_layer(self, v, draw_card_layer)
 	if self.config.type ~= 'placement' then return end
+	if store_renders_pattern() then return end
 	for i = 1, #self.cards do
 		if self.cards[i] ~= G.INPUT.focused.target then
 			if not self.cards[i].selected then
