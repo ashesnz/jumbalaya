@@ -9,7 +9,7 @@ local function runtime() return GameRT.game() end
 
 local round_config = require("jumbalaya_core.config.gameplay.round")
 local game_access = require("word_game.model.game_access")
-local Roll = require("word_game.ui.util.roll")
+local Roll = require("jumbalaya-engine.util.roll")
 
 local M = {}
 

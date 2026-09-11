@@ -95,7 +95,7 @@ There are **no modules at `word_game/ui/` root** — use subpackage paths only:
 
 | Package | Key modules |
 |---------|-------------|
-| `util/` | `colour`, `localize`, `number_format`, `roll` |
+| `util/` | `loc_colour` (`colour.lua`), `localize`, `game_runtime` — stateless helpers live in `jumbalaya-engine.util.*` |
 | `facade/` | Cross-package imports for UI (model/board/app) — use instead of deep `word_game.model.*` requires |
 | `cards/` | `tooltip`, `popups`, `visuals`, `ui`, `letter_faces`, `inspect` |
 | `table/` | `board`, `deck`, `input`, `dealt_hand`, `controls/`, `token_reward`, `jumble_fixed_letters` |

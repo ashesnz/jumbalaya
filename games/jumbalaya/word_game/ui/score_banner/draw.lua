@@ -7,7 +7,7 @@ local function runtime() return GameRT.game() end
 
 local Layout = require("word_game.ui.layout")
 local game_access = require("word_game.model.game_access")
-local Roll = require("word_game.ui.util.roll")
+local Roll = require("jumbalaya-engine.util.roll")
 local felt_layout = require("word_game.ui.layout.felt")
 local fonts = require("word_game.ui.score_banner.fonts")
 local boss_word_announce = require("word_game.ui.score_banner.boss_announce")

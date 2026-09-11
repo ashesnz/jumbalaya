@@ -1,16 +1,22 @@
+--[[ jumbalaya-engine/util/number_format.lua - Compact number formatting and UI scale helpers ]]
 
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
---[[
-	app/core/util/number_format.lua - compact number formatting and UI scale helpers.
-]]
 
-function number_format(value)
-	g().E_SWITCH_POINT = g().E_SWITCH_POINT or 100000000000
+local M = {}
+
+local DEFAULT_SWITCH_POINT = 100000000000
+
+local function switch_point()
+	local game = shell.game()
+	return (game and game.E_SWITCH_POINT) or DEFAULT_SWITCH_POINT
+end
+
+function M.number_format(value)
+	local threshold = switch_point()
 	if not value or type(value) ~= "number" then
 		return value or ""
 	end
-	if value >= g().E_SWITCH_POINT then
+	if value >= threshold then
 		local scientific = string.format("%.4g", value)
 		local exponent = math.floor(math.log(tonumber(scientific), 10))
 		return string.format("%.3f", scientific / (10 ^ exponent)) .. "e" .. exponent
@@ -26,9 +32,9 @@ function number_format(value)
 		:reverse()
 end
 
-function score_number_scale(scale, amount)
-	g().E_SWITCH_POINT = g().E_SWITCH_POINT or 100000000000
-	if type(amount) ~= "number" or amount >= g().E_SWITCH_POINT then
+function M.score_number_scale(scale, amount)
+	local threshold = switch_point()
+	if type(amount) ~= "number" or amount >= threshold then
 		return 0.7 * (scale or 1)
 	end
 	if amount >= 1000000 then
@@ -37,7 +43,4 @@ function score_number_scale(scale, amount)
 	return 0.75 * (scale or 1)
 end
 
-return {
-	number_format = number_format,
-	score_number_scale = score_number_scale,
-}
+return M

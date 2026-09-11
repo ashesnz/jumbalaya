@@ -1,0 +1,38 @@
+--[[ tests/unit/test_engine_util.lua - jumbalaya-engine util modules ]]
+
+local T = require("tests.framework")
+local Roll = require("jumbalaya-engine.util.roll")
+local NumberFormat = require("jumbalaya-engine.util.number_format")
+
+T.describe("jumbalaya-engine util", function()
+	T.describe("roll", function()
+		T.it("eases out toward the target value", function()
+			local roll = Roll.begin(0, 10, 1.0)
+			T.assert_not_nil(roll)
+			roll, _ = Roll.tick(roll, 0.5)
+			T.assert_not_nil(roll)
+			local _, _, progress = Roll.view(roll, 0)
+			T.assert_true(progress > 0 and progress < 1)
+			roll, _ = Roll.tick(roll, 0.6)
+			T.assert_nil(roll)
+		end)
+
+		T.it("steps integer rolls", function()
+			local roll, value = Roll.begin(1, 5, 1.0, { integer = true })
+			T.assert_equal(value, 1)
+			roll, value = Roll.tick_integer(roll, 0.2)
+			T.assert_not_nil(roll)
+			T.assert_true(value >= 1 and value <= 5)
+		end)
+	end)
+
+	T.describe("number_format", function()
+		T.it("formats integers with grouping", function()
+			T.assert_equal(NumberFormat.number_format(1234), "1,234")
+		end)
+
+		T.it("scales large score labels down", function()
+			T.assert_true(NumberFormat.score_number_scale(1, 2000000) < 1)
+		end)
+	end)
+end)

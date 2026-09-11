@@ -3,6 +3,7 @@
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
+local NumberFormat = require("jumbalaya-engine.util.number_format")
 local Easing = require "word_game.ui.effects.easing"
 local Components = require "word_game.ui.widgets.components"
 local game_access = require("word_game.model.game_access")
@@ -147,7 +148,7 @@ function build_round_scores_row(score, text_colour)
     check_high_score = true
     label = 'Set'
     score_tab = {
-      {n=runtime().UI.OBJECT, config={object = FlowText({string = {number_format((game and game.word_round and game.word_round.set) or 0)}, colours = {text_colour or runtime().C.FILTER},shadow = true, float = true, scale = 0.45})}},
+      {n=runtime().UI.OBJECT, config={object = FlowText({string = {NumberFormat.number_format((game and game.word_round and game.word_round.set) or 0)}, colours = {text_colour or runtime().C.FILTER},shadow = true, float = true, scale = 0.45})}},
     }
   end
   if score == 'furthest_round' then 
@@ -155,7 +156,7 @@ function build_round_scores_row(score, text_colour)
     check_high_score = true
     label = localize('term_round')
     score_tab = {
-      {n=runtime().UI.OBJECT, config={object = FlowText({string = {number_format(game and game.round or 0)}, colours = {text_colour or runtime().C.FILTER},shadow = true, float = true, scale = 0.45})}},
+      {n=runtime().UI.OBJECT, config={object = FlowText({string = {NumberFormat.number_format(game and game.round or 0)}, colours = {text_colour or runtime().C.FILTER},shadow = true, float = true, scale = 0.45})}},
     }
   end
   if score == 'seed' then 
@@ -178,12 +179,12 @@ function build_round_scores_row(score, text_colour)
         {n=runtime().UI.OBJECT, config={w=0.3,h=0.3 , object = chip_sprite}}
       }},
       {n=runtime().UI.COLUMN, config={align = "cm"}, nodes={
-        {n=runtime().UI.OBJECT, config={object = FlowText({string = {number_format(game.round_scores[score].amt)}, colours = {text_colour or runtime().C.RED},shadow = true, float = true, scale = math.min(0.6, score_number_scale(1.2, game.round_scores[score].amt))})}},
+        {n=runtime().UI.OBJECT, config={object = FlowText({string = {NumberFormat.number_format(game.round_scores[score].amt)}, colours = {text_colour or runtime().C.RED},shadow = true, float = true, scale = math.min(0.6, NumberFormat.score_number_scale(1.2, game.round_scores[score].amt))})}},
       }},
     }
   elseif game and game.round_scores[score] and not score_tab[1] then 
     score_tab = {
-      {n=runtime().UI.OBJECT, config={object = FlowText({string = {number_format(game.round_scores[score].amt)}, colours = {text_colour or runtime().C.FILTER},shadow = true, float = true, scale = score_number_scale(0.6, game.round_scores[score].amt)})}},
+      {n=runtime().UI.OBJECT, config={object = FlowText({string = {NumberFormat.number_format(game.round_scores[score].amt)}, colours = {text_colour or runtime().C.FILTER},shadow = true, float = true, scale = NumberFormat.score_number_scale(0.6, game.round_scores[score].amt)})}},
     }
   end
   return {n=runtime().UI.ROW, config={align = "cm", padding = 0.05, r = 0.1, colour = shade(runtime().C.MUTED_GREY, 0.1), emboss = 0.05, func = check_high_score and 'high_score_alert' or nil, id = score}, nodes={

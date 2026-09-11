@@ -1,8 +1,8 @@
 --[[
-  word_game/ui/colour.lua - game-specific colour lookups.
+  word_game/ui/util/colour.lua - game-specific palette token lookups (`loc_colour`).
 
-  Engine-level helpers (HEX, mix_colours, lighten, darken, adjust_alpha)
-  live in app/runtime/colour.lua and are installed as globals from there.
+  Stateless colour math (hex parse, tint, shade, blend) lives in
+  `jumbalaya-engine.util.colour` — require it directly; do not re-wrap.
 ]]
 
 local GameRT = require("word_game.ui.util.game_runtime")

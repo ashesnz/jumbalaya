@@ -1,9 +1,4 @@
---[[
-	word_game/ui/lib/roll.lua - Odometer roll state and easing.
-
-	Shared by stage labels, sidebar counters, deck token display, and score
-	banner points-to-get rolls.
-]]
+--[[ jumbalaya-engine/util/roll.lua - Odometer roll state and easing (stateless) ]]
 
 local M = {}
 

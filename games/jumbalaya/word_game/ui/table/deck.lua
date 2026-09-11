@@ -13,7 +13,7 @@ local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
 local TOKEN_HIGHLIGHT_TIME = 0.8
 local facade = require("word_game.ui.facade")
 local felt = require("word_game.ui.layout.felt")
-local Roll = require("word_game.ui.util.roll")
+local Roll = require("jumbalaya-engine.util.roll")
 local state = facade.run_state()
 
 local function deck_mod()

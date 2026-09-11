@@ -11,6 +11,7 @@ local FORBIDDEN_PROXY_FILES = {
 	"word_game/ui/effects/timeline_scheduler.lua",
 	"word_game/ui/views/ui_view_host.lua",
 	"word_game/ui/util/number_format.lua",
+	"word_game/ui/util/roll.lua",
 }
 
 local STALE_REQUIRE_PATTERNS = {
@@ -19,6 +20,7 @@ local STALE_REQUIRE_PATTERNS = {
 	"word_game%.ui%.effects%.timeline_scheduler",
 	"word_game%.ui%.views%.ui_view_host",
 	"word_game%.ui%.util%.number_format",
+	"word_game%.ui%.util%.roll",
 }
 
 --- Bootstrap entry points allowed to delegate to jumbalaya-engine at load time.

@@ -22,7 +22,9 @@ function M.install()
 	require "jumbalaya-engine.graphics.draw"
 	require "app.core.platform.display"
 	require "jumbalaya-engine.sound.sound"
-	require "jumbalaya-engine.util.number_format"
+	local NumberFormat = require "jumbalaya-engine.util.number_format"
+	number_format = NumberFormat.number_format
+	score_number_scale = NumberFormat.score_number_scale
 
 	require "jumbalaya-engine.retained_ui"
 	require "jumbalaya-engine.graphics.particles"

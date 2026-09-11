@@ -83,7 +83,7 @@ Glue modules are often labeled *"glue over jumbalaya_core"* in their file header
 
 **When adding gameplay logic:** implement the rule in `jumbalaya_core` first (with a `test_core_*` test), then add the thinnest possible glue in `word_game/model/`. Do not duplicate rule logic in `word_game/` — extend core and call it.
 
-**Direct imports (no proxies):** Engine-agnostic tuning → `jumbalaya_core.config.gameplay.*`; timeline scheduling → `jumbalaya-engine.effects.timeline_scheduler`; retained UI host → `jumbalaya-engine.view_host`; number formatting → `jumbalaya-engine.util.number_format`. Game-only data (jumble puzzles, visuals, boot flags, `run_params`) stays in `word_game/config/`. Do not add one-line `return require(...)` shim files or side-effect `require … return true` loaders under `word_game/` (`test_legacy_shims.lua` scans the tree). Allowed exception: `app/bootstrap/engine_boot.lua` delegates to `jumbalaya-engine.boot`.
+**Direct imports (no proxies):** Engine-agnostic tuning → `jumbalaya_core.config.gameplay.*`; timeline scheduling → `jumbalaya-engine.effects.timeline_scheduler`; retained UI host → `jumbalaya-engine.view_host`; stateless helpers → `jumbalaya-engine.util.*` (`colour`, `number_format`, `roll`, `geometry`, `tables`, `pack`, `random`, `tween`). Game-only data (jumble puzzles, visuals, boot flags, `run_params`) stays in `word_game/config/`. `word_game/ui/util/` keeps **game-bound** helpers only (`loc_colour`, `localize`, `game_runtime`) — do not re-wrap engine util modules there. Do not add one-line `return require(...)` shim files or side-effect `require … return true` loaders under `word_game/` (`test_legacy_shims.lua` scans the tree). Allowed exception: `app/bootstrap/engine_boot.lua` delegates to `jumbalaya-engine.boot`.
 
 ### UI foundation versus word-game UI
 
@@ -263,7 +263,7 @@ Runtime hand size (`WORD_GAME.HandSize.get()`) glue lives in `word_game/model/ha
 
 | Package | Purpose |
 |---------|---------|
-| `util/` | Stateless helpers: `colour`, `localize`, `number_format`, `roll`, `game_runtime` |
+| `util/` | Game-bound helpers: `loc_colour` (`colour.lua`), `localize`, `game_runtime`. Stateless formatting/easing → `jumbalaya-engine.util.*` |
 | `facade/` | Cross-package resolver — UI modules import model/board via `require("word_game.ui.facade")` |
 | `cards/` | Letter card presentation: `tooltip`, `popups`, `visuals`, `ui`, `letter_faces`, `inspect` |
 | `table/` | TABLE_BOARD coordinator and table chrome |

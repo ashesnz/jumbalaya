@@ -43,7 +43,7 @@ word_game/ui/      Presentation — may import model/config
 
 | Path | Role |
 |------|------|
-| `ui/util/` | `colour`, `localize`, `number_format`, `roll` |
+| `ui/util/` | `loc_colour` (`colour.lua`), `localize`, `game_runtime`; stateless helpers → `jumbalaya-engine.util.*` |
 | `ui/facade/` | Cross-package imports for UI (model/board/app) |
 | `ui/cards/` | Card tooltip, popups, visuals, inspect |
 | `ui/table/` | `board`, `deck`, `controls/` (play/shuffle), `token_reward` |

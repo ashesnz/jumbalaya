@@ -4,7 +4,7 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local Odometer = EaseNode:derive("Odometer")
-local Roll = require("word_game.ui.util.roll")
+local Roll = require("jumbalaya-engine.util.roll")
 
 local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
 local font_cache = {}
