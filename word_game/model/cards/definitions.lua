@@ -1,9 +1,11 @@
 --[[
 	model/cards/definitions.lua - Letter card definitions and shared centers.
 
-	G.LETTERS.faces holds letter faces (`red_A`–`gold_Z`).
-	G.LETTERS.centers holds card bodies (`letter_base`, deck backs, …).
+	live_game().LETTERS.faces holds letter faces (`red_A`–`gold_Z`).
+	live_game().LETTERS.centers holds card bodies (`letter_base`, deck backs, …).
 ]]
+
+local live_game = require("word_game.model.live_game")
 
 local Registry = require("word_game.model.cards.registry")
 
@@ -105,7 +107,7 @@ function Game:load_card_definitions()
 	-------------------------------------
 	local TESTHELPER_unlocks = false and not _RELEASE_MODE
 	-------------------------------------
-	local profile_id = (G.SETTINGS and G.SETTINGS.profile) or (self.SETTINGS and self.SETTINGS.profile) or 1
+	local profile_id = (live_game().SETTINGS and live_game().SETTINGS.profile) or (self.SETTINGS and self.SETTINGS.profile) or 1
 	if not love.filesystem.getInfo(profile_id .. "") then love.filesystem.createDirectory(profile_id .. "") end
 	if not love.filesystem.getInfo(profile_id .. "/" .. "meta.acs") then love.filesystem.append(profile_id .. "/" .. "meta.acs", "return {}") end
 

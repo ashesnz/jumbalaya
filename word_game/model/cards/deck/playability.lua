@@ -1,11 +1,13 @@
 -- Held-card accounting and playable-hand rerolls.
+local live_game = require("word_game.model.live_game")
+
 return function(context)
 	local M = context.module
 	local hand_size_cfg = require("word_game.model.hand_size")
 	local core_playability = require("jumbalaya_core.cards.playability")
 
 	local function deck_owns(card)
-		return core_playability.deck_owns(card, G.draw_pile)
+		return core_playability.deck_owns(card, live_game().draw_pile)
 	end
 
 	local function card_letter(card)
@@ -22,18 +24,18 @@ return function(context)
 	M.deck_owns = deck_owns
 
 	function M.deck_letter_counts()
-		return core_playability.deck_letter_counts(G.draw_pile and G.draw_pile.cards, G.draw_pile)
+		return core_playability.deck_letter_counts(live_game().draw_pile and live_game().draw_pile.cards, live_game().draw_pile)
 	end
 
 	local function placement_cards()
-		local area = G.pattern_row and G.pattern_row.area
+		local area = live_game().pattern_row and live_game().pattern_row.area
 		return (area and area.cards) or {}
 	end
 
 	local function held_cards()
 		local out = {}
-		if G.dealt_letters and G.dealt_letters.cards then
-			for _, card in ipairs(G.dealt_letters.cards) do
+		if live_game().dealt_letters and live_game().dealt_letters.cards then
+			for _, card in ipairs(live_game().dealt_letters.cards) do
 				out[#out + 1] = card
 			end
 		end
@@ -71,7 +73,7 @@ return function(context)
 
 	local function deck_pool_cards()
 		local out = {}
-		for _, card in ipairs(G.draw_pile and G.draw_pile.cards or {}) do
+		for _, card in ipairs(live_game().draw_pile and live_game().draw_pile.cards or {}) do
 			if deck_owns(card) then
 				out[#out + 1] = card
 			end
@@ -80,9 +82,9 @@ return function(context)
 	end
 
 	local function start_from_pile(card)
-		if not card or not G.draw_pile then return end
-		local x = G.draw_pile.T.x + 0.5 * ((G.draw_pile.T.w or card.T.w) - card.T.w)
-		local y = G.draw_pile.T.y + 0.5 * ((G.draw_pile.T.h or card.T.h) - card.T.h)
+		if not card or not live_game().draw_pile then return end
+		local x = live_game().draw_pile.T.x + 0.5 * ((live_game().draw_pile.T.w or card.T.w) - card.T.w)
+		local y = live_game().draw_pile.T.y + 0.5 * ((live_game().draw_pile.T.h or card.T.h) - card.T.h)
 		card.T.x, card.T.y = x, y
 		if card.VT then
 			card.VT.x, card.VT.y = x, y
@@ -99,9 +101,9 @@ return function(context)
 	end
 
 	local function fly_from_deck_to_hand(card)
-		if not card or not G.dealt_letters then return false end
+		if not card or not live_game().dealt_letters then return false end
 		start_from_pile(card)
-		G.dealt_letters:emplace(card)
+		live_game().dealt_letters:emplace(card)
 		if card.pulse then
 			card:pulse(0.18, 0.08)
 		end
@@ -113,15 +115,15 @@ return function(context)
 	context.fly_from_deck_to_hand = fly_from_deck_to_hand
 
 	local function swap_held_with_deck(held_card, deck_card)
-		if not held_card or not deck_card or not G.draw_pile then return false end
+		if not held_card or not deck_card or not live_game().draw_pile then return false end
 		local area = held_card.area
 		if not area then return false end
 
 		area:remove_card(held_card)
-		G.draw_pile:remove_card(deck_card)
-		G.draw_pile:emplace(held_card)
+		live_game().draw_pile:remove_card(deck_card)
+		live_game().draw_pile:emplace(held_card)
 
-		if area == G.dealt_letters then
+		if area == live_game().dealt_letters then
 			fly_from_deck_to_hand(deck_card)
 			M.reveal_in_hand(deck_card)
 		else
@@ -132,12 +134,12 @@ return function(context)
 	end
 
 	local function align_held()
-		if G.dealt_letters then
-			G.dealt_letters:set_ranks()
-			G.dealt_letters:relayout()
+		if live_game().dealt_letters then
+			live_game().dealt_letters:set_ranks()
+			live_game().dealt_letters:relayout()
 		end
-		if G.pattern_row then
-			G.pattern_row:relayout()
+		if live_game().pattern_row then
+			live_game().pattern_row:relayout()
 		end
 	end
 
@@ -186,19 +188,19 @@ return function(context)
 				return true
 			end
 			local hcard = held[1]
-			if not hcard or not hcard.area or not G.draw_pile or #G.draw_pile.cards == 0 then
+			if not hcard or not hcard.area or not live_game().draw_pile or #live_game().draw_pile.cards == 0 then
 				break
 			end
 			local area = hcard.area
 			area:remove_card(hcard)
-			G.draw_pile:emplace(hcard)
+			live_game().draw_pile:emplace(hcard)
 			local replacement = context.take_letter_from_deck(false)
 			if not replacement then
-				G.draw_pile:remove_card(hcard)
+				live_game().draw_pile:remove_card(hcard)
 				area:emplace(hcard)
 				break
 			end
-			if area == G.dealt_letters then
+			if area == live_game().dealt_letters then
 				fly_from_deck_to_hand(replacement)
 			else
 				area:emplace(replacement)

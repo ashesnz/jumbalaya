@@ -1,5 +1,7 @@
 --[[ word_game/model/jumble/slots.lua - Placement row slots (G glue over jumbalaya_core) ]]
 
+local live_game = require("word_game.model.live_game")
+
 return function(M)
 
 local bonus_return = require("word_game.model.jumble.bonus_return")
@@ -17,7 +19,7 @@ local function geometry(session)
 	if session and session.jumble_geometry then
 		return session.jumble_geometry
 	end
-	local pt = G.pattern_row
+	local pt = live_game().pattern_row
 	return pt and pt.jumble_geometry
 end
 
@@ -37,7 +39,7 @@ end
 M.all_blanks_filled = core.all_blanks_filled
 
 function M.sync_placement_cards(slots)
-	local area = G.pattern_row and G.pattern_row.area
+	local area = live_game().pattern_row and live_game().pattern_row.area
 	if not area then return end
 	area.cards = {}
 	for _, slot in ipairs(slots or {}) do
@@ -239,8 +241,8 @@ function M.assign_card_to_blank(slot_index, card, insert_pos)
 			local displaced = slot.card
 			if displaced.bonus_card then
 				bonus_return.return_card(displaced)
-			elseif G.dealt_letters and displaced.area ~= G.dealt_letters then
-				G.dealt_letters:emplace(displaced)
+			elseif live_game().dealt_letters and displaced.area ~= live_game().dealt_letters then
+				live_game().dealt_letters:emplace(displaced)
 			end
 		end
 		detach_card_from_slots(j.slots, card)
@@ -249,14 +251,14 @@ function M.assign_card_to_blank(slot_index, card, insert_pos)
 		return false
 	end
 
-	if G.pattern_row and G.pattern_row.area and card.set_card_area then
-		card:set_card_area(G.pattern_row.area)
+	if live_game().pattern_row and live_game().pattern_row.area and card.set_card_area then
+		card:set_card_area(live_game().pattern_row.area)
 	end
 	M.sync_placement_cards(j.slots)
-	if G.pattern_row then
-		G.pattern_row:relayout()
-		if G.pattern_row.area then
-			G.pattern_row.area:hard_set_cards()
+	if live_game().pattern_row then
+		live_game().pattern_row:relayout()
+		if live_game().pattern_row.area then
+			live_game().pattern_row.area:hard_set_cards()
 		end
 	end
 	return true
@@ -267,10 +269,10 @@ function M.remove_card_from_blanks(card)
 	if not j then return end
 	detach_card_from_slots(j.slots, card)
 	M.sync_placement_cards(j.slots)
-	if G.pattern_row then
-		G.pattern_row:relayout()
-		if G.pattern_row.area then
-			G.pattern_row.area:hard_set_cards()
+	if live_game().pattern_row then
+		live_game().pattern_row:relayout()
+		if live_game().pattern_row.area then
+			live_game().pattern_row.area:hard_set_cards()
 		end
 	end
 end

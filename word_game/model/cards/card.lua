@@ -36,6 +36,8 @@
 ---@field set_debuff fun(self: Card, should_debuff: boolean)
 ---@field add_to_deck fun(self: Card, from_debuff: boolean|nil)
 ---@field remove_from_deck fun(self: Card, from_debuff: boolean|nil)
+local live_game = require("word_game.model.live_game")
+
 Card = EaseNode:derive("Card")
 
 require "word_game.model.cards.card_ability"
@@ -96,8 +98,8 @@ function Card:construct(X, Y, W, H, card, center, params)
     self.no_ui = self.config.card.no_ui
 
     -- Identity / ordering.
-    G.sort_id = (G.sort_id or 0) + 1
-    self.sort_id = G.sort_id
+    live_game().sort_id = (live_game().sort_id or 0) + 1
+    self.sort_id = live_game().sort_id
     self.unique_val = 1 - self.ID / 1603301
     self.edition = nil
     self.area = nil
@@ -125,7 +127,7 @@ function Card:construct(X, Y, W, H, card, center, params)
     self.added_to_deck = nil
 
     if getmetatable(self) == Card then
-        table.insert(G.LIVE.CARD, self)
+        table.insert(live_game().LIVE.CARD, self)
     end
 end
 
@@ -152,21 +154,21 @@ end
 
 -- ============ Sprites & Base Playing-Card Data ============
 
--- Reverse lookup from face definition to its G.LETTERS.faces key, memoised so
+-- Reverse lookup from face definition to its live_game().LETTERS.faces key, memoised so
 -- apply_face stays O(1) after the first call.
 local face_keys = setmetatable({}, {__mode = "k"})
 local function face_key(definition)
 	if type(definition) ~= "table" then return nil end
 	local cached = face_keys[definition]
 	if cached then return cached end
-	for key, def in pairs(G.LETTERS.faces or {}) do
+	for key, def in pairs(live_game().LETTERS.faces or {}) do
 		face_keys[def] = key
 	end
 	return face_keys[definition]
 end
 
 --- Sets/refreshes this card's letter face (`self.base`: name/letter/color).
---- @param card table|nil raw card data (see `G.LETTERS.faces`); empty table = blank/no card
+--- @param card table|nil raw card data (see `live_game().LETTERS.faces`); empty table = blank/no card
 --- @param initial boolean|nil true during `Card:init` (skips some update-only work)
 function Card:apply_face(card, initial)
     card = card or {}
@@ -330,14 +332,14 @@ function Card:load(saved)
 
     self.config = {
         center_key = saved.refs.center,
-        center = G.LETTERS.centers[saved.refs.center],
+        center = live_game().LETTERS.centers[saved.refs.center],
         card_key = saved.refs.card,
-        card = G.LETTERS.faces[saved.refs.card],
+        card = live_game().LETTERS.faces[saved.refs.card],
     }
     self.params = saved.params
 
     -- Standard-size card restore.
-    local H, W = G.CARD_H, G.CARD_W
+    local H, W = live_game().CARD_H, live_game().CARD_W
     self.T.h, self.T.w = H, W
     self.VT.h = self.T.h
     self.VT.w = self.T.w
@@ -365,23 +367,23 @@ function Card:remove()
 
     self:remove_from_deck()
 
-    if G.letter_inventory then
-        for k, v in ipairs(G.letter_inventory) do
+    if live_game().letter_inventory then
+        for k, v in ipairs(live_game().letter_inventory) do
             if v == self then
-                table.remove(G.letter_inventory, k)
+                table.remove(live_game().letter_inventory, k)
                 break
             end
         end
-        for k, v in ipairs(G.letter_inventory) do
+        for k, v in ipairs(live_game().letter_inventory) do
             v.letter_card_id = k
         end
     end
 
     teardown_tree(self.children)
 
-    for k, v in pairs(G.LIVE.CARD) do
+    for k, v in pairs(live_game().LIVE.CARD) do
         if v == self then
-            table.remove(G.LIVE.CARD, k)
+            table.remove(live_game().LIVE.CARD, k)
             break
         end
     end

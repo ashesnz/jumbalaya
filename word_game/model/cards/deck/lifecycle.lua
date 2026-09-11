@@ -1,4 +1,6 @@
 -- Drafting, cutting, weighted selection, and deck listing.
+local live_game = require("word_game.model.live_game")
+
 return function(context)
 	local M = context.module
 	local LetterPalette = require "word_game.config.visuals.letter_card_palette"
@@ -10,8 +12,8 @@ return function(context)
 	M.STARTING_LETTERS = deck_config.STARTING_LETTERS
 
 	function M.shuffle_deck()
-		if not G.draw_pile or not G.draw_pile.cards then return end
-		local cards = G.draw_pile.cards
+		if not live_game().draw_pile or not live_game().draw_pile.cards then return end
+		local cards = live_game().draw_pile.cards
 		for i = #cards, 2, -1 do
 			local j = math.random(1, i)
 			cards[i], cards[j] = cards[j], cards[i]
@@ -19,26 +21,26 @@ return function(context)
 	end
 
  function M.populate_starting_deck()
- 	G.draw_pile.config = G.draw_pile.config or {}
-		G.letter_inventory = {}
-		G.letter_card_id = 0
-		G.draw_pile.cards = {}
+ 	live_game().draw_pile.config = live_game().draw_pile.config or {}
+		live_game().letter_inventory = {}
+		live_game().letter_card_id = 0
+		live_game().draw_pile.cards = {}
 		for _, letter in ipairs(M.STARTING_LETTERS) do
-			G.draw_pile:emplace(M.create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR))
+			live_game().draw_pile:emplace(M.create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR))
 		end
 		game_access.patch({ starting_deck_size = #M.STARTING_LETTERS })
-		G.draw_pile.config.card_limit = #M.STARTING_LETTERS
+		live_game().draw_pile.config.card_limit = #M.STARTING_LETTERS
 		M.shuffle_deck()
- 	if G.draw_pile.hard_set_T then G.draw_pile:hard_set_T() end
+ 	if live_game().draw_pile.hard_set_T then live_game().draw_pile:hard_set_T() end
 		M.sync_deck_count_display()
 		pile_sync.sync_areas_to_store()
 	end
 
 	 function M.draft_letter(letter, color)
-	 	G.draw_pile.config = G.draw_pile.config or {}
+	 	live_game().draw_pile.config = live_game().draw_pile.config or {}
 	 local card = M.create_letter_card(letter, color)
-		G.draw_pile:emplace(card)
-		G.draw_pile.config.card_limit = (G.draw_pile.config.card_limit or #M.STARTING_LETTERS) + 1
+		live_game().draw_pile:emplace(card)
+		live_game().draw_pile.config.card_limit = (live_game().draw_pile.config.card_limit or #M.STARTING_LETTERS) + 1
 		M.sync_deck_count_display()
 		return card
 	end
@@ -47,24 +49,24 @@ return function(context)
 		if not card then return end
 		for _, area in ipairs(M.all_areas()) do
 			if area and card.area == area then
-				if G.pattern_row and area == G.pattern_row.area then
-					G.pattern_row:on_remove_card(card)
+				if live_game().pattern_row and area == live_game().pattern_row.area then
+					live_game().pattern_row:on_remove_card(card)
 				end
 				area:remove_card(card)
 				break
 			end
 		end
-		for i = #(G.letter_inventory or {}), 1, -1 do
-			if G.letter_inventory[i] == card then
-				table.remove(G.letter_inventory, i)
+		for i = #(live_game().letter_inventory or {}), 1, -1 do
+			if live_game().letter_inventory[i] == card then
+				table.remove(live_game().letter_inventory, i)
 				break
 			end
 		end
 		card.REMOVED = true
-		if G.draw_pile then
-			G.draw_pile.config = G.draw_pile.config or {}
-			local total = #(G.letter_inventory or {})
-			G.draw_pile.config.card_limit = math.max(total, (G.draw_pile.config.card_limit or 1) - 1)
+		if live_game().draw_pile then
+			live_game().draw_pile.config = live_game().draw_pile.config or {}
+			local total = #(live_game().letter_inventory or {})
+			live_game().draw_pile.config.card_limit = math.max(total, (live_game().draw_pile.config.card_limit or 1) - 1)
 		end
 		if card.remove then
 			card:remove()

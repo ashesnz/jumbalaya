@@ -1,14 +1,16 @@
 --[[ word_game/model/persistence/run_save.lua - Run snapshot store state and card inventory ]]
 
+local live_game = require("word_game.model.live_game")
+
 local TableAreas = require("word_game.model.table_areas")
 local game_access = require("word_game.model.game_access")
 local store_sync = require("bridge.store_sync")
-local runtime = require("bridge.runtime")
+local BridgeRuntime = require("bridge.runtime")
 
 local M = {}
 
 function M.rebuild_card_inventory()
-	G.letter_inventory = {}
+	live_game().letter_inventory = {}
 	local seen = {}
 	local max_id = 0
 	local piles = {
@@ -24,24 +26,24 @@ function M.rebuild_card_inventory()
 				local id = card.letter_card_id or card.id
 				if id and not seen[id] then
 					seen[id] = true
-					G.letter_inventory[#G.letter_inventory + 1] = card
+					live_game().letter_inventory[#live_game().letter_inventory + 1] = card
 					if id > max_id then max_id = id end
 				end
 			end
 		end
 	end
-	G.letter_card_id = max_id
+	live_game().letter_card_id = max_id
 	local draw_pile = TableAreas.draw_pile()
-	if draw_pile and draw_pile.config and #G.letter_inventory > 0 then
-		draw_pile.config.card_limit = math.max(draw_pile.config.card_limit or 52, #G.letter_inventory)
+	if draw_pile and draw_pile.config and #live_game().letter_inventory > 0 then
+		draw_pile.config.card_limit = math.max(draw_pile.config.card_limit or 52, #live_game().letter_inventory)
 	end
-	game_access.patch({ starting_deck_size = #G.letter_inventory })
+	game_access.patch({ starting_deck_size = #live_game().letter_inventory })
 end
 
 function M.restore_card_areas(save_table)
 	if not save_table then return end
 	if save_table.store then
-		local store = runtime.store()
+		local store = BridgeRuntime.store()
 		if store then
 			store_sync.restore_snapshot(store, save_table.store)
 		end
@@ -76,13 +78,13 @@ function M.restore_card_areas(save_table)
 					row.area:load(data)
 				end
 			else
-				local area = G[key]
+				local area = live_game()[key]
 				if area and area.load then
 					area:load(data)
 				end
 			end
 		end
-		local store = runtime.store()
+		local store = BridgeRuntime.store()
 		if store then
 			store:patch({ piles = store_piles })
 		end
@@ -91,7 +93,7 @@ function M.restore_card_areas(save_table)
 end
 
 function M.append_pattern_row_snapshot(snapshot)
-	local store = runtime.store()
+	local store = BridgeRuntime.store()
 	if store then
 		snapshot.store = store:get()
 	else

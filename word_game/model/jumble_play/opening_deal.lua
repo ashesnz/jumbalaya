@@ -4,12 +4,14 @@
 	either way the hand ends up dealt and the HUD refreshed.
 ]]
 
+local live_game = require("word_game.model.live_game")
+
 local game_access = require("word_game.model.game_access")
 
 local M = {}
 
 function M.deal()
-	if not G.dealt_letters or not G.draw_pile then return end
+	if not live_game().dealt_letters or not live_game().draw_pile then return end
 
 	local wr = game_access.word_round()
 	if WORD_GAME and WORD_GAME.Deck

@@ -1,5 +1,7 @@
 --[[ word_game/model/table_areas.lua - Store selectors for table card piles ]]
 
+local live_game = require("word_game.model.live_game")
+
 local M = {}
 
 --- Legacy save cardAreas keys → G property names.
@@ -21,8 +23,8 @@ end
 
 local function get_store_state(state)
 	if state then return state end
-	local runtime = require("bridge.runtime")
-	local store = runtime.store()
+	local BridgeRuntime = require("bridge.runtime")
+	local store = BridgeRuntime.store()
 	if store then
 		return store:get()
 	end
@@ -35,7 +37,7 @@ function M.hand_cards(state)
 	if s and s.piles then
 		return s.piles.hand
 	end
-	return G and G.dealt_letters and G.dealt_letters.cards or {}
+	return live_game() and live_game().dealt_letters and live_game().dealt_letters.cards or {}
 end
 
 function M.draw_cards(state)
@@ -43,7 +45,7 @@ function M.draw_cards(state)
 	if s and s.piles then
 		return s.piles.draw
 	end
-	return G and G.draw_pile and G.draw_pile.cards or {}
+	return live_game() and live_game().draw_pile and live_game().draw_pile.cards or {}
 end
 
 function M.recycle_cards(state)
@@ -51,7 +53,7 @@ function M.recycle_cards(state)
 	if s and s.piles then
 		return s.piles.discard
 	end
-	return G and G.recycle_stash and G.recycle_stash.cards or {}
+	return live_game() and live_game().recycle_stash and live_game().recycle_stash.cards or {}
 end
 
 function M.pattern_cards(state)
@@ -59,7 +61,7 @@ function M.pattern_cards(state)
 	if s and s.piles then
 		return s.piles.pattern
 	end
-	return G and G.pattern_row and G.pattern_row.area and G.pattern_row.area.cards or {}
+	return live_game() and live_game().pattern_row and live_game().pattern_row.area and live_game().pattern_row.area.cards or {}
 end
 
 function M.bonus_cards(state)
@@ -67,12 +69,12 @@ function M.bonus_cards(state)
 	if s and s.piles then
 		return s.piles.bonus
 	end
-	return G and G.bonus_stack and G.bonus_stack.cards or {}
+	return live_game() and live_game().bonus_stack and live_game().bonus_stack.cards or {}
 end
 
 -- Legacy accessors for backwards compatibility with CardArea expectations
 function M.dealt_letters()
-	if G and G.dealt_letters then return G.dealt_letters end
+	if live_game() and live_game().dealt_letters then return live_game().dealt_letters end
 	return {
 		cards = M.hand_cards(),
 		config = { card_limit = 7, selected_limit = 7 },
@@ -91,7 +93,7 @@ function M.dealt_letters()
 end
 
 function M.draw_pile()
-	if G and G.draw_pile then return G.draw_pile end
+	if live_game() and live_game().draw_pile then return live_game().draw_pile end
 	return {
 		cards = M.draw_cards(),
 		config = { card_limit = 52 },
@@ -99,14 +101,14 @@ function M.draw_pile()
 end
 
 function M.recycle_stash()
-	if G and G.recycle_stash then return G.recycle_stash end
+	if live_game() and live_game().recycle_stash then return live_game().recycle_stash end
 	return {
 		cards = M.recycle_cards(),
 	}
 end
 
 function M.pattern_row()
-	if G and G.pattern_row then return G.pattern_row end
+	if live_game() and live_game().pattern_row then return live_game().pattern_row end
 	return {
 		cards = M.pattern_cards(),
 		area = M.pattern_row_area(),
@@ -114,7 +116,7 @@ function M.pattern_row()
 end
 
 function M.pattern_row_area()
-	local row = G and G.pattern_row
+	local row = live_game() and live_game().pattern_row
 	if row and row.area then return row.area end
 	return {
 		cards = M.pattern_cards(),

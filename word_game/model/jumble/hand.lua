@@ -1,5 +1,7 @@
 --[[ word_game/model/jumble/hand.lua - Jumble hand lifecycle (G glue over jumbalaya_core) ]]
 
+local live_game = require("word_game.model.live_game")
+
 return function(M)
 local Timeline = require("word_game.model.run.timeline")
 local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
@@ -39,25 +41,25 @@ function M.apply_puzzle(wr, puzzle)
 	core_hand.apply_puzzle(wr, puzzle, puzzle_hooks())
 
 	local j = wr.jumble
-	local area = G.pattern_row and G.pattern_row.area
+	local area = live_game().pattern_row and live_game().pattern_row.area
 	if area and area.cards then
 		for i = #area.cards, 1, -1 do
 			local card = area.cards[i]
-			if G.pattern_row then
-				G.pattern_row:on_remove_card(card)
+			if live_game().pattern_row then
+				live_game().pattern_row:on_remove_card(card)
 			end
 			area:remove_card(card)
 			if card.bonus_card then
 				bonus_return.return_card(card)
-			elseif card.area ~= G.dealt_letters and G.dealt_letters then
-				G.dealt_letters:emplace(card)
+			elseif card.area ~= live_game().dealt_letters and live_game().dealt_letters then
+				live_game().dealt_letters:emplace(card)
 			end
 		end
 		if area.config then
 			area.config.card_limit = M.blank_count(j.slots, j.puzzle)
 		end
-		if G.pattern_row then
-			G.pattern_row:relayout()
+		if live_game().pattern_row then
+			live_game().pattern_row:relayout()
 			if area.hard_set_cards then
 				area:hard_set_cards()
 			end

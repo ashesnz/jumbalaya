@@ -1,12 +1,14 @@
 --[[ word_game/model/run/scope.lua - Run lifecycle boundary for store and run caches.
 
 	Every new run must pass through this module so stale UI bindings, module
-	caches, and G.ARGS mirrors cannot leak across runs.
+	caches, and live_game().ARGS mirrors cannot leak across runs.
 ]]
+
+local live_game = require("word_game.model.live_game")
 
 local game_access = require("word_game.model.game_access")
 local store_sync = require("bridge.store_sync")
-local runtime = require("bridge.runtime")
+local BridgeRuntime = require("bridge.runtime")
 
 local M = {}
 
@@ -17,8 +19,8 @@ local RUN_ARG_DEFAULTS = {
 }
 
 local function ensure_run_table()
-	G.RUN = G.RUN or { generation = 0, active = false }
-	return G.RUN
+	live_game().RUN = live_game().RUN or { generation = 0, active = false }
+	return live_game().RUN
 end
 
 function M.on_teardown(name, fn)
@@ -32,7 +34,7 @@ function M.on_teardown(name, fn)
 end
 
 function M.generation()
-	return (G.ARGS and G.ARGS.run_generation) or (G.RUN and G.RUN.generation) or 0
+	return (live_game().ARGS and live_game().ARGS.run_generation) or (live_game().RUN and live_game().RUN.generation) or 0
 end
 
 function M.is_current(gen)
@@ -40,7 +42,7 @@ function M.is_current(gen)
 end
 
 function M.is_active()
-	local run = G.RUN
+	local run = live_game().RUN
 	return run and run.active and game_access.get() ~= nil
 end
 
@@ -54,49 +56,49 @@ function M.with_generation(gen, fn)
 end
 
 function M.reset_args()
-	G.ARGS = G.ARGS or {}
-	G.ARGS.run_generation = (G.ARGS.run_generation or 0) + 1
+	live_game().ARGS = live_game().ARGS or {}
+	live_game().ARGS.run_generation = (live_game().ARGS.run_generation or 0) + 1
 	for key, value in pairs(RUN_ARG_DEFAULTS) do
-		G.ARGS[key] = value
+		live_game().ARGS[key] = value
 	end
-	G.ARGS.pending_layout = nil
-	G.ARGS.run_snapshot = nil
-	G.ARGS.spin = { amount = 0, real = 0, eased = 0 }
-	if G.ARGS.score_intensity then
-		G.ARGS.score_intensity.earned_score = 0
-		G.ARGS.score_intensity.required_score = 0
+	live_game().ARGS.pending_layout = nil
+	live_game().ARGS.run_snapshot = nil
+	live_game().ARGS.spin = { amount = 0, real = 0, eased = 0 }
+	if live_game().ARGS.score_intensity then
+		live_game().ARGS.score_intensity.earned_score = 0
+		live_game().ARGS.score_intensity.required_score = 0
 	end
 	local run = ensure_run_table()
-	run.generation = G.ARGS.run_generation
+	run.generation = live_game().ARGS.run_generation
 end
 
 function M.reset_globals()
-	G.letter_inventory = {}
-	G.letter_card_id = 0
-	if G.LIVE then
-		local wipe_card = G.screenwipecard
-		G.LIVE.CARD = {}
+	live_game().letter_inventory = {}
+	live_game().letter_card_id = 0
+	if live_game().LIVE then
+		local wipe_card = live_game().screenwipecard
+		live_game().LIVE.CARD = {}
 		if wipe_card then
-			G.LIVE.CARD[#G.LIVE.CARD + 1] = wipe_card
+			live_game().LIVE.CARD[#live_game().LIVE.CARD + 1] = wipe_card
 		end
-		G.LIVE.CARDAREA = {}
+		live_game().LIVE.CARDAREA = {}
 	end
-	G.SIDEBAR_HUD = nil
-	if G.pattern_row then
-		if G.pattern_row.reset_run then
-			pcall(G.pattern_row.reset_run)
+	live_game().SIDEBAR_HUD = nil
+	if live_game().pattern_row then
+		if live_game().pattern_row.reset_run then
+			pcall(live_game().pattern_row.reset_run)
 		else
-			G.pattern_row.area = nil
+			live_game().pattern_row.area = nil
 		end
 	end
-	if G.HAND_CLEAR_OVERLAY and G.HAND_CLEAR_OVERLAY.remove then
-		pcall(function() G.HAND_CLEAR_OVERLAY:remove() end)
+	if live_game().HAND_CLEAR_OVERLAY and live_game().HAND_CLEAR_OVERLAY.remove then
+		pcall(function() live_game().HAND_CLEAR_OVERLAY:remove() end)
 	end
-	G.HAND_CLEAR_OVERLAY = nil
-	if G.FIRST_PLAY_TUTORIAL_OVERLAY and G.FIRST_PLAY_TUTORIAL_OVERLAY.remove then
-		pcall(function() G.FIRST_PLAY_TUTORIAL_OVERLAY:remove() end)
+	live_game().HAND_CLEAR_OVERLAY = nil
+	if live_game().FIRST_PLAY_TUTORIAL_OVERLAY and live_game().FIRST_PLAY_TUTORIAL_OVERLAY.remove then
+		pcall(function() live_game().FIRST_PLAY_TUTORIAL_OVERLAY:remove() end)
 	end
-	G.FIRST_PLAY_TUTORIAL_OVERLAY = nil
+	live_game().FIRST_PLAY_TUTORIAL_OVERLAY = nil
 end
 
 function M.teardown()
@@ -106,13 +108,13 @@ function M.teardown()
 	for i = #teardown_hooks, 1, -1 do
 		local hook = teardown_hooks[i]
 		local ok, err = pcall(hook.fn)
-		if not ok and G.DEBUG then
+		if not ok and live_game().DEBUG then
 			print("RunScope teardown hook failed:", hook.name, err)
 		end
 	end
 
 	M.reset_globals()
-	local store = runtime.store()
+	local store = BridgeRuntime.store()
 	if store then
 		local CoreStore = require("jumbalaya_core.store")
 		store_sync.replace(store, CoreStore.default_state())
@@ -121,7 +123,7 @@ function M.teardown()
 end
 
 function M.init_new_run_state()
-	local store = runtime.store()
+	local store = BridgeRuntime.store()
 	if store then
 		store_sync.dispatch(store, { type = "RUN_STATE_INIT" })
 	end
@@ -140,7 +142,7 @@ function M.begin_run(game_table, opts)
 	local run_state_mod = require("word_game.model.run.state")
 	run_state_mod.migrate_legacy_field(game_table)
 	game_table.run_generation = M.generation()
-	local store = runtime.store()
+	local store = BridgeRuntime.store()
 	if not store then
 		error("RunScope.begin_run requires WORD_GAME.store()")
 	end

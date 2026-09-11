@@ -2,10 +2,12 @@
 	word_game/model/game/loop.lua - Game-over state handling.
 ]]
 
+local live_game = require("word_game.model.live_game")
+
 local Presentation = require("word_game.model.presentation")
 
 function Game:update_match_end(dt)
-	if not G.STATE_COMPLETE then
+	if not self.STATE_COMPLETE then
 		if type(delete_saved_run) == "function" then
 			delete_saved_run()
 		end
@@ -13,10 +15,10 @@ function Game:update_match_end(dt)
 		play_sfx('negative', 0.5, 0.7)
 		play_sfx('whoosh2', 0.9, 0.7)
 
-		G.SETTINGS.paused = true
+		self.SETTINGS.paused = true
 		Presentation.emit("match_ended", false)
-		G.ROOM.jiggle = G.ROOM.jiggle + 3
+		self.ROOM.jiggle = self.ROOM.jiggle + 3
 
-		G.STATE_COMPLETE = true
+		self.STATE_COMPLETE = true
 	end
 end

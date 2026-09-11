@@ -1,5 +1,7 @@
 --[[ word_game/model/jumble_play/letter_modifier_effects.lua - Modified letter effects (G glue over core) ]]
 
+local live_game = require("word_game.model.live_game")
+
 local perk_effects = require("word_game.model.perks.effects")
 local RunMode = require("word_game.model.run.mode")
 local Timeline = require("word_game.model.run.timeline")
@@ -12,7 +14,7 @@ local function now()
 	if engine and engine.clock then
 		return engine.clock:get_time()
 	end
-	return (G.TIMERS and G.TIMERS.REAL) or 0
+	return (live_game().TIMERS and live_game().TIMERS.REAL) or 0
 end
 
 local function timeline_seconds()

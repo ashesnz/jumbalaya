@@ -1,5 +1,7 @@
 --[[ word_game/model/perks/effects.lua - Gameplay hooks for collected perks (G glue over core) ]]
 
+local live_game = require("word_game.model.live_game")
+
 local state = require("word_game.model.run.state")
 local game_access = require("word_game.model.game_access")
 local round_config = require("word_game.config.gameplay.round")
@@ -95,7 +97,7 @@ local function clock_now()
 	if engine and engine.clock then
 		return engine.clock:get_time()
 	end
-	return (G.TIMERS and G.TIMERS.REAL) or 0
+	return (live_game().TIMERS and live_game().TIMERS.REAL) or 0
 end
 
 function M.compute_word_effects(word, used_cards, j)

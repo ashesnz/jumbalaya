@@ -1,4 +1,6 @@
 -- Jumble-mode deck: built from Deck.STARTING_LETTERS with recycling replacements.
+local live_game = require("word_game.model.live_game")
+
 
 local Scheduler = require "app.effects.timeline_scheduler"
 local CardMotion = require "app.effects.card_motion"
@@ -20,18 +22,18 @@ return function(context)
 	end
 
 	local function reset_deck_pile()
-		if not G.draw_pile then return end
-		if G.draw_pile.cards then
-			for i = #G.draw_pile.cards, 1, -1 do
-				local card = G.draw_pile.cards[i]
+		if not live_game().draw_pile then return end
+		if live_game().draw_pile.cards then
+			for i = #live_game().draw_pile.cards, 1, -1 do
+				local card = live_game().draw_pile.cards[i]
 				if card and card.remove_from_area then
 					card:remove_from_area()
 				end
 			end
-			G.draw_pile.cards = {}
+			live_game().draw_pile.cards = {}
 		end
-		if G.draw_pile.hard_set_cards then
-			G.draw_pile:hard_set_cards()
+		if live_game().draw_pile.hard_set_cards then
+			live_game().draw_pile:hard_set_cards()
 		end
 	end
 
@@ -40,8 +42,8 @@ return function(context)
 			if not area or not area.cards or not area.remove_card then return end
 			for i = #area.cards, 1, -1 do
 				local card = area.cards[i]
-				if G.pattern_row and area == G.pattern_row.area then
-					G.pattern_row:on_remove_card(card)
+				if live_game().pattern_row and area == live_game().pattern_row.area then
+					live_game().pattern_row:on_remove_card(card)
 				end
 				area:remove_card(card)
 			end
@@ -49,19 +51,19 @@ return function(context)
 				area:hard_set_cards()
 			end
 		end
-		purge(G.dealt_letters)
-		purge(G.recycle_stash)
-		purge(G.pattern_row and G.pattern_row.area)
+		purge(live_game().dealt_letters)
+		purge(live_game().recycle_stash)
+		purge(live_game().pattern_row and live_game().pattern_row.area)
 	end
 
 	function M.populate_jumble_deck()
 		purge_table_cards()
-		if #(G.letter_inventory or {}) == 0 then
+		if #(live_game().letter_inventory or {}) == 0 then
 			M.populate_starting_deck()
 			return
 		end
 		reset_deck_pile()
-		for _, card in ipairs(G.letter_inventory) do
+		for _, card in ipairs(live_game().letter_inventory) do
 			if core_letter_card.is_jumble_draw_candidate(card) then
 				if card.remove_from_area then
 					card:remove_from_area()
@@ -71,28 +73,28 @@ return function(context)
 				if card.states then
 					card.states.visible = true
 				end
-				if G.draw_pile.emplace then
-					G.draw_pile:emplace(card)
+				if live_game().draw_pile.emplace then
+					live_game().draw_pile:emplace(card)
 				end
 			end
 		end
-		if G.draw_pile.config then
-			G.draw_pile.config.card_limit = #G.draw_pile.cards
+		if live_game().draw_pile.config then
+			live_game().draw_pile.config.card_limit = #live_game().draw_pile.cards
 		end
 		M.shuffle_deck()
-		if G.draw_pile.hard_set_T then
-			G.draw_pile:hard_set_T()
+		if live_game().draw_pile.hard_set_T then
+			live_game().draw_pile:hard_set_T()
 		end
 		M.sync_deck_count_display()
 	end
 
 	function M.clear_hand_and_placement()
-		local area = G.pattern_row and G.pattern_row.area
+		local area = live_game().pattern_row and live_game().pattern_row.area
 		if area and area.cards then
 			for i = #area.cards, 1, -1 do
 				local card = area.cards[i]
-				if G.pattern_row then
-					G.pattern_row:on_remove_card(card)
+				if live_game().pattern_row then
+					live_game().pattern_row:on_remove_card(card)
 				end
 				area:remove_card(card)
 				if card.bonus_card then
@@ -103,10 +105,10 @@ return function(context)
 			end
 			area:hard_set_cards()
 		end
-		if G.dealt_letters and G.dealt_letters.cards then
-			for i = #G.dealt_letters.cards, 1, -1 do
-				local card = G.dealt_letters.cards[i]
-				G.dealt_letters:remove_card(card)
+		if live_game().dealt_letters and live_game().dealt_letters.cards then
+			for i = #live_game().dealt_letters.cards, 1, -1 do
+				local card = live_game().dealt_letters.cards[i]
+				live_game().dealt_letters:remove_card(card)
 				if card.bonus_card then
 					bonus_return.return_card(card)
 				elseif card.boss_temp then
@@ -134,8 +136,8 @@ return function(context)
 	function M.return_hand_to_deck(on_complete, opts)
 		opts = opts or {}
 		local cards = {}
-		if G.dealt_letters and G.dealt_letters.cards then
-			for _, card in ipairs(G.dealt_letters.cards) do
+		if live_game().dealt_letters and live_game().dealt_letters.cards then
+			for _, card in ipairs(live_game().dealt_letters.cards) do
 				if core_letter_card.returns_to_draw_pile(card) then
 					cards[#cards + 1] = card
 				end
@@ -147,8 +149,8 @@ return function(context)
 		end
 		if opts.instant then
 			for _, card in ipairs(cards) do
-				G.dealt_letters:remove_card(card)
-				G.draw_pile:emplace(card)
+				live_game().dealt_letters:remove_card(card)
+				live_game().draw_pile:emplace(card)
 			end
 			M.shuffle_deck()
 			M.sync_deck_count_display()
@@ -156,22 +158,22 @@ return function(context)
 			return
 		end
 		for i, card in ipairs(cards) do
-			if G.TIMELINE and G.TIMELINE.enqueue then
+			if live_game().TIMELINE and live_game().TIMELINE.enqueue then
 				Scheduler.add{
 					mode = "window",
 					delay = (i - 1) * 0.08,
 					blocking = true,
 					func = function()
-						CardMotion.move{from = G.dealt_letters, to = G.draw_pile, percent = 50, direction = "down", stay_flipped = false, card = card, delay = 0.1}
+						CardMotion.move{from = live_game().dealt_letters, to = live_game().draw_pile, percent = 50, direction = "down", stay_flipped = false, card = card, delay = 0.1}
 						return true
 					end,
 				}
-			elseif G.dealt_letters and G.draw_pile then
-				G.dealt_letters:remove_card(card)
-				G.draw_pile:emplace(card)
+			elseif live_game().dealt_letters and live_game().draw_pile then
+				live_game().dealt_letters:remove_card(card)
+				live_game().draw_pile:emplace(card)
 			end
 		end
-		if G.TIMELINE and G.TIMELINE.enqueue then
+		if live_game().TIMELINE and live_game().TIMELINE.enqueue then
 			Scheduler.add{
 				mode = "delayed",
 				delay = #cards * 0.08 + 0.25,
@@ -191,21 +193,21 @@ return function(context)
 	M.deal_boss_hand = deal_boss_hand
 
 	function M.recycle_discard_into_deck()
-		if not G.recycle_stash or not G.recycle_stash.cards or #G.recycle_stash.cards == 0 then
+		if not live_game().recycle_stash or not live_game().recycle_stash.cards or #live_game().recycle_stash.cards == 0 then
 			return false
 		end
-		for i = #G.recycle_stash.cards, 1, -1 do
-			local card = G.recycle_stash.cards[i]
-			G.recycle_stash:remove_card(card)
+		for i = #live_game().recycle_stash.cards, 1, -1 do
+			local card = live_game().recycle_stash.cards[i]
+			live_game().recycle_stash:remove_card(card)
 			card.played_pool = nil
 			card.discard_stash = nil
 			if card.states then
 				card.states.visible = true
 			end
-			G.draw_pile:emplace(card)
+			live_game().draw_pile:emplace(card)
 		end
-		if G.recycle_stash.hard_set_cards then
-			G.recycle_stash:hard_set_cards()
+		if live_game().recycle_stash.hard_set_cards then
+			live_game().recycle_stash:hard_set_cards()
 		end
 		M.shuffle_deck()
 		M.sync_deck_count_display()
@@ -216,9 +218,9 @@ return function(context)
 		if not M.is_jumble_deck() then return false end
 		if M.hand_card_count() > 0 then return false end
 		if M.draw_pile_count() > 0 then return false end
-		local placement = G.pattern_row and G.pattern_row.area and G.pattern_row.area.cards
+		local placement = live_game().pattern_row and live_game().pattern_row.area and live_game().pattern_row.area.cards
 		if placement and #placement > 0 then return false end
-		local discard_count = (G.recycle_stash and G.recycle_stash.cards and #G.recycle_stash.cards) or 0
+		local discard_count = (live_game().recycle_stash and live_game().recycle_stash.cards and #live_game().recycle_stash.cards) or 0
 		return discard_count > 0
 	end
 
@@ -232,31 +234,31 @@ return function(context)
 			return false
 		end
 
-		local to_deal = math.min(hand_size_cfg.get(), #(G.draw_pile.cards or {}))
+		local to_deal = math.min(hand_size_cfg.get(), #(live_game().draw_pile.cards or {}))
 		for _ = 1, to_deal do
-			local card = G.draw_pile:remove_card()
-			if card and G.dealt_letters then
-				G.dealt_letters:emplace(card)
+			local card = live_game().draw_pile:remove_card()
+			if card and live_game().dealt_letters then
+				live_game().dealt_letters:emplace(card)
 			end
 		end
-		if G.dealt_letters then
-			G.dealt_letters:set_ranks()
-			G.dealt_letters:relayout()
-			G.dealt_letters:snap_VT()
-			G.dealt_letters:hard_set_cards()
+		if live_game().dealt_letters then
+			live_game().dealt_letters:set_ranks()
+			live_game().dealt_letters:relayout()
+			live_game().dealt_letters:snap_VT()
+			live_game().dealt_letters:hard_set_cards()
 		end
 		M.sync_deck_count_display()
 		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.ensure_playable_puzzle then
 			WORD_GAME.Jumble.ensure_playable_puzzle()
 		end
-		G.ARGS = G.ARGS or {}
-		G.ARGS.pending_layout = true
+		live_game().ARGS = live_game().ARGS or {}
+		live_game().ARGS.pending_layout = true
 		if on_complete then on_complete() end
 		return true
 	end
 
 	function M.deal_jumble_hand()
-		if not G.dealt_letters then return end
+		if not live_game().dealt_letters then return end
 		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.clear_blank_cards then
 			local wr = game_access.word_round()
 			local j = wr and wr.jumble
@@ -266,17 +268,17 @@ return function(context)
 		end
 		voucher_discard.reset()
 		M.clear_hand_and_placement()
-		local to_deal = math.min(hand_size_cfg.get(), #(G.draw_pile.cards or {}))
+		local to_deal = math.min(hand_size_cfg.get(), #(live_game().draw_pile.cards or {}))
 		for _ = 1, to_deal do
-			local card = G.draw_pile:remove_card()
+			local card = live_game().draw_pile:remove_card()
 			if card then
-				G.dealt_letters:emplace(card)
+				live_game().dealt_letters:emplace(card)
 			end
 		end
-		G.dealt_letters:set_ranks()
-		G.dealt_letters:relayout()
-		G.dealt_letters:snap_VT()
-		G.dealt_letters:hard_set_cards()
+		live_game().dealt_letters:set_ranks()
+		live_game().dealt_letters:relayout()
+		live_game().dealt_letters:snap_VT()
+		live_game().dealt_letters:hard_set_cards()
 		M.sync_deck_count_display()
 		if WORD_GAME and WORD_GAME.Jumble then
 			WORD_GAME.Jumble.ensure_playable_puzzle()
@@ -284,31 +286,31 @@ return function(context)
 	end
 
 	function M.draw_jumble_replacement()
-		if not G.dealt_letters then return nil end
+		if not live_game().dealt_letters then return nil end
 		if M.draw_pile_count() == 0 then
 			if M.try_jumble_reshuffle_and_deal() then
-				return G.dealt_letters.cards and G.dealt_letters.cards[#G.dealt_letters.cards]
+				return live_game().dealt_letters.cards and live_game().dealt_letters.cards[#live_game().dealt_letters.cards]
 			end
 			return nil
 		end
-		local card = G.draw_pile:remove_card()
+		local card = live_game().draw_pile:remove_card()
 		if not card then return nil end
 		local function finish()
-			if G.dealt_letters then
-				G.dealt_letters:set_ranks()
-				G.dealt_letters:relayout()
+			if live_game().dealt_letters then
+				live_game().dealt_letters:set_ranks()
+				live_game().dealt_letters:relayout()
 			end
 			M.sync_deck_count_display()
 		end
-		if G.TIMELINE and G.TIMELINE.enqueue then
+		if live_game().TIMELINE and live_game().TIMELINE.enqueue then
 			Scheduler.add{
 				mode = "window",
 				delay = 0.05,
 				blocking = true,
 				func = function()
 					CardMotion.move{
-						from = G.draw_pile,
-						to = G.dealt_letters,
+						from = live_game().draw_pile,
+						to = live_game().dealt_letters,
 						percent = 50,
 						direction = "up",
 						stay_flipped = false,
@@ -323,7 +325,7 @@ return function(context)
 			context.fly_from_deck_to_hand(card)
 			finish()
 		else
-			G.dealt_letters:emplace(card)
+			live_game().dealt_letters:emplace(card)
 			finish()
 		end
 		return card
@@ -339,12 +341,12 @@ return function(context)
 			voucher_discard.stash_discarded_card(card)
 			M.draw_jumble_replacement()
 			M.sync_deck_count_display()
-			if G.dealt_letters then
-				G.dealt_letters:hard_set_cards()
+			if live_game().dealt_letters then
+				live_game().dealt_letters:hard_set_cards()
 			end
-			if G.recycle_stash then
-				G.recycle_stash:relayout()
-				G.recycle_stash:hard_set_cards()
+			if live_game().recycle_stash then
+				live_game().recycle_stash:relayout()
+				live_game().recycle_stash:hard_set_cards()
 			end
 			Presentation.emit("hand_shuffle_sync")
 			game_access.mutate(function(g)
@@ -363,8 +365,8 @@ return function(context)
 
 		local dissolve_time = 0.7
 		local function run_dissolve_discard()
-			if G.dealt_letters then
-				G.dealt_letters:remove_card(card)
+			if live_game().dealt_letters then
+				live_game().dealt_letters:remove_card(card)
 			end
 			local vx, vy = voucher_discard and voucher_discard.voucher_discard_center and voucher_discard.voucher_discard_center()
 			if vx and vy and card.T then
@@ -383,7 +385,7 @@ return function(context)
 			if card.start_dissolve then
 				card:start_dissolve(nil, false, 1, true)
 			end
-			if G.TIMELINE and G.TIMELINE.enqueue then
+			if live_game().TIMELINE and live_game().TIMELINE.enqueue then
 				Scheduler.add{
 					mode = "delayed",
 					delay = dissolve_time,
@@ -398,9 +400,9 @@ return function(context)
 			end
 		end
 
-		if G.TIMELINE and G.TIMELINE.enqueue then
+		if live_game().TIMELINE and live_game().TIMELINE.enqueue then
 			run_dissolve_discard()
-		elseif G.dealt_letters then
+		elseif live_game().dealt_letters then
 			run_dissolve_discard()
 		else
 			return false
@@ -414,9 +416,9 @@ return function(context)
 		while M.held_count() < target_size do
 			if not M.draw_jumble_replacement() then break end
 		end
-		if G.dealt_letters then
-			G.dealt_letters:set_ranks()
-			G.dealt_letters:relayout()
+		if live_game().dealt_letters then
+			live_game().dealt_letters:set_ranks()
+			live_game().dealt_letters:relayout()
 		end
 		require("word_game.model.layout.request").refresh()
 	end

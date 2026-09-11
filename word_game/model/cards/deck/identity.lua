@@ -1,4 +1,6 @@
 -- Card identity, presentation, and area primitives for the letter deck.
+local live_game = require("word_game.model.live_game")
+
 return function(context)
 	local M = context.module
 	local core_identity = require("jumbalaya_core.cards.identity")
@@ -11,7 +13,7 @@ return function(context)
 
 	function M.front(letter, color)
 		local key = M.front_key(letter, color)
-		return key and G.LETTERS.faces and G.LETTERS.faces[key] or nil
+		return key and live_game().LETTERS.faces and live_game().LETTERS.faces[key] or nil
 	end
 
 	function M.control_for_letter(letter, color)
@@ -39,8 +41,8 @@ return function(context)
 	function M.restore_letter_face(card)
 		if not card then return end
 		local front = card.config and card.config.card
-		if (not front or not front.pos) and card.config and card.config.card_key and G.LETTERS.faces then
-			front = G.LETTERS.faces[card.config.card_key]
+		if (not front or not front.pos) and card.config and card.config.card_key and live_game().LETTERS.faces then
+			front = live_game().LETTERS.faces[card.config.card_key]
 		end
 		if not front or not front.pos then
 			local letter = card.ability and card.ability.letter
@@ -81,12 +83,12 @@ return function(context)
 	end
 
 	function M.sanitize_hand()
-		if not G.dealt_letters or not G.dealt_letters.cards then return end
-		for i = #G.dealt_letters.cards, 1, -1 do
-			local card = G.dealt_letters.cards[i]
+		if not live_game().dealt_letters or not live_game().dealt_letters.cards then return end
+		for i = #live_game().dealt_letters.cards, 1, -1 do
+			local card = live_game().dealt_letters.cards[i]
 			M.reveal_in_hand(card)
 			if not M.is_letter_card(card) then
-				G.dealt_letters:remove_card(card)
+				live_game().dealt_letters:remove_card(card)
 				if card and card.remove then
 					card:remove()
 				end
@@ -95,15 +97,15 @@ return function(context)
 	end
 
 	function M.all_areas()
-		local areas = { G.draw_pile, G.dealt_letters, G.recycle_stash }
-		if G.pattern_row and G.pattern_row.area then
-			areas[#areas + 1] = G.pattern_row.area
+		local areas = { live_game().draw_pile, live_game().dealt_letters, live_game().recycle_stash }
+		if live_game().pattern_row and live_game().pattern_row.area then
+			areas[#areas + 1] = live_game().pattern_row.area
 		end
 		return areas
 	end
 
 	function M.iter_cards(fn)
-		for _, card in ipairs(core_letter_card.collect_active_cards(G.letter_inventory)) do
+		for _, card in ipairs(core_letter_card.collect_active_cards(live_game().letter_inventory)) do
 			fn(card)
 		end
 	end
@@ -117,8 +119,8 @@ return function(context)
 			if area and area.cards then
 				for i = #area.cards, 1, -1 do
 					local card = area.cards[i]
-					if G.pattern_row and area == G.pattern_row.area then
-						G.pattern_row:on_remove_card(card)
+					if live_game().pattern_row and area == live_game().pattern_row.area then
+						live_game().pattern_row:on_remove_card(card)
 					end
 					area:remove_card(card)
 					all[#all + 1] = card
@@ -128,14 +130,14 @@ return function(context)
 		end
 
 		for _, card in ipairs(all) do
-			G.draw_pile:emplace(card)
+			live_game().draw_pile:emplace(card)
 		end
-		G.draw_pile:shuffle("letter_deck_reset")
-		G.draw_pile:hard_set_T()
+		live_game().draw_pile:shuffle("letter_deck_reset")
+		live_game().draw_pile:hard_set_T()
 	end
 
 	function M.letter_center()
-		local center = G.LETTERS.centers and G.LETTERS.centers.letter_base
+		local center = live_game().LETTERS.centers and live_game().LETTERS.centers.letter_base
 		if center then
 			center.atlas = "letter_frame"
 			center.pos = { x = 0, y = 0 }
@@ -147,20 +149,20 @@ return function(context)
 		local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 		color = color or LetterPalette.DEFAULT_FACE_COLOR
 		local front = M.front(letter, color)
-		G.letter_card_id = (G.letter_card_id or 0) + 1
-		local deck_x = (G.draw_pile and G.draw_pile.T and G.draw_pile.T.x) or 0
-		local deck_y = (G.draw_pile and G.draw_pile.T and G.draw_pile.T.y) or 0
+		live_game().letter_card_id = (live_game().letter_card_id or 0) + 1
+		local deck_x = (live_game().draw_pile and live_game().draw_pile.T and live_game().draw_pile.T.x) or 0
+		local deck_y = (live_game().draw_pile and live_game().draw_pile.T and live_game().draw_pile.T.y) or 0
 		local card = Card(
-			deck_x, deck_y, G.CARD_W or 1, G.CARD_H or 1.4,
+			deck_x, deck_y, live_game().CARD_W or 1, live_game().CARD_H or 1.4,
 			front,
 			M.letter_center(),
-			{ letter_card_id = G.letter_card_id }
+			{ letter_card_id = live_game().letter_card_id }
 		)
 		M.tag_card(card, letter, color)
-		card.id = G.letter_card_id
+		card.id = live_game().letter_card_id
 		card.pile_id = card.pile_id or "draw"
-		G.letter_inventory = G.letter_inventory or {}
-		G.letter_inventory[#G.letter_inventory + 1] = card
+		live_game().letter_inventory = live_game().letter_inventory or {}
+		live_game().letter_inventory[#live_game().letter_inventory + 1] = card
 		return card
 	end
 end

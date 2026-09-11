@@ -1,5 +1,7 @@
 --[[ word_game/model/run/mode.lua - Classic vs Time Run mode helpers ]]
 
+local live_game = require("word_game.model.live_game")
+
 local Timeline = require("word_game.model.run.timeline")
 local game_access = require("word_game.model.game_access")
 
@@ -12,7 +14,7 @@ local function is_valid(mode)
 end
 
 function M.preferred()
-	local mode = G.SETTINGS and G.SETTINGS.preferred_run_mode
+	local mode = live_game().SETTINGS and live_game().SETTINGS.preferred_run_mode
 	if is_valid(mode) then
 		return mode
 	end
@@ -21,10 +23,10 @@ end
 
 function M.set_preferred(mode)
 	if not is_valid(mode) then return end
-	G.SETTINGS = G.SETTINGS or {}
-	G.SETTINGS.preferred_run_mode = mode
-	if G.queue_settings_write then
-		G:queue_settings_write()
+	live_game().SETTINGS = live_game().SETTINGS or {}
+	live_game().SETTINGS.preferred_run_mode = mode
+	if live_game().queue_settings_write then
+		live_game():queue_settings_write()
 	end
 end
 

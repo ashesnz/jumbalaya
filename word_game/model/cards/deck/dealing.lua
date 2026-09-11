@@ -1,4 +1,6 @@
 -- Hand counts plus animated and immediate dealing flows.
+local live_game = require("word_game.model.live_game")
+
 
 local Scheduler = require "app.effects.timeline_scheduler"
 return function(context)
@@ -12,23 +14,23 @@ return function(context)
 	local take_letter_from_deck = context.take_letter_from_deck
 
 	local function placement_count()
-		local area = G.pattern_row and G.pattern_row.area
+		local area = live_game().pattern_row and live_game().pattern_row.area
 		return (area and area.cards and #area.cards) or 0
 	end
 
 	function M.held_count()
 		return pile_counts.held_count(
-			G.dealt_letters and G.dealt_letters.cards,
-			(G.pattern_row and G.pattern_row.area and G.pattern_row.area.cards)
+			live_game().dealt_letters and live_game().dealt_letters.cards,
+			(live_game().pattern_row and live_game().pattern_row.area and live_game().pattern_row.area.cards)
 		)
 	end
 
 	function M.hand_card_count()
-		return pile_counts.hand_card_count(G.dealt_letters and G.dealt_letters.cards)
+		return pile_counts.hand_card_count(live_game().dealt_letters and live_game().dealt_letters.cards)
 	end
 
 	function M.draw_pile_count()
-		return pile_counts.draw_pile_count(G.draw_pile and G.draw_pile.cards)
+		return pile_counts.draw_pile_count(live_game().draw_pile and live_game().draw_pile.cards)
 	end
 
 	function M.cards_left()
@@ -37,8 +39,8 @@ return function(context)
 
 	function M.sync_deck_count_display()
 		local count = M.cards_left()
-		G.ARGS = G.ARGS or {}
-		G.ARGS.deck_left_count = count
+		live_game().ARGS = live_game().ARGS or {}
+		live_game().ARGS.deck_left_count = count
 		game_access.patch({ deck_left_count = count })
 		pile_sync.sync_areas_to_store()
 		if pile_sync.chrome_release_enabled() then
@@ -50,7 +52,7 @@ return function(context)
 
 	function M.deal_one_to_hand(target_size)
 		target_size = target_size or hand_size_cfg.get()
-		if not G.dealt_letters or M.held_count() >= target_size then return false end
+		if not live_game().dealt_letters or M.held_count() >= target_size then return false end
 		local card = take_letter_from_deck(needs_vowel())
 		if not card then return false end
 		return context.fly_from_deck_to_hand(card)
@@ -94,9 +96,9 @@ return function(context)
 
 	function M.deal_fresh_hand(on_complete)
 		local hand_size_n = hand_size_cfg.get()
-		if G.dealt_letters then
-			G.dealt_letters.config.card_limit = hand_size_n
-			G.dealt_letters.config.selected_limit = hand_size_n
+		if live_game().dealt_letters then
+			live_game().dealt_letters.config.card_limit = hand_size_n
+			live_game().dealt_letters.config.selected_limit = hand_size_n
 		end
 		LayoutRequest.refresh()
 		return M.deal_into_hand(hand_size_n, on_complete)
@@ -104,24 +106,24 @@ return function(context)
 
 	function M.draw_to_hand(target_size)
 		target_size = target_size or hand_size_cfg.get()
-		while G.dealt_letters and M.held_count() < target_size do
+		while live_game().dealt_letters and M.held_count() < target_size do
 			local card = take_letter_from_deck(needs_vowel())
 			if not card then break end
-			G.dealt_letters:emplace(card)
+			live_game().dealt_letters:emplace(card)
 		end
 		M.ensure_vowel_in_hand()
 		M.ensure_playable_held()
-		if G.dealt_letters then
+		if live_game().dealt_letters then
 			M.sanitize_hand()
 			while M.held_count() < target_size do
 				local card = take_letter_from_deck(needs_vowel())
 				if not card then break end
-				G.dealt_letters:emplace(card)
+				live_game().dealt_letters:emplace(card)
 			end
 			M.ensure_vowel_in_hand()
 			M.ensure_playable_held()
-			G.dealt_letters:set_ranks()
-			G.dealt_letters:relayout()
+			live_game().dealt_letters:set_ranks()
+			live_game().dealt_letters:relayout()
 		end
 	end
 end

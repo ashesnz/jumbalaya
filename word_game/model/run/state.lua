@@ -1,10 +1,12 @@
 --[[ word_game/model/run/state.lua - Match-long run state on game snapshot run_state ]]
 
+local live_game = require("word_game.model.live_game")
+
 local perks_cfg = require("word_game.config.perks")
 local core_run_state = require("jumbalaya_core.store.run_state")
 local game_access = require("word_game.model.game_access")
 local store_sync = require("bridge.store_sync")
-local runtime = require("bridge.runtime")
+local BridgeRuntime = require("bridge.runtime")
 
 local M = {}
 
@@ -30,7 +32,7 @@ local function sync_store() end
 function M.get()
 	local game = game_access.get()
 	if not game then return nil end
-	if G.RUN and G.RUN.active == false then return nil end
+	if live_game().RUN and live_game().RUN.active == false then return nil end
 	M.migrate_legacy_field(game)
 	game.run_state = game.run_state or M.new()
 	return game.run_state
@@ -70,7 +72,7 @@ function M.add_perk(id)
 	rs.perks = rs.perks or {}
 	local slots = rs.perk_slots or perks_cfg.SLOT_COUNT
 	if #rs.perks >= slots then return false end
-	local store = runtime.store()
+	local store = BridgeRuntime.store()
 	if store then
 		store_sync.dispatch(store, { type = "RUN_STATE_ADD_PERK", id = id })
 		return true

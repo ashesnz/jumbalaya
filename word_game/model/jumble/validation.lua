@@ -1,5 +1,7 @@
 --[[ word_game/model/jumble/validation.lua - Dictionary checks (G glue over jumbalaya_core) ]]
 
+local live_game = require("word_game.model.live_game")
+
 return function(M)
 
 local round = require("word_game.model.round")
@@ -102,20 +104,20 @@ function M.find_playable_words(hand_counts, puzzle, limit)
 end
 
 function M.jumble_hand_counts()
-	if G.dealt_letters and G.dealt_letters.cards and #G.dealt_letters.cards > 0 and Dictionary then
-		return Dictionary.counts_from_cards(G.dealt_letters.cards)
+	if live_game().dealt_letters and live_game().dealt_letters.cards and #live_game().dealt_letters.cards > 0 and Dictionary then
+		return Dictionary.counts_from_cards(live_game().dealt_letters.cards)
 	end
 	return starting_letter_counts()
 end
 
 function M.debug_answer_cards()
 	local cards = {}
-	if G.dealt_letters and G.dealt_letters.cards then
-		for _, card in ipairs(G.dealt_letters.cards) do
+	if live_game().dealt_letters and live_game().dealt_letters.cards then
+		for _, card in ipairs(live_game().dealt_letters.cards) do
 			cards[#cards + 1] = card
 		end
 	end
-	local area = G.pattern_row and G.pattern_row.area
+	local area = live_game().pattern_row and live_game().pattern_row.area
 	if area and area.cards then
 		for _, card in ipairs(area.cards) do
 			cards[#cards + 1] = card
@@ -125,7 +127,7 @@ function M.debug_answer_cards()
 	if bonus_stack and bonus_stack.is_active and bonus_stack.is_active() then
 		for _, card in ipairs(bonus_stack.cards() or {}) do
 			if card and not card.REMOVED then
-				local in_hand = G.dealt_letters and card.area == G.dealt_letters
+				local in_hand = live_game().dealt_letters and card.area == live_game().dealt_letters
 				local in_placement = area and card.area == area
 				if not in_hand and not in_placement then
 					cards[#cards + 1] = card

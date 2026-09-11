@@ -2,6 +2,8 @@
 	model/run.lua - Starting a match (init_game_object, start_run, board).
 ]]
 
+local live_game = require("word_game.model.live_game")
+
 local LayoutRequest = require("word_game.model.layout.request")
 local Presentation = require("word_game.model.presentation")
 local Scheduler = require "app.effects.timeline_scheduler"
@@ -14,22 +16,22 @@ function Game:teardown_run_ui()
 	RunScope.teardown()
 end
 
---- Reset G.ARGS fields that mirror per-run gameplay state for HUD/runtime glue.
+--- Reset self.ARGS fields that mirror per-run gameplay state for HUD/runtime glue.
 function Game:reset_run_args()
 	RunScope.reset_args()
 end
 
 function Game:start_gameplay_board()
-    G.INPUT.locks.load = nil
+    self.INPUT.locks.load = nil
 
-    if G.debug_panel and G.debug_panel.is_open and G.debug_panel:is_open() then
-        G.debug_panel:close()
+    if self.debug_panel and self.debug_panel.is_open and self.debug_panel:is_open() then
+        self.debug_panel:close()
     end
 
     game_access.patch({ round = 1 })
 
-    G.STATE = G.STATES.TABLE_BOARD
-    G.STATE_COMPLETE = true
+    self.STATE = self.STATES.TABLE_BOARD
+    self.STATE_COMPLETE = true
     if WORD_GAME and WORD_GAME.Round then
         WORD_GAME.Round.init_run()
     end
@@ -43,13 +45,13 @@ function Game:start_gameplay_board()
     -- Layout after HUD / hand controls exist so hand + placement anchors match.
     LayoutRequest.refresh()
 
-    if G.TIMELINE then
+    if self.TIMELINE then
         Scheduler.add{
             mode = "delayed",
             delay = 0,
             blocking = false,
             func = function()
-                if G.STATE == G.STATES.TABLE_BOARD and G.STAGE == G.STAGES.RUN then
+                if self.STATE == self.STATES.TABLE_BOARD and self.STAGE == self.STAGES.RUN then
                     LayoutRequest.refresh()
                 end
                 return true
@@ -111,24 +113,24 @@ function Game:start_run(args)
         saveTable = nil
         delete_saved_run()
     end
-    G.STORED_RUN = nil
+    self.STORED_RUN = nil
 
     local viewed_back = self.GAME and self.GAME.viewed_back
     local selected_back_name = self.GAME and self.GAME.selected_back and self.GAME.selected_back.name
 
     self:teardown_run_ui()
 
-    self:prep_stage(G.STAGES.RUN, saveTable and saveTable.STATE or G.STATES.TABLE_BOARD)
+    self:prep_stage(self.STAGES.RUN, saveTable and saveTable.STATE or self.STATES.TABLE_BOARD)
     
-    G.STAGE = G.STAGES.RUN
+    self.STAGE = self.STAGES.RUN
 
-    G.STATE_COMPLETE = false
+    self.STATE_COMPLETE = false
 
     local function deck_center_from_name(name)
-        for _, v in pairs(G.LETTERS.centers) do
+        for _, v in pairs(self.LETTERS.centers) do
             if v.name == name then return v end
         end
-        return G.LETTERS.centers.deck_alpha
+        return self.LETTERS.centers.deck_alpha
     end
 
     local selected_back = saveTable and saveTable.BACK.name
@@ -142,12 +144,12 @@ function Game:start_run(args)
     self.GAME.selected_back = WORD_GAME.Back.new(selected_back)
     self.GAME.selected_back_key = selected_back
 
-    if ease_background_colour and G.C and G.C.GREEN then
-        ease_background_colour { new_colour = G.C.GREEN, contrast = 1 }
+    if ease_background_colour and self.C and self.C.GREEN then
+        ease_background_colour { new_colour = self.C.GREEN, contrast = 1 }
     end
 
-    G.C.UI_POINTS[1], G.C.UI_POINTS[2], G.C.UI_POINTS[3], G.C.UI_POINTS[4] = G.C.BLUE[1], G.C.BLUE[2], G.C.BLUE[3], G.C.BLUE[4]
-    G.C.UI_MULTIPLIER[1], G.C.UI_MULTIPLIER[2], G.C.UI_MULTIPLIER[3], G.C.UI_MULTIPLIER[4] = G.C.RED[1], G.C.RED[2], G.C.RED[3], G.C.RED[4]
+    self.C.UI_POINTS[1], self.C.UI_POINTS[2], self.C.UI_POINTS[3], self.C.UI_POINTS[4] = self.C.BLUE[1], self.C.BLUE[2], self.C.BLUE[3], self.C.BLUE[4]
+    self.C.UI_MULTIPLIER[1], self.C.UI_MULTIPLIER[2], self.C.UI_MULTIPLIER[3], self.C.UI_MULTIPLIER[4] = self.C.RED[1], self.C.RED[2], self.C.RED[3], self.C.RED[4]
 
     if not saveTable then 
         self.GAME.selected_back:apply_to_run()
@@ -172,8 +174,8 @@ function Game:start_run(args)
     for k, v in pairs(self.GAME.seed_streams) do if v == 0 then self.GAME.seed_streams[k] = hash_text(k..self.GAME.seed_streams.seed) end end
     self.GAME.seed_streams.hashed_seed = hash_text(self.GAME.seed_streams.seed)
 
-    G:queue_settings_write()
-    G.INPUT.locks.load = true
+    self:queue_settings_write()
+    self.INPUT.locks.load = true
     Scheduler.add{
         persistent = true,
         mode = 'delayed',
@@ -181,7 +183,7 @@ function Game:start_run(args)
         delay = 3.5,
         timer = 'TOTAL',
         func = function()
-            G.INPUT.locks.load = nil
+            self.INPUT.locks.load = nil
           return true
         end
       }
@@ -194,18 +196,18 @@ function Game:start_run(args)
     end
 
     local CAI = {
-        discard_W = G.CARD_W,
-        discard_H = G.CARD_H,
-        deck_W = G.CARD_W*1.1,
-        deck_H = 0.95*G.CARD_H,
+        discard_W = self.CARD_W,
+        discard_H = self.CARD_H,
+        deck_W = self.CARD_W*1.1,
+        deck_H = 0.95*self.CARD_H,
         hand_W = get_hand_area_width(hand_size),
-        hand_H = 0.95*G.CARD_H,
-        play_W = math.min(5, hand_size)*G.CARD_W + 0.3*G.CARD_W,
-        play_H = 0.95*G.CARD_H,
+        hand_H = 0.95*self.CARD_H,
+        play_W = math.min(5, hand_size)*self.CARD_W + 0.3*self.CARD_W,
+        play_H = 0.95*self.CARD_H,
         placement_W = self.pattern_row:area_width(),
         placement_H = self.pattern_row:area_height(),
-        usable_W = 2.3*G.CARD_W,
-        usable_H = 0.95*G.CARD_H
+        usable_W = 2.3*self.CARD_W,
+        usable_H = 0.95*self.CARD_H
     }
 
 
@@ -231,7 +233,7 @@ function Game:start_run(args)
         CAI.hand_W,CAI.hand_H,
         {card_limit = self.GAME.starting_params.hand_size, type = 'hand', selection_limit = 1})
 
-    G.letter_inventory = {}
+    self.letter_inventory = {}
 
 	if not saveTable and WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.populate_starting_deck then
 		WORD_GAME.Deck.populate_starting_deck()
@@ -257,14 +259,14 @@ function Game:start_run(args)
 
     if saveTable then
         restore_card_areas(saveTable)
-        G.STATE = saveTable.STATE or G.STATES.TABLE_BOARD
-        G.STATE_COMPLETE = true
+        self.STATE = saveTable.STATE or self.STATES.TABLE_BOARD
+        self.STATE_COMPLETE = true
         LayoutRequest.refresh()
         Presentation.emit("sidebar_ensure")
         if WORD_GAME and WORD_GAME.Round then
             WORD_GAME.Round.restore_from_save()
         end
-        G.INPUT.locks.load = nil
+        self.INPUT.locks.load = nil
     end
 
 end

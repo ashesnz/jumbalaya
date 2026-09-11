@@ -1,11 +1,13 @@
 --[[ word_game/model/feedback/init.lua - Model-layer attention text requests (UI drains) ]]
 
+local live_game = require("word_game.model.live_game")
+
 local M = {}
 
 local function queue()
-	G.ARGS = G.ARGS or {}
-	G.ARGS.word_feedback_queue = G.ARGS.word_feedback_queue or {}
-	return G.ARGS.word_feedback_queue
+	live_game().ARGS = live_game().ARGS or {}
+	live_game().ARGS.word_feedback_queue = live_game().ARGS.word_feedback_queue or {}
+	return live_game().ARGS.word_feedback_queue
 end
 
 function M.show(text, colour, hold, offset_y)
@@ -18,12 +20,12 @@ function M.show(text, colour, hold, offset_y)
 end
 
 function M.pending()
-	return G.ARGS and G.ARGS.word_feedback_queue
+	return live_game().ARGS and live_game().ARGS.word_feedback_queue
 end
 
 function M.clear()
-	if G.ARGS then
-		G.ARGS.word_feedback_queue = nil
+	if live_game().ARGS then
+		live_game().ARGS.word_feedback_queue = nil
 	end
 end
 

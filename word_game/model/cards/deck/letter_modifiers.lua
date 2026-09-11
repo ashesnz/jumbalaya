@@ -1,4 +1,6 @@
 -- Per-letter marketplace modifiers for deck cards (A–Z).
+local live_game = require("word_game.model.live_game")
+
 return function(context)
 	local M = context.module
 	local LetterPalette = require "word_game.config.visuals.letter_card_palette"
@@ -37,7 +39,7 @@ return function(context)
 
 	function M.deck_has_modified_letter(letter)
 		letter = letter and letter:upper()
-		for _, card in ipairs(core_letter_card.collect_active_cards(G.letter_inventory)) do
+		for _, card in ipairs(core_letter_card.collect_active_cards(live_game().letter_inventory)) do
 			if M.is_modified(card) and M.card_letter(card) == letter then
 				return true
 			end

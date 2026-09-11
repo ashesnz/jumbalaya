@@ -925,8 +925,24 @@ Each PR: `love tests` → `emmylua_check . --severity warn` → manual smoke (§
 | **PR-9a** | Runtime shell + session layer (`bridge/runtime.lua`, `lifecycle.lua`, `loop.lua`, save_queue) | ✅ |
 | **PR-9b** | `app/startup.lua`, input, persistence callbacks | ✅ |
 | **PR-9c** | `word_game/ui/` presentation purge | ✅ |
-| **PR-9d** | `word_game/model/` + delete `globals.lua` / `G = Game()` | pending |
+| **PR-9d** | `word_game/model/` purge off `G` | ✅ |
+| **PR-9d′** | Delete `globals.lua` / `G = Game()` (after `app/` + `board/` purge) | pending |
 | **PR-9e** | Retire `G.FUNCS` + `types/g_funcs.lua` | pending |
+
+#### PR-9d — `word_game/model/` purge ✅
+
+**Goal:** No runtime `G` reads in the model layer.
+
+| Action | Files |
+|--------|-------|
+| Add | `word_game/model/live_game.lua` — `live_game()` → `BridgeRuntime.game()` |
+| Migrate | 31 model modules: `G.` → `live_game()`; import named `live_game` to avoid shadowing `local game = game_access.get()` |
+| Game methods | `game/run.lua`, `game/loop.lua` — `Game:` methods use `self` |
+| Skip | `game/globals.lua` (`G = Game()` boot), `game/init.lua` (`G = self` in `construct`) |
+
+**Exit:** `rg '\bG[.:\[]' word_game/model` → **0** (comments only in `globals.lua`) ✅; **486 tests** ✅
+
+**Remaining for PR-9d′:** fold `define_constants` boot into `Game:construct` / runtime shell, then delete `G = Game()` line and migrate `word_game/board/`, `app/`, engine scene graph off `G`.
 
 | Action | Files |
 |--------|-------|

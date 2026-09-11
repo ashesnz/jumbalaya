@@ -1,11 +1,13 @@
 -- Card identity and deck membership.
+local live_game = require("word_game.model.live_game")
+
 
 ---@class (partial) Card : EaseNode
 
 function Card:apply_center(center, initial, delay_sprites)
     local old_center = self.config.center
     self.config.center = center
-    for key, prototype in pairs(G.LETTERS.centers) do
+    for key, prototype in pairs(live_game().LETTERS.centers) do
         if center == prototype then self.config.center_key = key end
     end
 

@@ -1,5 +1,7 @@
 --[[ word_game/model/perks/voucher_discard.lua - Discard-bin allowance (G glue over core) ]]
 
+local live_game = require("word_game.model.live_game")
+
 local Presentation = require("word_game.model.presentation")
 local run_state = require("word_game.model.run.state")
 local core = require("jumbalaya_core.rules.voucher_discard")
@@ -45,7 +47,7 @@ function M.can_discard_card(card)
 	return core.can_discard_card(card, {
 		perk_count = rs and #(rs.perks or {}) or 0,
 		used = M.used(),
-		hand_area = G.dealt_letters,
+		hand_area = live_game().dealt_letters,
 	})
 end
 
