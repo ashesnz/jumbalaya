@@ -1,13 +1,15 @@
---[[ tests/unit/test_phase7_store_authority.lua - Phase 7 store/engine owned by WORD_GAME ]]
+--[[ tests/unit/test_game_access.lua - Store-backed game snapshot access ]]
 
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
 local Store = require("jumbalaya_core.store")
 local Engine = require("jumbalaya-engine")
+local store_sync = require("app.bootstrap.store_sync")
+local game_access = require("word_game.model.game_access")
 local word_game = require("word_game")
 local runtime = require("app.runtime")
 
-T.describe("Phase 7 Store Authority", function()
+T.describe("game_access and store authority", function()
 	mock_env.reset_game()
 
 	T.it("binds store and engine on WORD_GAME, not G", function()
@@ -19,17 +21,27 @@ T.describe("Phase 7 Store Authority", function()
 		T.assert_equal(runtime.engine(), word_game.engine())
 	end)
 
-	T.it("game_access reads state from WORD_GAME.store", function()
-		local game_access = require("word_game.model.game_access")
-		word_game.Round.init_run()
-		T.assert_equal(game_access.get(), word_game.state())
+	T.it("reads and patches via store only", function()
+		local store = Store.new({ points = 42, round = 1 })
+		word_game._bind_store(store)
+		store_sync.bind_run(store, store:get())
+		T.assert_equal(game_access.get().points, 42)
+		game_access.patch({ round = 3 })
+		T.assert_equal(store:get().round, 3)
+		T.assert_equal(game_access.get().round, 3)
+		mock_env.reset_game()
 	end)
 
 	T.it("dispatch updates store snapshot", function()
-		local game_access = require("word_game.model.game_access")
 		game_access.dispatch({ type = "SHUFFLE_HAND" })
 		T.assert_equal(word_game.store():get().shuffle_hand_count, 1)
 		T.assert_equal(game_access.get().shuffle_hand_count, 1)
+	end)
+
+	T.it("sync_to_g does not mirror onto G.GAME", function()
+		G.GAME = { points = 1 }
+		store_sync.sync_to_g(word_game.store())
+		T.assert_equal(G.GAME.points, 1)
 	end)
 
 	T.it("allows tests to bind an isolated store via WORD_GAME", function()

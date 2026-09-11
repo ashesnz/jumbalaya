@@ -85,8 +85,8 @@ Must pass on every PR. Full list: [testing.md](testing.md#engine-migration-ci-ga
 | Tier | Examples |
 |------|----------|
 | Core (no boot) | `test_core_jumble_rules.lua`, `test_core_play_evaluate.lua`, … |
-| Store / piles | `test_store_sync.lua`, `test_phase5_pile_sync.lua` |
-| Engine / boot | `test_phase7_bootstrap.lua`, `test_phase9_no_g_singleton.lua` |
+| Store / piles | `test_store_sync.lua`, `test_piles.lua`, `test_game_access.lua` |
+| Engine / boot | `test_boot_simulation.lua`, `test_table_board.lua` |
 | Callback catalog | `test_g_funcs_registry.lua` |
 | Gameplay integration | `test_jumble_play_flow.lua`, `test_save_roundtrip.lua` |
 

@@ -1,4 +1,4 @@
---[[ tests/unit/test_phase6_1_table_board.lua - Phase 6.1 TableBoard store subscription & Renderer test ]]
+--[[ tests/unit/test_table_board.lua - TableBoard store subscription and rendering ]]
 
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
@@ -8,7 +8,7 @@ local BoardUI = require("word_game.ui.table.board")
 local views_install = require("word_game.ui.views.install")
 local word_game = require("word_game")
 
-T.describe("Phase 6.1 TableBoard Store Subscription & Renderer", function()
+T.describe("TableBoard store rendering", function()
 	mock_env.reset_game()
 	views_install.reset()
 
@@ -47,7 +47,7 @@ T.describe("Phase 6.1 TableBoard Store Subscription & Renderer", function()
 		T.assert_true(drawn)
 	end)
 
-	T.it("prefers store pattern pile when legacy pattern area is empty", function()
+	T.it("renders pattern pile from store", function()
 		local store = Store.new({
 			piles = {
 				hand = {},
@@ -67,7 +67,10 @@ T.describe("Phase 6.1 TableBoard Store Subscription & Renderer", function()
 		T.assert_true(table_view:should_render_pattern_from_store())
 	end)
 
-	T.it("prefers store draw pile when legacy draw pile is empty", function()
+	T.it("renders draw pile from store", function()
+		WORD_GAME_UI.TableDeck = WORD_GAME_UI.TableDeck or {}
+		WORD_GAME_UI.TableDeck.uses_table_draw = function() return true end
+
 		local store = Store.new({
 			piles = {
 				hand = {},

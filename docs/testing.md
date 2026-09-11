@@ -82,50 +82,18 @@ Prefer `mock_env.reset_game()` at the top of a `describe` block. Tests that call
 | `test_play_hold_redraw.lua` | Hold-to-redraw |
 | `test_layout.lua` | Sidebar HUD geometry and fixed width |
 
-## Engine migration CI gate
+## CI gate (representative)
 
-These tests must pass on every PR. Phases 0–9 are complete; Phase 10 consolidation is ongoing. See [engine-migration.md](engine-migration.md).
+These tests must pass on every PR. See [engine-migration.md](engine-migration.md).
 
-| File | Covers |
-|------|--------|
-| `test_jumble_patterns.lua` | Core rule tests (headless) |
-| `test_jumble_scoring.lua` | Scoring rules |
-| `test_jumble_play_flow.lua` | Play orchestration |
-| `test_timeline_timer.lua` | Fuse model |
-| `test_voucher_tokens.lua` | Perk economy |
-| `test_save_roundtrip.lua` | Persistence contract |
-| `test_store_sync.lua` | `bridge/store_sync.lua` shim |
-| `test_phase2_store_boot.lua` | Phase 2 store boot, dispatch dual-write, run binding |
-| `test_phase3_engine_services.lua` | Phase 3 engine context, adapters, and boot wiring |
-| `test_phase4_action_dispatch.lua` | Phase 4 Funcs → InputService action dispatch |
-| `test_phase5_1_cards_piles.lua` | Phase 5.1 LetterCard data, pile reducers, engine views |
-| `test_phase5_2_table_areas.lua` | Phase 5.2 TableAreas selectors and save aliases |
-| `test_phase5_3_snap.lua` | Phase 5.3 Snap placement `MOVE_CARD` dispatch |
-| `test_phase5_4_persistence.lua` | Phase 5.4 store-based run save/restore |
-| `test_phase5_pile_sync.lua` | Phase 5 pile dual-write bridge |
-| `test_phase6_1_table_board.lua` | Phase 6.1 TableBoardView store subscription and pile rendering |
-| `test_phase6_2_fx_subscribers.lua` | Phase 6.2 EventBus, FX subscribers, presentation hooks |
-| `test_phase6_3_uibox_retirement.lua` | Phase 6.3 `G.LIVE.UIBOX` retirement and store-backed TABLE_BOARD draw |
-| `test_phase7_bootstrap.lua` | Phase 7 slim bootstrap modules and engine_adapter wiring |
-| `test_phase7_store_authority.lua` | Phase 7 WORD_GAME owns store/engine; G._store/_engine absent |
-| `test_phase8_layoutview_retirement.lua` | Phase 8 PR-8 retained UI in `jumbalaya-engine` |
-| `test_phase9_runtime_shell.lua` | Phase 9 `bridge/runtime` game shell + session layer |
-| `test_phase9_no_g_singleton.lua` | Phase 9 `Game()` does not assign global `G` |
-| `test_core_store_dispatch.lua` | `jumbalaya_core` store reducers without boot |
-| `test_g_funcs_registry.lua` | `types/funcs.lua` catalog freeze |
-| `test_core_jumble_rules.lua` | `jumbalaya_core` scoring rules without boot |
-| `test_core_jumble_patterns.lua` | `jumbalaya_core` pattern/slot validation without `G` |
-| `test_core_hand.lua` | `jumbalaya_core` hand lifecycle without `G` |
-| `test_core_round.lua` | `jumbalaya_core` round reducers without `G` |
-| `test_core_dictionary_cards.lua` | `jumbalaya_core` dictionary card letter helpers without `G` |
-| `test_core_cards_identity.lua` | `jumbalaya_core` card face keys and letter-card detection without `G` |
-| `test_core_cards_letter_modifiers.lua` | `jumbalaya_core` per-letter modifier data without `G` |
-| `test_core_cards_playability.lua` | `jumbalaya_core` deck playability helpers without `G` |
-| `test_core_cards_deck_config.lua` | `jumbalaya_core` starting deck and trade letter weights without `G` |
-| `test_core_cards_letter_card.lua` | `jumbalaya_core` letter card data, sort, and inventory filters without `G` |
-| `test_core_hand_size.lua` | `jumbalaya_core` hand size from base + perks without `G` |
-| `test_core_perk_effects.lua` | `jumbalaya_core` perk word/bank effects without `G` |
-| `test_core_play_evaluate.lua` | `jumbalaya_core` play evaluation (bank + word play) without `G` |
+| Tier | Files | Role |
+|------|-------|------|
+| **Core rules** | `test_core_*.lua` | `jumbalaya_core` headless — no Love2D boot |
+| **Gameplay** | `test_jumble_*.lua`, `test_play_resolution.lua`, `test_classic_run_mode.lua`, … | Jumble loop, scoring, marketplace |
+| **Store / access** | `test_store_sync.lua`, `test_game_access.lua`, `test_piles.lua` | Store shim, `game_access`, pile sync |
+| **UI / table** | `test_table_board.lua`, `test_sidebar_stage_button.lua`, `test_timeline_timer.lua`, … | HUD, fuse, table rendering |
+| **Persistence** | `test_save_roundtrip.lua` | Save/load contract |
+| **Boot** | `test_boot_simulation.lua`, `test_g_funcs_registry.lua` | Startup smoke, Funcs catalog freeze |
 
 ## CI
 

@@ -1,4 +1,4 @@
---[[ tests/unit/test_phase5_pile_sync.lua - Store-authoritative pile sync (Phase 10b) ]]
+--[[ tests/unit/test_piles.lua - Store pile sync and chrome release ]]
 
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
@@ -7,7 +7,7 @@ local Store = require("jumbalaya_core.store")
 local pile_selectors = require("jumbalaya_core.store.selectors.piles")
 local word_game = require("word_game")
 
-T.describe("Phase 5 Pile Sync", function()
+T.describe("Store piles", function()
 	mock_env.reset_game()
 
 	T.it("snapshots live pile hosts into store piles", function()
@@ -36,7 +36,7 @@ T.describe("Phase 5 Pile Sync", function()
 		T.assert_equal(state.piles.hand[1].pile_id, "hand")
 	end)
 
-	T.it("chrome_release_enabled is always on after Phase 10b", function()
+	T.it("chrome_release_enabled is on", function()
 		T.assert_true(piles.chrome_release_enabled())
 	end)
 
