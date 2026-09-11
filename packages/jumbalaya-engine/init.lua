@@ -1,41 +1,27 @@
 --[[
-	jumbalaya-engine - Engine service interfaces and Love2D adapters (Phase 3).
+	jumbalaya-engine - Portable Love2D engine (scene, input, panels, services).
 ]]
 
-local Renderer = require("jumbalaya-engine.renderer")
-local InputService = require("jumbalaya-engine.input")
-local AudioService = require("jumbalaya-engine.audio")
-local Clock = require("jumbalaya-engine.clock")
-local Context = require("jumbalaya-engine.context")
-local Adapters = require("jumbalaya-engine.adapters.love2d")
-local LetterCardView = require("jumbalaya-engine.views.letter_card_view")
-local PileView = require("jumbalaya-engine.views.pile_view")
-local SettingsService = require("jumbalaya-engine.settings")
-local EventBus = require("jumbalaya-engine.event_bus")
 local Panels = require("jumbalaya-engine.panels")
-local Kind = require("jumbalaya-engine.object")
-local Boot = require("jumbalaya-engine.boot")
-local Shell = require("jumbalaya-engine.shell")
 
 return {
-	Boot = Boot,
-	Shell = Shell,
-	Kind = Kind,
+	Boot = require("jumbalaya-engine.boot"),
+	Shell = require("jumbalaya-engine.shell"),
+	Kind = require("jumbalaya-engine.object"),
 	Scene = {
 		Node = require("jumbalaya-engine.scene.node"),
 		AnimNode = require("jumbalaya-engine.scene.animated.init"),
 	},
-	Renderer = Renderer,
-	InputService = InputService,
-	AudioService = AudioService,
-	Clock = Clock,
-	Context = Context,
-	EventBus = EventBus,
-	Adapters = Adapters,
-	SettingsService = SettingsService,
+	Context = require("jumbalaya-engine.services.context"),
+	Renderer = require("jumbalaya-engine.services.renderer"),
+	InputService = require("jumbalaya-engine.services.input"),
+	AudioService = require("jumbalaya-engine.services.audio"),
+	Clock = require("jumbalaya-engine.services.clock"),
+	EventBus = require("jumbalaya-engine.services.event_bus"),
+	Adapters = require("jumbalaya-engine.adapters.love2d"),
 	Views = {
-		LetterCardView = LetterCardView,
-		PileView = PileView,
+		LetterCardView = require("jumbalaya-engine.views.letter_card_view"),
+		PileView = require("jumbalaya-engine.views.pile_view"),
 	},
 	Panels = Panels,
 	ViewHost = Panels.ViewHost,

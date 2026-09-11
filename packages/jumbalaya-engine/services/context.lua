@@ -1,12 +1,10 @@
---[[
-	jumbalaya-engine/context.lua - Service context (store + engine services).
-]]
+--[[ jumbalaya-engine/services/context.lua - Bundles store + engine services ]]
 
-local Renderer = require("jumbalaya-engine.renderer")
-local InputService = require("jumbalaya-engine.input")
-local AudioService = require("jumbalaya-engine.audio")
-local Clock = require("jumbalaya-engine.clock")
-local EventBus = require("jumbalaya-engine.event_bus")
+local Renderer = require("jumbalaya-engine.services.renderer")
+local InputService = require("jumbalaya-engine.services.input")
+local AudioService = require("jumbalaya-engine.services.audio")
+local Clock = require("jumbalaya-engine.services.clock")
+local EventBus = require("jumbalaya-engine.services.event_bus")
 local Love2D = require("jumbalaya-engine.adapters.love2d")
 
 ---@class EngineContext

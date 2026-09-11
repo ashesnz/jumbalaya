@@ -6,6 +6,7 @@ require "word_game.model.game"
 require "word_game.model.cards"
 require "word_game.model.game.globals"
 Game()
+require "app.core.platform.display"
 require "word_game.ui.util.colour"
 require "word_game.ui.util.localize"
 require "word_game.model.persistence.progress"

@@ -1,5 +1,7 @@
 --[[
-	jumbalaya-engine/input.lua - InputService interface and Love2D adapter.
+	jumbalaya-engine/services/input.lua - Typed action map (func name → store dispatch).
+
+	Low-level pointer/gamepad routing lives in jumbalaya-engine/interaction/.
 ]]
 
 local shell = require("jumbalaya-engine.shell")

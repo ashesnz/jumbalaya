@@ -33,7 +33,7 @@ Phases 0–13 are **complete** (store, engine package, retained UI, `Funcs` regi
 ```text
 packages/
   jumbalaya_core/               Portable domain: store, rules, jumble, cards, config (headless-testable)
-  jumbalaya-engine/             Portable engine: panels, scene, clock, input, event_bus, views
+  jumbalaya-engine/             Portable engine (see layout below)
 games/jumbalaya/
   app/                          Love2D shell: bootstrap, callbacks, startup, session/persistence
   word_game/                    Runtime glue, presentation, board geometry, config
@@ -53,7 +53,7 @@ _tools/                         Python asset/dev pipelines (not runtime)
 | Can we remove `packages/`? | **No** — store, reducers, core rules, retained UI, and `test_core_*` depend on it. |
 | Can we remove `app/`? | **No** — bootstrap, Love2D callbacks, and most of the scene graph still live here. |
 | What is duplicated? | `app/core/` and `packages/jumbalaya-engine/` overlap **during migration** (`panels` already moved; Card/Sprite/input still in `app/core/`). That overlap shrinks over time; do not collapse the trees prematurely. |
-| Dependency direction | `jumbalaya_core` imports nothing from `app/` or `word_game/`. `jumbalaya-engine` may import `app/core/scene/` (e.g. `AnimNode`). `word_game/` imports both. `app/` imports `word_game/` at boot only. |
+| Dependency direction | `jumbalaya_core` imports nothing from `app/` or `word_game/`. `jumbalaya-engine` imports only `jumbalaya_core` (when needed) and Love2D — **not** `app/` or `word_game/`. `word_game/` imports both packages. `app/` imports `word_game/` at boot only. |
 
 ### word_game vs jumbalaya_core
 
@@ -88,6 +88,27 @@ Glue modules are often labeled *"glue over jumbalaya_core"* in their file header
 **Model→UI event flow (unidirectional):** UI input → `store:dispatch` (core reducer) → model glue emits `Presentation.emit` → handlers in `word_game/ui/presentation/install.lua` update HUD/FX. Store-backed **views** (`word_game/ui/views/*`) may `store:subscribe` only to bump render revision — not to fan out side effects. Do not poll model state each frame to refresh HUD; emit presentation events when domain state changes. UIBox `Funcs.dispatch` is for shell/widgets only (overlays, profile), not model notifications.
 
 **Card / pile state (Phase 10):** Authoritative **table layout** is `store.piles` (`MOVE_CARD` / `ADD_CARD_TO_PILE` reducers in `jumbalaya_core`). **Run deck membership** is `G.letter_inventory` (live `Card` instances). **CardPile hosts** (`dealt_letters`, `draw_pile`, `pattern_row.area`) are presentation + input targets — mutate during drag/deal, then `word_game.model.piles.sync_hosts_to_store` or `piles.move_card`. `word_game/model/` must not import `ui/cardarea/`; `ui/cardarea/` must not import gameplay rules. Use `TableAreas` selectors for pile reads in model glue.
+
+### `jumbalaya-engine/` package layout
+
+```text
+jumbalaya-engine/
+  init.lua, boot.lua, shell.lua, object.lua   Entry points (facade, install order, app bridge, Kind)
+  services/     Testable service interfaces (Context, Renderer, InputService, Audio, Clock, EventBus)
+  scene/        Node + AnimNode scene graph
+  interaction/  InputRouter — pointer, gamepad, focus, collision (low-level HID)
+  graphics/     Sprite, particles, draw stack, FlowText
+  panels/       Declarative HUD trees (Panel, LayoutNode, ViewHost)
+  views/        Headless store-backed render helpers (PileView, LetterCardView)
+  effects/      Timeline tween scheduler (g().TIMELINE wrapper)
+  sound/        SFX API + mixer + worker thread entry
+  util/         Stateless helpers (colour, geometry, tween, pack, roll, …)
+  adapters/     Love2D renderer adapter
+```
+
+**Two “input” layers (by design):** `services/input.lua` maps UIBox `func` strings → store actions; `interaction/` routes raw Love2D events to scene nodes.
+
+**Boot boundary:** `boot.lua` installs engine globals only. App-specific modules (e.g. `app/core/platform/display.lua`) load from `app/bootstrap/runtime_boot.lua` after `Game()`.
 
 ### UI stack: engine panels vs word-game UI
 

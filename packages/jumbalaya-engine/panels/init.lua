@@ -18,8 +18,6 @@ function M.create(args)
 end
 
 M.Panel = Panel
----@deprecated Use M.Panel — alias kept for incremental migration.
-M.RetainedPanel = Panel
 M.ViewHost = ViewHost
 
 return M

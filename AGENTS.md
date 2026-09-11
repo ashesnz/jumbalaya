@@ -13,7 +13,7 @@ Roguelike **jumble** word game on Love2D/Lua. Active loop: fill **pattern puzzle
 ```text
 packages/
   jumbalaya_core/        Engine-agnostic rules, store, reducers (headless-testable)
-  jumbalaya-engine/      Custom engine: boot, scene, graphics, interaction, sound, panels, views
+  jumbalaya-engine/      Custom engine: services/, scene/, interaction/, graphics/, panels/, views/, sound/, util/
 games/jumbalaya/
   app/                   Love2D shell: bootstrap, callbacks, startup, runtime, session/persistence/platform
   word_game/             Game layer (model, ui, board, config)
