@@ -1,3 +1,10 @@
+--[[
+	word_game/model/cards/deck/dealing.lua - Hand/draw pile counts and animated or immediate deal flows
+
+	Core: jumbalaya_core.cards.pile_counts
+	Store: piles.sync_hosts_to_store, piles.hydrate_hosts_from_store, game_access.patch(deck_left_count)
+	Presentation: none
+]]
 -- Hand counts plus animated and immediate dealing flows.
 local live_game = require("word_game.model.live_game")
 

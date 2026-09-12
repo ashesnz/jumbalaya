@@ -1,8 +1,9 @@
 --[[
-	word_game.model.jumble.bonus_return - Return a bonus card to the left gutter.
+	word_game/model/jumble/bonus_return.lua - Return displaced bonus card to the left gutter
 
-	Model code that displaces bonus cards from the puzzle row should call this
-	instead of reaching into board geometry or the UI boss-word stack directly.
+	Core: none
+	Store: none
+	Presentation: bonus_card_return
 ]]
 
 local Presentation = require("word_game.model.presentation")

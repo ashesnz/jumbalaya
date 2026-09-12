@@ -1,8 +1,11 @@
 --[[
-	word_game/model/run/init.lua - Run lifecycle facade.
+	word_game/model/run/init.lua - Run lifecycle facade (State, Scope, Register, Mode, Match, InputLock, Busy)
 
-	Prefer `require("word_game.model.run")` and `.State`, `.Mode`, etc. over
-	deep requires of individual run submodules.
+	Prefer require("word_game.model.run") over deep requires of run submodules.
+
+	Core: none
+	Store: none
+	Presentation: none
 ]]
 
 return {

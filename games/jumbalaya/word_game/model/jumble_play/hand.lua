@@ -1,4 +1,10 @@
---[[ word_game/model/jumble_play/hand.lua - Hand-clear model logic (no UI imports) ]]
+--[[
+	word_game/model/jumble_play/hand.lua - Hand-clear prep, boss/trade/dealer resolution, match finalize after stage clear
+
+	Core: jumbalaya_core.config.gameplay.round
+	Store: game_access.dispatch(RUN_MATCH_END)
+	Presentation: none
+]]
 
 return function(M)
 local round = require("word_game.model.round")

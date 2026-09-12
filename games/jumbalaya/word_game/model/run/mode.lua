@@ -1,4 +1,10 @@
---[[ word_game/model/run/mode.lua - Classic vs Time Run mode helpers ]]
+--[[
+	word_game/model/run/mode.lua - Classic vs time_run mode resolve, preferred settings, classic stage targets
+
+	Core: none
+	Store: game_access.get(run_mode), live_game().SETTINGS
+	Presentation: none
+]]
 
 local live_game = require("word_game.model.live_game")
 

@@ -1,4 +1,10 @@
---[[ word_game/model/jumble/init.lua - Jumble mode facade ]]
+--[[
+	word_game/model/jumble/init.lua - Jumble mode facade (topology, BonusStack, PlacementWord, hand glue)
+
+	Core: jumbalaya_core.jumble.*, jumbalaya_core.rules.bonus_stack (via submodules)
+	Store: game_access.word_round via hand glue
+	Presentation: puzzle_applied, score_banner_jumble_hand_start, boss_puzzle_revealed, boss_word_begin, jumble_hud_refresh (via hand glue)
+]]
 
 local M = {}
 

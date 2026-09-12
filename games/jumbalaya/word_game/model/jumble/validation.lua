@@ -1,4 +1,10 @@
---[[ word_game/model/jumble/validation.lua - Dictionary checks (G glue over jumbalaya_core) ]]
+--[[
+	word_game/model/jumble/validation.lua - Playable-word search, answer cache, ensure_playable_puzzle, validate_current
+
+	Core: jumbalaya_core.jumble.validation
+	Store: game_access.word_round
+	Presentation: none
+]]
 
 local live_game = require("word_game.model.live_game")
 

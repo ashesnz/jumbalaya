@@ -1,7 +1,9 @@
---[[ word_game/model/jumble_play/opening_deal.lua - deals the opening hand for a stage.
+--[[
+	word_game/model/jumble_play/opening_deal.lua - Opening deal for jumble stages: populate deck, deal hand, refresh HUD
 
-	Jumble stages populate the jumble deck instead of the standard letter deck;
-	either way the hand ends up dealt and the HUD refreshed.
+	Core: none
+	Store: game_access.word_round
+	Presentation: jumble_hud_refresh (via Jumble.refresh_hud)
 ]]
 
 local live_game = require("word_game.model.live_game")

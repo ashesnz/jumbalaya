@@ -1,3 +1,10 @@
+--[[
+	word_game/model/cards/deck/lifecycle.lua - Starting deck populate, draft/destroy/cut, weighted letter pick
+
+	Core: jumbalaya_core.cards.deck_config, jumbalaya_core.cards.letter_card
+	Store: piles.sync_hosts_to_store, game_access.patch(starting_deck_size)
+	Presentation: none
+]]
 -- Drafting, cutting, weighted selection, and deck listing.
 local live_game = require("word_game.model.live_game")
 

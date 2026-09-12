@@ -1,3 +1,10 @@
+--[[
+	word_game/model/cards/deck/playability.lua - Deck ownership, letter counts, deal slide SFX, fly_from_deck_to_hand hook
+
+	Core: jumbalaya_core.cards.playability
+	Store: none
+	Presentation: none
+]]
 -- Deck ownership helpers and deal animations (jumble mode; no open-board rerolls).
 local live_game = require("word_game.model.live_game")
 

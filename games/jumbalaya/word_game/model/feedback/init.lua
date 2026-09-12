@@ -1,4 +1,10 @@
---[[ word_game/model/feedback/init.lua - Model-layer attention text requests (UI drains) ]]
+--[[
+	word_game/model/feedback/init.lua - Model-side word feedback queue on live_game().ARGS for UI to drain
+
+	Core: none
+	Store: none
+	Presentation: none
+]]
 
 local live_game = require("word_game.model.live_game")
 

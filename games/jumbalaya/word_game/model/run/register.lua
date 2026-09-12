@@ -1,4 +1,10 @@
---[[ word_game/model/run/register.lua - Register run teardown participants ]]
+--[[
+	word_game/model/run/register.lua - Registers domain/UI teardown callbacks on RunScope for run end cleanup
+
+	Core: none
+	Store: none
+	Presentation: none
+]]
 
 local RunScope = require("word_game.model.run.scope")
 local Busy = require("word_game.model.run.busy")

@@ -1,4 +1,10 @@
---[[ word_game/model/jumble/slot_topology.lua - Re-export from jumbalaya_core + runtime helpers ]]
+--[[
+	word_game/model/jumble/slot_topology.lua - Re-exports core slot topology plus span_active() from live jumble state
+
+	Core: jumbalaya_core.jumble.slot_topology
+	Store: none
+	Presentation: none
+]]
 
 local core = require("jumbalaya_core.jumble.slot_topology")
 

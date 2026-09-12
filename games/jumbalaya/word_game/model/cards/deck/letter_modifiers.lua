@@ -1,3 +1,10 @@
+--[[
+	word_game/model/cards/deck/letter_modifiers.lua - Marketplace modified-letter apply/sync and deck membership checks
+
+	Core: jumbalaya_core.cards.letter_modifiers, jumbalaya_core.cards.letter_card
+	Store: none
+	Presentation: none
+]]
 -- Per-letter marketplace modifiers for deck cards (A–Z).
 local live_game = require("word_game.model.live_game")
 

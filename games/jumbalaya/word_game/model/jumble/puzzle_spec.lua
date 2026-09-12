@@ -1,4 +1,10 @@
---[[ word_game/model/jumble/puzzle_spec.lua - Puzzle definitions (G glue over jumbalaya_core) ]]
+--[[
+	word_game/model/jumble/puzzle_spec.lua - Puzzle list and boss puzzle resolution with dictionary word_fits_pattern
+
+	Core: jumbalaya_core.jumble.puzzle_spec, jumbalaya_core.config.gameplay.round
+	Store: game_access.word_round(set, hand_index)
+	Presentation: none
+]]
 
 return function(M)
 local puzzles_cfg = require("word_game.config.jumble")

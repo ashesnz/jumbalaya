@@ -1,3 +1,10 @@
+--[[
+	word_game/model/cards/deck/init.lua - Deck package facade assembling deck submodules
+
+	Core: none
+	Store: none
+	Presentation: none
+]]
 -- Package facade for the 52-card letter deck.
 --
 -- Initializers run in the same order as the original monolithic module. The

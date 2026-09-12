@@ -1,4 +1,10 @@
---[[ word_game/model/persistence/save_schema.lua - Run snapshot schema version and load upgrades ]]
+--[[
+	word_game/model/persistence/save_schema.lua - Run save schema version stamp and alpha→run_state load migration
+
+	Core: none
+	Store: snapshot.SAVE_SCHEMA, game.run_state
+	Presentation: none
+]]
 
 local M = {}
 

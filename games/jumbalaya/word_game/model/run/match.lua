@@ -1,4 +1,10 @@
---[[ word_game/model/run/match.lua - Match end / game-over transitions ]]
+--[[
+	word_game/model/run/match.lua - end_run: delete save, dispatch match end, pause, set GAME_OVER state
+
+	Core: none
+	Store: game_access.dispatch(RUN_MATCH_END)
+	Presentation: match_ended
+]]
 
 local live_game = require("word_game.model.live_game")
 

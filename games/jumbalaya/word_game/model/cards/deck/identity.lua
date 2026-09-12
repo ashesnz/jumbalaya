@@ -1,3 +1,10 @@
+--[[
+	word_game/model/cards/deck/identity.lua - Letter face keys, create_letter_card, reset_table_deck, hand reveal
+
+	Core: jumbalaya_core.cards.identity, jumbalaya_core.cards.letter_card
+	Store: piles.hydrate_hosts_from_store
+	Presentation: table_deck_reset
+]]
 -- Card identity, presentation, and area primitives for the letter deck.
 local live_game = require("word_game.model.live_game")
 

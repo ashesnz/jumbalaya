@@ -1,10 +1,11 @@
 --[[
-	 word_game/model/cards/card.lua - Card class: a letter on the table.
+	word_game/model/cards/card.lua - Card EaseNode subclass: construct/apply_face, letter_inventory, removal
 
-	Extends EaseNode. Extra methods are mixed in from:
-	  card_ability.lua       apply_center / deck membership
-	  ui/cards/visuals.lua   sprites, dissolve, draw (via ui/cards/bind.lua at boot)
-	  ui/cards/ui.lua        hover tooltips, click, per-frame update
+	Mixins: card_ability.lua; ui/cards/visuals.lua and ui/cards/ui.lua at boot.
+
+	Core: none
+	Store: none
+	Presentation: none
 ]]
 
 ---@class (partial) Card : EaseNode

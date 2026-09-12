@@ -1,8 +1,11 @@
 --[[
-	word_game/model/jumble_play/init.lua - Jumble play-button orchestration.
+	word_game/model/jumble_play/init.lua - Jumble play facade (Rules, ModifierEffects, play_jumble_word, hand-clear)
 
-	`play_jumble_word` evaluates rules and returns a result table.
-	UI calls `word_game.ui.play_effects.resolution.resolve` for presentation effects.
+	UI calls word_game.ui.play_effects.resolution.resolve for play cinematics.
+
+	Core: none
+	Store: none
+	Presentation: none
 ]]
 
 local M = {}

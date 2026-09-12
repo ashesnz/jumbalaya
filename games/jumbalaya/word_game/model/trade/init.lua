@@ -1,4 +1,10 @@
---[[ word_game/model/trade/init.lua - The Card Marketplace: add or remove a card ]]
+--[[
+	word_game/model/trade/init.lua - Card Marketplace offers, token spend add/remove/modifier, trade_used tracking
+
+	Core: jumbalaya_core.config.gameplay.economy, jumbalaya_core.config.gameplay.round, jumbalaya_core.config.gameplay.letter_tiers
+	Store: store_sync.dispatch(RUN_STATE_MARK_TRADE_USED), run.state tokens
+	Presentation: none
+]]
 
 local economy = require("jumbalaya_core.config.gameplay.economy")
 local round_config = require("jumbalaya_core.config.gameplay.round")

@@ -1,4 +1,10 @@
---[[ word_game/model/invariant.lua - Fail-fast checks for model invariants ]]
+--[[
+	word_game/model/invariant.lua - Fail-fast assert helper for model invariant checks
+
+	Core: none
+	Store: none
+	Presentation: none
+]]
 
 local M = {}
 

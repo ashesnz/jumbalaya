@@ -1,4 +1,10 @@
---[[ word_game/model/perks/voucher_discard.lua - Discard-bin allowance (G glue over core) ]]
+--[[
+	word_game/model/perks/voucher_discard.lua - Discard-bin allowance tracking, can_discard checks, stash on discard
+
+	Core: jumbalaya_core.rules.voucher_discard
+	Store: game_access.dispatch(SET_VOUCHER_DISCARDS_USED)
+	Presentation: voucher_discard_ui_reset, voucher_discard_recorded
+]]
 
 local live_game = require("word_game.model.live_game")
 

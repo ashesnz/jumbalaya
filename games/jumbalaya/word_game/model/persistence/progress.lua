@@ -1,4 +1,10 @@
---[[ word_game/model/persistence/progress.lua - Profile progress payload and card discovery ]]
+--[[
+	word_game/model/persistence/progress.lua - Card discovery unlock and queue_progress_write profile UDA payload
+
+	Core: none
+	Store: live_game().ARGS.progress_payload, WRITE_FLAGS
+	Presentation: none
+]]
 
 local live_game = require("word_game.model.live_game")
 

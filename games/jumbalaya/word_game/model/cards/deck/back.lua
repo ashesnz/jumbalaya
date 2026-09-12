@@ -1,3 +1,10 @@
+--[[
+	word_game/model/cards/deck/back.lua - Deck-back center wrapper (new/change_to/save) for run back selection
+
+	Core: none
+	Store: none
+	Presentation: none
+]]
 local Back = {}
 local back_instance = {}
 back_instance.__index = back_instance

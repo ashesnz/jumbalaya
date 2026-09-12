@@ -1,4 +1,10 @@
---[[ word_game/model/persistence/run_save.lua - Run snapshot store state and card inventory ]]
+--[[
+	word_game/model/persistence/run_save.lua - Restore/store card piles snapshot, rebuild letter_inventory from store piles
+
+	Core: none
+	Store: store_sync.restore_snapshot, store:patch(piles), game_access.patch(starting_deck_size)
+	Presentation: round_restore_from_save
+]]
 
 local live_game = require("word_game.model.live_game")
 

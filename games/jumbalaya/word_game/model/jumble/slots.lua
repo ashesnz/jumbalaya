@@ -1,4 +1,10 @@
---[[ word_game/model/jumble/slots.lua - Placement row slots (G glue over jumbalaya_core) ]]
+--[[
+	word_game/model/jumble/slots.lua - Placement slot parse/build/sync, blank assignment, geometry slot picking
+
+	Core: jumbalaya_core.jumble.slots, jumbalaya_core.jumble.slot_topology
+	Store: none
+	Presentation: none
+]]
 
 local live_game = require("word_game.model.live_game")
 

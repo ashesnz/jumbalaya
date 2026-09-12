@@ -1,3 +1,10 @@
+--[[
+	word_game/model/cards/card_ability.lua - Mixin applying center definitions and deck membership
+
+	Core: none
+	Store: none
+	Presentation: none
+]]
 -- Card identity and deck membership.
 local CardRegistry = require("word_game.model.cards.registry")
 

@@ -1,4 +1,10 @@
---[[ word_game/model/hand_size.lua - Runtime jumble hand size (base + perk bonus) ]]
+--[[
+	word_game/model/hand_size.lua - Effective jumble hand size from dimensions plus wide_hand perk
+
+	Core: jumbalaya_core.rules.hand_size
+	Store: none
+	Presentation: none
+]]
 
 local live_game = require("word_game.model.live_game")
 

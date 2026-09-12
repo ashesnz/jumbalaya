@@ -1,5 +1,9 @@
 --[[
-	word_game/model/game/loop.lua - Game-over state handling.
+	word_game/model/game/loop.lua - Game:update_match_end — loss transition, pause, saved-run cleanup
+
+	Core: none
+	Store: none
+	Presentation: match_ended
 ]]
 
 local live_game = require("word_game.model.live_game")

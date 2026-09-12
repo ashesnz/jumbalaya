@@ -1,4 +1,10 @@
---[[ word_game/model/jumble_play/jumble.lua - Jumble play evaluation (no UI imports) ]]
+--[[
+	word_game/model/jumble_play/jumble.lua - play_jumble_word entry, end_jumble_hand_model, deal_after_jumble_timeout
+
+	Core: none
+	Store: game_access.patch(word_score_animating)
+	Presentation: none
+]]
 
 return function(M)
 local round = require("word_game.model.round")

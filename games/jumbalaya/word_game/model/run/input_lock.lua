@@ -1,4 +1,10 @@
---[[ word_game/model/run/input_lock.lua - Shared gameplay input gates ]]
+--[[
+	word_game/model/run/input_lock.lua - Blocks table input during score/shuffle/boss/bonus/busy animations
+
+	Core: none
+	Store: game_access.get animation/busy flags
+	Presentation: none
+]]
 
 local BonusStack = require("word_game.model.jumble.bonus_stack")
 local Busy = require("word_game.model.run.busy")

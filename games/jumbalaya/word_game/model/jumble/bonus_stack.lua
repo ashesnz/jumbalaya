@@ -1,4 +1,10 @@
---[[ word_game/model/jumble/bonus_stack.lua - Bonus gutter card stack state and scoring ]]
+--[[
+	word_game/model/jumble/bonus_stack.lua - In-memory bonus gutter stack state, scoring marks, hand-start clear
+
+	Core: jumbalaya_core.rules.bonus_stack, jumbalaya_core.config.gameplay.round
+	Store: none
+	Presentation: none
+]]
 
 local round_config = require("jumbalaya_core.config.gameplay.round")
 local core = require("jumbalaya_core.rules.bonus_stack")

@@ -1,5 +1,9 @@
 --[[
-	word_game/model/game/init.lua - Game class and stage prep.
+	word_game/model/game/init.lua - Game class construct (runtime bind, define_constants) and prep_stage
+
+	Core: none
+	Store: run.scope bind_snapshot
+	Presentation: none
 ]]
 
 local Kind = require("jumbalaya-engine.object")

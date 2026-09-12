@@ -1,4 +1,10 @@
---[[ word_game/model/cards/registry.lua - Letter face/center definitions on live_game().LETTERS ]]
+--[[
+	word_game/model/cards/registry.lua - Singleton live_game().LETTERS registry (faces, centers, pools, locked)
+
+	Core: none
+	Store: none
+	Presentation: none
+]]
 
 local live_game = require("word_game.model.live_game")
 

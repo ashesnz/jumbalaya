@@ -1,12 +1,9 @@
 --[[
-	Initializes the shared Game shell used by the Jumbalaya runtime.
+	word_game/model/game/globals.lua - Game:define_constants bootstraps flags, dimensions, STATES, LIVE registries
 
-	Everything the game reads/writes at runtime - feature flags, settings,
-	render scale, colours, instance registries (LIVE.*), state machine enums,
-	table layout constants, etc. - lives on the Game instance bound via
-	app/runtime.lua. This function is called once during boot
-	(Game:launch() in app/startup.lua) to set all of that up.
-
+	Core: none
+	Store: none
+	Presentation: none
 ]]
 
 local RuntimeOptions = require("word_game.config.boot.runtime_options")

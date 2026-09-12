@@ -1,3 +1,10 @@
+--[[
+	word_game/model/cards/deck/vowels.lua - Vowel guarantee in hand, take_letter_from_deck, ensure_letters_in_hand
+
+	Core: none
+	Store: piles.hydrate_hosts_from_store
+	Presentation: none
+]]
 -- Vowel guarantees and requested-letter hand adjustments.
 local live_game = require("word_game.model.live_game")
 

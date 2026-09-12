@@ -1,4 +1,10 @@
---[[ word_game/model/table_areas.lua - Store selectors for table card piles ]]
+--[[
+	word_game/model/table_areas.lua - Store pile selectors and CardPile host accessors for hand/draw/discard/pattern/bonus
+
+	Core: none
+	Store: BridgeRuntime.store piles (hand, draw, discard, pattern, bonus)
+	Presentation: none
+]]
 
 local live_game = require("word_game.model.live_game")
 

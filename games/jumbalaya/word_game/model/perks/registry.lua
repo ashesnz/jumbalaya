@@ -1,4 +1,10 @@
---[[ word_game/model/perks/registry.lua - Perk stamp rolls and selection (G glue over core) ]]
+--[[
+	word_game/model/perks/registry.lua - Perk stamp roll, selection apply, description vars with seeded RNG
+
+	Core: jumbalaya_core.perks.registry
+	Store: game_access.dispatch(SET_SELECTED_PERK)
+	Presentation: none
+]]
 
 local cfg = require("word_game.config.perks")
 local core = require("jumbalaya_core.perks.registry")

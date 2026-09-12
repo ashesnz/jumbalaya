@@ -1,8 +1,9 @@
 --[[
-	model/cards/definitions.lua - Letter card definitions and shared centers.
+	word_game/model/cards/definitions.lua - Game:load_card_definitions — faces, centers, pools, profile unlock meta
 
-	live_game().LETTERS.faces holds letter faces (`red_A`–`gold_Z`).
-	live_game().LETTERS.centers holds card bodies (`letter_base`, deck backs, …).
+	Core: none
+	Store: none
+	Presentation: none
 ]]
 
 local live_game = require("word_game.model.live_game")

@@ -1,4 +1,10 @@
---[[ word_game/model/perks/init.lua - Perk model package (registry, hand timer). ]]
+--[[
+	word_game/model/perks/init.lua - Perks package facade (Registry, Effects, VoucherDiscard)
+
+	Core: none
+	Store: none
+	Presentation: none
+]]
 
 return {
 	Registry = require("word_game.model.perks.registry"),

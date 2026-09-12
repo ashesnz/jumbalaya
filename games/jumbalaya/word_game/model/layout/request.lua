@@ -1,4 +1,10 @@
---[[ word_game/model/layout/request.lua - Deferred TABLE_BOARD layout refresh (model-safe) ]]
+--[[
+	word_game/model/layout/request.lua - Sets live_game().ARGS.pending_layout for deferred TABLE_BOARD relayout
+
+	Core: none
+	Store: none
+	Presentation: none — sets ARGS.pending_layout; UI loop applies relayout
+]]
 
 local live_game = require("word_game.model.live_game")
 

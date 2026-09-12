@@ -1,4 +1,10 @@
---[[ word_game/model/jumble_play/letter_modifier_effects.lua - Modified letter effects (G glue over core) ]]
+--[[
+	word_game/model/jumble_play/letter_modifier_effects.lua - Modified-letter word effects, timeline bonuses, perk merge, puzzle resets
+
+	Core: jumbalaya_core.rules.letter_modifier_effects
+	Store: none
+	Presentation: none
+]]
 
 local live_game = require("word_game.model.live_game")
 
