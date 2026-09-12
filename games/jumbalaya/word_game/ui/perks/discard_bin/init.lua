@@ -9,9 +9,9 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
 local felt = require("word_game.ui.layout.felt")
 local round_config = require("jumbalaya_core.config.gameplay.round")
-local game_access = require("word_game.model.game_access")
 local Odometer = require("word_game.ui.widgets.odometer")
 local perk_voucher = require("word_game.ui.perks.shared.voucher")
 

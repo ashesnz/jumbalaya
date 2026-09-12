@@ -1,10 +1,11 @@
 --[[ word_game/ui/cards/visuals/sprites.lua - Card body/front/back sprite setup ]]
 
+local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
 ---@class (partial) Card : EaseNode
 local GameRT = require("word_game.ui.util.game_runtime")
 local LetterFaces = require("word_game.ui.cards.letter_faces")
 local LetterPalette = require("word_game.config.visuals.letter_card_palette")
-local game_access = require("word_game.model.game_access")
 
 local function runtime() return GameRT.game() end
 

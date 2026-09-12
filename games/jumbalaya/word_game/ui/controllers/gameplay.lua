@@ -1,10 +1,11 @@
 --[[ word_game/ui/controllers/gameplay.lua - Phase 4 gameplay runtime().FUNCS controller ]]
 
+local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local action_dispatch = require("app.input.action_dispatch")
-local game_access = require("word_game.model.game_access")
 local TableControls = require("word_game.ui.table.controls")
 
 local M = {}

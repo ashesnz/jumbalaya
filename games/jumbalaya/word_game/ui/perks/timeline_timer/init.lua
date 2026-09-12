@@ -6,7 +6,7 @@
 ]]
 
 local facade = require("word_game.ui.facade")
-local game_access = require("word_game.model.game_access")
+local game_access = facade.game_access()
 local StageLabel = require("word_game.ui.score_banner.stage_label")
 local timer_layout = require("word_game.ui.perks.timeline_timer.layout")
 local timer_draw = require("word_game.ui.perks.timeline_timer.draw")

@@ -67,23 +67,11 @@ function M.shell_boundary_violations()
 	return violations
 end
 
---- Grandfathered deep model imports inside word_game/ui (migrate to ui/facade over time).
-local UI_MODEL_ALLOWLIST = {
-	["model.game_access"] = true,
-	["model.presentation"] = true,
-	["model.layout.request"] = true,
-	["model.table_areas"] = true,
-	["model.run.busy"] = true,
-	["model.run.mode"] = true,
-	["model.piles"] = true,
-}
-
 local function is_facade_module(rel)
 	return rel:sub(1, #"word_game/ui/facade/") == "word_game/ui/facade/"
-		or rel == "word_game/ui/presentation/install.lua"
 end
 
---- New deep word_game.model.* requires in word_game/ui outside the allowlist.
+--- Deep word_game.model.* requires in word_game/ui outside ui/facade/.
 function M.ui_model_boundary_violations()
 	local violations = {}
 	for _, path in ipairs(list_lua_files({ "word_game/ui" })) do
@@ -94,16 +82,10 @@ function M.ui_model_boundary_violations()
 				local content = file:read("*a")
 				file:close()
 				for mod in content:gmatch('require%("word_game%.model%.([^"]+)"%)') do
-					local key = "model." .. mod
-					if not UI_MODEL_ALLOWLIST[key] then
-						violations[#violations + 1] = rel .. " -> word_game." .. key
-					end
+					violations[#violations + 1] = rel .. " -> word_game.model." .. mod
 				end
 				for mod in content:gmatch("require%('word_game%.model%.([^']+)'%)") do
-					local key = "model." .. mod
-					if not UI_MODEL_ALLOWLIST[key] then
-						violations[#violations + 1] = rel .. " -> word_game." .. key
-					end
+					violations[#violations + 1] = rel .. " -> word_game.model." .. mod
 				end
 			end
 		end

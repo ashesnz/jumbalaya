@@ -9,7 +9,7 @@ T.describe("facade import boundaries", function()
 		T.assert_equal(#violations, 0, "boundary violations: " .. table.concat(violations, ", "))
 	end)
 
-	T.it("word_game/ui/ does not add new deep word_game.model.* imports outside allowlist", function()
+	T.it("word_game/ui/ does not deep-require word_game.model.* (use ui/facade)", function()
 		local violations = audit.ui_model_boundary_violations()
 		T.assert_equal(#violations, 0, "ui model violations: " .. table.concat(violations, ", "))
 	end)

@@ -1,9 +1,10 @@
 --[[ word_game/ui/presentation/install.lua - Register model→UI presentation hooks at boot ]]
 
+local facade = require("word_game.ui.facade")
+local Presentation = facade.presentation()
+local TableAreas = facade.table_areas()
 local GameRT = require("word_game.ui.util.game_runtime")
-local Presentation = require("word_game.model.presentation")
 local CardFocus = require("jumbalaya-engine.interaction.card_focus")
-local TableAreas = require("word_game.model.table_areas")
 local Funcs = require("app.callbacks.funcs")
 local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 local backgrounds = require("word_game.ui.layout.backgrounds")

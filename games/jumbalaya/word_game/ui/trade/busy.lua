@@ -1,7 +1,8 @@
 --[[ word_game/ui/trade/busy.lua - Push trade animation busy flag via Busy model ]]
 
-local Busy = require("word_game.model.run.busy")
 
+local facade = require("word_game.ui.facade")
+local Busy = facade.busy()
 local M = {}
 
 function M.sync()

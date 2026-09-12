@@ -1,6 +1,7 @@
 --[[ word_game/ui/perks/timeline_timer/fuse_mode.lua - Time Run fuse countdown HUD ]]
 
-local game_access = require("word_game.model.game_access")
+local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
 local timer_layout = require("word_game.ui.perks.timeline_timer.layout")
 
 local clamp01 = timer_layout.clamp01

@@ -2,12 +2,14 @@
 	word_game/ui/views/table_board_view.lua - TABLE_BOARD store-backed pile rendering (Phase 6 / 10b).
 ]]
 
+local facade = require("word_game.ui.facade")
+local piles = facade.piles()
+local TableAreas = facade.table_areas()
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local Engine = require("jumbalaya-engine")
 local PileView = Engine.Views.PileView
-local TableAreas = require("word_game.model.table_areas")
 
 local TableBoardView = {}
 TableBoardView.__index = TableBoardView

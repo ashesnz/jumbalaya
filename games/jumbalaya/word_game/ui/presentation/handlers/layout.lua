@@ -1,6 +1,7 @@
 --[[ word_game/ui/presentation/handlers/layout.lua - Layout and background hooks ]]
 
-local LayoutRequest = require("word_game.model.layout.request")
+local facade = require("word_game.ui.facade")
+local LayoutRequest = facade.layout_request()
 
 local M = {}
 

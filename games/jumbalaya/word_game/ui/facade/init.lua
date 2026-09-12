@@ -106,6 +106,18 @@ function M.presentation()
 	return load("word_game.model.presentation")
 end
 
+function M.piles()
+	return load("word_game.model.piles")
+end
+
+function M.table_areas()
+	return load("word_game.model.table_areas")
+end
+
+function M.layout_request()
+	return load("word_game.model.layout.request")
+end
+
 function M.updaters()
 	return load("app.core.session.updaters")
 end

@@ -6,7 +6,7 @@ local function runtime() return GameRT.game() end
 local M = {}
 
 local facade = require("word_game.ui.facade")
-local game_access = require("word_game.model.game_access")
+local game_access = facade.game_access()
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 local function bonus_stack_ui()
 	return facade.bonus_stack_ui()

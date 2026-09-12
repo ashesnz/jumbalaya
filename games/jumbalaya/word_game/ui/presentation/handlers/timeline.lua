@@ -1,8 +1,10 @@
 --[[ word_game/ui/presentation/handlers/timeline.lua - Timeline fuse / classic slider hooks ]]
 
+local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
+local Presentation = facade.presentation()
+local RunMode = facade.run_mode()
 local round_config = require("jumbalaya_core.config.gameplay.round")
-local RunMode = require("word_game.model.run.mode")
-local game_access = require("word_game.model.game_access")
 
 local M = {}
 

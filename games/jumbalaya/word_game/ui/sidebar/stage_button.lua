@@ -6,9 +6,9 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
 local Layout = require("word_game.ui.layout")
 local table_discard = require("word_game.ui.perks.discard_bin")
-local game_access = require("word_game.model.game_access")
 local action_dispatch = require("app.input.action_dispatch")
 local Funcs = require("app.callbacks.funcs")
 

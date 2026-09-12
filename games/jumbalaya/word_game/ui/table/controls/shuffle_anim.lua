@@ -1,11 +1,12 @@
 --[[ word_game/ui/table/controls/shuffle_anim.lua - Smooth riffle shuffle animation for the hand ]]
 
+local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
+local piles = facade.piles()
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
-local game_access = require("word_game.model.game_access")
-local piles = require("word_game.model.piles")
 local runtime = require("app.runtime")
 
 local M = {}

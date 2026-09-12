@@ -1,7 +1,9 @@
 --[[ word_game/ui/presentation/handlers/play.lua - Hand lifecycle, boss word, and match hooks ]]
 
-local game_access = require("word_game.model.game_access")
 
+local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
+local Presentation = facade.presentation()
 local M = {}
 
 function M.register(Presentation, ctx)

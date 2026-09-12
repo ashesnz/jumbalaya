@@ -4,10 +4,10 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
 local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 local CardMotion = require("word_game.ui.effects.card_motion")
 local play_effects = require("word_game.ui.play_effects")
-local game_access = require("word_game.model.game_access")
 local Funcs = require("app.callbacks.funcs")
 
 local feedback = facade.feedback()

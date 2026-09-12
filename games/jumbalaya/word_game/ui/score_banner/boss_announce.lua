@@ -5,11 +5,12 @@
 	Theme: sweeps right-to-left at the same moment, mirrored below boss with a gap — arrowhead stack.
 ]]
 
+local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local Layout = require("word_game.ui.layout")
-local game_access = require("word_game.model.game_access")
 local fonts = require("word_game.ui.score_banner.fonts")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 

@@ -9,10 +9,10 @@ local function runtime() return GameRT.game() end
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
 local InputLock = facade.input_lock()
 local perk_effects = facade.perks_effects()
 local Busy = facade.busy()
-local game_access = require("word_game.model.game_access")
 
 
 local M = {}

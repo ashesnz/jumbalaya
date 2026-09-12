@@ -4,11 +4,11 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
 local hand_shuffle_anim = require("word_game.ui.table.controls.shuffle_anim")
 local hand_placement_recall_anim = require("word_game.ui.table.controls.placement_recall_anim")
 
 local InputLock = facade.input_lock()
-local game_access = require("word_game.model.game_access")
 
 local M = {}
 

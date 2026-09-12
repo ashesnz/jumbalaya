@@ -5,7 +5,7 @@
 ]]
 
 local facade = require("word_game.ui.facade")
-local game_access = require("word_game.model.game_access")
+local game_access = facade.game_access()
 local fonts = require("word_game.ui.score_banner.fonts")
 local jumble = require("word_game.ui.score_banner.jumble")
 local draw = require("word_game.ui.score_banner.draw")

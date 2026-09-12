@@ -1,9 +1,10 @@
 --[[ word_game/ui/callbacks/overlays.lua - Overlay screen FUNCS (stable names) ]]
 
+local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
-local game_access = require("word_game.model.game_access")
 local UIViewHost = require("jumbalaya-engine.panels.view_host")
 local Funcs = require("app.callbacks.funcs")
 

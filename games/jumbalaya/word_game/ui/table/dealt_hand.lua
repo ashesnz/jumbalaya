@@ -7,7 +7,7 @@ local M = {}
 
 local felt_layout = require("word_game.ui.layout.felt")
 local facade = require("word_game.ui.facade")
-local game_access = require("word_game.model.game_access")
+local game_access = facade.game_access()
 
 local HAND_BOTTOM_MARGIN = 0.25
 

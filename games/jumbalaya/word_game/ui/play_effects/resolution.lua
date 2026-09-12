@@ -6,9 +6,9 @@
 ]]
 
 local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
+local Presentation = facade.presentation()
 local effects = require("word_game.ui.play_effects")
-local Presentation = require("word_game.model.presentation")
-local game_access = require("word_game.model.game_access")
 
 local RunMode = facade.run_mode()
 

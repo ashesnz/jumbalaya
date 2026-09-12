@@ -1,10 +1,11 @@
 --[[ word_game/ui/overlays/options.lua - Pause menu and settings overlays ]]
+local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local Components = require "word_game.ui.widgets.components"
-local game_access = require("word_game.model.game_access")
 
 local DEFINITIONS = runtime().DEFINITIONS
 

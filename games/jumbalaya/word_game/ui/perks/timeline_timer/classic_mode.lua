@@ -1,6 +1,8 @@
 --[[ word_game/ui/perks/timeline_timer/classic_mode.lua - Classic score slider HUD ]]
 
-local game_access = require("word_game.model.game_access")
+local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
+local RunMode = facade.run_mode()
 local StageLabel = require("word_game.ui.score_banner.stage_label")
 local timer_layout = require("word_game.ui.perks.timeline_timer.layout")
 

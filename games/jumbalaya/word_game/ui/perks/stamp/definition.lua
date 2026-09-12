@@ -4,12 +4,12 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
 local perk_cfg = require("word_game.config.perks")
 require("word_game.ui.perks.shared.voucher_sprite")
 
 local perk_model = facade.perks_registry()
 local run_state = facade.run_state()
-local game_access = require("word_game.model.game_access")
 
 local M = {}
 

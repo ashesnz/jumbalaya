@@ -13,12 +13,12 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
 local ComicBurst = require("word_game.ui.feedback.comic_burst")
 local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 
 local RunMode = facade.run_mode()
 
-local game_access = require("word_game.model.game_access")
 local UIViewHost = require("jumbalaya-engine.panels.view_host")
 
 local M = {}

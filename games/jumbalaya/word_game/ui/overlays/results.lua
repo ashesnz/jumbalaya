@@ -1,12 +1,13 @@
 --[[ word_game/ui/overlays/results.lua - Win, game over, and score summary overlays ]]
 
+local facade = require("word_game.ui.facade")
+local game_access = facade.game_access()
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local NumberFormat = require("jumbalaya-engine.util.number_format")
 local Easing = require "word_game.ui.effects.easing"
 local Components = require "word_game.ui.widgets.components"
-local game_access = require("word_game.model.game_access")
 
 function build_win()
   local show_win_cta = false
