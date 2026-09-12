@@ -50,10 +50,7 @@ local function mount_game_assets_if_needed(paths)
 	if paths.game_root == paths.source then
 		return
 	end
-	if love.filesystem.getInfo("resources/fonts/Outfit-Bold.ttf") then
-		return
-	end
-	-- Repo-root shim (`love .`): Love source is the repo root but assets live under game_root.
+	-- Repo-root shim (`love .`): mount the full game tree (assets, localization, shaders).
 	love.filesystem.mount("/", paths.game_root, true)
 end
 

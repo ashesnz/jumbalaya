@@ -6,7 +6,20 @@
 ]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
+local GameFiles = require("app.core.platform.game_files")
+
 local function runtime() return GameRT.game() end
+
+local function ensure_localization()
+	local game = runtime()
+	if not game then return false end
+	if game.localization and game.localization.misc then return true end
+	GameFiles.ensure_mounted()
+	if game.set_language then
+		game:set_language()
+	end
+	return game.localization and game.localization.misc
+end
 
 function init_localization()
   runtime().localization.misc.v_dictionary_parsed = {}
@@ -188,7 +201,10 @@ function each_utf8_char(s)
 end
 
 function localize(args, misc_cat)
-  if not runtime().localization or not runtime().localization.misc then
+  if not runtime() or not runtime().localization or not runtime().localization.misc then
+    ensure_localization()
+  end
+  if not runtime() or not runtime().localization or not runtime().localization.misc then
     if type(args) == 'string' then return args end
     if type(args) == 'table' and args.key then return tostring(args.key) end
     return 'ERROR'

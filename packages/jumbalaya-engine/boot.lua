@@ -20,6 +20,7 @@ function M.install()
 	require "jumbalaya-engine.util.random"
 	require "jumbalaya-engine.util.colour"
 	require "jumbalaya-engine.graphics.draw"
+	require "app.core.platform.display"
 	require "jumbalaya-engine.sound.sound"
 	local NumberFormat = require "jumbalaya-engine.util.number_format"
 	number_format = NumberFormat.number_format

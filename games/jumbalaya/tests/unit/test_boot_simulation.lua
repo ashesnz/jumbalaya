@@ -45,6 +45,29 @@ local Funcs = require("app.callbacks.funcs")
 			T.assert_not_nil(word_game.engine(), "WORD_GAME.engine must be wired after boot")
 			T.assert_not_nil(G.STAGE, "G.STAGE must be set after boot")
 			T.assert_equal(G.STAGES.MAIN_MENU, G.STAGE, "Initial boot should open to title screen stage")
+			T.assert_not_nil(G.localization and G.localization.misc, "localization must load during launch")
+			T.assert_equal(
+				G.localization.misc.dictionary.ui_classic,
+				"Classic",
+				"menu labels must resolve from localization dictionary"
+			)
+			T.assert_equal(localize("ui_classic"), "Classic", "localize() must resolve dictionary keys")
+			for _ = 1, 120 do
+				love.update(0.016)
+			end
+			T.assert_not_nil(G.MAIN_MENU_UI, "title menu UI should appear after timeline frames")
+			local function text_in_tree(node)
+				if not node then return nil end
+				if node.config and node.config.text then return node.config.text end
+				for _, child in ipairs(node.children or {}) do
+					local found = text_in_tree(child)
+					if found then return found end
+				end
+				return nil
+			end
+			local classic = G.MAIN_MENU_UI:find_node_by_id("main_menu_classic")
+			T.assert_not_nil(classic, "classic mode button should exist")
+			T.assert_equal(text_in_tree(classic), "Classic", "main menu button label must be localized")
 
 			-- Click Play to transition to gameplay board (Stage 1-1)
 			Funcs.dispatch("begin_run")

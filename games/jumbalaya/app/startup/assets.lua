@@ -3,6 +3,7 @@
 local M = {}
 
 local ASSETS_DIR = "resources/assets"
+local GameFiles = require("app.core.platform.game_files")
 local AtlasDpiscale = require("app.startup.atlas_dpiscale")
 local AtlasPaths = require("app.startup.atlas_paths")
 local AtlasDiagnostics = require("app.startup.atlas_diagnostics")
@@ -44,6 +45,7 @@ function M.init_shared_sprites(game)
 end
 
 function Game:set_render_settings()
+	GameFiles.ensure_mounted()
 	self.SETTINGS.GRAPHICS.texture_scaling = self.SETTINGS.GRAPHICS.texture_scaling or 2
 	AtlasDiagnostics.reset()
 

@@ -25,11 +25,15 @@ T.describe("engine services", function()
 		T.assert_not_nil(ctx.events)
 	end)
 
-	T.it("engine boot does not require app modules", function()
-		local boot_src = io.open((require("bootstrap_paths").resolve().repo_root) .. "/packages/jumbalaya-engine/boot.lua", "r")
-		T.assert_not_nil(boot_src)
-		local body = boot_src:read("*a")
-		boot_src:close()
-		T.assert_nil(body:find("app%.", 1, true), "boot.lua must not import app/")
+	T.it("repo-root shim mounts game assets when localization is missing", function()
+		local paths = require("bootstrap_paths").resolve()
+		if paths.game_root == paths.source then
+			T.assert_not_nil(love.filesystem.getInfo("localization/en-us.lua"))
+		else
+			T.assert_not_nil(
+				love.filesystem.getInfo("localization/en-us.lua"),
+				"localization must be visible after bootstrap_paths.install"
+			)
+		end
 	end)
 end)

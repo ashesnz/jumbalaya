@@ -1,6 +1,7 @@
 --[[ jumbalaya-engine/panels/view_host.lua - Thin wrapper around a panel instance ]]
 
 local Panel = require("jumbalaya-engine.panels.panel")
+require("jumbalaya-engine.panels.container")
 
 local ViewHost = {}
 ViewHost.__index = ViewHost

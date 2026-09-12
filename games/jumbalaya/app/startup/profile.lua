@@ -1,6 +1,7 @@
 --[[ app/startup/profile.lua - Profile load and localization setup ]]
 
 local BridgeRuntime = require("app.runtime")
+local GameFiles = require("app.core.platform.game_files")
 
 local DEFAULT_PROFILE = {
 	career_stats = { c_wins = 0 },
@@ -42,8 +43,10 @@ function Game:load_profile(profile_index)
 end
 
 function Game:set_language()
+	GameFiles.ensure_mounted()
 	if not self.LANGUAGES then
-		if not (love.filesystem.read("localization/" .. self.SETTINGS.language .. ".lua")) or self.F_ENGLISH_ONLY then
+		local lang_path = "localization/" .. (self.SETTINGS.language or "en-us") .. ".lua"
+		if not GameFiles.exists(lang_path) or self.F_ENGLISH_ONLY then
 			self.SETTINGS.language = "en-us"
 		end
 
@@ -82,9 +85,11 @@ function Game:set_language()
 
 	self.LANG = self.LANGUAGES[self.SETTINGS.language] or self.LANGUAGES["en-us"]
 
-	local localization = love.filesystem.getInfo("localization/" .. self.SETTINGS.language .. ".lua")
-	if localization ~= nil then
-		self.localization = assert(loadstring(love.filesystem.read("localization/" .. self.SETTINGS.language .. ".lua")))()
+	local loc_path = "localization/" .. self.SETTINGS.language .. ".lua"
+	local source = GameFiles.read(loc_path)
+	if source then
+		local loader = loadstring or load
+		self.localization = assert(loader(source, "@" .. loc_path))()
 		init_localization()
 	end
 end
