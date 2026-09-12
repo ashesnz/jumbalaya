@@ -74,7 +74,7 @@ function M.feedback()
 end
 
 function M.jumble()
-	return load("word_game.model.jumble")
+	return (WORD_GAME and WORD_GAME.Jumble) or load("word_game.model.jumble")
 end
 
 function M.jumble_play()

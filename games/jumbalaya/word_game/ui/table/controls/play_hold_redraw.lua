@@ -10,7 +10,6 @@ local function runtime() return GameRT.game() end
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local facade = require("word_game.ui.facade")
-local Deck = facade.deck()
 local game_access = facade.game_access()
 local InputLock = facade.input_lock()
 local perk_effects = facade.perks_effects()
@@ -263,7 +262,7 @@ local function trigger_redraw()
 	safe_sound("whoosh1", 0.9, 0.75)
 
 	discard_hand_down(function()
-		Deck.deal_into_hand(facade.hand_size().get(), finish_redraw)
+		facade.deck().deal_into_hand(facade.hand_size().get(), finish_redraw)
 	end)
 end
 

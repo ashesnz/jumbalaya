@@ -1,7 +1,6 @@
 --[[ word_game/ui/table/controls/placement.lua - Play button logic (registered as play_placement_word) ]]
 
 local facade = require("word_game.ui.facade")
-local Play = facade.jumble_play()
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 local play_resolution = require("word_game.ui.play_effects.resolution")
 
@@ -17,12 +16,12 @@ function M.try_play()
 		if not (hand_shuffle and hand_shuffle.placement_has_cards()) then
 			word_feedback.show_classic_proceed({ hold = 2.2 })
 		else
-			play_resolution.resolve(Play)
+			play_resolution.resolve(facade.jumble_play())
 		end
 		return
 	end
 	if WORD_GAME_UI.PlayHoldRedraw.consume_click() then return end
-	play_resolution.resolve(Play)
+	play_resolution.resolve(facade.jumble_play())
 end
 
 return M

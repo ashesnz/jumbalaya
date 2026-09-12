@@ -3,6 +3,8 @@
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
+local facade = require("word_game.ui.facade")
+
 local M = {}
 
 local definition
@@ -26,8 +28,8 @@ local function has_event_manager()
 end
 
 function M.present_boss_word(wr, on_complete)
-	local jumble = Jumble
-	local deck = Deck
+	local jumble = facade.jumble()
+	local deck = facade.deck()
 	if not wr or not jumble or not deck then
 		if on_complete then on_complete() end
 		return

@@ -231,7 +231,7 @@ function M.install(play_module)
 	function play_module.jumble_next(opts)
 		opts = opts or {}
 		play_effects.present_jumble_next(
-			Jumble,
+			facade.jumble(),
 			game_access.word_round(),
 			opts
 		)
