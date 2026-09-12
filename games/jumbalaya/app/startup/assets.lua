@@ -39,7 +39,6 @@ function M.init_shared_sprites(game)
 	local atlas = game.TEXTURE_ATLASES.letter_frame or game.TEXTURE_ATLASES.playing_back
 	if atlas then
 		game.shared_debuff = Sprite(0, 0, game.CARD_W, game.CARD_H, atlas, { x = 0, y = 0 })
-		game.shared_undiscovered_companion = Sprite(0, 0, game.CARD_W, game.CARD_H, atlas, { x = 0, y = 0 })
 	end
 
 end

@@ -155,10 +155,7 @@ function Card:begin_materialize(dissolve_colours, silent, timefac)
 	self.children.particles = DissolveFX.run(self, {
 		mode = 'in',
 		duration = dt,
-		colours = dissolve_colours or
-		(self.ability.set == 'Companion' and {runtime().C.RARITY[self.config.center.rarity]}) or
-		(self.ability.set == 'Perk' and {runtime().C.SECONDARY_SET.Perk, runtime().C.CLEAR}) or
-		{runtime().C.GREEN},
+		colours = dissolve_colours or {runtime().C.GREEN},
 		pulse = true,
 		particle = {timer = 0.025, scale = 0.25, speed = 3, lifespan = 0.7},
 		fade = {delay = 0.5 * dt, cap = true},

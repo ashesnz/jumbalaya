@@ -11,52 +11,10 @@ local function runtime() return GameRT.game() end
 
 local FLAT_LETTER_SETS = { Default = true, Enhanced = true }
 
-local PLACEHOLDER_ART = {
-	locked = {
-		Companion = { atlas = "Companion", pos = "companion_locked" },
-		Perk = { atlas = "Perk", pos = "perk_locked" },
-	},
-	undiscovered = {
-		Companion = "companion_undiscovered",
-		Finish = "companion_undiscovered",
-		Perk = "perk_undiscovered",
-	},
-}
-
-local function placeholder_art(self, center)
-	if not center or not center.set then return nil end
-	if self.params.bypass_discovery_center then return nil end
-
-	local locked = PLACEHOLDER_ART.locked[center.set]
-	if locked and not center.unlocked then
-		return { atlas = runtime().TEXTURE_ATLASES[locked.atlas], pos = runtime()[locked.pos].pos }
-	end
-
-	if center.usable and center.demo then
-		return nil
-	end
-
-	local veil_pos = PLACEHOLDER_ART.undiscovered[center.set]
-	if veil_pos and not center.discovered then
-		return { atlas = runtime().TEXTURE_ATLASES[center.atlas or center.set], pos = runtime()[veil_pos].pos }
-	end
-
-	return nil
-end
-
 function Card:set_sprites(_center, _front)
 	if _center and _center.set then
-		local ph = placeholder_art(self, _center)
-		local atlas, pos
-		if ph then
-			atlas, pos = ph.atlas, ph.pos
-		elseif _center.set == 'Companion' or _center.usable or _center.set == 'Perk' then
-			atlas = runtime().TEXTURE_ATLASES[_center.set]
-			pos = self.config.center.pos
-		else
-			atlas = runtime().TEXTURE_ATLASES[_center.atlas or 'centers']
-			pos = _center.pos
-		end
+		local atlas = runtime().TEXTURE_ATLASES[_center.atlas or 'centers']
+		local pos = _center.pos
 
 		if self.children.center then
 			self.children.center.atlas = atlas

@@ -106,24 +106,7 @@ function Card:draw_front()
 		end
 	end
 
-	if not self.config.center.discovered and (self.ability.usable or self.config.center.unlocked)
-		and not self.config.center.demo and not self.bypass_discovery_center then
-		local shared_sprite = runtime().shared_undiscovered_companion
-		local scale_mod = -0.05 + 0.05*math.sin(1.8*runtime().TIMERS.REAL)
-		local rotate_mod = 0.03*math.sin(1.219*runtime().TIMERS.REAL)
-
-		shared_sprite.role.draw_major = self
-		shared_sprite:apply_shader_effect('dissolve', nil, nil, nil, self.children.center, scale_mod, rotate_mod)
-	end
-
-	local has_overlays = self.debuff or self.greyed
-		or self.ability.set == 'Perk'
-		or self.config.center.demo
-	if has_overlays then
-		if self.ability.set == 'Perk' or self.config.center.demo then
-			self.children.center:apply_shader_effect('perk', nil, self.ARGS.send_to_shader)
-		end
-
+	if self.debuff or self.greyed then
 		if self.debuff then
 			self.children.center:apply_shader_effect('debuff', nil, self.ARGS.send_to_shader)
 			if self.children.front then
