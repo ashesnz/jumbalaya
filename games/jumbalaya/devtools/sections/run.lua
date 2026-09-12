@@ -16,7 +16,7 @@ return {
 
 	register = function(panel)
 		panel.state.tutorial_force_status = tutorial_force_label()
-		panel:action("delete_save", function()
+		panel:action("delete_save", function(ctx)
 			delete_saved_run()
 			if ctx.game and ctx.game.discard_run then ctx.game:discard_run() end
 		end)
