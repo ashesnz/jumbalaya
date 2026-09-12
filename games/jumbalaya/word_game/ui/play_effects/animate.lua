@@ -1,4 +1,8 @@
---[[ word_game/ui/play_effects/animate.lua - Play motion sequences and card choreography ]]
+--[[
+	word_game/ui/play_effects/animate.lua — Timed play sequences and card choreography.
+	Inputs: jumble state, play result, TIMELINE, card_fly_off, boss_word_intro.
+	Outputs: present_jumble_next, present_word_play_after_cards, present_boss_word_*.
+]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end

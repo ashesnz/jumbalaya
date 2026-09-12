@@ -46,6 +46,116 @@ Prefer `mock_env.reset_game()` at the top of a `describe` block. Tests that call
 
 **Core rule tests** (`test_core_*.lua`) call `jumbalaya_core` directly via `tests/helpers/core_env.lua` — no `mock_env.ensure_engine_globals()` needed.
 
+## `mock_env` recipes
+
+Copy these patterns from existing tests rather than re-stubbing globals ad hoc.
+
+### Reset a suite (default)
+
+```lua
+local mock_env = require("tests.helpers.mock_env")
+
+T.describe("my feature", function()
+    mock_env.reset_game()
+    -- G.GAME, G.pattern_row, WORD_GAME.Deck, store piles are seeded
+end)
+```
+
+### Publish custom run state (deal a hand, set target, jumble fields)
+
+```lua
+mock_env.reset_game()
+mock_env.publish_game({
+    word_score_animating = false,
+    hand_redraw_animating = false,
+    seed_streams = { seed = "TEST", hashed_seed = 0 },
+    word_round = {
+        set = 1,
+        hand_index = 1,
+        target = 25,
+        mode = "jumble",
+        jumble = { total_score = 0, puzzle_points = 0, puzzle_multi = 1.0, slots = {} },
+    },
+})
+```
+
+After mutating `G.GAME` fields directly, call `mock_env.sync_game()` so the store snapshot matches.
+
+### Stub sidebar / table controls
+
+```lua
+WORD_GAME_UI.TableControls = {
+    play_button_uie = function() return mock_btn end,
+    sync = function() end,
+    placement_has_cards = function() return false end,
+}
+WORD_GAME_UI.TradeUI = { is_open = function() return false end }
+WORD_GAME_UI.Sidebar = { sync_visibility = function() end, draw = function() end }
+```
+
+See `test_play_hold_redraw.lua`, `test_classic_run_mode.lua`.
+
+### Simulate play (model only vs full FX)
+
+```lua
+-- Rules only (no cinematics)
+local Play = require("word_game.model.jumble_play")
+local result = Play.play_jumble_word()
+
+-- Full resolution (banners, fly-off, hand clear)
+local resolution = require("word_game.ui.play_effects.resolution")
+resolution.resolve(Play, { instant = true })
+```
+
+### Presentation bus / score banner
+
+```lua
+mock_env.install_presentation({
+    ScoreBanner = {
+        snap_to_actual = function() snaps = snaps + 1 end,
+        sync_points_to_get_preview = function(enabled) preview = enabled end,
+    },
+})
+require("word_game.model.presentation").emit("PLAY_RESOLVED", { kind = "word_play", old_score = 0, new_score = 3 })
+```
+
+See `test_presentation_flow.lua`.
+
+### Hand-clear wiring (matches boot)
+
+```lua
+local Play = mock_env.install_hand_clear() -- installs hand_clear on Play module
+-- Play.on_hand_cleared / continue_after_dealer now behave like production
+```
+
+### Real Card instances
+
+```lua
+mock_env.ensure_card_class()
+-- Card, sprites, tooltip mixins loaded — use for drag/snap tests
+```
+
+### Engine globals without full game reset
+
+```lua
+mock_env.ensure_engine_globals() -- Sprite, Node, AnimNode, colour helpers
+```
+
+### API quick reference
+
+| Function | Use when |
+|----------|----------|
+| `reset_game()` | Start of every `describe` — preferred default |
+| `publish_game(table)` | Bind `G.GAME` + store from a snapshot |
+| `sync_game()` | After in-place `G.GAME` edits |
+| `clear_store_piles()` | Host-only pile tests; empty `store.piles` |
+| `install_presentation(overrides)` | Stub `WORD_GAME_UI` + wire `presentation/install` |
+| `install_hand_clear(play_module)` | Hand-clear / marketplace transition tests |
+| `ensure_card_class()` | Tests that construct or draw `Card` |
+| `ensure_engine_globals()` | Low-level scene-graph tests without full run state |
+| `setup()` | Rare; `reset_game()` calls this — use only for custom shells |
+| `teardown_boot_pollution()` | Alias for `reset_game()` |
+
 ## Adding New Tests
 
 1. Create `tests/unit/test_<name>.lua`.

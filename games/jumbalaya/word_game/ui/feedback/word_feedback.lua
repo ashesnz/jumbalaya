@@ -1,12 +1,7 @@
 --[[
-	word_game/ui/word_feedback.lua - Ephemeral board attention text (gameplay layer).
-
-	Callers:
-	  model/feedback.lua  — queue messages from rules (drained each frame)
-	  word_feedback       — immediate placement/hand-gap messages during play
-	  spawn_attention     — low-level UIBox primitive (exported as global for tests)
-	  play_effects        — play cinematics; delegates word messages here
-	  float_up_text       — per-card +points / +mult popups (not full sentences)
+	word_game/ui/feedback/word_feedback.lua — Ephemeral full-sentence board attention text.
+	Inputs: ROOM_ATTACH/pattern_row geometry, spawn_attention global, model feedback queue.
+	Outputs: show, show_invalid, show_classic_proceed, show_boss_countdown, flush_pending.
 ]]
 
 local GameRT = require("word_game.ui.util.game_runtime")

@@ -1,4 +1,8 @@
---[[ app/effects/easing.lua - Numeric and colour easing effects ]]
+--[[
+	word_game/ui/effects/easing.lua — Numeric and colour easing tweens for UI nodes.
+	Inputs: ref_table/ref_value targets, TIMELINE scheduler.
+	Outputs: Easing.value{...} event tables; shared by play_effects and panels.
+]]
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 

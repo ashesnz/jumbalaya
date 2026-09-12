@@ -67,8 +67,20 @@ Model glue **never** imports `word_game/ui/` or calls `WORD_GAME_UI`. It notifie
 | Token fly to sidebar | scene graph FX | `table/token_reward.lua` |
 | Fuse slider | panels + custom draw | `perks/timeline_timer/` |
 
+## Visual feedback folders (don’t mix these up)
+
+All three sound like “FX” to a new reader — they are **not** interchangeable:
+
+| Folder | One-liner | Example |
+|--------|-----------|---------|
+| [`ui/effects/`](../games/jumbalaya/word_game/ui/effects/README.md) | Reusable **motion & shaders** (card move, dissolve, canvas juice) | `card_motion.move`, `dissolve_fx` |
+| [`ui/play_effects/`](../games/jumbalaya/word_game/ui/play_effects/README.md) | **Play-button cinematics** (resolve → banners → clear → boss) | `resolution.resolve(Play)` |
+| [`ui/feedback/`](../games/jumbalaya/word_game/ui/feedback/README.md) | **Copy & popups** (sentences, +mult floats, confetti) | `word_feedback.show_invalid` |
+
 ## Further reading
 
 - Package map and dependency rules: [`code-organization.md`](code-organization.md)
+- Terminology (hand, stage, fuse, pattern row): [`glossary.md`](glossary.md)
 - Presentation event catalog: `types/presentation_events.lua`, `test_presentation_catalog.lua`
 - Glue headers and circular-deps exceptions: [`code-organization.md` § Phase 10a](code-organization.md#phase-10a-glue-hygiene-ongoing)
+- Test helper recipes: [`testing.md` § mock_env recipes](testing.md#mock_env-recipes)

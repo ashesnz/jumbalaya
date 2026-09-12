@@ -1,10 +1,7 @@
 --[[
-	app/effects/dissolve_fx.lua - generic dissolve / materialize effects.
-
-	Drives a timed dissolve animation on any node exposing a numeric
-	`dissolve` field (0 = intact, 1 = fully dissolved), pairing the shader
-	uniform tween with attach-mounted particles and completion hooks.
-	Knows nothing about Card — works for any Moveable-style node.
+	word_game/ui/effects/dissolve_fx.lua — Shader dissolve/materialize on any node with dissolve uniform.
+	Inputs: Moveable node, TIMELINE, optional particle attach.
+	Outputs: dissolve_fx.play(node, opts) with completion callback; no Card dependency.
 ]]
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"

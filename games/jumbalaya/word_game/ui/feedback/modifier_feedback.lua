@@ -1,4 +1,8 @@
---[[ word_game/ui/feedback/modifier_feedback.lua - Floating modifier hint above a placed card ]]
+--[[
+	word_game/ui/feedback/modifier_feedback.lua — Floating letter-modifier hint above a placed card.
+	Inputs: card T, modifier id from deck/perk rules.
+	Outputs: show_above_card(card) during pattern-row placement.
+]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end

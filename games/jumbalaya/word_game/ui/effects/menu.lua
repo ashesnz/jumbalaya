@@ -1,4 +1,8 @@
---[[ app/effects/menu.lua - Main menu presentation effects ]]
+--[[
+	word_game/ui/effects/menu.lua — Main-menu title motion and panel entrance FX.
+	Inputs: MAIN_MENU_UI nodes, TIMELINE, ViewHost.
+	Outputs: menu effect helpers called from menu/animate and boot.
+]]
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local ViewHost = require("jumbalaya-engine.panels.view_host")

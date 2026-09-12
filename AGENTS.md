@@ -102,7 +102,9 @@ There are **no modules at `word_game/ui/` root** — use subpackage paths only:
 | `table/` | `board`, `deck`, `input`, `dealt_hand`, `controls/`, `token_reward`, `jumble_fixed_letters` |
 | `feedback/` | `word_feedback`, `float_up_text`, `confetti`, `comic_burst`, `modifier_feedback` |
 | `tutorial/` | `first_play`, `character_speech`, `hand_clear_focus` |
-| `play_effects/` | `resolution`, `card_fly_off`, play cinematics |
+| `play_effects/` | `resolution`, `card_fly_off`, play cinematics — README in folder |
+| `effects/` | Runtime card motion, dissolve, canvas juice — README in folder |
+| `feedback/` | Copy, popups, confetti — README in folder |
 | `sidebar/` | right-hand HUD (see below) |
 | `layout/`, `score_banner/`, `perks/`, `trade/`, `menu/`, `overlays/`, `widgets/`, `callbacks/`, `cardarea/` | as named |
 

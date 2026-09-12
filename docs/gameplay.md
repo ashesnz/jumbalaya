@@ -2,6 +2,8 @@
 
 Jumbalaya is a roguelike **jumble** word game: pattern puzzles, a **points × multiplier** score banner, a burning **timeline fuse**, **tokens**, and **perks**.
 
+**Code vocabulary:** [glossary.md](glossary.md) maps these terms to modules and `G.GAME` fields.
+
 **Goal:** On each stage, bank enough cumulative score to meet the hand **target**, then move on. Clear set 8’s Showdown to win the match.
 
 ---

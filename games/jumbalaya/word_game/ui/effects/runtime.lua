@@ -1,4 +1,8 @@
---[[ app/effects/runtime.lua - Canvas motion and repeating card effects ]]
+--[[
+	word_game/ui/effects/runtime.lua — Canvas bounce/juice and repeating table motion hooks.
+	Inputs: Game shell CANVAS, TIMELINE, real_dt.
+	Outputs: Runtime.update_canvas_juice(dt); registered from runtime_boot early_frame updater.
+]]
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 

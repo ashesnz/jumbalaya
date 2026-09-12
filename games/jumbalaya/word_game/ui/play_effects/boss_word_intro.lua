@@ -1,4 +1,8 @@
---[[ word_game/ui/play_effects/boss_word_intro.lua - Boss-word intro countdown and staging ]]
+--[[
+	word_game/ui/play_effects/boss_word_intro.lua — Boss-word 3-2-1 intro and hand staging.
+	Inputs: word_round, facade jumble/deck, TimelineTimer, ScoreBanner, effects host.
+	Outputs: present_boss_word(wr, on_complete); countdown via word_feedback.show_boss_countdown.
+]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end

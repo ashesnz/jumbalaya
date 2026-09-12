@@ -1,4 +1,8 @@
---[[ word_game/ui/play_effects/definition.lua - Play feedback, banners, and layout sync ]]
+--[[
+	word_game/ui/play_effects/definition.lua — Shared play flags, banner hooks, and control sync.
+	Inputs: game_access, RunMode, WORD_GAME_UI ScoreBanner/TableControls.
+	Outputs: set_word_score_animating, roll_jumble_banners, BOSS_INTRO constants.
+]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end

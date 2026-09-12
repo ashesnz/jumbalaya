@@ -1,4 +1,8 @@
---[[ app/effects/status_text.lua - Data-driven Jumbalaya status presentation ]]
+--[[
+	word_game/ui/effects/status_text.lua — Data-driven status lines on moveables.
+	Inputs: node attach points, status payload tables, TIMELINE.
+	Outputs: status_text.show/update helpers for deck and pile chrome.
+]]
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 

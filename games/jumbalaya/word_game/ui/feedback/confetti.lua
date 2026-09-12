@@ -1,8 +1,7 @@
 --[[
-	word_game/ui/confetti.lua - Win celebration raining from the score banner.
-
-	Stars / discs / petals / kites in a muted paper palette, falling from the
-	hexagon plate down across the card felt.
+	word_game/ui/feedback/confetti.lua — Hand-clear confetti rain from the score banner.
+	Inputs: score banner rect, felt layout, particle palette.
+	Outputs: Confetti.spawn/update/draw celebration burst on stage clear.
 ]]
 
 local facade = require("word_game.ui.facade")

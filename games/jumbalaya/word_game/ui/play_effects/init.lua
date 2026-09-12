@@ -1,4 +1,8 @@
---[[ word_game/ui/play_effects/init.lua - Play-button UI orchestration facade ]]
+--[[
+	word_game/ui/play_effects/init.lua — Play-button cinematic facade (re-exports definition + animate).
+	Inputs: Game shell TIMELINE, play_effects submodules.
+	Outputs: resolve path via resolution.lua; queue_event, request_layout_refresh on host.
+]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end

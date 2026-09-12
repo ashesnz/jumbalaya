@@ -1,4 +1,8 @@
---[[ word_game/ui/play_effects/card_fly_off.lua - Played cards fly off-screen instead of the recycle pile ]]
+--[[
+	word_game/ui/play_effects/card_fly_off.lua — Played cards fly off-screen (recycle stash).
+	Inputs: played Card instances, Busy flags, TIMELINE.
+	Outputs: stash_played_card, fly_off batch helpers; reset() for tests.
+]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end

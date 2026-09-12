@@ -344,7 +344,9 @@ Runtime hand size (`WORD_GAME.HandSize.get()`) glue lives in `word_game/model/ha
 | `layout/` | TABLE_BOARD geometry |
 | `sidebar/` | Right-hand HUD |
 | `score_banner/` | Jumble score chips, stage label, boss announce |
-| `play_effects/` | Play cinematics + `resolution` |
+| `play_effects/` | Play cinematics + `resolution` — see [play_effects/README.md](../games/jumbalaya/word_game/ui/play_effects/README.md) |
+| `effects/` | Runtime card motion, dissolve, canvas juice — [effects/README.md](../games/jumbalaya/word_game/ui/effects/README.md) |
+| `feedback/` | Copy, popups, confetti — [feedback/README.md](../games/jumbalaya/word_game/ui/feedback/README.md) |
 | `perks/` | Bonus stack, discard bin, timeline timer, stamp UI |
 | `trade/` | Marketplace overlay |
 | `menu/` | Main menu + title logo |
@@ -394,6 +396,28 @@ Tests that need rules only call `jumbalaya_core` or `play_jumble_word`; tests th
 | Model queue | `model/feedback.lua` | Rules/model code that must not import UI |
 | Play cinematics | `play_effects/` | Full play resolution FX |
 | Per-card popups | `float_up_text.lua` | Short +2 / +mult rises from individual cards |
+
+### UI module headers
+
+Match model glue style: a **3-line block** at the top of every `word_game/ui/**/*.lua` file (new and edited files):
+
+```lua
+--[[
+	word_game/ui/<path> — <role in one sentence>.
+	Inputs: <facade/store/globals this module reads>.
+	Outputs: <draw/update/emit/API surface this module exposes>.
+]]
+```
+
+- **Role** — what the file owns (not a filename repeat).
+- **Inputs** — `WORD_GAME_UI`, `facade.game_access()`, `G.dealt_letters`, presentation handlers, etc.
+- **Outputs** — exported functions, draw passes, `Presentation` reactions, or “none” for leaf helpers.
+
+`init.lua` package entries list re-exports in **Outputs**. See `ui/effects/`, `ui/play_effects/`, and `ui/feedback/` for examples.
+
+### Terminology
+
+Player and code vocabulary: [glossary.md](glossary.md) (hand vs stage, pattern row, fuse, tokens, FX folder choice).
 
 ---
 

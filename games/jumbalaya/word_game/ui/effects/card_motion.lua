@@ -1,4 +1,8 @@
---[[ word_game/ui/effects/card_motion.lua - Queued card movement and selection effects ]]
+--[[
+	word_game/ui/effects/card_motion.lua — Queued card moves between piles via timeline scheduler.
+	Inputs: Game shell (TIMELINE), card.area, target coordinates in opts.
+	Outputs: CardMotion.move(opts); consumed by presentation card_motion_move handler.
+]]
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 

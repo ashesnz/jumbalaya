@@ -1,4 +1,8 @@
---[[ word_game/ui/play_effects/hand_clear.lua - Hand-clear presentation and flow wiring ]]
+--[[
+	word_game/ui/play_effects/hand_clear.lua — Stage-clear celebration and marketplace handoff.
+	Inputs: Play module hooks, facade deck/jumble, TIMELINE, Funcs dispatch strings.
+	Outputs: install(Play) wires on_hand_cleared; discard anim, token fly, TradeUI open.
+]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end

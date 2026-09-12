@@ -1,11 +1,7 @@
 --[[
-	word_game/ui/comic_burst.lua - Comic starburst behind score popups.
-
-	Drawn with love.graphics.polygon / circle only: yellow fill, red outline,
-	drop shadow, radiating action shards, and a couple of halftone clusters.
-
-	`ComicBurst.make` / `advance` / `paint` are the shared geometry API (card
-	EaseNode and the TO GO banner both use it).
+	word_game/ui/feedback/comic_burst.lua — Comic starburst geometry behind score popups.
+	Inputs: burst centre, elapsed time, scale.
+	Outputs: ComicBurst.make/advance/paint; shared by cards and score banner.
 ]]
 
 local GameRT = require("word_game.ui.util.game_runtime")

@@ -1,8 +1,7 @@
 --[[
-	word_game/ui/float_up_text.lua - Steam-rise score text.
-
-	Dice Have No Eyes float_up_text: spawn on the die, drift up, fade out.
-	Here it emits from a played card (or the play row) and wobbles like steam.
+	word_game/ui/feedback/float_up_text.lua — Per-card +points / +mult steam-rise popups.
+	Inputs: card or row anchor T, TIMELINE, colour/scale opts.
+	Outputs: spawn/update helpers; timeline_right_origin for fuse-adjacent labels.
 ]]
 
 local GameRT = require("word_game.ui.util.game_runtime")

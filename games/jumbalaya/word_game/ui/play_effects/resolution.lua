@@ -1,8 +1,7 @@
 --[[
-	word_game/ui/play_effects/resolution.lua - Apply play effects after model evaluation.
-
-	Model (`Play.play_jumble_word`) returns an evaluation result; this module runs
-	presentation and follow-up actions (banners, card fly, hand clear).
+	word_game/ui/play_effects/resolution.lua — Apply play cinematics after model evaluation.
+	Inputs: Play module (play_jumble_word result), facade.jumble, Presentation bus.
+	Outputs: resolve(play_module, opts) → banners, fly-off, hand clear, PLAY_RESOLVED emit.
 ]]
 
 local facade = require("word_game.ui.facade")

@@ -1,4 +1,8 @@
---[[ app/effects/init.lua - Jumbalaya runtime effects package ]]
+--[[
+	word_game/ui/effects/init.lua — Package entry for runtime FX (motion, dissolve, canvas juice).
+	Inputs: none.
+	Outputs: easing, card_motion, menu, runtime, scheduler, status_text module tables.
+]]
 
 return {
     easing = require "word_game.ui.effects.easing",
