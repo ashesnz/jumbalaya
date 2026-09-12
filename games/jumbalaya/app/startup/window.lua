@@ -22,13 +22,13 @@ function Game:init_window(reset)
 
 	local os_name = love.system.getOS()
 	if os_name == 'iOS' or os_name == 'Android' then
-		local Window = require "app.core.platform.window"
+		local Window = require "jumbalaya-engine.adapters.love2d.window"
 		Window.sync_resize()
 		self.SETTINGS.QUEUED_CHANGE = {}
 		return
 	end
 
 	Funcs.dispatch("apply_window_changes", true)
-	local Window = require "app.core.platform.window"
+	local Window = require "jumbalaya-engine.adapters.love2d.window"
 	Window.sync_resize()
 end

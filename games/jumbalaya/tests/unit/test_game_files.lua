@@ -1,7 +1,7 @@
 --[[ tests/unit/test_game_files.lua - Game asset path helpers ]]
 
 local T = require("tests.framework")
-local GameFiles = require("app.core.platform.game_files")
+local GameFiles = require("app.platform.game_files")
 
 T.describe("game files", function()
 	T.it("reads localization from the game tree", function()

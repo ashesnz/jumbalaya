@@ -79,8 +79,8 @@ function Game:launch()
 	end
 
 	boot_stage('window init', 'save worker')
-	if love.thread and love.thread.newThread and (not love.filesystem.getInfo or love.filesystem.getInfo('app/core/persistence/worker.lua')) then
-		local thread_ok, thread_res = pcall(love.thread.newThread, 'app/core/persistence/worker.lua')
+	if love.thread and love.thread.newThread and (not love.filesystem.getInfo or love.filesystem.getInfo('app/persistence/worker.lua')) then
+		local thread_ok, thread_res = pcall(love.thread.newThread, 'app/persistence/worker.lua')
 		if thread_ok and thread_res then
 			self.DISK_WORKER = {
 				thread = thread_res,

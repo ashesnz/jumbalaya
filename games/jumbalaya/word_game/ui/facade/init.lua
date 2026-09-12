@@ -130,7 +130,7 @@ function M.layout_request()
 end
 
 function M.updaters()
-	return load("app.core.session.updaters")
+	return load("jumbalaya-engine.session.updaters")
 end
 
 return M

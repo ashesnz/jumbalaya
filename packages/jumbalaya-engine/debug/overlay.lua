@@ -1,4 +1,4 @@
---[[ app/core/session/loop/debug_overlay.lua - FPS / perf overlay (no word_game requires) ]]
+--[[ jumbalaya-engine/debug/overlay.lua - FPS / perf overlay ]]
 
 local M = {}
 

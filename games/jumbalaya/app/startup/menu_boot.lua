@@ -21,7 +21,7 @@ function Game:boot_initial_screen()
 
 	local os_name = love.system.getOS()
 	if os_name == 'iOS' or os_name == 'Android' then
-		local Window = require "app.core.platform.window"
+		local Window = require "jumbalaya-engine.adapters.love2d.window"
 		Window.sync_resize()
 	end
 	self.LOADING = nil

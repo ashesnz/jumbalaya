@@ -12,7 +12,7 @@ T.describe("save round-trip", function()
 	require("word_game.model.cards.definitions")
 	require("word_game.ui.cardarea.init")
 	local pack = require("jumbalaya-engine.util.pack")
-	require("app.core.persistence.save")
+	require("app.persistence.save")
 	pack_to_source = pack.pack_to_source
 	unpack_source = pack.unpack_source
 	read_save_payload = pack.read_save_payload

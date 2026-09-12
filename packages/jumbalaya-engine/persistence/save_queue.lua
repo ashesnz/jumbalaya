@@ -1,14 +1,11 @@
---[[ app/core/session/loop/save_queue.lua - flushes pending write flags to disk ]]
+--[[ jumbalaya-engine/persistence/save_queue.lua - flushes pending write flags to disk ]]
 
-local BridgeRuntime = require("app.runtime")
+local shell = require("jumbalaya-engine.shell")
 
 local M = {}
 
---- Called once per frame from Game:update. When writes are pending and the
---- throttle allows (stage change, pause flip, force flag, or 30s heartbeat),
---- pushes each flagged payload to the disk worker and clears the flags.
 function M.update()
-	local game = BridgeRuntime.game()
+	local game = shell.game()
 	if not game then return end
 
 	local flags = game.WRITE_FLAGS

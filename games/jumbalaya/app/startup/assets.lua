@@ -3,7 +3,7 @@
 local M = {}
 
 local ASSETS_DIR = "resources/assets"
-local GameFiles = require("app.core.platform.game_files")
+local GameFiles = require("app.platform.game_files")
 local AtlasDpiscale = require("app.startup.atlas_dpiscale")
 local AtlasPaths = require("app.startup.atlas_paths")
 local AtlasDiagnostics = require("app.startup.atlas_diagnostics")

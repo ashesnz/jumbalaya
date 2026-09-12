@@ -1,10 +1,9 @@
---[[ app/core/platform/game_files.lua - Read game data files via Love FS or disk fallback ]]
+--[[ app/platform/game_files.lua - Read game data files via Love FS or disk fallback ]]
 
 local BootstrapPaths = require("bootstrap_paths")
 
 local M = {}
 
---- Mount games/jumbalaya when Love source is the repo root (`love .`).
 function M.ensure_mounted()
 	if not (love and love.filesystem and love.filesystem.mount) then
 		return
@@ -16,8 +15,6 @@ function M.ensure_mounted()
 	love.filesystem.mount("/", paths.game_root, true)
 end
 
----@param rel_path string Path relative to games/jumbalaya (e.g. localization/en-us.lua)
----@return string|nil
 function M.read(rel_path)
 	if love.filesystem and love.filesystem.getInfo(rel_path) then
 		return love.filesystem.read(rel_path)
@@ -33,8 +30,6 @@ function M.read(rel_path)
 	return content
 end
 
----@param rel_path string
----@return boolean
 function M.exists(rel_path)
 	if love.filesystem and love.filesystem.getInfo(rel_path) then
 		return true

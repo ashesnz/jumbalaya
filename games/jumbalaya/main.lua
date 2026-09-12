@@ -35,13 +35,13 @@ if os_name == "OS X" or os_name == "iOS" then
 end
 
 if os_name == "iOS" or os_name == "Android" then
-	require("app.core.platform.window").lock_landscape_orientation()
+	require("jumbalaya-engine.adapters.love2d.window").lock_landscape_orientation()
 end
 
 require "app.bootstrap"
 math.randomseed(require("app.runtime").game().SEED)
 
-require "app.core.session.lifecycle"
+require "jumbalaya-engine.adapters.love2d.lifecycle"
 require "app.input"
 require "app.error_handler"
-require "app.core.platform.window"
+require "jumbalaya-engine.adapters.love2d.window"

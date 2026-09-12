@@ -11,7 +11,7 @@ Jumbalaya is organized in **four cooperating layers**. They are not duplicates �
 
 Shell wiring (`app/runtime.lua`, `app/callbacks/funcs.lua`, `app/bootstrap/store_sync.lua`, `jumbalaya-engine.shell`) is injected at boot via `app/bootstrap/shell_bind.lua`. The old `bridge/` folder is dissolved.
 
-**Do not delete `app/` or `packages/`** — see [app vs packages](#app-vs-packages) below. The long-term plan is to *shrink* `app/core/` into `jumbalaya-engine`, not merge everything back into one tree.
+**Do not delete `app/` or `packages/`** — see [app vs packages](#app-vs-packages) below. Portable session/platform/persistence primitives live in `jumbalaya-engine/`; the Love2D shell stays in `app/` (`app/core/` removed).
 
 ### Engine migration
 
@@ -58,7 +58,7 @@ packages/
   jumbalaya_core/               Portable domain: store, rules, jumble, cards, config (headless-testable)
   jumbalaya-engine/             Portable engine (see layout below)
 games/jumbalaya/
-  app/                          Love2D shell: bootstrap, callbacks, startup, session/persistence
+  app/                          Love2D shell: bootstrap, callbacks, startup, persistence, session hooks
   word_game/                    Runtime glue, presentation, board geometry, config
   devtools/                     Dev-only panel (snake_case Lua modules under devtools/sections/)
   dictionary/                   Offline word validation
@@ -75,7 +75,7 @@ _tools/                         Python asset/dev pipelines (not runtime)
 | Why both `app/` and `packages/`? | `app/` **runs** this Love2D game. `packages/` holds **libraries** extracted so rules and engine services can be tested and reused without the full boot chain. |
 | Can we remove `packages/`? | **No** — store, reducers, core rules, retained UI, and `test_core_*` depend on it. |
 | Can we remove `app/`? | **No** — bootstrap, Love2D callbacks, and most of the scene graph still live here. |
-| What is duplicated? | `app/core/` and `packages/jumbalaya-engine/` overlap **during migration** (`panels` already moved; Card/Sprite/input still in `app/core/`). That overlap shrinks over time; do not collapse the trees prematurely. |
+| What is duplicated? | `app/` shell wiring and `packages/jumbalaya-engine/` — engine owns loop, updaters, draw passes, Love2D adapters; `app/` owns bootstrap, callbacks, persistence glue, draw-pass registration. |
 | Dependency direction | `jumbalaya_core` imports nothing from `app/` or `word_game/`. `jumbalaya-engine` imports only `jumbalaya_core` (when needed) and Love2D — **not** `app/` or `word_game/`. `word_game/` imports both packages. `app/` imports `word_game/` at boot only. |
 
 ### word_game vs jumbalaya_core
@@ -117,6 +117,10 @@ Glue modules are often labeled *"glue over jumbalaya_core"* in their file header
 ```text
 jumbalaya-engine/
   init.lua, boot.lua, shell.lua, object.lua   Entry points (facade, install order, app bridge, Kind)
+  adapters/love2d/  display, window, lifecycle (Love2D platform + love.run)
+  session/      loop.lua, updaters.lua, draw_passes.lua (frame loop + hook registries)
+  persistence/  save_queue.lua, worker.lua (disk flush + thread logic)
+  debug/        overlay.lua (FPS / perf overlay)
   services/     Testable service interfaces (Context, Renderer, InputService, Audio, Clock, EventBus)
   scene/        Node + AnimNode scene graph
   interaction/  InputRouter — pointer, gamepad, focus, collision (low-level HID)
@@ -126,12 +130,12 @@ jumbalaya-engine/
   effects/      Timeline tween scheduler (g().TIMELINE wrapper)
   sound/        SFX API + mixer + worker thread entry
   util/         Stateless helpers (colour, geometry, tween, pack, roll, …)
-  adapters/     Love2D renderer adapter
+  adapters/     love2d.lua renderer adapter
 ```
 
 **Two “input” layers (by design):** `services/input.lua` maps UIBox `func` strings → store actions; `interaction/` routes raw Love2D events to scene nodes.
 
-**Boot boundary:** `boot.lua` installs engine globals only. App-specific modules (e.g. `app/core/platform/display.lua`) load from `app/bootstrap/runtime_boot.lua` after `Game()`.
+**Boot boundary:** `boot.lua` installs engine globals including `jumbalaya-engine/adapters/love2d/display.lua`. Game draw passes register from `app/session/draw_passes.lua` in `runtime_boot.lua` after `Game()`.
 
 ### UI stack: engine panels vs word-game UI
 
@@ -160,7 +164,7 @@ These layers are **not** duplicates — they sit at different levels:
 
 **`Card` / `CardArea`** (`word_game/ui/cardarea/`) are a third presentation path for draggable letter tiles — scene-graph hosts, not panel definitions. Table layout authority is still `store.piles` (see Phase 10).
 
-Dependency direction: `word_game/ui/` → `jumbalaya-engine` + `app/core/` → never reverse into gameplay rules.
+Dependency direction: `word_game/ui/` → `jumbalaya-engine` + `app/` (shell) → never reverse into gameplay rules.
 
 `jumbalaya-engine/graphics/flow_text.lua` (`DynaText`) reads colours and timers from the bound **Game shell** (`jumbalaya-engine.shell`); localization copy lives in `games/jumbalaya/localization/`.
 
@@ -180,7 +184,7 @@ UIBox buttons still bind **string names** (`func = 'shuffle_hand'`). Runtime dis
 | Card tooltips | `word_game/ui/cards/tooltip.lua` |
 | Screen wipe transitions | `app/screen_wipe.lua` |
 
-`app/bootstrap.lua` loads callbacks in dependency order and wires input actions from `app/input_actions.lua` so `app/core/input/router.lua` does not require application code.
+`app/bootstrap.lua` loads callbacks in dependency order and wires input actions from `app/input_actions.lua` so `jumbalaya-engine/interaction/router.lua` does not require application code.
 
 ### Pivot note
 
@@ -203,7 +207,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 
 **Stop growing ad hoc state:** every new feature ships with a **facade method + owned run-state field** (declared in `types/game.lua`) or it does not land. Callback string names are registration only; logic lives on `WORD_GAME_UI` / app modules.
 
-**Engine vs game:** `app/core/` is the Love scene graph (Card, CardArea, input, loop). It must not reference jumble, letter faces, or card rules. Letter identity lives in `word_game/model/cards/`. Run save/restore lives in `word_game/model/persistence/` (`WORD_GAME.Persistence`); `app/core/persistence/save.lua` snapshots CardAreas and delegates.
+**Engine vs game:** `jumbalaya-engine/` owns the frame loop, updaters, draw-pass registry, Love2D adapters, and disk-worker logic. `app/` owns bootstrap, callbacks, and game save orchestration (`app/persistence/save.lua`). Letter identity lives in `word_game/model/cards/`. Run restore lives in `word_game/model/persistence/` (`WORD_GAME.Persistence`).
 
 ### Domain (`WORD_GAME`)
 
@@ -366,7 +370,7 @@ Runtime hand size (`WORD_GAME.HandSize.get()`) glue lives in `word_game/model/ha
 
 | File | Hook |
 |------|------|
-| `app/core/session/loop.lua` | Engine frame + state dispatch; delegates TABLE_BOARD to `WORD_GAME_UI.TableBoard` |
+| `jumbalaya-engine/session/loop.lua` | Engine frame loop; game draw passes registered in `app/session/draw_passes.lua` |
 | `app/startup.lua` | Thin orchestrator; `startup/profile`, `window`, `dealing` |
 | `word_game/ui/callbacks/placement.lua` | `play_placement_word` → `controls/placement.try_play` |
 

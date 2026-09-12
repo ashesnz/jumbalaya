@@ -1,24 +1,17 @@
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
--- Window callbacks, mobile landscape lock, and viewport reconstruction.
+--[[ jumbalaya-engine/adapters/love2d/window.lua - Window callbacks, mobile landscape lock, viewport ]]
 
 local Window = {}
 
--- Fixed landscape size passed to setMode. Width MUST exceed height so LÖVE/SDL
--- request landscape on iOS (see love.window.setMode wiki).
 local LANDSCAPE_W, LANDSCAPE_H = 1280, 720
 
----@return boolean
 function Window.is_mobile_os()
 	local os_name = love.system and love.system.getOS and love.system.getOS() or ""
 	return os_name == "iOS" or os_name == "Android"
 end
 
---- Force landscape aspect: width is always the long edge.
----@param w number
----@param h number
----@return number, number
 function Window.landscape_dimensions(w, h)
 	w, h = w or 0, h or 0
 	if h > w then
@@ -27,8 +20,6 @@ function Window.landscape_dimensions(w, h)
 	return w, h
 end
 
---- Window size in the same coordinate space LÖVE uses for drawing.
----@return number, number
 function Window.get_backbuffer_dimensions()
 	if love.graphics and love.graphics.getDimensions then
 		return love.graphics.getDimensions()
@@ -42,7 +33,6 @@ function Window.get_backbuffer_dimensions()
 	return 0, 0
 end
 
----@return number, number
 function Window.get_render_dimensions()
 	local w, h = Window.get_backbuffer_dimensions()
 	if Window.is_mobile_os() then
@@ -51,16 +41,11 @@ function Window.get_render_dimensions()
 	return w, h
 end
 
----@return boolean
 function Window.is_portrait_window()
 	local w, h = Window.get_backbuffer_dimensions()
 	return h > w
 end
 
---- Ask the OS for landscape using a fixed width>height mode.
---- Do NOT pass the current (possibly portrait) window size here — that does not
---- rotate the device, it only reshapes the drawable incorrectly.
----@return boolean
 function Window.lock_landscape_orientation()
 	if not Window.is_mobile_os() or not love.window or not love.window.setMode then
 		return false
@@ -81,8 +66,6 @@ function Window.lock_landscape_orientation()
 	return true
 end
 
---- Force landscape via setMode, then rebuild canvas when layout constants exist.
----@return number|nil, number|nil
 function Window.apply_mobile_window()
 	if not Window.lock_landscape_orientation() then
 		return nil, nil
@@ -94,8 +77,6 @@ function Window.apply_mobile_window()
 	return LANDSCAPE_W, LANDSCAPE_H
 end
 
---- Rebuild canvas + viewport from the current window size.
----@return number|nil, number|nil
 function Window.sync_resize()
 	if Window.is_mobile_os() and Window.is_portrait_window() then
 		Window.lock_landscape_orientation()
@@ -109,8 +90,6 @@ function Window.sync_resize()
 	return w, h
 end
 
----@param width number
----@param height number
 function love.resize(width, height)
 	if Window.is_mobile_os() then
 		if height > width then
@@ -154,15 +133,14 @@ function love.resize(width, height)
 		g().buttons:recalculate()
 	end
 	if g().STAGE == g().STAGES.RUN and g().STATE == g().STATES.TABLE_BOARD then
-		apply_run_layout()
+		if apply_run_layout then
+			apply_run_layout()
+		end
 	elseif g().STAGE == g().STAGES.MAIN_MENU and layout_main_menu then
 		layout_main_menu()
 	end
 end
 
---- Reject portrait orientation on mobile; Jumbalaya is landscape-only.
----@param _index number
----@param orientation string
 function love.displayrotated(_index, orientation)
 	if not Window.is_mobile_os() then
 		return

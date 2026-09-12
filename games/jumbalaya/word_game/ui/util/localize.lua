@@ -6,7 +6,7 @@
 ]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
-local GameFiles = require("app.core.platform.game_files")
+local GameFiles = require("app.platform.game_files")
 
 local function runtime() return GameRT.game() end
 

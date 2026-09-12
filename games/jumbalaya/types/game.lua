@@ -29,7 +29,7 @@
 	- **Live scene nodes** (CardPile, UIBox, overlays) may stay on the Game shell as engine/runtime
 	  wiring; prefer `WORD_GAME.Deck` / `Board` accessors over new top-level names.
 	- **Letter definitions** → LETTERS via `word_game/model/cards/registry.lua`, not
-	  ad-hoc globals. `app/core/` must not reference jumble, letters, or card faces.
+	  ad-hoc globals. `app/` shell must not reference jumble, letters, or card faces.
 	- After `GameRunState` is fully closed, re-enable `inject-field` in `.emmyrc.json`.
 ]]
 

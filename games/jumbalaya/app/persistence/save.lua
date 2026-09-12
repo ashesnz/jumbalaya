@@ -1,10 +1,9 @@
 --[[
-	app/core/persistence/save.lua - run snapshots, progress/settings writes,
-	and session teardown.
+	app/persistence/save.lua - run snapshots, progress/settings writes, and session teardown.
 
 	Game-specific restore/inventory logic lives in word_game/model/persistence/
-	(WORD_GAME.Persistence). This module only orchestrates the engine snapshot
-	format and delegates domain work through the facade.
+	(WORD_GAME.Persistence). This module orchestrates the snapshot format and
+	delegates domain work through the facade.
 ]]
 
 local BridgeRuntime = require("app.runtime")
@@ -25,7 +24,6 @@ function snapshot_for_action(action)
 	g.action = nil
 end
 
---- Collects store state plus game metadata and flags a pending run write.
 function queue_run_snapshot()
 	local g = game()
 	if not g or g.F_NO_SAVING == true then return end
@@ -53,7 +51,6 @@ function queue_run_snapshot()
 	g.WRITE_FLAGS.update_queued = true
 end
 
---- Deletes the stored run for the active profile, both on disk and in memory.
 function delete_saved_run()
 	local g = game()
 	if not g then return end
@@ -69,7 +66,6 @@ function delete_saved_run()
 	end
 end
 
---- Recollects live letter cards after load (delegates to WORD_GAME.Persistence).
 function rebuild_card_inventory()
 	local persist = persistence()
 	if persist and persist.RunSave then
@@ -77,7 +73,6 @@ function rebuild_card_inventory()
 	end
 end
 
---- Feeds each stored area blob back into its live counterpart.
 function restore_card_areas(save_table)
 	local persist = persistence()
 	if persist and persist.RunSave then
@@ -85,8 +80,6 @@ function restore_card_areas(save_table)
 	end
 end
 
---- Tears down all session UI/state (used when discarding a run or switching
---- profiles) and resets the stage machine.
 function Game:discard_run()
 	local domain = rawget(_G, "WORD_GAME")
 	local scope = domain and (domain.RunScope or (domain.Run and domain.Run.Scope))
@@ -125,7 +118,6 @@ function Game:discard_run()
 	self.STATE = -1
 end
 
---- Flags a progress write (delegates UDA assembly to WORD_GAME.Persistence).
 function Game:queue_progress_write()
 	local persist = persistence()
 	if persist and persist.Progress then

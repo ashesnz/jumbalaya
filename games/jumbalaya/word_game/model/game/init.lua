@@ -43,7 +43,7 @@ function Game:prep_stage(new_stage, new_state, new_game_obj)
 	self.PLAY_ATTACH = EaseNode{T={x = 0, y = 2.0, w = self.TILE_W - sidebar_w, h = self.TILE_H - 3.5}}
 	self.PLAY_ATTACH.states.drag.can = false
 	self.PLAY_ATTACH:set_container(self.ROOM)
-	if love.graphics and love.graphics.getWidth and love.graphics.getHeight then require("app.core.platform.window").sync_resize() end
+	if love.graphics and love.graphics.getWidth and love.graphics.getHeight then require("jumbalaya-engine.adapters.love2d.window").sync_resize() end
 end
 
 require "word_game.model.game.run"

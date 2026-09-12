@@ -8,13 +8,13 @@ require "word_game.model.game"
 require "word_game.model.cards"
 require "word_game.model.game.globals"
 Game()
-require "app.core.platform.display"
+require "jumbalaya-engine.adapters.love2d.display"
 require "word_game.ui.util.colour"
 require "word_game.ui.util.localize"
 require "word_game.model.persistence.progress"
 require "app.startup"
-require "app.core.persistence.save"
-require "app.core.session.loop"
+require "app.persistence.save"
+require "jumbalaya-engine.session.loop"
 
 require "word_game.ui.widgets"
 require "word_game.ui.cards.popups"
@@ -47,6 +47,8 @@ require "app.callbacks.registry"
 
 DEVTOOLS = require "devtools"
 
+require("app.session.draw_passes").install()
+
 g().consume_board_click = function()
 	if WORD_GAME_UI.FirstPlayTutorial.consume_click() then
 		return true
@@ -63,7 +65,12 @@ g().consume_board_click = function()
 	return false
 end
 
-local Updaters = require "app.core.session.updaters"
+local Updaters = require "jumbalaya-engine.session.updaters"
+local Runtime = require "word_game.ui.effects.runtime"
+
+Updaters.register('early_frame', 'canvas_juice', function(_, dt)
+	Runtime.update_canvas_juice(dt)
+end)
 Updaters.register('early_board', 'timeline_fuse', function(game, dt)
 	if game.STATE == game.STATES.TABLE_BOARD then
 		Timeline.update(dt)

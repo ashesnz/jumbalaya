@@ -1,8 +1,8 @@
+local shell = require("jumbalaya-engine.shell")
+local function g() return shell.game() end
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
 --[[
-	app/core/platform/display.lua - display enumeration, boot/perf timers,
+	jumbalaya-engine/adapters/love2d/display.lua - display enumeration, boot/perf timers,
 	and viewport fitting.
 
 	Display enumeration feeds the settings menu; it refreshes the stored
@@ -11,12 +11,9 @@ local function g() return BridgeRuntime.game() end
 	resizes.
 ]]
 
--- Upper bound on retained trend samples per checkpoint.
 local TREND_WINDOW = 400
+local checkpoints
 
---- Rebuilds the resolution option list for every connected display under the
---- given screenmode ('Windowed', 'Fullscreen', or 'Borderless').
----@return number index of the currently active entry in that list
 function enumerate_display_modes(screenmode, display)
 	display = display or g().SETTINGS.WINDOW.selcted_display or 1
 	screenmode = screenmode or g().SETTINGS.WINDOW.screenmode or 'Windowed'
@@ -29,11 +26,9 @@ function enumerate_display_modes(screenmode, display)
 
 	for i = 1, love.window.getDisplayCount() do
 		local record = {}
-		-- Desktop vs render dimensions work around a Windows OpenGL quirk
-		-- where the DPI scaling factor comes back wrong.
 		local desktop_w, desktop_h = love.window.getDesktopDimensions(i)
 		record.MONITOR_DIMS = love.window.getFullscreenModes(i)[1]
-		record.DPI_scale = 1 --math.floor((0.5*unscaled.w/desktop_w + 0.5*unscaled.h/desktop_h)*500 + 0.5)/500
+		record.DPI_scale = 1
 		record.screen_resolutions = {strings = {}, values = {}}
 		g().SETTINGS.WINDOW.DISPLAYS[i] = record
 		g().SETTINGS.WINDOW.display_names[i] = tostring(i)
@@ -43,7 +38,7 @@ function enumerate_display_modes(screenmode, display)
 		elseif screenmode == 'Windowed' then
 			record.screen_resolutions.strings[1] = '-'
 			record.screen_resolutions.values[1] = {w = 1280, h = 720}
-		else -- Borderless: a single entry pinned to the monitor's own size
+		else
 			local dims = record.MONITOR_DIMS
 			record.screen_resolutions.strings[1] =
 				tostring(dims.width / record.DPI_scale) .. ' X ' .. tostring(dims.height / record.DPI_scale)
@@ -54,10 +49,6 @@ function enumerate_display_modes(screenmode, display)
 	return active_index
 end
 
---- Lists every fullscreen mode that fits this monitor, scaled by its DPI
---- factor. Flags the entry matching the live window size when we are looking
---- at both the current and selected display.
----@return number index of the matching entry, 1 if unmatched
 function collect_fullscreen_options(record, current, display_index, wanted_display)
 	local dims = record.MONITOR_DIMS
 	for _, mode in ipairs(love.window.getFullscreenModes(display_index)) do
@@ -76,12 +67,6 @@ function collect_fullscreen_options(record, current, display_index, wanted_displ
 	return 1
 end
 
--- Perf overlay bookkeeping, keyed by stream ('update' or 'draw').
-local checkpoints
-
---- Records a named checkpoint on a perf stream and updates its rolling trend.
---- With `label` nil the stream resets; nothing happens unless the perf overlay
---- is enabled.
 function perf_checkpoint(label, stream, reset)
 	if not g().F_ENABLE_PERF_OVERLAY then return end
 
@@ -117,23 +102,16 @@ function perf_checkpoint(label, stream, reset)
 	cp.last_time = now
 end
 
---- Advances the boot loading screen to the next stage label.
 function boot_stage(label, next_label, progress)
 	g().LOADING = g().LOADING or {}
 	g().LOADING.label = label
 	g().LOADING.next = next_label
 	g().LOADING.progress = progress or 0
 
-	-- Never call love.graphics.present() here. Boot runs inside love.load(), and
-	-- presenting before the main loop breaks the iOS/Metal swap chain — the last
-	-- boot frames ("shared sprites" / "prep stage") can appear to loop while the
-	-- game keeps updating underneath.
 	g().ARGS = g().ARGS or {}
 	g().ARGS.bt = love.timer and love.timer.getTime and love.timer.getTime() or 0
 end
 
---- Refits the room transform after a resize so the board stays centred and
---- keeps its aspect ratio, then notifies the layout subsystems.
 function refit_viewport(w, h)
 	if not g().ROOM then return end
 
@@ -159,8 +137,12 @@ function refit_viewport(w, h)
 
 	g().ROOM_ORIG = {x = g().ROOM.T.x, y = g().ROOM.T.y, r = g().ROOM.T.r}
 
-	update_table_board_panel_attach()
-	apply_run_layout()
+	if update_table_board_panel_attach then
+		update_table_board_panel_attach()
+	end
+	if apply_run_layout then
+		apply_run_layout()
+	end
 	if g().notify_display_changed then
 		g().notify_display_changed()
 	end
