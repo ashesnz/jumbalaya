@@ -19,6 +19,7 @@ local perk_voucher = require("word_game.ui.perks.shared.voucher")
 local InputLock = facade.input_lock()
 local Match = facade.match()
 local run_state = facade.run_state()
+local Deck = facade.deck()
 
 local hud_definition
 local stamp_layout

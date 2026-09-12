@@ -90,11 +90,9 @@ Updaters.register('late_board', 'table_controls_stabilize', function(game, dt)
 end)
 Updaters.register('post_input', 'play_hold_redraw', function(game, dt)
 	WORD_GAME_UI.PlayHoldRedraw.update(dt)
-	end
 end)
 Updaters.register('post_input', 'card_inspect', function(game, dt)
 	WORD_GAME_UI.CardInspect.update(dt)
-	end
 end)
 Updaters.register('post_input', 'word_feedback_queue', function()
 	if g().ARGS and g().ARGS.word_feedback_queue then
@@ -103,9 +101,7 @@ Updaters.register('post_input', 'word_feedback_queue', function()
 end)
 Updaters.register('post_input', 'trade_card_fly', function(_, dt)
 	WORD_GAME_UI.TradeUI.step_card_fly(dt)
-	end
 end)
 Updaters.register('post_input', 'perk_stamp', function(_, dt)
 	WORD_GAME_UI.PerkStamp.update(dt)
-	end
 end)
