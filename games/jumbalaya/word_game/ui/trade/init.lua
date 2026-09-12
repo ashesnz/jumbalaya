@@ -5,6 +5,7 @@ local Funcs = require("app.callbacks.funcs")
 local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
+local Play = facade.jumble_play()
 
 local function trade_model()
 	return facade.trade()
@@ -232,11 +233,7 @@ local function continue_run()
 	if Funcs.get("close_overlay") then
 		Funcs.dispatch("close_overlay")
 	end
-	if WORD_GAME and WORD_GAME.Play then
-		WORD_GAME.Play.continue_after_dealer()
-		return
-	end
-	close_menu()
+	Play.continue_after_dealer()
 end
 
 finish_trade = function()

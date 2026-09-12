@@ -42,7 +42,7 @@ end
 
 function M.stamp_slot_height()
 	local count = 1
-	if WORD_GAME_UI and WORD_GAME_UI.PerkStamp and WORD_GAME_UI.PerkStamp.stack_count then
+	if WORD_GAME_UI.PerkStamp and WORD_GAME_UI.PerkStamp.stack_count then
 		count = WORD_GAME_UI.PerkStamp.stack_count()
 	end
 	return stamp_grid.panel_height_tiles(count)

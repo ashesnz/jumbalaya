@@ -16,6 +16,10 @@ local RunMode = require "word_game.model.run.mode"
 local game_access = require "word_game.model.game_access"
 local hand_size_cfg = require("word_game.model.hand_size")
 local Board = require("word_game.board")
+local Round = require("word_game.model.round")
+local Deck = require("word_game.model.cards.deck")
+local Back = require("word_game.model.cards.deck.back")
+local SaveSchema = require("word_game.model.persistence.save_schema")
 
 --- Tear down run-scoped UI and caches (delegates to RunScope).
 function Game:teardown_run_ui()
@@ -38,16 +42,12 @@ function Game:start_gameplay_board()
 
     self.STATE = self.STATES.TABLE_BOARD
     self.STATE_COMPLETE = true
-    if WORD_GAME and WORD_GAME.Round then
-        WORD_GAME.Round.init_run()
-    end
+    Round.init_run()
     local opening_deal = require "word_game.model.jumble_play.opening_deal"
     opening_deal.deal()
 
     Presentation.emit("sidebar_ensure")
-    if WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.sync_deck_count_display then
-        WORD_GAME.Deck.sync_deck_count_display()
-    end
+    Deck.sync_deck_count_display()
     -- Layout after HUD / hand controls exist so hand + placement anchors match.
     LayoutRequest.refresh()
 
@@ -91,7 +91,7 @@ function Game:start_run(args)
     local function has_invalid_starting_letter(saved_run)
         if not saved_run or not saved_run.cardAreas then return false end
         local allowed = {}
-        for _, letter in ipairs(WORD_GAME.Deck.STARTING_LETTERS or {}) do
+        for _, letter in ipairs(Deck.STARTING_LETTERS or {}) do
             allowed[letter] = (allowed[letter] or 0) + 1
         end
         local function inspect(value)
@@ -112,8 +112,8 @@ function Game:start_run(args)
         saveTable = nil
         delete_saved_run()
     end
-    if saveTable and WORD_GAME and WORD_GAME.Persistence and WORD_GAME.Persistence.SaveSchema then
-        if not WORD_GAME.Persistence.SaveSchema.prepare_loaded(saveTable) then
+    if saveTable then
+        if not SaveSchema.prepare_loaded(saveTable) then
             saveTable = nil
             delete_saved_run()
         end
@@ -148,7 +148,7 @@ function Game:start_run(args)
     RunScope.begin_run(game_table, { from_save = saveTable ~= nil })
     local run = game_access.get()
     run.modifiers = run.modifiers or {}
-    run.selected_back = WORD_GAME.Back.new(selected_back)
+    run.selected_back = Back.new(selected_back)
     run.selected_back_key = selected_back
 
     if ease_background_colour and self.C and self.C.GREEN then
@@ -230,8 +230,8 @@ function Game:start_run(args)
 
     self.letter_inventory = {}
 
-	if not saveTable and WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.populate_starting_deck then
-		WORD_GAME.Deck.populate_starting_deck()
+	if not saveTable then
+		Deck.populate_starting_deck()
 	end
 
     Presentation.emit("run_backgrounds")
@@ -255,9 +255,7 @@ function Game:start_run(args)
         self.STATE_COMPLETE = true
         LayoutRequest.refresh()
         Presentation.emit("sidebar_ensure")
-        if WORD_GAME and WORD_GAME.Round then
-            WORD_GAME.Round.restore_from_save()
-        end
+        Round.restore_from_save()
         self.INPUT.locks.load = nil
     end
 

@@ -1,7 +1,7 @@
 --[[
 	app/startup/dealing.lua - TABLE_BOARD layout accessor globals.
 
-	Thin adapters over WORD_GAME_UI.Layout used by the app layer (display,
+	Thin adapters over word_game.ui.layout used by the app layer (display,
 	window resize) and tests. Dealing and background staging live in the
 	game packages (word_game/model/jumble_play/opening_deal.lua and
 	word_game/ui/layout/backgrounds.lua).
@@ -25,45 +25,23 @@ function get_play_area_rect()
 end
 
 function get_table_board_sidebar_frac()
-	if WORD_GAME_UI.Layout then
-		return WORD_GAME_UI.Layout.sidebar_frac()
-	end
-	local g = game()
-	return (g.TABLE_BOARD_SIDEBAR_WIDTH or 3.0) / (g.TILE_W or 20)
+	return Layout.sidebar_frac()
 end
 
 function get_table_board_sidebar_width()
-	if WORD_GAME_UI.Layout then
-		return WORD_GAME_UI.Layout.sidebar_width()
-	end
-	local g = game()
-	return g.TABLE_BOARD_SIDEBAR_WIDTH or 3.0
+	return Layout.sidebar_width()
 end
 
 function get_side_panel_inner_width()
-	if WORD_GAME_UI.Layout then
-		return WORD_GAME_UI.Layout.inner_width()
-	end
-	return get_table_board_sidebar_width() * 0.92
+	return Layout.inner_width()
 end
 
 function update_table_board_panel_attach()
-	if WORD_GAME_UI.Layout then
-		WORD_GAME_UI.Layout.update_all()
-	end
+	Layout.update_all()
 end
 
 function get_table_felt_rect()
-	if WORD_GAME_UI.Layout then
-		return WORD_GAME_UI.Layout.felt_rect()
-	end
-	local g = game()
-	return {
-		x = 0.8,
-		y = 2.0,
-		w = g.TILE_W - 1.6,
-		h = g.TILE_H - 3.5,
-	}
+	return Layout.felt_rect()
 end
 
 function apply_run_layout()

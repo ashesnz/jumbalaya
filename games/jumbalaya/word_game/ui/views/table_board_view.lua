@@ -2,6 +2,7 @@
 	word_game/ui/views/table_board_view.lua - TABLE_BOARD store-backed pile rendering (Phase 6 / 10b).
 ]]
 
+
 local facade = require("word_game.ui.facade")
 local piles = facade.piles()
 local TableAreas = facade.table_areas()
@@ -97,7 +98,7 @@ function TableBoardView:should_render_pile_from_store(pile_id)
 	if not state or not state.piles then return false end
 	local pile = state.piles[pile_id]
 	if not pile or #pile == 0 then return false end
-	if pile_id == "draw" and WORD_GAME_UI and WORD_GAME_UI.TableDeck
+	if pile_id == "draw" and WORD_GAME_UI.TableDeck
 		and WORD_GAME_UI.TableDeck.uses_table_draw() then
 		return true
 	end
@@ -124,7 +125,7 @@ function TableBoardView:hand_rect()
 end
 
 function TableBoardView:draw_pile_rect()
-	local Layout = WORD_GAME_UI and WORD_GAME_UI.Layout
+	local Layout = WORD_GAME_UI.Layout
 	if Layout and Layout.deck_rect then
 		return Layout.deck_rect()
 	end

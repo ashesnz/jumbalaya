@@ -1,5 +1,6 @@
 --[[ word_game.board.jumble.geometry - Jumble row screen geometry and card alignment ]]
 
+local Jumble = require("word_game.model.jumble")
 local config = require "word_game.board.placement.config"
 local topology = require "word_game.model.jumble.slot_topology"
 local hand_size_cfg = require("word_game.model.hand_size")
@@ -14,10 +15,7 @@ local function row_slot_cap()
 end
 
 local function jumble_state()
-	if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.state then
-		return WORD_GAME.Jumble.state()
-	end
-	return nil
+	return Jumble.state()
 end
 
 local function is_boss_row(j)

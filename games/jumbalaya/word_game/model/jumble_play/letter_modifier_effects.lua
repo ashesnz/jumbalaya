@@ -16,7 +16,8 @@ local core = require("jumbalaya_core.rules.letter_modifier_effects")
 local M = {}
 
 local function now()
-	local engine = WORD_GAME and WORD_GAME.engine and WORD_GAME.engine()
+	local domain = package.loaded["word_game"]
+	local engine = domain and domain.engine and domain.engine()
 	if engine and engine.clock then
 		return engine.clock:get_time()
 	end

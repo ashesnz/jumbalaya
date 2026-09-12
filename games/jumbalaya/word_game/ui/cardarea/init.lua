@@ -11,6 +11,7 @@
 	centralized.
 ]]
 
+
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
@@ -22,6 +23,8 @@ local selection = require("word_game.ui.cardarea.selection")
 local relayout_mod = require("word_game.ui.cardarea.relayout")
 local chrome = require("word_game.ui.cardarea.chrome")
 local facade = require("word_game.ui.facade")
+local Deck = facade.deck()
+local Jumble = facade.jumble()
 
 local TYPE_HANDLERS = {
 	hand = hand,
@@ -120,8 +123,8 @@ end
 function CardPile:emplace(card, location, stay_flipped)
 	if table_board() and card and card.bonus_card and (self == runtime().dealt_letters or self == runtime().draw_pile) then
 		local origin_slot, origin_insert
-		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.slot_for_card then
-			origin_slot, origin_insert = WORD_GAME.Jumble.slot_for_card(card)
+		if Jumble.slot_for_card then
+			origin_slot, origin_insert = Jumble.slot_for_card(card)
 		end
 		facade.board_snap().restore_bonus_card(runtime().pattern_row, card, origin_slot, origin_insert)
 		return
@@ -133,8 +136,8 @@ function CardPile:emplace(card, location, stay_flipped)
 	end
 	if table_board() then
 		-- Pile art comes from the back sprite. Cards stay face-up and lerp into place.
-		if self == runtime().dealt_letters and WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.reveal_in_hand then
-			WORD_GAME.Deck.reveal_in_hand(card)
+		if self == runtime().dealt_letters and Deck.reveal_in_hand then
+			Deck.reveal_in_hand(card)
 		end
 	elseif card.facing == 'back' and self.config.type ~= 'discard' and self.config.type ~= 'deck' and not stay_flipped then
 		card:flip()

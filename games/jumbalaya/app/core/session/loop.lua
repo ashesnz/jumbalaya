@@ -2,6 +2,7 @@
 	app/core/session/loop.lua - Engine frame loop and state dispatch.
 ]]
 
+
 local save_queue = require "app.core.session.loop.save_queue"
 local debug_overlay = require "app.core.session.loop.debug_overlay"
 local Runtime = require "word_game.ui.effects.runtime"
@@ -104,7 +105,7 @@ function Game:update(dt)
 end
 
 function Game:draw_spotlight_overlay(overlay)
-	if self.STAGE == self.STAGES.RUN and self.STATE == self.STATES.TABLE_BOARD and WORD_GAME_UI and WORD_GAME_UI.TableBoard then
+	if self.STAGE == self.STAGES.RUN and self.STATE == self.STATES.TABLE_BOARD and WORD_GAME_UI.TableBoard then
 		WORD_GAME_UI.TableBoard.draw_spotlight_overlay(self, overlay)
 	end
 end
@@ -138,7 +139,7 @@ function Game:render_board_pass()
 	perf_checkpoint('primitives', 'draw')
 	perf_checkpoint('panels', 'draw')
 
-	if self.STAGE == self.STAGES.RUN and self.STATE == self.STATES.TABLE_BOARD and WORD_GAME_UI and WORD_GAME_UI.TableBoard then
+	if self.STAGE == self.STAGES.RUN and self.STATE == self.STATES.TABLE_BOARD and WORD_GAME_UI.TableBoard then
 		WORD_GAME_UI.TableBoard.draw_hud()
 		if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.draw then
 			WORD_GAME_UI.Sidebar.draw()
@@ -146,7 +147,7 @@ function Game:render_board_pass()
 		WORD_GAME_UI.TableBoard.draw_board(self)
 	end
 
-	if WORD_GAME_UI and WORD_GAME_UI.TableBoard then
+	if WORD_GAME_UI.TableBoard then
 		WORD_GAME_UI.TableBoard.draw_reward_passes()
 		WORD_GAME_UI.TableBoard.draw_attention_passes(self)
 	end
@@ -203,7 +204,7 @@ function Game:render_chrome_pass()
 		self.ALERT_ON_SCREEN = true
 	end
 
-	if self.STAGE == self.STAGES.RUN and self.STATE == self.STATES.TABLE_BOARD and WORD_GAME_UI and WORD_GAME_UI.TableBoard then
+	if self.STAGE == self.STAGES.RUN and self.STATE == self.STATES.TABLE_BOARD and WORD_GAME_UI.TableBoard then
 		WORD_GAME_UI.TableBoard.draw_card_interaction(self)
 	end
 

@@ -7,6 +7,7 @@
 ]]
 
 return function(M)
+local Jumble = require("word_game.model.jumble")
 local round = require("word_game.model.round")
 local opening_deal = require("word_game.model.jumble_play.opening_deal")
 local rules = require("word_game.model.jumble_play.jumble_rules")
@@ -14,7 +15,7 @@ local game_access = require("word_game.model.game_access")
 
 function M.play_jumble_word(opts)
 	opts = opts or {}
-	local jumble = WORD_GAME and WORD_GAME.Jumble
+	local jumble = Jumble
 	local j = jumble and jumble.state()
 	return rules.evaluate_play(jumble, j)
 end

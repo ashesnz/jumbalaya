@@ -5,6 +5,7 @@
 	score banner, token pile, and celebration effects stay prominent.
 ]]
 
+
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
 local GameRT = require("word_game.ui.util.game_runtime")

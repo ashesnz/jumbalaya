@@ -4,6 +4,8 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
+local Deck = facade.deck()
+local Jumble = facade.jumble()
 local game_access = facade.game_access()
 local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 local CardMotion = require("word_game.ui.effects.card_motion")
@@ -98,8 +100,8 @@ local function handle_after_clear(play_module, opts, outcome)
 		return
 	end
 	if outcome == "boss_hand_advanced" then
-		if WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.destroy_boss_cards then
-			WORD_GAME.Deck.destroy_boss_cards()
+		if Deck.destroy_boss_cards then
+			Deck.destroy_boss_cards()
 		end
 		if WORD_GAME_UI.PlayEffects and WORD_GAME_UI.PlayEffects.restore_boss_layout then
 			WORD_GAME_UI.PlayEffects.restore_boss_layout()
@@ -112,8 +114,8 @@ local function handle_after_clear(play_module, opts, outcome)
 	end
 	if outcome == "boss_next" then
 		local wr = game_access.word_round()
-		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.begin_boss_word then
-			WORD_GAME.Jumble.begin_boss_word(wr, function()
+		if Jumble.begin_boss_word then
+			Jumble.begin_boss_word(wr, function()
 				set_score_animating(false)
 			end)
 		end
@@ -177,8 +179,6 @@ function M.install(play_module)
 		end
 
 		if not opts.boss_cleared
-			and WORD_GAME
-			and WORD_GAME_UI.TokenReward
 			and WORD_GAME_UI.TokenReward.try_award(play_clear_sequence) then
 			return
 		end
@@ -231,7 +231,7 @@ function M.install(play_module)
 	function play_module.jumble_next(opts)
 		opts = opts or {}
 		play_effects.present_jumble_next(
-			WORD_GAME and WORD_GAME.Jumble,
+			Jumble,
 			game_access.word_round(),
 			opts
 		)

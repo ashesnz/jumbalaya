@@ -4,6 +4,7 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
+local Jumble = facade.jumble()
 local game_access = facade.game_access()
 local hand_shuffle_anim = require("word_game.ui.table.controls.shuffle_anim")
 local hand_placement_recall_anim = require("word_game.ui.table.controls.placement_recall_anim")
@@ -41,7 +42,7 @@ local function placement_area()
 end
 
 local function jumble_active()
-	return WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active()
+	return Jumble.is_active()
 end
 
 local function bonus_stack_ui()
@@ -72,8 +73,8 @@ function M.recall_placement_cards(opts)
 	if jumble_active() then
 		local wr = game_access.word_round()
 		if wr and wr.jumble and wr.jumble.slots then
-			WORD_GAME.Jumble.clear_blank_cards(wr.jumble.slots)
-			WORD_GAME.Jumble.sync_placement_cards(wr.jumble.slots)
+			Jumble.clear_blank_cards(wr.jumble.slots)
+			Jumble.sync_placement_cards(wr.jumble.slots)
 		end
 		if runtime().pattern_row and runtime().pattern_row.jumble_geometry then
 			runtime().pattern_row.jumble_geometry.relayout(runtime().pattern_row)

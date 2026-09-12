@@ -5,10 +5,12 @@
 	Classic: banked stage score becomes tokens (1 point = 1 token).
 ]]
 
+
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
+local Timeline = facade.timeline()
 local game_access = facade.game_access()
 local Layout = require("word_game.ui.layout")
 local round_config = require("jumbalaya_core.config.gameplay.round")
@@ -88,8 +90,8 @@ function M.earned_amount()
 	if RunMode.is_classic() then
 		return math.floor(banked_score())
 	end
-	if WORD_GAME and WORD_GAME.Timeline then
-		return math.floor(WORD_GAME.Timeline.seconds_remaining())
+	if Timeline then
+		return math.floor(Timeline.seconds_remaining())
 	end
 	return 0
 end
@@ -111,12 +113,12 @@ function M.capture_reward()
 		return
 	end
 	if captured_time ~= nil then return end
-	if WORD_GAME and WORD_GAME.Timeline then
-		captured_time = WORD_GAME.Timeline.seconds_remaining()
+	if Timeline then
+		captured_time = Timeline.seconds_remaining()
 		if captured_time == math.huge then
 			captured_time = 0
 		end
-		WORD_GAME.Timeline.freeze(captured_time)
+		Timeline.freeze(captured_time)
 	elseif WORD_GAME_UI.TimelineTimer then
 		local tt = WORD_GAME_UI.TimelineTimer
 		captured_time = tt.time_remaining or 0

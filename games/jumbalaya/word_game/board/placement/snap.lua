@@ -10,9 +10,11 @@ local piles = require("word_game.model.piles")
 local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
 
+local PlacementWord = require("word_game.model.jumble.placement_word")
+local Jumble = require("word_game.model.jumble")
+
 local function placement_word()
-	return (WORD_GAME and WORD_GAME.PlacementWord)
-		or require("word_game.model.jumble.placement_word")
+	return PlacementWord
 end
 local bonus_gutter = require "word_game.board.bonus.gutter"
 
@@ -63,7 +65,7 @@ function M.point_in_hand(x, y)
 end
 
 local function bonus_origin_slot(card)
-	local jumble = WORD_GAME and WORD_GAME.Jumble
+	local jumble = Jumble
 	if jumble and jumble.slot_for_card then
 		return jumble.slot_for_card(card)
 	end
@@ -81,7 +83,7 @@ function M.restore_bonus_card(session, card, origin_slot, origin_insert)
 		if draw.remove_card then draw:remove_card(card) else M.drop_from_area_list(draw, card) end
 	end
 
-	local jumble = WORD_GAME and WORD_GAME.Jumble
+	local jumble = Jumble
 	if origin_slot and jumble and jumble.assign_card_to_blank then
 		if jumble.assign_card_to_blank(origin_slot, card, origin_insert) then
 			if session and session.area then
@@ -134,7 +136,7 @@ local function card_in_jumble_slots(j, card)
 end
 
 function M.place_in_row(session, card)
-	local jumble = WORD_GAME and WORD_GAME.Jumble
+	local jumble = Jumble
 	if not jumble or not jumble.is_active() then return false end
 	local j = jumble.state()
 	if j and j.boss_puzzle_hidden then return false end
@@ -208,7 +210,7 @@ function M.place_in_row(session, card)
 end
 
 function M.return_to_hand(session, card)
-	local jumble = WORD_GAME and WORD_GAME.Jumble
+	local jumble = Jumble
 	if not jumble or not jumble.is_active() then return false end
 	local dealt = TableAreas.dealt_letters()
 	if BonusStack.is_bonus_card(card) then
@@ -243,7 +245,7 @@ end
 ---@return table effects Optional UI reactions for the caller (e.g. hand_shuffle_sync).
 function M.try_snap(session, card)
 	local effects = {}
-	if not (WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active()) then
+	if not (Jumble and Jumble.is_active()) then
 		return effects
 	end
 
@@ -253,7 +255,7 @@ function M.try_snap(session, card)
 	local cx = card.T.x + card.T.w / 2
 	local cy = card.T.y + card.T.h / 2
 	local in_row = layout.point_in_area(session, cx, cy)
-	local j = WORD_GAME.Jumble.state()
+	local j = Jumble.state()
 	local from_blank = card_in_jumble_slots(j, card)
 
 	if BonusStack.is_bonus_card(card) then
@@ -278,7 +280,7 @@ function M.try_snap(session, card)
 
 		local function leave_placement_slot()
 			if from_blank or M.card_on_placement(session, card) then
-				WORD_GAME.Jumble.remove_card_from_blanks(card)
+				Jumble.remove_card_from_blanks(card)
 			end
 		end
 
@@ -293,7 +295,7 @@ function M.try_snap(session, card)
 			if BonusStack.is_active() and cx < area.T.x then
 				bonus_gutter.return_card(card)
 				if from_blank or M.card_on_placement(session, card) then
-					WORD_GAME.Jumble.remove_card_from_blanks(card)
+					Jumble.remove_card_from_blanks(card)
 				end
 				if session and session.area then
 					jumble_geometry.relayout(session)

@@ -73,8 +73,20 @@ function M.feedback()
 	return load("word_game.model.feedback")
 end
 
+function M.jumble()
+	return load("word_game.model.jumble")
+end
+
 function M.jumble_play()
 	return (WORD_GAME and WORD_GAME.Play) or load("word_game.model.jumble_play")
+end
+
+function M.timeline()
+	return load("word_game.model.run.timeline")
+end
+
+function M.back()
+	return load("word_game.model.cards.deck.back")
 end
 
 function M.slot_topology()
@@ -86,8 +98,7 @@ function M.bonus_stack()
 end
 
 function M.bonus_stack_ui()
-	local ui = rawget(_G, "WORD_GAME_UI")
-	return (ui and ui.BonusStackUI) or load("word_game.ui.perks.bonus_stack")
+	return load("word_game.ui.perks.bonus_stack")
 end
 
 function M.dissolve_fx()

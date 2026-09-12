@@ -26,8 +26,8 @@ local function has_event_manager()
 end
 
 function M.present_boss_word(wr, on_complete)
-	local jumble = WORD_GAME and WORD_GAME.Jumble
-	local deck = WORD_GAME and WORD_GAME.Deck
+	local jumble = Jumble
+	local deck = Deck
 	if not wr or not jumble or not deck then
 		if on_complete then on_complete() end
 		return

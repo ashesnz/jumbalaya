@@ -7,6 +7,10 @@
 ]]
 
 local InputLock = require("word_game.model.run.input_lock")
+
+local function jumble()
+	return package.loaded["word_game.model.jumble"]
+end
 local RunMode = require("word_game.model.run.mode")
 local state = require("word_game.model.run.state")
 local invariant = require("word_game.model.invariant")
@@ -89,10 +93,10 @@ function M.preview_puzzle_total_after_word(j, word, used_cards, opts)
 end
 
 local function placement_preview_word(j)
-	local jumble = WORD_GAME and WORD_GAME.Jumble
+	local jumble_api = jumble()
 	return placement_preview.preview_word(j and j.slots, {
 		placed_count = j and M.placed_count(j.slots) or 0,
-		build_word = jumble and jumble.build_placement_preview_word,
+		build_word = jumble_api and jumble_api.build_placement_preview_word,
 		collect_used_cards = M.collect_used_cards,
 		puzzle_words = j and j.puzzle_words,
 	})

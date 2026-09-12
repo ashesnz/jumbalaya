@@ -5,7 +5,9 @@
 	Classic: score progress bar toward the stage target.
 ]]
 
+
 local facade = require("word_game.ui.facade")
+local Timeline = facade.timeline()
 local game_access = facade.game_access()
 local StageLabel = require("word_game.ui.score_banner.stage_label")
 local timer_layout = require("word_game.ui.perks.timeline_timer.layout")
@@ -70,8 +72,8 @@ end
 function M.reset(duration)
 	M._reset_intro_visibility()
 	duration = duration or 60.0
-	if WORD_GAME and WORD_GAME.Timeline and not M.is_progress_mode() then
-		WORD_GAME.Timeline.reset(duration)
+	if Timeline and not M.is_progress_mode() then
+		Timeline.reset(duration)
 		M.sync_from_model()
 	else
 		M.TOTAL_DURATION = duration

@@ -4,6 +4,7 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
+local Jumble = facade.jumble()
 local topology = facade.slot_topology()
 
 local M = {}
@@ -35,7 +36,7 @@ function M.set_anim(state)
 end
 
 function M.draw(session)
-	local j = WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.state()
+	local j = Jumble.state()
 	if not j or not j.slots or j.boss_puzzle_hidden then return end
 
 	local geo = session.jumble_geometry

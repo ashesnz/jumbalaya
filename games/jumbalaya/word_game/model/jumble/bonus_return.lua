@@ -6,6 +6,7 @@
 	Presentation: bonus_card_return
 ]]
 
+local BonusGutter = require("word_game.board.bonus.gutter")
 local Presentation = require("word_game.model.presentation")
 
 local M = {}
@@ -20,7 +21,7 @@ function M.return_card(card)
 	if handled then
 		return true
 	end
-	local gutter = WORD_GAME and WORD_GAME.Board and WORD_GAME.Board.BonusGutter
+	local gutter = BonusGutter
 	if gutter and gutter.return_card then
 		return gutter.return_card(card)
 	end

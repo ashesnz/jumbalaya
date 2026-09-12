@@ -1,6 +1,7 @@
 --[[ word_game/ui/table/controls/placement_recall_anim.lua - Slide placement-row cards back to hand ]]
 
 local facade = require("word_game.ui.facade")
+local Jumble = facade.jumble()
 local game_access = facade.game_access()
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
@@ -39,20 +40,20 @@ local function bonus_stack_ui()
 end
 
 local function sync_placement_from_jumble()
-	if not (WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active()) then return end
+	if not (Jumble.is_active()) then return end
 	local wr = game_access.word_round()
 	local slots = wr and wr.jumble and wr.jumble.slots
-	if slots and WORD_GAME.Jumble.sync_placement_cards then
-		WORD_GAME.Jumble.sync_placement_cards(slots)
+	if slots and Jumble.sync_placement_cards then
+		Jumble.sync_placement_cards(slots)
 	end
 end
 
 local function clear_jumble_slots()
-	if not (WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active()) then return end
+	if not (Jumble.is_active()) then return end
 	local wr = game_access.word_round()
 	local slots = wr and wr.jumble and wr.jumble.slots
-	if slots and WORD_GAME.Jumble.clear_blank_cards then
-		WORD_GAME.Jumble.clear_blank_cards(slots)
+	if slots and Jumble.clear_blank_cards then
+		Jumble.clear_blank_cards(slots)
 	end
 end
 
@@ -215,11 +216,11 @@ local function finish_recall()
 		end
 	end
 
-	if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active() then
+	if Jumble.is_active() then
 		local wr = game_access.word_round()
 		local slots = wr and wr.jumble and wr.jumble.slots
-		if slots and WORD_GAME.Jumble.sync_placement_cards then
-			WORD_GAME.Jumble.sync_placement_cards(slots)
+		if slots and Jumble.sync_placement_cards then
+			Jumble.sync_placement_cards(slots)
 		end
 		if runtime().pattern_row and runtime().pattern_row.jumble_geometry then
 			runtime().pattern_row.jumble_geometry.relayout(runtime().pattern_row)

@@ -4,11 +4,13 @@
 	Hold for 5s: yellow ring drains clockwise from 12 o'clock, then hand cards
 	slide down off screen and 7 new cards deal in one at a time from the deck.
 ]]
+
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local facade = require("word_game.ui.facade")
+local Deck = facade.deck()
 local game_access = facade.game_access()
 local InputLock = facade.input_lock()
 local perk_effects = facade.perks_effects()
@@ -261,11 +263,7 @@ local function trigger_redraw()
 	safe_sound("whoosh1", 0.9, 0.75)
 
 	discard_hand_down(function()
-		if not (WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.deal_into_hand) then
-			finish_redraw()
-			return
-		end
-		WORD_GAME.Deck.deal_into_hand(facade.hand_size().get(), finish_redraw)
+		Deck.deal_into_hand(facade.hand_size().get(), finish_redraw)
 	end)
 end
 

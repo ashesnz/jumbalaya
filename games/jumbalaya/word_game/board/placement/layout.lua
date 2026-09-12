@@ -1,5 +1,6 @@
 --[[ word_game.board.placement.layout - Jumble placement row geometry and alignment. ]]
 
+local Jumble = require("word_game.model.jumble")
 local config = require "word_game.board.placement.config"
 local jumble_geometry = require "word_game.board.jumble.geometry"
 
@@ -28,8 +29,7 @@ function M.apply_screen_position(session)
 	area.T.h = M.area_height(ctx)
 	area.T.x = felt.x + (felt.w - area.T.w) / 2
 
-	local j = WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.state
-		and WORD_GAME.Jumble.state()
+	local j = Jumble.state()
 	if jumble_geometry.is_boss_row(j) and g().dealt_letters then
 		local gap = math.max(0.28, ctx:card_h() * 0.22)
 		area.T.y = g().dealt_letters.T.y - area.T.h - gap

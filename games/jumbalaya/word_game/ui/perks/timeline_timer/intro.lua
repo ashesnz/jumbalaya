@@ -1,3 +1,5 @@
+local facade = require("word_game.ui.facade")
+local Timeline = facade.timeline()
 --[[ word_game/ui/perks/timeline_timer/intro.lua - Countdown intro scale animation ]]
 
 local StageLabel = require("word_game.ui.score_banner.stage_label")
@@ -45,8 +47,8 @@ return function(M, deps)
 	end
 
 	function M.arm_boss_countdown(duration)
-		if WORD_GAME and WORD_GAME.Timeline then
-			WORD_GAME.Timeline.arm_boss(duration or 60.0)
+		if Timeline then
+			Timeline.arm_boss(duration or 60.0)
 		end
 		sync_from_model()
 		M.sparks = {}

@@ -4,6 +4,8 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
+local Play = facade.jumble_play()
+local Jumble = facade.jumble()
 local RunMode = facade.run_mode()
 local definition = require("word_game.ui.table.controls.definition")
 local layout = require("word_game.ui.table.controls.layout")
@@ -16,7 +18,7 @@ animate.bind_layout(layout)
 local M = {}
 
 local function jumble_active()
-	return WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active()
+	return Jumble.is_active()
 end
 
 function M.play_button_uie()
@@ -35,7 +37,7 @@ function M.placement_has_cards()
 		return true
 	end
 	if jumble_active() then
-		local j = WORD_GAME.Jumble.state()
+		local j = Jumble.state()
 		if j and j.slots then
 			for _, slot in ipairs(j.slots) do
 				if slot.kind == "blank" and slot.card then
@@ -177,9 +179,7 @@ end
 
 --- Advance after a cleared jumble hand (Time Run proceed).
 function M.jumble_next()
-	if WORD_GAME and WORD_GAME.Play then
-		WORD_GAME.Play.jumble_next()
-	end
+	Play.jumble_next()
 	M.sync()
 end
 

@@ -20,13 +20,13 @@ local handlers = {
 
 local M = {}
 
-function M.install(ui, domain)
+function M.install(word_game_ui, domain)
 	Presentation.clear()
-	ui = ui or rawget(_G, "WORD_GAME_UI") or {}
-	domain = domain or rawget(_G, "WORD_GAME") or {}
+	word_game_ui = word_game_ui or rawget(_G, "WORD_GAME_UI") or {}
+	domain = domain or rawget(_G, "WORD_GAME") or require("word_game")
 
 	local ctx = {
-		ui = ui,
+		ui = word_game_ui,
 		domain = domain,
 		Presentation = Presentation,
 		Funcs = Funcs,
@@ -38,7 +38,7 @@ function M.install(ui, domain)
 	CardFocus.install({
 		hand_area = TableAreas.dealt_letters,
 		bonus_stack_contains = function(node)
-			return ui.BonusStackUI and ui.BonusStackUI.contains(node)
+			return word_game_ui.BonusStackUI and word_game_ui.BonusStackUI.contains(node)
 		end,
 	})
 

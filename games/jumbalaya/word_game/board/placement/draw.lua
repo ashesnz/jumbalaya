@@ -1,5 +1,6 @@
 --[[ word_game.board.placement.draw - Full-width placement row background. ]]
 
+local Jumble = require("word_game.model.jumble")
 local config = require "word_game.board.placement.config"
 local layout = require "word_game.board.placement.layout"
 
@@ -14,7 +15,7 @@ local BACKDROP_LINE_ALPHA = 0.28
 function M.shadows(session)
 	local area = session.area
 	if not area or not area.cards then return end
-	local j = WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.state and WORD_GAME.Jumble.state()
+	local j = Jumble.state()
 	if j and j.boss_puzzle_hidden then return end
 
 	local px, py, pw, ph = layout.row_pixels(session)

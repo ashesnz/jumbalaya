@@ -99,7 +99,8 @@ function M.try_award_stage_clear_bonus(j)
 end
 
 local function clock_now()
-	local engine = WORD_GAME and WORD_GAME.engine and WORD_GAME.engine()
+	local domain = package.loaded["word_game"]
+	local engine = domain and domain.engine and domain.engine()
 	if engine and engine.clock then
 		return engine.clock:get_time()
 	end

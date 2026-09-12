@@ -1,6 +1,7 @@
 --[[ word_game/ui/menu/animate.lua - Title garden pan and main menu open lifecycle ]]
 
 local facade = require("word_game.ui.facade")
+local Back = facade.back()
 local game_access = facade.game_access()
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
@@ -84,7 +85,7 @@ function M.open_main_menu(self, change_context)
 
 	self:prep_stage(runtime().STAGES.MAIN_MENU, runtime().STATES.MENU, true)
 		game_access.mutate(function(game)
-		game.selected_back = WORD_GAME.Back.new(runtime().LETTERS.centers.deck_alpha)
+		game.selected_back = Back.new(runtime().LETTERS.centers.deck_alpha)
 	end)
 
 	if Funcs.get("change_shadows") and runtime().SETTINGS and runtime().SETTINGS.GRAPHICS then

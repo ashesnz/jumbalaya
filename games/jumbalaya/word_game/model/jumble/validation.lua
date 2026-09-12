@@ -6,6 +6,8 @@
 	Presentation: none
 ]]
 
+local deck_config = require("jumbalaya_core.cards.deck_config")
+local BonusStack = require("word_game.model.jumble.bonus_stack")
 local live_game = require("word_game.model.live_game")
 
 return function(M)
@@ -20,7 +22,7 @@ local answer_cache = { signature = nil, words = nil }
 
 local function starting_letter_counts()
 	local counts = {}
-	local letters = (WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.STARTING_LETTERS) or {}
+	local letters = deck_config.STARTING_LETTERS or {}
 	for _, letter in ipairs(letters) do
 		counts[letter] = (counts[letter] or 0) + 1
 	end
@@ -129,7 +131,7 @@ function M.debug_answer_cards()
 			cards[#cards + 1] = card
 		end
 	end
-	local bonus_stack = WORD_GAME and WORD_GAME.BonusStack
+	local bonus_stack = BonusStack
 	if bonus_stack and bonus_stack.is_active and bonus_stack.is_active() then
 		for _, card in ipairs(bonus_stack.cards() or {}) do
 			if card and not card.REMOVED then

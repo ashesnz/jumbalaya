@@ -5,6 +5,7 @@
 	horizontal perk imprint on the side panel.
 ]]
 
+
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 

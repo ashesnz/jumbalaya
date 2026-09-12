@@ -5,6 +5,7 @@
 	placement row, play button, and score slider. Click anywhere to advance.
 ]]
 
+
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 

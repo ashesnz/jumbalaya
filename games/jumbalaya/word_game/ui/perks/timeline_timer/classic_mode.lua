@@ -1,6 +1,7 @@
 --[[ word_game/ui/perks/timeline_timer/classic_mode.lua - Classic score slider HUD ]]
 
 local facade = require("word_game.ui.facade")
+local Timeline = facade.timeline()
 local game_access = facade.game_access()
 local RunMode = facade.run_mode()
 local StageLabel = require("word_game.ui.score_banner.stage_label")
@@ -208,8 +209,8 @@ return function(M, deps)
 
 	function M.reset_progress(target)
 		M._reset_intro_visibility()
-		if WORD_GAME and WORD_GAME.Timeline then
-			WORD_GAME.Timeline.clear_boss_override()
+		if Timeline then
+			Timeline.clear_boss_override()
 		end
 		M.is_active = false
 		M.frozen_for_reward = false

@@ -2,6 +2,7 @@
 	word_game/ui/sidebar/stage_button.lua - End Run / Next sidebar button (classic stage goal).
 ]]
 
+
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 

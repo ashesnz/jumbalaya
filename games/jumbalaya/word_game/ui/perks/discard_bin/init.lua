@@ -5,6 +5,7 @@
 	voucher imprint; the counter overlays the voucher art.
 ]]
 
+
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
@@ -278,7 +279,7 @@ function M.try_discard(card)
 	local cx = card.T.x + card.T.w * 0.5
 	local cy = card.T.y + card.T.h * 0.5
 	if not M.point_in_discard_voucher(cx, cy) then return false end
-	local deck = WORD_GAME and WORD_GAME.Deck
+	local deck = Deck
 	if not deck or not deck.discard_from_hand then return false end
 	return deck.discard_from_hand(card)
 end

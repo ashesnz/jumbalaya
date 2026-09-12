@@ -7,6 +7,8 @@
 ]]
 
 return function(M)
+local Jumble = require("word_game.model.jumble")
+local Deck = require("word_game.model.cards.deck")
 local round = require("word_game.model.round")
 local round_config = require("jumbalaya_core.config.gameplay.round")
 local opening_deal = require("word_game.model.jumble_play.opening_deal")
@@ -28,16 +30,12 @@ function M.prepare_hand_clear(opts)
 	end
 	if not opts.boss_cleared
 		and j and j.slots
-		and WORD_GAME and WORD_GAME.Jumble
-		and WORD_GAME.Jumble.clear_blank_cards then
-		WORD_GAME.Jumble.clear_blank_cards(j.slots)
+		and Jumble.clear_blank_cards then
+		Jumble.clear_blank_cards(j.slots)
 	end
 	if not opts.boss_cleared
-		and WORD_GAME and WORD_GAME.Deck
-		and WORD_GAME.Deck.is_jumble_deck
-		and WORD_GAME.Deck.is_jumble_deck()
-		and WORD_GAME.Deck.reset_table_deck then
-		WORD_GAME.Deck.reset_table_deck()
+		and Deck.is_jumble_deck() then
+		Deck.reset_table_deck()
 	end
 	if wr and round_config.is_boss_word_hand(wr.set, wr.hand_index) and j
 		and not j.boss_word_active and not opts.boss_cleared then
@@ -96,9 +94,7 @@ function M.advance_after_dealer()
 	if result == "win" then
 		return "win"
 	end
-	if WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.reset_table_deck then
-		WORD_GAME.Deck.reset_table_deck()
-	end
+	Deck.reset_table_deck()
 	opening_deal.deal()
 	return "next"
 end

@@ -14,6 +14,7 @@
 	Presentation: none — CardPile relayout triggered by callers
 ]]
 
+local BonusStack = require("word_game.model.jumble.bonus_stack")
 local BridgeRuntime = require("app.runtime")
 local store_sync = require("app.bootstrap.store_sync")
 
@@ -49,7 +50,7 @@ end
 
 local function snapshot_bonus()
 	local out = {}
-	local bonus = rawget(_G, "WORD_GAME") and WORD_GAME.BonusStack
+	local bonus = BonusStack
 	if bonus and bonus.cards then
 		for index, card in ipairs(bonus.cards() or {}) do
 			if card and not card.REMOVED then

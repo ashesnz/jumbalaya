@@ -8,13 +8,18 @@
 
 local core = require("jumbalaya_core.jumble.slot_topology")
 
+local function jumble_module()
+	return package.loaded["word_game.model.jumble"]
+end
+
 local M = {}
 for key, value in pairs(core) do
 	M[key] = value
 end
 
 function M.span_active()
-	local j = WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.state and WORD_GAME.Jumble.state()
+	local jumble = jumble_module()
+	local j = jumble and jumble.state()
 	return core.span_active(j)
 end
 

@@ -7,6 +7,10 @@
 ]]
 
 local live_game = require("word_game.model.live_game")
+
+local function jumble()
+	return package.loaded["word_game.model.jumble"]
+end
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local card_motion_request = require("word_game.model.card_motion_request")
 local hand_size_cfg = require("word_game.model.hand_size")
@@ -135,9 +139,8 @@ return function(context)
 			live_game().dealt_letters:hard_set_cards()
 		end
 		context.commit_piles({ "hand", "draw", "discard" })
-		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.ensure_playable_puzzle then
-			WORD_GAME.Jumble.ensure_playable_puzzle()
-		end
+		local j = jumble()
+		if j and j.ensure_playable_puzzle then j.ensure_playable_puzzle() end
 		live_game().ARGS = live_game().ARGS or {}
 		live_game().ARGS.pending_layout = true
 		if on_complete then on_complete() end
@@ -146,11 +149,12 @@ return function(context)
 
 	function M.deal_jumble_hand()
 		if not live_game().dealt_letters then return end
-		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.clear_blank_cards then
+		local jumble_api = jumble()
+		if jumble_api and jumble_api.clear_blank_cards then
 			local wr = game_access.word_round()
 			local j = wr and wr.jumble
 			if j and j.slots then
-				WORD_GAME.Jumble.clear_blank_cards(j.slots)
+				jumble_api.clear_blank_cards(j.slots)
 			end
 		end
 		voucher_discard.reset()
@@ -168,9 +172,8 @@ return function(context)
 		live_game().dealt_letters:snap_VT()
 		live_game().dealt_letters:hard_set_cards()
 		context.commit_piles({ "hand", "draw", "pattern" })
-		if WORD_GAME and WORD_GAME.Jumble then
-			WORD_GAME.Jumble.ensure_playable_puzzle()
-		end
+		local j = jumble()
+		if j and j.ensure_playable_puzzle then j.ensure_playable_puzzle() end
 	end
 
 	function M.draw_jumble_replacement()

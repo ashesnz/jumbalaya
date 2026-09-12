@@ -14,6 +14,7 @@
 	  :draw_run_pass(game)  -> board draw pass (area + placed cards)
 ]]
 
+local Jumble = require("word_game.model.jumble")
 local PlacementContext = require "word_game.board.placement.context"
 local Kind = require "jumbalaya-engine.object"
 local game_access = require("word_game.model.game_access")
@@ -113,7 +114,7 @@ end
 function PlacementTable:draw_run_pass(game)
 	if not self.area or not self.area.cards then return end
 
-	local j = WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.state and WORD_GAME.Jumble.state()
+	local j = Jumble.state()
 	if j and j.boss_puzzle_hidden then return end
 
 	love.graphics.push()

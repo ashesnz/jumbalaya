@@ -6,6 +6,7 @@
 	Presentation: hand_cleared, jumble_hand_started, boss_word_reveal
 ]]
 
+local Deck = require("word_game.model.cards.deck")
 local live_game = require("word_game.model.live_game")
 
 return function(M)
@@ -119,12 +120,12 @@ function M.begin_boss_word(wr, on_complete)
 	if Presentation.emit("boss_word_begin", wr, on_complete) then
 		return true
 	end
-	if M.prepare_boss_word(wr) and WORD_GAME and WORD_GAME.Deck then
+	if M.prepare_boss_word(wr) then
 		local letters = M.boss_hand_letters(
 			wr.jumble.pending_boss.boss_word,
 			wr.jumble.pending_boss.pattern
 		)
-		WORD_GAME.Deck.deal_boss_hand(letters, on_complete)
+		Deck.deal_boss_hand(letters, on_complete)
 		return true
 	end
 	return false

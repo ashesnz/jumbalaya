@@ -2,6 +2,7 @@
 	word_game/ui/cardarea/deck.lua - Deck CardPile type behaviour.
 ]]
 
+
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
@@ -47,7 +48,7 @@ function M.relayout(self)
 end
 
 local function store_renders_draw()
-	local board = WORD_GAME_UI and WORD_GAME_UI.TableBoard
+	local board = WORD_GAME_UI.TableBoard
 	local view = board and board.table_board_view and board.table_board_view()
 	return view and view:should_render_draw_from_store()
 end

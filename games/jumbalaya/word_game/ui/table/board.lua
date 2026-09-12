@@ -2,6 +2,10 @@
 	word_game/ui/table/board.lua - TABLE_BOARD update and draw coordinator.
 ]]
 
+
+local facade = require("word_game.ui.facade")
+local Jumble = facade.jumble()
+local Play = facade.jumble_play()
 local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
@@ -24,7 +28,7 @@ local play_effects = require("word_game.ui.play_effects")
 local function ensure_placement_pattern_overlay(pt)
 	if not pt or pt.draw_pattern_overlay then return end
 	pt.draw_pattern_overlay = function(session)
-		if not (WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active()) then return end
+		if not (Jumble.is_active()) then return end
 		jumble_fixed_letters.draw(session)
 	end
 end
@@ -68,10 +72,10 @@ function M.update(game, dt)
 		if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
 			WORD_GAME_UI.Sidebar.sync_visibility()
 		end
-		if WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active() then
-			if WORD_GAME.Jumble.update_timer() then
-				if WORD_GAME.Play and WORD_GAME.Play.end_jumble_hand then
-					WORD_GAME.Play.end_jumble_hand()
+		if Jumble.is_active() then
+			if Jumble.update_timer() then
+				if Play.end_jumble_hand then
+					Play.end_jumble_hand()
 					if play_effects.present_end_jumble_sidebar then
 						play_effects.present_end_jumble_sidebar()
 					end
@@ -364,7 +368,7 @@ end
 
 function M.draw_debug_answers()
 	local text = "AVAILABLE ANSWERS\n"
-	local jumble = WORD_GAME and WORD_GAME.Jumble
+	local jumble = Jumble
 	if jumble and jumble.is_active() and jumble.find_playable_words then
 		local counts = jumble.debug_answer_counts and jumble.debug_answer_counts()
 			or (jumble.jumble_hand_counts and jumble.jumble_hand_counts() or {})
