@@ -3,6 +3,7 @@
 ---@class (partial) Card : EaseNode
 --- Clears cached ability tooltip UI so it gets rebuilt next time it's shown.
 local GameRT = require("word_game.ui.util.game_runtime")
+local facade = require("word_game.ui.facade")
 local function runtime() return GameRT.game() end
 
 function Card:remove_UI()
@@ -179,7 +180,10 @@ function Card:stop_drag()
         return
     end
     if runtime().pattern_row then
-        runtime().pattern_row:try_snap_card(self)
+        local effects = runtime().pattern_row:try_snap_card(self)
+        if effects and effects.hand_shuffle_sync then
+            facade.presentation().emit("hand_shuffle_sync")
+        end
     end
 end
 

@@ -3,13 +3,12 @@
 
 	Core: jumbalaya_core.cards.letter_card
 	Store: pile hosts via piles; deck_left_count patches
-	Presentation: deal animations via Scheduler; layout_refresh via LayoutRequest
+	Presentation: card_motion_move, hand_shuffle_sync; layout_refresh via LayoutRequest
 ]]
 local live_game = require("word_game.model.live_game")
 
-
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
-local CardMotion = require "word_game.ui.effects.card_motion"
+local card_motion_request = require("word_game.model.card_motion_request")
 local hand_size_cfg = require("word_game.model.hand_size")
 
 return function(context)
@@ -182,7 +181,7 @@ return function(context)
 					delay = (i - 1) * 0.08,
 					blocking = true,
 					func = function()
-						CardMotion.move{from = live_game().dealt_letters, to = live_game().draw_pile, percent = 50, direction = "down", stay_flipped = false, card = card, delay = 0.1}
+						card_motion_request.move{from = live_game().dealt_letters, to = live_game().draw_pile, percent = 50, direction = "down", stay_flipped = false, card = card, delay = 0.1}
 						return true
 					end,
 				}
@@ -331,7 +330,7 @@ return function(context)
 				delay = 0.05,
 				blocking = true,
 				func = function()
-					CardMotion.move{
+					card_motion_request.move{
 						from = live_game().draw_pile,
 						to = live_game().dealt_letters,
 						percent = 50,

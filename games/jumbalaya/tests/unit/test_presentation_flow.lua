@@ -42,6 +42,21 @@ T.describe("presentation flow", function()
 		T.assert_equal(hud_snaps, 0)
 	end)
 
+	T.it("card_motion_move is handled by presentation install", function()
+		local moved = false
+		require("word_game.ui.presentation.install").install({
+			ScoreBanner = { snap_to_actual = function() end },
+		})
+		local card_motion = require("word_game.ui.effects.card_motion")
+		local orig_move = card_motion.move
+		card_motion.move = function(opts)
+			moved = opts and opts.card ~= nil
+		end
+		Presentation.emit("card_motion_move", { card = { id = 1 } })
+		card_motion.move = orig_move
+		T.assert_true(moved)
+	end)
+
 	T.it("jumble_hud_refresh snaps score banner from model state", function()
 		local snaps = 0
 		require("word_game.ui.presentation.install").install({

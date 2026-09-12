@@ -1,4 +1,4 @@
---[[ app/effects/card_motion.lua - Queued card movement and selection effects ]]
+--[[ word_game/ui/effects/card_motion.lua - Queued card movement and selection effects ]]
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 

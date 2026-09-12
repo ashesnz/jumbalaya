@@ -10,7 +10,7 @@
 	  :setup()              -> reset row state at run start
 	  :draw_shadows()       -> called from CardPile:draw
 	  :relayout()           -> called from CardPile:relayout
-	  :try_snap_card(card)  -> called from Card:stop_drag
+	  :try_snap_card(card)  -> called from Card:stop_drag; returns snap effects for UI
 	  :draw_run_pass(game)  -> board draw pass (area + placed cards)
 ]]
 
@@ -105,7 +105,7 @@ function PlacementTable:on_remove_card(card)
 end
 
 function PlacementTable:try_snap_card(card)
-	snap.try_snap(self, card)
+	return snap.try_snap(self, card)
 end
 
 --- Draw placement area and placed cards during board mode.

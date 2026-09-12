@@ -112,4 +112,29 @@ function M.ui_model_boundary_violations()
 	return violations
 end
 
+local UI_IMPORT_PATTERNS = {
+	'require%("word_game%.ui%.([^"]+)"%)',
+	"require%('word_game%.ui%.([^']+)'%)",
+}
+
+--- word_game/model/ must not import word_game/ui/ (presentation via Presentation.emit).
+function M.model_ui_boundary_violations()
+	local violations = {}
+	for _, path in ipairs(list_lua_files({ "word_game/model" })) do
+		local rel = rel_path(path)
+		local file = io.open(path, "r")
+		if file then
+			local content = file:read("*a")
+			file:close()
+			for _, pattern in ipairs(UI_IMPORT_PATTERNS) do
+				for mod in content:gmatch(pattern) do
+					violations[#violations + 1] = rel .. " -> word_game.ui." .. mod
+				end
+			end
+		end
+	end
+	table.sort(violations)
+	return violations
+end
+
 return M

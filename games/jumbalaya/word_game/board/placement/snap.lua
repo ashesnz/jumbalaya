@@ -4,9 +4,8 @@ local layout = require "word_game.board.placement.layout"
 local jumble_geometry = require "word_game.board.jumble.geometry"
 local shimmer = require "word_game.board.placement.shimmer"
 local BonusStack = require "word_game.model.jumble.bonus_stack"
-local Presentation = require "word_game.model.presentation"
 local TableAreas = require "word_game.model.table_areas"
-local runtime = require "app.runtime"
+local piles = require("word_game.model.piles")
 
 local BridgeRuntime = require("app.runtime")
 local function g() return BridgeRuntime.game() end
@@ -191,7 +190,6 @@ function M.place_in_row(session, card)
 	jumble.assign_card_to_blank(slot_i, card, insert_pos)
 	card:set_card_area(area)
 
-	local piles = require("word_game.model.piles")
 	piles.move_card({
 		card = card,
 		card_id = card.id or card.letter_card_id,
@@ -205,7 +203,6 @@ function M.place_in_row(session, card)
 	area:hard_set_cards()
 
 	placement_word().refresh_from_jumble_slots(jumble.state().slots)
-	Presentation.emit("hand_shuffle_sync")
 	show_modifier_feedback(card)
 	return true
 end
@@ -230,7 +227,6 @@ function M.return_to_hand(session, card)
 	if dealt.snap_VT then dealt:snap_VT() end
 	if dealt.hard_set_cards then dealt:hard_set_cards() end
 
-	local piles = require("word_game.model.piles")
 	piles.move_card({
 		card = card,
 		card_id = card.id or card.letter_card_id,
@@ -244,13 +240,15 @@ function M.return_to_hand(session, card)
 	return true
 end
 
+---@return table effects Optional UI reactions for the caller (e.g. hand_shuffle_sync).
 function M.try_snap(session, card)
+	local effects = {}
 	if not (WORD_GAME and WORD_GAME.Jumble and WORD_GAME.Jumble.is_active()) then
-		return
+		return effects
 	end
 
 	local area = session.area
-	if not area or not card or card.REMOVED then return end
+	if not area or not card or card.REMOVED then return effects end
 
 	local cx = card.T.x + card.T.w / 2
 	local cy = card.T.y + card.T.h / 2
@@ -264,17 +262,18 @@ function M.try_snap(session, card)
 			local placed = M.place_in_row(session, card)
 			if placed then
 				play_sfx("card_drop", 0.9, 0.8)
+				effects.hand_shuffle_sync = true
 			end
 			if in_row and M.card_on_placement(session, card) then
 				shimmer.start_card(session, card)
 			end
-			return
+			return effects
 		end
 
 		local function finish_bonus_return()
 			placement_word().clear()
 			play_sfx("card_slide1", nil, 0.8)
-			Presentation.emit("hand_shuffle_sync")
+			effects.hand_shuffle_sync = true
 		end
 
 		local function leave_placement_slot()
@@ -287,7 +286,7 @@ function M.try_snap(session, card)
 			leave_placement_slot()
 			M.restore_bonus_card(session, card, origin_slot, origin_insert)
 			finish_bonus_return()
-			return
+			return effects
 		end
 
 		if from_blank or M.card_on_placement(session, card) then
@@ -305,24 +304,25 @@ function M.try_snap(session, card)
 				M.restore_bonus_card(session, card, origin_slot, origin_insert)
 			end
 			finish_bonus_return()
-			return
+			return effects
 		end
 
 		bonus_gutter.return_card(card)
-		return
+		return effects
 	end
 
 	if (from_blank or M.card_on_placement(session, card) or BonusStack.contains(card))
 		and M.point_in_return_zone(session, cx, cy) then
 		if M.return_to_hand(session, card) then
 			play_sfx("card_slide1", nil, 0.8)
-			Presentation.emit("hand_shuffle_sync")
-			return
+			effects.hand_shuffle_sync = true
+			return effects
 		end
 	elseif in_row then
 		local placed = M.place_in_row(session, card)
 		if placed then
 			play_sfx("card_drop", 0.9, 0.8)
+			effects.hand_shuffle_sync = true
 		elseif card.area then
 			card.area:relayout()
 		end
@@ -340,6 +340,7 @@ function M.try_snap(session, card)
 	if in_row and M.card_on_placement(session, card) then
 		shimmer.start_card(session, card)
 	end
+	return effects
 end
 
 return M

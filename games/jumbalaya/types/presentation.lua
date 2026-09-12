@@ -16,8 +16,13 @@
 --- Contract:
 --- - **1:1 hash** — at most one handler per event name.
 --- - **`on()` overwrites** — registering again replaces the previous handler.
---- - **No catalog** — names are conventions, not a closed set; discover handlers in
+--- - **Partial catalog** — common events are listed below; discover full handlers in
 ---   `word_game/ui/presentation/install.lua` and model `Presentation.emit` call sites.
+---
+--- Documented events:
+--- - `card_motion_move` (opts) — animated pile transfer; handler: CardMotion.move
+--- - `hand_shuffle_sync` — refresh play/shuffle table controls after hand layout changes
+--- - `try_snap` effects — board snap returns `{ hand_shuffle_sync = true }`; UI emits this event
 --- - **`emit` is notify, not query** — model reads domain state via game_access and `WORD_GAME.*`
 ---   facades; do not emit to fetch values from UI.
 --- - **Boot wiring** — `Presentation.clear()` then `install()` in game boot; tests use

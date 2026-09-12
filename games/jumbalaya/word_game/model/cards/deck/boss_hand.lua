@@ -1,9 +1,15 @@
---[[ word_game/model/cards/deck/boss_hand.lua - Boss-hand deal choreography ]]
+--[[
+	word_game/model/cards/deck/boss_hand.lua - Boss-hand deal choreography
+
+	Core: none
+	Store: boss_cards on jumble state; pile hosts via deck commit
+	Presentation: card_motion_move for deal fly-in
+]]
 
 local live_game = require("word_game.model.live_game")
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
-local CardMotion = require "word_game.ui.effects.card_motion"
+local card_motion_request = require("word_game.model.card_motion_request")
 local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 local game_access = require("word_game.model.game_access")
 
@@ -37,7 +43,7 @@ return function(deck_module, context)
 					delay = (i - 1) * stagger,
 					blocking = true,
 					func = function()
-						CardMotion.move{from = live_game().draw_pile, to = live_game().dealt_letters, percent = 50, direction = "up", stay_flipped = false, card = card, delay = 0.08}
+						card_motion_request.move{from = live_game().draw_pile, to = live_game().dealt_letters, percent = 50, direction = "up", stay_flipped = false, card = card, delay = 0.08}
 						return true
 					end,
 				}
