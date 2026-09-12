@@ -9,6 +9,7 @@
 local cfg = require("word_game.config.perks")
 local core = require("jumbalaya_core.perks.registry")
 local game_access = require("word_game.model.game_access")
+local run_state = require("word_game.model.run.state")
 
 local M = {}
 
@@ -29,7 +30,7 @@ local function rand_int(key, min, max)
 end
 
 function M.roll_stamp_perk()
-	local rs = require("word_game.model.run.state").get()
+	local rs = run_state.get()
 	return core.roll_stamp_perk({
 		pool = cfg.POOL,
 		perk_count = rs and #(rs.perks or {}) or 0,

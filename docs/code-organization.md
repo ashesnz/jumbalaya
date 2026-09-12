@@ -15,7 +15,7 @@ Shell wiring (`app/runtime.lua`, `app/callbacks/funcs.lua`, `app/bootstrap/store
 
 ### Engine migration
 
-Phases 0–13 are **complete** (store, engine package, retained UI, `Funcs` registry, no global `G`, `games/jumbalaya/` layout). **Phase 10a** (glue hygiene) continues incrementally.
+Phases 0–13 are **complete** (store, engine package, retained UI, `Funcs` registry, no global `G`, `games/jumbalaya/` layout). **Phase 10a** (glue hygiene) continues incrementally — see [Phase 10a](#phase-10a-glue-hygiene-ongoing) and [`docs/ui-stack.md`](ui-stack.md).
 
 **Freeze policy (ongoing):**
 
@@ -25,6 +25,29 @@ Phases 0–13 are **complete** (store, engine package, retained UI, `Funcs` regi
 - No new deep `word_game.model.*` / `word_game.ui.*` requires across `app/` (bootstrap wiring exempt), `devtools/`, or `word_game/ui/` (grandfathered allowlist) — enforced by `tests/unit/test_facade_boundaries.lua`.
 - New features ship via `WORD_GAME` / `WORD_GAME_UI` facade methods; model code uses `Presentation.emit`, not `Funcs.dispatch`.
 - Store authority lives on `WORD_GAME.store()` / `game_access`; `app/bootstrap/store_sync.lua` creates the store and binds runs at boot.
+
+### Phase 10a glue hygiene (ongoing)
+
+Incremental cleanup after the engine migration. Not a blocking phase gate — land small PRs as you touch code.
+
+| Item | Rule | Enforcement |
+|------|------|-------------|
+| Hoist `require()` | Module scope in hot paths (deal/draw, play controls, frame updaters). Inline requires only in bootstrap, tests, or documented cycles. | Review + `test_glue_hygiene.lua` (layout path) |
+| Model → UI | `Presentation.emit` or `LayoutRequest.refresh()` — never `WORD_GAME_UI`, `Funcs.dispatch`, or ad-hoc `ARGS.pending_layout` in model glue | `test_glue_hygiene.lua`, `test_presentation_catalog.lua` |
+| Glue headers | `word_game/model/*` files document **Core** / **Store** / **Presentation** in the file header | Review |
+| UI layer choice | Panels vs cardarea vs play_effects — see [`docs/ui-stack.md`](ui-stack.md) | Docs |
+
+**Documented circular-deps** (do not “fix” by hoisting — use the listed pattern):
+
+| Cycle | Pattern | Files |
+|-------|---------|-------|
+| `deck` ↔ `jumble` | `package.loaded["word_game.model.jumble"]` lazy accessor | `jumble_deal.lua`, `jumble_rules.lua`, `slot_topology.lua` |
+| `facade` ↔ export tree | Lazy `load()` cache in `ui/facade/init.lua`; export-tree modules use `WORD_GAME_UI` at runtime, not `require("…exports")` at load | `ui/facade/init.lua`, `ui/presentation/install.lua` |
+| `table_areas` ↔ `app.runtime` | Inline `require("app.runtime")` inside `get_store_state()` only when no state arg | `model/table_areas.lua` |
+| `deck` submodules | Factory `return function(context)` — requires run once when `deck/init.lua` composes the API, not per deal | `model/cards/deck/*.lua` |
+| `game` ↔ `run.scope` | `require("word_game.model.run.scope")` inside `Game:bind_snapshot`, not at `game/init` top | `model/game/init.lua` |
+
+When adding a new lazy require, **comment why** in the file header or next to the accessor.
 
 ---
 
@@ -111,6 +134,16 @@ jumbalaya-engine/
 **Boot boundary:** `boot.lua` installs engine globals only. App-specific modules (e.g. `app/core/platform/display.lua`) load from `app/bootstrap/runtime_boot.lua` after `Game()`.
 
 ### UI stack: engine panels vs word-game UI
+
+**Newcomer guide:** [`docs/ui-stack.md`](ui-stack.md) — decision tree (“where does this HUD go?”), mermaid flow, and examples.
+
+Quick chooser:
+
+| Need | Layer |
+|------|-------|
+| Declarative buttons / labels | `jumbalaya-engine/panels` |
+| Draggable letter tiles | `word_game/ui/cardarea` |
+| One-off FX sprite / cinematic | Scene graph + `word_game/ui/play_effects` |
 
 These layers are **not** duplicates — they sit at different levels:
 
@@ -434,6 +467,7 @@ Key test tiers:
 - **Integration:** `test_jumble_play_flow.lua`, `test_save_roundtrip.lua`, `test_game_access.lua`
 - **Core rules (no boot):** `test_core_jumble_rules.lua`, `test_core_play_evaluate.lua`, …
 - **Callback catalog:** `test_g_funcs_registry.lua`
+- **Glue hygiene:** `test_glue_hygiene.lua`, `test_presentation_catalog.lua`
 
 `tests/runner.lua` auto-discovers all `tests/unit/test_*.lua` files alphabetically.
 

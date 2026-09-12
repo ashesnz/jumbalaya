@@ -3,7 +3,7 @@
 
 	Core: jumbalaya_core.cards.letter_card
 	Store: piles via context.commit_piles
-	Presentation: card_motion_move
+	Presentation: card_motion_move; layout via LayoutRequest.refresh()
 ]]
 
 local live_game = require("word_game.model.live_game")
@@ -12,6 +12,7 @@ local function jumble()
 	return package.loaded["word_game.model.jumble"]
 end
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
+local LayoutRequest = require("word_game.model.layout.request")
 local card_motion_request = require("word_game.model.card_motion_request")
 local hand_size_cfg = require("word_game.model.hand_size")
 local game_access = require("word_game.model.game_access")
@@ -141,8 +142,7 @@ return function(context)
 		context.commit_piles({ "hand", "draw", "discard" })
 		local j = jumble()
 		if j and j.ensure_playable_puzzle then j.ensure_playable_puzzle() end
-		live_game().ARGS = live_game().ARGS or {}
-		live_game().ARGS.pending_layout = true
+		LayoutRequest.refresh()
 		if on_complete then on_complete() end
 		return true
 	end

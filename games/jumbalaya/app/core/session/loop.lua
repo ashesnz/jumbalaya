@@ -5,6 +5,7 @@
 
 local save_queue = require "app.core.session.loop.save_queue"
 local debug_overlay = require "app.core.session.loop.debug_overlay"
+local atlas_diagnostics = require "app.startup.atlas_diagnostics"
 local Runtime = require "word_game.ui.effects.runtime"
 local Updaters = require "app.core.session.updaters"
 
@@ -248,7 +249,7 @@ function Game:present_frame()
 	perf_checkpoint('canvas', 'draw')
 
 	debug_overlay.draw(self)
-	require("app.startup.atlas_diagnostics").draw_overlay()
+	atlas_diagnostics.draw_overlay()
 	perf_checkpoint('debug', 'draw')
 end
 

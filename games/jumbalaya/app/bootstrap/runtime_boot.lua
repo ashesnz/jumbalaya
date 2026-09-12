@@ -18,7 +18,7 @@ require "app.core.session.loop"
 
 require "word_game.ui.widgets"
 require "word_game.ui.cards.popups"
-require "word_game.ui.feedback.word_feedback"
+local word_feedback = require "word_game.ui.feedback.word_feedback"
 require "word_game.ui.overlays"
 
 require "word_game.ui.effects"
@@ -41,6 +41,8 @@ Dictionary = require "dictionary"
 WORD_GAME = require "word_game"
 require("app.bootstrap.shell_bind").install()
 
+local views_install = require("word_game.ui.views.install")
+
 require "app.callbacks.registry"
 
 DEVTOOLS = require "devtools"
@@ -53,7 +55,6 @@ g().consume_board_click = function()
 		return true
 	end
 	if WORD_GAME_UI.SidebarStageButton.consume_click then
-		local views_install = require("word_game.ui.views.install")
 		local view = views_install.sidebar_view()
 		if view and view.consume_click and view:consume_click() then
 			return true
@@ -96,7 +97,7 @@ Updaters.register('post_input', 'card_inspect', function(game, dt)
 end)
 Updaters.register('post_input', 'word_feedback_queue', function()
 	if g().ARGS and g().ARGS.word_feedback_queue then
-		require("word_game.ui.feedback.word_feedback").flush_pending()
+		word_feedback.flush_pending()
 	end
 end)
 Updaters.register('post_input', 'trade_card_fly', function(_, dt)
