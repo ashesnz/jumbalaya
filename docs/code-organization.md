@@ -35,7 +35,8 @@ The run snapshot is **copy-on-write** through reducers:
 | `jumbalaya_core/store/reducers/*` | Each handler receives a shallow copy of the prior snapshot; nested tables (`word_round`, `run_state`, `piles`) are copied before mutation where reducers touch them (`store/immutable.lua`). |
 | `store:dispatch(action)` | Always replaces `store._state` with the reducer return value and notifies subscribers. |
 | `store:patch(fields)` | Dispatches `{ type = "GAME_PATCH", patch = fields }` — no in-place merge on the live snapshot. |
-| `game_access.mutate(fn)` / `store_ops.mutate(fn)` | Jumble nested edits and test fixtures only: shallow-copy snapshot, run `fn(draft)`, `store:replace(draft)`. Prefer typed dispatches for new code. |
+| `jumbalaya_core/store/reducers/jumble.lua` | Jumble lifecycle: `JUMBLE_APPLY_PUZZLE`, `JUMBLE_LOAD_PUZZLE`, `JUMBLE_START_HAND`, `JUMBLE_RECORD_WORD`, `JUMBLE_ADVANCE_PUZZLE`, boss-word actions — copy `word_round` via `immutable.copy_word_round()`. |
+| `game_access.mutate(fn)` / `store_ops.mutate(fn)` | **Test fixtures only** (`mock_env.mutate_game`). Production jumble glue dispatches `JUMBLE_*` actions; prefer typed dispatches elsewhere too. |
 | Run snapshot reads | **`game_access.get()`** / **`WORD_GAME.state()`** — there is no `Game.GAME` alias; the store is the sole authority. |
 
 **Do not** cache `game_access.get()` across a `dispatch`/`patch`/`mutate` boundary — nested table references from the old snapshot are stale once reducers copy subtrees.

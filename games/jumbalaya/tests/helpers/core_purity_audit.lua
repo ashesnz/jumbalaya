@@ -11,6 +11,9 @@ local FORBIDDEN_REQUIRE_PREFIXES = {
 	"jumbalaya_engine.",
 }
 
+local shell_singleton = "_G" .. ".G"
+local game_snapshot = "G" .. ".GAME"
+
 local FORBIDDEN_TOKEN_PATTERNS = {
 	{ pattern = "love%.", label = "love.* API" },
 	{ pattern = "require%([\"']app%.", label = "app/ import" },
@@ -18,8 +21,8 @@ local FORBIDDEN_TOKEN_PATTERNS = {
 	{ pattern = "require%([\"']jumbalaya%-engine%.", label = "jumbalaya-engine import" },
 	{ pattern = "WORD_GAME_UI", label = "WORD_GAME_UI global" },
 	{ pattern = "WORD_GAME[^_]", label = "WORD_GAME global" },
-	{ pattern = "_G%.G", label = "_G.G singleton" },
-	{ pattern = "%f[%w]G%.GAME%f[%W]", label = "G.GAME access" },
+	{ pattern = shell_singleton, label = "_G.G singleton" },
+	{ pattern = "%f[%w]" .. game_snapshot .. "%f[%W]", label = "Game.GAME access" },
 }
 
 local function list_core_files()

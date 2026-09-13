@@ -1,8 +1,19 @@
 --[[ tests/helpers/mock_env.lua
-     Provides a standard test environment and global mocks for unit tests.
+     Headless test environment — shell via jumbalaya-engine.shell (no global G).
 ]]
 
 local M = {}
+
+local shell = require("jumbalaya-engine.shell")
+
+local function shell_game()
+	local game = shell.game()
+	if not game then
+		shell.bind_game({})
+		game = shell.game()
+	end
+	return game
+end
 
 local function stub_atlas()
 	return {
@@ -18,23 +29,19 @@ function M.ensure_engine_globals()
 		require("bootstrap_paths").install()
 	end
 
-	local shell = require("jumbalaya-engine.shell")
-	if not shell.game() then
-		shell.bind_game({})
-	end
-	_G.G = shell.game()
+	local S = shell_game()
 	_G.WORD_GAME = _G.WORD_GAME or {}
 	_G.WORD_GAME_UI = _G.WORD_GAME_UI or {}
-	G.SETTINGS = G.SETTINGS or {
+	S.SETTINGS = S.SETTINGS or {
 		paused = false,
 		GRAPHICS = { shadows = "Off", texture_scaling = 1 },
 	}
-	G.ID = G.ID or 1
-	G.STAGE = G.STAGE or 1
-	G.STAGES = G.STAGES or { MAIN_MENU = 1, RUN = 2 }
-	G.STAGE_OBJECTS = G.STAGE_OBJECTS or { {}, {} }
-	G.STAGE_OBJECT_INTERRUPT = G.STAGE_OBJECT_INTERRUPT or false
-	G.LIVE = G.LIVE or {
+	S.ID = S.ID or 1
+	S.STAGE = S.STAGE or 1
+	S.STAGES = S.STAGES or { MAIN_MENU = 1, RUN = 2 }
+	S.STAGE_OBJECTS = S.STAGE_OBJECTS or { {}, {} }
+	S.STAGE_OBJECT_INTERRUPT = S.STAGE_OBJECT_INTERRUPT or false
+	S.LIVE = S.LIVE or {
 		NODE = {},
 		TRANSFORM = {},
 		SPRITE = {},
@@ -43,36 +50,36 @@ function M.ensure_engine_globals()
 		CARDAREA = {},
 		ALERT = {},
 	}
-	G.TRANSFORMS = G.TRANSFORMS or {}
-	G.ANIMATIONS = G.ANIMATIONS or {}
-	G.ANIMATION_FPS = G.ANIMATION_FPS or 10
-	G.FRAMES = G.FRAMES or { RENDER = 0, TRANSFORM = 0 }
-	G.TIMERS = G.TIMERS or { REAL = 0, TOTAL = 0, UPTIME = 0, BACKGROUND = 0 }
-	G.real_dt = G.real_dt or 0.016
-	G.ROOM = G.ROOM or {
+	S.TRANSFORMS = S.TRANSFORMS or {}
+	S.ANIMATIONS = S.ANIMATIONS or {}
+	S.ANIMATION_FPS = S.ANIMATION_FPS or 10
+	S.FRAMES = S.FRAMES or { RENDER = 0, TRANSFORM = 0 }
+	S.TIMERS = S.TIMERS or { REAL = 0, TOTAL = 0, UPTIME = 0, BACKGROUND = 0 }
+	S.real_dt = S.real_dt or 0.016
+	S.ROOM = S.ROOM or {
 		T = { x = 0, y = 0, w = 20, h = 11 },
 		jiggle = 0,
 		alignment = { offset = { x = 0, y = 0 } },
 	}
-	G.ROOM_ATTACH = G.ROOM_ATTACH or {
+	S.ROOM_ATTACH = S.ROOM_ATTACH or {
 		T = { x = 0, y = 0, w = 20, h = 11 },
 		alignment = { offset = { x = 0, y = 0 } },
 		align_to_major = function() end,
 	}
-	G.TEXTURE_ATLASES = G.TEXTURE_ATLASES or {}
-	G.TEXTURE_ATLASES["ui_1"] = G.TEXTURE_ATLASES["ui_1"] or stub_atlas()
-	G.TEXTURE_ATLASES["coin"] = G.TEXTURE_ATLASES["coin"] or stub_atlas()
-	G.C = G.C or {}
-	G.C.BACKGROUND = G.C.BACKGROUND or {
+	S.TEXTURE_ATLASES = S.TEXTURE_ATLASES or {}
+	S.TEXTURE_ATLASES["ui_1"] = S.TEXTURE_ATLASES["ui_1"] or stub_atlas()
+	S.TEXTURE_ATLASES["coin"] = S.TEXTURE_ATLASES["coin"] or stub_atlas()
+	S.C = S.C or {}
+	S.C.BACKGROUND = S.C.BACKGROUND or {
 		C = { 0, 0, 0, 1 },
 		L = { 0, 0, 0, 1 },
 		D = { 0, 0, 0, 1 },
 		contrast = 1,
 	}
-	G.C.GREEN = G.C.GREEN or { 0, 1, 0, 1 }
-	G.SHADERS = G.SHADERS or {}
+	S.C.GREEN = S.C.GREEN or { 0, 1, 0, 1 }
+	S.SHADERS = S.SHADERS or {}
 
-	require("jumbalaya-engine.util.colour") -- installs colour_from_hex and friends
+	require("jumbalaya-engine.util.colour")
 	_G.ease_background_colour = _G.ease_background_colour or function() end
 	_G.push_node_transform = _G.push_node_transform or function() end
 	_G.track_hit_target = _G.track_hit_target or function() end
@@ -88,7 +95,6 @@ function M.ensure_engine_globals()
 	require("jumbalaya-engine.interaction.router")
 end
 
---- Load the real Card class plus presentation mixins (sprites, draw, tooltips).
 function M.ensure_card_class()
 	M.ensure_engine_globals()
 	require("word_game.model.cards.card")
@@ -111,10 +117,10 @@ function M.install_presentation(overrides)
 	require("word_game.ui.presentation.install").install(_G.WORD_GAME_UI, _G.WORD_GAME)
 end
 
---- Low-level globals and stubs. Prefer `reset_game()` for per-suite isolation.
 function M.setup()
 	M.ensure_engine_globals()
-		G.C = G.C or {
+	local S = shell_game()
+	S.C = S.C or {
 		CLEAR = { 0, 0, 0, 0 },
 		RED = { 1, 0, 0, 1 },
 		GREEN = { 0, 1, 0, 1 },
@@ -123,37 +129,37 @@ function M.setup()
 		UI = { TRANSPARENT_DARK = { 0, 0, 0, 0.5 }, TEXT_LIGHT = { 1, 1, 1, 1 } },
 		DYN_UI = { BOSS_MAIN = { 1, 1, 1, 1 }, BOSS_DARK = { 0, 0, 0, 1 }, MAIN = { 0.22, 0.32, 0.35, 1 } },
 	}
-	G.UI = G.UI or { ROOT = 1, ROW = 2, COL = 3, TEXT = 4, OBJECT = 5, BOX = 6 }
-	G.TILE_W = G.TILE_W or 20
-	G.TILE_H = G.TILE_H or 11
-	G.CARD_W = G.CARD_W or 1
-	G.CARD_H = G.CARD_H or 1.4
-	G.HAND_CARD_SPACING = G.HAND_CARD_SPACING or 0.78
-	G.TABLE_HAND_SIZE = G.TABLE_HAND_SIZE or 7
-	G.TABLE_BOARD_SIDEBAR_WIDTH = G.TABLE_BOARD_SIDEBAR_WIDTH or 3.0
-	G.STATES = G.STATES or { TABLE_BOARD = 1, MENU = 2 }
-	G.STAGES = G.STAGES or { RUN = 1, MAIN_MENU = 2 }
-	G.DEFINITIONS = G.DEFINITIONS or {}
-	G.TIMERS = G.TIMERS or { REAL = 0, TOTAL = 0, UPTIME = 0, BACKGROUND = 0 }
-	G.ROOM = G.ROOM or { T = { x = 0, y = 0, w = 20, h = 11 }, jiggle = 0 }
-	G.LETTERS = G.LETTERS or {
+	S.UI = S.UI or { ROOT = 1, ROW = 2, COL = 3, TEXT = 4, OBJECT = 5, BOX = 6 }
+	S.TILE_W = S.TILE_W or 20
+	S.TILE_H = S.TILE_H or 11
+	S.CARD_W = S.CARD_W or 1
+	S.CARD_H = S.CARD_H or 1.4
+	S.HAND_CARD_SPACING = S.HAND_CARD_SPACING or 0.78
+	S.TABLE_HAND_SIZE = S.TABLE_HAND_SIZE or 7
+	S.TABLE_BOARD_SIDEBAR_WIDTH = S.TABLE_BOARD_SIDEBAR_WIDTH or 3.0
+	S.STATES = S.STATES or { TABLE_BOARD = 1, MENU = 2 }
+	S.STAGES = S.STAGES or { RUN = 1, MAIN_MENU = 2 }
+	S.DEFINITIONS = S.DEFINITIONS or {}
+	S.TIMERS = S.TIMERS or { REAL = 0, TOTAL = 0, UPTIME = 0, BACKGROUND = 0 }
+	S.ROOM = S.ROOM or { T = { x = 0, y = 0, w = 20, h = 11 }, jiggle = 0 }
+	S.LETTERS = S.LETTERS or {
 		faces = { letter_base = { key = "letter_base" }, empty = {} },
 		centers = { letter_base = { key = "letter_base" } },
 		center_pools = {},
 		locked = {},
 	}
-	G.letter_inventory = G.letter_inventory or {}
-	G.ROOM_ATTACH = G.ROOM_ATTACH or {
+	S.letter_inventory = S.letter_inventory or {}
+	S.ROOM_ATTACH = S.ROOM_ATTACH or {
 		T = { x = 0, y = 0, w = 20, h = 11 },
 		alignment = { offset = { x = 0, y = 0 } },
 		align_to_major = function() end,
 	}
-	G.POINTER = G.POINTER or {
+	S.POINTER = S.POINTER or {
 		T = { x = 0, y = 0, w = 1, h = 1 },
 		VT = { x = 0, y = 0, w = 1, h = 1 },
 		states = { hover = {}, click = {}, collide = {}, drag = {} },
 	}
-	G.INPUT = G.INPUT or {
+	S.INPUT = S.INPUT or {
 		locks = {},
 		hover_state = { T = { x = 0, y = 0 }, time = 0 },
 		cursor_position = { x = 0, y = 0 },
@@ -173,7 +179,7 @@ function M.setup()
 	end
 
 	love.audio = love.audio or {
-		newSource = function(path, type)
+		newSource = function(_path, _type)
 			return {
 				setVolume = function() end,
 				setPitch = function() end,
@@ -190,7 +196,6 @@ function M.setup()
 		pause = function() end,
 	}
 
-	-- Force headless stubs (game source mounts resources/; Love may expose real draw APIs).
 	local noop = function() end
 	love.graphics = love.graphics or {}
 	love.graphics.push = noop
@@ -258,21 +263,21 @@ function M.setup()
 	_G.WORD_GAME_UI = _G.WORD_GAME_UI or {}
 	_G.Tween = _G.Tween or function(def) return def end
 	_G.read_save_payload = _G.read_save_payload or function() return nil end
-	_G.unpack_source = _G.unpack_source or function(str) return {} end
-	G.TIMELINE = Scheduler()
+	_G.unpack_source = _G.unpack_source or function(_str) return {} end
+	S.TIMELINE = Scheduler()
 	_G.play_sfx = _G.play_sfx or function() end
 	_G.spawn_attention = _G.spawn_attention or function() end
 	_G.attention = _G.attention or function() end
-	_G.Card = _G.Card or function(x, y, w, h, front, center, params)
+	_G.Card = _G.Card or function(x, y, w, h, front, center, _params)
 		return {
 			T = { x = x or 0, y = y or 0, w = w or 1, h = h or 1.4 },
 			VT = { x = x or 0, y = y or 0, w = w or 1, h = h or 1.4 },
 			ability = {},
 			config = { center = center, card = front },
 			states = { hover = {}, click = {}, collide = {}, drag = {} },
-			set_sprites = function(self) end,
-			pulse = function(self) end,
-			remove = function(self) end,
+			set_sprites = function() end,
+			pulse = function() end,
+			remove = function() end,
 		}
 	end
 
@@ -316,15 +321,14 @@ function M.setup()
 
 	local ok_geo, jg = pcall(require, "word_game.board.jumble.geometry")
 	if ok_geo then
-		G.pattern_row = G.pattern_row or {}
-		G.pattern_row.jumble_geometry = jg
-		if not G.pattern_row.relayout then
-			G.pattern_row.relayout = function() end
+		S.pattern_row = S.pattern_row or {}
+		S.pattern_row.jumble_geometry = jg
+		if not S.pattern_row.relayout then
+			S.pattern_row.relayout = function() end
 		end
 	end
 end
 
---- Mirrors boot wiring for hand-clear presentation on the shared Play module.
 function M.install_hand_clear(play_module)
 	play_module = play_module or require("word_game.model.jumble_play")
 	require("word_game.ui.play_effects.hand_clear").install(play_module)
@@ -346,12 +350,13 @@ function M.reset_game()
 		_G.WORD_GAME_UI.TokenReward = nil
 		_G.WORD_GAME_UI.CardFlyOff = nil
 	end
-	if G.SIDEBAR_HUD and G.SIDEBAR_HUD.remove then
-		pcall(function() G.SIDEBAR_HUD:remove() end)
+	local S = shell_game()
+	if S.SIDEBAR_HUD and S.SIDEBAR_HUD.remove then
+		pcall(function() S.SIDEBAR_HUD:remove() end)
 	end
-	G.SIDEBAR_HUD = nil
-	local jg = G.pattern_row and G.pattern_row.jumble_geometry
-	G.pattern_row = {
+	S.SIDEBAR_HUD = nil
+	local jg = S.pattern_row and S.pattern_row.jumble_geometry
+	S.pattern_row = {
 		relayout = function() end,
 		jumble_geometry = jg,
 	}
@@ -364,8 +369,8 @@ function M.reset_game()
 			played_words = {},
 		},
 	}
-	G.STATE = nil
-	G.ARGS = G.ARGS or {}
+	S.STATE = nil
+	S.ARGS = S.ARGS or {}
 	local ok_stage, stage_button = pcall(require, "word_game.ui.sidebar.stage_button")
 	if ok_stage and stage_button.reset then
 		stage_button.reset()
@@ -378,7 +383,6 @@ function M.reset_game()
 	M.publish_game(initial)
 end
 
---- Bind a game snapshot as the authoritative store state (Phase 8 PR-2).
 function M.publish_game(game_table)
 	if not game_table then return end
 	_G.WORD_GAME = require("word_game")
@@ -399,22 +403,18 @@ function M.publish_game(game_table)
 	end
 end
 
---- Authoritative run snapshot via game_access (store-backed).
 function M.game_state()
 	return require("word_game.model.game_access").get()
 end
 
---- Shallow-merge top-level run fields via GAME_PATCH dispatch.
 function M.patch_game(fields)
 	return require("word_game.model.game_access").patch(fields)
 end
 
---- Copy-on-write nested edits for test fixtures.
 function M.mutate_game(fn)
 	return require("word_game.model.game_access").mutate(fn)
 end
 
---- Clear store pile snapshots so host-only test setups stay authoritative.
 function M.clear_store_piles()
 	local store = require("word_game.model.store_ops").store()
 	if store then
