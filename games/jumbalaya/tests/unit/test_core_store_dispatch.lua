@@ -196,4 +196,73 @@ T.describe("jumbalaya_core store dispatch", function()
 		store:dispatch({ type = "JUMBLE_ADVANCE_PUZZLE", puzzle_list = puzzles })
 		T.assert_equal(store:get().word_round.jumble.puzzle.pattern, "DOG")
 	end)
+
+	T.it("clears boss staging via JUMBLE_CLEAR_BOSS_STAGING", function()
+		local store = Store.new({
+			word_round = {
+				mode = "jumble",
+				jumble = { boss_word_staging = true },
+			},
+		})
+		store:dispatch({ type = "JUMBLE_CLEAR_BOSS_STAGING" })
+		T.assert_false(store:get().word_round.jumble.boss_word_staging)
+	end)
+
+	T.it("clears boss staging when revealing boss puzzle", function()
+		local store = Store.new({
+			word_round = {
+				set = 1,
+				hand_index = 3,
+				mode = "jumble",
+				jumble = {
+					boss_word_staging = true,
+					pending_boss = { boss_word = "ABCDEFGHI", pattern = "A_BCDEFGH_I" },
+				},
+			},
+		})
+		store:dispatch({ type = "JUMBLE_REVEAL_BOSS_PUZZLE" })
+		local j = store:get().word_round.jumble
+		T.assert_false(j.boss_word_staging)
+		T.assert_true(j.boss_word_active)
+	end)
+
+	T.it("sets locked hand layout via JUMBLE_SET_LOCKED_HAND_LAYOUT", function()
+		local store = Store.new({
+			word_round = {
+				mode = "jumble",
+				jumble = { locked_hand_layout = { x = 1, y = 2, w = 3, h = 4 } },
+			},
+		})
+		store:dispatch({
+			type = "JUMBLE_SET_LOCKED_HAND_LAYOUT",
+			layout = { x = 9, y = 8, w = 7, h = 6 },
+		})
+		local layout = store:get().word_round.jumble.locked_hand_layout
+		T.assert_equal(layout.x, 9)
+		T.assert_equal(layout.h, 6)
+	end)
+
+	T.it("clears boss jumble flags via JUMBLE_CLEAR_BOSS_STATE", function()
+		local store = Store.new({
+			word_round = {
+				mode = "jumble",
+				jumble = {
+					boss_word_active = true,
+					boss_word_staging = true,
+					boss_puzzle_hidden = true,
+					pending_boss = { boss_word = "CAT" },
+					locked_hand_layout = { x = 0, y = 0, w = 1, h = 1 },
+					boss_cards = { { id = "c1" } },
+				},
+			},
+		})
+		store:dispatch({ type = "JUMBLE_CLEAR_BOSS_STATE" })
+		local j = store:get().word_round.jumble
+		T.assert_false(j.boss_word_active)
+		T.assert_false(j.boss_word_staging)
+		T.assert_false(j.boss_puzzle_hidden)
+		T.assert_nil(j.pending_boss)
+		T.assert_nil(j.locked_hand_layout)
+		T.assert_nil(j.boss_cards)
+	end)
 end)

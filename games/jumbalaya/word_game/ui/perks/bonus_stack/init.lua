@@ -207,6 +207,7 @@ function M.animate_cards_to_stack(queue_event, easing_mod, opts)
 end
 
 function M.finalize_for_bonus_hand(wr)
+	local game_access = facade.game_access()
 	local j = wr and wr.jumble
 	if j and j.boss_cards then
 		local deck = deck_api()
@@ -215,7 +216,7 @@ function M.finalize_for_bonus_hand(wr)
 				deck.destroy_card(card)
 			end
 		end
-		j.boss_cards = nil
+		game_access.dispatch({ type = "JUMBLE_SET_BOSS_CARDS" })
 	end
 	if not M.is_animating() then
 		M.sync_positions()

@@ -27,20 +27,36 @@ local function effects()
 	return effects_host and effects_host() or nil
 end
 
+local function game_access()
+	return facade.game_access()
+end
+
+local function live_word_round()
+	return game_access().word_round()
+end
+
+local function clear_boss_staging()
+	game_access().dispatch({ type = "JUMBLE_CLEAR_BOSS_STAGING" })
+end
+
+local function clear_locked_hand_layout()
+	game_access().dispatch({ type = "JUMBLE_SET_LOCKED_HAND_LAYOUT" })
+end
+
 local function has_event_manager()
 	return runtime().TIMELINE and runtime().TIMELINE.enqueue
 end
 
-function M.present_boss_word(wr, on_complete)
+function M.present_boss_word(_wr, on_complete)
 	local jumble = facade.jumble()
 	local deck = facade.deck()
-	if not wr or not jumble or not deck then
+	if not _wr or not jumble or not deck then
 		if on_complete then on_complete() end
 		return
 	end
 
-	if runtime().dealt_letters and wr.jumble then
-		wr.jumble.locked_hand_layout = nil
+	if runtime().dealt_letters then
+		clear_locked_hand_layout()
 	end
 
 	definition.set_word_score_animating(true)
@@ -71,12 +87,10 @@ function M.present_boss_word(wr, on_complete)
 				WORD_GAME_UI.BossWordAnnounce.play_theme("Garden Theme")
 			end
 		end
-		local revealed = jumble.reveal_boss_puzzle(wr)
-		if wr.jumble then
-			wr.jumble.boss_word_staging = false
-		end
+		local revealed = jumble.reveal_boss_puzzle()
 		if not revealed then
 			definition.set_word_score_animating(false)
+			clear_boss_staging()
 			if on_complete then on_complete() end
 			return
 		end
@@ -183,28 +197,26 @@ function M.present_boss_word(wr, on_complete)
 	end
 
 	local function deal_boss_hand()
-		if not wr.jumble or not wr.jumble.pending_boss then
+		local wr = live_word_round()
+		local j = wr and wr.jumble
+		if not j or not j.pending_boss then
 			definition.set_word_score_animating(false)
-			if wr.jumble then
-				wr.jumble.boss_word_staging = false
-			end
+			clear_boss_staging()
 			if on_complete then on_complete() end
 			return
 		end
-		local puzzle = wr.jumble.pending_boss
+		local puzzle = j.pending_boss
 		local letters = jumble.boss_hand_letters(puzzle.boss_word, puzzle.pattern)
 		deck.deal_boss_hand(letters, function()
 			definition.sync_hand_after_deal()
-			word_feedback.lock_hand_layout(wr)
+			word_feedback.lock_hand_layout()
 			after_boss_deal()
 		end, { fast = true })
 	end
 
-	if not jumble.prepare_boss_word(wr) then
+	if not jumble.prepare_boss_word() then
 		definition.set_word_score_animating(false)
-		if wr.jumble then
-			wr.jumble.boss_word_staging = false
-		end
+		clear_boss_staging()
 		if on_complete then on_complete() end
 		return
 	end

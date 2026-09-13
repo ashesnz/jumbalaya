@@ -188,7 +188,7 @@ function M.restore_boss_layout(opts)
 	end
 	local wr = game_access.word_round()
 	if wr and wr.jumble then
-		wr.jumble.locked_hand_layout = nil
+		game_access.dispatch({ type = "JUMBLE_SET_LOCKED_HAND_LAYOUT" })
 	end
 	if WORD_GAME_UI.Layout then
 		WORD_GAME_UI.Layout.update_all()

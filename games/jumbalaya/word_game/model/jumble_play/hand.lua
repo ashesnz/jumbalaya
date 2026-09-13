@@ -44,13 +44,8 @@ function M.prepare_hand_clear(opts)
 	return wr, j, opts
 end
 
-function M.clear_boss_state(j, wr)
-	if not j then return end
-	j.boss_word_active = false
-	j.boss_word_staging = false
-	j.boss_puzzle_hidden = false
-	j.pending_boss = nil
-	j.locked_hand_layout = nil
+function M.clear_boss_state(_j, _wr)
+	game_access.dispatch({ type = "JUMBLE_CLEAR_BOSS_STATE" })
 end
 
 function M.resolve_after_clear(opts)

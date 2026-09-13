@@ -338,17 +338,21 @@ function M.hand_dealt_metrics()
 	return hand_dealt_metrics()
 end
 
-function M.lock_hand_layout(wr)
-	if not wr or not wr.jumble then return end
-	wr.jumble.locked_hand_layout = nil
+function M.lock_hand_layout(_wr)
 	local metrics = hand_dealt_metrics()
-	if not metrics then return end
-	wr.jumble.locked_hand_layout = {
-		x = metrics.left,
-		y = metrics.top,
-		w = metrics.w,
-		h = metrics.h,
-	}
+	if not metrics then
+		game_access.dispatch({ type = "JUMBLE_SET_LOCKED_HAND_LAYOUT" })
+		return
+	end
+	game_access.dispatch({
+		type = "JUMBLE_SET_LOCKED_HAND_LAYOUT",
+		layout = {
+			x = metrics.left,
+			y = metrics.top,
+			w = metrics.w,
+			h = metrics.h,
+		},
+	})
 end
 
 function M.flush_pending()

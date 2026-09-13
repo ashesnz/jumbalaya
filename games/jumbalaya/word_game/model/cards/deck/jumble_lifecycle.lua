@@ -128,6 +128,6 @@ return function(context)
 				M.destroy_card(card)
 			end
 		end
-		j.boss_cards = nil
+		game_access.dispatch({ type = "JUMBLE_SET_BOSS_CARDS" })
 	end
 end

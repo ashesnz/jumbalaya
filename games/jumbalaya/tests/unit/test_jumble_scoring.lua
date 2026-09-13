@@ -194,6 +194,7 @@ T.describe("Jumble scoring and odometer", function()
 			g.word_round.jumble.slots[2].card = { ability = { letter = "A" } }
 		end)
 		placement_word.refresh_from_jumble_slots(mock_env.game_state().word_round.jumble.slots)
+		sb.sync_points_to_get_preview(true)
 		sb.update(0.2)
 		T.assert_equal(sb.points_to_get, 17, "Valid placed word should preview its puzzle points")
 		T.assert_equal(sb.points_earned, 5)

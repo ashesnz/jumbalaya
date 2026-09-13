@@ -23,9 +23,7 @@ return function(deck_module, context)
 			return
 		end
 		deck_module.clear_hand_and_placement()
-		local wr = game_access.word_round()
-		local j = wr and wr.jumble
-		j.boss_cards = {}
+		local boss_cards = {}
 		for i, letter in ipairs(letters) do
 			local card = deck_module.create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR)
 			card.boss_temp = true
@@ -35,7 +33,7 @@ return function(deck_module, context)
 					break
 				end
 			end
-			j.boss_cards[#j.boss_cards + 1] = card
+			boss_cards[#boss_cards + 1] = card
 			live_game().draw_pile:emplace(card)
 			if live_game().TIMELINE and live_game().TIMELINE.enqueue then
 				Scheduler.add{
@@ -54,6 +52,7 @@ return function(deck_module, context)
 				live_game().dealt_letters:emplace(card)
 			end
 		end
+		game_access.dispatch({ type = "JUMBLE_SET_BOSS_CARDS", cards = boss_cards })
 		local finish = function()
 			local wr_finish = game_access.word_round()
 			local j_finish = wr_finish and wr_finish.jumble

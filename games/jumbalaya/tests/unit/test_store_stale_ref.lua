@@ -35,4 +35,35 @@ T.describe("store stale references", function()
 		T.assert_not_nil(slots[1])
 		T.assert_nil(game_access.word_round().jumble)
 	end)
+
+	T.it("invalidates cached pending_boss after JUMBLE_PREPARE_BOSS_WORD", function()
+		mock_env.patch_game({
+			word_round = {
+				set = 1,
+				hand_index = 3,
+				mode = "jumble",
+				jumble = { boss_word_staging = true },
+			},
+		})
+		local stale = game_access.word_round()
+		game_access.dispatch({
+			type = "JUMBLE_PREPARE_BOSS_WORD",
+			boss = { boss_word = "ABCDEFGHI", pattern = "A_BCDEFGH_I" },
+		})
+		T.assert_nil(stale.jumble and stale.jumble.pending_boss)
+		T.assert_not_nil(game_access.word_round().jumble.pending_boss)
+	end)
+
+	T.it("clears boss staging on live store via JUMBLE_CLEAR_BOSS_STAGING", function()
+		mock_env.patch_game({
+			word_round = {
+				mode = "jumble",
+				jumble = { boss_word_staging = true },
+			},
+		})
+		local stale = game_access.word_round().jumble
+		game_access.dispatch({ type = "JUMBLE_CLEAR_BOSS_STAGING" })
+		T.assert_true(stale.boss_word_staging)
+		T.assert_false(game_access.word_round().jumble.boss_word_staging)
+	end)
 end)

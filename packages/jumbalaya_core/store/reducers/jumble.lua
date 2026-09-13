@@ -81,11 +81,18 @@ end
 function M.JUMBLE_REVEAL_BOSS_PUZZLE(state, action)
 	if not state.word_round then return state end
 	if action.word_round then
-		return replace_word_round(state, immutable.copy_word_round(action.word_round))
+		local wr = immutable.copy_word_round(action.word_round)
+		if wr.jumble then
+			wr.jumble.boss_word_staging = false
+		end
+		return replace_word_round(state, wr)
 	end
 	local wr = immutable.copy_word_round(state.word_round)
 	if not core_hand.reveal_boss_puzzle(wr, nil) then
 		return state
+	end
+	if wr.jumble then
+		wr.jumble.boss_word_staging = false
 	end
 	return replace_word_round(state, wr)
 end
@@ -94,6 +101,57 @@ function M.JUMBLE_SET_BOSS_STAGING(state)
 	if not state.word_round or not state.word_round.jumble then return state end
 	local wr = immutable.copy_word_round(state.word_round)
 	wr.jumble.boss_word_staging = true
+	return replace_word_round(state, wr)
+end
+
+function M.JUMBLE_CLEAR_BOSS_STAGING(state)
+	if not state.word_round or not state.word_round.jumble then return state end
+	local wr = immutable.copy_word_round(state.word_round)
+	wr.jumble.boss_word_staging = false
+	return replace_word_round(state, wr)
+end
+
+---@param action table|nil { layout: { x, y, w, h }|nil } — omit layout or pass nil to clear
+function M.JUMBLE_SET_LOCKED_HAND_LAYOUT(state, action)
+	if not state.word_round or not state.word_round.jumble then return state end
+	local wr = immutable.copy_word_round(state.word_round)
+	local layout = action and action.layout
+	if layout then
+		wr.jumble.locked_hand_layout = {
+			x = layout.x,
+			y = layout.y,
+			w = layout.w,
+			h = layout.h,
+		}
+	else
+		wr.jumble.locked_hand_layout = nil
+	end
+	return replace_word_round(state, wr)
+end
+
+function M.JUMBLE_CLEAR_BOSS_STATE(state)
+	if not state.word_round or not state.word_round.jumble then return state end
+	local wr = immutable.copy_word_round(state.word_round)
+	local j = wr.jumble
+	j.boss_word_active = false
+	j.boss_word_staging = false
+	j.boss_puzzle_hidden = false
+	j.pending_boss = nil
+	j.locked_hand_layout = nil
+	j.boss_cards = nil
+	return replace_word_round(state, wr)
+end
+
+---@param action table|nil { cards: table[]|nil }
+function M.JUMBLE_SET_BOSS_CARDS(state, action)
+	if not state.word_round or not state.word_round.jumble then return state end
+	local wr = immutable.copy_word_round(state.word_round)
+	local cards = action and action.cards
+	if cards then
+		wr.jumble.boss_cards = immutable.shallow_copy(cards)
+	else
+		wr.jumble.boss_cards = nil
+	end
 	return replace_word_round(state, wr)
 end
 
