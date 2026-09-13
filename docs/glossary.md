@@ -2,15 +2,19 @@
 
 Maps player-facing terms from [gameplay.md](gameplay.md) to code symbols and modules. When docs and UI disagree, **gameplay.md** is player truth; this file is **code truth**.
 
+## Run snapshot (store)
+
+Match progress lives on the **store snapshot** — read it via `game_access.get()`, `WORD_GAME.state()`, or `WORD_GAME.store():get()`. In the tables below, **`word_round.*`** and **`run_state.*`** refer to fields on that snapshot (see `types/store.lua`). Do not use `G.GAME`; the alias was removed.
+
 ## Run structure
 
 | Term | Meaning | Code / state |
 |------|---------|--------------|
 | **Match** / **run** | Full roguelike attempt from menu to win or End Run | `G.STAGE == G.STAGES.RUN`; `Game:discard_run()` |
-| **Set** | Group of hands (set 1 = 9 tutorial hands; sets 2–8 = 3 each) | `G.GAME.word_round.set` |
-| **Hand** / **stage** | One scored round within a set (e.g. set 1 hand 3 → `1-3`) | `G.GAME.word_round.hand_index`; `round_config.hand_target(set, hand)` |
+| **Set** | Group of hands (set 1 = 9 tutorial hands; sets 2–8 = 3 each) | `word_round.set` |
+| **Hand** / **stage** | One scored round within a set (e.g. set 1 hand 3 → `1-3`) | `word_round.hand_index`; `round_config.hand_target(set, hand)` |
 | **Showdown** | Third hand of sets 2–8 (higher target) | Same `hand_index == 3` in non-tutorial sets |
-| **Target** | Score to reach on this hand | `G.GAME.word_round.target`; banner “Points to get” |
+| **Target** | Score to reach on this hand | `word_round.target`; banner “Points to get” |
 
 ## Table layout
 
@@ -27,7 +31,7 @@ Maps player-facing terms from [gameplay.md](gameplay.md) to code symbols and mod
 
 | Term | Meaning | Code / state |
 |------|---------|--------------|
-| **Jumble** / **jumble mode** | Active puzzle loop (pattern + hand + play) | `WORD_GAME.Jumble.is_active()`; `G.GAME.word_round.jumble` |
+| **Jumble** / **jumble mode** | Active puzzle loop (pattern + hand + play) | `WORD_GAME.Jumble.is_active()`; `word_round.jumble` |
 | **Puzzle** | One pattern configuration within a hand | `jumble.puzzle_index`; config `jumble_puzzle_{set}_{hand}.lua` |
 | **Slots** | Blank or fixed letter positions in the pattern | `jumble.slots[]`; `slot.kind` = `blank` \| `fixed` \| `span` |
 | **Bank** (puzzle) | Commit solved puzzle points × multiplier to stage total | `play_jumble_word` → `kind == "bank_puzzle"` |

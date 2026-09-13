@@ -78,4 +78,27 @@ T.describe("jumbalaya_core store immutability", function()
 		T.assert_equal(before_slots[1].kind, "blank")
 		T.assert_nil(store:get().word_round.jumble)
 	end)
+
+	T.it("copies jumble state without mutating the prior snapshot", function()
+		local store = Store.new({
+			word_round = {
+				mode = "jumble",
+				jumble = { puzzle_words = {}, puzzle_points = 0, puzzle_multi = 1.0 },
+			},
+		})
+		local before_j = store:get().word_round.jumble
+		store:dispatch({
+			type = "JUMBLE_RECORD_WORD",
+			jumble = {
+				puzzle_words = { "ZOO" },
+				puzzle_points = 5,
+				puzzle_multi = 1.5,
+				solved = true,
+			},
+		})
+		local after_j = store:get().word_round.jumble
+		T.assert_not_equal(before_j, after_j)
+		T.assert_equal(#before_j.puzzle_words, 0)
+		T.assert_equal(after_j.puzzle_words[1], "ZOO")
+	end)
 end)

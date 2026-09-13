@@ -137,4 +137,63 @@ T.describe("jumbalaya_core store dispatch", function()
 		T.assert_equal(store:get().voucher_discards_used, 2)
 		T.assert_equal(store:get().discard_bin_count, 2)
 	end)
+
+	T.it("applies jumble puzzle via JUMBLE_APPLY_PUZZLE", function()
+		local store = Store.new({
+			word_round = {
+				set = 1,
+				hand_index = 1,
+				mode = "jumble",
+				jumble = { puzzle_index = 1, puzzle_words = { "OLD" }, puzzle_points = 9 },
+			},
+		})
+		store:dispatch({
+			type = "JUMBLE_APPLY_PUZZLE",
+			puzzle = { kind = "fixed", pattern = "CAT" },
+		})
+		local j = store:get().word_round.jumble
+		T.assert_equal(j.puzzle.pattern, "CAT")
+		T.assert_equal(j.puzzle_points, 0)
+		T.assert_equal(#j.puzzle_words, 0)
+	end)
+
+	T.it("records jumble word via JUMBLE_RECORD_WORD", function()
+		local store = Store.new({
+			word_round = {
+				mode = "jumble",
+				jumble = { puzzle_words = {}, puzzle_points = 0, puzzle_multi = 1.0 },
+			},
+		})
+		store:dispatch({
+			type = "JUMBLE_RECORD_WORD",
+			jumble = {
+				puzzle_words = { "CAT" },
+				puzzle_points = 3,
+				puzzle_multi = 1.2,
+				solved = true,
+			},
+		})
+		local j = store:get().word_round.jumble
+		T.assert_equal(j.puzzle_words[1], "CAT")
+		T.assert_equal(j.puzzle_points, 3)
+		T.assert_equal(j.puzzle_multi, 1.2)
+		T.assert_true(j.solved)
+	end)
+
+	T.it("advances jumble puzzle via JUMBLE_ADVANCE_PUZZLE", function()
+		local puzzles = {
+			{ kind = "fixed", pattern = "CAT" },
+			{ kind = "fixed", pattern = "DOG" },
+		}
+		local store = Store.new({
+			word_round = {
+				set = 1,
+				hand_index = 1,
+				mode = "jumble",
+				jumble = { puzzle_index = 1, puzzle = puzzles[1] },
+			},
+		})
+		store:dispatch({ type = "JUMBLE_ADVANCE_PUZZLE", puzzle_list = puzzles })
+		T.assert_equal(store:get().word_round.jumble.puzzle.pattern, "DOG")
+	end)
 end)

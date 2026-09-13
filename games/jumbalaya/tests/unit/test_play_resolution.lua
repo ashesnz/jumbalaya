@@ -71,7 +71,7 @@ T.describe("play resolution", function()
 
 		local result = resolution.resolve(play, { instant = true })
 		T.assert_equal(result.kind, "bank_puzzle")
-		T.assert_equal(wr.jumble.puzzle_index, 2)
+		T.assert_equal(mock_env.game_state().word_round.jumble.puzzle_index, 2)
 		T.assert_equal(feedback, 4)
 
 		effects.show_puzzle_bank_feedback = orig_feedback

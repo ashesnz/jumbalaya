@@ -46,9 +46,10 @@ T.describe("Jumble play flow integration", function()
 		local play_resolution = require("word_game.ui.play_effects.resolution")
 		play_resolution.resolve(flow)
 
-		T.assert_equal(wr.jumble.puzzle_index, 2, "Puzzle index should advance to 2")
-		T.assert_false(wr.jumble.solved, "New puzzle solved state should be false")
-		T.assert_equal(wr.jumble.puzzle.suffix, "AR", "Next puzzle should have suffix AR (_ A R)")
+		local state_wr = mock_env.game_state().word_round
+		T.assert_equal(state_wr.jumble.puzzle_index, 2, "Puzzle index should advance to 2")
+		T.assert_false(state_wr.jumble.solved, "New puzzle solved state should be false")
+		T.assert_equal(state_wr.jumble.puzzle.suffix, "AR", "Next puzzle should have suffix AR (_ A R)")
 		local anim = fixed_letters.anim_state()
 		T.assert_equal(anim.offset_y, 0, "Fixed animation offset should reset to 0")
 		T.assert_equal(anim.alpha, 1, "Fixed animation alpha should reset to 1")

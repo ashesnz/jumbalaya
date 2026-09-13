@@ -2,7 +2,7 @@
 
 Jumbalaya is a roguelike **jumble** word game: pattern puzzles, a **points × multiplier** score banner, a burning **timeline fuse**, **tokens**, and **perks**.
 
-**Code vocabulary:** [glossary.md](glossary.md) maps these terms to modules and `G.GAME` fields.
+**Code vocabulary:** [glossary.md](glossary.md) maps these terms to modules and store fields (`game_access.get()` / `WORD_GAME.state()`).
 
 **Goal:** On each stage, bank enough cumulative score to meet the hand **target**, then move on. Clear set 8’s Showdown to win the match.
 
@@ -18,7 +18,7 @@ A **match** (run) is a sequence of **sets**. **Set 1** is a nine-hand tutorial a
 | 2–8 | 3 each | Standard → Standard → Showdown |
 
 - **Win** by clearing the Showdown on **set 8** (`1-9` in set 1 is the final Showdown there).
-- Progress is shown as **set-hand** (e.g. `1-3` = set 1, hand 3). The set index is `G.GAME.word_round.set`.
+- Progress is shown as **set-hand** (e.g. `1-3` = set 1, hand 3). The set index is `word_round.set` on the run snapshot (`game_access.get()` / `WORD_GAME.state()`).
 
 Every stage in sets 1–8 runs in **jumble mode** (`word_game/model/jumble.lua` → `is_active_hand`).
 
@@ -216,7 +216,7 @@ Hold-to-redraw is blocked only during score/redraw animations.
 
 ## Perks
 
-Perks are acquired via the **rubber-stamp flow** on the sidebar (`word_game/ui/perks/stamp/`). Purchased perks are stored on `G.GAME.run_state.perks` and gameplay hooks live in `word_game/model/perks/effects.lua`.
+Perks are acquired via the **rubber-stamp flow** on the sidebar (`word_game/ui/perks/stamp/`). Purchased perks are stored on `run_state.perks` (run snapshot via `game_access.get()`) and gameplay hooks live in `word_game/model/perks/effects.lua`.
 
 Perks are collected as sidebar stamps for display. Gameplay effects are **not wired yet** — descriptions note planned scoring bonuses; `state.has_perk()` is reserved for future hooks.
 
