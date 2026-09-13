@@ -1,5 +1,5 @@
 --[[
-	app/runtime.lua - Runtime service accessors (store, engine, game shell).
+	app/runtime.lua - App-layer facade over jumbalaya-engine.shell + WORD_GAME bindings.
 ]]
 
 local shell = require("jumbalaya-engine.shell")
@@ -21,11 +21,7 @@ function M.game()
 end
 
 function M.store()
-	local wg = word_game()
-	if wg and wg.store then
-		return wg.store()
-	end
-	return nil
+	return shell.store() or (word_game() and word_game().store())
 end
 
 function M.engine()
@@ -51,7 +47,6 @@ function M.settings()
 	return game and game.SETTINGS
 end
 
---- Bound run snapshot accessor (wired in app/bootstrap/shell_bind.lua).
 function M.game_access()
 	return shell.game_access()
 end

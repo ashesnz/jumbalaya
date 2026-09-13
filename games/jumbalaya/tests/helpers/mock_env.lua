@@ -18,8 +18,11 @@ function M.ensure_engine_globals()
 		require("bootstrap_paths").install()
 	end
 
-	_G.G = _G.G or {}
-	require("app.runtime").bind_game(_G.G)
+	local shell = require("jumbalaya-engine.shell")
+	if not shell.game() then
+		shell.bind_game({})
+	end
+	_G.G = shell.game()
 	_G.WORD_GAME = _G.WORD_GAME or {}
 	_G.WORD_GAME_UI = _G.WORD_GAME_UI or {}
 	G.SETTINGS = G.SETTINGS or {
@@ -380,12 +383,12 @@ end
 function M.publish_game(game_table)
 	if not game_table then return end
 	_G.WORD_GAME = require("word_game")
-	local store_sync = require("app.bootstrap.store_sync")
-	store_sync.ensure_test_binding()
-	local store = require("app.runtime").store()
+	local store_ops = require("word_game.model.store_ops")
+	store_ops.ensure_test_binding()
+	local store = store_ops.store()
 	if store then
-		store_sync.bind_run(store, game_table)
-		store:patch({
+		store_ops.bind_run(store, game_table)
+		store_ops.patch(store, {
 			piles = { hand = {}, draw = {}, pattern = {}, bonus = {}, discard = {} },
 		})
 		G.GAME = store:get()
@@ -394,18 +397,26 @@ function M.publish_game(game_table)
 	end
 end
 
---- Re-bind the store after direct G.GAME field mutation in a test.
-function M.sync_game()
-	if G.GAME then
-		M.publish_game(G.GAME)
-	end
+--- Authoritative run snapshot (store-backed). Prefer over G.GAME in tests.
+function M.game_state()
+	return require("word_game.model.game_access").get()
+end
+
+--- Shallow-merge top-level run fields via GAME_PATCH dispatch.
+function M.patch_game(fields)
+	return require("word_game.model.game_access").patch(fields)
+end
+
+--- Copy-on-write nested edits for test fixtures.
+function M.mutate_game(fn)
+	return require("word_game.model.game_access").mutate(fn)
 end
 
 --- Clear store pile snapshots so host-only test setups stay authoritative.
 function M.clear_store_piles()
-	local store = require("app.runtime").store()
+	local store = require("word_game.model.store_ops").store()
 	if store then
-		store:patch({
+		require("word_game.model.store_ops").patch(store, {
 			piles = { hand = {}, draw = {}, pattern = {}, bonus = {}, discard = {} },
 		})
 	end

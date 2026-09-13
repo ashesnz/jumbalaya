@@ -11,8 +11,7 @@ local live_game = require("word_game.model.live_game")
 local perks_cfg = require("word_game.config.perks")
 local core_run_state = require("jumbalaya_core.store.run_state")
 local game_access = require("word_game.model.game_access")
-local store_sync = require("app.bootstrap.store_sync")
-local BridgeRuntime = require("app.runtime")
+local store_ops = require("word_game.model.store_ops")
 
 local M = {}
 
@@ -60,9 +59,9 @@ function M.add_perk(id)
 	rs.perks = rs.perks or {}
 	local slots = rs.perk_slots or perks_cfg.SLOT_COUNT
 	if #rs.perks >= slots then return false end
-	local store = BridgeRuntime.store()
+	local store = store_ops.store()
 	if store then
-		store_sync.dispatch(store, { type = "RUN_STATE_ADD_PERK", id = id })
+		store_ops.dispatch(store, { type = "RUN_STATE_ADD_PERK", id = id })
 		return true
 	end
 	rs.perks[#rs.perks + 1] = id

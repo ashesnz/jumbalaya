@@ -6,7 +6,7 @@
 	`draw_pile`, `pattern_row.area`) are presentation/interaction targets;
 	mutate hosts during animation, then `sync_hosts_to_store` or `move_card`.
 
-	Run deck membership (`G.letter_inventory`) is separate: it tracks every live
+	Run deck membership (`shell.game().letter_inventory`) is separate: it tracks every live
 	letter Card instance in the run; pile placement is always `store.piles`.
 
 	Core: jumbalaya_core.store.reducers.piles + selectors.piles + cards.pile_record
@@ -15,8 +15,8 @@
 ]]
 
 local BonusStack = require("word_game.model.jumble.bonus_stack")
-local BridgeRuntime = require("app.runtime")
-local store_sync = require("app.bootstrap.store_sync")
+local shell = require("jumbalaya-engine.shell")
+local store_ops = require("word_game.model.store_ops")
 local pile_record = require("jumbalaya_core.cards.pile_record")
 local live_game = require("word_game.model.live_game")
 
@@ -78,23 +78,23 @@ local function snapshot_bonus()
 end
 
 local function host_for_pile(pile_id)
-	local shell = BridgeRuntime.game()
-	if not shell then return nil end
+	local game = shell.game()
+	if not game then return nil end
 	if pile_id == "pattern" then
-		return shell.pattern_row and shell.pattern_row.area
+		return game.pattern_row and game.pattern_row.area
 	end
-	return shell[PILE_HOST[pile_id]]
+	return game[PILE_HOST[pile_id]]
 end
 
 local function interaction_cards()
 	local out = {}
-	local shell = BridgeRuntime.game()
-	if not shell or not shell.INPUT then return out end
-	if shell.INPUT.dragging and shell.INPUT.dragging.target then
-		out[shell.INPUT.dragging.target] = true
+	local game = shell.game()
+	if not game or not game.INPUT then return out end
+	if game.INPUT.dragging and game.INPUT.dragging.target then
+		out[game.INPUT.dragging.target] = true
 	end
-	if shell.INPUT.focused and shell.INPUT.focused.target then
-		out[shell.INPUT.focused.target] = true
+	if game.INPUT.focused and game.INPUT.focused.target then
+		out[game.INPUT.focused.target] = true
 	end
 	return out
 end
@@ -122,9 +122,9 @@ end
 function M.move_card(opts)
 	if type(opts) ~= "table" then return end
 	local id = opts.card_id or card_id(opts.card)
-	local store = opts.store or BridgeRuntime.store()
+	local store = opts.store or store_ops.store()
 	if store and id and opts.to_pile then
-		store_sync.dispatch(store, {
+		store_ops.dispatch(store, {
 			type = "MOVE_CARD",
 			card_id = id,
 			from_pile = opts.from_pile,
@@ -139,26 +139,26 @@ function M.move_card(opts)
 end
 
 function M.collect_piles()
-	local shell = BridgeRuntime.game()
-	if not shell then return nil end
-	local pattern_host = shell.pattern_row and shell.pattern_row.area
+	local game = shell.game()
+	if not game then return nil end
+	local pattern_host = game.pattern_row and game.pattern_row.area
 	return {
-		hand = snapshot_area(shell.dealt_letters, "hand"),
-		draw = snapshot_area(shell.draw_pile, "draw"),
-		discard = snapshot_area(shell.recycle_stash, "discard"),
+		hand = snapshot_area(game.dealt_letters, "hand"),
+		draw = snapshot_area(game.draw_pile, "draw"),
+		discard = snapshot_area(game.recycle_stash, "discard"),
 		pattern = snapshot_area(pattern_host, "pattern"),
 		bonus = snapshot_bonus(),
 	}
 end
 
 local function dispatch_piles(store, piles)
-	store_sync.dispatch(store, { type = "SYNC_PILES", piles = piles })
+	store_ops.dispatch(store, { type = "SYNC_PILES", piles = piles })
 end
 
 ---@param store table|nil
 ---@param pile_ids string[]|nil When set, only these piles are overwritten from host snapshots.
 function M.sync_hosts_to_store(store, pile_ids)
-	store = store or BridgeRuntime.store()
+	store = store or store_ops.store()
 	if not store then return end
 	local snapshot = M.collect_piles()
 	if not snapshot then return end
@@ -177,7 +177,7 @@ end
 --- Copy resting store cards into empty pile hosts so deal/shuffle can mutate hosts.
 ---@param pile_ids string[]|nil
 function M.hydrate_hosts_from_store(pile_ids)
-	local store = BridgeRuntime.store()
+	local store = store_ops.store()
 	if not store then return end
 	local state = store:get()
 	if not state or not state.piles then return end
@@ -208,7 +208,7 @@ end
 ---@param store table|nil
 ---@param pile_ids string[]|nil
 function M.release_static_chrome(store, pile_ids)
-	store = store or BridgeRuntime.store()
+	store = store or store_ops.store()
 	if not store then return end
 	pile_ids = pile_ids or { "hand", "draw", "pattern" }
 	M.sync_hosts_to_store(store, pile_ids)

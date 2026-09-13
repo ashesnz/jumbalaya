@@ -2,7 +2,7 @@
 	word_game/model/run/scope.lua - Run lifecycle boundary for store and run caches.
 
 	Core: jumbalaya_core.store.default_state (teardown reset)
-	Store: bind_run / replace via store_sync; RUN_STATE_INIT on new run
+	Store: bind_run / replace via store_ops; RUN_STATE_INIT on new run
 	Presentation: none (teardown hooks notify UI via install.lua subscribers)
 
 	Every new run must pass through this module so stale UI bindings, module
@@ -12,8 +12,7 @@
 local live_game = require("word_game.model.live_game")
 
 local game_access = require("word_game.model.game_access")
-local store_sync = require("app.bootstrap.store_sync")
-local BridgeRuntime = require("app.runtime")
+local store_ops = require("word_game.model.store_ops")
 local CoreStore = require("jumbalaya_core.store")
 
 local M = {}
@@ -120,9 +119,9 @@ function M.teardown()
 	end
 
 	M.reset_globals()
-	local store = BridgeRuntime.store()
+	local store = store_ops.store()
 	if store then
-		store_sync.replace(store, CoreStore.default_state())
+		store_ops.replace(store, CoreStore.default_state())
 	end
 	live_game().GAME = nil
 end
@@ -132,20 +131,20 @@ function M.bind_snapshot(game_table)
 	if type(game_table) ~= "table" then
 		error("RunScope.bind_snapshot requires a game table")
 	end
-	local store = BridgeRuntime.store()
+	local store = store_ops.store()
 	if not store then
 		error("RunScope.bind_snapshot requires WORD_GAME.store()")
 	end
-	store_sync.bind_run(store, game_table)
+	store_ops.bind_run(store, game_table)
 	local state = game_access.get()
 	live_game().GAME = state
 	return state
 end
 
 function M.init_new_run_state()
-	local store = BridgeRuntime.store()
+	local store = store_ops.store()
 	if store then
-		store_sync.dispatch(store, { type = "RUN_STATE_INIT" })
+		store_ops.dispatch(store, { type = "RUN_STATE_INIT" })
 	end
 end
 
@@ -160,11 +159,11 @@ function M.begin_run(game_table, opts)
 	end
 	M.reset_args()
 	game_table.run_generation = M.generation()
-	local store = BridgeRuntime.store()
+	local store = store_ops.store()
 	if not store then
 		error("RunScope.begin_run requires WORD_GAME.store()")
 	end
-	store_sync.bind_run(store, game_table)
+	store_ops.bind_run(store, game_table)
 	local run = ensure_run_table()
 	run.active = true
 	run.from_save = opts.from_save or false

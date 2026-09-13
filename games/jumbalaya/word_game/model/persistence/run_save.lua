@@ -2,7 +2,7 @@
 	word_game/model/persistence/run_save.lua - Restore/store card piles snapshot, rebuild letter_inventory from store piles
 
 	Core: none
-	Store: store_sync.restore_snapshot, store:patch(piles), game_access.patch(starting_deck_size)
+	Store: store_ops.restore_snapshot, store_ops.patch(piles), game_access.patch(starting_deck_size)
 	Presentation: round_restore_from_save
 ]]
 
@@ -10,8 +10,7 @@ local live_game = require("word_game.model.live_game")
 
 local TableAreas = require("word_game.model.table_areas")
 local game_access = require("word_game.model.game_access")
-local store_sync = require("app.bootstrap.store_sync")
-local BridgeRuntime = require("app.runtime")
+local store_ops = require("word_game.model.store_ops")
 
 local M = {}
 
@@ -70,9 +69,9 @@ end
 function M.restore_card_areas(save_table)
 	if not save_table then return end
 	if save_table.store then
-		local store = BridgeRuntime.store()
+		local store = store_ops.store()
 		if store then
-			store_sync.restore_snapshot(store, save_table.store)
+			store_ops.restore_snapshot(store, save_table.store)
 		end
 	elseif save_table.cardAreas then
 		local store_piles = { hand = {}, draw = {}, pattern = {}, bonus = {}, discard = {} }
@@ -100,16 +99,16 @@ function M.restore_card_areas(save_table)
 				end
 			end
 		end
-		local store = BridgeRuntime.store()
+		local store = store_ops.store()
 		if store then
-			store:patch({ piles = store_piles })
+			store_ops.patch(store, { piles = store_piles })
 		end
 	end
 	M.rebuild_card_inventory()
 end
 
 function M.append_pattern_row_snapshot(snapshot)
-	local store = BridgeRuntime.store()
+	local store = store_ops.store()
 	if store then
 		snapshot.store = store:get()
 	else

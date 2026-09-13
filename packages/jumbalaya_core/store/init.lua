@@ -27,10 +27,7 @@ function M:replace(state)
 end
 
 function M:patch(patch)
-	for key, value in pairs(patch) do
-		self._state[key] = value
-	end
-	self:_notify()
+	self:dispatch({ type = "GAME_PATCH", patch = patch })
 end
 
 function M:subscribe(fn)

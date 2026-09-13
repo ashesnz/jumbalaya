@@ -1,26 +1,17 @@
 --[[
-	word_game/model/game_access.lua - Read/write run snapshot via WORD_GAME.store().
+	word_game/model/game_access.lua - Read/write run snapshot via shell-bound store.
 
-	Core: jumbalaya_core.store reducers (dispatched through store_sync)
+	Core: jumbalaya_core.store reducers (via word_game.model.store_ops)
 	Store: get / patch / dispatch / mutate on GameRunState (types/store.lua)
 	Presentation: none — callers emit after store writes
 ]]
 
-local store_sync = require("app.bootstrap.store_sync")
-local runtime = require("app.runtime")
+local store_ops = require("word_game.model.store_ops")
 
 local M = {}
 
-local function store()
-	return runtime.store()
-end
-
 function M.get()
-	local s = store()
-	if s then
-		return s:get()
-	end
-	return nil
+	return store_ops.get()
 end
 
 function M.word_round()
@@ -29,30 +20,15 @@ function M.word_round()
 end
 
 function M.dispatch(action)
-	local s = store()
-	if not s or not action then
-		return M.get()
-	end
-	return store_sync.dispatch(s, action)
+	return store_ops.dispatch(nil, action)
 end
 
 function M.patch(fields)
-	local s = store()
-	if not s or not fields then
-		return M.get()
-	end
-	return store_sync.dispatch(s, { type = "GAME_PATCH", patch = fields })
+	return store_ops.patch(nil, fields)
 end
 
---- In-place mutation of the live store snapshot (same table as store:get()).
---- Notifies store subscribers so views stay in sync.
 function M.mutate(fn)
-	local s = store()
-	local game = M.get()
-	if not game or not fn then return game end
-	fn(game)
-	if s then s:notify() end
-	return game
+	return store_ops.mutate(fn)
 end
 
 return M

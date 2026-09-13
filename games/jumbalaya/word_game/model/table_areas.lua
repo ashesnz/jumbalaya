@@ -31,8 +31,7 @@ end
 
 local function get_store_state(state)
 	if state then return state end
-	local BridgeRuntime = require("app.runtime")
-	local store = BridgeRuntime.store()
+	local store = require("word_game.model.store_ops").store()
 	if store then
 		return store:get()
 	end

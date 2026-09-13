@@ -2,7 +2,7 @@
 	word_game/model/trade/init.lua - Card Marketplace offers, token spend add/remove/modifier, trade_used tracking
 
 	Core: jumbalaya_core.config.gameplay.economy, jumbalaya_core.config.gameplay.round, jumbalaya_core.config.gameplay.letter_tiers
-	Store: store_sync.dispatch(RUN_STATE_MARK_TRADE_USED), run.state tokens
+	Store: store_ops.dispatch(RUN_STATE_MARK_TRADE_USED), run.state tokens
 	Presentation: none
 ]]
 
@@ -12,8 +12,7 @@ local letter_tiers = require("jumbalaya_core.config.gameplay.letter_tiers")
 local state = require("word_game.model.run.state")
 local game_access = require("word_game.model.game_access")
 local deck = require("word_game.model.cards.deck")
-local store_sync = require("app.bootstrap.store_sync")
-local runtime = require("app.runtime")
+local store_ops = require("word_game.model.store_ops")
 local LetterPalette = require("word_game.config.visuals.letter_card_palette")
 
 local M = {}
@@ -29,9 +28,9 @@ local function game_state()
 end
 
 local function mark_trade_used()
-	local store = runtime.store()
+	local store = store_ops.store()
 	if store then
-		store_sync.dispatch(store, { type = "RUN_STATE_MARK_TRADE_USED" })
+		store_ops.dispatch(store, { type = "RUN_STATE_MARK_TRADE_USED" })
 	else
 		local rs = state.get()
 		if rs then rs.trade_used_this_hand = true end

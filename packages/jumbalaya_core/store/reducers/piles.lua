@@ -1,6 +1,6 @@
 --[[ packages/jumbalaya_core/store/reducers/piles.lua - Pile state reducers (no G) ]]
 
-local pile_record = require("jumbalaya_core.cards.pile_record")
+local immutable = require("jumbalaya_core.store.immutable")
 
 local M = {}
 
@@ -42,7 +42,7 @@ end
 
 function M.ADD_CARD_TO_PILE(state, action)
 	if not action.card or not action.pile_id then return state end
-	state.piles = state.piles or { hand = {}, draw = {}, pattern = {}, bonus = {}, discard = {} }
+	state = immutable.with_piles(state)
 	local pile = state.piles[action.pile_id]
 	if pile then
 		local card = action.card
@@ -59,7 +59,7 @@ end
 
 function M.REMOVE_CARD_FROM_PILE(state, action)
 	if not action.card_id or not action.pile_id then return state end
-	state.piles = state.piles or {}
+	state = immutable.with_piles(state)
 	remove_card_from_pile(state.piles[action.pile_id], action.card_id, action.pile_id == "pattern")
 	return state
 end
@@ -71,7 +71,7 @@ function M.MOVE_CARD(state, action)
 	local slot_index = action.slot_index
 
 	if not card_id or not to_pile then return state end
-	state.piles = state.piles or { hand = {}, draw = {}, pattern = {}, bonus = {}, discard = {} }
+	state = immutable.with_piles(state)
 
 	local found_card = nil
 	if from_pile and state.piles[from_pile] then

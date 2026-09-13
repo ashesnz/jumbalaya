@@ -1,10 +1,11 @@
 --[[
-	jumbalaya-engine/shell.lua - Bound Game shell + app callbacks (injected at boot; no app/ import).
+	jumbalaya-engine/shell.lua - Bound Game shell + store + app callbacks (injected at boot; no app/ import).
 ]]
 
 local M = {}
 
 local _game = nil
+local _store = nil
 local _app_events = nil
 local _funcs = nil
 local _action_dispatch = nil
@@ -16,6 +17,14 @@ end
 
 function M.game()
 	return _game
+end
+
+function M.bind_store(store)
+	_store = store
+end
+
+function M.store()
+	return _store
 end
 
 function M.bind_app_events(module)

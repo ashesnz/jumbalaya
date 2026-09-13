@@ -1,13 +1,13 @@
 --[[
-	word_game/model/live_game.lua - Returns live Game instance via app.runtime bridge
+	word_game/model/live_game.lua - Returns live Game instance via jumbalaya-engine.shell
 
 	Core: none
 	Store: none
 	Presentation: none
 ]]
 
-local BridgeRuntime = require("app.runtime")
+local shell = require("jumbalaya-engine.shell")
 
 return function()
-	return BridgeRuntime.game()
+	return shell.game()
 end

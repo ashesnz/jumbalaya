@@ -15,6 +15,8 @@ function M.install()
 	require "jumbalaya-engine.graphics.sprite"
 	require "jumbalaya-engine.graphics.sprite_animator"
 
+	require "jumbalaya-engine.globals".install()
+
 	require "jumbalaya-engine.util.tables"
 	require "jumbalaya-engine.util.geometry"
 	require "jumbalaya-engine.util.random"
