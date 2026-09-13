@@ -59,7 +59,7 @@ local function setup_sidebar_layout_env()
 	G.CARD_H = G.CARD_H or 1.4
 	G.TILE_H = G.TILE_H or 11.5
 	G.TILE_W = G.TILE_W or 20
-	G.GAME = G.GAME or { word_round = { mode = "jumble" } }
+	mock_env.patch_game({ word_round = { mode = "jumble" } })
 	G.STATE = G.STATES.TABLE_BOARD
 	G.STAGE = G.STAGES.RUN
 	G.ROOM = { T = { x = 0, y = 0, w = G.TILE_W, h = G.TILE_H } }
@@ -135,15 +135,18 @@ end
 T.describe("Sidebar stage button", function()
 	T.it("advances the hand through Play.on_hand_cleared when Next is pressed", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_score_animating = false,
+			word_round = {
+				set = 1,
+				hand_index = 1,
+				target = 25,
+				jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0 },
+			},
+		})
 		G.STATE = G.STATES.TABLE_BOARD
 		G.STAGE = G.STAGES.RUN
-		G.GAME.word_round = {
-			set = 1,
-			hand_index = 1,
-			target = 25,
-			jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0 },
-		}
 
 		local tt = require("word_game.ui.perks.timeline_timer")
 		local token_reward = require("word_game.ui.table.token_reward")
@@ -154,7 +157,6 @@ T.describe("Sidebar stage button", function()
 		WORD_GAME_UI.SidebarStageButton = stage_btn
 		WORD_GAME.Play = Play
 		token_reward.reset()
-		G.GAME.word_score_animating = false
 		tt.reset_progress(25)
 		tt.sync_progress()
 
@@ -174,13 +176,15 @@ T.describe("Sidebar stage button", function()
 
 	T.it("does not call on_hand_cleared when the stage score is zero", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				target = 25,
+				jumble = { total_score = 0, puzzle_points = 0, puzzle_multi = 1.0 },
+			},
+		})
 		G.STATE = G.STATES.TABLE_BOARD
 		G.STAGE = G.STAGES.RUN
-		G.GAME.word_round = {
-			target = 25,
-			jumble = { total_score = 0, puzzle_points = 0, puzzle_multi = 1.0 },
-		}
 		local stage_btn = require("word_game.ui.sidebar.stage_button")
 		local Play = require("word_game.model.jumble_play")
 		WORD_GAME.Play = Play
@@ -200,7 +204,13 @@ T.describe("Sidebar stage button", function()
 
 	T.it("animates to a full-size blue square with Next when the classic target is met", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				target = 25,
+				jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0 },
+			},
+		})
 		G.STATE = G.STATES.TABLE_BOARD
 		G.STAGE = G.STAGES.RUN
 
@@ -214,10 +224,6 @@ T.describe("Sidebar stage button", function()
 		local tt = require("word_game.ui.perks.timeline_timer")
 		local stage_btn = require("word_game.ui.sidebar.stage_button")
 		WORD_GAME_UI.TimelineTimer = tt
-		G.GAME.word_round = {
-			target = 25,
-			jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0 },
-		}
 		tt.reset_progress(25)
 		tt.sync_progress()
 
@@ -292,11 +298,13 @@ T.describe("Sidebar stage button", function()
 
 	T.it("lays out Next text inside the square after the classic transition", function()
 		setup_sidebar_layout_env()
-		G.GAME.run_mode = "classic"
-		G.GAME.word_round = {
-			target = 25,
-			jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0 },
-		}
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				target = 25,
+				jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0 },
+			},
+		})
 		local tt = require("word_game.ui.perks.timeline_timer")
 		local stage_btn = require("word_game.ui.sidebar.stage_button")
 		WORD_GAME_UI.TimelineTimer = tt
@@ -329,8 +337,7 @@ T.describe("Sidebar stage button", function()
 
 	T.it("defines a square sidebar button with a direct centered label child", function()
 		mock_env.reset_game()
-		G.GAME = G.GAME or {}
-		G.GAME.word_round = { mode = "jumble" }
+		mock_env.patch_game({ word_round = { mode = "jumble" } })
 		G.STATE = G.STATES.TABLE_BOARD
 		G.STAGE = G.STAGES.RUN
 		G.CARD_W = 1

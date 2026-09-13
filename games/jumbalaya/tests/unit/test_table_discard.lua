@@ -57,9 +57,7 @@ end
 T.describe("table discard bin", function()
 	T.it("sidebar HUD places End Run below deck count without stamp debug buttons", function()
 		MockEnv.setup()
-		G.GAME = G.GAME or {}
-		G.GAME.deck_left_count = 7
-		G.GAME.word_round = { mode = "jumble" }
+		MockEnv.patch_game({ deck_left_count = 7, word_round = { mode = "jumble" } })
 		G.STATE = G.STATES.TABLE_BOARD
 		G.STAGE = G.STAGES.RUN
 		G.CARD_W = 1
@@ -108,7 +106,9 @@ T.describe("table discard bin", function()
 		G.STATE = G.STATES.TABLE_BOARD
 		T.assert_true(table_discard.should_show_end_run(), "End Run visible when discards are exhausted")
 
-		G.GAME = nil
+		MockEnv.mutate_game(function(g)
+			for k in pairs(g) do g[k] = nil end
+		end)
 	end)
 
 	T.it("rejects discards once the voucher allowance is used up", function()
@@ -232,9 +232,11 @@ T.describe("table discard bin", function()
 		G.TIMELINE = nil
 		G.TILESCALE = 1
 		G.TILESIZE = 1
-		G.GAME.word_score_animating = false
-		G.GAME.hand_redraw_animating = false
-		G.GAME.round_scores = { cards_discarded = { amt = 0 } }
+		MockEnv.patch_game({
+			word_score_animating = false,
+			hand_redraw_animating = false,
+			round_scores = { cards_discarded = { amt = 0 } },
+		})
 		G.CARD_W = 1
 		G.CARD_H = 1.4
 		G.recycle_stash = {
@@ -476,10 +478,12 @@ T.describe("table discard bin", function()
 		local table_discard = require("word_game.ui.perks.discard_bin")
 		local deck = require("word_game.model.cards.deck")
 		setup_unlocked_voucher_discard()
-		G.GAME.word_round = { mode = "jumble" }
-		G.GAME.word_score_animating = false
-		G.GAME.hand_redraw_animating = false
-		G.GAME.round_scores = { cards_discarded = { amt = 0 } }
+		MockEnv.patch_game({
+			word_round = { mode = "jumble" },
+			word_score_animating = false,
+			hand_redraw_animating = false,
+			round_scores = { cards_discarded = { amt = 0 } },
+		})
 		G.TIMELINE = nil
 		G.CARD_W = 1
 		G.CARD_H = 1.4

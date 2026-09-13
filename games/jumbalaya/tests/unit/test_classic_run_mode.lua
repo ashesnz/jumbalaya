@@ -6,13 +6,15 @@ local mock_env = require("tests.helpers.mock_env")
 T.describe("Classic run mode", function()
 	T.it("awards tokens equal to banked score when a classic hand clears", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
-		G.GAME.word_round = {
-			set = 1,
-			hand_index = 1,
-			target = 50,
-			jumble = { total_score = 50 },
-		}
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				set = 1,
+				hand_index = 1,
+				target = 50,
+				jumble = { total_score = 50 },
+			},
+		})
 		local token_reward = require("word_game.ui.table.token_reward")
 		WORD_GAME_UI.TokenReward = token_reward
 		token_reward.reset()
@@ -24,32 +26,34 @@ T.describe("Classic run mode", function()
 
 	T.it("bumps the classic slider and smoke through CAT → CART → CREST then resets on next puzzle", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
 		local tt = require("word_game.ui.perks.timeline_timer")
 		local jumble = require("word_game.model.jumble")
 		local rules = require("word_game.model.jumble_play.jumble_rules")
 		WORD_GAME_UI.TimelineTimer = tt
 		WORD_GAME.Jumble = jumble
 
-		G.GAME.word_round = {
-			set = 1,
-			hand_index = 1,
-			target = 50,
-			mode = "jumble",
-			played_words = {},
-			jumble = {
-				total_score = 0,
-				puzzle_points = 0,
-				puzzle_multi = 1.0,
-				puzzle_words = {},
-				solved = false,
-				slots = {},
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				set = 1,
+				hand_index = 1,
+				target = 50,
+				mode = "jumble",
+				played_words = {},
+				jumble = {
+					total_score = 0,
+					puzzle_points = 0,
+					puzzle_multi = 1.0,
+					puzzle_words = {},
+					solved = false,
+					slots = {},
+				},
 			},
-		}
+		})
 		tt.reset_progress(50)
 
 		local function play_word(word)
-			local j = G.GAME.word_round.jumble
+			local j = mock_env.game_state().word_round.jumble
 			local old_pts = j.puzzle_points or 0
 			local old_multi = j.puzzle_multi or 1.0
 			j.puzzle_words[#j.puzzle_words + 1] = word
@@ -67,26 +71,27 @@ T.describe("Classic run mode", function()
 		play_word("CREST")
 		T.assert_true(tt.smoke_active)
 
-		jumble.apply_puzzle(G.GAME.word_round, { pattern = "_ A R", display = "_ A R" })
+		jumble.apply_puzzle(mock_env.game_state().word_round, { pattern = "_ A R", display = "_ A R" })
 		T.assert_false(tt.smoke_active, "New puzzle should stop building combo immediately")
 		T.assert_true(tt.display_combo_level() > 0, "Visual smoke should ease out on puzzle change")
-		T.assert_equal(#G.GAME.word_round.jumble.puzzle_words, 0)
+		T.assert_equal(#mock_env.game_state().word_round.jumble.puzzle_words, 0)
 	end)
 
 	T.it("does not end the hand when the classic target is met", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				set = 1,
+				hand_index = 1,
+				target = 25,
+				jumble = { total_score = 30 },
+			},
+		})
 		local RunMode = require("word_game.model.run.mode")
 		local token_reward = require("word_game.ui.table.token_reward")
 		local effects = require("word_game.ui.play_effects")
 		T.assert_false(RunMode.ends_hand_on_target())
-
-		G.GAME.word_round = {
-			set = 1,
-			hand_index = 1,
-			target = 25,
-			jumble = { total_score = 30 },
-		}
 		token_reward.reset()
 		local focus_started = false
 		local prev_focus = WORD_GAME_UI.HandClearFocus
@@ -101,26 +106,30 @@ T.describe("Classic run mode", function()
 
 	T.it("keeps timer-based rewards for Time Run on stage 1-1 only", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "time_run"
-		G.GAME.word_round = { set = 1, hand_index = 2, target = 2 }
+		mock_env.patch_game({
+			run_mode = "time_run",
+			word_round = { set = 1, hand_index = 2, target = 2 },
+		})
 		local token_reward = require("word_game.ui.table.token_reward")
 		token_reward.reset()
 		T.assert_false(token_reward.is_eligible(), "Time Run should not award tokens after 1-1")
 
-		G.GAME.word_round.hand_index = 1
+		mock_env.mutate_game(function(g) g.word_round.hand_index = 1 end)
 		T.assert_true(token_reward.is_eligible(), "Time Run should award tokens on 1-1")
 	end)
 
 	T.it("switches the sidebar button to Next when the classic target is met", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				set = 1,
+				hand_index = 1,
+				target = 25,
+				jumble = { total_score = 25, puzzle_points = 0, puzzle_multi = 1.0 },
+			},
+		})
 		G.STATE = G.STATES.TABLE_BOARD
-		G.GAME.word_round = {
-			set = 1,
-			hand_index = 1,
-			target = 25,
-			jumble = { total_score = 25, puzzle_points = 0, puzzle_multi = 1.0 },
-		}
 		local tt = require("word_game.ui.perks.timeline_timer")
 		local stage_btn = require("word_game.ui.sidebar.stage_button")
 		WORD_GAME_UI.TimelineTimer = tt
@@ -132,14 +141,16 @@ T.describe("Classic run mode", function()
 
 	T.it("allows further play once the classic target is reached", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				set = 1,
+				hand_index = 1,
+				target = 25,
+				jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0, slots = {} },
+			},
+		})
 		G.STATE = G.STATES.TABLE_BOARD
-		G.GAME.word_round = {
-			set = 1,
-			hand_index = 1,
-			target = 25,
-			jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0, slots = {} },
-		}
 		local RunMode = require("word_game.model.run.mode")
 		local rules = require("word_game.model.jumble_play.jumble_rules")
 		local tt = require("word_game.ui.perks.timeline_timer")
@@ -148,38 +159,42 @@ T.describe("Classic run mode", function()
 		tt.sync_progress()
 
 		T.assert_true(RunMode.classic_stage_complete())
-		T.assert_false(rules.play_blocked(G.GAME.word_round.jumble))
+		T.assert_false(rules.play_blocked(mock_env.game_state().word_round.jumble))
 	end)
 
 	T.it("doubles word points after the classic target is already reached", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
-		G.GAME.word_round = {
-			set = 1,
-			hand_index = 1,
-			target = 25,
-			mode = "jumble",
-			played_words = {},
-			jumble = {
-				total_score = 30,
-				puzzle_points = 0,
-				puzzle_multi = 1.0,
-				puzzle_words = {},
-				solved = false,
-				slots = {},
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				set = 1,
+				hand_index = 1,
+				target = 25,
+				mode = "jumble",
+				played_words = {},
+				jumble = {
+					total_score = 30,
+					puzzle_points = 0,
+					puzzle_multi = 1.0,
+					puzzle_words = {},
+					solved = false,
+					slots = {},
+				},
 			},
-		}
+		})
 		local jumble = require("word_game.model.jumble")
 		local rules = require("word_game.model.jumble_play.jumble_rules")
 
 		local old_pts, new_pts = jumble.record_puzzle_word("CATS", { used_cards = {} })
 		T.assert_equal(new_pts - old_pts, 8, "Four-letter word should double to eight after target")
 
-		G.GAME.word_round.jumble.total_score = 20
-		G.GAME.word_round.jumble.puzzle_points = 0
-		G.GAME.word_round.jumble.puzzle_words = {}
+		mock_env.mutate_game(function(g)
+			g.word_round.jumble.total_score = 20
+			g.word_round.jumble.puzzle_points = 0
+			g.word_round.jumble.puzzle_words = {}
+		end)
 		local preview = rules.preview_puzzle_total_after_word(
-			G.GAME.word_round.jumble, "CATS", {})
+			mock_env.game_state().word_round.jumble, "CATS", {})
 		T.assert_equal(preview, 4)
 
 		old_pts, new_pts = jumble.record_puzzle_word("CATS", { used_cards = {} })
@@ -188,25 +203,27 @@ T.describe("Classic run mode", function()
 
 	T.it("doubles banked puzzle totals when the stage was already past target", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
-		G.GAME.word_round = {
-			set = 1,
-			hand_index = 1,
-			target = 25,
-			mode = "jumble",
-			played_words = {},
-			jumble = {
-				total_score = 30,
-				puzzle_points = 5,
-				puzzle_multi = 1.0,
-				puzzle_words = { "CAT" },
-				solved = true,
-				slots = {},
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				set = 1,
+				hand_index = 1,
+				target = 25,
+				mode = "jumble",
+				played_words = {},
+				jumble = {
+					total_score = 30,
+					puzzle_points = 5,
+					puzzle_multi = 1.0,
+					puzzle_words = { "CAT" },
+					solved = true,
+					slots = {},
+				},
 			},
-		}
+		})
 		local rules = require("word_game.model.jumble_play.jumble_rules")
 		local jumble = require("word_game.model.jumble")
-		local result = rules.evaluate_play(jumble, G.GAME.word_round.jumble)
+		local result = rules.evaluate_play(jumble, mock_env.game_state().word_round.jumble)
 		T.assert_equal(result.kind, "bank_puzzle")
 		T.assert_equal(result.new_total, 40, "Five puzzle points should double to ten when banking past target")
 		T.assert_true(result.post_target_doubled)
@@ -214,12 +231,14 @@ T.describe("Classic run mode", function()
 
 	T.it("shows post-target scoring on the classic timeline slider", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
 		local tt = require("word_game.ui.perks.timeline_timer")
-		G.GAME.word_round = {
-			target = 25,
-			jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0 },
-		}
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				target = 25,
+				jumble = { total_score = 30, puzzle_points = 0, puzzle_multi = 1.0 },
+			},
+		})
 		tt.reset_progress(25)
 		tt.sync_progress()
 		T.assert_true(tt.post_target_scoring)
@@ -229,7 +248,7 @@ T.describe("Classic run mode", function()
 
 	T.it("floats ×2 off the right end of the slider like Hand Cleared", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
+		mock_env.patch_game({ run_mode = "classic" })
 		G.C.GOLD = G.C.GOLD or { 1, 0.8, 0, 1 }
 		local play_effects = require("word_game.ui.play_effects")
 		local float_up_text = require("word_game.ui.feedback.float_up_text")
@@ -266,15 +285,17 @@ T.describe("Classic run mode", function()
 
 	T.it("shows the proceed hint only when play is pressed with an empty card area", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				set = 1,
+				hand_index = 1,
+				target = 25,
+				mode = "jumble",
+				jumble = { total_score = 32, puzzle_points = 0, puzzle_multi = 1.0, slots = {} },
+			},
+		})
 		G.STATE = G.STATES.TABLE_BOARD
-		G.GAME.word_round = {
-			set = 1,
-			hand_index = 1,
-			target = 25,
-			mode = "jumble",
-			jumble = { total_score = 32, puzzle_points = 0, puzzle_multi = 1.0, slots = {} },
-		}
 		G.pattern_row = { area = { T = { x = 4, y = 4, w = 10, h = 2 }, cards = {} } }
 		G.dealt_letters = { T = { x = 3, y = 8, w = 12, h = 2.8 }, cards = {} }
 		G.TILE_W = 20
@@ -291,7 +312,7 @@ T.describe("Classic run mode", function()
 		WORD_GAME_UI.TableControls = TableControls
 		WORD_GAME.Jumble = {
 			is_active = function() return true end,
-			state = function() return G.GAME.word_round.jumble end,
+			state = function() return mock_env.game_state().word_round.jumble end,
 		}
 		tt.reset_progress(25)
 		tt.sync_progress()
@@ -322,8 +343,7 @@ T.describe("Classic run mode", function()
 
 	T.it("styles the proceed hint like Hand Cleared in red", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
-		G.GAME.word_round = { target = 25 }
+		mock_env.patch_game({ run_mode = "classic", word_round = { target = 25 } })
 		local word_feedback = require("word_game.ui.feedback.word_feedback")
 
 		local captured = nil
@@ -341,14 +361,16 @@ T.describe("Classic run mode", function()
 
 	T.it("rolls the classic timeline score down during token award", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				set = 1,
+				hand_index = 1,
+				target = 25,
+				jumble = { total_score = 30 },
+			},
+		})
 		G.STATE = G.STATES.TABLE_BOARD
-		G.GAME.word_round = {
-			set = 1,
-			hand_index = 1,
-			target = 25,
-			jumble = { total_score = 30 },
-		}
 		local tt = require("word_game.ui.perks.timeline_timer")
 		local token_reward = require("word_game.ui.table.token_reward")
 		WORD_GAME_UI.TimelineTimer = tt

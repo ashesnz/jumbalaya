@@ -8,7 +8,7 @@ local Timeline = require("word_game.model.run.timeline")
 
 local function ensure_time_run_fuse()
 	mock_env.reset_game()
-	G.GAME.run_mode = "time_run"
+	mock_env.patch_game({ run_mode = "time_run" })
 	WORD_GAME = WORD_GAME or {}
 	WORD_GAME.Timeline = Timeline
 end
@@ -143,7 +143,7 @@ T.describe("Timeline Timer & Shape Math", function()
 		local tt = require("word_game.ui.perks.timeline_timer")
 		tt.reset()
 		tick_fuse(tt, 10.8)
-		tt.freeze_reward_display(math.floor(G.GAME.timeline_seconds))
+		tt.freeze_reward_display(math.floor(mock_env.game_state().timeline_seconds))
 		T.assert_equal(tt.time_remaining, 49)
 		T.assert_false(tt.is_active)
 		T.assert_true(tt.frozen_for_reward)
@@ -152,12 +152,14 @@ T.describe("Timeline Timer & Shape Math", function()
 
 	T.it("shows classic score progress instead of a countdown timer", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
 		local tt = require("word_game.ui.perks.timeline_timer")
-		G.GAME.word_round = {
-			target = 50,
-			jumble = { total_score = 18, puzzle_points = 4, puzzle_multi = 2.0, puzzle_words = {} },
-		}
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				target = 50,
+				jumble = { total_score = 18, puzzle_points = 4, puzzle_multi = 2.0, puzzle_words = {} },
+			},
+		})
 		tt.reset_progress(50)
 		tt.sync_progress()
 		T.assert_true(tt.is_progress_mode())
@@ -169,12 +171,14 @@ T.describe("Timeline Timer & Shape Math", function()
 
 	T.it("keeps the slider width fixed and slides the goal seam left after target is exceeded", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
 		local tt = require("word_game.ui.perks.timeline_timer")
-		G.GAME.word_round = {
-			target = 25,
-			jumble = { total_score = 50, puzzle_points = 0, puzzle_multi = 1.0, puzzle_words = {} },
-		}
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				target = 25,
+				jumble = { total_score = 50, puzzle_points = 0, puzzle_multi = 1.0, puzzle_words = {} },
+			},
+		})
 		tt.reset_progress(25)
 		tt.sync_progress()
 		T.assert_true(tt.goal_reached)
@@ -182,24 +186,26 @@ T.describe("Timeline Timer & Shape Math", function()
 		T.assert_almost_equal(tt.progress_goal_marker_fraction(), 0.5, 0.001, "Goal seam should move left as score doubles")
 		T.assert_equal(tt.format_progress_label(), "50 / 25")
 
-		G.GAME.word_round.jumble.total_score = 100
+		mock_env.mutate_game(function(g) g.word_round.jumble.total_score = 100 end)
 		tt.sync_progress()
 		T.assert_almost_equal(tt.progress_goal_marker_fraction(), 0.25, 0.001, "More score should push the goal seam further left")
 	end)
 
 	T.it("animates the slider toward projected score on each word play", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
 		local tt = require("word_game.ui.perks.timeline_timer")
-		G.GAME.word_round = {
-			target = 50,
-			jumble = {
-				total_score = 0,
-				puzzle_points = 3,
-				puzzle_multi = 1.0,
-				puzzle_words = { "CAT" },
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				target = 50,
+				jumble = {
+					total_score = 0,
+					puzzle_points = 3,
+					puzzle_multi = 1.0,
+					puzzle_words = { "CAT" },
+				},
 			},
-		}
+		})
 		tt.reset_progress(50)
 		tt.display_frac = 0
 		tt.on_word_played(0, 3)
@@ -212,19 +218,21 @@ T.describe("Timeline Timer & Shape Math", function()
 
 	T.it("engages smoke only after the third word on the same puzzle", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
 		local tt = require("word_game.ui.perks.timeline_timer")
+		mock_env.patch_game({ run_mode = "classic" })
 
 		local function sync_words(words)
-			G.GAME.word_round = {
-				target = 50,
-				jumble = {
-					total_score = 0,
-					puzzle_points = #words * 3,
-					puzzle_multi = 1.0,
-					puzzle_words = words,
+			mock_env.patch_game({
+				word_round = {
+					target = 50,
+					jumble = {
+						total_score = 0,
+						puzzle_points = #words * 3,
+						puzzle_multi = 1.0,
+						puzzle_words = words,
+					},
 				},
-			}
+			})
 			tt.reset_progress(50)
 			tt.sync_progress()
 		end
@@ -239,17 +247,19 @@ T.describe("Timeline Timer & Shape Math", function()
 
 	T.it("resets smoke when advancing to a new puzzle", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
 		local tt = require("word_game.ui.perks.timeline_timer")
-		G.GAME.word_round = {
-			target = 50,
-			jumble = {
-				total_score = 0,
-				puzzle_points = 9,
-				puzzle_multi = 1.0,
-				puzzle_words = { "CAT", "CART", "CREST" },
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				target = 50,
+				jumble = {
+					total_score = 0,
+					puzzle_points = 9,
+					puzzle_multi = 1.0,
+					puzzle_words = { "CAT", "CART", "CREST" },
+				},
 			},
-		}
+		})
 		tt.reset_progress(50)
 		tt.sync_progress()
 		tt.display_combo = 3
@@ -257,7 +267,7 @@ T.describe("Timeline Timer & Shape Math", function()
 		table.insert(tt.sparks, { age = 0, life = 1, x = 0, y = 0, vx = 0, vy = 0, alpha = 1, size = 3, color = { 1, 1, 1, 1 } })
 
 		tt.reset_puzzle_smoke()
-		G.GAME.word_round.jumble.puzzle_words = {}
+		mock_env.mutate_game(function(g) g.word_round.jumble.puzzle_words = {} end)
 		tt.sync_progress()
 		T.assert_false(tt.smoke_active)
 		T.assert_true(tt.display_combo_level() > 0, "Smoke and glow should ease out instead of snapping off")
@@ -269,23 +279,25 @@ T.describe("Timeline Timer & Shape Math", function()
 
 	T.it("eases vibration down after a high combo puzzle ends", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
 		local tt = require("word_game.ui.perks.timeline_timer")
-		G.GAME.word_round = {
-			target = 50,
-			jumble = {
-				total_score = 0,
-				puzzle_points = 0,
-				puzzle_multi = 1.0,
-				puzzle_words = { "A", "B", "C", "D", "E", "F" },
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				target = 50,
+				jumble = {
+					total_score = 0,
+					puzzle_points = 0,
+					puzzle_multi = 1.0,
+					puzzle_words = { "A", "B", "C", "D", "E", "F" },
+				},
 			},
-		}
+		})
 		tt.reset_progress(50)
 		tt.sync_progress()
 		tt.display_combo = tt.combo_level()
 		T.assert_true(tt.display_shake_strength() > 0)
 
-		G.GAME.word_round.jumble.puzzle_words = {}
+		mock_env.mutate_game(function(g) g.word_round.jumble.puzzle_words = {} end)
 		tt.sync_progress()
 		T.assert_true(tt.display_shake_strength() > 0, "Shake should linger briefly after the puzzle resets")
 		for _ = 1, 40 do
@@ -296,19 +308,21 @@ T.describe("Timeline Timer & Shape Math", function()
 
 	T.it("escalates glow, smoke, and shake after the third consecutive word", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
 		local tt = require("word_game.ui.perks.timeline_timer")
+		mock_env.patch_game({ run_mode = "classic" })
 
 		local function sync_words(words)
-			G.GAME.word_round = {
-				target = 50,
-				jumble = {
-					total_score = 0,
-					puzzle_points = #words * 3,
-					puzzle_multi = 1.0,
-					puzzle_words = words,
+			mock_env.patch_game({
+				word_round = {
+					target = 50,
+					jumble = {
+						total_score = 0,
+						puzzle_points = #words * 3,
+						puzzle_multi = 1.0,
+						puzzle_words = words,
+					},
 				},
-			}
+			})
 			tt.reset_progress(50)
 			tt.sync_progress()
 		end
@@ -337,7 +351,7 @@ T.describe("Timeline Timer & Shape Math", function()
 
 	T.it("resets to a score slider on new classic hands", function()
 		mock_env.reset_game()
-		G.GAME.run_mode = "classic"
+		mock_env.patch_game({ run_mode = "classic" })
 		WORD_GAME_UI.Sidebar = {
 			refresh = function() end,
 			clear_hand = function() end,
@@ -356,7 +370,7 @@ T.describe("Timeline Timer & Shape Math", function()
 			StageLabel = { sync = function() end },
 			BonusStackUI = { on_hand_start = function() end },
 		})
-		G.GAME.word_round = { set = 1, hand_index = 1, target = 25, played_words = {} }
+		mock_env.patch_game({ word_round = { set = 1, hand_index = 1, target = 25, played_words = {} } })
 
 		round.start_hand(1, 1)
 		T.assert_true(tt.is_progress_mode())
@@ -409,8 +423,7 @@ T.describe("Timeline Timer & Shape Math", function()
 
 	T.it("rolls stage label digits when advancing to the next hand", function()
 		local stage_label = require("word_game.ui.score_banner.stage_label")
-		G.GAME = G.GAME or {}
-		G.GAME.word_round = { set = 1, hand_index = 1 }
+		mock_env.patch_game({ word_round = { set = 1, hand_index = 1 } })
 		stage_label.force_sync()
 		stage_label.roll_to_next_hand()
 		T.assert_not_nil(stage_label.right_roll, "Hand digit should roll on advance")
@@ -425,12 +438,14 @@ T.describe("Timeline Timer & Shape Math", function()
 
 	T.it("hides the slider then arms a 60s countdown that scales back in", function()
 		ensure_time_run_fuse()
-		G.GAME.run_mode = "classic"
 		local tt = require("word_game.ui.perks.timeline_timer")
-		G.GAME.word_round = {
-			target = 50,
-			jumble = { total_score = 18, puzzle_points = 0, puzzle_multi = 1.0, puzzle_words = {} },
-		}
+		mock_env.patch_game({
+			run_mode = "classic",
+			word_round = {
+				target = 50,
+				jumble = { total_score = 18, puzzle_points = 0, puzzle_multi = 1.0, puzzle_words = {} },
+			},
+		})
 		tt.reset_progress(50)
 		T.assert_true(tt.is_progress_mode())
 		T.assert_equal(tt.intro_visible, 1)
@@ -465,7 +480,7 @@ T.describe("Timeline Timer & Shape Math", function()
 
 	T.it("clears the boss countdown override when a new classic hand starts", function()
 		ensure_time_run_fuse()
-		G.GAME.run_mode = "classic"
+		mock_env.patch_game({ run_mode = "classic" })
 		local tt = require("word_game.ui.perks.timeline_timer")
 		tt.arm_boss_countdown(60)
 		T.assert_false(tt.is_progress_mode())

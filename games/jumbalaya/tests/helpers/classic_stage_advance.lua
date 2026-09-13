@@ -38,7 +38,7 @@ function M.setup_card_areas()
 		relayout = function() end,
 		apply_screen_position = function() end,
 	}
-	G.GAME.deck_alpha = { pos = { x = 0, y = 0 } }
+	mock_env.patch_game({ deck_alpha = { pos = { x = 0, y = 0 } } })
 	G.RUN = { active = true }
 end
 
@@ -84,18 +84,20 @@ end
 
 function M.configure_round(opts)
 	opts = opts or {}
-	G.GAME.run_mode = "classic"
 	G.RUN = G.RUN or { active = true }
 	G.RUN.active = true
-	G.GAME.run_state = { tokens = 100, perks = {}, trade_used_this_hand = false }
-	G.GAME.word_round = {
-		set = opts.set or 1,
-		hand_index = opts.hand_index or 1,
-		target = opts.target or 25,
-		mode = "jumble",
-		played_words = {},
-		jumble = opts.jumble or default_jumble(opts),
-	}
+	mock_env.patch_game({
+		run_mode = "classic",
+		run_state = { tokens = 100, perks = {}, trade_used_this_hand = false },
+		word_round = {
+			set = opts.set or 1,
+			hand_index = opts.hand_index or 1,
+			target = opts.target or 25,
+			mode = "jumble",
+			played_words = {},
+			jumble = opts.jumble or default_jumble(opts),
+		},
+	})
 end
 
 function M.make_timeline()

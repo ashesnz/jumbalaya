@@ -360,7 +360,6 @@ T.describe("perk stamp panel layout", function()
 
 	T.it("applies a queued perk but picks a stamp sprite for the imprint", function()
 		Stamp.reset()
-		G.GAME = G.GAME or {}
 		local target = perk_cfg.by_id("wide_hand")
 		T.assert_true(Stamp.queue(target))
 		T.assert_equal(Stamp.resolve_perk().id, "wide_hand")
@@ -529,7 +528,6 @@ T.describe("perk stamp click popup", function()
 
 	T.it("persists earned perks on match state", function()
 		Stamp.reset()
-		G.GAME = G.GAME or {}
 		local state = require("word_game.model.run.state")
 		state.get().perks = {}
 

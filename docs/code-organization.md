@@ -24,7 +24,23 @@ Phases 0–13 are **complete** (store, engine package, retained UI, `Funcs` regi
 - `jumbalaya_core/` must stay headless (no `love.*`, no `app/` / `word_game/` imports) — enforced by `tests/unit/test_core_purity.lua`.
 - No new deep `word_game.model.*` / `word_game.ui.*` requires across `app/` (bootstrap wiring exempt), `devtools/`, or `word_game/ui/` (grandfathered allowlist) — enforced by `tests/unit/test_facade_boundaries.lua`.
 - New features ship via `WORD_GAME` / `WORD_GAME_UI` facade methods; model code uses `Presentation.emit`, not `Funcs.dispatch`.
-- Store authority lives on `WORD_GAME.store()` / `game_access`; `app/bootstrap/store_sync.lua` creates the store and binds runs at boot.
+- Store authority lives on `WORD_GAME.store()` / `game_access` via `word_game/model/store_ops.lua` (app re-exports legacy `app/bootstrap/store_sync.lua`).
+
+### Store immutability (POC)
+
+The run snapshot is **copy-on-write** through reducers:
+
+| Layer | Role |
+|-------|------|
+| `jumbalaya_core/store/reducers/*` | Each handler receives a shallow copy of the prior snapshot; nested tables (`word_round`, `run_state`, `piles`) are copied before mutation where reducers touch them (`store/immutable.lua`). |
+| `store:dispatch(action)` | Always replaces `store._state` with the reducer return value and notifies subscribers. |
+| `store:patch(fields)` | Dispatches `{ type = "GAME_PATCH", patch = fields }` — no in-place merge on the live snapshot. |
+| `game_access.mutate(fn)` / `store_ops.mutate(fn)` | Legacy glue escape hatch: shallow-copy snapshot, run `fn(draft)`, `store:replace(draft)`. Prefer typed dispatches for new code. |
+| `Game.GAME` / `G.GAME` in tests | **Read alias only** — `store_ops.install_game_alias_sync()` mirrors the store into `shell.game().GAME` after every notify. Do not mutate `G.GAME` directly in tests; use `mock_env.patch_game` / `mock_env.mutate_game` / `game_access.get()`. |
+
+**Do not** cache `game_access.get()` across a `dispatch`/`patch`/`mutate` boundary — nested table references from the old snapshot are stale once reducers copy subtrees.
+
+Enforcement: `tests/unit/test_core_store_immutable.lua` (nested copy guarantees), `tests/unit/test_core_store_dispatch.lua` (reducer behavior), `tests/unit/test_store_ops.lua` (glue API + alias sync).
 
 ### Phase 10a glue hygiene (ongoing)
 
@@ -201,7 +217,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | Concern | Access |
 |---------|--------|
 | Game shell (settings, scene nodes, timers) | `app/runtime.lua` → `jumbalaya-engine.shell` |
-| Run snapshot | `WORD_GAME.store()` / `game_access.get()` on `Game.GAME` |
+| Run snapshot | `WORD_GAME.store()` / `game_access.get()` — `Game.GAME` is a synced alias, not the authority |
 | UIBox string callbacks | `app/callbacks/funcs.lua` → `Funcs.dispatch("name", …)` |
 | Model → UI notify | `Presentation.emit` (contract: `types/presentation.lua`) |
 

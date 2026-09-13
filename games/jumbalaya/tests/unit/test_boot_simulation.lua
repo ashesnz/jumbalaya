@@ -38,8 +38,8 @@ T.describe("Full Game Boot & Run Simulation", function()
 			end
 
 			-- Verify title screen initialized cleanly
-			T.assert_not_nil(G.GAME, "G.GAME must be initialized after boot")
 			local word_game = require("word_game")
+			T.assert_not_nil(word_game.state(), "game state must be initialized after boot")
 local Funcs = require("app.callbacks.funcs")
 			T.assert_not_nil(word_game.store(), "WORD_GAME.store must be wired after boot")
 			T.assert_not_nil(word_game.engine(), "WORD_GAME.engine must be wired after boot")
@@ -77,9 +77,10 @@ local Funcs = require("app.callbacks.funcs")
 			end
 
 			-- Verify transition to Stage 1-1 gameplay board
-			T.assert_not_nil(G.GAME.word_round, "G.GAME.word_round must be present after starting run")
-			T.assert_equal(1, G.GAME.word_round.set, "Round set should be 1")
-			T.assert_equal(1, G.GAME.word_round.hand_index, "Round hand_index should be 1 (Stage 1-1)")
+			local game = word_game.state()
+			T.assert_not_nil(game.word_round, "word_round must be present after starting run")
+			T.assert_equal(1, game.word_round.set, "Round set should be 1")
+			T.assert_equal(1, game.word_round.hand_index, "Round hand_index should be 1 (Stage 1-1)")
 		end)
 
 		if orig_getOS then

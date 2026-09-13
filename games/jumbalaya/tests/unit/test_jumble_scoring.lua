@@ -22,7 +22,7 @@ T.describe("Jumble scoring and odometer", function()
 				puzzle = { span = { "C", "T" }, min = 3, max = 7, kind = "span" },
 			},
 		}
-		G.GAME.word_round = wr
+		mock_env.patch_game({ word_round = wr })
 
 		local old_p1, new_p1, old_m1, new_m1 = jumble.record_puzzle_word("CAT")
 		T.assert_equal(old_p1, 0)
@@ -70,8 +70,7 @@ T.describe("Jumble scoring and odometer", function()
 				puzzle = { span = { "C", "T" }, display = "C…T", min = 3, max = 7, kind = "span" },
 			},
 		}
-		G.GAME.word_round = wr
-		G.GAME.word_score_animating = false
+		mock_env.patch_game({ word_round = wr, word_score_animating = false })
 
 		require("word_game.ui.play_effects.resolution").resolve(flow)
 
@@ -95,8 +94,7 @@ T.describe("Jumble scoring and odometer", function()
 				puzzle = { span = { "C", "T" }, display = "C…T", min = 3, max = 7, kind = "span" },
 			},
 		}
-		G.GAME.word_round = wr2
-		G.GAME.word_score_animating = false
+		mock_env.patch_game({ word_round = wr2, word_score_animating = false })
 
 		require("word_game.ui.play_effects.resolution").resolve(flow)
 		T.assert_equal(wr2.jumble.total_score, 108, "Total score should be 100 + math.floor(7 * 1.2) = 108")
@@ -143,7 +141,7 @@ T.describe("Jumble scoring and odometer", function()
 
 	T.it("executes fast odometer countdown for points to get in under 0.5s", function()
 		local sb = require("word_game.ui.score_banner")
-		G.GAME.word_round = { target = 20, jumble = { total_score = 0 } }
+		mock_env.patch_game({ word_round = { target = 20, jumble = { total_score = 0 } } })
 		sb.reset_jumble_score()
 		T.assert_equal(sb.points_to_get, 20, "Initial remaining should be 20")
 		T.assert_equal(sb.points_earned, 0)
@@ -168,30 +166,34 @@ T.describe("Jumble scoring and odometer", function()
 		local placement_word = require("word_game.model.jumble.placement_word")
 		WORD_GAME_UI.ScoreBanner = sb
 		WORD_GAME.Jumble = jumble
-		G.GAME.word_round = {
-			target = 25,
-			mode = "jumble",
-			played_words = {},
-			jumble = {
-				total_score = 5,
-				puzzle_points = 0,
-				puzzle_multi = 1.0,
-				puzzle_words = {},
-				slots = {
-					{ kind = "fixed", letter = "C" },
-					{ kind = "blank", card = nil },
-					{ kind = "fixed", letter = "T" },
+		mock_env.patch_game({
+			word_round = {
+				target = 25,
+				mode = "jumble",
+				played_words = {},
+				jumble = {
+					total_score = 5,
+					puzzle_points = 0,
+					puzzle_multi = 1.0,
+					puzzle_words = {},
+					slots = {
+						{ kind = "fixed", letter = "C" },
+						{ kind = "blank", card = nil },
+						{ kind = "fixed", letter = "T" },
+					},
+					puzzle = "C_T",
 				},
-				puzzle = "C_T",
 			},
-		}
+		})
 		sb.reset_jumble_score()
 		T.assert_equal(sb.points_to_get, 20, "No placement should use banked score only")
 		T.assert_equal(sb.points_earned, 5)
 		T.assert_equal(sb.points_got, 0)
 
-		G.GAME.word_round.jumble.slots[2].card = { ability = { letter = "A" } }
-		placement_word.refresh_from_jumble_slots(G.GAME.word_round.jumble.slots)
+		mock_env.mutate_game(function(g)
+			g.word_round.jumble.slots[2].card = { ability = { letter = "A" } }
+		end)
+		placement_word.refresh_from_jumble_slots(mock_env.game_state().word_round.jumble.slots)
 		sb.update(0.2)
 		T.assert_equal(sb.points_to_get, 17, "Valid placed word should preview its puzzle points")
 		T.assert_equal(sb.points_earned, 5)
@@ -205,28 +207,31 @@ T.describe("Jumble scoring and odometer", function()
 		local rules = require("word_game.model.jumble_play.jumble_rules")
 		WORD_GAME_UI.ScoreBanner = sb
 		WORD_GAME.Jumble = jumble
-		G.GAME.word_round = {
-			target = 25,
-			mode = "jumble",
-			played_words = {},
-			jumble = {
-				total_score = 0,
-				puzzle_points = 0,
-				puzzle_multi = 1.0,
-				puzzle_words = {},
-				slots = {
-					{ kind = "fixed", letter = "C" },
-					{ kind = "blank", card = { ability = { letter = "X" } } },
-					{ kind = "fixed", letter = "T" },
+		mock_env.patch_game({
+			word_round = {
+				target = 25,
+				mode = "jumble",
+				played_words = {},
+				jumble = {
+					total_score = 0,
+					puzzle_points = 0,
+					puzzle_multi = 1.0,
+					puzzle_words = {},
+					slots = {
+						{ kind = "fixed", letter = "C" },
+						{ kind = "blank", card = { ability = { letter = "X" } } },
+						{ kind = "fixed", letter = "T" },
+					},
+					puzzle = "C_T",
 				},
-				puzzle = "C_T",
 			},
-		}
+		})
 		sb.reset_jumble_score()
-		placement_word.refresh_from_jumble_slots(G.GAME.word_round.jumble.slots)
+		local game = mock_env.game_state()
+		placement_word.refresh_from_jumble_slots(game.word_round.jumble.slots)
 		sb.update(0.2)
-		T.assert_false(G.GAME.placement_word_valid, "Invalid words stay invalid until play")
+		T.assert_false(mock_env.game_state().placement_word_valid, "Invalid words stay invalid until play")
 		T.assert_equal(sb.points_got, 3, "Invalid CXT should still preview 3 points")
-		T.assert_equal(rules.remaining_to_target(G.GAME.word_round.jumble, 25), 22)
+		T.assert_equal(rules.remaining_to_target(mock_env.game_state().word_round.jumble, 25), 22)
 	end)
 end)

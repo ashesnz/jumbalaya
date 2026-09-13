@@ -3,6 +3,7 @@
 ]]
 
 local T = require("tests.framework")
+local mock_env = require("tests.helpers.mock_env")
 local fixture = require("tests.helpers.classic_stage_advance")
 local TableAreas = require("word_game.model.table_areas")
 local piles = require("word_game.model.piles")
@@ -48,8 +49,9 @@ T.describe("Classic stage advance deal", function()
 
 		ctx.continue()
 
-		T.assert_equal(G.GAME.word_round.hand_index, 2, "Should advance to stage 1-2")
-		T.assert_equal(G.GAME.word_round.target, 50, "Stage 1-2 target should be 50")
+		local game = mock_env.game_state()
+		T.assert_equal(game.word_round.hand_index, 2, "Should advance to stage 1-2")
+		T.assert_equal(game.word_round.target, 50, "Stage 1-2 target should be 50")
 		T.assert_equal(hand_count(), ctx.hand_size.get(),
 			"Stage 1-2 should deal a full seven-card hand")
 		T.assert_equal(draw_count(), expected - ctx.hand_size.get(),
@@ -67,8 +69,9 @@ T.describe("Classic stage advance deal", function()
 
 		ctx.advance()
 
-		T.assert_equal(G.GAME.word_round.hand_index, 2)
-		T.assert_equal(G.GAME.word_round.target, 50)
+		local game = mock_env.game_state()
+		T.assert_equal(game.word_round.hand_index, 2)
+		T.assert_equal(game.word_round.target, 50)
 		T.assert_equal(hand_count(), ctx.hand_size.get())
 		T.assert_equal(#G.letter_inventory, expected)
 		T.assert_equal(ctx.deck.cards_left() + ctx.deck.held_count(), expected)
@@ -102,8 +105,9 @@ T.describe("Classic stage advance deal", function()
 
 		ctx.advance()
 
-		T.assert_equal(G.GAME.word_round.hand_index, 2)
-		T.assert_equal(G.GAME.word_round.target, 50)
+		local game = mock_env.game_state()
+		T.assert_equal(game.word_round.hand_index, 2)
+		T.assert_equal(game.word_round.target, 50)
 		T.assert_equal(#TableAreas.pattern_cards(), 0,
 			"Stage opening deal should clear the placement row")
 		T.assert_equal(hand_count(), ctx.hand_size.get(),
@@ -120,7 +124,8 @@ T.describe("Classic stage advance deal", function()
 
 		ctx.advance()
 
-		T.assert_equal(G.GAME.word_round.hand_index, 2)
+		local game = mock_env.game_state()
+		T.assert_equal(game.word_round.hand_index, 2)
 		T.assert_equal(hand_count(), ctx.hand_size.get(),
 			"Table board stage advance should deal a full hand")
 		T.assert_true(draw_count() > 0,
@@ -136,9 +141,10 @@ T.describe("Classic stage advance deal", function()
 
 		ctx.advance({ { letter = "Z", color = "red" } })
 
-		T.assert_equal(G.GAME.word_round.hand_index, 2)
+		local game = mock_env.game_state()
+		T.assert_equal(game.word_round.hand_index, 2)
 		T.assert_equal(hand_count(), ctx.hand_size.get())
-		T.assert_false(G.GAME.word_score_animating,
+		T.assert_false(game.word_score_animating,
 			"Score animation flag must clear after stage opening deal")
 		fixture.assert_hand_draggable(T, "Stage 1-2")
 
@@ -155,9 +161,10 @@ T.describe("Classic stage advance deal", function()
 
 		ctx.advance({ { letter = "X", color = "red" } })
 
-		T.assert_equal(G.GAME.word_round.hand_index, 3)
+		local game = mock_env.game_state()
+		T.assert_equal(game.word_round.hand_index, 3)
 		T.assert_equal(hand_count(), ctx.hand_size.get())
-		T.assert_false(G.GAME.word_score_animating)
+		T.assert_false(game.word_score_animating)
 		fixture.assert_hand_draggable(T, "Stage 1-3")
 
 		ctx.restore()

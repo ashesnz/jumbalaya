@@ -57,8 +57,7 @@ T.describe("Stage 1-3 boss words", function()
 		local config = require("word_game.board.placement.config")
 		local puzzle = { kind = "rigid", pattern = "_______" }
 		local slots = jumble.parse_slots(puzzle)
-		G.GAME = G.GAME or {}
-		G.GAME.word_round = { mode = "jumble", jumble = { puzzle = puzzle, slots = slots } }
+		mock_env.patch_game({ word_round = { mode = "jumble", jumble = { puzzle = puzzle, slots = slots } } })
 		G.TABLE_HAND_SIZE = 7
 		G.CARD_W = 2
 		G.HAND_CARD_SPACING = 0.78
@@ -84,8 +83,7 @@ T.describe("Stage 1-3 boss words", function()
 		local config = require("word_game.board.placement.config")
 		local puzzle = { kind = "rigid", pattern = "C_T" }
 		local slots = jumble.parse_slots(puzzle)
-		G.GAME = G.GAME or {}
-		G.GAME.word_round = { mode = "jumble", jumble = { puzzle = puzzle, slots = slots } }
+		mock_env.patch_game({ word_round = { mode = "jumble", jumble = { puzzle = puzzle, slots = slots } } })
 		G.TABLE_HAND_SIZE = 7
 		G.CARD_W = 2
 		G.HAND_CARD_SPACING = 0.78
@@ -112,15 +110,16 @@ T.describe("Stage 1-3 boss words", function()
 		local board_config = require("word_game.board.placement.config")
 		local puzzle = jumble.boss_puzzle(1, 3)
 		local slots = jumble.parse_slots(puzzle)
-		G.GAME = G.GAME or {}
-		G.GAME.word_round = {
-			mode = "jumble",
-			jumble = {
-				puzzle = puzzle,
-				slots = slots,
-				boss_word_active = true,
+		mock_env.patch_game({
+			word_round = {
+				mode = "jumble",
+				jumble = {
+					puzzle = puzzle,
+					slots = slots,
+					boss_word_active = true,
+				},
 			},
-		}
+		})
 		G.TABLE_HAND_SIZE = 7
 		G.CARD_W = 2
 		G.HAND_CARD_SPACING = 0.78
@@ -167,7 +166,7 @@ T.describe("Stage 1-3 boss words", function()
 		G.TILE_W = 20
 		G.ROOM = { T = { x = 0, y = 0, w = 20, h = 11.5 } }
 		local boss_col = felt.play_column()
-		G.GAME.word_round.jumble.boss_word_active = false
+		mock_env.mutate_game(function(g) g.word_round.jumble.boss_word_active = false end)
 		local normal_col = felt.play_column()
 		T.assert_true(boss_col.w > normal_col.w, "Boss layout should widen the play column")
 	end)
@@ -184,7 +183,7 @@ T.describe("Stage 1-3 boss words", function()
 		G.ROOM = { T = { x = 0, y = 0, w = 20, h = 11.5 } }
 		local boss_col = felt.play_column()
 		local hand_col = felt.hand_play_column()
-		G.GAME.word_round.jumble.boss_word_active = false
+		mock_env.mutate_game(function(g) g.word_round.jumble.boss_word_active = false end)
 		local normal_col = felt.play_column()
 		T.assert_almost_equal(hand_col.x, normal_col.x, 0.01)
 		T.assert_almost_equal(hand_col.w, normal_col.w, 0.01)
@@ -249,16 +248,17 @@ T.describe("Stage 1-3 boss words", function()
 		slots[8].card = card("L")
 		slots[9].card = card("E")
 
-		G.GAME = G.GAME or {}
-		G.GAME.word_round = {
-			mode = "jumble",
-			played_words = {},
-			jumble = {
-				boss_word_active = true,
-				puzzle = puzzle,
-				slots = slots,
+		mock_env.patch_game({
+			word_round = {
+				mode = "jumble",
+				played_words = {},
+				jumble = {
+					boss_word_active = true,
+					puzzle = puzzle,
+					slots = slots,
+				},
 			},
-		}
+		})
 
 		T.assert_equal(jumble.build_word(slots), "VEGETABLE")
 		T.assert_true(jumble.word_fits_pattern("VEGETABLE", puzzle))
@@ -349,16 +349,17 @@ T.describe("Stage 1-3 boss words", function()
 		local puzzle = jumble.boss_puzzle(1, 3)
 		local slots = jumble.parse_slots(puzzle)
 
-		G.GAME = G.GAME or {}
-		G.GAME.word_round = {
-			mode = "jumble",
-			jumble = {
-				boss_word_active = true,
-				boss_puzzle_hidden = false,
-				puzzle = puzzle,
-				slots = slots,
+		mock_env.patch_game({
+			word_round = {
+				mode = "jumble",
+				jumble = {
+					boss_word_active = true,
+					boss_puzzle_hidden = false,
+					puzzle = puzzle,
+					slots = slots,
+				},
 			},
-		}
+		})
 		G.TABLE_HAND_SIZE = 7
 		G.CARD_W = 2
 		G.CARD_H = 2.8
@@ -443,17 +444,20 @@ T.describe("Stage 1-3 boss words", function()
 		mock_env.reset_game()
 		local InputLock = require("word_game.model.run.input_lock")
 		local rules = require("word_game.model.jumble_play.jumble_rules")
-		G.GAME.word_score_animating = false
-		G.GAME.word_round = {
-			mode = "jumble",
-			jumble = { boss_word_staging = true },
-		}
+		mock_env.patch_game({
+			word_score_animating = false,
+			word_round = {
+				mode = "jumble",
+				jumble = { boss_word_staging = true },
+			},
+		})
 		WORD_GAME_UI.PlayHoldRedraw = { is_animating = function() return false end }
 		T.assert_true(InputLock.is_table_busy())
-		T.assert_true(rules.play_blocked(G.GAME.word_round.jumble))
-		G.GAME.word_round.jumble.boss_word_staging = false
+		local game = mock_env.game_state()
+		T.assert_true(rules.play_blocked(game.word_round.jumble))
+		mock_env.mutate_game(function(g) g.word_round.jumble.boss_word_staging = false end)
 		T.assert_false(InputLock.is_table_busy())
-		T.assert_false(rules.play_blocked(G.GAME.word_round.jumble))
+		T.assert_false(rules.play_blocked(mock_env.game_state().word_round.jumble))
 	end)
 
 	T.it("shows large centered throbbing 3-2-1 digits", function()
@@ -478,7 +482,7 @@ T.describe("Stage 1-3 boss words", function()
 		mock_env.reset_game()
 		local saved_timeline = G.TIMELINE
 		G.TIMELINE = nil
-		G.GAME.run_mode = "classic"
+		mock_env.patch_game({ run_mode = "classic" })
 		local play_effects = require("word_game.ui.play_effects")
 		local word_feedback = require("word_game.ui.feedback.word_feedback")
 		local InputLock = require("word_game.model.run.input_lock")
@@ -501,8 +505,7 @@ T.describe("Stage 1-3 boss words", function()
 			target = 25,
 			jumble = { boss_word_staging = true },
 		}
-		G.GAME.word_round = wr
-		G.GAME.word_score_animating = false
+		mock_env.patch_game({ word_round = wr, word_score_animating = false })
 
 		local reset_called = false
 		local puzzle_revealed = false
@@ -576,7 +579,7 @@ T.describe("Stage 1-3 boss words", function()
 		T.assert_false(reset_called, "Classic reset_timeline would restore the score slider")
 		T.assert_true(done)
 		T.assert_false(wr.jumble.boss_word_staging)
-		T.assert_false(G.GAME.word_score_animating)
+		T.assert_false(mock_env.game_state().word_score_animating)
 		T.assert_false(InputLock.is_table_busy())
 		T.assert_true(puzzle_revealed and not wr.jumble.boss_word_staging,
 			"Puzzle and play unlock together")

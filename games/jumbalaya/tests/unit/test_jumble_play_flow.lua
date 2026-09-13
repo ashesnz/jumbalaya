@@ -11,12 +11,14 @@ T.describe("Jumble play flow integration", function()
 	local play = require("word_game.model.jumble_play")
 
 	T.it("resolve_after_clear returns trade when eligible without TradeUI loaded", function()
-		G.GAME.word_round = {
-			set = 1,
-			hand_index = 1,
-			jumble = { total_score = 30 },
-		}
-		G.GAME.run_state = { tokens = 10, perks = {}, trade_used_this_hand = false }
+		mock_env.patch_game({
+			word_round = {
+				set = 1,
+				hand_index = 1,
+				jumble = { total_score = 30 },
+			},
+			run_state = { tokens = 10, perks = {}, trade_used_this_hand = false },
+		})
 		WORD_GAME_UI.TradeUI = nil
 		T.assert_equal(play.resolve_after_clear({}), "trade")
 	end)
@@ -39,8 +41,7 @@ T.describe("Jumble play flow integration", function()
 				puzzle = { span = { "C", "T" }, min = 3, max = 7, kind = "span" },
 			},
 		}
-		G.GAME.word_round = wr
-		G.GAME.word_score_animating = false
+		mock_env.patch_game({ word_round = wr, word_score_animating = false })
 
 		local play_resolution = require("word_game.ui.play_effects.resolution")
 		play_resolution.resolve(flow)
@@ -69,8 +70,7 @@ T.describe("Jumble play flow integration", function()
 				puzzle = { span = { "C", "T" }, min = 3, max = 7, kind = "span" },
 			},
 		}
-		G.GAME.word_round = wr
-		G.GAME.word_score_animating = false
+		mock_env.patch_game({ word_round = wr, word_score_animating = false })
 
 		local play_resolution = require("word_game.ui.play_effects.resolution")
 		play_resolution.resolve(flow)
@@ -92,7 +92,7 @@ T.describe("Jumble play flow integration", function()
 	T.it("updates the token counter while the marketplace hides the table deck area", function()
 		local table_deck = require("word_game.ui.table.deck")
 		local state = require("word_game.model.run.state")
-		G.GAME.run_state = { tokens = 20, perks = {} }
+		mock_env.patch_game({ run_state = { tokens = 20, perks = {} } })
 		table_deck.reset()
 		state.spend_tokens(10)
 		table_deck.spend_tokens_display(10)

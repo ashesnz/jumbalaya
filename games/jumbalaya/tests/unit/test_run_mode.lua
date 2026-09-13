@@ -39,10 +39,9 @@ T.describe("run mode preference", function()
 
 	T.it("ends the hand on target in time run only", function()
 		mock_env.reset_game()
-		G.GAME = G.GAME or {}
-		G.GAME.run_mode = "time_run"
+		mock_env.patch_game({ run_mode = "time_run" })
 		T.assert_true(RunMode.ends_hand_on_target())
-		G.GAME.run_mode = "classic"
+		mock_env.patch_game({ run_mode = "classic" })
 		T.assert_false(RunMode.ends_hand_on_target())
 	end)
 end)

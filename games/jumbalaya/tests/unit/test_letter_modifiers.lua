@@ -121,8 +121,7 @@ T.describe("Vowel letter modifiers (A, E, I, O, U)", function()
 
 	T.it("A: adds +0.2× to puzzle score when modified A is played in a word with A", function()
 		local rules = require("word_game.model.jumble_play.jumble_rules")
-		G.GAME = G.GAME or {}
-		G.GAME.word_round = { target = 100 }
+		mock_env.patch_game({ word_round = { target = 100 } })
 		local j = fresh_jumble_state()
 		local without = rules.preview_puzzle_total_after_word(j, "RATES", { modified_card("T") })
 		local with_a = rules.preview_puzzle_total_after_word(j, "RATES", { modified_card("A") })
@@ -149,8 +148,7 @@ T.describe("Vowel letter modifiers (A, E, I, O, U)", function()
 
 	T.it("E: adds +1 point to puzzle score when modified E is played in a word with E", function()
 		local rules = require("word_game.model.jumble_play.jumble_rules")
-		G.GAME = G.GAME or {}
-		G.GAME.word_round = { target = 100 }
+		mock_env.patch_game({ word_round = { target = 100 } })
 		local j = fresh_jumble_state()
 		local without = rules.preview_puzzle_total_after_word(j, "PET", { modified_card("P") })
 		local with_e = rules.preview_puzzle_total_after_word(j, "PET", { modified_card("E") })
@@ -169,8 +167,7 @@ T.describe("Vowel letter modifiers (A, E, I, O, U)", function()
 
 	T.it("I: adds +1 point to puzzle score when modified I is played in a word with I", function()
 		local rules = require("word_game.model.jumble_play.jumble_rules")
-		G.GAME = G.GAME or {}
-		G.GAME.word_round = { target = 100 }
+		mock_env.patch_game({ word_round = { target = 100 } })
 		local j = fresh_jumble_state()
 		local without = rules.preview_puzzle_total_after_word(j, "PIG", { modified_card("P") })
 		local with_i = rules.preview_puzzle_total_after_word(j, "PIG", { modified_card("I") })
@@ -190,8 +187,7 @@ T.describe("Vowel letter modifiers (A, E, I, O, U)", function()
 
 	T.it("O: adds +0.2× to puzzle score when modified O is played in a word with O", function()
 		local rules = require("word_game.model.jumble_play.jumble_rules")
-		G.GAME = G.GAME or {}
-		G.GAME.word_round = { target = 100 }
+		mock_env.patch_game({ word_round = { target = 100 } })
 		local without = rules.preview_puzzle_total_after_word(
 			fresh_jumble_state(), "MOONS", { modified_card("M") })
 		local with_o = rules.preview_puzzle_total_after_word(
@@ -211,8 +207,7 @@ T.describe("Vowel letter modifiers (A, E, I, O, U)", function()
 
 	T.it("U: adds +1 point to puzzle score when modified U is played in a word with U", function()
 		local rules = require("word_game.model.jumble_play.jumble_rules")
-		G.GAME = G.GAME or {}
-		G.GAME.word_round = { target = 100 }
+		mock_env.patch_game({ word_round = { target = 100 } })
 		local without = rules.preview_puzzle_total_after_word(
 			fresh_jumble_state(), "CUT", { modified_card("C") })
 		local with_u = rules.preview_puzzle_total_after_word(

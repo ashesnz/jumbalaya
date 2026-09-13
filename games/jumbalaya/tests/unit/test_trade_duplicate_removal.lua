@@ -58,7 +58,8 @@ local function live_letter_count(letter)
 end
 
 local function state_tokens()
-	return G.GAME.run_state and G.GAME.run_state.tokens or 0
+	local game = mock_env.game_state()
+	return game.run_state and game.run_state.tokens or 0
 end
 
 T.describe("Marketplace duplicate removal (word_game.model.trade)", function()

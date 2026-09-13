@@ -90,8 +90,7 @@ T.describe("Card marketplace offers (word_game.model.trade)", function()
 
 	T.it("reports affordability through can_afford_action", function()
 		local trade_ui = require("word_game.ui.trade")
-		G.GAME = G.GAME or {}
-		G.GAME.run_state = { tokens = 22, perks = {}, trade_used_this_hand = false }
+		mock_env.patch_game({ run_state = { tokens = 22, perks = {}, trade_used_this_hand = false } })
 		G.RUN = G.RUN or {}
 		G.RUN.active = true
 		local session_state = { add_cost_bonus = 10 }
@@ -99,7 +98,7 @@ T.describe("Card marketplace offers (word_game.model.trade)", function()
 		T.assert_true(trade_ui.can_afford_action("remove", session_state))
 		T.assert_false(trade_ui.can_afford_action("modifier", session_state))
 
-		G.GAME.run_state.tokens = 2
+		mock_env.mutate_game(function(g) g.run_state.tokens = 2 end)
 		T.assert_false(trade_ui.can_afford_action("add", session_state))
 		T.assert_false(trade_ui.can_afford_action("remove", session_state))
 		T.assert_false(trade_ui.can_afford_action("modifier", session_state))

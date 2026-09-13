@@ -62,13 +62,13 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 		T.assert_false(PlayHoldRedraw.can_hold(), "Should not allow hold while the card marketplace is open")
 		WORD_GAME_UI.TradeUI = { is_open = function() return false end }
 
-		G.GAME.hand_redraw_animating = true
+		mock_env.patch_game({ hand_redraw_animating = true })
 		T.assert_equal(PlayHoldRedraw.can_hold(), false, "Should not allow hold during redraw animation")
-		G.GAME.hand_redraw_animating = false
+		mock_env.patch_game({ hand_redraw_animating = false })
 
-		G.GAME.word_score_animating = true
+		mock_env.patch_game({ word_score_animating = true })
 		T.assert_equal(PlayHoldRedraw.can_hold(), false, "Should not allow hold during score animation")
-		G.GAME.word_score_animating = false
+		mock_env.patch_game({ word_score_animating = false })
 	end)
 
 	T.it("end-to-end hold redraw discards the hand and deals seven replacements", function()
@@ -148,7 +148,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 
 		T.assert_equal(#G.draw_pile.cards, 7, "Held cards should return to the deck")
 		T.assert_equal(dealt_count, 7, "Hold redraw should deal a full replacement hand")
-		T.assert_equal(G.GAME.word_round.jumble.redraws_remaining, 0, "Redraw allowance should be consumed")
+		T.assert_equal(mock_env.game_state().word_round.jumble.redraws_remaining, 0, "Redraw allowance should be consumed")
 	end)
 
 	T.it("tracks hold state and triggers redraw at 5 seconds", function()
@@ -495,7 +495,7 @@ T.describe("Play Button Hold Redraw (word_game.ui.table.controls.play_hold_redra
 		end
 
 		T.assert_equal(PlayHoldRedraw.is_animating(), false, "Redraw should be finished")
-		T.assert_equal(G.GAME.hand_redraw_animating, false, "hand_redraw_animating flag should be false")
+		T.assert_equal(mock_env.game_state().hand_redraw_animating, false, "hand_redraw_animating flag should be false")
 		T.assert_true(refreshed, "TableInput.refresh_card_input should have been called")
 
 		-- Verify all 7 new hand cards are now draggable

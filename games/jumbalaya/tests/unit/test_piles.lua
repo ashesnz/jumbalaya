@@ -85,7 +85,7 @@ T.describe("Store piles", function()
 		G.recycle_stash = { cards = {} }
 		G.pattern_row = { area = { cards = {} } }
 
-		require("app.bootstrap.store_sync").ensure_test_binding()
+		require("word_game.model.store_ops").ensure_test_binding()
 		T.assert_equal(#word_game.store():get().piles.hand, 1)
 		T.assert_equal(word_game.store():get().piles.hand[1].ability.letter, "Z")
 	end)
