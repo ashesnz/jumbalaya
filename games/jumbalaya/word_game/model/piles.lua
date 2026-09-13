@@ -1,15 +1,15 @@
 --[[
 	word_game/model/piles.lua - Store-authoritative pile sync for CardPile hosts.
 
-	Authoritative table layout lives in `store.piles` (plain card records with
-	id / pile_id / slot_index / ability). CardPile hosts (`dealt_letters`,
+	Authoritative table layout lives in `store.piles` as plain PileCard records
+	(id / pile_id / slot_index / ability). CardPile hosts (`dealt_letters`,
 	`draw_pile`, `pattern_row.area`) are presentation/interaction targets;
 	mutate hosts during animation, then `sync_hosts_to_store` or `move_card`.
 
 	Run deck membership (`G.letter_inventory`) is separate: it tracks every live
 	letter Card instance in the run; pile placement is always `store.piles`.
 
-	Core: jumbalaya_core.store.reducers.piles + selectors.piles
+	Core: jumbalaya_core.store.reducers.piles + selectors.piles + cards.pile_record
 	Store: patches piles; hydrates hosts from store snapshots
 	Presentation: none — CardPile relayout triggered by callers
 ]]
@@ -17,6 +17,8 @@
 local BonusStack = require("word_game.model.jumble.bonus_stack")
 local BridgeRuntime = require("app.runtime")
 local store_sync = require("app.bootstrap.store_sync")
+local pile_record = require("jumbalaya_core.cards.pile_record")
+local live_game = require("word_game.model.live_game")
 
 local M = {}
 
@@ -28,21 +30,34 @@ local PILE_HOST = {
 }
 
 local function card_id(card)
-	return card and (card.letter_card_id or card.id)
+	return pile_record.id(card)
+end
+
+local function snapshot_card(card, pile_id, index)
+	if not card or card.REMOVED then return nil end
+	local id = card_id(card)
+	if id then
+		card.id = id
+	elseif card.id == nil then
+		-- Headless stub cards may omit ids; use pile-local index for store records.
+		id = index
+		card.id = id
+	end
+	local slot_index = pile_id == "pattern" and (card.slot_index or index) or index
+	return pile_record.from_live_card(card, pile_id, slot_index)
 end
 
 local function snapshot_area(area, pile_id)
 	local out = {}
 	if not area or not area.cards then return out end
 	for index, card in ipairs(area.cards) do
-		if card and not card.REMOVED then
-			local id = card_id(card)
-			if id then
-				card.id = id
+		local record = snapshot_card(card, pile_id, index)
+		if record then
+			if pile_id == "pattern" and record.slot_index then
+				out[record.slot_index] = record
+			else
+				out[#out + 1] = record
 			end
-			card.pile_id = pile_id
-			card.slot_index = index
-			out[#out + 1] = card
 		end
 	end
 	return out
@@ -53,12 +68,9 @@ local function snapshot_bonus()
 	local bonus = BonusStack
 	if bonus and bonus.cards then
 		for index, card in ipairs(bonus.cards() or {}) do
-			if card and not card.REMOVED then
-				local id = card_id(card)
-				if id then card.id = id end
-				card.pile_id = "bonus"
-				card.slot_index = index
-				out[#out + 1] = card
+			local record = snapshot_card(card, "bonus", index)
+			if record then
+				out[#out + 1] = record
 			end
 		end
 	end
@@ -87,16 +99,34 @@ local function interaction_cards()
 	return out
 end
 
+local function resolve_live_card(record)
+	if not record then return nil end
+	if not pile_record.is_record(record) then
+		return record
+	end
+	local want = pile_record.id(record)
+	local shell = live_game()
+	if not shell or not want then return record end
+	for _, card in ipairs(shell.letter_inventory or {}) do
+		if card_id(card) == want and not card.REMOVED then
+			card.pile_id = record.pile_id or card.pile_id
+			card.slot_index = record.slot_index
+			return card
+		end
+	end
+	return record
+end
+
 --- Dispatch a core MOVE_CARD action and mirror pile_id on a live Card (presentation).
 --- Gameplay ownership changes must go through the store reducer, not card.area alone.
 function M.move_card(opts)
 	if type(opts) ~= "table" then return end
-	local card_id = opts.card_id or (opts.card and (opts.card.id or opts.card.letter_card_id))
+	local id = opts.card_id or card_id(opts.card)
 	local store = opts.store or BridgeRuntime.store()
-	if store and card_id and opts.to_pile then
+	if store and id and opts.to_pile then
 		store_sync.dispatch(store, {
 			type = "MOVE_CARD",
-			card_id = card_id,
+			card_id = id,
 			from_pile = opts.from_pile,
 			to_pile = opts.to_pile,
 			slot_index = opts.slot_index,
@@ -121,6 +151,10 @@ function M.collect_piles()
 	}
 end
 
+local function dispatch_piles(store, piles)
+	store_sync.dispatch(store, { type = "SYNC_PILES", piles = piles })
+end
+
 ---@param store table|nil
 ---@param pile_ids string[]|nil When set, only these piles are overwritten from host snapshots.
 function M.sync_hosts_to_store(store, pile_ids)
@@ -137,7 +171,7 @@ function M.sync_hosts_to_store(store, pile_ids)
 	else
 		piles = snapshot
 	end
-	store:patch({ piles = piles })
+	dispatch_piles(store, piles)
 end
 
 --- Copy resting store cards into empty pile hosts so deal/shuffle can mutate hosts.
@@ -151,9 +185,19 @@ function M.hydrate_hosts_from_store(pile_ids)
 	for _, pile_id in ipairs(pile_ids) do
 		local host = host_for_pile(pile_id)
 		local store_pile = state.piles[pile_id]
-		if host and host.emplace and store_pile and #store_pile > 0 and #(host.cards or {}) == 0 then
-			for _, card in ipairs(store_pile) do
-				host:emplace(card)
+		if host and host.emplace and store_pile and pile_record.count(store_pile) > 0 and #(host.cards or {}) == 0 then
+			if pile_id == "pattern" then
+				for slot_index, record in pairs(store_pile) do
+					if type(slot_index) == "number" and record then
+						local card = resolve_live_card(record)
+						if card then host:emplace(card) end
+					end
+				end
+			else
+				for _, record in ipairs(store_pile) do
+					local card = resolve_live_card(record)
+					if card then host:emplace(card) end
+				end
 			end
 			if host.set_ranks then host:set_ranks() end
 		end
@@ -185,5 +229,7 @@ function M.release_static_chrome(store, pile_ids)
 		end
 	end
 end
+
+M.resolve_live_card = resolve_live_card
 
 return M

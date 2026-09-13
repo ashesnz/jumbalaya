@@ -52,4 +52,22 @@ T.describe("game_access and store authority", function()
 		T.assert_equal(runtime.engine(), engine)
 		T.assert_nil(G._engine)
 	end)
+
+	T.it("mutate notifies store subscribers", function()
+		mock_env.reset_game()
+		local store = Store.new({ round = 1 })
+		word_game._bind_store(store)
+		store_sync.bind_run(store, store:get())
+		local seen_round = nil
+		local function on_state(state)
+			seen_round = state.round
+		end
+		store:subscribe(on_state)
+		game_access.mutate(function(g)
+			g.round = 2
+		end)
+		store:unsubscribe(on_state)
+		T.assert_equal(seen_round, 2)
+		T.assert_equal(store:get().round, 2)
+	end)
 end)

@@ -72,6 +72,38 @@ T.describe("jumbalaya_core store dispatch", function()
 		T.assert_true(store:get().run_state.match_won)
 	end)
 
+	T.it("clears jumble hand via END_JUMBLE_HAND", function()
+		local store = Store.new({
+			word_score_animating = true,
+			word_round = {
+				set = 1,
+				hand_index = 1,
+				mode = "jumble",
+				jumble = { total_score = 42 },
+			},
+		})
+		store:dispatch({ type = "END_JUMBLE_HAND" })
+		local state = store:get()
+		T.assert_nil(state.word_round.mode)
+		T.assert_nil(state.word_round.jumble)
+		T.assert_false(state.word_score_animating)
+	end)
+
+	T.it("syncs pile snapshots via SYNC_PILES", function()
+		local store = Store.new()
+		store:dispatch({
+			type = "SYNC_PILES",
+			piles = {
+				hand = { { id = 1, pile_id = "hand", ability = { letter = "A" } } },
+				draw = {},
+				pattern = {},
+				bonus = {},
+				discard = {},
+			},
+		})
+		T.assert_equal(store:get().piles.hand[1].id, 1)
+	end)
+
 	T.it("syncs voucher discard counts via SET_VOUCHER_DISCARDS_USED", function()
 		local store = Store.new()
 		store:dispatch({ type = "SET_VOUCHER_DISCARDS_USED", count = 2 })

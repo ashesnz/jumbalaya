@@ -60,4 +60,13 @@ function M.CLASSIC_STAGE_NEXT(state, action)
 	return state
 end
 
+function M.END_JUMBLE_HAND(state)
+	local wr = state.word_round
+	if not wr or wr.mode ~= "jumble" then return state end
+	wr.mode = nil
+	wr.jumble = nil
+	state.word_score_animating = false
+	return state
+end
+
 return M

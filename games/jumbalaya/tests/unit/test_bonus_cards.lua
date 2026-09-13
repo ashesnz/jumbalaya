@@ -428,8 +428,8 @@ T.describe("Bonus cards", function()
 		mock_env.reset_game()
 		local deck_mod = require("word_game.model.cards.deck")
 		G.letter_inventory = {
-			{ REMOVED = false, boss_temp = false, bonus_card = false },
-			{ REMOVED = false, bonus_card = true },
+			{ id = 1, REMOVED = false, boss_temp = false, bonus_card = false },
+			{ id = 2, REMOVED = false, bonus_card = true },
 		}
 		G.draw_pile = {
 			cards = {},

@@ -2,7 +2,7 @@
 	word_game/model/jumble_play/jumble.lua - play_jumble_word entry, end_jumble_hand_model, deal_after_jumble_timeout
 
 	Core: none
-	Store: game_access.patch(word_score_animating)
+	Store: game_access.dispatch(END_JUMBLE_HAND)
 	Presentation: none
 ]]
 
@@ -23,11 +23,8 @@ end
 function M.end_jumble_hand_model()
 	local wr = game_access.word_round()
 	if not wr or wr.mode ~= "jumble" then return nil end
-	local j = wr.jumble
-	local score = j and j.total_score or 0
-	wr.mode = nil
-	wr.jumble = nil
-	game_access.patch({ word_score_animating = false })
+	local score = wr.jumble and wr.jumble.total_score or 0
+	game_access.dispatch({ type = "END_JUMBLE_HAND" })
 	round.advance_hand()
 	return score
 end

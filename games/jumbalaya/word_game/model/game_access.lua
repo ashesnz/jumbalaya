@@ -45,10 +45,13 @@ function M.patch(fields)
 end
 
 --- In-place mutation of the live store snapshot (same table as store:get()).
+--- Notifies store subscribers so views stay in sync.
 function M.mutate(fn)
+	local s = store()
 	local game = M.get()
 	if not game or not fn then return game end
 	fn(game)
+	if s then s:notify() end
 	return game
 end
 

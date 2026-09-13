@@ -34,6 +34,7 @@ T.describe("Store piles", function()
 		T.assert_equal(#pile_selectors.draw_cards(state), 1)
 		T.assert_equal(state.piles.hand[1].id, 1)
 		T.assert_equal(state.piles.hand[1].pile_id, "hand")
+		T.assert_nil(state.piles.hand[1].T, "store piles must be plain records, not live Card hosts")
 	end)
 
 	T.it("release_static_chrome snapshots then clears resting pile host cards", function()

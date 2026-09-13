@@ -19,6 +19,7 @@ return {
 	CardPlayability = require("jumbalaya_core.cards.playability"),
 	DeckConfig = require("jumbalaya_core.cards.deck_config"),
 	LetterCard = require("jumbalaya_core.cards.letter_card"),
+	PileRecord = require("jumbalaya_core.cards.pile_record"),
 	PileCounts = require("jumbalaya_core.cards.pile_counts"),
 	RunState = require("jumbalaya_core.store.run_state"),
 	PerkRegistry = require("jumbalaya_core.perks.registry"),

@@ -78,12 +78,20 @@ T.describe("Classic stage advance deal", function()
 
 	T.it("deals seven even when placement still holds cards across classic stage advance", function()
 		local ctx = fixture.begin()
+		local piles = require("word_game.model.piles")
 
-		for _ = 1, 4 do
+		for i = 1, 4 do
 			piles.hydrate_hosts_from_store({ "hand", "pattern" })
 			local card = G.dealt_letters.cards[1]
 			G.dealt_letters:remove_card(card)
 			G.pattern_row.area:emplace(card)
+			piles.move_card({
+				card = card,
+				card_id = card.letter_card_id or card.id,
+				from_pile = "hand",
+				to_pile = "pattern",
+				slot_index = i,
+			})
 			deck.commit_pile_hosts({ "hand", "pattern" })
 		end
 		T.assert_equal(hand_count(), 3)

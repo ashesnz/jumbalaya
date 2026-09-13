@@ -7,6 +7,8 @@
 ]]
 
 local live_game = require("word_game.model.live_game")
+local pile_record = require("jumbalaya_core.cards.pile_record")
+local piles = require("word_game.model.piles")
 
 local M = {}
 
@@ -37,19 +39,37 @@ local function get_store_state(state)
 	return nil
 end
 
+local function resolve_pile_for_read(pile)
+	if not pile then return {} end
+	local out = {}
+	for index, record in ipairs(pile) do
+		out[index] = piles.resolve_live_card(record)
+	end
+	for index, record in pairs(pile) do
+		if type(index) == "number" and out[index] == nil and record then
+			out[index] = piles.resolve_live_card(record)
+		end
+	end
+	return out
+end
+
 local function pile_or_host(state, pile_id, host_cards_fn)
 	if state ~= nil then
 		if state.piles and state.piles[pile_id] then
-			return state.piles[pile_id]
+			return resolve_pile_for_read(state.piles[pile_id])
 		end
 		return {}
 	end
+	local host_cards = host_cards_fn()
+	if host_cards and #host_cards > 0 then
+		return host_cards
+	end
 	local s = get_store_state(nil)
 	local store_pile = s and s.piles and s.piles[pile_id]
-	if store_pile and #store_pile > 0 then
-		return store_pile
+	if store_pile and pile_record.count(store_pile) > 0 then
+		return resolve_pile_for_read(store_pile)
 	end
-	return host_cards_fn()
+	return {}
 end
 
 -- Store selectors (prefer non-empty store piles; fall back to live hosts for headless tests)

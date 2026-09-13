@@ -37,10 +37,23 @@ function M:subscribe(fn)
 	self._subscribers[#self._subscribers + 1] = fn
 end
 
+function M:unsubscribe(fn)
+	for i = #self._subscribers, 1, -1 do
+		if self._subscribers[i] == fn then
+			table.remove(self._subscribers, i)
+		end
+	end
+end
+
 function M:dispatch(action)
 	self._state = reducers.reduce(self._state, action)
 	self:_notify()
 	return self._state
+end
+
+--- Notify subscribers after in-place snapshot edits (game_access.mutate).
+function M:notify()
+	self:_notify()
 end
 
 function M:_notify()

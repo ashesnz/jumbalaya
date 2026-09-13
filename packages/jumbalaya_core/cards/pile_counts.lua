@@ -1,13 +1,15 @@
 --[[ packages/jumbalaya_core/cards/pile_counts.lua - Pure pile size helpers (no G) ]]
 
+local pile_record = require("jumbalaya_core.cards.pile_record")
+
 local M = {}
 
 function M.hand_card_count(hand_cards)
-	return hand_cards and #hand_cards or 0
+	return pile_record.count(hand_cards)
 end
 
 function M.placement_count(placement_cards)
-	return placement_cards and #placement_cards or 0
+	return pile_record.count(placement_cards)
 end
 
 function M.held_count(hand_cards, placement_cards)
