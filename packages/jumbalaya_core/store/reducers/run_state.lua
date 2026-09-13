@@ -43,6 +43,35 @@ function M.RUN_STATE_MARK_TRADE_USED(state)
 	return state
 end
 
+function M.RUN_STATE_RECORD_WORD_PLAYED(state)
+	local rs = immutable.copy_run_state(state.run_state) or core_run_state.new()
+	rs.stats = rs.stats or {}
+	rs.stats.words_played = (rs.stats.words_played or 0) + 1
+	rs.stats.best_puzzle_score = rs.stats.best_puzzle_score or 0
+	state.run_state = rs
+	return state
+end
+
+function M.RUN_STATE_RECORD_PUZZLE_SCORE(state, action)
+	local score = math.floor(tonumber(action.score) or 0)
+	if score <= 0 then return state end
+	local rs = immutable.copy_run_state(state.run_state) or core_run_state.new()
+	rs.stats = rs.stats or {}
+	local stats = rs.stats
+	stats.words_played = stats.words_played or 0
+	stats.best_puzzle_score = stats.best_puzzle_score or 0
+	if score <= stats.best_puzzle_score then return state end
+	local pattern = action.pattern
+	if type(pattern) == "string" and pattern ~= "" then
+		stats.best_puzzle = pattern
+	else
+		stats.best_puzzle = stats.best_puzzle or "Puzzle"
+	end
+	stats.best_puzzle_score = score
+	state.run_state = rs
+	return state
+end
+
 function M.RUN_MATCH_END(state, action)
 	if not state.run_state then return state end
 	local rs = immutable.copy_run_state(state.run_state)

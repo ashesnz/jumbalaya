@@ -6,7 +6,6 @@
 	Presentation: hand_started, round_restore_from_save, timeline_reset
 ]]
 
-local state = require("word_game.model.run.state")
 local game_access = require("word_game.model.game_access")
 local Presentation = require("word_game.model.presentation")
 local core_round = require("jumbalaya_core.round")
@@ -24,13 +23,12 @@ end
 local M = {}
 
 function M.init_run()
-	state.get()
+	game_access.dispatch({ type = "RUN_STATE_INIT" })
 	game_access.dispatch({ type = "ROUND_INIT_RUN" })
 	M.start_hand(1, 1)
 end
 
 function M.restore_from_save()
-	state.get()
 	local wr = game_access.word_round()
 	if not wr then
 		M.init_run()

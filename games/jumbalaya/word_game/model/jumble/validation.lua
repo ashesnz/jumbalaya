@@ -16,6 +16,7 @@ local round = require("word_game.model.round")
 local jumble_rules = require("word_game.model.jumble_play.jumble_rules")
 local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
 local core = require("jumbalaya_core.jumble.validation")
+local core_hand = require("jumbalaya_core.jumble.hand")
 local game_access = require("word_game.model.game_access")
 
 local answer_cache = { signature = nil, words = nil }
@@ -151,32 +152,42 @@ function M.debug_answer_counts()
 	return Dictionary.counts_from_cards(M.debug_answer_cards())
 end
 
-function M.ensure_playable_puzzle(wr)
-	wr = wr or game_access.word_round()
-	local j = wr and wr.jumble
-	if not j then return false end
-	if j.boss_word_active then return true end
-
-	local counts = M.jumble_hand_counts()
-
-	local puzzle = M.resolve_puzzle(j.puzzle)
-	if puzzle and M.has_playable_word(counts, puzzle) then
-		if puzzle ~= j.puzzle then
-			M.apply_puzzle(wr, puzzle)
+function M.ensure_playable_puzzle(_wr)
+	local ok = false
+	game_access.mutate(function(g)
+		local wr = g.word_round or _wr
+		if not wr then return end
+		g.word_round = wr
+		local j = wr.jumble
+		if not j then return end
+		if j.boss_word_active then
+			ok = true
+			return
 		end
-		return true
-	end
 
-	local list = M.puzzles(wr and wr.set, wr and wr.hand_index)
-	if #list == 0 then return false end
-	for idx, candidate in ipairs(list) do
-		if M.has_playable_word(counts, candidate) then
-			j.puzzle_index = idx
-			M.apply_puzzle(wr, candidate)
-			return true
+		local counts = M.jumble_hand_counts()
+
+		local puzzle = M.resolve_puzzle(j.puzzle)
+		if puzzle and M.has_playable_word(counts, puzzle) then
+			if puzzle ~= j.puzzle then
+				core_hand.apply_puzzle(wr, puzzle, nil)
+			end
+			ok = true
+			return
 		end
-	end
-	return false
+
+		local list = M.puzzles(wr.set, wr.hand_index)
+		if #list == 0 then return end
+		for idx, candidate in ipairs(list) do
+			if M.has_playable_word(counts, candidate) then
+				j.puzzle_index = idx
+				core_hand.apply_puzzle(wr, candidate, nil)
+				ok = true
+				return
+			end
+		end
+	end)
+	return ok
 end
 
 function M.validate_current()

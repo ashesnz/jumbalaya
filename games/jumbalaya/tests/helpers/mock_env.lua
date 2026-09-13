@@ -395,6 +395,12 @@ function M.publish_game(game_table)
 	else
 		G.GAME = game_table
 	end
+	local shell_bind = package.loaded["app.bootstrap.shell_bind"]
+	if shell_bind and shell_bind.install then
+		shell_bind.install()
+	elseif pcall(require, "app.bootstrap.shell_bind") then
+		require("app.bootstrap.shell_bind").install()
+	end
 end
 
 --- Authoritative run snapshot (store-backed). Prefer over G.GAME in tests.

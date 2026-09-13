@@ -45,62 +45,61 @@ end
 function M.update(dt)
 	if not dt or dt <= 0 then return end
 	if not M.tick_enabled() then return end
-	game_access.mutate(function(g)
-		g.timeline_seconds = math.max(0, g.timeline_seconds - dt)
-	end)
+	local g = game_access.get()
+	if not g then return end
+	game_access.patch({
+		timeline_seconds = math.max(0, (g.timeline_seconds or 0) - dt),
+	})
 end
 
 function M.reset(seconds)
 	seconds = seconds or DEFAULT_DURATION
-	game_access.mutate(function(g)
-		g.timeline_duration = seconds
-		g.timeline_seconds = seconds
-		g.timeline_active = true
-		g.timeline_frozen = false
-		g.timeline_boss_override = nil
-	end)
+	game_access.patch({
+		timeline_duration = seconds,
+		timeline_seconds = seconds,
+		timeline_active = true,
+		timeline_frozen = false,
+		timeline_boss_override = nil,
+	})
 	Presentation.emit("timeline_sync_from_model")
 end
 
 function M.pause()
-	game_access.mutate(function(g)
-		g.timeline_active = false
-	end)
+	game_access.patch({ timeline_active = false })
 end
 
 function M.resume()
-	game_access.mutate(function(g)
-		g.timeline_frozen = false
-		g.timeline_active = true
-	end)
+	game_access.patch({
+		timeline_frozen = false,
+		timeline_active = true,
+	})
 end
 
 function M.arm_boss(seconds)
 	seconds = seconds or DEFAULT_DURATION
-	game_access.mutate(function(g)
-		g.timeline_duration = seconds
-		g.timeline_seconds = seconds
-		g.timeline_active = false
-		g.timeline_frozen = false
-		g.timeline_boss_override = true
-	end)
+	game_access.patch({
+		timeline_duration = seconds,
+		timeline_seconds = seconds,
+		timeline_active = false,
+		timeline_frozen = false,
+		timeline_boss_override = true,
+	})
 	Presentation.emit("timeline_sync_from_model")
 end
 
 function M.clear_boss_override()
-	game_access.mutate(function(g)
-		g.timeline_boss_override = nil
-	end)
+	game_access.patch({ timeline_boss_override = nil })
 end
 
 function M.freeze(seconds)
-	game_access.mutate(function(g)
-		g.timeline_frozen = true
-		g.timeline_active = false
-		if seconds ~= nil then
-			g.timeline_seconds = math.max(0, seconds)
-		end
-	end)
+	local patch = {
+		timeline_frozen = true,
+		timeline_active = false,
+	}
+	if seconds ~= nil then
+		patch.timeline_seconds = math.max(0, seconds)
+	end
+	game_access.patch(patch)
 end
 
 function M.add_seconds(seconds)
@@ -110,9 +109,9 @@ function M.add_seconds(seconds)
 	local cur = M.seconds_remaining()
 	if cur == math.huge then return end
 	local cap = M.duration()
-	game_access.mutate(function(game)
-		game.timeline_seconds = math.max(0, math.min(cap, cur + seconds))
-	end)
+	game_access.patch({
+		timeline_seconds = math.max(0, math.min(cap, cur + seconds)),
+	})
 	Presentation.emit("timeline_sync_from_model")
 end
 

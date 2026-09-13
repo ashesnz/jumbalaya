@@ -30,7 +30,7 @@ app/               Love2D shell: bootstrap, callbacks, startup, runtime, session
 packages/jumbalaya_core/   Pure rules + store (headless test_core_*)
 packages/jumbalaya-engine/ Custom engine: services/, scene/, interaction/, graphics/, panels/, views/
 word_game/ui/effects/      Game-specific runtime FX (was app/effects/)
-app/runtime.lua, app/callbacks/funcs.lua, app/bootstrap/store_sync.lua  (was bridge/)
+app/runtime.lua, app/callbacks/funcs.lua, word_game/model/store_ops.lua  (was bridge/)
 word_game/config/  Game tuning; round/economy re-export core
 word_game/model/   Runtime glue over jumbalaya_core — not duplicate rules
 word_game/board/   Row snap/geometry — no UI imports at require time

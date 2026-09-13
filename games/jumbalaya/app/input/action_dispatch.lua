@@ -1,6 +1,5 @@
 --[[ app/input/action_dispatch.lua - Unified action dispatch via engine InputService ]]
 
-local store_sync = require("app.bootstrap.store_sync")
 local runtime = require("app.runtime")
 
 local M = {}
@@ -22,7 +21,7 @@ function M.dispatch(action)
 	end
 	local store = runtime.store()
 	if store then
-		store_sync.dispatch(store, action)
+		store:dispatch(action)
 	end
 end
 

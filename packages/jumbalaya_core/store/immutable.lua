@@ -15,6 +15,24 @@ function M.shallow_state(state)
 	return M.shallow_copy(state)
 end
 
+function M.copy_slot(slot)
+	if not slot then return nil end
+	local out = M.shallow_copy(slot)
+	if slot.cards then
+		out.cards = M.shallow_copy(slot.cards)
+	end
+	return out
+end
+
+function M.copy_jumble_slots(slots)
+	if not slots then return nil end
+	local out = {}
+	for i, slot in ipairs(slots) do
+		out[i] = M.copy_slot(slot)
+	end
+	return out
+end
+
 function M.copy_word_round(wr)
 	if not wr then return nil end
 	local out = M.shallow_copy(wr)
@@ -27,7 +45,10 @@ function M.copy_word_round(wr)
 			out.jumble.puzzle_words = M.shallow_copy(wr.jumble.puzzle_words)
 		end
 		if wr.jumble.slots then
-			out.jumble.slots = wr.jumble.slots
+			out.jumble.slots = M.copy_jumble_slots(wr.jumble.slots)
+		end
+		if wr.jumble.pending_boss then
+			out.jumble.pending_boss = M.shallow_copy(wr.jumble.pending_boss)
 		end
 	end
 	return out

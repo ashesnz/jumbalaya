@@ -9,7 +9,7 @@ Jumbalaya is organized in **four cooperating layers**. They are not duplicates �
 | **Portable engine** | `packages/jumbalaya-engine/` | Service interfaces (clock, input map, event bus, retained UI, views) |
 | **This game** | `games/jumbalaya/word_game/` | Jumbalaya runtime glue, presentation, board geometry, game-specific config |
 
-Shell wiring (`app/runtime.lua`, `app/callbacks/funcs.lua`, `app/bootstrap/store_sync.lua`, `jumbalaya-engine.shell`) is injected at boot via `app/bootstrap/shell_bind.lua`. The old `bridge/` folder is dissolved.
+Shell wiring (`app/runtime.lua`, `app/callbacks/funcs.lua`, `word_game/model/store_ops.lua`, `jumbalaya-engine.shell`) is injected at boot via `app/bootstrap/shell_bind.lua`. The old `bridge/` folder is dissolved.
 
 **Do not delete `app/` or `packages/`** — see [app vs packages](#app-vs-packages) below. Portable session/platform/persistence primitives live in `jumbalaya-engine/`; the Love2D shell stays in `app/` (`app/core/` removed).
 
@@ -24,7 +24,7 @@ Phases 0–13 are **complete** (store, engine package, retained UI, `Funcs` regi
 - `jumbalaya_core/` must stay headless (no `love.*`, no `app/` / `word_game/` imports) — enforced by `tests/unit/test_core_purity.lua`.
 - No new deep `word_game.model.*` / `word_game.ui.*` requires across `app/` (bootstrap wiring exempt), `devtools/`, or `word_game/ui/` (grandfathered allowlist) — enforced by `tests/unit/test_facade_boundaries.lua`.
 - New features ship via `WORD_GAME` / `WORD_GAME_UI` facade methods; model code uses `Presentation.emit`, not `Funcs.dispatch`.
-- Store authority lives on `WORD_GAME.store()` / `game_access` via `word_game/model/store_ops.lua` (app re-exports legacy `app/bootstrap/store_sync.lua`).
+- Store authority lives on `WORD_GAME.store()` / `game_access` via `word_game/model/store_ops.lua`.
 
 ### Store immutability (POC)
 
@@ -40,7 +40,7 @@ The run snapshot is **copy-on-write** through reducers:
 
 **Do not** cache `game_access.get()` across a `dispatch`/`patch`/`mutate` boundary — nested table references from the old snapshot are stale once reducers copy subtrees.
 
-Enforcement: `tests/unit/test_core_store_immutable.lua` (nested copy guarantees), `tests/unit/test_core_store_dispatch.lua` (reducer behavior), `tests/unit/test_store_ops.lua` (glue API + alias sync).
+Enforcement: `tests/unit/test_core_store_immutable.lua` (nested copy guarantees), `tests/unit/test_core_store_dispatch.lua` (reducer behavior), `tests/unit/test_store_ops.lua` (glue API + alias sync), `tests/unit/test_store_stale_ref.lua` (stale snapshot guards).
 
 ### Phase 10a glue hygiene (ongoing)
 

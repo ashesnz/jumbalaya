@@ -133,18 +133,6 @@ function M.ensure_test_binding()
 		require("word_game.model.piles").sync_hosts_to_store(store)
 	end
 
-	local engine_boot = package.loaded["app.bootstrap.engine_services_boot"]
-	if engine_boot and engine_boot.install then
-		engine_boot.install()
-	end
-
-	local shell_bind = package.loaded["app.bootstrap.shell_bind"]
-	if shell_bind and shell_bind.install then
-		shell_bind.install()
-	elseif not package.loaded["app.bootstrap.shell_bind"] then
-		require("app.bootstrap.shell_bind").install()
-	end
-
 	return store
 end
 

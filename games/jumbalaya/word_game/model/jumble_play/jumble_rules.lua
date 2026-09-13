@@ -17,7 +17,6 @@ local invariant = require("word_game.model.invariant")
 local core = require("jumbalaya_core.rules.jumble")
 local core_play = require("jumbalaya_core.rules.play")
 local placement_preview = require("jumbalaya_core.jumble.placement_preview")
-local store_sync = require("app.bootstrap.store_sync")
 local game_access = require("word_game.model.game_access")
 
 local M = {}

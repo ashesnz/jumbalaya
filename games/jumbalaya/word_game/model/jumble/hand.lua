@@ -20,6 +20,13 @@ local Presentation = require("word_game.model.presentation")
 local core_hand = require("jumbalaya_core.jumble.hand")
 local game_access = require("word_game.model.game_access")
 
+local function mutate_word_round(fn)
+	game_access.mutate(function(g)
+		local wr = g.word_round
+		if wr then fn(wr) end
+	end)
+end
+
 local function puzzle_hooks()
 	return {
 		on_puzzle_start = function(j, wr)
@@ -44,91 +51,109 @@ function M.state()
 	return core_hand.state(game_access.word_round())
 end
 
-function M.apply_puzzle(wr, puzzle)
-	core_hand.apply_puzzle(wr, puzzle, puzzle_hooks())
+function M.apply_puzzle(_wr, puzzle)
+	mutate_word_round(function(wr)
+		core_hand.apply_puzzle(wr, puzzle, puzzle_hooks())
 
-	local j = wr.jumble
-	local area = live_game().pattern_row and live_game().pattern_row.area
-	if area and area.cards then
-		for i = #area.cards, 1, -1 do
-			local card = area.cards[i]
+		local j = wr.jumble
+		local area = live_game().pattern_row and live_game().pattern_row.area
+		if area and area.cards then
+			for i = #area.cards, 1, -1 do
+				local card = area.cards[i]
+				if live_game().pattern_row then
+					live_game().pattern_row:on_remove_card(card)
+				end
+				area:remove_card(card)
+				if card.bonus_card then
+					bonus_return.return_card(card)
+				elseif card.area ~= live_game().dealt_letters and live_game().dealt_letters then
+					live_game().dealt_letters:emplace(card)
+				end
+			end
+			if area.config then
+				area.config.card_limit = M.blank_count(j.slots, j.puzzle)
+			end
 			if live_game().pattern_row then
-				live_game().pattern_row:on_remove_card(card)
-			end
-			area:remove_card(card)
-			if card.bonus_card then
-				bonus_return.return_card(card)
-			elseif card.area ~= live_game().dealt_letters and live_game().dealt_letters then
-				live_game().dealt_letters:emplace(card)
+				live_game().pattern_row:relayout()
+				if area.hard_set_cards then
+					area:hard_set_cards()
+				end
 			end
 		end
-		if area.config then
-			area.config.card_limit = M.blank_count(j.slots, j.puzzle)
-		end
-		if live_game().pattern_row then
-			live_game().pattern_row:relayout()
-			if area.hard_set_cards then
-				area:hard_set_cards()
-			end
-		end
-	end
 
-	M.PlacementWord.clear()
+		M.PlacementWord.clear()
+	end)
 end
 
-function M.load_puzzle(wr, index)
-	local set = wr and wr.set
-	local hand = wr and wr.hand_index
-	core_hand.load_puzzle(wr, index, M.puzzles(set, hand))
+function M.load_puzzle(_wr, index)
+	mutate_word_round(function(wr)
+		core_hand.load_puzzle(wr, index, M.puzzles(wr.set, wr.hand_index))
+	end)
 end
 
-function M.start_hand(wr)
-	modifier_effects.reset_stage_state(wr)
-	core_hand.start_hand(wr, {
-		on_stage_start = function()
-			Presentation.emit("score_banner_jumble_hand_start")
-		end,
-		puzzle_list = M.puzzles(wr.set, wr.hand_index),
-	})
+function M.start_hand(_wr)
+	mutate_word_round(function(wr)
+		modifier_effects.reset_stage_state(wr)
+		core_hand.start_hand(wr, {
+			on_stage_start = function()
+				Presentation.emit("score_banner_jumble_hand_start")
+			end,
+			puzzle_list = M.puzzles(wr.set, wr.hand_index),
+		})
+	end)
 end
 
 function M.start_boss_word(wr)
 	return M.reveal_boss_puzzle(wr)
 end
 
-function M.prepare_boss_word(wr)
-	if not core_hand.prepare_boss_word(wr, M.boss_puzzle(wr.set, wr.hand_index)) then
-		return false
-	end
-	if wr.jumble.slots then
-		M.sync_placement_cards(wr.jumble.slots)
-	end
-	return true
+function M.prepare_boss_word(_wr)
+	local ok = false
+	mutate_word_round(function(wr)
+		if not core_hand.prepare_boss_word(wr, M.boss_puzzle(wr.set, wr.hand_index)) then
+			return
+		end
+		if wr.jumble.slots then
+			M.sync_placement_cards(wr.jumble.slots)
+		end
+		ok = true
+	end)
+	return ok
 end
 
-function M.reveal_boss_puzzle(wr)
-	local ok = core_hand.reveal_boss_puzzle(wr, puzzle_hooks())
+function M.reveal_boss_puzzle(_wr)
+	local ok = false
+	mutate_word_round(function(wr)
+		ok = core_hand.reveal_boss_puzzle(wr, puzzle_hooks()) or false
+	end)
 	if ok then
 		Presentation.emit("boss_puzzle_revealed")
 	end
 	return ok
 end
 
-function M.begin_boss_word(wr, on_complete)
-	if not wr or not wr.jumble or wr.jumble.boss_word_active then return false end
-	wr.jumble.boss_word_staging = true
-	if Presentation.emit("boss_word_begin", wr, on_complete) then
-		return true
-	end
-	if M.prepare_boss_word(wr) then
-		local letters = M.boss_hand_letters(
-			wr.jumble.pending_boss.boss_word,
-			wr.jumble.pending_boss.pattern
-		)
-		Deck.deal_boss_hand(letters, on_complete)
-		return true
-	end
-	return false
+function M.begin_boss_word(_wr, on_complete)
+	local started = false
+	mutate_word_round(function(wr)
+		if not wr.jumble or wr.jumble.boss_word_active then return end
+		wr.jumble.boss_word_staging = true
+		if Presentation.emit("boss_word_begin", wr, on_complete) then
+			started = true
+			return
+		end
+		if core_hand.prepare_boss_word(wr, M.boss_puzzle(wr.set, wr.hand_index)) then
+			if wr.jumble.slots then
+				M.sync_placement_cards(wr.jumble.slots)
+			end
+			local letters = M.boss_hand_letters(
+				wr.jumble.pending_boss.boss_word,
+				wr.jumble.pending_boss.pattern
+			)
+			Deck.deal_boss_hand(letters, on_complete)
+			started = true
+		end
+	end)
+	return started
 end
 
 function M.current_puzzle_points()
@@ -143,18 +168,20 @@ end
 
 function M.record_puzzle_word(word, opts)
 	opts = opts or {}
-	local j = M.state()
-	if not j then return 0, 0, 1.0, 1.0 end
-	local wr = game_access.word_round()
-	local used_cards = opts.used_cards
-	local score_opts = jumble_rules.build_score_opts(j, word, used_cards, {
-		wr = wr,
-		apply_time_penalty = true,
-		old_pts = j.puzzle_points or 0,
-		old_multi = j.puzzle_multi or 1.0,
-		word_count = #(j.puzzle_words or {}) + 1,
-	})
-	local old_pts, new_pts, old_multi, new_multi = core_hand.record_puzzle_word(j, word, score_opts)
+	local old_pts, new_pts, old_multi, new_multi = 0, 0, 1.0, 1.0
+	mutate_word_round(function(wr)
+		local j = core_hand.state(wr)
+		if not j then return end
+		local used_cards = opts.used_cards
+		local score_opts = jumble_rules.build_score_opts(j, word, used_cards, {
+			wr = wr,
+			apply_time_penalty = true,
+			old_pts = j.puzzle_points or 0,
+			old_multi = j.puzzle_multi or 1.0,
+			word_count = #(j.puzzle_words or {}) + 1,
+		})
+		old_pts, new_pts, old_multi, new_multi = core_hand.record_puzzle_word(j, word, score_opts)
+	end)
 	return old_pts, new_pts, old_multi, new_multi
 end
 
@@ -173,8 +200,10 @@ function M.refresh_hud()
 	Presentation.emit("jumble_hud_refresh")
 end
 
-function M.advance_puzzle(wr)
-	if not wr or not wr.jumble then return end
-	core_hand.advance_puzzle(wr, M.puzzles(wr.set, wr.hand_index))
+function M.advance_puzzle(_wr)
+	mutate_word_round(function(wr)
+		if not wr.jumble then return end
+		core_hand.advance_puzzle(wr, M.puzzles(wr.set, wr.hand_index))
+	end)
 end
 end

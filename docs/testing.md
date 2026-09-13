@@ -200,7 +200,7 @@ These tests must pass on every PR. See [code-organization.md](code-organization.
 |------|-------|------|
 | **Core rules** | `test_core_*.lua` | `jumbalaya_core` headless — no Love2D boot |
 | **Gameplay** | `test_jumble_*.lua`, `test_play_resolution.lua`, `test_classic_run_mode.lua`, … | Jumble loop, scoring, marketplace |
-| **Store / access** | `test_store_sync.lua`, `test_game_access.lua`, `test_piles.lua` | Store binding, `game_access`, pile hosts |
+| **Store / access** | `test_store_ops.lua`, `test_store_stale_ref.lua`, `test_game_access.lua`, `test_piles.lua` | Store binding, `game_access`, pile hosts, stale-ref guards |
 | **UI / table** | `test_table_board.lua`, `test_sidebar_stage_button.lua`, `test_timeline_timer.lua`, … | HUD, fuse, table rendering |
 | **Persistence** | `test_save_roundtrip.lua` | Save/load contract |
 | **Boot / policy** | `test_boot_simulation.lua`, `test_g_funcs_registry.lua`, `test_store_state_catalog.lua`, `test_facade_boundaries.lua`, `test_core_purity.lua`, `test_legacy_shims.lua` | Startup smoke, Funcs/UI bindings, run-state catalog, facade imports, core isolation, proxy-file scan |

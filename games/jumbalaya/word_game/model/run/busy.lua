@@ -18,9 +18,7 @@ local FLAGS = {
 }
 
 function M.set(name, on)
-	game_access.mutate(function(g)
-		g[name] = on and true or nil
-	end)
+	game_access.dispatch({ type = "SET_BUSY_FLAG", name = name, on = on })
 end
 
 function M.on(name)
@@ -29,11 +27,7 @@ function M.on(name)
 end
 
 function M.clear()
-	game_access.mutate(function(g)
-		for _, flag in ipairs(FLAGS) do
-			g[flag] = nil
-		end
-	end)
+	game_access.dispatch({ type = "CLEAR_BUSY_FLAGS", names = FLAGS })
 end
 
 return M
