@@ -13,6 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install runtime dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libgl1 libglu1-mesa libopenal1 libvorbis0a libvorbisenc2 xvfb
       - name: Install LÖVE ${{ env.LOVE_VERSION }}
         run: |
           curl -fsSL -o love.AppImage \
@@ -26,7 +31,7 @@ jobs:
           echo "$(dirname "$love_bin")" >> "$GITHUB_PATH"
           "$love_bin" --version | grep -F "${LOVE_VERSION}"
       - name: Run headless suite
-        run: love games/jumbalaya tests
+        run: xvfb-run -a love games/jumbalaya tests
 
   emmylua-check:
     runs-on: ubuntu-latest

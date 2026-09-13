@@ -9,6 +9,12 @@ function Game:boot_initial_screen()
 	self.TIMELINE = Scheduler()
 	self.TIME_SCALE = 1
 
+	local os_name = love.system.getOS()
+	if os_name == 'iOS' or os_name == 'Android' then
+		local Window = require "jumbalaya-engine.adapters.love2d.window"
+		Window.sync_resize()
+	end
+
 	local skip_title = self.F_SKIP_TITLE_SCREEN
 		or (self.SETTINGS and self.SETTINGS.skip_title_screen)
 		or (self.SETTINGS and self.SETTINGS.title_screen == false)
@@ -19,11 +25,6 @@ function Game:boot_initial_screen()
 		self:open_main_menu()
 	end
 
-	local os_name = love.system.getOS()
-	if os_name == 'iOS' or os_name == 'Android' then
-		local Window = require "jumbalaya-engine.adapters.love2d.window"
-		Window.sync_resize()
-	end
 	self.LOADING = nil
 end
 

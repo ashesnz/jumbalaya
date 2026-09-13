@@ -69,6 +69,27 @@ local function setup_title_garden_background()
 		offset = {x = 0, y = 0},
 	})
 	runtime().SPLASH_BACK.title_garden_pan = { t = 0 }
+	if runtime().SPLASH_BACK.align_to_major then
+		runtime().SPLASH_BACK:align_to_major()
+	end
+	if runtime().SPLASH_BACK.snap_VT then
+		runtime().SPLASH_BACK:snap_VT()
+	end
+end
+
+local function settle_main_menu_layout()
+	if layout_main_menu then
+		layout_main_menu()
+	end
+	if runtime().title_top then
+		runtime().title_top:sort("order")
+		runtime().title_top:set_ranks()
+		runtime().title_top:relayout()
+		runtime().title_top:hard_set_cards()
+	end
+	if runtime().SPLASH_LOGO and runtime().SPLASH_LOGO.snap_VT then
+		runtime().SPLASH_LOGO:snap_VT()
+	end
 end
 
 function M.open_main_menu(self, change_context)
@@ -111,6 +132,12 @@ function M.open_main_menu(self, change_context)
 	runtime().SPLASH_LOGO.dissolve_colours = {runtime().C.WHITE, runtime().C.WHITE}
 	runtime().SPLASH_LOGO.dissolve = 1
 
+	local cold_boot = change_context == nil
+	if cold_boot then
+		MenuEffects.set_main_ui()
+		settle_main_menu_layout()
+	end
+
 	Scheduler.add{mode = "delayed",
 		delay = change_context == "splash" and 1.8 or change_context == "game" and 2 or 0.15,
 		blockable = false, blocking = false, func = function()
@@ -126,15 +153,19 @@ function M.open_main_menu(self, change_context)
 	Scheduler.delayed{delay = 0.1 + (change_context == "splash" and 2 or change_context == "game" and 1.5 or 0)}
 	Scheduler.add{func = function() if runtime().INPUT then runtime().INPUT.lock_input = false end; return true end}
 	Layout.set_screen_positions()
-	self.title_top:sort("order")
-	self.title_top:set_ranks()
-	self.title_top:relayout()
-	self.title_top:hard_set_cards()
-	Scheduler.add{mode = "delayed", delay = change_context == "splash" and 4.05 or change_context == "game" and 3 or 0.4,
-		blockable = false, blocking = false, func = function()
-			MenuEffects.set_main_ui()
-			return true
-		end}
+	if not cold_boot then
+		self.title_top:sort("order")
+		self.title_top:set_ranks()
+		self.title_top:relayout()
+		self.title_top:hard_set_cards()
+	end
+	if not cold_boot then
+		Scheduler.add{mode = "delayed", delay = change_context == "splash" and 4.05 or change_context == "game" and 3 or 0.4,
+			blockable = false, blocking = false, func = function()
+				MenuEffects.set_main_ui()
+				return true
+			end}
+	end
 	Scheduler.add{blockable = false, func = function()
 		runtime().REFRESH_ALERTS = true
 		return true
