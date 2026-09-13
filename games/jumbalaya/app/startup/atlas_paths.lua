@@ -13,16 +13,17 @@ end
 ---@return string path
 ---@return string|nil source "1x", "2x", or "legacy"
 function M.resolve(filename, texture_scaling, legacy_path)
+	local GameFiles = require("app.platform.game_files")
 	local suffix = M.scale_suffix(texture_scaling)
 	local scaled_path = string.format("resources/textures/%s/%s", suffix, filename)
-	if love.filesystem.getInfo(scaled_path) then
+	if GameFiles.exists(scaled_path) then
 		return scaled_path, suffix
 	end
-	if legacy_path and love.filesystem.getInfo(legacy_path) then
+	if legacy_path and GameFiles.exists(legacy_path) then
 		return legacy_path, "legacy"
 	end
 	local assets_path = "resources/assets/" .. filename
-	if love.filesystem.getInfo(assets_path) then
+	if GameFiles.exists(assets_path) then
 		return assets_path, "legacy"
 	end
 	return legacy_path or assets_path, nil

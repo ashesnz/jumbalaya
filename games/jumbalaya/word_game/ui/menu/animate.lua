@@ -58,7 +58,7 @@ local function setup_title_garden_background()
 	end
 
 	local atlas = runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES.title_garden
-	if not atlas then return end
+	if not atlas or not atlas.image then return end
 
 	local w, h = M.title_garden_sprite_dims()
 	runtime().SPLASH_BACK = Sprite(-30, -13, w, h, atlas, {x = 0, y = 0})
@@ -69,10 +69,6 @@ local function setup_title_garden_background()
 		offset = {x = 0, y = 0},
 	})
 	runtime().SPLASH_BACK.title_garden_pan = { t = 0 }
-	runtime().SPLASH_BACK:define_draw_steps({{
-		shader = "garden_title",
-		send = {{name = "time", ref_table = runtime().TIMERS, ref_value = "REAL"}},
-	}})
 end
 
 function M.open_main_menu(self, change_context)

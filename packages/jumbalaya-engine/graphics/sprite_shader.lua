@@ -101,7 +101,12 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 		end
 	end
 
-	local active_shader = sprite_util.shader_for(_shader)
+	local active_shader
+	if custom_shader then
+		active_shader = g().SHADERS and g().SHADERS[_shader]
+	else
+		active_shader = sprite_util.shader_for(_shader)
+	end
 	if active_shader then love.graphics.setShader(active_shader) end
 
 	if other_obj then

@@ -51,7 +51,7 @@ local function mount_game_assets_if_needed(paths)
 		return
 	end
 	-- Repo-root shim (`love .`): mount the full game tree (assets, localization, shaders).
-	love.filesystem.mount("/", paths.game_root, true)
+	love.filesystem.mount(paths.game_root, "/", true)
 end
 
 function M.install()

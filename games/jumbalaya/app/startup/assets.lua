@@ -13,12 +13,12 @@ local function asset_path(filename)
 end
 
 local function resolve_asset_path(filename, alternates)
-	if love.filesystem.getInfo(asset_path(filename)) then
+	if GameFiles.exists(asset_path(filename)) then
 		return asset_path(filename)
 	end
 	for _, alt in ipairs(alternates or {}) do
 		local path = asset_path(alt)
-		if love.filesystem.getInfo(path) then
+		if GameFiles.exists(path) then
 			return path
 		end
 	end
@@ -26,6 +26,7 @@ local function resolve_asset_path(filename, alternates)
 end
 
 function M.load_shaders(game)
+	GameFiles.ensure_mounted()
 	game.SHADERS = {}
 	for _, filename in ipairs(love.filesystem.getDirectoryItems("resources/shaders")) do
 		if string.sub(filename, -3) == '.fs' then
@@ -105,18 +106,20 @@ function Game:set_render_settings()
 			legacy = resolve_asset_path(spec.filename, spec.alternates)
 		end
 		local path, source = AtlasPaths.resolve(spec.filename, self.SETTINGS.GRAPHICS.texture_scaling, legacy)
-		if love.filesystem.getInfo(path) then
+		if GameFiles.exists(path) then
 			local dpiscale = AtlasPaths.dpiscale_for_source(source, self.SETTINGS.GRAPHICS.texture_scaling, spec.name)
 			local retina_atlas = AtlasDpiscale.is_retina_atlas(spec.name)
+			local image = GameFiles.load_image(path, {
+				mipmaps = not retina_atlas,
+				dpiscale = dpiscale,
+			})
+			if image then
 			self.TEXTURE_ATLASES[spec.name] = {}
 			self.TEXTURE_ATLASES[spec.name].name = spec.name
 			self.TEXTURE_ATLASES[spec.name].path = path
 			self.TEXTURE_ATLASES[spec.name].source = source
 			self.TEXTURE_ATLASES[spec.name].dpiscale = dpiscale
-			self.TEXTURE_ATLASES[spec.name].image = love.graphics.newImage(path, {
-				mipmaps = not retina_atlas,
-				dpiscale = dpiscale,
-			})
+			self.TEXTURE_ATLASES[spec.name].image = image
 			if AtlasDpiscale.is_letter_atlas(spec.name) then
 				self.TEXTURE_ATLASES[spec.name].image:setFilter('linear', 'linear')
 			elseif spec.name == "jumbalaya_base" or spec.name == "jumbalaya_start_a"
@@ -140,6 +143,7 @@ function Game:set_render_settings()
 			AtlasDiagnostics.record(spec.name, path, source, dpiscale,
 				self.TEXTURE_ATLASES[spec.name].px, self.TEXTURE_ATLASES[spec.name].py,
 				self.TEXTURE_ATLASES[spec.name].image)
+			end
 		end
 	end
 	if not self.TEXTURE_ATLASES.centers then
