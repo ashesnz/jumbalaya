@@ -57,9 +57,11 @@ local mock_env = require("tests.helpers.mock_env")
 
 T.describe("my feature", function()
     mock_env.reset_game()
-    -- G.GAME, G.pattern_row, WORD_GAME.Deck, store piles are seeded
+    -- store snapshot via mock_env.game_state(); G.pattern_row, WORD_GAME.Deck seeded
 end)
 ```
+
+Use `mock_env.patch_game({ ... })` for top-level store fields and `mock_env.mutate_game(fn)` for nested edits.
 
 ### Publish custom run state (deal a hand, set target, jumble fields)
 
@@ -79,7 +81,7 @@ mock_env.publish_game({
 })
 ```
 
-After mutating `G.GAME` fields directly, call `mock_env.sync_game()` so the store snapshot matches.
+Use `mock_env.patch_game` / `mock_env.mutate_game` for mid-test edits — do not mutate a cached snapshot across dispatches.
 
 ### Stub sidebar / table controls
 
@@ -146,8 +148,10 @@ mock_env.ensure_engine_globals() -- Sprite, Node, AnimNode, colour helpers
 | Function | Use when |
 |----------|----------|
 | `reset_game()` | Start of every `describe` — preferred default |
-| `publish_game(table)` | Bind `G.GAME` + store from a snapshot |
-| `sync_game()` | After in-place `G.GAME` edits |
+| `game_state()` | Read authoritative store snapshot |
+| `patch_game(fields)` | Shallow-merge top-level run fields |
+| `mutate_game(fn)` | Copy-on-write nested test fixtures |
+| `publish_game(table)` | Bind store from a snapshot |
 | `clear_store_piles()` | Host-only pile tests; empty `store.piles` |
 | `install_presentation(overrides)` | Stub `WORD_GAME_UI` + wire `presentation/install` |
 | `install_hand_clear(play_module)` | Hand-clear / marketplace transition tests |
@@ -214,11 +218,13 @@ GitHub Actions (`.github/workflows/tests.yml`) runs on every push and PR:
 | `love-tests` | LÖVE AppImage **11.5** | `LOVE_VERSION` in workflow — not distro `apt` packages |
 | `emmylua-check` | `emmylua_check` **0.25.1** | `EMMYLUA_CHECK_VERSION` in workflow |
 
-CI runs `emmylua_check . --severity error` (blocks on analyzer errors). Locally, use `--severity warn` before structural refactors:
+CI runs `emmylua_check . --severity error` (blocks on analyzer errors). Locally, install/run via:
 
 ```sh
 love tests
-emmylua_check . --severity warn
+_tools/run_emmylua_check.sh warn
 ```
+
+The helper installs `emmylua_check` **0.25.1** (same pin as CI) when missing and adds `~/.cargo/bin` to `PATH`.
 
 Smoke-test title screen, score banner animations, and token fly in-game when touching those UI flows — those paths no longer have dedicated unit tests.

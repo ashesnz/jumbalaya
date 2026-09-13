@@ -1,11 +1,10 @@
 --[[ devtools/sections/stage.lua - Jump to a match stage from the debug panel. ]]
 
 local layout = require "devtools.layout"
-local game_runtime = require "devtools.runtime"
 local round_config = require "jumbalaya_core.config.gameplay.round"
 
 local function shell()
-	return game_runtime.game()
+	return require("devtools.runtime").game()
 end
 local opening_deal = require "word_game.model.jumble_play.opening_deal"
 local Funcs = require("app.callbacks.funcs")
@@ -57,10 +56,10 @@ local function jump_to_hand(ctx, set, hand_index)
 
 	set = math.max(1, math.min(round_config.SETS_TO_WIN or 8, set))
 	hand_index = math.max(1, math.min(round_config.hands_in_set(set), hand_index or 1))
-	if game.GAME then
-		game.GAME.word_score_animating = false
-		game.GAME.hand_redraw_animating = false
-	end
+	WORD_GAME.GameAccess.patch({
+		word_score_animating = false,
+		hand_redraw_animating = false,
+	})
 	if Funcs.get("close_overlay") then
 		Funcs.dispatch("close_overlay")
 	end
@@ -73,7 +72,7 @@ local function jump_to_hand(ctx, set, hand_index)
 	if WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.reset then
 		WORD_GAME_UI.TokenReward.reset()
 	end
-	local wr = game.GAME and game.GAME.word_round
+	local wr = WORD_GAME.GameAccess.word_round()
 	if wr and wr.jumble and WORD_GAME.Deck and WORD_GAME.Deck.destroy_boss_cards then
 		WORD_GAME.Deck.destroy_boss_cards()
 	end

@@ -118,6 +118,10 @@
 --- Owner: ui/cards/inspect.lua
 ---@field inspecting_card Card|nil
 ---
+--- Owner: word_game/ui/menu/animate.lua, model/game/run.lua
+---@field selected_back any|nil
+---@field selected_back_key any|nil
+---
 --- Owner: app/input/actions.lua, app/callbacks/controllers/run_lifecycle.lua
 ---@field viewed_back any|nil
 ---@field [string] any

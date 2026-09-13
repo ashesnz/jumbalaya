@@ -33,7 +33,6 @@ local M = {
 function M._bind_store(store)
 	M._store = store
 	require("jumbalaya-engine.shell").bind_store(store)
-	require("word_game.model.store_ops").install_game_alias_sync(store)
 end
 
 function M._bind_engine(engine)

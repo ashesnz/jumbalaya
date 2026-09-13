@@ -84,9 +84,9 @@ function M.open_main_menu(self, change_context)
 	end
 
 	self:prep_stage(runtime().STAGES.MAIN_MENU, runtime().STATES.MENU, true)
-		game_access.mutate(function(game)
-		game.selected_back = Back.new(runtime().LETTERS.centers.deck_alpha)
-	end)
+	game_access.patch({
+		selected_back = Back.new(runtime().LETTERS.centers.deck_alpha),
+	})
 
 	if Funcs.get("change_shadows") and runtime().SETTINGS and runtime().SETTINGS.GRAPHICS then
 		Funcs.dispatch("change_shadows", {to_key = runtime().SETTINGS.GRAPHICS.shadows == "On" and 1 or 2})

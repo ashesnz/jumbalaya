@@ -116,11 +116,7 @@ function WordSidebar:draw()
 end
 
 function WordSidebar:clear_hand()
-	game_access.mutate(function(g)
-		if g.word_round then
-			g.word_round.played_words = {}
-		end
-	end)
+	game_access.dispatch({ type = "ROUND_CLEAR_PLAYED_WORDS" })
 end
 
 function WordSidebar.ensure_table_board()

@@ -30,6 +30,14 @@ function M.ROUND_RECORD_WORD(state, action)
 	return state
 end
 
+function M.ROUND_CLEAR_PLAYED_WORDS(state)
+	if not state.word_round then return state end
+	local wr = immutable.copy_word_round(state.word_round)
+	wr.played_words = {}
+	state.word_round = wr
+	return state
+end
+
 function M.ROUND_SET_WORD_ROUND(state, action)
 	state.word_round = action.word_round
 	return state

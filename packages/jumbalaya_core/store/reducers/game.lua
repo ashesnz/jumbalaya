@@ -1,5 +1,7 @@
 --[[ packages/jumbalaya_core/store/reducers/game.lua - Top-level game snapshot patches (no G) ]]
 
+local immutable = require("jumbalaya_core.store.immutable")
+
 local M = {}
 
 function M.GAME_PATCH(state, action)
@@ -38,6 +40,14 @@ end
 
 function M.SET_SELECTED_PERK(state, action)
 	state.selected_perk = action.perk
+	return state
+end
+
+function M.RECORD_CARD_DISCARDED(state)
+	local scores = state.round_scores or {}
+	local discarded = scores.cards_discarded or { amt = 0 }
+	state.round_scores = immutable.shallow_copy(scores)
+	state.round_scores.cards_discarded = { amt = (discarded.amt or 0) + 1 }
 	return state
 end
 

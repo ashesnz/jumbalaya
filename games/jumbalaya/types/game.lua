@@ -1,8 +1,8 @@
 --[[
-	types/game.lua - Live run state on Game.GAME (analyzer-only).
+	types/game.lua - Love2D Game shell fields (analyzer-only). Run snapshot schema: types/store.lua + WORD_GAME.store().
 
 	Runtime bus (live state on the Game shell via app/runtime.lua):
-	- **Game.GAME** — authoritative run snapshot; domain modules read/write through their owner.
+	- **Run snapshot** — `WORD_GAME.store()` / `game_access.get()`; schema in `types/store.lua`.
 	- **UIBox callbacks** — string handlers via app/callbacks/funcs.lua (catalog: types/funcs.lua).
 	- **Presentation** — model→UI notify (contract: types/presentation.lua).
 

@@ -123,7 +123,6 @@ function M.teardown()
 	if store then
 		store_ops.replace(store, CoreStore.default_state())
 	end
-	live_game().GAME = nil
 end
 
 --- Bind a snapshot without starting a full run (e.g. main menu deck preview).
@@ -136,9 +135,7 @@ function M.bind_snapshot(game_table)
 		error("RunScope.bind_snapshot requires WORD_GAME.store()")
 	end
 	store_ops.bind_run(store, game_table)
-	local state = game_access.get()
-	live_game().GAME = state
-	return state
+	return game_access.get()
 end
 
 function M.init_new_run_state()
@@ -170,9 +167,7 @@ function M.begin_run(game_table, opts)
 	if not opts.from_save then
 		M.init_new_run_state()
 	end
-	local state = game_access.get()
-	live_game().GAME = state
-	return state
+	return game_access.get()
 end
 
 function M.assign_game(game_table, opts)

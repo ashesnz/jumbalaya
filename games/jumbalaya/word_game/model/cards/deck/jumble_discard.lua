@@ -2,7 +2,7 @@
 	word_game/model/cards/deck/jumble_discard.lua - Voucher discard from hand with dissolve and hand refill
 
 	Core: none
-	Store: game_access.mutate(round_scores.cards_discarded)
+	Store: game_access.dispatch(RECORD_CARD_DISCARDED)
 	Presentation: hand_shuffle_sync
 ]]
 
@@ -35,12 +35,7 @@ return function(context)
 				live_game().recycle_stash:hard_set_cards()
 			end
 			Presentation.emit("hand_shuffle_sync")
-			game_access.mutate(function(g)
-				if g.round_scores then
-					g.round_scores.cards_discarded = g.round_scores.cards_discarded or { amt = 0 }
-					g.round_scores.cards_discarded.amt = (g.round_scores.cards_discarded.amt or 0) + 1
-				end
-			end)
+			game_access.dispatch({ type = "RECORD_CARD_DISCARDED" })
 		end
 
 		voucher_discard.record_discard()

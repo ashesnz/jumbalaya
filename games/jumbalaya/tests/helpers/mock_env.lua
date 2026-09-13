@@ -134,7 +134,6 @@ function M.setup()
 	G.STATES = G.STATES or { TABLE_BOARD = 1, MENU = 2 }
 	G.STAGES = G.STAGES or { RUN = 1, MAIN_MENU = 2 }
 	G.DEFINITIONS = G.DEFINITIONS or {}
-	G.GAME = G.GAME or {}
 	G.TIMERS = G.TIMERS or { REAL = 0, TOTAL = 0, UPTIME = 0, BACKGROUND = 0 }
 	G.ROOM = G.ROOM or { T = { x = 0, y = 0, w = 20, h = 11 }, jiggle = 0 }
 	G.LETTERS = G.LETTERS or {
@@ -356,7 +355,7 @@ function M.reset_game()
 		relayout = function() end,
 		jumble_geometry = jg,
 	}
-	G.GAME = {
+	local initial = {
 		points = 0,
 		seed_streams = { seed = "TEST", hashed_seed = 0 },
 		word_round = {
@@ -376,7 +375,7 @@ function M.reset_game()
 	if ok_views and views_install.reset then
 		views_install.reset()
 	end
-	M.publish_game(G.GAME)
+	M.publish_game(initial)
 end
 
 --- Bind a game snapshot as the authoritative store state (Phase 8 PR-2).
@@ -391,9 +390,6 @@ function M.publish_game(game_table)
 		store_ops.patch(store, {
 			piles = { hand = {}, draw = {}, pattern = {}, bonus = {}, discard = {} },
 		})
-		G.GAME = store:get()
-	else
-		G.GAME = game_table
 	end
 	local shell_bind = package.loaded["app.bootstrap.shell_bind"]
 	if shell_bind and shell_bind.install then
@@ -403,7 +399,7 @@ function M.publish_game(game_table)
 	end
 end
 
---- Authoritative run snapshot (store-backed). Prefer over G.GAME in tests.
+--- Authoritative run snapshot via game_access (store-backed).
 function M.game_state()
 	return require("word_game.model.game_access").get()
 end
