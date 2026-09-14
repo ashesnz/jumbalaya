@@ -9,7 +9,13 @@
 local Deck = require("word_game.model.cards.deck")
 local live_game = require("word_game.model.live_game")
 
-return function(M)
+local M = {}
+
+-- Sibling exports on the jumble facade (lazy — init may still be loading this module).
+local function J()
+	return package.loaded["word_game.model.jumble"]
+end
+
 local Timeline = require("word_game.model.run.timeline")
 local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
 local perk_effects = require("word_game.model.perks.effects")
@@ -30,7 +36,7 @@ local function puzzle_start_hooks()
 end
 
 local function puzzle_list_for(wr)
-	return M.puzzles(wr.set, wr.hand_index)
+	return J().puzzles(wr.set, wr.hand_index)
 end
 
 local function clear_pattern_row_cards(j)
@@ -49,7 +55,7 @@ local function clear_pattern_row_cards(j)
 			end
 		end
 		if area.config then
-			area.config.card_limit = M.blank_count(j.slots, j.puzzle)
+			area.config.card_limit = J().blank_count(j.slots, j.puzzle)
 		end
 		if live_game().pattern_row then
 			live_game().pattern_row:relayout()
@@ -58,7 +64,7 @@ local function clear_pattern_row_cards(j)
 			end
 		end
 	end
-	M.PlacementWord.clear()
+	J().PlacementWord.clear()
 end
 
 function M.is_active_hand(set, hand_index)
@@ -115,14 +121,14 @@ function M.prepare_boss_word(_wr)
 	if not wr then return false end
 	game_access.dispatch({
 		type = "JUMBLE_PREPARE_BOSS_WORD",
-		boss = M.boss_puzzle(wr.set, wr.hand_index),
+		boss = J().boss_puzzle(wr.set, wr.hand_index),
 	})
 	local next_wr = game_access.word_round()
 	if not next_wr or not next_wr.jumble or not next_wr.jumble.pending_boss then
 		return false
 	end
 	if next_wr.jumble.slots then
-		M.sync_placement_cards(next_wr.jumble.slots)
+		J().sync_placement_cards(next_wr.jumble.slots)
 	end
 	return true
 end
@@ -151,7 +157,7 @@ function M.begin_boss_word(_wr, on_complete)
 
 	if M.prepare_boss_word(wr) then
 		wr = game_access.word_round()
-		local letters = M.boss_hand_letters(
+		local letters = J().boss_hand_letters(
 			wr.jumble.pending_boss.boss_word,
 			wr.jumble.pending_boss.pattern
 		)
@@ -224,4 +230,4 @@ function M.advance_puzzle(_wr)
 		puzzle_list = puzzle_list_for(wr),
 	})
 end
-end
+return M

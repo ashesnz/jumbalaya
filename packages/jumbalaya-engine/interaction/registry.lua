@@ -1,6 +1,6 @@
 return function(InputRouter)
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 
 function InputRouter:cull_registry()
@@ -19,7 +19,7 @@ function InputRouter:add_to_registry(node, registry)
 	self.button_registry[registry] = self.button_registry[registry] or {}
 	table.insert(self.button_registry[registry], 1, {
 		node = node,
-		menu = (not not g().OVERLAY_MENU) or (not not g().SETTINGS.paused),
+		menu = (not not game().OVERLAY_MENU) or (not not game().SETTINGS.paused),
 	})
 end
 
@@ -30,9 +30,9 @@ function InputRouter:process_registry()
 		for i = 1, #registry do
 			local entry = registry[i]
 			if entry.click and entry.node.click then
-				local in_bounds = entry.node.T.x > -2 and entry.node.T.x < g().ROOM.T.w + 2
-					and entry.node.T.y > -2 and entry.node.T.y < g().ROOM.T.h + 2
-				if entry.menu == (not not g().OVERLAY_MENU) and in_bounds then
+				local in_bounds = entry.node.T.x > -2 and entry.node.T.x < game().ROOM.T.w + 2
+					and entry.node.T.y > -2 and entry.node.T.y < game().ROOM.T.h + 2
+				if entry.menu == (not not game().OVERLAY_MENU) and in_bounds then
 					entry.node:click()
 				end
 				entry.click = nil

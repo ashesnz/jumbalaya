@@ -1,5 +1,5 @@
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 --[[ jumbalaya-engine/adapters/love2d/window.lua - Window callbacks, mobile landscape lock, viewport ]]
 
@@ -52,8 +52,8 @@ function Window.lock_landscape_orientation()
 	end
 
 	local vsync = 1
-	if g() and g().SETTINGS and g().SETTINGS.WINDOW and g().SETTINGS.WINDOW.vsync ~= nil then
-		vsync = g().SETTINGS.WINDOW.vsync
+	if game() and game().SETTINGS and game().SETTINGS.WINDOW and game().SETTINGS.WINDOW.vsync ~= nil then
+		vsync = game().SETTINGS.WINDOW.vsync
 	end
 
 	love.window.setMode(LANDSCAPE_W, LANDSCAPE_H, {
@@ -71,7 +71,7 @@ function Window.apply_mobile_window()
 		return nil, nil
 	end
 
-	if g() and g().ROOM_PADDING_W then
+	if game() and game().ROOM_PADDING_W then
 		return Window.sync_resize()
 	end
 	return LANDSCAPE_W, LANDSCAPE_H
@@ -98,12 +98,12 @@ function love.resize(width, height)
 		end
 	end
 
-	local tile_w = g().TILE_W or 20
-	local tile_h = g().TILE_H or 11.5
-	local pad_w = g().ROOM_PADDING_W or 1
-	local pad_h = g().ROOM_PADDING_H or 0.7
+	local tile_w = game().TILE_W or 20
+	local tile_h = game().TILE_H or 11.5
+	local pad_w = game().ROOM_PADDING_W or 1
+	local pad_h = game().ROOM_PADDING_H or 0.7
 
-	g().WINDOW_TRANSFORM = {
+	game().WINDOW_TRANSFORM = {
 		x = 0,
 		y = 0,
 		w = tile_w + 2 * pad_w,
@@ -111,32 +111,32 @@ function love.resize(width, height)
 		real_window_w = width,
 		real_window_h = height,
 	}
-	g().CANVAS_SCALE = 1
+	game().CANVAS_SCALE = 1
 
 	local os_name = love.system and love.system.getOS and love.system.getOS() or ""
 	local canvas_opts = (os_name == "iOS" or os_name == "Android") and { type = "2d" }
 		or { type = "2d", readable = true }
 
-	g().CANVAS = love.graphics.newCanvas(
-		width * g().CANVAS_SCALE,
-		height * g().CANVAS_SCALE,
+	game().CANVAS = love.graphics.newCanvas(
+		width * game().CANVAS_SCALE,
+		height * game().CANVAS_SCALE,
 		canvas_opts
 	)
-	g().CANVAS:setFilter("linear", "linear")
+	game().CANVAS:setFilter("linear", "linear")
 
-	if not g().ROOM then
+	if not game().ROOM then
 		return
 	end
 
 	refit_viewport(width, height)
-	if g().buttons then
-		g().buttons:recalculate()
+	if game().buttons then
+		game().buttons:recalculate()
 	end
-	if g().STAGE == g().STAGES.RUN and g().STATE == g().STATES.TABLE_BOARD then
+	if game().STAGE == game().STAGES.RUN and game().STATE == game().STATES.TABLE_BOARD then
 		if apply_run_layout then
 			apply_run_layout()
 		end
-	elseif g().STAGE == g().STAGES.MAIN_MENU and layout_main_menu then
+	elseif game().STAGE == game().STAGES.MAIN_MENU and layout_main_menu then
 		layout_main_menu()
 	end
 end
@@ -147,7 +147,7 @@ function love.displayrotated(_index, orientation)
 	end
 	if orientation == "portrait" or orientation == "portraitflipped" then
 		Window.lock_landscape_orientation()
-		if g() and g().ROOM_PADDING_W then
+		if game() and game().ROOM_PADDING_W then
 			Window.sync_resize()
 		end
 	end

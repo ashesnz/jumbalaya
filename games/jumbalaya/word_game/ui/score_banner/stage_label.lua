@@ -6,8 +6,7 @@
 
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local round_config = require("jumbalaya_core.config.gameplay.round")
 local Roll = require("jumbalaya-engine.util.roll")
@@ -188,7 +187,7 @@ function M.draw_above_timer(x, y, w, h)
 	local cx = x + (w - total_w) * 0.5
 	local digit_y = y - gap - digit_h
 
-	local colour = (runtime() and runtime().C and runtime().C.GOLD) or { 1, 0.85, 0.35, 1 }
+	local colour = (game() and game().C and game().C.GOLD) or { 1, 0.85, 0.35, 1 }
 
 	local lf, lt, lrt, lroll = Roll.view(M.left_roll, M.left_count or 1)
 	local rf, rt, rrt, rroll = Roll.view(M.right_roll, M.right_count or 1)

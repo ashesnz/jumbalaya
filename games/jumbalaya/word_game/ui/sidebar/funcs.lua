@@ -1,7 +1,6 @@
---[[ word_game/ui/sidebar/funcs.lua - Sidebar runtime().FUNCS registration (logic on Sidebar module) ]]
+--[[ word_game/ui/sidebar/funcs.lua - Sidebar game().FUNCS registration (logic on Sidebar module) ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local SidebarController = require("word_game.ui.controllers.sidebar")
 local Funcs = require("app.callbacks.funcs")

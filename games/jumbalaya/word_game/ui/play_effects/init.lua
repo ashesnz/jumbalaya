@@ -4,8 +4,7 @@
 	Outputs: resolve path via resolution.lua; queue_event, request_layout_refresh on host.
 ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local definition = require("word_game.ui.play_effects.definition")
@@ -16,7 +15,7 @@ local M = {}
 animate.bind_host(M)
 
 local function has_event_manager()
-	return runtime().TIMELINE and runtime().TIMELINE.enqueue
+	return game().TIMELINE and game().TIMELINE.enqueue
 end
 
 function M.queue_event(ev)
@@ -28,8 +27,8 @@ function M.queue_event(ev)
 end
 
 function M.request_layout_refresh()
-	runtime().ARGS = runtime().ARGS or {}
-	runtime().ARGS.pending_layout = true
+	game().ARGS = game().ARGS or {}
+	game().ARGS.pending_layout = true
 end
 
 for k, v in pairs(definition) do

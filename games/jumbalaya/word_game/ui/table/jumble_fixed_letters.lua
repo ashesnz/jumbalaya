@@ -1,7 +1,6 @@
 --[[ word_game/ui/table/jumble_fixed_letters.lua - Fixed puzzle letter tiles on the placement row ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local facade = require("word_game.ui.facade")
 local Jumble = facade.jumble()
@@ -40,7 +39,7 @@ function M.draw(session)
 	if not j or not j.slots or j.boss_puzzle_hidden then return end
 
 	local geo = session.jumble_geometry
-		or (runtime().pattern_row and runtime().pattern_row.jumble_geometry)
+		or (game().pattern_row and game().pattern_row.jumble_geometry)
 	if not geo then return end
 
 	local area = session.area

@@ -4,8 +4,7 @@
 	Outputs: present_boss_word(wr, on_complete); countdown via word_feedback.show_boss_countdown.
 ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local facade = require("word_game.ui.facade")
 
@@ -44,7 +43,7 @@ local function clear_locked_hand_layout()
 end
 
 local function has_event_manager()
-	return runtime().TIMELINE and runtime().TIMELINE.enqueue
+	return game().TIMELINE and game().TIMELINE.enqueue
 end
 
 function M.present_boss_word(_wr, on_complete)
@@ -55,7 +54,7 @@ function M.present_boss_word(_wr, on_complete)
 		return
 	end
 
-	if runtime().dealt_letters then
+	if game().dealt_letters then
 		clear_locked_hand_layout()
 	end
 
@@ -96,8 +95,8 @@ function M.present_boss_word(_wr, on_complete)
 		end
 		if WORD_GAME_UI.Layout and WORD_GAME_UI.Layout.refresh_placement_layout then
 			WORD_GAME_UI.Layout.refresh_placement_layout()
-		elseif runtime().pattern_row and runtime().pattern_row.apply_screen_position then
-			runtime().pattern_row:apply_screen_position()
+		elseif game().pattern_row and game().pattern_row.apply_screen_position then
+			game().pattern_row:apply_screen_position()
 		end
 		if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
 			WORD_GAME_UI.Sidebar.sync_visibility()

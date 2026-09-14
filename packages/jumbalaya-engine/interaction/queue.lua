@@ -1,6 +1,6 @@
 return function(InputRouter)
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 
 function InputRouter:key_press(key)

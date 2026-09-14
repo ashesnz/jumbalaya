@@ -6,7 +6,8 @@
 	Presentation: none
 ]]
 
-return function(M)
+local M = {}
+
 local puzzles_cfg = require("word_game.config.jumble")
 local round_config = require("jumbalaya_core.config.gameplay.round")
 local core = require("jumbalaya_core.jumble.puzzle_spec")
@@ -92,4 +93,4 @@ function M.boss_puzzle(set, hand_index)
 	return random_boss_puzzle(stage_cfg and stage_cfg.BOSS_WORDS)
 end
 
-end
+return M

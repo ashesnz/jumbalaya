@@ -1,18 +1,18 @@
 
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 return function(AnimNode)
 --- Critically-damped XY integration of VT toward T with a speed clamp.
 function AnimNode:move_xy(dt)
 	if (self.T.x ~= self.VT.x or math.abs(self.velocity.x) > 0.01) or
 		(self.T.y ~= self.VT.y or math.abs(self.velocity.y) > 0.01) then
-		self.velocity.x = g().smoothing.xy * self.velocity.x + (1 - g().smoothing.xy) * (self.T.x - self.VT.x) * 30 * dt
-		self.velocity.y = g().smoothing.xy * self.velocity.y + (1 - g().smoothing.xy) * (self.T.y - self.VT.y) * 30 * dt
+		self.velocity.x = game().smoothing.xy * self.velocity.x + (1 - game().smoothing.xy) * (self.T.x - self.VT.x) * 30 * dt
+		self.velocity.y = game().smoothing.xy * self.velocity.y + (1 - game().smoothing.xy) * (self.T.y - self.VT.y) * 30 * dt
 		local vel_sq = self.velocity.x^2 + self.velocity.y^2
-		if vel_sq > g().smoothing.max_vel^2 then
+		if vel_sq > game().smoothing.max_vel^2 then
 			local actual_vel = math.sqrt(vel_sq)
-			self.velocity.x = g().smoothing.max_vel * self.velocity.x / actual_vel
-			self.velocity.y = g().smoothing.max_vel * self.velocity.y / actual_vel
+			self.velocity.x = game().smoothing.max_vel * self.velocity.x / actual_vel
+			self.velocity.y = game().smoothing.max_vel * self.velocity.y / actual_vel
 		end
 		self.STATIONARY = false
 		self.VT.x = self.VT.x + self.velocity.x
@@ -34,8 +34,8 @@ function AnimNode:move_scale(dt)
 
 	if desired_scale ~= self.VT.scale or math.abs(self.velocity.scale) > 0.001 then
 		self.STATIONARY = false
-		self.velocity.scale = g().smoothing.scale * self.velocity.scale
-			+ (1 - g().smoothing.scale) * (desired_scale - self.VT.scale)
+		self.velocity.scale = game().smoothing.scale * self.velocity.scale
+			+ (1 - game().smoothing.scale) * (desired_scale - self.VT.scale)
 		self.VT.scale = self.VT.scale + self.velocity.scale
 	end
 end
@@ -60,7 +60,7 @@ function AnimNode:move_r(dt, vel)
 
 	if desired_r ~= self.VT.r or math.abs(self.velocity.r) > 0.001 then
 		self.STATIONARY = false
-		self.velocity.r = g().smoothing.r * self.velocity.r + (1 - g().smoothing.r) * (desired_r - self.VT.r)
+		self.velocity.r = game().smoothing.r * self.velocity.r + (1 - game().smoothing.r) * (desired_r - self.VT.r)
 		self.VT.r = self.VT.r + self.velocity.r
 	end
 	if math.abs(self.VT.r - self.T.r) < 0.001 and math.abs(self.velocity.r) < 0.001 then

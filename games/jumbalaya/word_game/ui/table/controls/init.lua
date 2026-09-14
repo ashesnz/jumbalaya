@@ -1,7 +1,6 @@
 --[[ word_game/ui/table/controls/init.lua - Play/shuffle buttons beside the dealt hand ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local facade = require("word_game.ui.facade")
 local Play = facade.jumble_play()
@@ -22,17 +21,17 @@ local function jumble_active()
 end
 
 function M.play_button_uie()
-	if not runtime().hand_action_bar or runtime().hand_action_bar.REMOVED then return nil end
-	return runtime().hand_action_bar:find_node_by_id("hand_play_button")
+	if not game().hand_action_bar or game().hand_action_bar.REMOVED then return nil end
+	return game().hand_action_bar:find_node_by_id("hand_play_button")
 end
 
 function M.shuffle_button_uie()
-	if not runtime().table_shuffle_bar or runtime().table_shuffle_bar.REMOVED then return nil end
-	return runtime().table_shuffle_bar:find_node_by_id("hand_shuffle_button")
+	if not game().table_shuffle_bar or game().table_shuffle_bar.REMOVED then return nil end
+	return game().table_shuffle_bar:find_node_by_id("hand_shuffle_button")
 end
 
 function M.placement_has_cards()
-	local area = runtime().pattern_row and runtime().pattern_row.area
+	local area = game().pattern_row and game().pattern_row.area
 	if area and area.cards and #area.cards > 0 then
 		return true
 	end
@@ -64,15 +63,15 @@ function M.sync_position()
 end
 
 function M.buttons_present()
-	if not runtime().hand_action_bar or runtime().hand_action_bar.REMOVED then return false end
-	if not runtime().table_shuffle_bar or runtime().table_shuffle_bar.REMOVED then return false end
+	if not game().hand_action_bar or game().hand_action_bar.REMOVED then return false end
+	if not game().table_shuffle_bar or game().table_shuffle_bar.REMOVED then return false end
 	return M.play_button_uie() ~= nil and M.shuffle_button_uie() ~= nil
 end
 
 function M.visible()
-	return runtime().STATE == runtime().STATES.TABLE_BOARD
-		and runtime().ROOM_ATTACH ~= nil
-		and runtime().dealt_letters ~= nil
+	return game().STATE == game().STATES.TABLE_BOARD
+		and game().ROOM_ATTACH ~= nil
+		and game().dealt_letters ~= nil
 end
 
 local function action_visible()
@@ -136,10 +135,10 @@ local function sync_play_button(play_btn, show)
 end
 
 function M.sync_visibility(_opts)
-	if runtime().table_shuffle_bar and not runtime().table_shuffle_bar.REMOVED then
+	if game().table_shuffle_bar and not game().table_shuffle_bar.REMOVED then
 		sync_shuffle_button(M.shuffle_button_uie(), action_visible())
 	end
-	if runtime().hand_action_bar and not runtime().hand_action_bar.REMOVED then
+	if game().hand_action_bar and not game().hand_action_bar.REMOVED then
 		sync_play_button(M.play_button_uie(), action_visible())
 	end
 end

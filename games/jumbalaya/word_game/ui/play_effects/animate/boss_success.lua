@@ -1,6 +1,6 @@
 --[[ word_game/ui/play_effects/animate/boss_success.lua - Boss word cleared sequence ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 local definition = require("word_game.ui.play_effects.definition")
@@ -10,9 +10,6 @@ local bonus_stack_ui = facade.bonus_stack_ui()
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 local function detach_card_for_stack(card)
 	bonus_stack_ui.detach(card)
@@ -53,7 +50,7 @@ function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_
 		delay = 0.05,
 		blocking = true,
 		func = function()
-			word_feedback.show_screen_centered("Well done!", runtime().C.GOLD, WELL_DONE_HOLD)
+			word_feedback.show_screen_centered("Well done!", game().C.GOLD, WELL_DONE_HOLD)
 			if play_sfx then
 				play_sfx("coin2", 1, 0.9)
 			end

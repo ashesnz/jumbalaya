@@ -1,13 +1,12 @@
 --[[ word_game/ui/cards/visuals/draw.lua - Card shadow, tilt, and draw passes ]]
 
 ---@class (partial) Card : EaseNode
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local LetterFaces = require("word_game.ui.cards.letter_faces")
 local LetterPalette = require("word_game.config.visuals.letter_card_palette")
 local Tables = require("jumbalaya-engine.util.tables")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 
-local function runtime() return GameRT.game() end
 
 local function letter_card_tint(card)
 	if card.bonus_card then
@@ -24,8 +23,8 @@ end
 
 function Card:sync_shadow_state()
 	self.ARGS.send_to_shader = self.ARGS.send_to_shader or {}
-	self.ARGS.send_to_shader[1] = math.min(self.VT.r*3, 1) + runtime().TIMERS.REAL/(28) + (self.bounce and self.bounce.r*20 or 0) + self.tilt_var.amt
-	self.ARGS.send_to_shader[2] = runtime().TIMERS.REAL
+	self.ARGS.send_to_shader[1] = math.min(self.VT.r*3, 1) + game().TIMERS.REAL/(28) + (self.bounce and self.bounce.r*20 or 0) + self.tilt_var.amt
+	self.ARGS.send_to_shader[2] = game().TIMERS.REAL
 
 	for _, child in pairs(self.children) do
 		child.VT.scale = self.VT.scale
@@ -34,10 +33,10 @@ end
 
 function Card:draw_shadow()
 	local wants_shadow = not self.no_shadow
-		and runtime().SETTINGS.GRAPHICS.shadows == 'On'
+		and game().SETTINGS.GRAPHICS.shadows == 'On'
 		and self.ability.effect ~= 'Glass Card'
 		and not self.greyed
-		and ((self.area and self.area ~= runtime().recycle_stash and self.area.config.type ~= 'deck')
+		and ((self.area and self.area ~= game().recycle_stash and self.area.config.type ~= 'deck')
 			or not self.area or self.states.drag.is)
 
 	if wants_shadow then
@@ -47,7 +46,7 @@ function Card:draw_shadow()
 		if self.inspecting then
 			self.shadow_height = self.shadow_height + 0.22
 		end
-		runtime().shared_shadow:apply_shader_effect('dissolve', self.shadow_height)
+		game().shared_shadow:apply_shader_effect('dissolve', self.shadow_height)
 	end
 end
 
@@ -59,16 +58,16 @@ function Card:update_tilt()
 	local tilt_factor = 0.3
 	if self.states.focus.is then
 		self.tilt_var.mx, self.tilt_var.my =
-			runtime().INPUT.cursor_position.x + self.tilt_var.dx*self.T.w*runtime().TILESCALE*runtime().TILESIZE,
-			runtime().INPUT.cursor_position.y + self.tilt_var.dy*self.T.h*runtime().TILESCALE*runtime().TILESIZE
+			game().INPUT.cursor_position.x + self.tilt_var.dx*self.T.w*game().TILESCALE*game().TILESIZE,
+			game().INPUT.cursor_position.y + self.tilt_var.dy*self.T.h*game().TILESCALE*game().TILESIZE
 		self.tilt_var.amt = math.abs(self.hover_offset.y + self.hover_offset.x - 1 + self.tilt_var.dx + self.tilt_var.dy - 1)*tilt_factor
 	elseif self.states.hover.is then
-		self.tilt_var.mx, self.tilt_var.my = runtime().INPUT.cursor_position.x, runtime().INPUT.cursor_position.y
+		self.tilt_var.mx, self.tilt_var.my = game().INPUT.cursor_position.x, game().INPUT.cursor_position.y
 		self.tilt_var.amt = math.abs(self.hover_offset.y + self.hover_offset.x - 1)*tilt_factor
 	elseif self.ambient_tilt then
-		local tilt_angle = runtime().TIMERS.REAL*(1.56 + (self.ID/1.14212)%1) + self.ID/1.35122
-		self.tilt_var.mx = ((0.5 + 0.5*self.ambient_tilt*math.cos(tilt_angle))*self.VT.w+self.VT.x+runtime().ROOM.T.x)*runtime().TILESIZE*runtime().TILESCALE
-		self.tilt_var.my = ((0.5 + 0.5*self.ambient_tilt*math.sin(tilt_angle))*self.VT.h+self.VT.y+runtime().ROOM.T.y)*runtime().TILESIZE*runtime().TILESCALE
+		local tilt_angle = game().TIMERS.REAL*(1.56 + (self.ID/1.14212)%1) + self.ID/1.35122
+		self.tilt_var.mx = ((0.5 + 0.5*self.ambient_tilt*math.cos(tilt_angle))*self.VT.w+self.VT.x+game().ROOM.T.x)*game().TILESIZE*game().TILESCALE
+		self.tilt_var.my = ((0.5 + 0.5*self.ambient_tilt*math.sin(tilt_angle))*self.VT.h+self.VT.y+game().ROOM.T.y)*game().TILESIZE*game().TILESCALE
 		self.tilt_var.amt = self.ambient_tilt*(0.5+math.cos(tilt_angle))*tilt_factor
 	end
 end
@@ -125,7 +124,7 @@ function Card:draw_front()
 end
 
 function Card:draw_back()
-	local overlay = runtime().C.WHITE
+	local overlay = game().C.WHITE
 	if self.area and self.area.config.type == 'deck' then
 		overlay = {0.5 + ((#self.area.cards - self.slot)%7)/50,
 			0.5 + ((#self.area.cards - self.slot)%7)/50,
@@ -160,14 +159,14 @@ function Card:draw(layer)
 		self:sync_shadow_state()
 	end
 
-	runtime().shared_shadow = self.sprite_facing == 'front' and self.children.center or self.children.back
+	game().shared_shadow = self.sprite_facing == 'front' and self.children.center or self.children.back
 
 	if layer == 'shadow' or layer == 'both' then
 		self:draw_shadow()
 	end
 
 	if layer == 'card' or layer == 'both' then
-		if self.area ~= runtime().dealt_letters and self.children.focused_ui then
+		if self.area ~= game().dealt_letters and self.children.focused_ui then
 			self.children.focused_ui:draw()
 		end
 
@@ -190,14 +189,14 @@ function Card:draw(layer)
 
 		if self.children.overwrite then
 			love.graphics.push()
-			love.graphics.setColor(runtime().C.BLUE)
-			runtime().OVERLAY_TINT = {1, 1, 1, math.sin(5*runtime().TIMERS.REAL)}
+			love.graphics.setColor(game().C.BLUE)
+			game().OVERLAY_TINT = {1, 1, 1, math.sin(5*game().TIMERS.REAL)}
 			self.children.overwrite:draw('card')
-			runtime().OVERLAY_TINT = nil
+			game().OVERLAY_TINT = nil
 			love.graphics.pop()
 		end
 
-		if self.area == runtime().dealt_letters and self.children.focused_ui then
+		if self.area == game().dealt_letters and self.children.focused_ui then
 			self.children.focused_ui:draw()
 		end
 

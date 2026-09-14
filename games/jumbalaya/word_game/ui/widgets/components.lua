@@ -1,7 +1,7 @@
 --[[
 	word_game/ui/widgets/components.lua - component API over the UI node tree.
 
-	Wraps the declarative {n=runtime().UI.*, config={...}} DSL in composable
+	Wraps the declarative {n=game().UI.*, config={...}} DSL in composable
 	component constructors with friendlier keys (`onClick`, `width`,
 	`height`, `textSize`) and Jumbalaya's own chrome language: flat
 	panels with soft corners and hover tints instead of embossed,
@@ -11,9 +11,8 @@
 	existing call sites keep working.
 ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local Funcs = require("app.callbacks.funcs")
-local function runtime() return GameRT.game() end
 
 local Components = {}
 
@@ -69,7 +68,7 @@ Components.resolve_action = resolve_action
 --------------------------------------------------------------------
 
 --- Builds a push button.
---- Friendly keys: onClick (function or runtime().FUNCS name), onTick, width,
+--- Friendly keys: onClick (function or game().FUNCS name), onTick, width,
 --- height, textSize, textColour. Legacy keys still honoured.
 ---@param def table
 function Components.button(def)
@@ -90,25 +89,25 @@ function Components.button(def)
 	local rows = {}
 	for k, v in ipairs(labels) do
 		local wants_pip = k == #labels and def.focus_args and def.focus_args.set_button_pip
-		rows[#rows + 1] = {n=runtime().UI.ROW, config={align = "cm", padding = CHROME.label_gap, minw = minw, maxw = maxw}, nodes={
-			{n=runtime().UI.TEXT, config={text = v, scale = scale, font = alpha_button_font(), colour = def.textColour or def.text_colour or runtime().C.UI.TEXT_LIGHT, shadow = def.shadow, focus_args = wants_pip and def.focus_args or nil, func = wants_pip and 'set_button_pip' or nil, ref_table = def.ref_table}}
+		rows[#rows + 1] = {n=game().UI.ROW, config={align = "cm", padding = CHROME.label_gap, minw = minw, maxw = maxw}, nodes={
+			{n=game().UI.TEXT, config={text = v, scale = scale, font = alpha_button_font(), colour = def.textColour or def.text_colour or game().C.UI.TEXT_LIGHT, shadow = def.shadow, focus_args = wants_pip and def.focus_args or nil, func = wants_pip and 'set_button_pip' or nil, ref_table = def.ref_table}}
 		}}
 	end
 
 	if def.count then
-		rows[#rows + 1] = {n=runtime().UI.ROW, config={align = "cm", minh = 0.4}, nodes={
-			{n=runtime().UI.TEXT, config={scale = 0.35, text = def.count.tally..' / '..def.count.of, colour = {1, 1, 1, 0.9}}}
+		rows[#rows + 1] = {n=game().UI.ROW, config={align = "cm", minh = 0.4}, nodes={
+			{n=game().UI.TEXT, config={scale = 0.35, text = def.count.tally..' / '..def.count.of, colour = {1, 1, 1, 0.9}}}
 		}}
 	end
 
-	return {n=(def.col == true and runtime().UI.COLUMN or runtime().UI.ROW), config={align = 'cm'}, nodes={
-		{n=runtime().UI.COLUMN, config={
+	return {n=(def.col == true and game().UI.COLUMN or game().UI.ROW), config={align = 'cm'}, nodes={
+		{n=game().UI.COLUMN, config={
 			align = "cm",
 			padding = def.padding or CHROME.padding,
 			r = CHROME.radius,
 			hover = true,
-			colour = def.colour or runtime().C.RED,
-			hover_colour = def.hover_colour or runtime().C.UI.BUTTON_HOVER,
+			colour = def.colour or game().C.RED,
+			hover_colour = def.hover_colour or game().C.UI.BUTTON_HOVER,
 			one_press = def.one_press,
 			button = click,
 			choice = def.choice,
@@ -132,7 +131,7 @@ end
 --- Builds a drag slider bound to ref_table[ref_value].
 function Components.slider(def)
 	def = def or {}
-	def.colour = def.colour or runtime().C.RED
+	def.colour = def.colour or game().C.RED
 	def.w = def.w or def.width or 1
 	def.h = def.h or def.height or 0.5
 	def.label_scale = def.label_scale or 0.5
@@ -144,21 +143,21 @@ function Components.slider(def)
 	local startval = def.w * (def.ref_table[def.ref_value] - def.min) / (def.max - def.min)
 
 	local t =
-		{n=runtime().UI.COLUMN, config={align = "cm", minw = def.w, min_h = def.h, padding = 0.07, r = CHROME.radius * 0.6, colour = runtime().C.CLEAR, focus_args = {type = 'slider'}}, nodes={
-			{n=runtime().UI.COLUMN, config={align = "cl", minw = def.w, r = CHROME.radius * 0.6, min_h = def.h, collideable = true, hover = true, colour = runtime().C.BLACK, func = 'drag_slider', refresh_movement = true}, nodes={
-				{n=runtime().UI.BOX, config={w = startval, h = def.h, r = CHROME.radius * 0.6, colour = def.colour, ref_table = def, refresh_movement = true}},
+		{n=game().UI.COLUMN, config={align = "cm", minw = def.w, min_h = def.h, padding = 0.07, r = CHROME.radius * 0.6, colour = game().C.CLEAR, focus_args = {type = 'slider'}}, nodes={
+			{n=game().UI.COLUMN, config={align = "cl", minw = def.w, r = CHROME.radius * 0.6, min_h = def.h, collideable = true, hover = true, colour = game().C.BLACK, func = 'drag_slider', refresh_movement = true}, nodes={
+				{n=game().UI.BOX, config={w = startval, h = def.h, r = CHROME.radius * 0.6, colour = def.colour, ref_table = def, refresh_movement = true}},
 			}},
-			{n=runtime().UI.COLUMN, config={align = "cm", minh = def.h, r = CHROME.radius * 0.6, minw = 0.8, colour = runtime().C.CLEAR}, nodes={
-				{n=runtime().UI.TEXT, config={ref_table = def, ref_value = 'text', scale = def.text_scale, colour = runtime().C.UI.TEXT_LIGHT, decimal_places = def.decimal_places}}
+			{n=game().UI.COLUMN, config={align = "cm", minh = def.h, r = CHROME.radius * 0.6, minw = 0.8, colour = game().C.CLEAR}, nodes={
+				{n=game().UI.TEXT, config={ref_table = def, ref_value = 'text', scale = def.text_scale, colour = game().C.UI.TEXT_LIGHT, decimal_places = def.decimal_places}}
 			}},
 		}}
 
 	if def.label then
-		t = {n=runtime().UI.ROW, config={align = "cm", minh = 1, minw = 1, padding = 0.1 * def.label_scale, colour = runtime().C.CLEAR}, nodes={
-			{n=runtime().UI.ROW, config={align = "cm", padding = CHROME.label_gap}, nodes={
-				{n=runtime().UI.TEXT, config={text = def.label, scale = def.label_scale, colour = runtime().C.UI.TEXT_LIGHT}}
+		t = {n=game().UI.ROW, config={align = "cm", minh = 1, minw = 1, padding = 0.1 * def.label_scale, colour = game().C.CLEAR}, nodes={
+			{n=game().UI.ROW, config={align = "cm", padding = CHROME.label_gap}, nodes={
+				{n=game().UI.TEXT, config={text = def.label, scale = def.label_scale, colour = game().C.UI.TEXT_LIGHT}}
 			}},
-			{n=runtime().UI.ROW, config={align = "cm", padding = CHROME.label_gap}, nodes={t}},
+			{n=game().UI.ROW, config={align = "cm", padding = CHROME.label_gap}, nodes={t}},
 		}}
 	end
 	return t
@@ -171,8 +170,8 @@ end
 --- Builds a flip toggle bound to ref_table[ref_value].
 function Components.toggle(def)
 	def = def or {}
-	def.active_colour = def.active_colour or runtime().C.RED
-	def.inactive_colour = def.inactive_colour or runtime().C.BLACK
+	def.active_colour = def.active_colour or game().C.RED
+	def.inactive_colour = def.inactive_colour or game().C.BLACK
 	def.w = def.w or def.width or 3
 	def.h = def.h or def.height or 0.5
 	def.scale = def.scale or 1
@@ -181,7 +180,7 @@ function Components.toggle(def)
 	def.ref_table = def.ref_table or {}
 	def.ref_value = def.ref_value or 'test'
 
-	local check = Sprite(0, 0, 0.5 * def.scale, 0.5 * def.scale, runtime().TEXTURE_ATLASES["icons"], {x = 1, y = 0})
+	local check = Sprite(0, 0, 0.5 * def.scale, 0.5 * def.scale, game().TEXTURE_ATLASES["icons"], {x = 1, y = 0})
 	check.states.drag.can = false
 	check.states.visible = false
 
@@ -189,33 +188,33 @@ function Components.toggle(def)
 	if def.info then
 		info = {}
 		for _, v in ipairs(def.info) do
-			table.insert(info, {n=runtime().UI.ROW, config={align = "cm", minh = 0.05}, nodes={
-				{n=runtime().UI.TEXT, config={text = v, scale = 0.25, colour = runtime().C.UI.TEXT_LIGHT}}
+			table.insert(info, {n=game().UI.ROW, config={align = "cm", minh = 0.05}, nodes={
+				{n=game().UI.TEXT, config={text = v, scale = 0.25, colour = game().C.UI.TEXT_LIGHT}}
 			}})
 		end
-		info = {n=runtime().UI.ROW, config={align = "cm", minh = 0.05}, nodes = info}
+		info = {n=game().UI.ROW, config={align = "cm", minh = 0.05}, nodes = info}
 	end
 
 	local t =
-		{n=def.col and runtime().UI.COLUMN or runtime().UI.ROW, config={align = "cm", padding = CHROME.padding, r = CHROME.radius, colour = runtime().C.CLEAR, focus_args = {funnel_from = true}}, nodes={
-			{n=runtime().UI.COLUMN, config={align = "cr", minw = def.w}, nodes={
-				{n=runtime().UI.TEXT, config={text = def.label, scale = def.label_scale, colour = runtime().C.UI.TEXT_LIGHT}},
-				{n=runtime().UI.BOX, config={w = 0.1, h = 0.1}},
+		{n=def.col and game().UI.COLUMN or game().UI.ROW, config={align = "cm", padding = CHROME.padding, r = CHROME.radius, colour = game().C.CLEAR, focus_args = {funnel_from = true}}, nodes={
+			{n=game().UI.COLUMN, config={align = "cr", minw = def.w}, nodes={
+				{n=game().UI.TEXT, config={text = def.label, scale = def.label_scale, colour = game().C.UI.TEXT_LIGHT}},
+				{n=game().UI.BOX, config={w = 0.1, h = 0.1}},
 			}},
-			{n=runtime().UI.COLUMN, config={align = "cl", minw = 0.3 * def.w}, nodes={
-				{n=runtime().UI.COLUMN, config={align = "cm", r = CHROME.radius, colour = runtime().C.BLACK}, nodes={
-					{n=runtime().UI.COLUMN, config={align = "cm", r = CHROME.radius, padding = 0.03, minw = 0.4 * def.scale, minh = 0.4 * def.scale, outline_colour = runtime().C.WHITE, outline = 1.2 * def.scale, line_emboss = 0.5 * def.scale, ref_table = def,
+			{n=game().UI.COLUMN, config={align = "cl", minw = 0.3 * def.w}, nodes={
+				{n=game().UI.COLUMN, config={align = "cm", r = CHROME.radius, colour = game().C.BLACK}, nodes={
+					{n=game().UI.COLUMN, config={align = "cm", r = CHROME.radius, padding = 0.03, minw = 0.4 * def.scale, minh = 0.4 * def.scale, outline_colour = game().C.WHITE, outline = 1.2 * def.scale, line_emboss = 0.5 * def.scale, ref_table = def,
 						colour = def.inactive_colour,
 						hover_colour = def.active_colour,
 						button = 'flip_switch', button_dist = 0.2, hover = true, toggle_callback = def.callback, func = 'flip_switch', focus_args = {funnel_to = true}}, nodes={
-						{n=runtime().UI.OBJECT, config={object = check}},
+						{n=game().UI.OBJECT, config={object = check}},
 					}},
 				}}
 			}},
 		}}
 
 	if def.info then
-		t = {n=def.col and runtime().UI.COLUMN or runtime().UI.ROW, config={align = "cm"}, nodes={t, info}}
+		t = {n=def.col and game().UI.COLUMN or game().UI.ROW, config={align = "cm"}, nodes={t, info}}
 	end
 	return t
 end
@@ -227,7 +226,7 @@ end
 --- Builds a `< value >` option cycler bound to an opt_callback.
 function Components.cycler(def)
 	def = def or {}
-	def.colour = def.colour or runtime().C.RED
+	def.colour = def.colour or game().C.RED
 	def.options = def.options or {'Option 1', 'Option 2'}
 	def.current_option = def.current_option or 1
 	def.current_option_val = def.options[def.current_option]
@@ -249,73 +248,73 @@ function Components.cycler(def)
 	if def.info then
 		info = {}
 		for _, v in ipairs(def.info) do
-			table.insert(info, {n=runtime().UI.ROW, config={align = "cm", minh = 0.05}, nodes={
-				{n=runtime().UI.TEXT, config={text = v, scale = 0.3 * def.scale, colour = runtime().C.UI.TEXT_LIGHT}}
+			table.insert(info, {n=game().UI.ROW, config={align = "cm", minh = 0.05}, nodes={
+				{n=game().UI.TEXT, config={text = v, scale = 0.3 * def.scale, colour = game().C.UI.TEXT_LIGHT}}
 			}})
 		end
-		info = {n=runtime().UI.ROW, config={align = "cm", minh = 0.05}, nodes = info}
+		info = {n=game().UI.ROW, config={align = "cm", minh = 0.05}, nodes = info}
 	end
 
 	local disabled = #def.options < 2
 	local pips = {}
 	for i = 1, #def.options do
-		pips[#pips + 1] = {n=runtime().UI.BOX, config={w = 0.1 * def.scale, h = 0.1 * def.scale, r = 0.05, id = 'pip_'..i, colour = def.current_option == i and runtime().C.WHITE or runtime().C.BLACK}}
+		pips[#pips + 1] = {n=game().UI.BOX, config={w = 0.1 * def.scale, h = 0.1 * def.scale, r = 0.05, id = 'pip_'..i, colour = def.current_option == i and game().C.WHITE or game().C.BLACK}}
 	end
 
-	local choice_pips = not def.no_pips and {n=runtime().UI.ROW, config={align = "cm", padding = (0.05 - (#def.options > 15 and 0.03 or 0)) * def.scale}, nodes = pips} or nil
+	local choice_pips = not def.no_pips and {n=game().UI.ROW, config={align = "cm", padding = (0.05 - (#def.options > 15 and 0.03 or 0)) * def.scale}, nodes = pips} or nil
 
 	local arrow_chip = {
 		align = "cm",
 		r = CHROME.radius,
 		minw = 0.6 * def.scale,
 		hover = not disabled,
-		hover_colour = def.hover_colour or runtime().C.UI.BUTTON_HOVER,
-		colour = not disabled and def.colour or runtime().C.BLACK,
+		hover_colour = def.hover_colour or game().C.UI.BUTTON_HOVER,
+		colour = not disabled and def.colour or game().C.BLACK,
 		button = not disabled and 'cycle_option' or nil,
 		ref_table = def,
 		focus_args = {type = 'none'},
 	}
 
 	local t =
-		{n=runtime().UI.COLUMN, config={align = "cm", padding = CHROME.padding, r = CHROME.radius, colour = runtime().C.CLEAR, id = def.id and (not def.label and def.id or nil) or nil, focus_args = def.focus_args}, nodes={
-			{n=runtime().UI.COLUMN, config=arrow_chip, nodes={
-				{n=runtime().UI.TEXT, config={ref_table = def, ref_value = 'l', scale = def.text_scale, colour = not disabled and runtime().C.UI.TEXT_LIGHT or runtime().C.UI.TEXT_INACTIVE}}
+		{n=game().UI.COLUMN, config={align = "cm", padding = CHROME.padding, r = CHROME.radius, colour = game().C.CLEAR, id = def.id and (not def.label and def.id or nil) or nil, focus_args = def.focus_args}, nodes={
+			{n=game().UI.COLUMN, config=arrow_chip, nodes={
+				{n=game().UI.TEXT, config={ref_table = def, ref_value = 'l', scale = def.text_scale, colour = not disabled and game().C.UI.TEXT_LIGHT or game().C.UI.TEXT_INACTIVE}}
 			}},
 			def.mid and
-			{n=runtime().UI.COLUMN, config={id = 'cycle_main'}, nodes={
-				{n=runtime().UI.ROW, config={align = "cm", minh = 0.05}, nodes={def.mid}},
+			{n=game().UI.COLUMN, config={id = 'cycle_main'}, nodes={
+				{n=game().UI.ROW, config={align = "cm", minh = 0.05}, nodes={def.mid}},
 				not disabled and choice_pips or nil,
 			}}
-			or {n=runtime().UI.COLUMN, config={id = 'cycle_main', align = "cm", minw = def.w, minh = def.h, r = CHROME.radius, padding = 0.05, colour = def.colour, hover = true, hover_colour = def.hover_colour or runtime().C.UI.BUTTON_HOVER, can_collide = true, on_demand_tooltip = def.on_demand_tooltip}, nodes={
-				{n=runtime().UI.ROW, config={align = "cm"}, nodes={
-					{n=runtime().UI.ROW, config={align = "cm"}, nodes={
-						{n=runtime().UI.OBJECT, config={object = FlowText({string = {{ref_table = def, ref_value = "current_option_val"}}, colours = {runtime().C.UI.TEXT_LIGHT}, pop_in = 0, pop_in_rate = 8, reset_pop_in = true, shadow = true, float = true, silent = true, bump = true, scale = def.text_scale, non_recalc = true})}},
+			or {n=game().UI.COLUMN, config={id = 'cycle_main', align = "cm", minw = def.w, minh = def.h, r = CHROME.radius, padding = 0.05, colour = def.colour, hover = true, hover_colour = def.hover_colour or game().C.UI.BUTTON_HOVER, can_collide = true, on_demand_tooltip = def.on_demand_tooltip}, nodes={
+				{n=game().UI.ROW, config={align = "cm"}, nodes={
+					{n=game().UI.ROW, config={align = "cm"}, nodes={
+						{n=game().UI.OBJECT, config={object = FlowText({string = {{ref_table = def, ref_value = "current_option_val"}}, colours = {game().C.UI.TEXT_LIGHT}, pop_in = 0, pop_in_rate = 8, reset_pop_in = true, shadow = true, float = true, silent = true, bump = true, scale = def.text_scale, non_recalc = true})}},
 					}},
-					{n=runtime().UI.ROW, config={align = "cm", minh = 0.05}, nodes={}},
+					{n=game().UI.ROW, config={align = "cm", minh = 0.05}, nodes={}},
 					not disabled and choice_pips or nil,
 				}}
 			}},
-			{n=runtime().UI.COLUMN, config=arrow_chip, nodes={
-				{n=runtime().UI.TEXT, config={ref_table = def, ref_value = 'r', scale = def.text_scale, colour = not disabled and runtime().C.UI.TEXT_LIGHT or runtime().C.UI.TEXT_INACTIVE}}
+			{n=game().UI.COLUMN, config=arrow_chip, nodes={
+				{n=game().UI.TEXT, config={ref_table = def, ref_value = 'r', scale = def.text_scale, colour = not disabled and game().C.UI.TEXT_LIGHT or game().C.UI.TEXT_INACTIVE}}
 			}},
 		}}
 
 	if def.cycle_shoulders then
 		t =
-		{n=runtime().UI.ROW, config={align = "cm", colour = runtime().C.CLEAR}, nodes = {
-			{n=runtime().UI.COLUMN, config={minw = 0.7, align = "cm", colour = runtime().C.CLEAR, func = 'set_button_pip', focus_args = {button = 'leftshoulder', type = 'none', orientation = 'cm', scale = 0.7, offset = {x = -0.1, y = 0}}}, nodes = {}},
-			{n=runtime().UI.COLUMN, config={id = 'cycle_shoulders', padding = CHROME.padding}, nodes = {t}},
-			{n=runtime().UI.COLUMN, config={minw = 0.7, align = "cm", colour = runtime().C.CLEAR, func = 'set_button_pip', focus_args = {button = 'rightshoulder', type = 'none', orientation = 'cm', scale = 0.7, offset = {x = 0.1, y = 0}}}, nodes = {}},
+		{n=game().UI.ROW, config={align = "cm", colour = game().C.CLEAR}, nodes = {
+			{n=game().UI.COLUMN, config={minw = 0.7, align = "cm", colour = game().C.CLEAR, func = 'set_button_pip', focus_args = {button = 'leftshoulder', type = 'none', orientation = 'cm', scale = 0.7, offset = {x = -0.1, y = 0}}}, nodes = {}},
+			{n=game().UI.COLUMN, config={id = 'cycle_shoulders', padding = CHROME.padding}, nodes = {t}},
+			{n=game().UI.COLUMN, config={minw = 0.7, align = "cm", colour = game().C.CLEAR, func = 'set_button_pip', focus_args = {button = 'rightshoulder', type = 'none', orientation = 'cm', scale = 0.7, offset = {x = 0.1, y = 0}}}, nodes = {}},
 		}}
 	else
 		t =
-		{n=runtime().UI.ROW, config={align = "cm", colour = runtime().C.CLEAR, padding = 0.0}, nodes = {t}}
+		{n=game().UI.ROW, config={align = "cm", colour = game().C.CLEAR, padding = 0.0}, nodes = {t}}
 	end
 
 	if def.label or def.info then
-		t = {n=runtime().UI.ROW, config={align = "cm", padding = 0.05, id = def.id or nil}, nodes={
-			def.label and {n=runtime().UI.ROW, config={align = "cm"}, nodes={
-				{n=runtime().UI.TEXT, config={text = def.label, scale = 0.5 * def.scale, colour = runtime().C.UI.TEXT_LIGHT}}
+		t = {n=game().UI.ROW, config={align = "cm", padding = 0.05, id = def.id or nil}, nodes={
+			def.label and {n=game().UI.ROW, config={align = "cm"}, nodes={
+				{n=game().UI.TEXT, config={text = def.label, scale = 0.5 * def.scale, colour = game().C.UI.TEXT_LIGHT}}
 			}} or nil,
 			t,
 			info,

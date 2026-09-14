@@ -1,13 +1,13 @@
 return function(InputRouter)
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 
 function InputRouter:shift_context_layer(delta)
 	if delta == 1 then
 		self.cursor_context.stack[self.cursor_context.layer] = {
 			node = self.focused.target,
-			cursor_pos = {x = g().POINTER.T.x, y = g().POINTER.T.y},
+			cursor_pos = {x = game().POINTER.T.x, y = game().POINTER.T.y},
 			interrupt = self.interrupt.focus,
 		}
 		self.cursor_context.layer = self.cursor_context.layer + 1
@@ -32,8 +32,8 @@ end
 
 --- Remembers which card in an area had focus (e.g. before a shop reroll).
 function InputRouter:save_cardarea_focus(_cardarea)
-	if g()[_cardarea] then
-		if self.focused.target and self.focused.target.area and self.focused.target.area == g()[_cardarea] then
+	if game()[_cardarea] then
+		if self.focused.target and self.focused.target.area and self.focused.target.area == game()[_cardarea] then
 			self.cardarea_context[_cardarea] = self.focused.target.slot
 			return true
 		else
@@ -45,7 +45,7 @@ end
 --- Restores focus into a card area at the previously-saved slot.
 function InputRouter:recall_cardarea_focus(_cardarea)
 	local ca_string = nil
-	if type(_cardarea) == 'string' then ca_string = _cardarea; _cardarea = g()[_cardarea] end
+	if type(_cardarea) == 'string' then ca_string = _cardarea; _cardarea = game()[_cardarea] end
 
 	if _cardarea and (not self.focused.target
 		or self.interrupt.focus
@@ -68,22 +68,22 @@ end
 
 --- Places the cursor: hard-set to `hard_set_T`, or centered on the focus target.
 function InputRouter:update_cursor(hard_set_T)
-	local units = g().TILESCALE * g().TILESIZE
+	local units = game().TILESCALE * game().TILESIZE
 	if hard_set_T then
-		g().POINTER.T.x = hard_set_T.x
-		g().POINTER.T.y = hard_set_T.y
-		self.cursor_position.x = g().POINTER.T.x * units
-		self.cursor_position.y = g().POINTER.T.y * units
-		g().POINTER.VT.x = g().POINTER.T.x
-		g().POINTER.VT.y = g().POINTER.T.y
+		game().POINTER.T.x = hard_set_T.x
+		game().POINTER.T.y = hard_set_T.y
+		self.cursor_position.x = game().POINTER.T.x * units
+		self.cursor_position.y = game().POINTER.T.y * units
+		game().POINTER.VT.x = game().POINTER.T.x
+		game().POINTER.VT.y = game().POINTER.T.y
 		return
 	end
 	if self.focused.target then
 		self.cursor_position.x, self.cursor_position.y = self.focused.target:put_focused_cursor()
-		g().POINTER.T.x = self.cursor_position.x / units
-		g().POINTER.T.y = self.cursor_position.y / units
-		g().POINTER.VT.x = g().POINTER.T.x
-		g().POINTER.VT.y = g().POINTER.T.y
+		game().POINTER.T.x = self.cursor_position.x / units
+		game().POINTER.T.y = self.cursor_position.y / units
+		game().POINTER.VT.x = game().POINTER.T.x
+		game().POINTER.VT.y = game().POINTER.T.y
 	end
 end
 end

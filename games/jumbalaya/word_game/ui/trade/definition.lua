@@ -1,7 +1,6 @@
 --[[ word_game/ui/trade/definition.lua - Marketplace UIBox node builders ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
@@ -26,7 +25,7 @@ local MODIFIER_LINE_CHARS = 38
 local TOKEN_COIN_W = 0.24
 
 local function make_face_card(item, w, h)
-	if not game_access.get() or not runtime().LETTERS.faces or not deck_model().letter_center() then
+	if not game_access.get() or not game().LETTERS.faces or not deck_model().letter_center() then
 		return nil
 	end
 	if not item or not item.letter then return nil end
@@ -49,22 +48,22 @@ end
 
 local function face_node(item)
 	if item.flying then
-		return { n = runtime().UI.ROW, config = { align = "cm", minw = runtime().CARD_W * M.MARKET_CARD_SCALE, minh = runtime().CARD_H * M.MARKET_CARD_SCALE }, nodes = {} }
+		return { n = game().UI.ROW, config = { align = "cm", minw = game().CARD_W * M.MARKET_CARD_SCALE, minh = game().CARD_H * M.MARKET_CARD_SCALE }, nodes = {} }
 	end
 	-- A card whose deck copy was removed this session stays gone: empty slot.
 	if item.removed or (item.mode == "remove" and not trade_model().item_in_deck(item)) then
-		return { n = runtime().UI.ROW, config = { align = "cm", minw = runtime().CARD_W * M.MARKET_CARD_SCALE, minh = runtime().CARD_H * M.MARKET_CARD_SCALE }, nodes = {} }
+		return { n = game().UI.ROW, config = { align = "cm", minw = game().CARD_W * M.MARKET_CARD_SCALE, minh = game().CARD_H * M.MARKET_CARD_SCALE }, nodes = {} }
 	end
-	local w, h = runtime().CARD_W * M.MARKET_CARD_SCALE, runtime().CARD_H * M.MARKET_CARD_SCALE
+	local w, h = game().CARD_W * M.MARKET_CARD_SCALE, game().CARD_H * M.MARKET_CARD_SCALE
 	local card = make_face_card(item, w, h)
 	item.market_card = card
 	if card then
-		return { n = runtime().UI.OBJECT, config = { object = card, w = w, h = h } }
+		return { n = game().UI.OBJECT, config = { object = card, w = w, h = h } }
 	end
-	return { n = runtime().UI.TEXT, config = {
+	return { n = game().UI.TEXT, config = {
 		text = item and item.letter or "?",
 		scale = 0.8,
-		colour = runtime().C.WHITE,
+		colour = game().C.WHITE,
 		shadow = true,
 	}}
 end
@@ -72,7 +71,7 @@ end
 -- The coin atlas is a single non-square image, so the sprite height must be
 -- derived from the image ratio or the coin renders squashed.
 local function token_coin_node()
-	local atlas = runtime() and runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES.coin
+	local atlas = game() and game().TEXTURE_ATLASES and game().TEXTURE_ATLASES.coin
 	if not atlas or not atlas.image then
 		return nil
 	end
@@ -88,23 +87,23 @@ local function token_coin_node()
 	sprite.states.hover.can = false
 	sprite.states.collide.can = false
 	sprite.states.click.can = false
-	return { n = runtime().UI.OBJECT, config = { object = sprite, w = w, h = h } }
+	return { n = game().UI.OBJECT, config = { object = sprite, w = w, h = h } }
 end
 
 local function action_button_label_nodes(label, cost)
 	local nodes = {
-		{ n = runtime().UI.TEXT, config = {
+		{ n = game().UI.TEXT, config = {
 			text = label,
 			scale = BUTTON_LABEL_SCALE,
 			font = alpha_button_font(),
-			colour = runtime().C.UI.BUTTON_TEXT,
+			colour = game().C.UI.BUTTON_TEXT,
 			shadow = true,
 		}},
-		{ n = runtime().UI.TEXT, config = {
+		{ n = game().UI.TEXT, config = {
 			text = tostring(cost),
 			scale = BUTTON_LABEL_SCALE,
 			font = alpha_button_font(),
-			colour = runtime().C.UI.BUTTON_TEXT,
+			colour = game().C.UI.BUTTON_TEXT,
 			shadow = true,
 		}},
 	}
@@ -140,12 +139,12 @@ end
 local function action_button(item, action, cost, colour, disabled)
 	local ref = { item = item, action = action }
 	local label = action == "modifier" and "Modify" or (action:gsub("^%l", string.upper))
-	return { n = runtime().UI.ROW, config = {
-		align = "cm", padding = 0.12, r = 0.18, minw = runtime().CARD_W * M.MARKET_CARD_SCALE + 0.45, minh = 0.62,
-		hover = not disabled, button = disabled and nil or "trade_pick", ref_table = ref, colour = disabled and runtime().C.UI.BACKGROUND_INACTIVE or colour or runtime().C.UI.BUTTON,
-	        hover_colour = runtime().C.UI.BUTTON_HOVER, shadow = true, emboss = 0.1, no_jiggle = true,
+	return { n = game().UI.ROW, config = {
+		align = "cm", padding = 0.12, r = 0.18, minw = game().CARD_W * M.MARKET_CARD_SCALE + 0.45, minh = 0.62,
+		hover = not disabled, button = disabled and nil or "trade_pick", ref_table = ref, colour = disabled and game().C.UI.BACKGROUND_INACTIVE or colour or game().C.UI.BUTTON,
+	        hover_colour = game().C.UI.BUTTON_HOVER, shadow = true, emboss = 0.1, no_jiggle = true,
 	    }, nodes = {
-		{ n = runtime().UI.ROW, config = { align = "cm", padding = 0.05 }, nodes = action_button_label_nodes(label, cost) },
+		{ n = game().UI.ROW, config = { align = "cm", padding = 0.05 }, nodes = action_button_label_nodes(label, cost) },
 	}}
 end
 
@@ -155,15 +154,15 @@ local function modifier_description_node(item, placeholder)
 	local lines = wrap_description(text)
 	local line_nodes = {}
 	for _, line in ipairs(lines) do
-		line_nodes[#line_nodes + 1] = { n = runtime().UI.ROW, config = { align = "cm", padding = 0.02 }, nodes = {
-			{ n = runtime().UI.TEXT, config = {
+		line_nodes[#line_nodes + 1] = { n = game().UI.ROW, config = { align = "cm", padding = 0.02 }, nodes = {
+			{ n = game().UI.TEXT, config = {
 				text = line,
 				scale = MODIFIER_TEXT_SCALE,
 				font = alpha_button_font(),
 				-- Placeholder keeps the same invisible ink (alpha 0) so the
 				-- text still measures identically and the modal width never
 				-- changes when a card is removed.
-				colour = placeholder and runtime().C.CLEAR or (runtime().C.BLACK or { 0, 0, 0, 1 }),
+				colour = placeholder and game().C.CLEAR or (game().C.BLACK or { 0, 0, 0, 1 }),
 				shadow = false,
 			}},
 		}}
@@ -171,13 +170,13 @@ local function modifier_description_node(item, placeholder)
 	-- Parchment chip so the black text stays readable on the artwork. The
 	-- placeholder variant is fully transparent but reserves the same footprint
 	-- so the modal keeps its size when a card is removed.
-	return { n = runtime().UI.COLUMN, config = {
+	return { n = game().UI.COLUMN, config = {
 		align = "cm",
 		padding = 0.08,
-		minw = runtime().CARD_W * M.MARKET_CARD_SCALE + 0.35,
+		minw = game().CARD_W * M.MARKET_CARD_SCALE + 0.35,
 		minh = math.max(0.5, #lines * 0.28) + 0.12,
 		r = 0.14,
-		colour = placeholder and runtime().C.CLEAR or { 0.97, 0.93, 0.84, 1 },
+		colour = placeholder and game().C.CLEAR or { 0.97, 0.93, 0.84, 1 },
 		shadow = not placeholder and true or nil,
 	}, nodes = line_nodes }
 end
@@ -186,21 +185,21 @@ local function deck_count_node(item, placeholder)
 	if not item or not item.letter then return nil end
 	local count = deck_model().count_letters_in_deck(item.letter)
 	local text = tostring(count) .. " in deck"
-	return { n = runtime().UI.COLUMN, config = {
+	return { n = game().UI.COLUMN, config = {
 		align = "cm",
 		padding = 0.08,
-		minw = runtime().CARD_W * M.MARKET_CARD_SCALE + 0.35,
+		minw = game().CARD_W * M.MARKET_CARD_SCALE + 0.35,
 		minh = math.max(0.5, 0.28) + 0.12,
 		r = 0.14,
-		colour = placeholder and runtime().C.CLEAR or { 0.97, 0.93, 0.84, 1 },
+		colour = placeholder and game().C.CLEAR or { 0.97, 0.93, 0.84, 1 },
 		shadow = not placeholder and true or nil,
 	}, nodes = {
-		{ n = runtime().UI.ROW, config = { align = "cm", padding = 0.02 }, nodes = {
-			{ n = runtime().UI.TEXT, config = {
+		{ n = game().UI.ROW, config = { align = "cm", padding = 0.02 }, nodes = {
+			{ n = game().UI.TEXT, config = {
 				text = text,
 				scale = MODIFIER_TEXT_SCALE,
 				font = alpha_button_font(),
-				colour = placeholder and runtime().C.CLEAR or (runtime().C.BLACK or { 0, 0, 0, 1 }),
+				colour = placeholder and game().C.CLEAR or (game().C.BLACK or { 0, 0, 0, 1 }),
 				shadow = false,
 			}},
 		}},
@@ -215,11 +214,11 @@ local function action_column(item, mode, done, session_state, host)
 	local column_nodes = {}
 	local deck_count = deck_count_node(item)
 	if deck_count then
-		column_nodes[#column_nodes + 1] = { n = runtime().UI.ROW, config = { align = "cm", padding = 0.02 }, nodes = { deck_count } }
+		column_nodes[#column_nodes + 1] = { n = game().UI.ROW, config = { align = "cm", padding = 0.02 }, nodes = { deck_count } }
 	elseif item.letter then
-		column_nodes[#column_nodes + 1] = { n = runtime().UI.ROW, config = { align = "cm", padding = 0.02 }, nodes = { deck_count_node(item, true) } }
+		column_nodes[#column_nodes + 1] = { n = game().UI.ROW, config = { align = "cm", padding = 0.02 }, nodes = { deck_count_node(item, true) } }
 	end
-	column_nodes[#column_nodes + 1] = { n = runtime().UI.ROW, config = { align = "cm", padding = 0.03 }, nodes = { face_node(item) } }
+	column_nodes[#column_nodes + 1] = { n = game().UI.ROW, config = { align = "cm", padding = 0.03 }, nodes = { face_node(item) } }
 	-- No card left to describe: keep an invisible placeholder so the modal
 	-- window keeps its size.
 	local desc = nil
@@ -229,48 +228,48 @@ local function action_column(item, mode, done, session_state, host)
 		desc = modifier_description_node(item, true)
 	end
 	if desc then
-		column_nodes[#column_nodes + 1] = { n = runtime().UI.ROW, config = { align = "cm", padding = 0.0 }, nodes = { desc } }
+		column_nodes[#column_nodes + 1] = { n = game().UI.ROW, config = { align = "cm", padding = 0.0 }, nodes = { desc } }
 	end
-	column_nodes[#column_nodes + 1] = { n = runtime().UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
-		action_button(item, "add", add_cost, runtime().C.BLUE, add_disabled),
+	column_nodes[#column_nodes + 1] = { n = game().UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
+		action_button(item, "add", add_cost, game().C.BLUE, add_disabled),
 	}}
-	column_nodes[#column_nodes + 1] = { n = runtime().UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
-		action_button(item, "remove", 20, runtime().C.RED, remove_disabled),
+	column_nodes[#column_nodes + 1] = { n = game().UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
+		action_button(item, "remove", 20, game().C.RED, remove_disabled),
 	}}
-	column_nodes[#column_nodes + 1] = { n = runtime().UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
-		action_button(item, "modifier", 30, runtime().C.GOLD, modify_disabled),
+	column_nodes[#column_nodes + 1] = { n = game().UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
+		action_button(item, "modifier", 30, game().C.GOLD, modify_disabled),
 	}}
-	return { n = runtime().UI.COLUMN, config = { align = "cm", padding = 0.28, minw = runtime().CARD_W * M.MARKET_CARD_SCALE + 0.7 }, nodes = column_nodes }
+	return { n = game().UI.COLUMN, config = { align = "cm", padding = 0.28, minw = game().CARD_W * M.MARKET_CARD_SCALE + 0.7 }, nodes = column_nodes }
 end
 
 local function card_row(items, mode, done, session_state, host)
 	local cards = {}
 	for _, item in ipairs(items or {}) do
 		cards[#cards + 1] = action_column(item, mode, done, session_state, host)
-		cards[#cards + 1] = { n = runtime().UI.COLUMN, config = { minw = 0.5 }, nodes = {} }
+		cards[#cards + 1] = { n = game().UI.COLUMN, config = { minw = 0.5 }, nodes = {} }
 	end
 	if #cards > 0 then
 		cards[#cards] = nil
 	end
-	return { n = runtime().UI.ROW, config = {
+	return { n = game().UI.ROW, config = {
 		align = "cm",
 		padding = 0.12,
-		minh = 3.4 * runtime().CARD_H * M.MARKET_CARD_SCALE,
-		minw = 3.8 * runtime().CARD_W * M.MARKET_CARD_SCALE,
+		minh = 3.4 * game().CARD_H * M.MARKET_CARD_SCALE,
+		minw = 3.8 * game().CARD_W * M.MARKET_CARD_SCALE,
 	}, nodes = cards }
 end
 
 local function close_button_node(skip_func)
-	return { n = runtime().UI.COLUMN, config = {
+	return { n = game().UI.COLUMN, config = {
 		align = "cm", minw = 2.2, minh = 0.5, r = 0.18, padding = 0.22,
-		hover = true, colour = runtime().C.ORANGE, hover_colour = runtime().C.UI.BUTTON_HOVER,
+		hover = true, colour = game().C.ORANGE, hover_colour = game().C.UI.BUTTON_HOVER,
 		button = skip_func, shadow = true, emboss = 0.1, no_jiggle = true,
 	}, nodes = {
-		{ n = runtime().UI.TEXT, config = {
+		{ n = game().UI.TEXT, config = {
 			text = "Close",
 			scale = 0.35,
 			font = alpha_button_font(),
-			colour = runtime().C.UI.BUTTON_TEXT,
+			colour = game().C.UI.BUTTON_TEXT,
 			shadow = true,
 		}},
 	}}
@@ -278,16 +277,16 @@ end
 
 local function status_or_skip(done, done_text, skip_func)
 	if done then
-		return { n = runtime().UI.ROW, config = { align = "cm", padding = 0.04 }, nodes = {
-			{ n = runtime().UI.TEXT, config = {
+		return { n = game().UI.ROW, config = { align = "cm", padding = 0.04 }, nodes = {
+			{ n = game().UI.TEXT, config = {
 				text = done_text,
 				scale = 0.28,
-				colour = runtime().C.GOLD,
+				colour = game().C.GOLD,
 				shadow = true,
 			}},
 		}}
 	end
-	return { n = runtime().UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
+	return { n = game().UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
 		close_button_node(skip_func)
 	}}
 end
@@ -299,34 +298,34 @@ function M.marketplace_content_nodes(ctx)
 	local add = offer.add or offer
 	local nodes = {
 		-- Red cross close button, top right of the modal.
-		{ n = runtime().UI.ROW, config = { align = "cr", minw = 3.8 * runtime().CARD_W * M.MARKET_CARD_SCALE }, nodes = {
-			{ n = runtime().UI.COLUMN, config = {
+		{ n = game().UI.ROW, config = { align = "cr", minw = 3.8 * game().CARD_W * M.MARKET_CARD_SCALE }, nodes = {
+			{ n = game().UI.COLUMN, config = {
 				align = "cm", minw = 0.72, minh = 0.72, r = 0.16, padding = 0.1,
-				hover = true, colour = runtime().C.RED, hover_colour = runtime().C.UI.BUTTON_HOVER,
+				hover = true, colour = game().C.RED, hover_colour = game().C.UI.BUTTON_HOVER,
 				button = "trade_skip_add", shadow = true, emboss = 0.12, no_jiggle = true,
 			}, nodes = {
-				{ n = runtime().UI.TEXT, config = {
+				{ n = game().UI.TEXT, config = {
 					text = "X",
 					scale = 0.62,
 					font = alpha_button_font(),
-					colour = runtime().C.WHITE,
+					colour = game().C.WHITE,
 					shadow = true,
 				}},
 			}},
 		}},
 		-- Push the cards/text/buttons down from the cross button.
-		{ n = runtime().UI.ROW, config = { minh = 40 / (runtime().TILESIZE or 64) }, nodes = {} },
+		{ n = game().UI.ROW, config = { minh = 40 / (game().TILESIZE or 64) }, nodes = {} },
 		card_row(add.letters, "market", session.add_done, session, ctx.host),
 	}
 
 	if offer.showdown then
 		local remove = offer.remove
-		nodes[#nodes + 1] = { n = runtime().UI.ROW, config = { minh = 0.12 }, nodes = {} }
-		nodes[#nodes + 1] = { n = runtime().UI.ROW, config = { align = "cm", padding = 0.03 }, nodes = {
-			{ n = runtime().UI.TEXT, config = {
+		nodes[#nodes + 1] = { n = game().UI.ROW, config = { minh = 0.12 }, nodes = {} }
+		nodes[#nodes + 1] = { n = game().UI.ROW, config = { align = "cm", padding = 0.03 }, nodes = {
+			{ n = game().UI.TEXT, config = {
 				text = "Remove a card from your pack",
 				scale = 0.3,
-				colour = runtime().C.RED,
+				colour = game().C.RED,
 				shadow = true,
 			}},
 		}}
@@ -338,11 +337,11 @@ function M.marketplace_content_nodes(ctx)
 				"trade_skip_remove"
 			)
 		else
-			nodes[#nodes + 1] = { n = runtime().UI.ROW, config = { align = "cm", padding = 0.04 }, nodes = {
-				{ n = runtime().UI.TEXT, config = {
+			nodes[#nodes + 1] = { n = game().UI.ROW, config = { align = "cm", padding = 0.04 }, nodes = {
+				{ n = game().UI.TEXT, config = {
 					text = "No cards available to remove",
 					scale = 0.28,
-					colour = runtime().C.UI.TEXT_LIGHT,
+					colour = game().C.UI.TEXT_LIGHT,
 					shadow = true,
 				}},
 			}}
@@ -354,8 +353,8 @@ end
 
 function M.marketplace_body_definition(ctx)
 	return {
-		n = runtime().UI.ROOT,
-		config = { align = "cm", colour = runtime().C.CLEAR },
+		n = game().UI.ROOT,
+		config = { align = "cm", colour = game().C.CLEAR },
 		nodes = M.marketplace_content_nodes(ctx),
 	}
 end
@@ -366,11 +365,11 @@ function M.build_overlay_definition(ctx)
 		minw = 12,
 		minh = ctx.modal_minh(),
 		padding = 0.35,
-		bg_colour = runtime().C.CLEAR,
-		outline_colour = runtime().C.CLEAR,
-		colour = runtime().C.CLEAR,
+		bg_colour = game().C.CLEAR,
+		outline_colour = game().C.CLEAR,
+		colour = game().C.CLEAR,
 		contents = {
-			{ n = runtime().UI.OBJECT, config = {
+			{ n = game().UI.OBJECT, config = {
 				id = "trade_marketplace_body",
 				object = TradeView.create_marketplace_body(ctx),
 			}},

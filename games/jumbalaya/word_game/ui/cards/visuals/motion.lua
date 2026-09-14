@@ -1,20 +1,19 @@
 --[[ word_game/ui/cards/visuals/motion.lua - Card motion, flip, and timed FX ]]
 
 ---@class (partial) Card : EaseNode
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local DissolveFX = require "word_game.ui.effects.dissolve_fx"
 local Random = require("jumbalaya-engine.util.random")
 
-local function runtime() return GameRT.game() end
 
 function Card:explode(dissolve_colours, explode_time_fac)
-    local explode_time = 1.3*(explode_time_fac or 1)*(math.sqrt(runtime().SETTINGS.GAMESPEED))
+    local explode_time = 1.3*(explode_time_fac or 1)*(math.sqrt(game().SETTINGS.GAMESPEED))
     self.dissolve = 0
     self.dissolve_colours = dissolve_colours
-        or {runtime().C.WHITE}
+        or {game().C.WHITE}
 
-    local start_time = runtime().TIMERS.TOTAL
+    local start_time = game().TIMERS.TOTAL
     local percent = 0
     play_sfx('explosion_buildup1')
     self.bounce = {
@@ -41,11 +40,11 @@ function Card:explode(dissolve_colours, explode_time_fac)
         blockable = false,
         func = (function()
                 if self.bounce then 
-                    percent = (runtime().TIMERS.TOTAL - start_time)/explode_time
-                    self.bounce.r = 0.05*(math.sin(5*runtime().TIMERS.TOTAL) + math.cos(0.33 + 41.15332*runtime().TIMERS.TOTAL) + math.cos(67.12*runtime().TIMERS.TOTAL))*percent
+                    percent = (game().TIMERS.TOTAL - start_time)/explode_time
+                    self.bounce.r = 0.05*(math.sin(5*game().TIMERS.TOTAL) + math.cos(0.33 + 41.15332*game().TIMERS.TOTAL) + math.cos(67.12*game().TIMERS.TOTAL))*percent
                     self.bounce.scale = percent*0.15
                 end
-                if runtime().TIMERS.TOTAL - start_time > 1.5*explode_time then return true end
+                if game().TIMERS.TOTAL - start_time > 1.5*explode_time then return true end
             end)
     }
     Scheduler.add{
@@ -84,7 +83,7 @@ function Card:explode(dissolve_colours, explode_time_fac)
                 func = function(t) return t end
             }
             self:pulse()
-            runtime().VIBRATION = runtime().VIBRATION + 1
+            game().VIBRATION = game().VIBRATION + 1
             play_sfx('explosion_release1')
             childParts1:fade(0.3*explode_time) return true end)
     }
@@ -139,7 +138,7 @@ function Card:start_dissolve(dissolve_colours, silent, dissolve_time_fac, no_bou
 		duration = dt,
 		remove = true,
 		colours = dissolve_colours
-			or {runtime().C.BLACK, runtime().C.ORANGE, runtime().C.RED, runtime().C.GOLD, runtime().C.MUTED_GREY},
+			or {game().C.BLACK, game().C.ORANGE, game().C.RED, game().C.GOLD, game().C.MUTED_GREY},
 		pulse = not no_bounce,
 		fade = {delay = 0.7 * dt, duration = 0.3 * dt},
 		on_start = not silent and function()
@@ -156,7 +155,7 @@ function Card:begin_materialize(dissolve_colours, silent, timefac)
 	self.children.particles = DissolveFX.run(self, {
 		mode = 'in',
 		duration = dt,
-		colours = dissolve_colours or {runtime().C.GREEN},
+		colours = dissolve_colours or {game().C.GREEN},
 		pulse = true,
 		particle = {timer = 0.025, scale = 0.25, speed = 3, lifespan = 0.7},
 		fade = {delay = 0.5 * dt, cap = true},
@@ -169,8 +168,8 @@ function Card:begin_materialize(dissolve_colours, silent, timefac)
 		end,
 	})
 	if not silent then
-		if not runtime().last_materialized or runtime().last_materialized +0.01 < runtime().TIMERS.REAL or runtime().last_materialized > runtime().TIMERS.REAL then
-			runtime().last_materialized = runtime().TIMERS.REAL
+		if not game().last_materialized or game().last_materialized +0.01 < game().TIMERS.REAL or game().last_materialized > game().TIMERS.REAL then
+			game().last_materialized = game().TIMERS.REAL
 			Scheduler.add{
 				blockable = false,
 				func = function()

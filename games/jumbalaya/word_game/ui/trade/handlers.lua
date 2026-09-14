@@ -1,6 +1,6 @@
 --[[ word_game/ui/trade/handlers.lua - Marketplace pick and skip actions ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
 local trade_fly = require("word_game.ui.trade.fly")
 local trade_animate = require("word_game.ui.trade.animate")
@@ -11,16 +11,13 @@ local lifecycle = require("word_game.ui.trade.lifecycle")
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 local function trade_model()
 	return facade.trade()
 end
 
 local function fail(text)
-	word_feedback.show_screen_centered(tostring(text), runtime().C.RED, 1.4)
+	word_feedback.show_screen_centered(tostring(text), game().C.RED, 1.4)
 end
 
 function M.on_pick(e)
@@ -58,9 +55,9 @@ function M.on_pick(e)
 		end
 		local card = item.market_card
 		local transform = card and card.T
-		local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
-		local start_x = transform and (transform.x + (transform.w or runtime().CARD_W) * 0.5) * ts
-		local start_y = transform and (transform.y + (transform.h or runtime().CARD_H) * 0.5) * ts
+		local ts = (game().TILESCALE or 1) * (game().TILESIZE or 1)
+		local start_x = transform and (transform.x + (transform.w or game().CARD_W) * 0.5) * ts
+		local start_y = transform and (transform.y + (transform.h or game().CARD_H) * 0.5) * ts
 		item.flying = true
 		lifecycle.rebuild_overlay()
 		trade_fly.start_card_fly(item, function()

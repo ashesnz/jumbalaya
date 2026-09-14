@@ -1,24 +1,21 @@
 --[[ word_game/ui/layout/felt/hud.lua - HUD band height metrics ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local config = require("word_game.ui.layout.felt.config")
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 function M.hud_top()
-	return runtime().TILE_H * config.HUD_TOP_FRAC
+	return game().TILE_H * config.HUD_TOP_FRAC
 end
 
 function M.portrait_h()
-	return math.max(1.7, runtime().TILE_H * config.PORTRAIT_H_FRAC)
+	return math.max(1.7, game().TILE_H * config.PORTRAIT_H_FRAC)
 end
 
 function M.togo_h()
-	return math.max(0.8, runtime().TILE_H * config.TOGO_H_FRAC)
+	return math.max(0.8, game().TILE_H * config.TOGO_H_FRAC)
 end
 
 function M.meta_h()

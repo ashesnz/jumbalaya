@@ -1,7 +1,6 @@
 --[[ word_game/ui/perks/timeline_timer/layout.lua - geometry, fonts, and label formatting ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
 local font_cache = {}
@@ -46,9 +45,9 @@ function M.timer_font(px)
 end
 
 function M.room_translate()
-	local room = runtime() and runtime().ROOM
+	local room = game() and game().ROOM
 	if not room or not love or not love.graphics then return end
-	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
+	local ts = (game().TILESCALE or 1) * (game().TILESIZE or 1)
 	love.graphics.translate(room.T.w * ts * 0.5, room.T.h * ts * 0.5)
 	love.graphics.rotate(room.T.r or 0)
 	love.graphics.translate(

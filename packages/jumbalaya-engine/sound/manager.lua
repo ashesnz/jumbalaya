@@ -1,11 +1,11 @@
 --[[
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 	app/core/audio/manager.lua - audio worker thread.
 
 	Runs as a love.thread (started from app/startup.lua when
-	`g().F_SOUND_THREAD` is on). Preloads every .ogg under resources/sounds,
+	`game().F_SOUND_THREAD` is on). Preloads every .ogg under resources/sounds,
 	reports progress over the 'alpha_audio_log' channel, then serves requests
 	from 'alpha_audio_in' forever. All pooling/mixing lives in the shared
 	mixer module; this file is just the transport loop.

@@ -1,7 +1,7 @@
 --[[ app/core/graphics/sprite.lua - textured atlas quad (GfxSprite) ]]
 
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 GfxSprite = AnimNode:derive("GfxSprite")
 Sprite = GfxSprite
@@ -19,7 +19,7 @@ function GfxSprite:construct(X, Y, W, H, new_sprite_atlas, sprite_pos)
 		self.zoom = true
 		self.sprite_pos = sprite_pos or {x = 0, y = 0}
 		self.states.visible = false
-		if getmetatable(self) == GfxSprite then table.insert(g().LIVE.SPRITE, self) end
+		if getmetatable(self) == GfxSprite then table.insert(game().LIVE.SPRITE, self) end
 		return
 	end
 
@@ -29,7 +29,7 @@ function GfxSprite:construct(X, Y, W, H, new_sprite_atlas, sprite_pos)
 
 	self:set_sprite_pos(sprite_pos)
 
-	if getmetatable(self) == GfxSprite then table.insert(g().LIVE.SPRITE, self) end
+	if getmetatable(self) == GfxSprite then table.insert(game().LIVE.SPRITE, self) end
 end
 
 require("jumbalaya-engine.graphics.sprite_texture")(GfxSprite)

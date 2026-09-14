@@ -1,15 +1,12 @@
 --[[ word_game/ui/table/controls/play_hold_redraw/ring.lua - Hold progress ring draw pass ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local button = require("word_game.ui.table.controls.play_hold_redraw.button")
 local state = require("word_game.ui.table.controls.play_hold_redraw.state")
 local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 local function draw_arc(cx, cy, radius, start_angle, end_angle, r, g, b, a, width)
 	local sweep = end_angle - start_angle
@@ -53,12 +50,12 @@ function M.draw(enabled_fn, constants)
 
 	local hold_duration = constants.HOLD_DURATION
 	local progress = hold_duration <= 0 and 0 or math.min(1, state.hold_t() / hold_duration)
-	local w = (btn.VT.w or 1.25) * (runtime().TILESIZE or 20)
-	local h = (btn.VT.h or 1.25) * (runtime().TILESIZE or 20)
+	local w = (btn.VT.w or 1.25) * (game().TILESIZE or 20)
+	local h = (btn.VT.h or 1.25) * (game().TILESIZE or 20)
 	local cx, cy = w * 0.5, h * 0.5
 
 	local sprite = find_sprite_object(btn)
-	local sprite_w = sprite and sprite.VT and sprite.VT.w and (sprite.VT.w * (runtime().TILESIZE or 20))
+	local sprite_w = sprite and sprite.VT and sprite.VT.w and (sprite.VT.w * (game().TILESIZE or 20))
 	local radius = (sprite_w and sprite_w > 0 and (sprite_w * 0.5)) or (math.min(w, h) * 0.5)
 	local line_w = constants.RING_WIDTH
 
@@ -67,12 +64,12 @@ function M.draw(enabled_fn, constants)
 		btn:translate_container()
 	elseif btn.panel and btn.panel.container and btn.panel.translate_container then
 		btn.panel:translate_container()
-	elseif runtime().ROOM and runtime().ROOM.translate_container then
-		runtime().ROOM:translate_container()
+	elseif game().ROOM and game().ROOM.translate_container then
+		game().ROOM:translate_container()
 	end
 
 	NodeTransform.push_node_transform(btn, 1)
-	love.graphics.scale(1 / (runtime().TILESIZE or 1))
+	love.graphics.scale(1 / (game().TILESIZE or 1))
 
 	local a_top = -math.pi * 0.5
 

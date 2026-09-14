@@ -2,12 +2,12 @@
 local Tables = require("jumbalaya-engine.util.tables")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 return function(Target)
 function RetainedPanel:remove()
-	if self == g().OVERLAY_MENU then g().REFRESH_ALERTS = true end
+	if self == game().OVERLAY_MENU then game().REFRESH_ALERTS = true end
 	self.root_node:remove()
-	local registry = self.config and self.config.instance_type and g().LIVE and g().LIVE[self.config.instance_type] or nil
+	local registry = self.config and self.config.instance_type and game().LIVE and game().LIVE[self.config.instance_type] or nil
 	if registry then
 		for k, v in pairs(registry) do
 			if v == self then table.remove(registry, k) end
@@ -19,9 +19,9 @@ end
 
 function RetainedPanel:draw()
 	-- One draw per frame unless a tutorial overlay forces a redraw.
-	if self.FRAME.RENDER >= g().FRAMES.RENDER
-		and not g().FIRST_PLAY_TUTORIAL_OVERLAY then return end
-	self.FRAME.RENDER = g().FRAMES.RENDER
+	if self.FRAME.RENDER >= game().FRAMES.RENDER
+		and not game().FIRST_PLAY_TUTORIAL_OVERLAY then return end
+	self.FRAME.RENDER = game().FRAMES.RENDER
 
 	-- Regular children first (popups/alerts excluded)...
 	for k, v in pairs(self.children) do
@@ -52,9 +52,9 @@ function RetainedPanel:recalculate()
 	self.root_node:set_alignments()
 	self.T.w = self.root_node.T.w
 	self.T.h = self.root_node.T.h
-	g().REFRESH_FRAME_MAJOR_CACHE = (g().REFRESH_FRAME_MAJOR_CACHE or 0) + 1
+	game().REFRESH_FRAME_MAJOR_CACHE = (game().REFRESH_FRAME_MAJOR_CACHE or 0) + 1
 	self.root_node:initialize_VT()
-	g().REFRESH_FRAME_MAJOR_CACHE = (g().REFRESH_FRAME_MAJOR_CACHE > 1 and g().REFRESH_FRAME_MAJOR_CACHE - 1 or nil)
+	game().REFRESH_FRAME_MAJOR_CACHE = (game().REFRESH_FRAME_MAJOR_CACHE > 1 and game().REFRESH_FRAME_MAJOR_CACHE - 1 or nil)
 end
 
 function RetainedPanel:move(dt)
@@ -64,7 +64,7 @@ end
 
 function RetainedPanel:drag(offset)
 	AnimNode.drag(self, offset)
-	AnimNode.move(self.root_node, g().real_dt)
+	AnimNode.move(self.root_node, game().real_dt)
 end
 
 function RetainedPanel:add_child(node, parent)

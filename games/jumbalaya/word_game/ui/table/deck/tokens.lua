@@ -1,6 +1,6 @@
 --[[ word_game/ui/table/deck/tokens.lua - Sidebar token counter display and rolls ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
 local Roll = require("jumbalaya-engine.util.roll")
 
@@ -66,8 +66,7 @@ function M.token_count(deck)
 end
 
 function M.update_tokens(deck, dt)
-	local runtime = GameRT.game
-	dt = dt or (runtime() and runtime().real_dt) or 0.016
+	dt = dt or (game() and game().real_dt) or 0.016
 	deck.token_highlight = math.max(0, (deck.token_highlight or 0) - dt)
 	local actual = state.tokens()
 	if deck.token_display == nil then

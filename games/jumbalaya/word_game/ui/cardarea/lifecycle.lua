@@ -1,6 +1,6 @@
 --[[ word_game/ui/cardarea/lifecycle.lua - Card pile membership, shuffle, persistence ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local Tables = require("jumbalaya-engine.util.tables")
 local Random = require("jumbalaya-engine.util.random")
 local facade = require("word_game.ui.facade")
@@ -10,21 +10,18 @@ local Jumble = facade.jumble()
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 local function table_board()
-	return runtime().STATE == runtime().STATES.TABLE_BOARD
+	return game().STATE == game().STATES.TABLE_BOARD
 end
 
 function M.emplace(self, card, location, stay_flipped)
-	if table_board() and card and card.bonus_card and (self == runtime().dealt_letters or self == runtime().draw_pile) then
+	if table_board() and card and card.bonus_card and (self == game().dealt_letters or self == game().draw_pile) then
 		local origin_slot, origin_insert
 		if Jumble.slot_for_card then
 			origin_slot, origin_insert = Jumble.slot_for_card(card)
 		end
-		facade.board_snap().restore_bonus_card(runtime().pattern_row, card, origin_slot, origin_insert)
+		facade.board_snap().restore_bonus_card(game().pattern_row, card, origin_slot, origin_insert)
 		return
 	end
 	if location == 'front' or self.config.type == 'deck' then
@@ -33,16 +30,16 @@ function M.emplace(self, card, location, stay_flipped)
 		self.cards[#self.cards+1] = card
 	end
 	if table_board() then
-		if self == runtime().dealt_letters and Deck.reveal_in_hand then
+		if self == game().dealt_letters and Deck.reveal_in_hand then
 			Deck.reveal_in_hand(card)
 		end
 	elseif card.facing == 'back' and self.config.type ~= 'discard' and self.config.type ~= 'deck' and not stay_flipped then
 		card:flip()
-	elseif self == runtime().dealt_letters and stay_flipped then
+	elseif self == game().dealt_letters and stay_flipped then
 		card.ability.wheel_flipped = true
 	end
 
-	if self == runtime().draw_pile and #self.cards > self.config.card_limit then
+	if self == game().draw_pile and #self.cards > self.config.card_limit then
 		self.config.card_limit = #self.cards
 	end
 
@@ -115,10 +112,10 @@ end
 
 function M.draw_card_from(self, area, stay_flipped, discarded_only)
 	if area:is_kind(CardPile) then
-		if #self.cards < self.config.card_limit or self == runtime().draw_pile or self == runtime().dealt_letters then
+		if #self.cards < self.config.card_limit or self == game().draw_pile or self == game().dealt_letters then
 			local card = area:remove_card(nil, discarded_only)
 			if card then
-				if area == runtime().recycle_stash then
+				if area == game().recycle_stash then
 					card.T.r = 0
 				end
 				self:emplace(card)
@@ -151,7 +148,7 @@ function M.load(self, cardAreaTable)
 	self.config = cardAreaTable.config
 
 	for i = 1, #cardAreaTable.cards do
-		local card = Card(0, 0, runtime().CARD_W, runtime().CARD_H, runtime().LETTERS.faces.empty, runtime().LETTERS.centers.letter_base, nil)
+		local card = Card(0, 0, game().CARD_W, game().CARD_H, game().LETTERS.faces.empty, game().LETTERS.centers.letter_base, nil)
 		card:load(cardAreaTable.cards[i])
 		self.cards[#self.cards + 1] = card
 		if card.selected then
@@ -173,9 +170,9 @@ function M.remove(self, type_handler)
 	self.cards = nil
 	Tables.teardown_tree(self.children or {})
 	self.children = nil
-	for k, v in pairs(runtime().LIVE.CARDPILE) do
+	for k, v in pairs(game().LIVE.CARDPILE) do
 		if v == self then
-			table.remove(runtime().LIVE.CARDPILE, k)
+			table.remove(game().LIVE.CARDPILE, k)
 		end
 	end
 	EaseNode.remove(self)

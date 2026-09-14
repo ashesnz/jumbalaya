@@ -3,8 +3,7 @@
 local facade = require("word_game.ui.facade")
 local Jumble = facade.jumble()
 local game_access = facade.game_access()
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local domain = require "word_game.ui.facade"
@@ -32,7 +31,7 @@ local function set_animating(active)
 end
 
 local function placement_area()
-	return runtime().pattern_row and runtime().pattern_row.area
+	return game().pattern_row and game().pattern_row.area
 end
 
 local function bonus_stack_ui()
@@ -105,8 +104,8 @@ local function slide_card_to_bonus_stack(card, p_area, delay)
 			if not card or not p_area then return true end
 			local sx, sy = card.T.x, card.T.y
 			local sr = card.T.r or 0
-			if runtime().pattern_row then
-				runtime().pattern_row:on_remove_card(card)
+			if game().pattern_row then
+				game().pattern_row:on_remove_card(card)
 			end
 			if card.area == p_area then
 				p_area:remove_card(card)
@@ -117,9 +116,9 @@ local function slide_card_to_bonus_stack(card, p_area, delay)
 			end
 			local tx, ty = card.T.x, card.T.y
 			local tr = card.T.r or 0
-			local arc = (runtime().CARD_H or 1.4) * ARC_FRAC
+			local arc = (game().CARD_H or 1.4) * ARC_FRAC
 			park_card(card, sx, sy, sr)
-			local started = runtime().TIMERS.REAL
+			local started = game().TIMERS.REAL
 			Scheduler.add{
 				mode = "window",
 				timer = "REAL",
@@ -127,7 +126,7 @@ local function slide_card_to_bonus_stack(card, p_area, delay)
 				blockable = false,
 				blocking = false,
 				func = function()
-					local u = math.min(1, (runtime().TIMERS.REAL - started) / SLIDE_DURATION)
+					local u = math.min(1, (game().TIMERS.REAL - started) / SLIDE_DURATION)
 					local e = smoothstep(u)
 					card.T.x = sx + (tx - sx) * e
 					card.T.y = sy + (ty - sy) * e - arc * math.sin(math.pi * u)
@@ -157,26 +156,26 @@ local function slide_card_to_hand(card, p_area, delay)
 		delay = delay,
 		blockable = false,
 		func = function()
-			if not card or not runtime().dealt_letters or not p_area then return true end
+			if not card or not game().dealt_letters or not p_area then return true end
 
 			local sx, sy = card.T.x, card.T.y
 			local sr = card.T.r or 0
 
-			if runtime().pattern_row then
-				runtime().pattern_row:on_remove_card(card)
+			if game().pattern_row then
+				game().pattern_row:on_remove_card(card)
 			end
 			if card.area == p_area then
 				p_area:remove_card(card)
 			end
 
 			card.placement_recall_slide = true
-			runtime().dealt_letters:emplace(card)
+			game().dealt_letters:emplace(card)
 
 			local tx, ty, tr = card.T.x, card.T.y, card.T.r or 0
-			local arc = (runtime().CARD_H or 1.4) * ARC_FRAC
+			local arc = (game().CARD_H or 1.4) * ARC_FRAC
 			park_card(card, sx, sy, sr)
 
-			local started = runtime().TIMERS.REAL
+			local started = game().TIMERS.REAL
 			Scheduler.add{
 				mode = "window",
 				timer = "REAL",
@@ -184,7 +183,7 @@ local function slide_card_to_hand(card, p_area, delay)
 				blockable = false,
 				blocking = false,
 				func = function()
-					local u = math.min(1, (runtime().TIMERS.REAL - started) / SLIDE_DURATION)
+					local u = math.min(1, (game().TIMERS.REAL - started) / SLIDE_DURATION)
 					local e = smoothstep(u)
 					card.T.x = sx + (tx - sx) * e
 					card.T.y = sy + (ty - sy) * e - arc * math.sin(math.pi * u)
@@ -210,8 +209,8 @@ local function slide_card_to_hand(card, p_area, delay)
 end
 
 local function finish_recall()
-	if runtime().dealt_letters then
-		for _, card in ipairs(runtime().dealt_letters.cards or {}) do
+	if game().dealt_letters then
+		for _, card in ipairs(game().dealt_letters.cards or {}) do
 			card.placement_recall_slide = nil
 		end
 	end
@@ -222,8 +221,8 @@ local function finish_recall()
 		if slots and Jumble.sync_placement_cards then
 			Jumble.sync_placement_cards(slots)
 		end
-		if runtime().pattern_row and runtime().pattern_row.jumble_geometry then
-			runtime().pattern_row.jumble_geometry.relayout(runtime().pattern_row)
+		if game().pattern_row and game().pattern_row.jumble_geometry then
+			game().pattern_row.jumble_geometry.relayout(game().pattern_row)
 		end
 	end
 
@@ -234,17 +233,17 @@ local function finish_recall()
 		area:hard_set_cards()
 	end
 
-	if runtime().dealt_letters then
-		if runtime().dealt_letters.clear_selection then runtime().dealt_letters:clear_selection() end
-		if runtime().dealt_letters.set_ranks then runtime().dealt_letters:set_ranks() end
-		if runtime().dealt_letters.relayout then runtime().dealt_letters:relayout() end
-		if runtime().dealt_letters.hard_set_cards then runtime().dealt_letters:hard_set_cards() end
-		if runtime().dealt_letters.snap_VT then runtime().dealt_letters:snap_VT() end
+	if game().dealt_letters then
+		if game().dealt_letters.clear_selection then game().dealt_letters:clear_selection() end
+		if game().dealt_letters.set_ranks then game().dealt_letters:set_ranks() end
+		if game().dealt_letters.relayout then game().dealt_letters:relayout() end
+		if game().dealt_letters.hard_set_cards then game().dealt_letters:hard_set_cards() end
+		if game().dealt_letters.snap_VT then game().dealt_letters:snap_VT() end
 	end
 end
 
 function M.animate(on_complete)
-	if animating or not runtime().dealt_letters or not placement_area() then
+	if animating or not game().dealt_letters or not placement_area() then
 		if on_complete then on_complete() end
 		return false
 	end
@@ -255,7 +254,7 @@ function M.animate(on_complete)
 		return false
 	end
 
-	if not (runtime().TIMELINE and runtime().TIMELINE.enqueue) then
+	if not (game().TIMELINE and game().TIMELINE.enqueue) then
 		return false
 	end
 

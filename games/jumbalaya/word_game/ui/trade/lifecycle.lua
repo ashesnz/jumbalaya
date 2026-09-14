@@ -1,6 +1,6 @@
 --[[ word_game/ui/trade/lifecycle.lua - Overlay open, rebuild, refresh, and close ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local Funcs = require("app.callbacks.funcs")
 
 local facade = require("word_game.ui.facade")
@@ -25,9 +25,6 @@ function M.bind(trade_host)
 	host = trade_host
 end
 
-local function runtime()
-	return GameRT.game()
-end
 
 function M.def_ctx()
 	return {
@@ -71,7 +68,7 @@ function M.open_overlay()
 	if engine then
 		views_install.install_trade(engine)
 	end
-	runtime().SETTINGS.paused = true
+	game().SETTINGS.paused = true
 	if WORD_GAME_UI.PlayHoldRedraw and WORD_GAME_UI.PlayHoldRedraw.reset then
 		WORD_GAME_UI.PlayHoldRedraw.reset()
 	end
@@ -82,11 +79,11 @@ function M.open_overlay()
 end
 
 function M.rebuild_overlay()
-	if not runtime().OVERLAY_MENU then
+	if not game().OVERLAY_MENU then
 		M.open_overlay()
 		return
 	end
-	local menu_host = runtime().OVERLAY_MENU:find_node_by_id("trade_marketplace_body")
+	local menu_host = game().OVERLAY_MENU:find_node_by_id("trade_marketplace_body")
 	if not menu_host or not menu_host.config then
 		M.open_overlay()
 		return
@@ -108,7 +105,7 @@ function M.rebuild_overlay()
 		align = "cm",
 		parent = menu_host,
 	}, body_def)
-	runtime().OVERLAY_MENU:recalculate()
+	game().OVERLAY_MENU:recalculate()
 end
 
 function M.refresh_overlay()

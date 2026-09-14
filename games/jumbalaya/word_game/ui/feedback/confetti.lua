@@ -6,8 +6,7 @@
 
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local Layout = require("word_game.ui.layout")
 
@@ -34,9 +33,9 @@ local RAIN_GAP = 0.018
 local GRAVITY = 5.6
 
 local function room_translate()
-	local room = runtime().ROOM
+	local room = game().ROOM
 	if not room then return end
-	local ts = runtime().TILESCALE * runtime().TILESIZE
+	local ts = game().TILESCALE * game().TILESIZE
 	love.graphics.translate(room.T.w * ts * 0.5, room.T.h * ts * 0.5)
 	love.graphics.rotate(room.T.r)
 	love.graphics.translate(
@@ -180,13 +179,13 @@ local function paint_shape(p, ts)
 end
 
 function M.draw()
-	if not game_access.get() or not runtime().ROOM then return end
-	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return end
+	if not game_access.get() or not game().ROOM then return end
+	if game().STATE ~= game().STATES.TABLE_BOARD then return end
 	if #pieces == 0 and rain_left <= 0 then return end
 
 	local r = clip_rect()
 	if not r then return end
-	local ts = runtime().TILESCALE * runtime().TILESIZE
+	local ts = game().TILESCALE * game().TILESIZE
 
 	local prev_shader = love.graphics.getShader and love.graphics.getShader()
 	local cr, cg, cb, ca = 1, 1, 1, 1

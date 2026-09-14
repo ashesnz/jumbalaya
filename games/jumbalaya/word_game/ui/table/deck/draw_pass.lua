@@ -1,6 +1,6 @@
 --[[ word_game/ui/table/deck/draw_pass.lua - Token label + 2.5D deck pack render ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local geometry = require("word_game.ui.table.deck.geometry")
 local tokens = require("word_game.ui.table.deck.tokens")
 
@@ -12,7 +12,6 @@ local COL_RIGHT = { 0.86, 0.83, 0.76, 1 }
 local font_cache = {}
 local M = {}
 
-local function runtime() return GameRT.game() end
 
 local function deck_font(px)
 	px = math.max(10, math.floor(px + 0.5))
@@ -28,7 +27,7 @@ local function deck_font(px)
 end
 
 local function tokens_atlas()
-	return runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES.tokens
+	return game().TEXTURE_ATLASES and game().TEXTURE_ATLASES.tokens
 end
 
 local function token_layout(deck, area, ox, oy, miny, pack_w, card_w, ts)
@@ -99,9 +98,9 @@ end
 
 function M.token_center_px(deck, area)
 	if not area then return end
-	local ts = runtime().TILESCALE * runtime().TILESIZE
-	local W = runtime().CARD_W * deck.SIZE
-	local D = runtime().CARD_H * deck.SIZE
+	local ts = game().TILESCALE * game().TILESIZE
+	local W = game().CARD_W * deck.SIZE
+	local D = game().CARD_H * deck.SIZE
 	local n = area.cards and #area.cards or 0
 	local H = geometry.pack_stack_height(deck, n)
 	local minx, miny, maxx, maxy = geometry.pack_bounds(W, D, H)
@@ -120,9 +119,9 @@ end
 function M.draw(deck, area)
 	if not area or not area.cards then return end
 
-	local ts = runtime().TILESCALE * runtime().TILESIZE
-	local W = runtime().CARD_W * deck.SIZE
-	local D = runtime().CARD_H * deck.SIZE
+	local ts = game().TILESCALE * game().TILESIZE
+	local W = game().CARD_W * deck.SIZE
+	local D = game().CARD_H * deck.SIZE
 	local n = #area.cards
 	local H = geometry.pack_stack_height(deck, n)
 	local r = math.min(W, D) * 0.11

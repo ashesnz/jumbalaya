@@ -1,14 +1,11 @@
 --[[ word_game/ui/feedback/comic_burst/burst.lua - Burst state, pop envelope, paint ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local config = require("word_game.ui.feedback.comic_burst.config")
 local geometry = require("word_game.ui.feedback.comic_burst.geometry")
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 local function pop_scale(age)
 	if age < 0.07 then
@@ -19,12 +16,12 @@ local function pop_scale(age)
 		u = u * u * (3 - 2 * u)
 		return 1.18 + (1.0 - 1.18) * u
 	end
-	return 1.0 + 0.018 * math.sin((runtime().TIMERS.REAL or 0) * 9)
+	return 1.0 + 0.018 * math.sin((game().TIMERS.REAL or 0) * 9)
 end
 
 function M.make(radius)
 	radius = radius or 1
-	local rng = geometry.make_rng((runtime().TIMERS.TOTAL or 0) * 10000 + math.random(1, 99999))
+	local rng = geometry.make_rng((game().TIMERS.TOTAL or 0) * 10000 + math.random(1, 99999))
 	return {
 		alpha = 1,
 		age = 0,

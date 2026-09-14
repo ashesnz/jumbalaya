@@ -1,7 +1,6 @@
---[[ word_game/ui/callbacks/tutorial.lua - Tutorial runtime().FUNCS registration ]]
+--[[ word_game/ui/callbacks/tutorial.lua - Tutorial game().FUNCS registration ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local FirstPlayTutorial = require("word_game.ui.tutorial.first_play")
 local Funcs = require("app.callbacks.funcs")

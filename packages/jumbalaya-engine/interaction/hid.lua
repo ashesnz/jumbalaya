@@ -1,6 +1,6 @@
 return function(InputRouter)
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 
 function InputRouter:set_HID_flags(HID_type, button)
@@ -38,9 +38,9 @@ function InputRouter:set_cursor_position()
 	end
 
 	self.cursor_position.x, self.cursor_position.y = love.mouse.getPosition()
-	g().POINTER.T.x = self.cursor_position.x / (g().TILESCALE * g().TILESIZE)
-	g().POINTER.T.y = self.cursor_position.y / (g().TILESCALE * g().TILESIZE)
-	g().POINTER.VT.x = g().POINTER.T.x
-	g().POINTER.VT.y = g().POINTER.T.y
+	game().POINTER.T.x = self.cursor_position.x / (game().TILESCALE * game().TILESIZE)
+	game().POINTER.T.y = self.cursor_position.y / (game().TILESCALE * game().TILESIZE)
+	game().POINTER.VT.x = game().POINTER.T.x
+	game().POINTER.VT.y = game().POINTER.T.y
 end
 end

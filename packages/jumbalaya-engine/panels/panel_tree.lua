@@ -1,6 +1,6 @@
 
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 return function(Target)
 function RetainedPanel:find_node_by_id(id, node)
 	node = node or self.root_node
@@ -69,11 +69,11 @@ function RetainedPanel:attach_node(node, parent)
 
 	-- An embedded object that itself carries the button shouldn't compete
 	-- for clicks with the element wrapping it.
-	if node.n and node.n == g().UI.OBJECT and ui_e.config.button then
+	if node.n and node.n == game().UI.OBJECT and ui_e.config.button then
 		ui_e.config.object.states.click.can = false
 	end
 
-	if (node.n and node.n == g().UI.COLUMN or node.n == g().UI.ROW or node.n == g().UI.ROOT) and node.nodes then
+	if (node.n and node.n == game().UI.COLUMN or node.n == game().UI.ROW or node.n == game().UI.ROOT) and node.nodes then
 		for _, v in ipairs(node.nodes) do
 			self:attach_node(v, ui_e)
 		end

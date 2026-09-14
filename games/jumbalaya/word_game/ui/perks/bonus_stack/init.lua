@@ -1,7 +1,6 @@
 --[[ word_game/ui/perks/bonus_stack/init.lua - Bonus gutter presentation (boss-word rewards) ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local facade = require("word_game.ui.facade")
 local layout = require("word_game.ui.perks.bonus_stack.layout")
@@ -65,8 +64,8 @@ end
 
 function M.detach(card)
 	if not card then return end
-	if runtime().pattern_row and runtime().pattern_row.on_remove_card then
-		runtime().pattern_row:on_remove_card(card)
+	if game().pattern_row and game().pattern_row.on_remove_card then
+		game().pattern_row:on_remove_card(card)
 	end
 	if card.area and card.area.remove_card then
 		card.area:remove_card(card)
@@ -155,10 +154,10 @@ end
 
 function M.sync_positions()
 	if not M.cards() or M.is_animating() then return end
-	local placement = runtime().pattern_row and runtime().pattern_row.area
+	local placement = game().pattern_row and game().pattern_row.area
 	for i, card in ipairs(M.cards() or {}) do
 		if card and not card.REMOVED then
-			if card.area == runtime().dealt_letters and M.is_bonus_card(card) then
+			if card.area == game().dealt_letters and M.is_bonus_card(card) then
 				M.return_card(card)
 			elseif card.area == placement then
 				-- Bonus cards placed in the puzzle row keep their slot layout.
@@ -239,7 +238,7 @@ local function try_award_gutter_perk()
 	if not perk_stamp.play(rolled) then
 		perk_stamp.queue(rolled)
 	end
-	word_feedback.show_screen_centered("Perk earned!", runtime().C and runtime().C.GOLD or { 1, 0.85, 0.2, 1 }, 1.1)
+	word_feedback.show_screen_centered("Perk earned!", game().C and game().C.GOLD or { 1, 0.85, 0.2, 1 }, 1.1)
 end
 
 function M.consume_card(card)

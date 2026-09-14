@@ -10,7 +10,11 @@ local deck_config = require("jumbalaya_core.cards.deck_config")
 local BonusStack = require("word_game.model.jumble.bonus_stack")
 local live_game = require("word_game.model.live_game")
 
-return function(M)
+local M = {}
+
+local function J()
+	return package.loaded["word_game.model.jumble"]
+end
 
 local round = require("word_game.model.round")
 local jumble_rules = require("word_game.model.jumble_play.jumble_rules")
@@ -88,7 +92,7 @@ function M.invalidate_answer_cache()
 end
 
 function M.find_playable_words(hand_counts, puzzle, limit)
-	puzzle = M.resolve_puzzle(puzzle)
+	puzzle = J().resolve_puzzle(puzzle)
 	if not puzzle or not Dictionary then return {} end
 
 	local signature = answer_signature(hand_counts, puzzle, limit)
@@ -161,7 +165,7 @@ function M.ensure_playable_puzzle(_wr)
 	local counts = M.jumble_hand_counts()
 	local j = wr.jumble
 
-	local puzzle = M.resolve_puzzle(j.puzzle)
+	local puzzle = J().resolve_puzzle(j.puzzle)
 	if puzzle and M.has_playable_word(counts, puzzle) then
 		if puzzle ~= j.puzzle then
 			local wr_copy = immutable.copy_word_round(wr)
@@ -171,7 +175,7 @@ function M.ensure_playable_puzzle(_wr)
 		return true
 	end
 
-	local list = M.puzzles(wr.set, wr.hand_index)
+	local list = J().puzzles(wr.set, wr.hand_index)
 	if #list == 0 then return false end
 	for idx, candidate in ipairs(list) do
 		if M.has_playable_word(counts, candidate) then
@@ -186,7 +190,7 @@ function M.ensure_playable_puzzle(_wr)
 end
 
 function M.validate_current()
-	local j = M.state()
+	local j = J().state()
 	if not j or not j.slots or not j.puzzle then
 		return nil, "No puzzle"
 	end
@@ -207,4 +211,4 @@ function M.validate_current()
 		end,
 	})
 end
-end
+return M

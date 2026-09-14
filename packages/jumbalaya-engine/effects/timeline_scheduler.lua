@@ -1,17 +1,17 @@
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 --[[
-	jumbalaya-engine/effects/timeline_scheduler.lua - g().TIMELINE tween scheduling.
+	jumbalaya-engine/effects/timeline_scheduler.lua - game().TIMELINE tween scheduling.
 
 	Thin conveniences over the global timeline: each helper stamps the tween
-	mode, hands the options table to Tween(), and files it on g().TIMELINE.
+	mode, hands the options table to Tween(), and files it on game().TIMELINE.
 ]]
 
 local Scheduler = {}
 
 function Scheduler.add(options)
 	local tween = Tween(options.event or options)
-	g().TIMELINE:enqueue(tween, options.lane, options.urgent)
+	game().TIMELINE:enqueue(tween, options.lane, options.urgent)
 	return tween
 end
 

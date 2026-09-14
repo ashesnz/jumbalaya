@@ -3,7 +3,7 @@
 local AnimNode = require("jumbalaya-engine.scene.animated.init")
 
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 ---@class RetainedPanel : AnimNode
 ---@field definition table
@@ -58,8 +58,8 @@ function RetainedPanel:construct(args)
 	self.root_node:initialize_VT(true)
 	if getmetatable(self) == RetainedPanel then
 		if args.config and args.config.instance_type then
-			if g().LIVE and g().LIVE[args.config.instance_type] then
-				table.insert(g().LIVE[args.config.instance_type], self)
+			if game().LIVE and game().LIVE[args.config.instance_type] then
+				table.insert(game().LIVE[args.config.instance_type], self)
 			end
 		end
 	end

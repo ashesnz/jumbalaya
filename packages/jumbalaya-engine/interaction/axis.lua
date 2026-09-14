@@ -1,15 +1,15 @@
 return function(InputRouter)
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 
 function InputRouter:handle_axis_buttons()
 	for _, v in pairs(self.axis_buttons) do
 		if v.previous ~= '' and (v.current == '' or v.previous ~= v.current) then
-			g().INPUT:button_release(v.previous)
+			game().INPUT:button_release(v.previous)
 		end
 		if v.current ~= '' and v.previous ~= v.current then
-			g().INPUT:button_press(v.current)
+			game().INPUT:button_press(v.current)
 		end
 	end
 end
@@ -45,12 +45,12 @@ function InputRouter:update_axis(dt)
 			lx = lx + (lx > 0 and -0.1 or 0) + (lx < 0 and 0.1 or 0)
 			ly = ly + (ly > 0 and -0.1 or 0) + (ly < 0 and 0.1 or 0)
 
-			g().POINTER.T.x = g().POINTER.T.x + dt * lx * self.axis_cursor_speed
-			g().POINTER.T.y = g().POINTER.T.y + dt * ly * self.axis_cursor_speed
-			g().POINTER.VT.x = g().POINTER.T.x
-			g().POINTER.VT.y = g().POINTER.T.y
-			self.cursor_position.x = g().POINTER.T.x * (g().TILESCALE * g().TILESIZE)
-			self.cursor_position.y = g().POINTER.T.y * (g().TILESCALE * g().TILESIZE)
+			game().POINTER.T.x = game().POINTER.T.x + dt * lx * self.axis_cursor_speed
+			game().POINTER.T.y = game().POINTER.T.y + dt * ly * self.axis_cursor_speed
+			game().POINTER.VT.x = game().POINTER.T.x
+			game().POINTER.VT.y = game().POINTER.T.y
+			self.cursor_position.x = game().POINTER.T.x * (game().TILESCALE * game().TILESIZE)
+			self.cursor_position.y = game().POINTER.T.y * (game().TILESCALE * game().TILESIZE)
 		else
 			-- D-pad mode: dominant direction past 0.5, hysteresis below 0.3.
 			self.axis_buttons.l_stick.current = self.axis_buttons.l_stick.previous
@@ -70,23 +70,23 @@ function InputRouter:update_axis(dt)
 		---------------------------------------------------------------
 		local rx = self.GAMEPAD.object:getGamepadAxis('rightx')
 		local ry = self.GAMEPAD.object:getGamepadAxis('righty')
-		g().DEADZONE = 0.2
+		game().DEADZONE = 0.2
 		local mag = math.sqrt(math.abs(rx)^2 + math.abs(ry)^2)
-		g().DEBUG_VALUE = mag
+		game().DEBUG_VALUE = mag
 
-		if mag > g().DEADZONE then
+		if mag > game().DEADZONE then
 			axis_interpretation = 'axis_cursor'
-			if math.abs(rx) < g().DEADZONE then rx = 0 end
-			if math.abs(ry) < g().DEADZONE then ry = 0 end
-			rx = rx + (rx > 0 and -g().DEADZONE or 0) + (rx < 0 and g().DEADZONE or 0)
-			ry = ry + (ry > 0 and -g().DEADZONE or 0) + (ry < 0 and g().DEADZONE or 0)
+			if math.abs(rx) < game().DEADZONE then rx = 0 end
+			if math.abs(ry) < game().DEADZONE then ry = 0 end
+			rx = rx + (rx > 0 and -game().DEADZONE or 0) + (rx < 0 and game().DEADZONE or 0)
+			ry = ry + (ry > 0 and -game().DEADZONE or 0) + (ry < 0 and game().DEADZONE or 0)
 
-			g().POINTER.T.x = g().POINTER.T.x + dt * rx * self.axis_cursor_speed
-			g().POINTER.T.y = g().POINTER.T.y + dt * ry * self.axis_cursor_speed
-			g().POINTER.VT.x = g().POINTER.T.x
-			g().POINTER.VT.y = g().POINTER.T.y
-			self.cursor_position.x = g().POINTER.T.x * (g().TILESCALE * g().TILESIZE)
-			self.cursor_position.y = g().POINTER.T.y * (g().TILESCALE * g().TILESIZE)
+			game().POINTER.T.x = game().POINTER.T.x + dt * rx * self.axis_cursor_speed
+			game().POINTER.T.y = game().POINTER.T.y + dt * ry * self.axis_cursor_speed
+			game().POINTER.VT.x = game().POINTER.T.x
+			game().POINTER.VT.y = game().POINTER.T.y
+			self.cursor_position.x = game().POINTER.T.x * (game().TILESCALE * game().TILESIZE)
+			self.cursor_position.y = game().POINTER.T.y * (game().TILESCALE * game().TILESIZE)
 		end
 
 		---------------------------------------------------------------

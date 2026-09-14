@@ -1,7 +1,7 @@
 return function(ParticleEmitter)
 local Random = require("jumbalaya-engine.util.random")
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 
@@ -46,11 +46,11 @@ end
 --- Emission pass: refill the spawn-credit budget from elapsed time, then
 --- spend credits. Bursts may exceed `max` while burst allowance remains.
 function ParticleEmitter:update(dt)
-	local now = g().TIMERS[self.timer_type]
+	local now = game().TIMERS[self.timer_type]
 	local elapsed = now - (self.last_tick or now)
 	self.last_tick = now
 
-	if g().SETTINGS.paused and not self.created_on_pause then return end
+	if game().SETTINGS.paused and not self.created_on_pause then return end
 
 	self.emit_credit = math.min(self.emit_credit + elapsed * self.rate, self.max_debt)
 
@@ -70,11 +70,11 @@ end
 --- A particle dies of old age (past its own `life`) instead of relying on a
 --- scale sign flip.
 function ParticleEmitter:move(dt)
-	if g().SETTINGS.paused and not self.created_on_pause then return end
+	if game().SETTINGS.paused and not self.created_on_pause then return end
 
 	AnimNode.move(self, dt)
 
-	if self.timer_type ~= 'REAL' then dt = dt * g().TIME_SCALE end
+	if self.timer_type ~= 'REAL' then dt = dt * game().TIME_SCALE end
 	local damp = math.max(0, 1 - 1.4 * dt)
 
 	for i = #self.particles, 1, -1 do

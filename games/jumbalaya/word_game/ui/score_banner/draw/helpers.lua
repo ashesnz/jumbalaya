@@ -1,13 +1,10 @@
 --[[ word_game/ui/score_banner/draw/helpers.lua - Room transform and rolling digits ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local Roll = require("jumbalaya-engine.util.roll")
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 function M.ease_inout(t)
 	t = Roll.clamp01(t)
@@ -15,9 +12,9 @@ function M.ease_inout(t)
 end
 
 function M.room_translate()
-	local room = runtime().ROOM
+	local room = game().ROOM
 	if not room then return end
-	local ts = runtime().TILESCALE * runtime().TILESIZE
+	local ts = game().TILESCALE * game().TILESIZE
 	love.graphics.translate(room.T.w * ts * 0.5, room.T.h * ts * 0.5)
 	love.graphics.rotate(room.T.r)
 	love.graphics.translate(

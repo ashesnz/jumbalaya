@@ -3,17 +3,16 @@
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
 ---@class (partial) Card : EaseNode
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local LetterFaces = require("word_game.ui.cards.letter_faces")
 local LetterPalette = require("word_game.config.visuals.letter_card_palette")
 
-local function runtime() return GameRT.game() end
 
 local FLAT_LETTER_SETS = { Default = true, Enhanced = true }
 
 function Card:set_sprites(_center, _front)
 	if _center and _center.set then
-		local atlas = runtime().TEXTURE_ATLASES[_center.atlas or 'centers']
+		local atlas = game().TEXTURE_ATLASES[_center.atlas or 'centers']
 		local pos = _center.pos
 
 		if self.children.center then
@@ -29,11 +28,11 @@ function Card:set_sprites(_center, _front)
 		end
 
 		if not self.children.back then
-			local back_atlas = runtime().TEXTURE_ATLASES["playing_back"] or runtime().TEXTURE_ATLASES["centers"]
-			local default_back = runtime().LETTERS.centers and runtime().LETTERS.centers['deck_alpha']
+			local back_atlas = game().TEXTURE_ATLASES["playing_back"] or game().TEXTURE_ATLASES["centers"]
+			local default_back = game().LETTERS.centers and game().LETTERS.centers['deck_alpha']
 			local game = game_access.get()
 			local game_back_pos = game and game[self.back] and game[self.back].pos
-			local back_pos = runtime().TEXTURE_ATLASES["playing_back"] and {x = 0, y = 0}
+			local back_pos = game().TEXTURE_ATLASES["playing_back"] and {x = 0, y = 0}
 				or (self.params.bypass_back or (self.letter_card_id and game_back_pos)
 				or (default_back and default_back.pos) or {x = 0, y = 0})
 			self.children.back = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, back_atlas, back_pos)
@@ -42,8 +41,8 @@ function Card:set_sprites(_center, _front)
 			self.children.back.states.drag = self.states.drag
 			self.children.back.states.collide.can = false
 			self.children.back:set_role({major = self, role_type = 'Glued', draw_major = self})
-		elseif runtime().TEXTURE_ATLASES["playing_back"] and self.children.back.atlas ~= runtime().TEXTURE_ATLASES["playing_back"] then
-			self.children.back.atlas = runtime().TEXTURE_ATLASES["playing_back"]
+		elseif game().TEXTURE_ATLASES["playing_back"] and self.children.back.atlas ~= game().TEXTURE_ATLASES["playing_back"] then
+			self.children.back.atlas = game().TEXTURE_ATLASES["playing_back"]
 			self.children.back:set_sprite_pos({x = 0, y = 0})
 		end
 	end
@@ -75,7 +74,7 @@ function Card:set_sprites(_center, _front)
 				end
 			end
 		else
-			local face_atlas = runtime().TEXTURE_ATLASES[_front.atlas] or runtime().TEXTURE_ATLASES.letters
+			local face_atlas = game().TEXTURE_ATLASES[_front.atlas] or game().TEXTURE_ATLASES.letters
 			local face_pos = self.config.card and self.config.card.pos
 			if self.children.front then
 				self.children.front.atlas = face_atlas

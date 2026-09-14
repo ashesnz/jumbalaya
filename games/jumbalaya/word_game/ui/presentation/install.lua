@@ -3,7 +3,7 @@
 local facade = require("word_game.ui.facade")
 local Presentation = facade.presentation()
 local TableAreas = facade.table_areas()
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local CardFocus = require("jumbalaya-engine.interaction.card_focus")
 local Funcs = require("app.callbacks.funcs")
 local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
@@ -32,7 +32,7 @@ function M.install(word_game_ui, domain)
 		Funcs = Funcs,
 		Scheduler = Scheduler,
 		backgrounds = backgrounds,
-		runtime = function() return GameRT.game() end,
+		runtime = function() return game() end,
 	}
 
 	CardFocus.install({

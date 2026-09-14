@@ -1,6 +1,6 @@
 return function(InputRouter)
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 
 function InputRouter:capture_focused_input(button, input_type, dt)
@@ -46,13 +46,13 @@ function InputRouter:capture_focused_input(button, input_type, dt)
 	end
 
 	-- Overlay shoulder buttons hijack L/R for tab strips and option cycles.
-	if g().OVERLAY_MENU and not self.screen_keyboard and input_type == 'press'
+	if game().OVERLAY_MENU and not self.screen_keyboard and input_type == 'press'
 		and (button == 'leftshoulder' or button == 'rightshoulder') then
-		if g().OVERLAY_MENU:find_node_by_id('tab_shoulders') then
-			focused = g().OVERLAY_MENU:find_node_by_id('tab_shoulders')
+		if game().OVERLAY_MENU:find_node_by_id('tab_shoulders') then
+			focused = game().OVERLAY_MENU:find_node_by_id('tab_shoulders')
 			extern_button = true
 		end
-		local cycle = g().OVERLAY_MENU:find_node_by_id('cycle_shoulders')
+		local cycle = game().OVERLAY_MENU:find_node_by_id('cycle_shoulders')
 		if cycle then
 			focused = cycle.children[1]
 			extern_button = true
@@ -113,7 +113,7 @@ function InputRouter:capture_focused_input(button, input_type, dt)
 		end
 	end
 
-	if captured then g().VIBRATION = g().VIBRATION + 1 end
+	if captured then game().VIBRATION = game().VIBRATION + 1 end
 	return captured
 end
 

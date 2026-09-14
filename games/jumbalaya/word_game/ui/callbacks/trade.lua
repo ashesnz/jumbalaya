@@ -1,7 +1,6 @@
---[[ word_game/ui/callbacks/trade.lua - Card Marketplace runtime().FUNCS registration ]]
+--[[ word_game/ui/callbacks/trade.lua - Card Marketplace game().FUNCS registration ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local TradeController = require("word_game.ui.controllers.trade")
 local Funcs = require("app.callbacks.funcs")

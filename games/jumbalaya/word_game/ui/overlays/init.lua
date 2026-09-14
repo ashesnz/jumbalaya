@@ -1,14 +1,13 @@
 --[[
 	word_game/ui/overlays/ - Pause, settings, win, game over, demo CTA.
 
-	These stay globals (`build_*`, `runtime().DEFINITIONS.*`) so existing call sites
+	These stay globals (`build_*`, `game().DEFINITIONS.*`) so existing call sites
 	do not change. Loaded from app/bootstrap/game_boot.lua.
 ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
-runtime().DEFINITIONS = runtime().DEFINITIONS or {}
+game().DEFINITIONS = game().DEFINITIONS or {}
 
 require("word_game.ui.overlays.options")
 require("word_game.ui.overlays.results")

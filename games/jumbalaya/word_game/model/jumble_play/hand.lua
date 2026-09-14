@@ -6,7 +6,8 @@
 	Presentation: none
 ]]
 
-return function(M)
+local M = {}
+
 local Jumble = require("word_game.model.jumble")
 local Deck = require("word_game.model.cards.deck")
 local round = require("word_game.model.round")
@@ -100,4 +101,4 @@ function M.finalize_match(won)
 	return won
 end
 
-end
+return M

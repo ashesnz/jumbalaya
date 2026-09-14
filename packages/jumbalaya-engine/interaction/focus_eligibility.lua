@@ -1,17 +1,17 @@
 return function(InputRouter)
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 
 local CardFocus = require("jumbalaya-engine.interaction.card_focus")
 
 function InputRouter:is_node_focusable(node)
 	local focusable = false
-	if node.T.y > g().ROOM.T.h + 3 then return false end
+	if node.T.y > game().ROOM.T.h + 3 then return false end
 
 	if not node.REMOVED and not node.under_overlay
 		and (node.states.hover.can and not self.dragging.target or self.dragging.target == node)
-		and ((not not node.created_on_pause) == (not not g().SETTINGS.paused))
+		and ((not not node.created_on_pause) == (not not game().SETTINGS.paused))
 		and node.states.visible
 		and (not node.panel or node.panel.states.visible) then
 		if self.screen_keyboard then

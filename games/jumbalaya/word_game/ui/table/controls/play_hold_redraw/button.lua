@@ -1,12 +1,9 @@
 --[[ word_game/ui/table/controls/play_hold_redraw/button.lua - Play button press detection ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 function M.gameplay_overlays_active()
 	if WORD_GAME_UI.TradeUI and WORD_GAME_UI.TradeUI.is_open and WORD_GAME_UI.TradeUI.is_open() then
@@ -36,7 +33,7 @@ function M.is_pressing_play()
 	local btn = M.play_button_uie()
 	if not btn or not btn.states.visible or not btn.config.button then return false end
 
-	local c = runtime().INPUT
+	local c = game().INPUT
 	local press_state = (c and c.pointer_held) or (love.mouse and love.mouse.isDown and love.mouse.isDown(1))
 	if not press_state then return false end
 
@@ -51,7 +48,7 @@ function M.is_pressing_play()
 		if belongs_to_play_button(node) then return true end
 	end
 
-	local pt = runtime().POINTER and runtime().POINTER.T
+	local pt = game().POINTER and game().POINTER.T
 	if pt and btn.collides_with_point and btn:collides_with_point(pt) then return true end
 
 	return false

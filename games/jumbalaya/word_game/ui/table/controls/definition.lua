@@ -1,7 +1,6 @@
 --[[ word_game/ui/table/controls/definition.lua - Shuffle/play button chrome and definitions ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local M = {}
 
@@ -9,16 +8,16 @@ M.ICON_PLAY = "▶"
 M.ICON_NEXT = "→"
 
 function M.button_size()
-	return math.max(0.92, (runtime().CARD_H or 1.4) * 0.68)
+	return math.max(0.92, (game().CARD_H or 1.4) * 0.68)
 end
 
 function M.play_gap()
-	local card_w = (runtime().dealt_letters and runtime().dealt_letters.card_w) or runtime().CARD_W or 1
+	local card_w = (game().dealt_letters and game().dealt_letters.card_w) or game().CARD_W or 1
 	return math.max(0.32, card_w * 0.24)
 end
 
 function M.play_button_colour()
-	return runtime().C.CLEAR
+	return game().C.CLEAR
 end
 
 function M.find_node(uie, id)
@@ -50,7 +49,7 @@ function M.set_play_display(play_btn, mode, icon)
 end
 
 function M.action_icon_sprite(size, atlas_name)
-	local atlas = runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES[atlas_name]
+	local atlas = game().TEXTURE_ATLASES and game().TEXTURE_ATLASES[atlas_name]
 	if not atlas or not atlas.image then return nil end
 	local icon_size = size * 0.92
 	return Sprite(0, 0, icon_size, icon_size, atlas, { x = 0, y = 0 })
@@ -65,7 +64,7 @@ local function shuffle_icon_sprite(size)
 end
 
 local function set_shuffle_icon_sprite(sprite, atlas_name, size)
-	local atlas = runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES[atlas_name]
+	local atlas = game().TEXTURE_ATLASES and game().TEXTURE_ATLASES[atlas_name]
 	if not sprite or not atlas or not atlas.image then return end
 	local icon_size = size * 0.92
 	sprite.atlas = atlas
@@ -94,12 +93,12 @@ function M.shuffle_button_def(size)
 	local nodes = {}
 	if shuffle_sprite then
 		nodes[#nodes + 1] = {
-			n = runtime().UI.OBJECT,
+			n = game().UI.OBJECT,
 			config = { id = "hand_shuffle_icon", object = shuffle_sprite },
 		}
 	end
 	return {
-		n = runtime().UI.COLUMN,
+		n = game().UI.COLUMN,
 		config = {
 			align = "cm",
 			padding = 0,
@@ -128,22 +127,22 @@ function M.play_button_def(size)
 	local sprite = play_icon_sprite(size)
 	if sprite then
 		nodes[#nodes + 1] = {
-			n = runtime().UI.OBJECT,
+			n = game().UI.OBJECT,
 			config = { id = "play_hand_icon", object = sprite },
 		}
 	end
 	nodes[#nodes + 1] = {
-		n = runtime().UI.TEXT,
+		n = game().UI.TEXT,
 		config = {
 			id = "play_hand_icon_text",
 			text = M.ICON_PLAY,
 			scale = 0.48,
-			colour = runtime().C.WHITE,
+			colour = game().C.WHITE,
 			shadow = true,
 		},
 	}
 	return {
-		n = runtime().UI.COLUMN,
+		n = game().UI.COLUMN,
 		config = {
 			align = "cm",
 			padding = 0,

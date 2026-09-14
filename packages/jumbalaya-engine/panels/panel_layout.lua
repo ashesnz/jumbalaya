@@ -1,21 +1,21 @@
 
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 return function(Target)
 function RetainedPanel:calculate_xywh(node, _T, recalculate, _scale)
 	node.ARGS.xywh_node_trans = node.ARGS.xywh_node_trans or {}
 	local node_t = node.ARGS.xywh_node_trans
 	local content = {x = 0, y = 0, w = 0, h = 0}
 
-	local padding = node.config.padding or g().UI.padding
+	local padding = node.config.padding or game().UI.padding
 
-	if node.ui_kind == g().UI.BOX or node.ui_kind == g().UI.TEXT or node.ui_kind == g().UI.OBJECT then
+	if node.ui_kind == game().UI.BOX or node.ui_kind == game().UI.TEXT or node.ui_kind == game().UI.OBJECT then
 		-- Leaves take their size from config or from an embedded object.
 		node_t.x, node_t.y = _T.x, _T.y
 		node_t.w = node.config.w or (node.config.object and node.config.object.T.w)
 		node_t.h = node.config.h or (node.config.object and node.config.object.T.h)
 
-		if node.ui_kind == g().UI.TEXT then
+		if node.ui_kind == game().UI.TEXT then
 			node.config.text_drawable = nil
 			local scale = node.config.scale or 1
 			if node.config.ref_table and node.config.ref_value then
@@ -24,7 +24,7 @@ function RetainedPanel:calculate_xywh(node, _T, recalculate, _scale)
 			end
 			if not node.config.text then node.config.text = '[UI ERROR]' end
 
-			node.config.lang = node.config.lang or g().LANG
+			node.config.lang = node.config.lang or game().LANG
 			local font_obj = node.config.font or (node.config.lang and node.config.lang.font)
 			local font_face = font_obj and font_obj.FONT
 			local squish = (font_obj and font_obj.squish) or 1
@@ -34,20 +34,20 @@ function RetainedPanel:calculate_xywh(node, _T, recalculate, _scale)
 				or (string.len(node.config.text) * 12)
 			local text_h = (font_face and font_face.getHeight and font_face:getHeight()) or 20
 			if font_face and love.graphics and love.graphics.newText then
-				node.config.text_drawable = love.graphics.newText(font_face, {g().C.WHITE, node.config.text})
+				node.config.text_drawable = love.graphics.newText(font_face, {game().C.WHITE, node.config.text})
 			end
-			local px_w = text_w * squish * scale * g().TILESCALE * font_scale
-			local px_h = text_h * scale * g().TILESCALE * font_scale * height_scale
+			local px_w = text_w * squish * scale * game().TILESCALE * font_scale
+			local px_h = text_h * scale * game().TILESCALE * font_scale * height_scale
 			if node.config.vert then px_w, px_h = px_h, px_w end
 			node_t.x, node_t.y = _T.x, _T.y
-			node_t.w = px_w / (g().TILESIZE * g().TILESCALE)
-			node_t.h = px_h / (g().TILESIZE * g().TILESCALE)
+			node_t.w = px_w / (game().TILESIZE * game().TILESCALE)
+			node_t.h = px_h / (game().TILESIZE * game().TILESCALE)
 
 			node.content_dimensions = node.content_dimensions or {}
 			node.content_dimensions.w = _T.w
 			node.content_dimensions.h = _T.h
 			node:set_values(node_t, recalculate)
-		elseif node.ui_kind == g().UI.BOX or node.ui_kind == g().UI.OBJECT then
+		elseif node.ui_kind == game().UI.BOX or node.ui_kind == game().UI.OBJECT then
 			node.content_dimensions = node.content_dimensions or {}
 			node.content_dimensions.w = node_t.w
 			node.content_dimensions.h = node_t.h
@@ -72,7 +72,7 @@ function RetainedPanel:calculate_xywh(node, _T, recalculate, _scale)
 			node_t.x, node_t.y = _T.x, _T.y
 			node_t.w = node.config.minw or 0
 			node_t.h = node.config.minh or 0
-			if node.ui_kind == g().UI.ROOT then
+			if node.ui_kind == game().UI.ROOT then
 				node_t.x, node_t.y = 0, 0
 				node_t.w, node_t.h = node.config.minw or 0, node.config.minh or 0
 			end
@@ -84,7 +84,7 @@ function RetainedPanel:calculate_xywh(node, _T, recalculate, _scale)
 					if v.config and v.config.scale then v.config.scale = v.config.scale * fac end
 					local child_w, child_h = self:calculate_xywh(v, content, recalculate, fac)
 					if child_h and child_w then
-						if v.ui_kind == g().UI.ROW then
+						if v.ui_kind == game().UI.ROW then
 							content.h = content.h + child_h + padding
 							content.y = content.y + child_h + padding
 							if child_w + padding > content.w then content.w = child_w + padding end

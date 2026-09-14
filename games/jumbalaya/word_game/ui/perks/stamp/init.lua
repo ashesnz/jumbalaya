@@ -6,8 +6,7 @@
 ]]
 
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
@@ -63,7 +62,7 @@ end
 
 function M.play(perk_entry, callback)
 	if animate.is_active() then return false end
-	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return false end
+	if game().STATE ~= game().STATES.TABLE_BOARD then return false end
 	perk_entry = definition.resolve_stamp_perk(perk_entry)
 	if not perk_entry then return false end
 	local sprite_entry = definition.resolve_stamp_sprite()
@@ -86,7 +85,7 @@ function M.try_opening_demo()
 		and WORD_GAME_UI.FirstPlayTutorial.is_active() then
 		return false
 	end
-	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return false end
+	if game().STATE ~= game().STATES.TABLE_BOARD then return false end
 	if animate.imprint_count() > 0 then return false end
 	local rs = run_state.get()
 	if not rs or #(rs.perks or {}) > 0 then return false end
@@ -96,7 +95,7 @@ function M.try_opening_demo()
 end
 
 function M.demo_play()
-	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return end
+	if game().STATE ~= game().STATES.TABLE_BOARD then return end
 	local anim = animate.get_anim()
 	if anim and not anim.debug and anim.t < animate.TOTAL_DUR then return end
 
@@ -147,10 +146,10 @@ end
 
 function M.reset()
 	M.clear_runtime()
-	if runtime().SIDEBAR_HUD and runtime().SIDEBAR_HUD.remove then
-		pcall(function() runtime().SIDEBAR_HUD:remove() end)
+	if game().SIDEBAR_HUD and game().SIDEBAR_HUD.remove then
+		pcall(function() game().SIDEBAR_HUD:remove() end)
 	end
-	runtime().SIDEBAR_HUD = nil
+	game().SIDEBAR_HUD = nil
 end
 
 function M.has_imprint()
@@ -195,13 +194,13 @@ function M.show_perk_popup(perk_entry)
 end
 
 function M.consume_click(mx, my)
-	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return false end
-	if runtime().OVERLAY_MENU then return false end
+	if game().STATE ~= game().STATES.TABLE_BOARD then return false end
+	if game().OVERLAY_MENU then return false end
 	local anim = animate.get_anim()
 	if anim and not anim.finished then return false end
 	if not animate.has_imprint() then return false end
 
-	local c = runtime().INPUT
+	local c = game().INPUT
 	if not c or c.clicked.handled or not c.clicked.target then return false end
 	if Card and getmetatable(c.clicked.target) == Card then return false end
 

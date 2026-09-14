@@ -13,7 +13,9 @@ local M = {}
 M.Rules = require("word_game.model.jumble_play.jumble_rules")
 M.ModifierEffects = require("word_game.model.jumble_play.letter_modifier_effects")
 
-require("word_game.model.jumble_play.hand")(M)
-require("word_game.model.jumble_play.jumble")(M)
+local hand = require("word_game.model.jumble_play.hand")
+for k, v in pairs(hand) do M[k] = v end
+local jumble = require("word_game.model.jumble_play.jumble")
+for k, v in pairs(jumble) do M[k] = v end
 
 return M

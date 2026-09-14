@@ -1,6 +1,6 @@
 --[[ word_game/ui/sidebar/stage_button/input.lua - Click hit-test and press actions ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
 local table_discard = require("word_game.ui.perks.discard_bin")
@@ -11,9 +11,6 @@ local animate = require("word_game.ui.sidebar.stage_button.animate")
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 local function widget()
 	return state.widget()
@@ -28,8 +25,8 @@ local function play()
 end
 
 local function pointer_tile()
-	if not runtime() or not runtime().POINTER or not runtime().POINTER.T then return nil, nil end
-	return runtime().POINTER.T.x, runtime().POINTER.T.y
+	if not game() or not game().POINTER or not game().POINTER.T then return nil, nil end
+	return game().POINTER.T.x, game().POINTER.T.y
 end
 
 function M.point_in_button(rect, tx, ty)
@@ -37,7 +34,7 @@ function M.point_in_button(rect, tx, ty)
 	if not rect or not w.visible then return false end
 	tx, ty = tx or pointer_tile()
 	if not tx or not ty then return false end
-	local attach = runtime().SIDEBAR_ATTACH and runtime().SIDEBAR_ATTACH.T
+	local attach = game().SIDEBAR_ATTACH and game().SIDEBAR_ATTACH.T
 	if not attach then return false end
 	local x = attach.x + rect.x
 	local y = attach.y + rect.y
@@ -89,8 +86,8 @@ function M.press()
 end
 
 function M.consume_click(mx, my, rect)
-	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return false end
-	if runtime().OVERLAY_MENU then return false end
+	if game().STATE ~= game().STATES.TABLE_BOARD then return false end
+	if game().OVERLAY_MENU then return false end
 	local w = widget()
 	if not w.visible then return false end
 	if not M.point_in_button(rect, mx, my) then return false end

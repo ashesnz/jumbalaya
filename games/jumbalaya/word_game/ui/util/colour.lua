@@ -5,16 +5,15 @@
   `jumbalaya-engine.util.colour` — require it directly; do not re-wrap.
 ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 function loc_colour(_c, _default)
-  runtime().ARGS.LOC_COLOURS = runtime().ARGS.LOC_COLOURS or {
-    red = runtime().C.RED, multiplier = runtime().C.MULTIPLIER, blue = runtime().C.BLUE, points = runtime().C.POINTS,
-    green = runtime().C.GREEN, money = runtime().C.MONEY, gold = runtime().C.GOLD, attention = runtime().C.FILTER,
-    purple = runtime().C.PURPLE, white = runtime().C.WHITE, inactive = runtime().C.UI.TEXT_INACTIVE,
-    finish = runtime().C.FINISH,
-    dark_finish = runtime().C.DARK_FINISH, legendary = runtime().C.RARITY[4],
+  game().ARGS.LOC_COLOURS = game().ARGS.LOC_COLOURS or {
+    red = game().C.RED, multiplier = game().C.MULTIPLIER, blue = game().C.BLUE, points = game().C.POINTS,
+    green = game().C.GREEN, money = game().C.MONEY, gold = game().C.GOLD, attention = game().C.FILTER,
+    purple = game().C.PURPLE, white = game().C.WHITE, inactive = game().C.UI.TEXT_INACTIVE,
+    finish = game().C.FINISH,
+    dark_finish = game().C.DARK_FINISH, legendary = game().C.RARITY[4],
   }
-  return runtime().ARGS.LOC_COLOURS[_c] or _default or runtime().C.UI.TEXT_DARK
+  return game().ARGS.LOC_COLOURS[_c] or _default or game().C.UI.TEXT_DARK
 end

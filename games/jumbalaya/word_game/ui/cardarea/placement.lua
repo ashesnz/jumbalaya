@@ -3,8 +3,7 @@
 ]]
 
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local M = {}
 
@@ -19,28 +18,28 @@ function M.add_selection(self, card, silent)
 end
 
 function M.on_remove_card(self, card)
-	if runtime().pattern_row and runtime().pattern_row.area == self then
-		runtime().pattern_row:on_remove_card(card)
+	if game().pattern_row and game().pattern_row.area == self then
+		game().pattern_row:on_remove_card(card)
 	end
 end
 
 function M.on_remove(self)
-	if runtime().pattern_row and runtime().pattern_row.area == self then
-		runtime().pattern_row.area = nil
+	if game().pattern_row and game().pattern_row.area == self then
+		game().pattern_row.area = nil
 	end
 end
 
 function M.relayout(self)
 	if self.config.type ~= 'placement' then return end
-	if runtime().pattern_row and runtime().pattern_row.area == self then
-		runtime().pattern_row:relayout()
+	if game().pattern_row and game().pattern_row.area == self then
+		game().pattern_row:relayout()
 	end
 end
 
 function M.draw_shadows(self)
 	if self.config.type ~= 'placement' then return end
-	if runtime().pattern_row and runtime().pattern_row.area == self then
-		runtime().pattern_row:draw_shadows()
+	if game().pattern_row and game().pattern_row.area == self then
+		game().pattern_row:draw_shadows()
 	end
 end
 
@@ -54,14 +53,14 @@ function M.draw_layer(self, v, draw_card_layer)
 	if self.config.type ~= 'placement' then return end
 	if store_renders_pattern() then return end
 	for i = 1, #self.cards do
-		if self.cards[i] ~= runtime().INPUT.focused.target then
+		if self.cards[i] ~= game().INPUT.focused.target then
 			if not self.cards[i].selected then
 				draw_card_layer(self.cards[i], v)
 			end
 		end
 	end
 	for i = 1, #self.cards do
-		if self.cards[i] ~= runtime().INPUT.focused.target then
+		if self.cards[i] ~= game().INPUT.focused.target then
 			if self.cards[i].selected then
 				draw_card_layer(self.cards[i], v)
 			end

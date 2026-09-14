@@ -2,13 +2,13 @@
 local Colour = require("jumbalaya-engine.util.colour")
 local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 return function(Target)
 function LayoutNode:draw_self_decor(parallax_dist)
 	-- Configured outline stroke.
 	if self.config.outline and self.config.outline_colour[4] > 0.01 then
 		NodeTransform.push_node_transform(self, 1)
-		love.graphics.scale(1 / g().TILESIZE)
+		love.graphics.scale(1 / game().TILESIZE)
 		love.graphics.setLineWidth(self.config.outline)
 		if self.config.line_emboss then
 			love.graphics.setColor(Colour.shade(self.config.outline_colour, self.states.hover.is and 0.5 or 0.3, true))
@@ -18,7 +18,7 @@ function LayoutNode:draw_self_decor(parallax_dist)
 		if self.config.r and self.VT.w > 0.01 then
 			if self.config.speech_tail then
 				-- Stroke the bubble outline, leaving a gap where the tail joins.
-				local tw, th = self.VT.w * g().TILESIZE, self.VT.h * g().TILESIZE
+				local tw, th = self.VT.w * game().TILESIZE, self.VT.h * game().TILESIZE
 				local tail = get_speech_bubble_tail(0, 0, tw, th,
 					self.config.speech_tail, self.config.speech_tail_reach, self.config.speech_tail_along)
 				if love.graphics.setLineStyle then love.graphics.setLineStyle('rough') end
@@ -30,22 +30,22 @@ function LayoutNode:draw_self_decor(parallax_dist)
 				self:draw_pixellated_rect('line', parallax_dist)
 			end
 		else
-			love.graphics.rectangle('line', 0, 0, self.VT.w * g().TILESIZE, self.VT.h * g().TILESIZE)
+			love.graphics.rectangle('line', 0, 0, self.VT.w * game().TILESIZE, self.VT.h * game().TILESIZE)
 		end
 		love.graphics.pop()
 	end
 
 	-- Gamepad-focus set_selected ring (animated fade-in).
 	if self.states.focus.is then
-		self.focus_timer = self.focus_timer or g().TIMERS.REAL
-		local lw = 50 * math.max(0, self.focus_timer - g().TIMERS.REAL + 0.3)^2
+		self.focus_timer = self.focus_timer or game().TIMERS.REAL
+		local lw = 50 * math.max(0, self.focus_timer - game().TIMERS.REAL + 0.3)^2
 		NodeTransform.push_node_transform(self, 1)
-		love.graphics.scale(1 / g().TILESIZE)
+		love.graphics.scale(1 / game().TILESIZE)
 		love.graphics.setLineWidth(lw + 1.5)
-		love.graphics.setColor(Colour.with_alpha(g().C.WHITE, 0.2 * lw, true))
+		love.graphics.setColor(Colour.with_alpha(game().C.WHITE, 0.2 * lw, true))
 		self:draw_pixellated_rect('fill', parallax_dist)
 		love.graphics.setColor(self.config.colour[4] > 0
-			and Colour.blend_colours(g().C.WHITE, self.config.colour, 0.8) or g().C.WHITE)
+			and Colour.blend_colours(game().C.WHITE, self.config.colour, 0.8) or game().C.WHITE)
 		self:draw_pixellated_rect('line', parallax_dist)
 		love.graphics.pop()
 	else
@@ -55,11 +55,11 @@ function LayoutNode:draw_self_decor(parallax_dist)
 	-- Speech-bubble tail fill (plus its shadow when shadows are enabled).
 	if self.config.speech_tail and self.config.colour[4] > 0.01 then
 		NodeTransform.push_node_transform(self, 1)
-		love.graphics.scale(1 / g().TILESIZE)
+		love.graphics.scale(1 / game().TILESIZE)
 		local px, py = self.parallax_shift.x, self.parallax_shift.y
-		local tw, th = self.VT.w * g().TILESIZE, self.VT.h * g().TILESIZE
+		local tw, th = self.VT.w * game().TILESIZE, self.VT.h * game().TILESIZE
 		local tail_args = {self.config.speech_tail, self.config.speech_tail_reach, self.config.speech_tail_along}
-		if self.config.shadow and g().SETTINGS.GRAPHICS.shadows == 'On' then
+		if self.config.shadow and game().SETTINGS.GRAPHICS.shadows == 'On' then
 			love.graphics.setColor(0, 0, 0, 0.25 * self.config.colour[4])
 			love.graphics.polygon('fill', get_speech_bubble_tail(
 				px - self.shadow_parallax.x * parallax_dist * 0.5,
@@ -74,22 +74,22 @@ function LayoutNode:draw_self_decor(parallax_dist)
 	-- Chosen-option marker triangle (shadow pass + red marker).
 	if self.config.chosen then
 		NodeTransform.push_node_transform(self, 0.98)
-		love.graphics.scale(1 / g().TILESIZE)
-		if self.config.shadow and g().SETTINGS.GRAPHICS.shadows == 'On' then
+		love.graphics.scale(1 / game().TILESIZE)
+		if self.config.shadow and game().SETTINGS.GRAPHICS.shadows == 'On' then
 			love.graphics.setColor(0, 0, 0, 0.25 * self.config.colour[4])
 			love.graphics.polygon('fill', pointer_triangle(
 				self.parallax_shift.x - self.shadow_parallax.x * parallax_dist * 0.5,
 				self.parallax_shift.y - self.shadow_parallax.y * parallax_dist * 0.5,
-				self.VT.w * g().TILESIZE, self.VT.h * g().TILESIZE, self.config.chosen == 'vert'))
+				self.VT.w * game().TILESIZE, self.VT.h * game().TILESIZE, self.config.chosen == 'vert'))
 		end
 		love.graphics.pop()
 
 		NodeTransform.push_node_transform(self, 1)
-		love.graphics.scale(1 / g().TILESIZE)
-		love.graphics.setColor(g().C.RED)
+		love.graphics.scale(1 / game().TILESIZE)
+		love.graphics.setColor(game().C.RED)
 		love.graphics.polygon('fill', pointer_triangle(
 			self.parallax_shift.x, self.parallax_shift.y,
-			self.VT.w * g().TILESIZE, self.VT.h * g().TILESIZE, self.config.chosen == 'vert'))
+			self.VT.w * game().TILESIZE, self.VT.h * game().TILESIZE, self.config.chosen == 'vert'))
 		love.graphics.pop()
 	end
 end

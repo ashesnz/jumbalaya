@@ -1,7 +1,7 @@
 return function(GfxSprite)
 local Tables = require("jumbalaya-engine.util.tables")
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 local sprite_util = require("jumbalaya-engine.graphics.sprite_util")
 
@@ -46,10 +46,10 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 
 	if custom_shader then
 		-- Caller-driven mode: send exactly the uniforms the step listed.
-		if _send and g().SHADERS and g().SHADERS[_shader] then
+		if _send and game().SHADERS and game().SHADERS[_shader] then
 			for _, uniform in ipairs(_send) do
 				pcall(function()
-					g().SHADERS[_shader]:send(uniform.name,
+					game().SHADERS[_shader]:send(uniform.name,
 						uniform.val or (uniform.func and uniform.func()) or uniform.ref_table[uniform.ref_value])
 				end)
 			end
@@ -60,15 +60,15 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 			self.ARGS.prep_shader = self.ARGS.prep_shader or {}
 			self.ARGS.prep_shader.cursor_pos = self.ARGS.prep_shader.cursor_pos or {}
 			self.ARGS.prep_shader.cursor_pos[1] =
-				draw_major.tilt_var and draw_major.tilt_var.mx * g().CANVAS_SCALE
-				or (g().INPUT and g().INPUT.cursor_position and g().INPUT.cursor_position.x * g().CANVAS_SCALE or 0)
+				draw_major.tilt_var and draw_major.tilt_var.mx * game().CANVAS_SCALE
+				or (game().INPUT and game().INPUT.cursor_position and game().INPUT.cursor_position.x * game().CANVAS_SCALE or 0)
 			self.ARGS.prep_shader.cursor_pos[2] =
-				draw_major.tilt_var and draw_major.tilt_var.my * g().CANVAS_SCALE
-				or (g().INPUT and g().INPUT.cursor_position and g().INPUT.cursor_position.y * g().CANVAS_SCALE or 0)
+				draw_major.tilt_var and draw_major.tilt_var.my * game().CANVAS_SCALE
+				or (game().INPUT and game().INPUT.cursor_position and game().INPUT.cursor_position.y * game().CANVAS_SCALE or 0)
 
 			pcall(function()
 				sh:send('mouse_screen_pos', self.ARGS.prep_shader.cursor_pos)
-				sh:send('screen_scale', g().TILESCALE * g().TILESIZE * (draw_major.mouse_damping or 1) * g().CANVAS_SCALE)
+				sh:send('screen_scale', game().TILESCALE * game().TILESIZE * (draw_major.mouse_damping or 1) * game().CANVAS_SCALE)
 				sh:send('hovering', ((_shadow_height and not tilt_shadow) or _no_tilt) and 0
 					or (draw_major.hover_tilt or 0) * (tilt_shadow or 1))
 				sh:send('dissolve', math.abs(draw_major.dissolve or 0))
@@ -80,12 +80,12 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 				-- earlier uniform cannot leave the shimmer clock stuck at 0.
 				if _shader ~= 'gold_seal' then
 					local id_phase = 123.33412 * ((tonumber(draw_major.ID) or 0) / 1.14212) % 3000
-					sh:send('time', id_phase + (g().TIMERS and g().TIMERS.REAL or 0))
+					sh:send('time', id_phase + (game().TIMERS and game().TIMERS.REAL or 0))
 				end
 				sh:send('texture_details', self:texture_descriptor())
 				sh:send('image_details', self:image_dimensions())
-				sh:send('burn_colour_1', draw_major.dissolve_colours and draw_major.dissolve_colours[1] or g().C.CLEAR)
-				sh:send('burn_colour_2', draw_major.dissolve_colours and draw_major.dissolve_colours[2] or g().C.CLEAR)
+				sh:send('burn_colour_1', draw_major.dissolve_colours and draw_major.dissolve_colours[1] or game().C.CLEAR)
+				sh:send('burn_colour_2', draw_major.dissolve_colours and draw_major.dissolve_colours[2] or game().C.CLEAR)
 				sh:send('shadow', (not not _shadow_height))
 				if _shader ~= 'gold_seal' and _send then
 					sh:send(_shader, _send)
@@ -94,7 +94,7 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 			-- Own pcall: still animates if texture_details / burn_colour send failed.
 			if _shader == 'gold_seal' then
 				pcall(function()
-					local clock = (g().TIMERS and g().TIMERS.REAL) or 0
+					local clock = (game().TIMERS and game().TIMERS.REAL) or 0
 					sh:send('time', clock)
 					sh:send('gold_seal', clock, clock, 0, 1)
 				end)
@@ -104,7 +104,7 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 
 	local active_shader
 	if custom_shader then
-		active_shader = g().SHADERS and g().SHADERS[_shader]
+		active_shader = game().SHADERS and game().SHADERS[_shader]
 	else
 		active_shader = sprite_util.shader_for(_shader)
 	end

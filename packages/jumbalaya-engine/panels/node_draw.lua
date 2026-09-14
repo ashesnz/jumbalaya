@@ -1,9 +1,9 @@
 
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 return function(Target)
 function LayoutNode:pulse(amount, rot_amt)
-	if self.ui_kind == g().UI.OBJECT then
+	if self.ui_kind == game().UI.OBJECT then
 		if self.config.object then self.config.object:pulse(amount, rot_amt) end
 	else
 		AnimNode.pulse(self, amount, rot_amt)

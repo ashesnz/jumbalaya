@@ -4,8 +4,7 @@
 	Outputs: show_above_card(card) during pattern-row placement.
 ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local facade = require("word_game.ui.facade")
 
@@ -25,7 +24,7 @@ function M.show_on_placed_card(card)
 	local FloatUp = WORD_GAME_UI.FloatUpText
 	if not FloatUp or not FloatUp.from_card_above then return end
 	FloatUp.from_card_above(card, text, {
-		colour = runtime().C and runtime().C.GOLD or DEFAULT_COLOUR,
+		colour = game().C and game().C.GOLD or DEFAULT_COLOUR,
 		font_px = 26,
 		life = 1.35,
 		speed = 1.2,

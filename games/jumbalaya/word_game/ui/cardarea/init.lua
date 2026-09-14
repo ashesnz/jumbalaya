@@ -12,8 +12,7 @@
 ]]
 
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local hand = require("word_game.ui.cardarea.hand")
 local deck = require("word_game.ui.cardarea.deck")
@@ -63,7 +62,7 @@ local TYPE_HANDLERS = {
 CardPile = EaseNode:derive("CardPile")
 
 local function table_board()
-	return runtime().STATE == runtime().STATES.TABLE_BOARD
+	return game().STATE == game().STATES.TABLE_BOARD
 end
 
 local function face_down_in_pile(card)
@@ -75,7 +74,7 @@ end
 
 local function draw_card_layer(card, layer)
 	if not card then return end
-	if runtime().INPUT.dragging.target ~= card and not (WORD_GAME_UI.CardInspect and WORD_GAME_UI.CardInspect.is(card)) then
+	if game().INPUT.dragging.target ~= card and not (WORD_GAME_UI.CardInspect and WORD_GAME_UI.CardInspect.is(card)) then
 		card:draw(layer)
 	end
 end
@@ -90,7 +89,7 @@ end
 ---   `type` (string, default 'deck') - behaviour selector, see file header;
 ---   `selection_limit` (number, default 5) - max cards selectable at once;
 ---   `card_limit` (number, default 52) - max cards this area can hold;
----   `card_w` (number, default `runtime().CARD_W`) - card width override;
+---   `card_w` (number, default `game().CARD_W`) - card width override;
 ---   `sort` (string, default 'desc') - default `CardPile:sort` method.
 function CardPile:construct(X, Y, W, H, config)
 	EaseNode.construct(self, X, Y, W, H)
@@ -102,7 +101,7 @@ function CardPile:construct(X, Y, W, H, config)
 
 	config = config or {}
 	self.config = config
-	self.card_w = config.card_w or runtime().CARD_W
+	self.card_w = config.card_w or game().CARD_W
 	self.cards = {}
 	self.children = {}
 	self.selected = {}
@@ -116,7 +115,7 @@ function CardPile:construct(X, Y, W, H, config)
 	self.shuffle_amt = 0
 
 	if getmetatable(self) == CardPile then
-		table.insert(runtime().LIVE.CARDPILE, self)
+		table.insert(game().LIVE.CARDPILE, self)
 	end
 end
 
@@ -187,7 +186,7 @@ end
 
 --- @param dt number seconds since last frame
 function CardPile:update(dt)
-	if self == runtime().dealt_letters then
+	if self == game().dealt_letters then
 		for _, v in ipairs(self.cards) do
 			if v.ability.forced_selection and not self.selected[1] then
 				self:add_selection(v)
@@ -197,7 +196,7 @@ function CardPile:update(dt)
 	deck.update(self, dt)
 	discard.update(self, dt)
 	--Check and see if controller is being used
-	if runtime().INPUT.HID.controller and self ~= runtime().dealt_letters then self:clear_selection() end
+	if game().INPUT.HID.controller and self ~= game().dealt_letters then self:clear_selection() end
 	self.config.temp_limit = math.max(#self.cards, self.config.card_limit)
 	self.config.card_count = #self.cards
 end
@@ -212,7 +211,7 @@ end
 function CardPile:draw()
 	if not self.states.visible then return end
 	if not self.cards then return end
-	if runtime().VIEWING_DECK and (self==runtime().draw_pile or self==runtime().dealt_letters) then return end
+	if game().VIEWING_DECK and (self==game().draw_pile or self==game().dealt_letters) then return end
 
 	if not chrome.skip_chrome(self) then
 		chrome.draw_chrome(self)
@@ -277,7 +276,7 @@ end
 --- only meaningful for the deck (opens deck info) and opponent deck
 --- (triggers opponent draw).
 function CardPile:click()
-	if self == runtime().draw_pile then
+	if self == game().draw_pile then
 		if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
 			WORD_GAME_UI.TableDeck.show_info()
 		end

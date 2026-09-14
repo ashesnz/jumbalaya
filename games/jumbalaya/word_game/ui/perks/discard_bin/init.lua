@@ -6,8 +6,7 @@
 ]]
 
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
@@ -45,7 +44,7 @@ local discards_used_count = 0
 local overlay_odometer
 
 local function tile_scale()
-	return (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
+	return (game().TILESCALE or 1) * (game().TILESIZE or 1)
 end
 
 local function perk_stamp()
@@ -151,7 +150,7 @@ function M.is_full()
 end
 
 function M.uses_table_draw()
-	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return false end
+	if game().STATE ~= game().STATES.TABLE_BOARD then return false end
 	if felt.is_boss_sequence() then return false end
 	return true
 end
@@ -161,9 +160,9 @@ function M.voucher_discard_active()
 end
 
 function M.end_run_button_visible()
-	if runtime().STAGE ~= runtime().STAGES.RUN then return false end
+	if game().STAGE ~= game().STAGES.RUN then return false end
 	if felt.is_boss_sequence() then return false end
-	return runtime().STATE == runtime().STATES.TABLE_BOARD
+	return game().STATE == game().STATES.TABLE_BOARD
 end
 
 function M.should_show_end_run()
@@ -173,10 +172,10 @@ function M.should_show_end_run()
 end
 
 function M.sync_discard_pile_area()
-	if not runtime().recycle_stash or not runtime().recycle_stash.states then return end
-	runtime().recycle_stash.states.collide.can = false
-	runtime().recycle_stash.states.hover.can = false
-	runtime().recycle_stash.states.release_on.can = false
+	if not game().recycle_stash or not game().recycle_stash.states then return end
+	game().recycle_stash.states.collide.can = false
+	game().recycle_stash.states.hover.can = false
+	game().recycle_stash.states.release_on.can = false
 end
 
 function M.stash_discarded_card(card)
@@ -188,8 +187,8 @@ function M.stash_discarded_card(card)
 end
 
 function M.hide_discard_pile_cards()
-	if not runtime().recycle_stash or not runtime().recycle_stash.cards then return end
-	for _, card in ipairs(runtime().recycle_stash.cards) do
+	if not game().recycle_stash or not game().recycle_stash.cards then return end
+	for _, card in ipairs(game().recycle_stash.cards) do
 		M.stash_discarded_card(card)
 	end
 end
@@ -223,8 +222,8 @@ function M.record_discard()
 end
 
 function M.end_run_slot_size(card_w, card_h)
-	card_w = card_w or runtime().CARD_W or 1
-	card_h = card_h or runtime().CARD_H or 1.4
+	card_w = card_w or game().CARD_W or 1
+	card_h = card_h or game().CARD_H or 1.4
 	local side = math.min(card_w, card_h) * M.END_RUN_SLOT_SCALE
 	return side, side
 end
@@ -269,7 +268,7 @@ end
 
 function M.can_discard_card(card)
 	if not M.voucher_discard_active() then return false end
-	if not card or card.REMOVED or card.area ~= runtime().dealt_letters then return false end
+	if not card or card.REMOVED or card.area ~= game().dealt_letters then return false end
 	if card.bonus_card or card.boss_temp then return false end
 	if InputLock.is_table_busy() then return false end
 	return true
@@ -333,7 +332,7 @@ function M.visible_counter_digit()
 end
 
 local function voucher_hover_highlight(art_x, art_y, art_w, art_h)
-	local dragging = runtime().INPUT and runtime().INPUT.dragging and runtime().INPUT.dragging.target
+	local dragging = game().INPUT and game().INPUT.dragging and game().INPUT.dragging.target
 	if not dragging or not M.can_discard_card(dragging) then return false end
 	return M.point_in_discard_voucher(
 		dragging.T.x + dragging.T.w * 0.5,
@@ -381,7 +380,7 @@ end
 --- Redraw the discard_bin voucher and counter above dragged/dissolving cards.
 function M.draw_voucher_foreground()
 	if not M.voucher_discard_unlocked() or not M.uses_table_draw() then return end
-	if runtime().STATE ~= runtime().STATES.TABLE_BOARD or not runtime().ROOM or not love.graphics then return end
+	if game().STATE ~= game().STATES.TABLE_BOARD or not game().ROOM or not love.graphics then return end
 
 	local entry, rect = discard_voucher_slot_px()
 	if not entry or not rect then return end

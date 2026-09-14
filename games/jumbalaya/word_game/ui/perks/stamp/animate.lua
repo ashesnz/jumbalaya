@@ -1,7 +1,6 @@
 --[[ word_game/ui/perks/stamp/animate.lua - stamp strike animation and imprint state ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
@@ -176,8 +175,8 @@ function M.trigger_impact(frame)
 	frame.impacted = true
 	M.apply_imprint(frame.sprite_entry, frame.perk_entry)
 	stamp_puff.spawn(frame.land_cx, frame.land_cy, frame.slot_w, frame.slot_h)
-	if runtime().VIBRATION then
-		runtime().VIBRATION = runtime().VIBRATION + 0.55
+	if game().VIBRATION then
+		game().VIBRATION = game().VIBRATION + 0.55
 	end
 	if play_sfx then
 		play_sfx("stamp", 1.0, 0.9)
@@ -241,7 +240,7 @@ function M.begin_debug_anim(sprite_entry, perk_entry)
 end
 
 function M.update(dt)
-	dt = dt or (runtime() and runtime().real_dt) or 0.016
+	dt = dt or (game() and game().real_dt) or 0.016
 	dt = math.min(0.05, dt)
 	stamp_puff.update(dt)
 
@@ -270,7 +269,7 @@ function M.update(dt)
 end
 
 function M.debug_step()
-	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return end
+	if game().STATE ~= game().STATES.TABLE_BOARD then return end
 
 	if anim and anim.finished then
 		anim = nil

@@ -4,7 +4,7 @@
 	Outputs: install(Play) wires on_hand_cleared; discard anim, token fly, TradeUI open.
 ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
 local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 local play_effects = require("word_game.ui.play_effects")
@@ -18,9 +18,6 @@ local game_access = facade.game_access()
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 local function set_score_animating(active)
 	play_effects.set_word_score_animating(active)
@@ -44,7 +41,7 @@ function M.install(play_module)
 
 		local function play_clear_sequence()
 			local outcome = play_module.resolve_after_clear(opts)
-			if runtime().TIMELINE and runtime().TIMELINE.enqueue then
+			if game().TIMELINE and game().TIMELINE.enqueue then
 				Scheduler.add{
 					mode = "instant",
 					func = function()
@@ -85,8 +82,8 @@ function M.install(play_module)
 		if Funcs.get("close_overlay") then
 			Funcs.dispatch("close_overlay")
 		end
-		if runtime().SETTINGS then
-			runtime().SETTINGS.paused = false
+		if game().SETTINGS then
+			game().SETTINGS.paused = false
 		end
 		set_score_animating(true)
 		local function finish_deal()
@@ -103,7 +100,7 @@ function M.install(play_module)
 			end
 			finish_deal()
 		end
-		if runtime().TIMELINE and runtime().TIMELINE.enqueue then
+		if game().TIMELINE and game().TIMELINE.enqueue then
 			Scheduler.add{
 				mode = "delayed",
 				delay = 0.18,
@@ -136,7 +133,7 @@ function M.install(play_module)
 	function play_module.end_jumble_hand()
 		local score = play_module.end_jumble_hand_model()
 		if score == nil then return end
-		feedback.show("Time!  " .. score .. " points", runtime().C.GOLD, 2.2, 0.35)
+		feedback.show("Time!  " .. score .. " points", game().C.GOLD, 2.2, 0.35)
 		play_sfx("timpani", 0.9, 0.85)
 		if WORD_GAME_UI.ScoreBanner then
 			local hud = WORD_GAME_UI.ScoreBanner.state()

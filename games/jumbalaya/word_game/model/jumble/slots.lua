@@ -8,7 +8,11 @@
 
 local live_game = require("word_game.model.live_game")
 
-return function(M)
+local M = {}
+
+local function J()
+	return package.loaded["word_game.model.jumble"]
+end
 
 local bonus_return = require("word_game.model.jumble.bonus_return")
 local core = require("jumbalaya_core.jumble.slots")
@@ -61,7 +65,7 @@ function M.sync_placement_cards(slots)
 end
 
 function M.blank_slot_index_for_x(session, x)
-	local j = M.state()
+	local j = J().state()
 	if not j or not j.slots then return nil end
 	local geo = geometry(session)
 	if not geo then return nil end
@@ -139,7 +143,7 @@ function M.blank_slot_index_for_x(session, x)
 end
 
 function M.first_empty_blank()
-	local j = M.state()
+	local j = J().state()
 	if not j then return nil end
 	if j.puzzle and j.puzzle.kind == "span" then
 		if j.puzzle.center then
@@ -184,7 +188,7 @@ local function detach_card_from_slots(slots, card)
 end
 
 function M.slot_for_card(card)
-	local j = M.state()
+	local j = J().state()
 	if not j or not j.slots or not card then return nil end
 	for i, slot in ipairs(j.slots) do
 		if slot.kind == "blank" and slot.card == card then
@@ -201,7 +205,7 @@ function M.slot_for_card(card)
 end
 
 function M.assign_card_to_blank(slot_index, card, insert_pos)
-	local j = M.state()
+	local j = J().state()
 	if not j or not j.slots then return false end
 	local slot = j.slots[slot_index]
 	if not slot then return false end
@@ -271,7 +275,7 @@ function M.assign_card_to_blank(slot_index, card, insert_pos)
 end
 
 function M.remove_card_from_blanks(card)
-	local j = M.state()
+	local j = J().state()
 	if not j then return end
 	detach_card_from_slots(j.slots, card)
 	M.sync_placement_cards(j.slots)
@@ -282,4 +286,4 @@ function M.remove_card_from_blanks(card)
 		end
 	end
 end
-end
+return M

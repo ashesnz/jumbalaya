@@ -3,7 +3,7 @@
 local Kind = require("jumbalaya-engine.object")
 
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 ---@class Node : Kind
 Node = Kind:derive("Node")
@@ -27,12 +27,12 @@ function Node:construct(args)
 	self.CT = self.T
 	self.click_offset = { x = 0, y = 0 }
 	self.hover_offset = { x = 0, y = 0 }
-	self.created_on_pause = g().SETTINGS.paused
+	self.created_on_pause = game().SETTINGS.paused
 	self.REMOVED = false
 
-	g().ID = g().ID or 1
-	self.ID = g().ID
-	g().ID = g().ID + 1
+	game().ID = game().ID or 1
+	self.ID = game().ID
+	game().ID = game().ID + 1
 
 	self.FRAME = { RENDER = -1, TRANSFORM = -1 }
 	self.states = {
@@ -45,14 +45,14 @@ function Node:construct(args)
 		release_on = { can = true, is = false },
 	}
 
-	self.container = args.container or g().ROOM
+	self.container = args.container or game().ROOM
 	self.children = self.children or {}
 
 	if getmetatable(self) == Node then
-		table.insert(g().LIVE.NODE, self)
+		table.insert(game().LIVE.NODE, self)
 	end
-	if not g().STAGE_OBJECT_INTERRUPT then
-		table.insert(g().STAGE_OBJECTS[g().STAGE], self)
+	if not game().STAGE_OBJECT_INTERRUPT then
+		table.insert(game().STAGE_OBJECTS[game().STAGE], self)
 	end
 end
 

@@ -1,6 +1,6 @@
 return function(InputRouter)
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 
 function InputRouter:button_press_update(button, dt)
@@ -16,16 +16,16 @@ function InputRouter:button_press_update(button, dt)
 		if button == "dpright" then self:navigate_focus('R') end
 	end
 
-	if ((self.locked) and not g().SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
+	if ((self.locked) and not game().SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
 	self.frame_buttonpress = true
 
 	local registry = self.button_registry[button]
 	if registry and registry[1] and not registry[1].node.under_overlay then
 		registry[1].click = true
 	else
-		if button == 'start' and g().STATE == g().STATES.SPLASH then
-			g():discard_run()
-			g():open_main_menu()
+		if button == 'start' and game().STATE == game().STATES.SPLASH then
+			game():discard_run()
+			game():open_main_menu()
 		end
 		if button == "a" then
 			-- Focused sliders handle their own activation in pure-controller mode.
@@ -48,7 +48,7 @@ function InputRouter:button_press_update(button, dt)
 end
 
 function InputRouter:button_hold_update(button, dt)
-	if ((self.locked) and not g().SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
+	if ((self.locked) and not game().SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
 	self.frame_buttonpress = true
 
 	if self.held_button_times[button] then
@@ -99,17 +99,17 @@ function InputRouter:key_press_update(key, dt)
 	end
 
 	if key == "escape" then
-		if g().STATE == g().STATES.SPLASH then
-			g():discard_run()
-			g():open_main_menu()
-		elseif not g().OVERLAY_MENU then
+		if game().STATE == game().STATES.SPLASH then
+			game():discard_run()
+			game():open_main_menu()
+		elseif not game().OVERLAY_MENU then
 			shell.dispatch_func("open_options")
-		elseif not g().OVERLAY_MENU.config.no_esc then
+		elseif not game().OVERLAY_MENU.config.no_esc then
 			shell.dispatch_func("close_overlay")
 		end
 	end
 
-	if ((self.locked) and not g().SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
+	if ((self.locked) and not game().SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
 	self.frame_buttonpress = true
 	self.held_key_times[key] = 0
 
@@ -119,8 +119,8 @@ function InputRouter:key_press_update(key, dt)
 end
 
 function InputRouter:key_hold_update(key, dt)
-	if ((self.locked) and not g().SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
-	if self.held_key_times[key] and key == "r" and not g().SETTINGS.paused then
+	if ((self.locked) and not game().SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
+	if self.held_key_times[key] and key == "r" and not game().SETTINGS.paused then
 		if self.held_key_times[key] > 0.7 then
 			if InputRouter._input_actions then
 				InputRouter._input_actions.key_hold(self, key, dt)
@@ -132,7 +132,7 @@ function InputRouter:key_hold_update(key, dt)
 end
 
 function InputRouter:key_release_update(key, dt)
-	if ((self.locked) and not g().SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
+	if ((self.locked) and not game().SETTINGS.paused) or self.locks.frame or self.frame_buttonpress then return end
 	self.frame_buttonpress = true
 	if InputRouter._input_actions then
 		InputRouter._input_actions.key_release(self, key)

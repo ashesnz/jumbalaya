@@ -1,6 +1,6 @@
 --[[ word_game/ui/tutorial/first_play/steps.lua - Apply spotlight steps to the overlay ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local CharacterSpeech = require("word_game.ui.tutorial.character_speech")
 local UIViewHost = require("jumbalaya-engine.panels.view_host")
 local config = require("word_game.ui.tutorial.first_play.config")
@@ -9,21 +9,18 @@ local layout = require("word_game.ui.tutorial.first_play.layout")
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 local function build_selections(step, bubble_ui)
 	local selections = { bubble_ui }
-	if step.spotlight == "hand" and runtime().dealt_letters then
-		selections = { runtime().dealt_letters, bubble_ui }
+	if step.spotlight == "hand" and game().dealt_letters then
+		selections = { game().dealt_letters, bubble_ui }
 	end
 	return selections
 end
 
 function M.apply_current()
 	local step = config.STEPS[session.step_index()]
-	if not step or not runtime().FIRST_PLAY_TUTORIAL_OVERLAY then return end
+	if not step or not game().FIRST_PLAY_TUTORIAL_OVERLAY then return end
 
 	session.clear_bubble()
 
@@ -42,7 +39,7 @@ function M.apply_current()
 	session.set_bubble_ui(bubble_ui)
 	CharacterSpeech.pop_bubble(bubble_ui)
 
-	local overlay = runtime().FIRST_PLAY_TUTORIAL_OVERLAY
+	local overlay = game().FIRST_PLAY_TUTORIAL_OVERLAY
 	overlay.selections = build_selections(step, bubble_ui)
 	overlay.redraw_hand = step.spotlight == "hand" and true or nil
 	overlay.redraw_placement = step.spotlight == "placement" and true or nil

@@ -1,6 +1,6 @@
 
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 --[[
 	app/core/audio/mixer.lua - the mixing engine behind both audio runtimes.
 
@@ -17,7 +17,7 @@ local function g() return shell.game() end
 	  born_paused  started while an overlay was up
 	  state_tag    game state the sound was triggered from
 
-	Requests are plain records; `settings` always carries g().SETTINGS.SOUND.
+	Requests are plain records; `settings` always carries game().SETTINGS.SOUND.
 ]]
 
 local MIXER = {}

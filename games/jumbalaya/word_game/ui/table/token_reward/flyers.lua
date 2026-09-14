@@ -1,6 +1,6 @@
 --[[ word_game/ui/table/token_reward/flyers.lua - Spawn, update, and grant token flyers ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
 local config = require("word_game.ui.table.token_reward.config")
 local session = require("word_game.ui.table.token_reward.session")
@@ -12,9 +12,6 @@ local state = facade.run_state()
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 local function clamp01(t)
 	if t < 0 then return 0 end
@@ -127,7 +124,7 @@ function M.try_award(callback)
 	session.set_fly_route(layout.timeline_center_px(), end_x, end_y)
 
 	if attention then
-		attention("+" .. tostring(amount) .. " tokens", runtime().C.GOLD or { 1, 0.85, 0.35, 1 }, 1.4)
+		attention("+" .. tostring(amount) .. " tokens", game().C.GOLD or { 1, 0.85, 0.35, 1 }, 1.4)
 	end
 	if play_sfx then
 		play_sfx("coin1", 1, 0.75)
@@ -161,12 +158,12 @@ function M.spend_fly(amount, callback)
 	session.set_active(true)
 	session.set_grant_on_land(false)
 	local from_x, from_y = layout.resolve_target_px()
-	local room = runtime() and runtime().ROOM
-	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
-	session.set_fly_route(from_x, from_y, (room and room.T.w or runtime().TILE_W or 20) * ts + 80, from_y - 24)
+	local room = game() and game().ROOM
+	local ts = (game().TILESCALE or 1) * (game().TILESIZE or 1)
+	session.set_fly_route(from_x, from_y, (room and room.T.w or game().TILE_W or 20) * ts + 80, from_y - 24)
 
 	if attention then
-		attention("-" .. tostring(amount) .. " tokens", runtime().C.RED or { 1, 0.35, 0.35, 1 }, 1.2)
+		attention("-" .. tostring(amount) .. " tokens", game().C.RED or { 1, 0.35, 0.35, 1 }, 1.2)
 	end
 	if play_sfx then
 		play_sfx("coin2", 0.9, 0.65)
@@ -175,7 +172,7 @@ end
 
 function M.update(dt)
 	if not session.is_active() then return end
-	dt = dt or (runtime() and runtime().real_dt) or 0.016
+	dt = dt or (game() and game().real_dt) or 0.016
 
 	session.add_spawn_acc(dt)
 	while session.spawned() < session.total() and session.spawn_acc() >= config.STAGGER do

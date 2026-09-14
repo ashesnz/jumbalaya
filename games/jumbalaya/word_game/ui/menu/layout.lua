@@ -1,7 +1,6 @@
 --[[ word_game/ui/menu/layout.lua - Main menu layout and measurement ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local M = {}
 
@@ -13,7 +12,7 @@ local TITLE_LOGO_MIN_SCALE = 0.7
 local STACK_GAP_PX = 20
 
 local function menu_px_to_tiles(px)
-	local ts = (runtime().TILESIZE or 1) * (runtime().TILESCALE or 1)
+	local ts = (game().TILESIZE or 1) * (game().TILESCALE or 1)
 	return px / ts
 end
 
@@ -22,15 +21,15 @@ function M.main_menu_bottom_offset()
 end
 
 function M.main_menu_logo_scale()
-	return 1.1 * (runtime().debug_splash_size_toggle and 0.8 or 1)
+	return 1.1 * (game().debug_splash_size_toggle and 0.8 or 1)
 end
 
 function M.main_menu_title_offset_y()
-	return -(runtime().debug_splash_size_toggle and 2 or 1.2)
+	return -(game().debug_splash_size_toggle and 2 or 1.2)
 end
 
 function M.main_menu_logo_ratio()
-	local logo_atlas = runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES.jumbalaya_base
+	local logo_atlas = game().TEXTURE_ATLASES and game().TEXTURE_ATLASES.jumbalaya_base
 	return logo_atlas and logo_atlas.py and logo_atlas.px
 		and logo_atlas.py / logo_atlas.px or (267 / 933)
 end
@@ -46,7 +45,7 @@ function M.main_menu_title_menu_gap_px()
 end
 
 function M.main_menu_menu_top(menu_h)
-	local room_h = runtime().TILE_H or (runtime().ROOM_ATTACH and runtime().ROOM_ATTACH.T.h) or 11.5
+	local room_h = game().TILE_H or (game().ROOM_ATTACH and game().ROOM_ATTACH.T.h) or 11.5
 	return room_h + M.main_menu_bottom_offset() - menu_h
 end
 
@@ -113,20 +112,20 @@ function M.main_menu_mode_utility_column_alignment(ui, opts)
 end
 
 function M.layout_main_menu_mode_column()
-	if not runtime().MAIN_MENU_UI then return end
-	local row = runtime().MAIN_MENU_UI:find_node_by_id("main_menu_mode_align_row")
+	if not game().MAIN_MENU_UI then return end
+	local row = game().MAIN_MENU_UI:find_node_by_id("main_menu_mode_align_row")
 	if row and row.role then
 		row.role.offset.x = 0
 	end
-	runtime().MAIN_MENU_UI:recalculate()
-	local settings_rect = M.main_menu_button_abs_rect(runtime().MAIN_MENU_UI, "open_settings")
-	local classic_rect = M.main_menu_button_abs_rect(runtime().MAIN_MENU_UI, "main_menu_classic")
+	game().MAIN_MENU_UI:recalculate()
+	local settings_rect = M.main_menu_button_abs_rect(game().MAIN_MENU_UI, "open_settings")
+	local classic_rect = M.main_menu_button_abs_rect(game().MAIN_MENU_UI, "main_menu_classic")
 	if not settings_rect or not classic_rect or not row or not row.role then return end
 	local delta = settings_rect.x - classic_rect.x
 	if math.abs(delta) < 0.01 then return end
 	row.role.offset.x = delta
-	if runtime().MAIN_MENU_UI.root_node and runtime().MAIN_MENU_UI.root_node.move_with_major then
-		runtime().MAIN_MENU_UI.root_node:move_with_major(0)
+	if game().MAIN_MENU_UI.root_node and game().MAIN_MENU_UI.root_node.move_with_major then
+		game().MAIN_MENU_UI.root_node:move_with_major(0)
 	end
 end
 
@@ -212,13 +211,13 @@ function M.main_menu_resolve_logo_layout(menu_h, gap_tiles)
 	local scale = M.main_menu_logo_scale()
 	local min_scale = TITLE_LOGO_MIN_SCALE
 	local min_y = menu_px_to_tiles(TITLE_TOP_MARGIN_PX)
-	local tile_w = runtime().TILE_W or (runtime().ROOM_ATTACH and runtime().ROOM_ATTACH.T.w) or 20
+	local tile_w = game().TILE_W or (game().ROOM_ATTACH and game().ROOM_ATTACH.T.w) or 20
 
 	while scale >= min_scale do
 		local logo_w, logo_h = M.main_menu_logo_dimensions(scale)
 		local menu_top = M.main_menu_menu_top(menu_h)
 		local offset_y = M.main_menu_title_offset_y()
-		local default_y = runtime().TILE_H / 2 - logo_h / 2 + offset_y
+		local default_y = game().TILE_H / 2 - logo_h / 2 + offset_y
 		local max_bottom = menu_top - gap_tiles
 		local y = math.min(default_y, max_bottom - logo_h)
 		y = math.max(y, min_y)
@@ -253,66 +252,66 @@ function M.main_menu_resolve_logo_layout(menu_h, gap_tiles)
 end
 
 function M.main_menu_title_rect()
-	if runtime().title_top and runtime().title_top.T then
+	if game().title_top and game().title_top.T then
 		return {
-			x = runtime().title_top.T.x,
-			y = runtime().title_top.T.y,
-			w = runtime().title_top.T.w,
-			h = runtime().title_top.T.h,
+			x = game().title_top.T.x,
+			y = game().title_top.T.y,
+			w = game().title_top.T.w,
+			h = game().title_top.T.h,
 		}
 	end
-	local menu_h = runtime().MAIN_MENU_UI and runtime().MAIN_MENU_UI.T and runtime().MAIN_MENU_UI.T.h or 0
+	local menu_h = game().MAIN_MENU_UI and game().MAIN_MENU_UI.T and game().MAIN_MENU_UI.T.h or 0
 	local layout = M.main_menu_resolve_logo_layout(menu_h)
 	return { x = layout.x, y = layout.y, w = layout.w, h = layout.h }
 end
 
 function M.main_menu_layout_gap()
-	if not runtime().MAIN_MENU_UI or not runtime().MAIN_MENU_UI.T then return nil end
+	if not game().MAIN_MENU_UI or not game().MAIN_MENU_UI.T then return nil end
 	local title = M.main_menu_title_rect()
 	if not title then return nil end
-	return runtime().MAIN_MENU_UI.T.y - (title.y + title.h)
+	return game().MAIN_MENU_UI.T.y - (title.y + title.h)
 end
 
 function M.layout_main_menu_title()
-	if not runtime().title_top then return end
+	if not game().title_top then return end
 
-	local menu_h = runtime().MAIN_MENU_UI and runtime().MAIN_MENU_UI.T and runtime().MAIN_MENU_UI.T.h or 0
+	local menu_h = game().MAIN_MENU_UI and game().MAIN_MENU_UI.T and game().MAIN_MENU_UI.T.h or 0
 	local layout = M.main_menu_resolve_logo_layout(menu_h)
 
-	runtime().title_top.T.x = layout.x
-	runtime().title_top.T.y = layout.y
-	runtime().title_top.T.w = layout.w
-	runtime().title_top.T.h = layout.h
-	if runtime().title_top.hard_set_T then
-		runtime().title_top:hard_set_T(layout.x, layout.y, layout.w, layout.h)
+	game().title_top.T.x = layout.x
+	game().title_top.T.y = layout.y
+	game().title_top.T.w = layout.w
+	game().title_top.T.h = layout.h
+	if game().title_top.hard_set_T then
+		game().title_top:hard_set_T(layout.x, layout.y, layout.w, layout.h)
 	end
-	runtime().title_top:snap_VT()
+	game().title_top:snap_VT()
 
-	if runtime().SPLASH_LOGO and runtime().SPLASH_LOGO.T then
-		local cx = runtime().title_top.T.x + runtime().title_top.T.w * 0.5
-		local cy = runtime().title_top.T.y + runtime().title_top.T.h * 0.5
-		runtime().SPLASH_LOGO.T.w = layout.w
-		runtime().SPLASH_LOGO.T.h = layout.h
-		if runtime().SPLASH_LOGO.hard_set_T then
-			runtime().SPLASH_LOGO:hard_set_T(cx - layout.w * 0.5, cy - layout.h * 0.5, layout.w, layout.h)
+	if game().SPLASH_LOGO and game().SPLASH_LOGO.T then
+		local cx = game().title_top.T.x + game().title_top.T.w * 0.5
+		local cy = game().title_top.T.y + game().title_top.T.h * 0.5
+		game().SPLASH_LOGO.T.w = layout.w
+		game().SPLASH_LOGO.T.h = layout.h
+		if game().SPLASH_LOGO.hard_set_T then
+			game().SPLASH_LOGO:hard_set_T(cx - layout.w * 0.5, cy - layout.h * 0.5, layout.w, layout.h)
 		end
-		if runtime().SPLASH_LOGO.VT then
-			runtime().SPLASH_LOGO.VT.w = layout.w
-			runtime().SPLASH_LOGO.VT.h = layout.h
+		if game().SPLASH_LOGO.VT then
+			game().SPLASH_LOGO.VT.w = layout.w
+			game().SPLASH_LOGO.VT.h = layout.h
 		end
-		if runtime().SPLASH_LOGO.align_to_major then
-			runtime().SPLASH_LOGO:align_to_major()
+		if game().SPLASH_LOGO.align_to_major then
+			game().SPLASH_LOGO:align_to_major()
 		end
 	end
-	runtime().main_menu_logo_applied_scale = layout.scale
+	game().main_menu_logo_applied_scale = layout.scale
 end
 
 function M.layout_main_menu()
-	if not runtime().MAIN_MENU_UI or not runtime().MAIN_MENU_UI.T then return end
-	runtime().MAIN_MENU_UI.alignment.offset.y = M.main_menu_bottom_offset()
-	runtime().MAIN_MENU_UI:recalculate()
+	if not game().MAIN_MENU_UI or not game().MAIN_MENU_UI.T then return end
+	game().MAIN_MENU_UI.alignment.offset.y = M.main_menu_bottom_offset()
+	game().MAIN_MENU_UI:recalculate()
 	M.layout_main_menu_mode_column()
-	runtime().MAIN_MENU_UI:align_to_major()
+	game().MAIN_MENU_UI:align_to_major()
 	M.layout_main_menu_title()
 end
 

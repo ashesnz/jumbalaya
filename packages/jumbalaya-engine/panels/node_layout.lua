@@ -1,9 +1,9 @@
 
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 return function(Target)
 function LayoutNode:set_wh()
-	local padding = (self.config and self.config.padding) or g().UI.padding
+	local padding = (self.config and self.config.padding) or game().UI.padding
 
 	if next(self.children) == nil or self.config.no_fill then
 		return self.T.w, self.T.h
@@ -23,8 +23,8 @@ function LayoutNode:set_wh()
 		end
 	end
 	for _, w in pairs(self.children) do
-		if w.ui_kind == g().UI.ROW and not w.config.no_stretch then w.T.w = max_w end
-		if w.ui_kind == g().UI.COLUMN and not w.config.no_stretch then w.T.h = max_h end
+		if w.ui_kind == game().UI.ROW and not w.config.no_stretch then w.T.w = max_w end
+		if w.ui_kind == game().UI.COLUMN and not w.config.no_stretch then w.T.h = max_h end
 	end
 
 	return self.T.w, self.T.h
@@ -44,10 +44,10 @@ end
 function LayoutNode:set_alignments()
 	for _, v in pairs(self.children) do
 		if self.config and self.config.align and v.align then
-			local padding = self.config.padding or g().UI.padding
+			local padding = self.config.padding or game().UI.padding
 			-- Leaves center within our full box; containers within our content box.
 			if string.find(self.config.align, 'c') then
-				if v.ui_kind == g().UI.TEXT or v.ui_kind == g().UI.BOX or v.ui_kind == g().UI.OBJECT then
+				if v.ui_kind == game().UI.TEXT or v.ui_kind == game().UI.BOX or v.ui_kind == game().UI.OBJECT then
 					v:align(0, 0.5 * (self.T.h - 2 * padding - v.T.h))
 				else
 					v:align(0, 0.5 * (self.T.h - self.content_dimensions.h))
@@ -84,10 +84,10 @@ function LayoutNode:update_text()
 	end
 
 	if self.config and self.config.text and not self.config.text_drawable then
-		self.config.lang = self.config.lang or g().LANG
+		self.config.lang = self.config.lang or game().LANG
 		local font_obj = self.config.font or (self.config.lang and self.config.lang.font)
 		if love.graphics and love.graphics.newText and font_obj and font_obj.FONT then
-			self.config.text_drawable = love.graphics.newText(font_obj.FONT, {g().C.WHITE, self.config.text})
+			self.config.text_drawable = love.graphics.newText(font_obj.FONT, {game().C.WHITE, self.config.text})
 		end
 	end
 end

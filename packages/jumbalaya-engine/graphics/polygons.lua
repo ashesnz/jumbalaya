@@ -1,20 +1,20 @@
 
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 local M = {}
 
 function M.pointer_triangle(x, y, w, h, vert)
 	local scale = 2
 	if vert then
-		x = x + math.min(0.6 * math.sin(g().TIMERS.REAL * 9) * scale + 0.2, 0)
+		x = x + math.min(0.6 * math.sin(game().TIMERS.REAL * 9) * scale + 0.2, 0)
 		return {
 			x - 3.5 * scale, y + h / 2 - 1.5 * scale,
 			x - 0.5 * scale, y + h / 2,
 			x - 3.5 * scale, y + h / 2 + 1.5 * scale,
 		}
 	end
-	y = y + math.min(0.6 * math.sin(g().TIMERS.REAL * 9) * scale + 0.2, 0)
+	y = y + math.min(0.6 * math.sin(game().TIMERS.REAL * 9) * scale + 0.2, 0)
 	return {
 		x + w / 2 - 1.5 * scale, y - 4 * scale,
 		x + w / 2, y - 1.1 * scale,
@@ -29,7 +29,7 @@ function M.get_speech_bubble_tail(x, y, w, h, kind, reach, along)
 	local scale = 2.4
 	local by = y + h
 	if kind == 'mouth' then
-		local ts = g().TILESIZE or 20
+		local ts = game().TILESIZE or 20
 		local bx = x + w * math.max(0.08, math.min(0.92, along or 0.82))
 		local drop = math.max(0.28, reach or 0.5) * ts
 		return {bx - 1.6 * scale, by, bx + 1.8 * scale, by, bx, by + drop}

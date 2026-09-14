@@ -2,9 +2,8 @@
 
 ---@class (partial) Card : EaseNode
 --- Clears cached ability tooltip UI so it gets rebuilt next time it's shown.
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
-local function runtime() return GameRT.game() end
 
 function Card:remove_UI()
     self.tooltip_info = nil
@@ -52,7 +51,7 @@ function Card:build_card_tooltip()
                     letter_bonus = (self.ability.bonus + (self.ability.perma_bonus or 0)) > 0 and (self.ability.bonus + (self.ability.perma_bonus or 0)) or nil,
                 }
     elseif self.ability.set == 'Companion' then
-        -- Shop/collection companions were removed from runtime().LETTERS.centers.
+        -- Shop/collection companions were removed from game().LETTERS.centers.
     end
     local badges = {}
     if (card_type ~= 'Locked' and card_type ~= 'Undiscovered' and card_type ~= 'Default') or self.debuff then
@@ -100,7 +99,7 @@ end
 function Card:align_h_popup()
         local focused_ui = self.children.focused_ui and true or false
         local popup_direction = (self.children.buy_button or (self.area and self.area.config.view_deck) or (self.area and self.area.config.type == 'shop')) and 'cl' or 
-                                (self.T.y < runtime().CARD_H*0.8) and 'bm' or
+                                (self.T.y < game().CARD_H*0.8) and 'bm' or
                                 'tm'
         return {
             major = self.children.focused_ui or self,
@@ -115,7 +114,7 @@ function Card:align_h_popup()
                     (self.ability.set == 'Perk' and 0.0) or
                     -0.05,
                 y = focused_ui and (
-                            popup_direction == 'tm' and (self.area and self.area == runtime().dealt_letters and -0.08 or-0.15) or
+                            popup_direction == 'tm' and (self.area and self.area == game().dealt_letters and -0.08 or-0.15) or
                             popup_direction == 'bm' and 0.12 or
                             0
                         ) or
@@ -133,7 +132,7 @@ end
 function Card:mark_alert_seen()
     if self.children.alert and not self.config.center.alerted then
         self.config.center.alerted = true
-        runtime():queue_progress_write()
+        game():queue_progress_write()
     end
 end
 
@@ -147,19 +146,19 @@ function Card:hover()
 
     -- The gamepad-focused card gets a persistent highlight frame.
     if self.states.focus.is and not self.children.focused_ui then
-        self.children.focused_ui = runtime().DEFINITIONS.card_focus_ui(self)
+        self.children.focused_ui = game().DEFINITIONS.card_focus_ui(self)
     end
 
-    if self.facing ~= 'front' or self.no_ui or runtime().debug_tooltip_toggle then return end
+    if self.facing ~= 'front' or self.no_ui or game().debug_tooltip_toggle then return end
     self:mark_alert_seen()
 
     -- Letter cards are placed by dragging; no hover popup for them.
     if is_letter then return end
 
-    if not self.states.drag.is or runtime().INPUT.HID.touch then
+    if not self.states.drag.is or game().INPUT.HID.touch then
         if not self.children.h_popup then
             self.tooltip_info = self:build_card_tooltip()
-            self.config.h_popup = runtime().DEFINITIONS.card_h_popup(self)
+            self.config.h_popup = game().DEFINITIONS.card_h_popup(self)
             self.config.h_popup_config = self:align_h_popup()
         end
         SceneNode.hover(self)
@@ -174,13 +173,13 @@ end
 
 function Card:stop_drag()
     SceneNode.stop_drag(self)
-    if self.area == runtime().dealt_letters
+    if self.area == game().dealt_letters
         and WORD_GAME_UI.VoucherDiscard
         and WORD_GAME_UI.VoucherDiscard.try_discard(self) then
         return
     end
-    if runtime().pattern_row then
-        local effects = runtime().pattern_row:try_snap_card(self)
+    if game().pattern_row then
+        local effects = game().pattern_row:try_snap_card(self)
         if effects and effects.hand_shuffle_sync then
             facade.presentation().emit("hand_shuffle_sync")
         end
@@ -202,7 +201,7 @@ end
 
 function Card:click() 
     local is_playing = self.ability and (self.ability.set == 'Default' or self.ability.set == 'Enhanced')
-    if is_playing and runtime().STATE == runtime().STATES.TABLE_BOARD then
+    if is_playing and game().STATE == game().STATES.TABLE_BOARD then
         -- Letter cards are placed by dragging; a click must not raise/select them.
         return
     end
@@ -214,7 +213,7 @@ function Card:click()
             play_sfx('card_slide1', nil, 0.3)
         end
     end
-    if self.area and self.area == runtime().draw_pile and self.area.cards[1] == self then
+    if self.area and self.area == game().draw_pile and self.area.cards[1] == self then
         if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
             WORD_GAME_UI.TableDeck.show_info()
         end

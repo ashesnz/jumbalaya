@@ -1,7 +1,6 @@
 --[[ word_game/ui/perks/stamp/geometry.lua - Stamp panel and cell layout in screen space ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local Layout = require("word_game.ui.layout")
 local stamp_layout = require("word_game.ui.perks.stamp.layout")
@@ -31,8 +30,8 @@ function M.stamp_panel_rect_px(layout_count)
 	if sidebar_view and sidebar_view.find_node_by_id then
 		row = sidebar_view:find_node_by_id("row_stamp_slot")
 	end
-	if not row and runtime().SIDEBAR_HUD and runtime().SIDEBAR_HUD.find_node_by_id then
-		row = runtime().SIDEBAR_HUD:find_node_by_id("row_stamp_slot")
+	if not row and game().SIDEBAR_HUD and game().SIDEBAR_HUD.find_node_by_id then
+		row = game().SIDEBAR_HUD:find_node_by_id("row_stamp_slot")
 	end
 	local rx, ry, rw, rh = node_rect_px(row)
 	if not rx then

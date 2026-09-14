@@ -1,7 +1,6 @@
 --[[ word_game/ui/perks/bonus_stack/layout.lua - Bonus gutter geometry ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local facade = require("word_game.ui.facade")
 local felt = require("word_game.ui.layout.felt")
@@ -15,10 +14,10 @@ M.STACK_Y_LIFT_PX = gutter.STACK_Y_LIFT_PX
 
 local function gameplay_left_edge()
 	local edge
-	if runtime().dealt_letters and runtime().dealt_letters.T then
-		edge = runtime().dealt_letters.T.x
+	if game().dealt_letters and game().dealt_letters.T then
+		edge = game().dealt_letters.T.x
 	end
-	local area = runtime().pattern_row and runtime().pattern_row.area
+	local area = game().pattern_row and game().pattern_row.area
 	if area and area.T then
 		if edge then
 			edge = math.min(edge, area.T.x)

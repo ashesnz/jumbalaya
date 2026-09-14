@@ -3,7 +3,7 @@
 local Node = require("jumbalaya-engine.scene.node")
 
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 ---@class AnimNode : Node
 AnimNode = Node:derive("AnimNode")
@@ -53,9 +53,9 @@ function AnimNode:construct(X, Y, W, H)
 	self.shadow_height = 0.2
 	self:calculate_parallax()
 
-	table.insert(g().TRANSFORMS, self)
+	table.insert(game().TRANSFORMS, self)
 	if getmetatable(self) == AnimNode then
-		table.insert(g().LIVE.TRANSFORM, self)
+		table.insert(game().LIVE.TRANSFORM, self)
 	end
 end
 
@@ -76,7 +76,7 @@ local function remove_from_registry(registry, node)
 end
 
 function AnimNode:remove()
-	for _, registry in ipairs({ g().TRANSFORMS, g().LIVE.TRANSFORM }) do
+	for _, registry in ipairs({ game().TRANSFORMS, game().LIVE.TRANSFORM }) do
 		remove_from_registry(registry, self)
 	end
 	Node.remove(self)

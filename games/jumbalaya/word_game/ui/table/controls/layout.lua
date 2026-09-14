@@ -1,7 +1,6 @@
 --[[ word_game/ui/table/controls/layout.lua - Hand shuffle/play button positioning ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local felt_layout = require("word_game.ui.layout.felt")
 local facade = require("word_game.ui.facade")
@@ -34,9 +33,9 @@ function M.layout_pos_sig()
 	local felt = felt_layout.hand_felt_rect()
 	return string.format(
 		"%.4f|%.4f|%.4f|%.4f|%.4f|%d",
-		runtime().TILE_W or 0,
-		runtime().TILE_H or 0,
-		runtime().CARD_H or 0,
+		game().TILE_W or 0,
+		game().TILE_H or 0,
+		game().CARD_H or 0,
 		felt.x,
 		felt.w,
 		facade.hand_size().get()
@@ -51,10 +50,10 @@ function M.button_anchors()
 	local gap = definition.play_gap()
 	local hand_size = facade.hand_size().get()
 	local hand_w = get_hand_area_width(hand_size)
-	local hand_h = (runtime().CARD_H or 1.4) * 0.95
+	local hand_h = (game().CARD_H or 1.4) * 0.95
 	local felt = felt_layout.hand_felt_rect()
 	local hand_x = felt.x + math.max(0, (felt.w - hand_w) * 0.5)
-	local hand_y = runtime().TILE_H - hand_h - HAND_BOTTOM_MARGIN
+	local hand_y = game().TILE_H - hand_h - HAND_BOTTOM_MARGIN
 	local center_y = hand_y + hand_h * 0.5
 	locked_anchors = {
 		sig = pos_sig,
@@ -68,22 +67,22 @@ end
 
 local function room_center_offset(x, y, size)
 	return {
-		x = x + size * 0.5 - (runtime().TILE_W or 20) * 0.5,
-		y = y + size * 0.5 - (runtime().TILE_H or 11.5) * 0.5,
+		x = x + size * 0.5 - (game().TILE_W or 20) * 0.5,
+		y = y + size * 0.5 - (game().TILE_H or 11.5) * 0.5,
 	}
 end
 
 local function dragging_hand_card()
-	local target = runtime().INPUT and runtime().INPUT.dragging and runtime().INPUT.dragging.target
+	local target = game().INPUT and game().INPUT.dragging and game().INPUT.dragging.target
 	return target and target.states and target.states.drag and target.states.drag.is
-		and target.area == runtime().dealt_letters
+		and target.area == game().dealt_letters
 end
 
 function M.hand_position_drift()
-	if not runtime().dealt_letters then return false end
-	if math.abs((runtime().dealt_letters.VT.x or 0) - (runtime().dealt_letters.T.x or 0)) > SNAP_EPS then return true end
-	if math.abs((runtime().dealt_letters.VT.y or 0) - (runtime().dealt_letters.T.y or 0)) > SNAP_EPS then return true end
-	for _, card in ipairs(runtime().dealt_letters.cards or {}) do
+	if not game().dealt_letters then return false end
+	if math.abs((game().dealt_letters.VT.x or 0) - (game().dealt_letters.T.x or 0)) > SNAP_EPS then return true end
+	if math.abs((game().dealt_letters.VT.y or 0) - (game().dealt_letters.T.y or 0)) > SNAP_EPS then return true end
+	for _, card in ipairs(game().dealt_letters.cards or {}) do
 		if card.states and card.states.drag and card.states.drag.is then
 			goto continue
 		end
@@ -115,19 +114,19 @@ function M.snap_bar(bar)
 end
 
 function M.snap_hand_container()
-	if not runtime().dealt_letters or dragging_hand_card() then return end
-	runtime().dealt_letters:snap_VT()
-	if runtime().dealt_letters.velocity then
-		runtime().dealt_letters.velocity.x = 0
-		runtime().dealt_letters.velocity.y = 0
-		runtime().dealt_letters.velocity.r = 0
-		runtime().dealt_letters.velocity.scale = 0
+	if not game().dealt_letters or dragging_hand_card() then return end
+	game().dealt_letters:snap_VT()
+	if game().dealt_letters.velocity then
+		game().dealt_letters.velocity.x = 0
+		game().dealt_letters.velocity.y = 0
+		game().dealt_letters.velocity.r = 0
+		game().dealt_letters.velocity.scale = 0
 	end
 end
 
 function M.snap_hand_cards()
-	if not runtime().dealt_letters or dragging_hand_card() then return end
-	for _, card in ipairs(runtime().dealt_letters.cards or {}) do
+	if not game().dealt_letters or dragging_hand_card() then return end
+	for _, card in ipairs(game().dealt_letters.cards or {}) do
 		if card.states and card.states.drag and card.states.drag.is then
 			goto continue
 		end
@@ -150,12 +149,12 @@ end
 function M.place_bar(bar, x, y, size)
 	if not bar then return end
 	local offset = room_center_offset(x, y, size)
-	bar.config.major = runtime().ROOM_ATTACH
+	bar.config.major = game().ROOM_ATTACH
 	bar.config.align = "cm"
 	bar.config.offset = offset
 	if bar.set_alignment then
 		bar:set_alignment({
-			major = runtime().ROOM_ATTACH,
+			major = game().ROOM_ATTACH,
 			type = "cm",
 			offset = offset,
 		})
@@ -173,7 +172,7 @@ function M.place_bar(bar, x, y, size)
 end
 
 function M.place_action_bars()
-	if not runtime().ROOM_ATTACH then return end
+	if not game().ROOM_ATTACH then return end
 	local sig = M.layout_pos_sig()
 	if locked_anchors and locked_anchors.sig ~= sig then
 		locked_anchors = nil
@@ -181,16 +180,16 @@ function M.place_action_bars()
 	pos_sig = sig
 	local anchors = M.button_anchors()
 	local size = anchors.size
-	if runtime().table_shuffle_bar and not runtime().table_shuffle_bar.REMOVED then
-		M.place_bar(runtime().table_shuffle_bar, anchors.shuffle_x, anchors.y, size)
+	if game().table_shuffle_bar and not game().table_shuffle_bar.REMOVED then
+		M.place_bar(game().table_shuffle_bar, anchors.shuffle_x, anchors.y, size)
 	end
-	if runtime().hand_action_bar and not runtime().hand_action_bar.REMOVED then
-		M.place_bar(runtime().hand_action_bar, anchors.play_x, anchors.y, size)
+	if game().hand_action_bar and not game().hand_action_bar.REMOVED then
+		M.place_bar(game().hand_action_bar, anchors.play_x, anchors.y, size)
 	end
 end
 
 function M.sync_position()
-	if not runtime().dealt_letters or not runtime().ROOM_ATTACH then return end
+	if not game().dealt_letters or not game().ROOM_ATTACH then return end
 	local sig = M.layout_pos_sig()
 	if sig == pos_sig and locked_anchors then return end
 	locked_anchors = nil
@@ -198,9 +197,9 @@ function M.sync_position()
 end
 
 function M.snap()
-	if not runtime().dealt_letters then return end
-	if (not runtime().hand_action_bar or runtime().hand_action_bar.REMOVED)
-		and (not runtime().table_shuffle_bar or runtime().table_shuffle_bar.REMOVED) then
+	if not game().dealt_letters then return end
+	if (not game().hand_action_bar or game().hand_action_bar.REMOVED)
+		and (not game().table_shuffle_bar or game().table_shuffle_bar.REMOVED) then
 		return
 	end
 	M.sync_position()
@@ -211,29 +210,29 @@ function M.ensure(visible, sync_visibility)
 		M.destroy()
 		return
 	end
-	local has_play = runtime().hand_action_bar
-		and not runtime().hand_action_bar.REMOVED
-		and runtime().hand_action_bar:find_node_by_id("hand_play_button")
-	local has_shuffle = runtime().table_shuffle_bar
-		and not runtime().table_shuffle_bar.REMOVED
-		and runtime().table_shuffle_bar:find_node_by_id("hand_shuffle_button")
+	local has_play = game().hand_action_bar
+		and not game().hand_action_bar.REMOVED
+		and game().hand_action_bar:find_node_by_id("hand_play_button")
+	local has_shuffle = game().table_shuffle_bar
+		and not game().table_shuffle_bar.REMOVED
+		and game().table_shuffle_bar:find_node_by_id("hand_shuffle_button")
 	if has_play and has_shuffle then
 		sync_visibility()
 		return
 	end
-	if runtime().hand_action_bar or runtime().table_shuffle_bar then
+	if game().hand_action_bar or game().table_shuffle_bar then
 		M.destroy()
 	end
 
 	local size = definition.button_size()
 	pos_sig = nil
 	locked_anchors = nil
-	runtime().table_shuffle_bar = TableControlsView.create_shuffle_bar(size)
-	runtime().hand_action_bar = TableControlsView.create_play_bar(size)
+	game().table_shuffle_bar = TableControlsView.create_shuffle_bar(size)
+	game().hand_action_bar = TableControlsView.create_play_bar(size)
 
-	runtime().table_shuffle_button = runtime().table_shuffle_bar
-	runtime().hand_play_button = runtime().hand_action_bar
-	runtime().PLAY_WORD_UI = runtime().hand_action_bar
+	game().table_shuffle_button = game().table_shuffle_bar
+	game().hand_play_button = game().hand_action_bar
+	game().PLAY_WORD_UI = game().hand_action_bar
 
 	M.sync_position()
 	sync_visibility()
@@ -242,18 +241,18 @@ end
 function M.destroy()
 	pos_sig = nil
 	locked_anchors = nil
-	if runtime().table_shuffle_bar then
-		runtime().table_shuffle_bar:remove()
-		runtime().table_shuffle_bar = nil
+	if game().table_shuffle_bar then
+		game().table_shuffle_bar:remove()
+		game().table_shuffle_bar = nil
 	end
-	if runtime().hand_action_bar then
-		runtime().hand_action_bar:remove()
-		runtime().hand_action_bar = nil
+	if game().hand_action_bar then
+		game().hand_action_bar:remove()
+		game().hand_action_bar = nil
 	end
-	runtime().table_shuffle_button = nil
-	runtime().hand_play_button = nil
-	if runtime().PLAY_WORD_UI then
-		runtime().PLAY_WORD_UI = nil
+	game().table_shuffle_button = nil
+	game().hand_play_button = nil
+	if game().PLAY_WORD_UI then
+		game().PLAY_WORD_UI = nil
 	end
 end
 

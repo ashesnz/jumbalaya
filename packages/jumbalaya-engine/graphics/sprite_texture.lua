@@ -1,6 +1,6 @@
 return function(GfxSprite)
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 local sprite_util = require("jumbalaya-engine.graphics.sprite_util")
 
@@ -11,7 +11,7 @@ end
 
 --- Rebinds the atlas by name (after hot-reload / texture-scaling change).
 function GfxSprite:reset()
-	self.atlas = (g().TEXTURE_ATLASES and g().TEXTURE_ATLASES[self.atlas.name]) or self.atlas
+	self.atlas = (game().TEXTURE_ATLASES and game().TEXTURE_ATLASES[self.atlas.name]) or self.atlas
 	self:set_sprite_pos(self.sprite_pos)
 end
 
@@ -62,7 +62,7 @@ end
 
 --- Draws the quad (or video frame) centered in the pushed transform.
 function GfxSprite:draw_texture(overlay)
-	love.graphics.setColor(overlay or g().OVERLAY_TINT or g().C.WHITE)
+	love.graphics.setColor(overlay or game().OVERLAY_TINT or game().C.WHITE)
 
 	if self.video then
 		self.video_dims = self.video_dims or {

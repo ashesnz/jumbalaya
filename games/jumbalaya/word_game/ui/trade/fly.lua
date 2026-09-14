@@ -1,7 +1,6 @@
 --[[ word_game/ui/trade/fly.lua - marketplace card fly-to-deck animation ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local Layout = require("word_game.ui.layout")
 local trade_busy = require("word_game.ui.trade.busy")
@@ -23,9 +22,9 @@ function M.clear()
 end
 
 local function deck_target_px()
-	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
-	if runtime().draw_pile and runtime().draw_pile.T then
-		local t = runtime().draw_pile.T
+	local ts = (game().TILESCALE or 1) * (game().TILESIZE or 1)
+	if game().draw_pile and game().draw_pile.T then
+		local t = game().draw_pile.T
 		return (t.x + (t.w or 0) * 0.5) * ts, (t.y + (t.h or 0) * 0.5) * ts
 	end
 	local rect = Layout.deck_rect()
@@ -33,9 +32,9 @@ local function deck_target_px()
 end
 
 local function room_translate()
-	local room = runtime() and runtime().ROOM
+	local room = game() and game().ROOM
 	if not room or not love or not love.graphics then return end
-	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
+	local ts = (game().TILESCALE or 1) * (game().TILESIZE or 1)
 	love.graphics.translate(room.T.w * ts * 0.5, room.T.h * ts * 0.5)
 	love.graphics.rotate(room.T.r or 0)
 	love.graphics.translate(
@@ -46,25 +45,25 @@ end
 
 local function draw_flyer_card(item, x, y, rot, alpha)
 	if not item then return end
-	local size = math.max(30, (runtime().CARD_W or 1) * (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1))
+	local size = math.max(30, (game().CARD_W or 1) * (game().TILESCALE or 1) * (game().TILESIZE or 1))
 	local LetterFaces = require "word_game.ui.cards.letter_faces"
-	LetterFaces.draw_composite(x, y, rot, size, size * ((runtime().CARD_H or 1) / (runtime().CARD_W or 1)),
+	LetterFaces.draw_composite(x, y, rot, size, size * ((game().CARD_H or 1) / (game().CARD_W or 1)),
 		item.letter, item.color, alpha)
 end
 
 function M.start_card_fly(item, callback, start_x, start_y)
-	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
+	local ts = (game().TILESCALE or 1) * (game().TILESIZE or 1)
 	local sx, sy = start_x, start_y
 	if not sx or not sy then
 		local card = item and item.market_card
 		local transform = card and card.T
-		sx = transform and (transform.x + (transform.w or runtime().CARD_W) * 0.5) * ts
-		sy = transform and (transform.y + (transform.h or runtime().CARD_H) * 0.5) * ts
+		sx = transform and (transform.x + (transform.w or game().CARD_W) * 0.5) * ts
+		sy = transform and (transform.y + (transform.h or game().CARD_H) * 0.5) * ts
 	end
 	if not sx or not sy then
-		local room = runtime().ROOM and runtime().ROOM.T
-		sx = ((room and room.w or runtime().TILE_W or 20) * 0.5) * ts
-		sy = ((room and room.h or runtime().TILE_H or 11) * 0.45) * ts
+		local room = game().ROOM and game().ROOM.T
+		sx = ((room and room.w or game().TILE_W or 20) * 0.5) * ts
+		sy = ((room and room.h or game().TILE_H or 11) * 0.45) * ts
 	end
 	local ex, ey = deck_target_px()
 	flyer = {
@@ -82,7 +81,7 @@ function M.start_card_fly(item, callback, start_x, start_y)
 end
 
 local function fly_delta(dt)
-	dt = dt or (runtime() and runtime().real_dt) or 0.016
+	dt = dt or (game() and game().real_dt) or 0.016
 	if (not dt or dt <= 0) and love and love.timer and love.timer.getDelta then
 		dt = love.timer.getDelta()
 	end
@@ -107,10 +106,10 @@ function M.step_card_fly(dt)
 end
 
 function M.draw_pass()
-	if not flyer or not runtime().ROOM or not love.graphics then return end
+	if not flyer or not game().ROOM or not love.graphics then return end
 	local u = math.min(1, flyer.t / FLY_TIME)
 	local eased = 1 - (1 - u) * (1 - u)
-	local arc = math.sin(u * math.pi) * 0.8 * (runtime().TILESIZE or 1) * (runtime().TILESCALE or 1)
+	local arc = math.sin(u * math.pi) * 0.8 * (game().TILESIZE or 1) * (game().TILESCALE or 1)
 	local x = flyer.landed and flyer.ex or flyer.sx + (flyer.ex - flyer.sx) * eased
 	local y = flyer.landed and flyer.ey or flyer.sy + (flyer.ey - flyer.sy) * eased - arc
 	flyer.rot = flyer.landed and flyer.rot or (math.pi * 0.08) * math.sin(u * math.pi)

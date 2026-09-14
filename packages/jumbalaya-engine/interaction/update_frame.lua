@@ -1,6 +1,6 @@
 local EffectsScheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 
 return function(InputRouter)
@@ -32,7 +32,7 @@ function InputRouter:update_frame(dt)
 	end
 
 	self.overlay_timer = self.overlay_timer or 0
-	if g().OVERLAY_MENU then
+	if game().OVERLAY_MENU then
 		self.overlay_timer = self.overlay_timer + dt
 	else
 		self.overlay_timer = 0
@@ -46,15 +46,15 @@ function InputRouter:update_frame(dt)
 
 	-- Soft cursor sprite visible only for stick-driven pointing.
 	if self.HID.pointer and not (self.HID.mouse or self.HID.touch) and not self.interrupt.focus then
-		g().POINTER.states.visible = true
+		game().POINTER.states.visible = true
 	else
-		g().POINTER.states.visible = false
+		game().POINTER.states.visible = false
 	end
 
 	self:set_cursor_position()
 
 	-- Key/button phase (suppressed during screen wipes).
-	if not g().screenwipe then
+	if not game().screenwipe then
 		for k, v in pairs(self.pressed_keys) do
 			if v then self:key_press_update(k, dt) end
 		end

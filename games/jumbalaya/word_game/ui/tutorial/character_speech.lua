@@ -4,8 +4,7 @@
 	Letters start hidden and appear at full size one-by-one, left to right,
 	with a paper tick — like a typewriter on the white bubble.
 ]]
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 
@@ -31,7 +30,7 @@ local function part_colour(part, vars, default_col)
 	if part.control.V and vars and vars.colours then
 		return vars.colours[tonumber(part.control.V)]
 	end
-	return loc_colour(part.control.C, default_col or runtime().C.UI.TEXT_DARK)
+	return loc_colour(part.control.C, default_col or game().C.UI.TEXT_DARK)
 end
 
 local function hide_letters(dyna)
@@ -73,7 +72,7 @@ end
 
 function M.duration(text_key, loc_vars)
 	loc_vars = loc_vars or {}
-	local loc_target = runtime().localization and runtime().localization.tutorial_parsed and runtime().localization.tutorial_parsed[text_key]
+	local loc_target = game().localization and game().localization.tutorial_parsed and game().localization.tutorial_parsed[text_key]
 	if not loc_target then return 1.4 end
 	local cps = loc_vars.chars_per_sec or M.CHARS_PER_SEC
 	local delay = loc_vars.pop_in_start or 0.02
@@ -92,12 +91,12 @@ end
 
 function M.bubble_definition(text_key, loc_vars)
 	loc_vars = loc_vars or {}
-	local loc_target = runtime().localization.tutorial_parsed[text_key]
+	local loc_target = game().localization.tutorial_parsed[text_key]
 	if not loc_target then
-		return runtime().DEFINITIONS.speech_bubble(text_key, loc_vars)
+		return game().DEFINITIONS.speech_bubble(text_key, loc_vars)
 	end
 
-	local desc_scale = runtime().LANG.font.DESCSCALE
+	local desc_scale = game().LANG.font.DESCSCALE
 	local scale = 0.32 * desc_scale
 	local cps = loc_vars.chars_per_sec or M.CHARS_PER_SEC
 	local row = {}
@@ -119,34 +118,34 @@ function M.bubble_definition(text_key, loc_vars)
 				hide_letters(dyna)
 				delay = type_letters(dyna, delay, cps)
 				line_nodes[#line_nodes + 1] = {
-					n = runtime().UI.OBJECT,
+					n = game().UI.OBJECT,
 					config = { object = dyna },
 				}
 			end
 		end
 		if #line_nodes > 0 then
-			row[#row + 1] = { n = runtime().UI.ROW, config = { align = "cl" }, nodes = line_nodes }
+			row[#row + 1] = { n = game().UI.ROW, config = { align = "cl" }, nodes = line_nodes }
 			delay = delay + M.LINE_GAP
 		end
 	end
 
 	return {
-		n = runtime().UI.ROOT,
+		n = game().UI.ROOT,
 		config = {
 			align = "cm",
 			minw = 1.8,
 			minh = 0.5,
 			padding = 0.16,
 			r = 0.22,
-			colour = runtime().C.WHITE,
+			colour = game().C.WHITE,
 			shadow = true,
 			outline = 1,
-			outline_colour = runtime().C.BLACK,
+			outline_colour = game().C.BLACK,
 			speech_tail = "mouth",
 		},
 		nodes = {
-			{ n = runtime().UI.COLUMN, config = { align = "cl", colour = runtime().C.CLEAR }, nodes = row },
-			{ n = runtime().UI.BOX, config = { h = 0.1, w = 0.01 } },
+			{ n = game().UI.COLUMN, config = { align = "cl", colour = game().C.CLEAR }, nodes = row },
+			{ n = game().UI.BOX, config = { h = 0.1, w = 0.01 } },
 		},
 	}
 end

@@ -1,6 +1,6 @@
 --[[ word_game/ui/menu/animate/garden.lua - Title garden backdrop pan ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 
 local M = {}
 
@@ -13,12 +13,9 @@ local TITLE_GARDEN_PAN = {
 	period_y = 64,
 }
 
-local function runtime()
-	return GameRT.game()
-end
 
 function M.title_garden_sprite_dims(room)
-	room = room or (runtime().ROOM and runtime().ROOM.T) or { w = 20, h = 11 }
+	room = room or (game().ROOM and game().ROOM.T) or { w = 20, h = 11 }
 	return (room.w or 20) + TITLE_GARDEN_EXTRA_W, (room.h or 11) + TITLE_GARDEN_EXTRA_H
 end
 
@@ -31,39 +28,39 @@ function M.title_garden_pan_offset(time)
 end
 
 function M.update_title_garden_pan(dt)
-	local sprite = runtime().SPLASH_BACK
+	local sprite = game().SPLASH_BACK
 	local pan = sprite and sprite.title_garden_pan
 	if type(pan) ~= "table" then return end
 	local off = sprite.alignment and sprite.alignment.offset
 	if not off then return end
-	dt = dt or (runtime() and runtime().real_dt) or 0
+	dt = dt or (game() and game().real_dt) or 0
 	pan.t = (pan.t or 0) + dt
 	off.x, off.y = M.title_garden_pan_offset(pan.t)
 end
 
 function M.setup_title_garden_background()
-	if runtime().SPLASH_BACK then
-		runtime().SPLASH_BACK:remove()
-		runtime().SPLASH_BACK = nil
+	if game().SPLASH_BACK then
+		game().SPLASH_BACK:remove()
+		game().SPLASH_BACK = nil
 	end
 
-	local atlas = runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES.title_garden
+	local atlas = game().TEXTURE_ATLASES and game().TEXTURE_ATLASES.title_garden
 	if not atlas or not atlas.image then return end
 
 	local w, h = M.title_garden_sprite_dims()
-	runtime().SPLASH_BACK = Sprite(-30, -13, w, h, atlas, {x = 0, y = 0})
-	runtime().SPLASH_BACK:set_alignment({
-		major = runtime().ROOM_ATTACH,
+	game().SPLASH_BACK = Sprite(-30, -13, w, h, atlas, {x = 0, y = 0})
+	game().SPLASH_BACK:set_alignment({
+		major = game().ROOM_ATTACH,
 		type = "cm",
 		bond = "Strong",
 		offset = {x = 0, y = 0},
 	})
-	runtime().SPLASH_BACK.title_garden_pan = { t = 0 }
-	if runtime().SPLASH_BACK.align_to_major then
-		runtime().SPLASH_BACK:align_to_major()
+	game().SPLASH_BACK.title_garden_pan = { t = 0 }
+	if game().SPLASH_BACK.align_to_major then
+		game().SPLASH_BACK:align_to_major()
 	end
-	if runtime().SPLASH_BACK.snap_VT then
-		runtime().SPLASH_BACK:snap_VT()
+	if game().SPLASH_BACK.snap_VT then
+		game().SPLASH_BACK:snap_VT()
 	end
 end
 

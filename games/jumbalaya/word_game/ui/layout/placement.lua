@@ -3,8 +3,7 @@
 ]]
 
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local felt = require("word_game.ui.layout.felt")
 local sidebar_layout = require("word_game.ui.sidebar.layout")
@@ -25,18 +24,18 @@ local function snap_moveable(moveable)
 end
 
 function M.card_area_width()
-	if runtime().pattern_row and runtime().pattern_row.area and runtime().pattern_row.area.T and (runtime().pattern_row.area.T.w or 0) > 0 then
-		return runtime().pattern_row.area.T.w
+	if game().pattern_row and game().pattern_row.area and game().pattern_row.area.T and (game().pattern_row.area.T.w or 0) > 0 then
+		return game().pattern_row.area.T.w
 	end
-	local placement_area = runtime().pattern_row and runtime().pattern_row.area
+	local placement_area = game().pattern_row and game().pattern_row.area
 	if placement_area and placement_area.T and (placement_area.T.w or 0) > 0 then
 		return placement_area.T.w
 	end
 	local ok, playout = pcall(require, "word_game.board.placement.layout")
 	if ok and playout and playout.area_width then
 		local pctx = {
-			card_w = function() return runtime().CARD_W or 1.0 end,
-			card_h = function() return runtime().CARD_H or 1.4 end,
+			card_w = function() return game().CARD_W or 1.0 end,
+			card_h = function() return game().CARD_H or 1.4 end,
 			card_limit = function() return facade.hand_size().get() end,
 		}
 		local w = playout.area_width(pctx)
@@ -57,8 +56,8 @@ function M.timeline_rect()
 		h = h,
 		slant = h * 0.88,
 	}
-	runtime().ARGS = runtime().ARGS or {}
-	runtime().ARGS.timeline_rect = rect
+	game().ARGS = game().ARGS or {}
+	game().ARGS.timeline_rect = rect
 	return rect
 end
 
@@ -86,17 +85,17 @@ end
 
 function M.hud_bottom_y()
 	local banner = M.banner_rect()
-	return banner.y + banner.h + runtime().TILE_H * 0.02
+	return banner.y + banner.h + game().TILE_H * 0.02
 end
 
 function M.update_play_attach()
-	if not runtime().PLAY_ATTACH then return end
+	if not game().PLAY_ATTACH then return end
 	local rect = felt.felt_rect()
-	runtime().PLAY_ATTACH.T.x = rect.x
-	runtime().PLAY_ATTACH.T.y = rect.y
-	runtime().PLAY_ATTACH.T.w = rect.w
-	runtime().PLAY_ATTACH.T.h = rect.h
-	runtime().PLAY_ATTACH:hard_set_T(rect.x, rect.y, rect.w, rect.h)
+	game().PLAY_ATTACH.T.x = rect.x
+	game().PLAY_ATTACH.T.y = rect.y
+	game().PLAY_ATTACH.T.w = rect.w
+	game().PLAY_ATTACH.T.h = rect.h
+	game().PLAY_ATTACH:hard_set_T(rect.x, rect.y, rect.w, rect.h)
 end
 
 function M.update_all()
@@ -107,63 +106,63 @@ end
 
 function M.set_screen_positions(opts)
 	opts = opts or {}
-	if runtime().STAGE == runtime().STAGES.RUN and runtime().dealt_letters then
+	if game().STAGE == game().STAGES.RUN and game().dealt_letters then
 		if WORD_GAME_UI.Layout then
 			WORD_GAME_UI.Layout.update_all()
 		end
 		local rect = get_table_felt_rect()
 		local pad_x = rect.w * 0.04
 		local pad_y = rect.h * 0.06
-		if runtime().STATE == runtime().STATES.TABLE_BOARD
+		if game().STATE == game().STATES.TABLE_BOARD
 			and WORD_GAME_UI.Layout and WORD_GAME_UI.Layout.deck_rect then
 			local deck = WORD_GAME_UI.Layout.deck_rect()
-			if runtime().draw_pile and runtime().draw_pile.T then
-			runtime().draw_pile.T.x = deck.x
-			runtime().draw_pile.T.y = deck.y
-			runtime().draw_pile.T.w = deck.w
-			runtime().draw_pile.T.h = deck.h
-			if runtime().draw_pile.hard_set_T then runtime().draw_pile:hard_set_T(deck.x, deck.y, deck.w, deck.h) end
+			if game().draw_pile and game().draw_pile.T then
+			game().draw_pile.T.x = deck.x
+			game().draw_pile.T.y = deck.y
+			game().draw_pile.T.w = deck.w
+			game().draw_pile.T.h = deck.h
+			if game().draw_pile.hard_set_T then game().draw_pile:hard_set_T(deck.x, deck.y, deck.w, deck.h) end
 			end
 			-- Invisible recycle pile; voucher discard dissolves on the perk imprint.
-			if runtime().recycle_stash and runtime().recycle_stash.T then
-				runtime().recycle_stash.T.x = -20
-				runtime().recycle_stash.T.y = -20
-				if runtime().recycle_stash.hard_set_T then
-					runtime().recycle_stash:hard_set_T(-20, -20, runtime().recycle_stash.T.w, runtime().recycle_stash.T.h)
+			if game().recycle_stash and game().recycle_stash.T then
+				game().recycle_stash.T.x = -20
+				game().recycle_stash.T.y = -20
+				if game().recycle_stash.hard_set_T then
+					game().recycle_stash:hard_set_T(-20, -20, game().recycle_stash.T.w, game().recycle_stash.T.h)
 				end
 			end
 		else
-			if runtime().draw_pile and runtime().draw_pile.T then
-				runtime().draw_pile.T.x = rect.x + pad_x
-				runtime().draw_pile.T.y = rect.y + rect.h - runtime().draw_pile.T.h - pad_y
+			if game().draw_pile and game().draw_pile.T then
+				game().draw_pile.T.x = rect.x + pad_x
+				game().draw_pile.T.y = rect.y + rect.h - game().draw_pile.T.h - pad_y
 			end
 		end
 
 		dealt_hand.apply_screen_position()
 
-		if runtime().recycle_stash and runtime().recycle_stash.T
+		if game().recycle_stash and game().recycle_stash.T
 			and not (WORD_GAME_UI.VoucherDiscard and WORD_GAME_UI.VoucherDiscard.uses_table_draw
 				and WORD_GAME_UI.VoucherDiscard.uses_table_draw()) then
-			runtime().recycle_stash.T.x = rect.x + rect.w * 0.5
-			runtime().recycle_stash.T.y = rect.y + rect.h * 0.5
+			game().recycle_stash.T.x = rect.x + rect.w * 0.5
+			game().recycle_stash.T.y = rect.y + rect.h * 0.5
 		end
 
-		if runtime().dealt_letters.snap_VT then runtime().dealt_letters:snap_VT() end
-		snap_moveable(runtime().dealt_letters)
-		snap_moveable(runtime().draw_pile)
-		snap_moveable(runtime().recycle_stash)
-		if runtime().draw_pile and runtime().draw_pile.cards and runtime().draw_pile.cards[1] then
-			if runtime().draw_pile.relayout then runtime().draw_pile:relayout() end
-			if runtime().draw_pile.hard_set_cards then runtime().draw_pile:hard_set_cards() end
+		if game().dealt_letters.snap_VT then game().dealt_letters:snap_VT() end
+		snap_moveable(game().dealt_letters)
+		snap_moveable(game().draw_pile)
+		snap_moveable(game().recycle_stash)
+		if game().draw_pile and game().draw_pile.cards and game().draw_pile.cards[1] then
+			if game().draw_pile.relayout then game().draw_pile:relayout() end
+			if game().draw_pile.hard_set_cards then game().draw_pile:hard_set_cards() end
 		end
 
 		if WORD_GAME_UI.TableControls and not opts.skip_hand_shuffle then
 			WORD_GAME_UI.TableControls.sync()
 		end
-		local placement = runtime().pattern_row and runtime().pattern_row.area
-		if runtime().pattern_row and runtime().pattern_row.apply_screen_position then
-			runtime().pattern_row:apply_screen_position()
-			placement = runtime().pattern_row.area
+		local placement = game().pattern_row and game().pattern_row.area
+		if game().pattern_row and game().pattern_row.apply_screen_position then
+			game().pattern_row:apply_screen_position()
+			placement = game().pattern_row.area
 		end
 
 		if placement then
@@ -175,17 +174,17 @@ function M.set_screen_positions(opts)
 			WORD_GAME_UI.TableControls.mark_layout_settle(4)
 		end
 	end
-	if runtime().STAGE == runtime().STAGES.MAIN_MENU and layout_main_menu then
+	if game().STAGE == game().STAGES.MAIN_MENU and layout_main_menu then
 		layout_main_menu()
 	end
 end
 
 function M.refresh_placement_layout()
-	if runtime().STAGE ~= runtime().STAGES.RUN or not runtime().pattern_row then return end
-	if runtime().pattern_row.apply_screen_position then
-		runtime().pattern_row:apply_screen_position()
+	if game().STAGE ~= game().STAGES.RUN or not game().pattern_row then return end
+	if game().pattern_row.apply_screen_position then
+		game().pattern_row:apply_screen_position()
 	end
-	local placement = runtime().pattern_row.area
+	local placement = game().pattern_row.area
 	if placement then
 		placement:snap_VT()
 		if placement.velocity then

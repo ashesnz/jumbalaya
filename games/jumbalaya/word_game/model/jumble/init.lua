@@ -17,9 +17,13 @@ M.BonusStack = require("word_game.model.jumble.bonus_stack")
 M.PlacementWord = require("word_game.model.jumble.placement_word")
 M.return_bonus_card = require("word_game.model.jumble.bonus_return").return_card
 
-require("word_game.model.jumble.puzzle_spec")(M)
-require("word_game.model.jumble.validation")(M)
-require("word_game.model.jumble.slots")(M)
-require("word_game.model.jumble.hand")(M)
+local puzzle_spec = require("word_game.model.jumble.puzzle_spec")
+for k, v in pairs(puzzle_spec) do M[k] = v end
+local validation = require("word_game.model.jumble.validation")
+for k, v in pairs(validation) do M[k] = v end
+local slots = require("word_game.model.jumble.slots")
+for k, v in pairs(slots) do M[k] = v end
+local hand = require("word_game.model.jumble.hand")
+for k, v in pairs(hand) do M[k] = v end
 
 return M

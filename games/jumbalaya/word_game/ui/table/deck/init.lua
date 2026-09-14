@@ -5,14 +5,13 @@
 ]]
 
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
 local felt = require("word_game.ui.layout.felt")
 local geometry = require("word_game.ui.table.deck.geometry")
 local draw_pass = require("word_game.ui.table.deck.draw_pass")
 local tokens = require("word_game.ui.table.deck.tokens")
 
-local function runtime() return GameRT.game() end
 
 local function deck_mod()
 	return facade.deck()
@@ -64,12 +63,12 @@ function M.update_tokens(dt)
 end
 
 function M.update(dt, area)
-	dt = dt or (runtime() and runtime().real_dt) or 0.016
+	dt = dt or (game() and game().real_dt) or 0.016
 	M.update_tokens(dt)
 end
 
 function M.uses_table_draw()
-	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return false end
+	if game().STATE ~= game().STATES.TABLE_BOARD then return false end
 	if felt.is_boss_sequence() then return false end
 	return true
 end
@@ -91,15 +90,15 @@ function M.draw(area)
 end
 
 function M.show_info()
-	if not M.uses_table_draw() or not runtime().draw_pile then return end
+	if not M.uses_table_draw() or not game().draw_pile then return end
 	spawn_attention({
 		scale = 0.58,
 		text = "Cards left: " .. tostring(deck_mod().cards_left()),
 		hold = 2.0,
 		align = "cm",
-		major = runtime().draw_pile,
+		major = game().draw_pile,
 		offset = { x = 0, y = -0.35 },
-		colour = runtime().C.WHITE,
+		colour = game().C.WHITE,
 	})
 	play_sfx("generic1", 0.88, 0.62)
 end

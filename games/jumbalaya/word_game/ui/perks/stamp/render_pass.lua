@@ -1,7 +1,6 @@
 --[[ word_game/ui/perks/stamp/render_pass.lua - Sidebar stamp draw pass ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local stamp_layout = require("word_game.ui.perks.stamp.layout")
 local stamp_puff = require("word_game.ui.perks.stamp.puff")
@@ -12,7 +11,7 @@ local geometry = require("word_game.ui.perks.stamp.geometry")
 local M = {}
 
 function M.draw_pass()
-	if runtime().STATE ~= runtime().STATES.TABLE_BOARD or not runtime().ROOM or not love.graphics then return end
+	if game().STATE ~= game().STATES.TABLE_BOARD or not game().ROOM or not love.graphics then return end
 
 	local prev_shader = love.graphics.getShader()
 	local cr, cg, cb, ca = love.graphics.getColor()

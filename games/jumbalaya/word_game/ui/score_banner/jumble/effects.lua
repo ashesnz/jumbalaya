@@ -1,6 +1,6 @@
 --[[ word_game/ui/score_banner/jumble/effects.lua - Bounce, spin, burst, layout math ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local Layout = require("word_game.ui.layout")
 local fonts = require("word_game.ui.score_banner.fonts")
 local config = require("word_game.ui.score_banner.jumble.config")
@@ -8,9 +8,6 @@ local ComicBurst = require("word_game.ui.feedback.comic_burst")
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 local function clamp01(t)
 	if t < 0 then return 0 end
@@ -123,14 +120,14 @@ function M.get_multi_growth(cur_multi)
 end
 
 function M.calc_points_to_get_pos(cx, ts)
-	ts = ts or ((runtime() and runtime().TILESCALE or 1) * (runtime() and runtime().TILESIZE or 1))
-	local area = runtime() and runtime().pattern_row and runtime().pattern_row.area
+	ts = ts or ((game() and game().TILESCALE or 1) * (game() and game().TILESIZE or 1))
+	local area = game() and game().pattern_row and game().pattern_row.area
 	local felt = Layout.felt_rect()
 	local card_bottom = (area and area.T and area.T.y and area.T.h)
 		and ((area.T.y + area.T.h) * ts)
 		or ((felt.y + 2.0) * ts)
-	local hand_top = (runtime() and runtime().dealt_letters and runtime().dealt_letters.T and runtime().dealt_letters.T.y)
-		and (runtime().dealt_letters.T.y * ts)
+	local hand_top = (game() and game().dealt_letters and game().dealt_letters.T and game().dealt_letters.T.y)
+		and (game().dealt_letters.T.y * ts)
 		or ((felt.y + felt.h - 2.5) * ts)
 	local gap_cy = (card_bottom + hand_top) * 0.5 - ts * config.POINTS_TO_GET_RAISE
 	return cx or ((felt.x + felt.w * 0.5) * ts), gap_cy

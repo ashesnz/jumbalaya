@@ -1,7 +1,6 @@
 --[[ word_game/ui/trade/animate.lua - Marketplace card transform/remove FX ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local facade = require("word_game.ui.facade")
 local LetterPalette = require("word_game.config.visuals.letter_card_palette")
@@ -79,7 +78,7 @@ local function finish_transform_fx()
 		ctx.finish_trade()
 		return
 	end
-	if runtime().OVERLAY_MENU then
+	if game().OVERLAY_MENU then
 		ctx.refresh_overlay()
 	end
 end
@@ -144,7 +143,7 @@ function M.start_remove_dissolve(item)
 	play_sfx("crumple" .. math.random(1, 5), math.random() * 0.2 + 0.9, 0.5)
 	dissolve_fx().run(card, {
 		duration = 0.7,
-		colours = { runtime().C.BLACK, runtime().C.ORANGE, runtime().C.RED, runtime().C.GOLD },
+		colours = { game().C.BLACK, game().C.ORANGE, game().C.RED, game().C.GOLD },
 		pulse = true,
 		remove = true,
 		on_finish = function()
@@ -167,7 +166,7 @@ function M.start_remove_dissolve(item)
 				ctx.finish_trade()
 				return
 			end
-			if runtime().OVERLAY_MENU then
+			if game().OVERLAY_MENU then
 				ctx.refresh_overlay()
 			end
 		end,

@@ -2,7 +2,7 @@ return function(GfxSprite)
 local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 local sprite_util = require("jumbalaya-engine.graphics.sprite_util")
 
@@ -59,7 +59,7 @@ end
 
 function GfxSprite:draw_projected_texture(target)
 	love.graphics.scale(self:projection_scale(target))
-	love.graphics.setColor(g().OVERLAY_TINT or g().C.WHITE)
+	love.graphics.setColor(game().OVERLAY_TINT or game().C.WHITE)
 	love.graphics.draw(
 		self.atlas.image, self.sprite,
 		self:projection_offset(target), 0, 0,
@@ -84,8 +84,8 @@ end
 
 function GfxSprite:remove()
 	if self.video then self.video:release() end
-	sprite_util.unregister_instance(g().ANIMATIONS, self)
-	sprite_util.unregister_instance(g().LIVE and g().LIVE.SPRITE, self)
+	sprite_util.unregister_instance(game().ANIMATIONS, self)
+	sprite_util.unregister_instance(game().LIVE and game().LIVE.SPRITE, self)
 	AnimNode.remove(self)
 end
 end

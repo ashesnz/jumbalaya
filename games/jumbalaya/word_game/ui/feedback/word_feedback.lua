@@ -4,8 +4,7 @@
 	Outputs: show, show_invalid, show_classic_proceed, show_boss_countdown, flush_pending.
 ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
@@ -26,8 +25,8 @@ function M.spawn_attention(args)
 	args = args or {}
 	args.text = args.text or 'test'
 	args.scale = args.scale or 1
-	args.colour = Tables.deep_clone(args.colour or runtime().C.WHITE)
-	args.hold = (args.hold or 0) + 0.1 * ((runtime() and runtime().TIME_SCALE) or 1)
+	args.colour = Tables.deep_clone(args.colour or game().C.WHITE)
+	args.hold = (args.hold or 0) + 0.1 * ((game() and game().TIME_SCALE) or 1)
 	args.pos = args.pos or { x = 0, y = 0 }
 	args.align = args.align or 'cm'
 	args.emboss = args.emboss or nil
@@ -35,11 +34,11 @@ function M.spawn_attention(args)
 	args.fade = 1
 
 	if args.cover then
-		args.cover_colour = Tables.deep_clone(args.cover_colour or runtime().C.RED)
+		args.cover_colour = Tables.deep_clone(args.cover_colour or game().C.RED)
 		args.cover_colour_l = Tables.deep_clone(Colour.tint(args.cover_colour, 0.2))
 		args.cover_colour_d = Tables.deep_clone(Colour.shade(args.cover_colour, 0.2))
 	else
-		args.cover_colour = Tables.deep_clone(runtime().C.CLEAR)
+		args.cover_colour = Tables.deep_clone(game().C.CLEAR)
 	end
 
 	args.uibox_config = {
@@ -57,8 +56,8 @@ function M.spawn_attention(args)
 			args.AT = UIViewHost.create{
 				T = { args.pos.x, args.pos.y, 0, 0 },
 				definition =
-					{ n = runtime().UI.ROOT, config = { align = args.cover_align or 'cm', minw = (args.cover and args.cover.T.w or 0.001) + (args.cover_padding or 0), minh = (args.cover and args.cover.T.h or 0.001) + (args.cover_padding or 0), padding = 0.03, r = 0.1, emboss = args.emboss, colour = args.cover_colour }, nodes = {
-						{ n = runtime().UI.OBJECT, config = { draw_layer = 1, object = FlowText({ scale = args.scale, string = args.text, maxw = args.maxw, colours = { args.colour }, float = not args.bump, shadow = true, silent = not args.noisy, args.scale, pop_in = 0, pop_in_rate = 6, rotate = args.rotate or nil, bump = args.bump, bump_rate = args.bump_rate, bump_amount = args.bump_amount }) } },
+					{ n = game().UI.ROOT, config = { align = args.cover_align or 'cm', minw = (args.cover and args.cover.T.w or 0.001) + (args.cover_padding or 0), minh = (args.cover and args.cover.T.h or 0.001) + (args.cover_padding or 0), padding = 0.03, r = 0.1, emboss = args.emboss, colour = args.cover_colour }, nodes = {
+						{ n = game().UI.OBJECT, config = { draw_layer = 1, object = FlowText({ scale = args.scale, string = args.text, maxw = args.maxw, colours = { args.colour }, float = not args.bump, shadow = true, silent = not args.noisy, args.scale, pop_in = 0, pop_in_rate = 6, rotate = args.rotate or nil, bump = args.bump, bump_rate = args.bump_rate, bump_amount = args.bump_amount }) } },
 					} },
 				config = args.uibox_config
 			}
@@ -111,10 +110,10 @@ function M.spawn_attention(args)
 		blocking = false,
 		func = function()
 			if not args.start_time then
-				args.start_time = runtime().TIMERS.TOTAL
+				args.start_time = game().TIMERS.TOTAL
 				args.text:pop_out(3)
 			else
-				args.fade = math.max(0, 1 - 3 * (runtime().TIMERS.TOTAL - args.start_time))
+				args.fade = math.max(0, 1 - 3 * (game().TIMERS.TOTAL - args.start_time))
 				if args.cover_colour then args.cover_colour[4] = math.min(args.cover_colour[4], 2 * args.fade) end
 				if args.cover_colour_l then args.cover_colour_l[4] = math.min(args.cover_colour_l[4], args.fade) end
 				if args.cover_colour_d then args.cover_colour_d[4] = math.min(args.cover_colour_d[4], args.fade) end
@@ -131,11 +130,11 @@ function M.spawn_attention(args)
 end
 
 local function placement_area()
-	return runtime().pattern_row and runtime().pattern_row.area
+	return game().pattern_row and game().pattern_row.area
 end
 
 local function hand_dealt_metrics()
-	if not runtime().dealt_letters then return nil end
+	if not game().dealt_letters then return nil end
 
 	local wr = game_access.word_round()
 	local locked = wr and wr.jumble and wr.jumble.locked_hand_layout
@@ -146,13 +145,13 @@ local function hand_dealt_metrics()
 		right = locked.x + locked.w
 		top = locked.y
 		bottom = locked.y + locked.h
-	elseif runtime().dealt_letters.cards and #runtime().dealt_letters.cards > 0 then
-		for _, card in ipairs(runtime().dealt_letters.cards) do
+	elseif game().dealt_letters.cards and #game().dealt_letters.cards > 0 then
+		for _, card in ipairs(game().dealt_letters.cards) do
 			if card and card.T then
 				local cl = card.T.x
-				local cr = card.T.x + (card.T.w or runtime().CARD_W or 1)
+				local cr = card.T.x + (card.T.w or game().CARD_W or 1)
 				local ct = card.T.y
-				local cb = card.T.y + (card.T.h or runtime().CARD_H or 1.4)
+				local cb = card.T.y + (card.T.h or game().CARD_H or 1.4)
 				left = left and math.min(left, cl) or cl
 				right = right and math.max(right, cr) or cr
 				top = top and math.min(top, ct) or ct
@@ -162,11 +161,11 @@ local function hand_dealt_metrics()
 	end
 
 	if not left then
-		if not runtime().dealt_letters.T then return nil end
-		left = runtime().dealt_letters.T.x
-		right = runtime().dealt_letters.T.x + runtime().dealt_letters.T.w
-		top = runtime().dealt_letters.T.y
-		bottom = runtime().dealt_letters.T.y + runtime().dealt_letters.T.h
+		if not game().dealt_letters.T then return nil end
+		left = game().dealt_letters.T.x
+		right = game().dealt_letters.T.x + game().dealt_letters.T.w
+		top = game().dealt_letters.T.y
+		bottom = game().dealt_letters.T.y + game().dealt_letters.T.h
 	end
 
 	local row_w = right - left
@@ -180,19 +179,19 @@ local function hand_dealt_metrics()
 		w = row_w,
 		h = row_h,
 		bottom = bottom,
-		gap_w = math.min(math.max(row_w, runtime().dealt_letters.T.w), felt.w * 0.82),
-		inner_h = math.max(row_h, runtime().dealt_letters.T.h),
+		gap_w = math.min(math.max(row_w, game().dealt_letters.T.w), felt.w * 0.82),
+		inner_h = math.max(row_h, game().dealt_letters.T.h),
 	}
 end
 
 local function hand_gap_metrics()
 	local area = placement_area()
-	if not area or not area.T or not runtime().dealt_letters or not runtime().dealt_letters.T then return nil end
+	if not area or not area.T or not game().dealt_letters or not game().dealt_letters.T then return nil end
 	local felt = get_table_felt_rect()
 	local top = area.T.y + area.T.h
-	local bottom = runtime().dealt_letters.T.y
+	local bottom = game().dealt_letters.T.y
 	if bottom <= top + 0.04 then
-		bottom = top + math.max(0.28, (runtime().CARD_H or 1) * 0.32)
+		bottom = top + math.max(0.28, (game().CARD_H or 1) * 0.32)
 	end
 	local gap = bottom - top
 	local pad = math.max(0.08, gap * 0.22)
@@ -210,7 +209,7 @@ function M.show(text, colour, hold, offset_y)
 	if not gap then
 		if spawn_attention then
 			spawn_attention({ text = text, scale = 0.5, hold = hold or 1.5,
-				align = "cm", colour = colour or runtime().C.RED })
+				align = "cm", colour = colour or game().C.RED })
 		end
 		return
 	end
@@ -222,12 +221,12 @@ function M.show(text, colour, hold, offset_y)
 		maxw = gap.gap_w,
 		hold = hold or 1.5,
 		align = "cm",
-		major = runtime().ROOM_ATTACH,
+		major = game().ROOM_ATTACH,
 		offset = {
-			x = gap.cx - runtime().TILE_W * 0.5,
-			y = gap.cy - runtime().TILE_H * 0.5 + (offset_y or 0),
+			x = gap.cx - game().TILE_W * 0.5,
+			y = gap.cy - game().TILE_H * 0.5 + (offset_y or 0),
 		},
-		colour = colour or runtime().C.RED,
+		colour = colour or game().C.RED,
 	})
 end
 
@@ -245,30 +244,30 @@ function M.show_hand_centered(text, colour, hold, offset_y)
 		maxw = row.gap_w,
 		hold = hold or 1.5,
 		align = "cm",
-		major = runtime().ROOM_ATTACH,
+		major = game().ROOM_ATTACH,
 		offset = {
-			x = row.cx - runtime().TILE_W * 0.5,
-			y = row.cy - runtime().TILE_H * 0.5 + (offset_y or 0),
+			x = row.cx - game().TILE_W * 0.5,
+			y = row.cy - game().TILE_H * 0.5 + (offset_y or 0),
 		},
-		colour = colour or runtime().C.RED,
+		colour = colour or game().C.RED,
 	})
 end
 
 function M.show_screen_centered(text, colour, hold, offset_y)
 	if not spawn_attention then return end
-	local scale = math.min(0.82, math.max(0.48, (runtime().TILE_H or 11) * 0.055))
+	local scale = math.min(0.82, math.max(0.48, (game().TILE_H or 11) * 0.055))
 	spawn_attention({
 		text = text,
 		scale = scale,
-		maxw = (runtime().TILE_W or 20) * 0.72,
+		maxw = (game().TILE_W or 20) * 0.72,
 		hold = hold or 1.2,
 		align = "cm",
-		major = runtime().ROOM_ATTACH,
+		major = game().ROOM_ATTACH,
 		offset = {
 			x = 0,
 			y = offset_y or 0,
 		},
-		colour = colour or runtime().C.GOLD,
+		colour = colour or game().C.GOLD,
 	})
 end
 
@@ -280,9 +279,9 @@ function M.show_boss_countdown(text, hold)
 		scale = 2.6,
 		hold = hold or 0.85,
 		align = "cm",
-		major = runtime().ROOM_ATTACH,
+		major = game().ROOM_ATTACH,
 		offset = { x = 0, y = 0 },
-		colour = runtime().C.GOLD,
+		colour = game().C.GOLD,
 		bump = true,
 		bump_rate = 2.2,
 		bump_amount = 2.4,
@@ -308,28 +307,28 @@ function M.show_above_hand_centered(text, colour, hold, offset_y)
 		maxw = row.gap_w,
 		hold = hold or 1.5,
 		align = "cm",
-		major = runtime().ROOM_ATTACH,
+		major = game().ROOM_ATTACH,
 		offset = {
-			x = row.cx - runtime().TILE_W * 0.5,
-			y = cy - runtime().TILE_H * 0.5 + (offset_y or 0),
+			x = row.cx - game().TILE_W * 0.5,
+			y = cy - game().TILE_H * 0.5 + (offset_y or 0),
 		},
-		colour = colour or runtime().C.RED,
+		colour = colour or game().C.RED,
 	})
 end
 
 function M.show_classic_proceed(opts)
 	opts = opts or {}
-	M.show(RunMode.classic_proceed_message(), runtime().C.RED, opts.hold or 2.8, opts.offset_y or 0.15)
-	local major = (runtime().pattern_row and runtime().pattern_row.area)
-		or runtime().PLAY_ATTACH
-		or runtime().ROOM_ATTACH
+	M.show(RunMode.classic_proceed_message(), game().C.RED, opts.hold or 2.8, opts.offset_y or 0.15)
+	local major = (game().pattern_row and game().pattern_row.area)
+		or game().PLAY_ATTACH
+		or game().ROOM_ATTACH
 	if major and major.pulse then
 		major:pulse(0.35, 0.2)
 	end
 end
 
 function M.show_invalid()
-	M.show(INVALID_WORD_TEXT, runtime().C.RED, 1.6)
+	M.show(INVALID_WORD_TEXT, game().C.RED, 1.6)
 end
 
 function M.is_invalid_reason(reason)
@@ -358,9 +357,9 @@ function M.lock_hand_layout(_wr)
 end
 
 function M.flush_pending()
-	local pending = runtime().ARGS and runtime().ARGS.word_feedback_queue
+	local pending = game().ARGS and game().ARGS.word_feedback_queue
 	if not pending or #pending == 0 then return end
-	runtime().ARGS.word_feedback_queue = nil
+	game().ARGS.word_feedback_queue = nil
 	for _, item in ipairs(pending) do
 		M.show(item.text, item.colour, item.hold, item.offset_y)
 	end

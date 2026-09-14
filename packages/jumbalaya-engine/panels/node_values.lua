@@ -1,6 +1,6 @@
 
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 return function(Target)
 function LayoutNode:set_values(_T, recalculate)
 	if not recalculate or not self.T then
@@ -39,7 +39,7 @@ function LayoutNode:set_values(_T, recalculate)
 		if self.config.object then self.config.object.states.collide.can = self.states.collide.can end
 	end
 
-	if self.ui_kind == g().UI.OBJECT and not self.config.no_role then
+	if self.ui_kind == game().UI.OBJECT and not self.config.no_role then
 		self.config.object:set_role(self.config.role
 			or {role_type = 'Minor', major = self, xy_bond = 'Strong', wh_bond = 'Weak', scale_bond = 'Weak'})
 	end
@@ -48,11 +48,11 @@ function LayoutNode:set_values(_T, recalculate)
 		self.config.prev_value = self.config.ref_table[self.config.ref_value]
 	end
 
-	if self.ui_kind == g().UI.TEXT then self.static_rotation = true end
+	if self.ui_kind == game().UI.TEXT then self.static_rotation = true end
 
 	-- One-shot bounce requested via config (object leaves bounce the object).
 	if self.config.bounce then
-		if self.ui_kind == g().UI.OBJECT then
+		if self.ui_kind == game().UI.OBJECT then
 			self.config.object:pulse(0.5)
 		else
 			self:pulse()
@@ -62,30 +62,30 @@ function LayoutNode:set_values(_T, recalculate)
 
 	-- Sensible default colours per node type.
 	if not self.config.colour then
-		if self.ui_kind == g().UI.ROOT then self.config.colour = g().C.UI.BACKGROUND_DARK end
-		if self.ui_kind == g().UI.TEXT then self.config.colour = g().C.UI.TEXT_LIGHT end
-		if self.ui_kind == g().UI.OBJECT then self.config.colour = g().C.WHITE end
-		if self.ui_kind == g().UI.BOX or self.ui_kind == g().UI.COLUMN or self.ui_kind == g().UI.ROW then
-			self.config.colour = g().C.CLEAR
+		if self.ui_kind == game().UI.ROOT then self.config.colour = game().C.UI.BACKGROUND_DARK end
+		if self.ui_kind == game().UI.TEXT then self.config.colour = game().C.UI.TEXT_LIGHT end
+		if self.ui_kind == game().UI.OBJECT then self.config.colour = game().C.WHITE end
+		if self.ui_kind == game().UI.BOX or self.ui_kind == game().UI.COLUMN or self.ui_kind == game().UI.ROW then
+			self.config.colour = game().C.CLEAR
 		end
 	end
 	if not self.config.outline_colour then
-		if self.ui_kind == g().UI.OBJECT then
+		if self.ui_kind == game().UI.OBJECT then
 			-- Historical quirk: O nodes route their outline default through
 			-- `colour`; preserved because some definitions rely on it.
-			self.config.colour = g().C.UI.OUTLINE_LIGHT
+			self.config.colour = game().C.UI.OUTLINE_LIGHT
 		else
-			self.config.outline_colour = g().C.UI.OUTLINE_LIGHT
+			self.config.outline_colour = game().C.UI.OUTLINE_LIGHT
 		end
 	end
 
 	-- Register gamepad-focus metadata exactly once per element.
 	if self.config.focus_args and not self.config.focus_args.registered then
 		if self.config.focus_args.button then
-			g().INPUT:add_to_registry(self.config.button_UIE or self, self.config.focus_args.button)
+			game().INPUT:add_to_registry(self.config.button_UIE or self, self.config.focus_args.button)
 		end
 		if self.config.focus_args.snap_to then
-			g().INPUT:snap_to{node = self}
+			game().INPUT:snap_to{node = self}
 		end
 		if self.config.focus_args.funnel_to then
 			-- Cross-link with the nearest ancestor advertising funnel_from.
@@ -105,8 +105,8 @@ function LayoutNode:set_values(_T, recalculate)
 	if self.config.force_focus then self.states.collide.can = true end
 
 	if self.config.button_delay and not self.config.button_delay_start then
-		self.config.button_delay_start = g().TIMERS.REAL
-		self.config.button_delay_end = g().TIMERS.REAL + self.config.button_delay
+		self.config.button_delay_start = game().TIMERS.REAL
+		self.config.button_delay_end = game().TIMERS.REAL + self.config.button_delay
 		self.config.button_delay_progress = 0
 	end
 

@@ -1,7 +1,6 @@
 --[[ word_game/ui/sidebar/init.lua - Right-hand match HUD panel ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
@@ -55,20 +54,20 @@ function WordSidebar:ensure()
 		self:destroy()
 		return nil
 	end
-	if runtime().STAGE ~= runtime().STAGES.RUN then return end
+	if game().STAGE ~= game().STAGES.RUN then return end
 	local BridgeRuntime = require("app.runtime")
 	local engine = BridgeRuntime.engine()
 	if engine then
 		views_install.install_sidebar(engine)
 	end
-	if not runtime().ROOM_ATTACH then return end
+	if not game().ROOM_ATTACH then return end
 
 	local view = sidebar_view()
 	if not view then return nil end
 
 	view:ensure_deck_count()
 	view:relayout()
-	runtime().SIDEBAR_HUD = view
+	game().SIDEBAR_HUD = view
 	deck_mod().sync_deck_count_display()
 	sync_hand_controls()
 	hud_definition.sync_end_run_row()
@@ -82,7 +81,7 @@ function WordSidebar:destroy()
 	if view and view.remove then
 		view:remove()
 	end
-	runtime().SIDEBAR_HUD = nil
+	game().SIDEBAR_HUD = nil
 end
 
 function WordSidebar:refresh()
@@ -91,7 +90,7 @@ function WordSidebar:refresh()
 		return
 	end
 	if not sidebar_view() then
-		if runtime().STATE == runtime().STATES.TABLE_BOARD then
+		if game().STATE == game().STATES.TABLE_BOARD then
 			self:ensure()
 		end
 		return
@@ -101,16 +100,16 @@ end
 
 function WordSidebar:draw()
 	if WordSidebar.is_hidden() then return end
-	if runtime().STAGE ~= runtime().STAGES.RUN then return end
+	if game().STAGE ~= game().STAGES.RUN then return end
 	local view = sidebar_view()
 	if not view then
 		self:ensure()
 		view = sidebar_view()
 	end
 	if not view or not view.draw then return end
-	if not runtime().SIDEBAR_ATTACH then return end
+	if not game().SIDEBAR_ATTACH then return end
 	love.graphics.push()
-	runtime().SIDEBAR_ATTACH:translate_container()
+	game().SIDEBAR_ATTACH:translate_container()
 	view:draw()
 	love.graphics.pop()
 end

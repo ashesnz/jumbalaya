@@ -6,7 +6,8 @@
 	Presentation: none
 ]]
 
-return function(M)
+local M = {}
+
 local Jumble = require("word_game.model.jumble")
 local round = require("word_game.model.round")
 local opening_deal = require("word_game.model.jumble_play.opening_deal")
@@ -33,4 +34,4 @@ function M.deal_after_jumble_timeout()
 	opening_deal.deal()
 end
 
-end
+return M

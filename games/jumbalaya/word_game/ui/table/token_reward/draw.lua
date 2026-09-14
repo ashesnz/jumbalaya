@@ -1,6 +1,6 @@
 --[[ word_game/ui/table/token_reward/draw.lua - Coin sticker draw pass ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
 local session = require("word_game.ui.table.token_reward.session")
 local layout = require("word_game.ui.table.token_reward.layout")
@@ -10,22 +10,19 @@ local game_access = facade.game_access()
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 function M.draw_pass()
 	if not session.is_active() and #session.flyers() == 0 then return end
-	if not game_access.get() or not runtime().ROOM then return end
-	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return end
+	if not game_access.get() or not game().ROOM then return end
+	if game().STATE ~= game().STATES.TABLE_BOARD then return end
 
 	flyers.update(math.min(0.05, love.timer and love.timer.getDelta() or 0.016))
 
 	local img, quad, pw, ph = layout.sticker_quad()
 	if not img or not quad then return end
 
-	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
-	local size = math.max(22, runtime().CARD_W * ts * 0.16)
+	local ts = (game().TILESCALE or 1) * (game().TILESIZE or 1)
+	local size = math.max(22, game().CARD_W * ts * 0.16)
 	local scale = size / pw
 
 	local prev_shader = love.graphics.getShader()

@@ -2,7 +2,7 @@
 
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local Layout = require("word_game.ui.layout")
 local felt_layout = require("word_game.ui.layout.felt")
 local boss_word_announce = require("word_game.ui.score_banner.boss_announce")
@@ -12,13 +12,10 @@ local equation = require("word_game.ui.score_banner.draw.equation")
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 function M.draw(sb)
-	if not game_access.get() or not runtime().ROOM then return end
-	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return end
+	if not game_access.get() or not game().ROOM then return end
+	if game().STATE ~= game().STATES.TABLE_BOARD then return end
 
 	local dt = math.min(0.05, love.timer.getDelta())
 	sb.update(dt)
@@ -33,7 +30,7 @@ function M.draw(sb)
 		return
 	end
 
-	local ts = runtime().TILESCALE * runtime().TILESIZE
+	local ts = game().TILESCALE * game().TILESIZE
 	local rect = Layout.banner_rect()
 	local w = rect.w * ts
 	local h = rect.h * ts
@@ -56,7 +53,7 @@ function M.draw(sb)
 	if love.graphics.setLineStyle then love.graphics.setLineStyle("smooth") end
 	if love.graphics.setLineJoin then love.graphics.setLineJoin("bevel") end
 
-	local breathe = helpers.ease_inout((math.sin((runtime().TIMERS.REAL or 0) * math.pi * 2 / 3) * 1.3 + 1) / 2)
+	local breathe = helpers.ease_inout((math.sin((game().TIMERS.REAL or 0) * math.pi * 2 / 3) * 1.3 + 1) / 2)
 	local pulse_s = 1 + sb.pulse_value() * 0.1
 	local cx = x + w * 0.5
 	local cy = mid_y

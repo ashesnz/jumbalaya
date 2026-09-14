@@ -1,6 +1,5 @@
 --[[ word_game/ui/widgets/sliders.lua - Tabs, text input, and on-screen keyboard ]]
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local Components = require "word_game.ui.widgets.components"
 local UIViewHost = require("jumbalaya-engine.panels.view_host")
@@ -9,7 +8,7 @@ local Tables = require("jumbalaya-engine.util.tables")
 
 function make_tab_strip(args)
   args = args or {}
-  args.colour = args.colour or runtime().C.RED
+  args.colour = args.colour or game().C.RED
   args.tab_alignment = args.tab_alignment or 'cm'
   args.opt_callback = args.opt_callback or nil
   args.scale = args.scale or 1
@@ -21,22 +20,22 @@ function make_tab_strip(args)
       label = 'tab 1',
       chosen = true,
       func = nil,
-      tab_definition_function = function() return  {n=runtime().UI.ROOT, config={align = "cm"}, nodes={
-        {n=runtime().UI.TEXT, config={text = 'A', scale = 1, colour = runtime().C.UI.TEXT_LIGHT}}
+      tab_definition_function = function() return  {n=game().UI.ROOT, config={align = "cm"}, nodes={
+        {n=game().UI.TEXT, config={text = 'A', scale = 1, colour = game().C.UI.TEXT_LIGHT}}
       }} end
     },
     {
       label = 'tab 2',
       chosen = false,
-      tab_definition_function = function() return  {n=runtime().UI.ROOT, config={align = "cm"}, nodes={
-        {n=runtime().UI.TEXT, config={text = 'B', scale = 1, colour = runtime().C.UI.TEXT_LIGHT}}
+      tab_definition_function = function() return  {n=game().UI.ROOT, config={align = "cm"}, nodes={
+        {n=game().UI.TEXT, config={text = 'B', scale = 1, colour = game().C.UI.TEXT_LIGHT}}
       }} end
     },
     {
       label = 'tab 3',
       chosen = false,
-      tab_definition_function = function() return  {n=runtime().UI.ROOT, config={align = "cm"}, nodes={
-        {n=runtime().UI.TEXT, config={text = 'C', scale = 1, colour = runtime().C.UI.TEXT_LIGHT}}
+      tab_definition_function = function() return  {n=game().UI.ROOT, config={align = "cm"}, nodes={
+        {n=game().UI.TEXT, config={text = 'C', scale = 1, colour = game().C.UI.TEXT_LIGHT}}
       }} end
     }
   }
@@ -49,14 +48,14 @@ function make_tab_strip(args)
   end
 
   local t =
-  {n=runtime().UI.ROW, config={padding = 0.0, align = "cm", colour = runtime().C.CLEAR}, nodes={
-    {n=runtime().UI.ROW, config={align = "cm", colour = runtime().C.CLEAR}, nodes = {
-      (#args.tabs > 1 and not args.no_shoulders) and {n=runtime().UI.COLUMN, config={minw = 0.7,align = "cm", colour = runtime().C.CLEAR,func = 'set_button_pip', focus_args = {button = 'leftshoulder', type = 'none', orientation = 'cm', scale = 0.7, offset = {x = -0.1, y = 0}}}, nodes = {}} or nil,
-      {n=runtime().UI.COLUMN, config={id = args.no_shoulders and 'no_shoulders' or 'tab_shoulders', ref_table = args, align = "cm", padding = 0.15, group = 1, collideable = true, focus_args = #args.tabs > 1 and {type = 'tab', nav = 'wide',snap_to = args.snap_to_nav, no_loop = args.no_loop} or nil}, nodes=tab_buttons},
-      (#args.tabs > 1 and not args.no_shoulders) and {n=runtime().UI.COLUMN, config={minw = 0.7,align = "cm", colour = runtime().C.CLEAR,func = 'set_button_pip', focus_args = {button = 'rightshoulder', type = 'none', orientation = 'cm', scale = 0.7, offset = {x = 0.1, y = 0}}}, nodes = {}} or nil,
+  {n=game().UI.ROW, config={padding = 0.0, align = "cm", colour = game().C.CLEAR}, nodes={
+    {n=game().UI.ROW, config={align = "cm", colour = game().C.CLEAR}, nodes = {
+      (#args.tabs > 1 and not args.no_shoulders) and {n=game().UI.COLUMN, config={minw = 0.7,align = "cm", colour = game().C.CLEAR,func = 'set_button_pip', focus_args = {button = 'leftshoulder', type = 'none', orientation = 'cm', scale = 0.7, offset = {x = -0.1, y = 0}}}, nodes = {}} or nil,
+      {n=game().UI.COLUMN, config={id = args.no_shoulders and 'no_shoulders' or 'tab_shoulders', ref_table = args, align = "cm", padding = 0.15, group = 1, collideable = true, focus_args = #args.tabs > 1 and {type = 'tab', nav = 'wide',snap_to = args.snap_to_nav, no_loop = args.no_loop} or nil}, nodes=tab_buttons},
+      (#args.tabs > 1 and not args.no_shoulders) and {n=game().UI.COLUMN, config={minw = 0.7,align = "cm", colour = game().C.CLEAR,func = 'set_button_pip', focus_args = {button = 'rightshoulder', type = 'none', orientation = 'cm', scale = 0.7, offset = {x = 0.1, y = 0}}}, nodes = {}} or nil,
     }},
-    {n=runtime().UI.ROW, config={align = args.tab_alignment, padding = args.padding or 0.1, no_fill = true, minh = args.tab_h, minw = args.tab_w}, nodes={
-      {n=runtime().UI.OBJECT, config={id = 'tab_contents', object = UIViewHost.create{definition = args.current.v.tab_definition_function(args.current.v.tab_definition_function_args), config = {offset = {x=0,y=0}}}}}
+    {n=game().UI.ROW, config={align = args.tab_alignment, padding = args.padding or 0.1, no_fill = true, minh = args.tab_h, minw = args.tab_w}, nodes={
+      {n=game().UI.OBJECT, config={id = 'tab_contents', object = UIViewHost.create{definition = args.current.v.tab_definition_function(args.current.v.tab_definition_function_args), config = {offset = {x=0,y=0}}}}}
     }},
   }}
 
@@ -66,8 +65,8 @@ end
 
 function make_text_field(args)
   args = args or {}
-  args.colour = Tables.deep_clone(args.colour) or Tables.deep_clone(runtime().C.BLUE)
-  args.hooked_colour = Tables.deep_clone(args.hooked_colour) or Colour.shade(Tables.deep_clone(runtime().C.BLUE), 0.3)
+  args.colour = Tables.deep_clone(args.colour) or Tables.deep_clone(game().C.BLUE)
+  args.hooked_colour = Tables.deep_clone(args.hooked_colour) or Colour.shade(Tables.deep_clone(game().C.BLUE), 0.3)
   args.w = args.w or 2.5
   args.h = args.h or 0.7
   args.text_scale = args.text_scale or 0.4
@@ -80,20 +79,20 @@ function make_text_field(args)
   local ui_letters = {}
   for i = 1, args.max_length do
     text.letters[i] = (args.ref_table[args.ref_value] and (string.sub(args.ref_table[args.ref_value], i, i) or '')) or ''
-    ui_letters[i] = {n=runtime().UI.TEXT, config={ref_table = text.letters, ref_value = i, scale = args.text_scale, colour = runtime().C.UI.TEXT_LIGHT, id = 'letter_'..i}}
+    ui_letters[i] = {n=game().UI.TEXT, config={ref_table = text.letters, ref_value = i, scale = args.text_scale, colour = game().C.UI.TEXT_LIGHT, id = 'letter_'..i}}
   end
   args.text = text
 
-  local position_text_colour = Colour.tint(Tables.deep_clone(runtime().C.BLUE), 0.4)
+  local position_text_colour = Colour.tint(Tables.deep_clone(game().C.BLUE), 0.4)
 
-  ui_letters[#ui_letters+1] = {n=runtime().UI.TEXT, config={ref_table = args, ref_value = 'current_prompt_text', scale = args.text_scale, colour = Colour.tint(Tables.deep_clone(args.colour), 0.4), id = 'prompt'}}
-  ui_letters[#ui_letters+1] = {n=runtime().UI.BOX, config={r = 0.03,w=0.1, h=0.4, colour = position_text_colour, id = 'position', func = 'pulse_node'}}
+  ui_letters[#ui_letters+1] = {n=game().UI.TEXT, config={ref_table = args, ref_value = 'current_prompt_text', scale = args.text_scale, colour = Colour.tint(Tables.deep_clone(args.colour), 0.4), id = 'prompt'}}
+  ui_letters[#ui_letters+1] = {n=game().UI.BOX, config={r = 0.03,w=0.1, h=0.4, colour = position_text_colour, id = 'position', func = 'pulse_node'}}
 
   local t =
-       {n=runtime().UI.COLUMN, config={align = "cm", draw_layer = 1, colour = runtime().C.CLEAR}, nodes = {
-          {n=runtime().UI.COLUMN, config={id = 'text_input', align = "cm", padding = 0.05, r = 0.1, draw_layer = 2, hover = true, colour = args.colour,minw = args.w, min_h = args.h, button = 'focus_text_field', shadow = true}, nodes={
-            {n=runtime().UI.ROW, config={ref_table = args, padding = 0.05, align = "cm", r = 0.1, colour = runtime().C.CLEAR}, nodes={
-              {n=runtime().UI.ROW, config={ref_table = args, align = "cm", r = 0.1, colour = runtime().C.CLEAR, func = 'text_input'}, nodes=
+       {n=game().UI.COLUMN, config={align = "cm", draw_layer = 1, colour = game().C.CLEAR}, nodes = {
+          {n=game().UI.COLUMN, config={id = 'text_input', align = "cm", padding = 0.05, r = 0.1, draw_layer = 2, hover = true, colour = args.colour,minw = args.w, min_h = args.h, button = 'focus_text_field', shadow = true}, nodes={
+            {n=game().UI.ROW, config={ref_table = args, padding = 0.05, align = "cm", r = 0.1, colour = game().C.CLEAR}, nodes={
+              {n=game().UI.ROW, config={ref_table = args, align = "cm", r = 0.1, colour = game().C.CLEAR, func = 'text_input'}, nodes=
                 ui_letters
               }
             }}
@@ -120,21 +119,21 @@ function make_onscreen_keyboard(args)
           keyboard_button_rows[k][#keyboard_button_rows[k] +1] = make_keyboard_key(c, c == ' ' and 'y' or nil)
       end
   end
-  return {n=runtime().UI.ROOT, config={align = "cm", padding = 15, r = 0.1, colour = {runtime().C.GREY[1], runtime().C.GREY[2], runtime().C.GREY[3],0.7}}, nodes={
-    {n=runtime().UI.COLUMN, config={align = "cm", padding = 0.05, colour = runtime().C.CLEAR}, nodes = {
-      {n=runtime().UI.COLUMN, config={align = "cm", padding = 0.05, colour = runtime().C.BLACK, emboss = 0.05, r = 0.1, mid = true}, nodes = {
-        {n=runtime().UI.ROW, config={align = "cm", padding = 0.05}, nodes = {
-          {n=runtime().UI.COLUMN, config={align = "cm", padding = 0.05, colour = runtime().C.CLEAR}, nodes = {
-              {n=runtime().UI.ROW, config={align = "cm", padding = 0.07, colour = runtime().C.CLEAR}, nodes=keyboard_button_rows[1]},
-              {n=runtime().UI.ROW, config={align = "cm", padding = 0.07, colour = runtime().C.CLEAR}, nodes=keyboard_button_rows[2]},
-              {n=runtime().UI.ROW, config={align = "cm", padding = 0.07, colour = runtime().C.CLEAR}, nodes=keyboard_button_rows[3]},
-              {n=runtime().UI.ROW, config={align = "cm", padding = 0.07, colour = runtime().C.CLEAR}, nodes=keyboard_button_rows[4]},
-              {n=runtime().UI.ROW, config={align = "cm", padding = 0.07, colour = runtime().C.CLEAR}, nodes=keyboard_button_rows[5]}
+  return {n=game().UI.ROOT, config={align = "cm", padding = 15, r = 0.1, colour = {game().C.GREY[1], game().C.GREY[2], game().C.GREY[3],0.7}}, nodes={
+    {n=game().UI.COLUMN, config={align = "cm", padding = 0.05, colour = game().C.CLEAR}, nodes = {
+      {n=game().UI.COLUMN, config={align = "cm", padding = 0.05, colour = game().C.BLACK, emboss = 0.05, r = 0.1, mid = true}, nodes = {
+        {n=game().UI.ROW, config={align = "cm", padding = 0.05}, nodes = {
+          {n=game().UI.COLUMN, config={align = "cm", padding = 0.05, colour = game().C.CLEAR}, nodes = {
+              {n=game().UI.ROW, config={align = "cm", padding = 0.07, colour = game().C.CLEAR}, nodes=keyboard_button_rows[1]},
+              {n=game().UI.ROW, config={align = "cm", padding = 0.07, colour = game().C.CLEAR}, nodes=keyboard_button_rows[2]},
+              {n=game().UI.ROW, config={align = "cm", padding = 0.07, colour = game().C.CLEAR}, nodes=keyboard_button_rows[3]},
+              {n=game().UI.ROW, config={align = "cm", padding = 0.07, colour = game().C.CLEAR}, nodes=keyboard_button_rows[4]},
+              {n=game().UI.ROW, config={align = "cm", padding = 0.07, colour = game().C.CLEAR}, nodes=keyboard_button_rows[5]}
           }},
-          (args.backspace_key or args.return_key) and {n=runtime().UI.COLUMN, config={align = "cm", padding = 0.05, colour = runtime().C.CLEAR}, nodes = {
-              args.backspace_key and {n=runtime().UI.ROW, config={align = "cm", padding = 0.05, colour = runtime().C.CLEAR}, nodes={make_keyboard_key('backspace', 'x')}} or nil,
-              args.return_key and {n=runtime().UI.ROW, config={align = "cm", padding = 0.05, colour = runtime().C.CLEAR}, nodes={make_keyboard_key('return', 'start')}} or nil,
-              {n=runtime().UI.ROW, config={align = "cm", padding = 0.05, colour = runtime().C.CLEAR}, nodes={make_keyboard_key('back', 'b')}}
+          (args.backspace_key or args.return_key) and {n=game().UI.COLUMN, config={align = "cm", padding = 0.05, colour = game().C.CLEAR}, nodes = {
+              args.backspace_key and {n=game().UI.ROW, config={align = "cm", padding = 0.05, colour = game().C.CLEAR}, nodes={make_keyboard_key('backspace', 'x')}} or nil,
+              args.return_key and {n=game().UI.ROW, config={align = "cm", padding = 0.05, colour = game().C.CLEAR}, nodes={make_keyboard_key('return', 'start')}} or nil,
+              {n=game().UI.ROW, config={align = "cm", padding = 0.05, colour = game().C.CLEAR}, nodes={make_keyboard_key('back', 'b')}}
           }} or nil
         }},
       }}

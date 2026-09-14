@@ -1,21 +1,18 @@
 --[[ word_game/ui/sidebar/stage_button/layout.lua - Label metrics and HUD proxy wiring ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local Layout = require("word_game.ui.layout")
 local state = require("word_game.ui.sidebar.stage_button.state")
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 local function widget()
 	return state.widget()
 end
 
 function M.font_metrics()
-	local lang = (runtime() and runtime().LANG) or {}
+	local lang = (game() and game().LANG) or {}
 	local font_obj = lang.font or {}
 	return {
 		face = font_obj.FONT,
@@ -27,13 +24,13 @@ end
 
 function M.text_box_size(text, scale)
 	local metrics = M.font_metrics()
-	local tile = (runtime().TILESIZE or 20) * (runtime().TILESCALE or 1)
+	local tile = (game().TILESIZE or 20) * (game().TILESCALE or 1)
 	local text_w = (metrics.face and metrics.face.getWidth and metrics.face:getWidth(text))
 		or (string.len(text or "") * 10)
 	local text_h = (metrics.face and metrics.face.getHeight and metrics.face:getHeight())
 		or 20
-	local px_w = text_w * metrics.squish * scale * (runtime().TILESCALE or 1) * metrics.font_scale
-	local px_h = text_h * scale * (runtime().TILESCALE or 1) * metrics.font_scale * metrics.height_scale
+	local px_w = text_w * metrics.squish * scale * (game().TILESCALE or 1) * metrics.font_scale
+	local px_h = text_h * scale * (game().TILESCALE or 1) * metrics.font_scale * metrics.height_scale
 	return px_w / tile, px_h / tile
 end
 
@@ -56,15 +53,15 @@ function M.label_scale_for(text)
 end
 
 function M.red_colour()
-	return (runtime() and runtime().C and runtime().C.RED) or { 1, 0, 0.4, 1 }
+	return (game() and game().C and game().C.RED) or { 1, 0, 0.4, 1 }
 end
 
 function M.blue_colour()
-	return (runtime() and runtime().C and runtime().C.BLUE) or { 0.2, 0.5, 1, 1 }
+	return (game() and game().C and game().C.BLUE) or { 0.2, 0.5, 1, 1 }
 end
 
 function M.label_colour()
-	return (runtime() and runtime().C and runtime().C.UI and runtime().C.UI.TEXT_LIGHT) or { 1, 1, 1, 1 }
+	return (game() and game().C and game().C.UI and game().C.UI.TEXT_LIGHT) or { 1, 1, 1, 1 }
 end
 
 local function find_node(uie, id)
@@ -79,8 +76,8 @@ end
 
 function M.button_column()
 	if state.bound_button() then return state.bound_button() end
-	if runtime().SIDEBAR_HUD and runtime().SIDEBAR_HUD.find_node_by_id then
-		return runtime().SIDEBAR_HUD:find_node_by_id("end_run_button")
+	if game().SIDEBAR_HUD and game().SIDEBAR_HUD.find_node_by_id then
+		return game().SIDEBAR_HUD:find_node_by_id("end_run_button")
 	end
 	return nil
 end
@@ -122,7 +119,7 @@ function M.set_display_mode(col, mode, opts)
 	local label = M.label_node(col)
 	if mode == "next" then
 		w.mode = "next"
-		w.panel_colour = opts.panel_colour or (runtime() and runtime().C and runtime().C.BLUE) or M.blue_colour()
+		w.panel_colour = opts.panel_colour or (game() and game().C and game().C.BLUE) or M.blue_colour()
 		w.button_action = "classic_stage_next"
 		M.set_label_text(label, opts.label_text or state.LABEL_NEXT)
 		if label and label.config then
@@ -167,7 +164,7 @@ function M.draw(rect)
 	local w = widget()
 	if not rect or not w.visible then return end
 	if not love or not love.graphics then return end
-	local attach = runtime().SIDEBAR_ATTACH and runtime().SIDEBAR_ATTACH.T
+	local attach = game().SIDEBAR_ATTACH and game().SIDEBAR_ATTACH.T
 	local ox = (attach and attach.x) or 0
 	local oy = (attach and attach.y) or 0
 	local x, y, rw, rh = ox + rect.x, oy + rect.y, rect.w, rect.h
@@ -181,7 +178,7 @@ function M.draw(rect)
 	local scale = M.label_scale_for(w.label_text)
 	local tw, th = M.text_box_size(w.label_text, scale)
 	love.graphics.setColor(M.label_colour())
-	love.graphics.print(w.label_text, (rw - tw) * 0.5, (rh - th) * 0.5, 0, scale * (runtime().TILESCALE or 1))
+	love.graphics.print(w.label_text, (rw - tw) * 0.5, (rh - th) * 0.5, 0, scale * (game().TILESCALE or 1))
 	love.graphics.pop()
 end
 

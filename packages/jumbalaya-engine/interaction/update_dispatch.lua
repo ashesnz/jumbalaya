@@ -1,6 +1,6 @@
 local EffectsScheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 
 return function(InputRouter)
@@ -26,7 +26,7 @@ function InputRouter:update_dispatch(dt)
 	-- Click (word-game hook: cinematic dialogue may swallow the click).
 	if not self.clicked.handled then
 		local clicked = self.clicked.target
-		if g().consume_board_click and g().consume_board_click() then
+		if game().consume_board_click and game().consume_board_click() then
 			self.clicked.handled = true
 		elseif clicked then
 			clicked:click()
@@ -66,7 +66,7 @@ function InputRouter:update_dispatch(dt)
 					mode = 'delayed',
 					blockable = false,
 					blocking = false,
-					delay = g().MIN_HOVER_TIME,
+					delay = game().MIN_HOVER_TIME,
 					func = function()
 						if self.hovering.target and target_id == self.hovering.target.ID then
 							self.hovering.target:hover()

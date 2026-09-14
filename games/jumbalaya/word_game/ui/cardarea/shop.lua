@@ -1,7 +1,6 @@
 --[[ word_game/ui/cardarea/shop.lua - Shop, usable, and title_2 CardPile behaviour ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local M = {}
 
@@ -22,13 +21,13 @@ end
 local function draw_unselected_then_selected(self, v, draw_card_layer)
 	for i = 1, #self.cards do
 		local card = self.cards[i]
-		if card ~= runtime().INPUT.focused.target and not card.selected then
+		if card ~= game().INPUT.focused.target and not card.selected then
 			draw_card_layer(card, v)
 		end
 	end
 	for i = 1, #self.cards do
 		local card = self.cards[i]
-		if card ~= runtime().INPUT.focused.target and card.selected then
+		if card ~= game().INPUT.focused.target and card.selected then
 			draw_card_layer(card, v)
 		end
 	end

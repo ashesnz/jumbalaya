@@ -1,6 +1,6 @@
 
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 --[[
 	app/core/util/scheduler.lua - the timeline: lanes of scheduled tweens.
 
@@ -19,9 +19,9 @@ function Scheduler:construct()
 		badges = {},
 		misc = {},
 	}
-	self.cadence_clock = g().TIMERS.REAL
+	self.cadence_clock = game().TIMERS.REAL
 	self.cadence_step = 1 / 60
-	self.last_tick_at = g().TIMERS.REAL
+	self.last_tick_at = game().TIMERS.REAL
 end
 
 --- Files a Tween onto a lane ('base' by default); non-Tweens are dropped.
@@ -78,8 +78,8 @@ function Scheduler:advance(dt, forced)
 		local blocked = false
 		local i = 1
 		while i <= #lane do
-			g().ARGS.timeline_tick = g().ARGS.timeline_tick or {}
-			local results = g().ARGS.timeline_tick
+			game().ARGS.timeline_tick = game().ARGS.timeline_tick or {}
+			local results = game().ARGS.timeline_tick
 			results.blocking, results.completed, results.time_done, results.pause_skip = false, false, false, false
 
 			if not blocked or not lane[i].blockable then lane[i]:tick(results) end

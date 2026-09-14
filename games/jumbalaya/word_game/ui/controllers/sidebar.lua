@@ -1,7 +1,6 @@
---[[ word_game/ui/controllers/sidebar.lua - Phase 4 sidebar runtime().FUNCS controller ]]
+--[[ word_game/ui/controllers/sidebar.lua - Phase 4 sidebar game().FUNCS controller ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local action_dispatch = require("app.input.action_dispatch")
 

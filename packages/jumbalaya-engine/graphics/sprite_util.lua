@@ -1,6 +1,6 @@
 
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 --[[ app/core/graphics/sprite_util.lua - shared helpers for GfxSprite mixins ]]
 
 local M = {}
@@ -20,8 +20,8 @@ function M.atlas_dimensions(atlas)
 end
 
 function M.shader_for(name)
-	if not g().SHADERS then return nil end
-	return g().SHADERS[name] or g().SHADERS.dissolve
+	if not game().SHADERS then return nil end
+	return game().SHADERS[name] or game().SHADERS.dissolve
 end
 
 return M

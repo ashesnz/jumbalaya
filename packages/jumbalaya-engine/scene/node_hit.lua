@@ -1,7 +1,7 @@
 
 local Geometry = require("jumbalaya-engine.util.geometry")
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 return function(Node)
 	function Node:collides_with_point(point)
 		if not self.container then return end
@@ -14,7 +14,7 @@ return function(Node)
 		local t = self.ARGS.collides_with_point_translation
 		local rot = self.ARGS.collides_with_point_rotation
 
-		local buffer = self.states.hover.is and g().COLLISION_BUFFER or 0
+		local buffer = self.states.hover.is and game().COLLISION_BUFFER or 0
 		p.x, p.y = point.x, point.y
 
 		if self.container ~= self then
@@ -67,7 +67,7 @@ return function(Node)
 	end
 
 	function Node:put_focused_cursor()
-		local units = g().TILESCALE * g().TILESIZE
+		local units = game().TILESCALE * game().TILESIZE
 		return (self.T.x + self.T.w / 2 + self.container.T.x) * units,
 			(self.T.y + self.T.h / 2 + self.container.T.y) * units
 	end

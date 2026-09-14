@@ -5,7 +5,7 @@
 ]]
 
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 ---@class InputService
 local InputService = {}
@@ -44,9 +44,9 @@ end
 
 function InputService:on_pointer_down(x, y)
 	local result = { hit = false, x = x, y = y }
-	if g() and g().INPUT and g().INPUT.hover_state and g().INPUT.hover_state.target then
+	if game() and game().INPUT and game().INPUT.hover_state and game().INPUT.hover_state.target then
 		result.hit = true
-		result.target = g().INPUT.hover_state.target
+		result.target = game().INPUT.hover_state.target
 	end
 	return result
 end

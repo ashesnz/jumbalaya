@@ -7,8 +7,7 @@
 
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
-local GameRT = require("word_game.ui.util.game_runtime")
-local function runtime() return GameRT.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local Layout = require("word_game.ui.layout")
 local fonts = require("word_game.ui.score_banner.fonts")
@@ -49,9 +48,9 @@ local function hsv_to_rgb(h, s, v)
 end
 
 local function room_translate()
-	local room = runtime().ROOM
+	local room = game().ROOM
 	if not room then return end
-	local ts = runtime().TILESCALE * runtime().TILESIZE
+	local ts = game().TILESCALE * game().TILESIZE
 	love.graphics.translate(room.T.w * ts * 0.5, room.T.h * ts * 0.5)
 	love.graphics.rotate(room.T.r)
 	love.graphics.translate(
@@ -61,7 +60,7 @@ local function room_translate()
 end
 
 local function pixels_per_tile()
-	local px = (runtime().TILESIZE or 1) * (runtime().TILESCALE or 1)
+	local px = (game().TILESIZE or 1) * (game().TILESCALE or 1)
 	return px > 0 and px or REF_TILE_PX
 end
 
@@ -103,7 +102,7 @@ end
 local function stack_layout_pixels()
 	local stack = stack_layout_tiles()
 	if not stack then return nil end
-	local ts = runtime().TILESCALE * runtime().TILESIZE
+	local ts = game().TILESCALE * game().TILESIZE
 	return {
 		cx = stack.cx * ts,
 		w = stack.w * ts,
@@ -114,7 +113,7 @@ local function stack_layout_pixels()
 end
 
 local function ribbon_texture_size()
-	local atlas = runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES.boss_banner
+	local atlas = game().TEXTURE_ATLASES and game().TEXTURE_ATLASES.boss_banner
 	if atlas and atlas.image and atlas.image.getDimensions then
 		return atlas.image:getDimensions()
 	end
@@ -195,7 +194,7 @@ end
 function M.measure_stack()
 	local stack = stack_layout_tiles()
 	if not stack then return nil end
-	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
+	local ts = (game().TILESCALE or 1) * (game().TILESIZE or 1)
 	local img_w_px, _, iw, ih = ribbon_size({ w = stack.w * ts, h = stack.h * ts })
 	local img_w = img_w_px / ts
 	local origin = ribbon_content_origin(iw, ih)
@@ -311,7 +310,7 @@ local function draw_banner(banner, stack, img_w, img_h)
 	love.graphics.translate(stack.cx, cy)
 
 	local band_l, band_r, band_cx = nil, nil, nil
-	local atlas = runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES.boss_banner
+	local atlas = game().TEXTURE_ATLASES and game().TEXTURE_ATLASES.boss_banner
 	if atlas and atlas.image and love.graphics.draw then
 		local iw, ih = atlas.image:getDimensions()
 		local origin = ribbon_content_origin(iw, ih)
@@ -339,7 +338,7 @@ local function draw_banner(banner, stack, img_w, img_h)
 		love.graphics.intersectScissor(
 			math.min(x1, x2), math.min(y1, y2),
 			math.abs(x2 - x1), math.abs(y2 - y1))
-		local hr, hg, hb = hsv_to_rgb(((runtime().TIMERS.REAL or 0) * 1.2) % 1, 0.35, 1)
+		local hr, hg, hb = hsv_to_rgb(((game().TIMERS.REAL or 0) * 1.2) % 1, 0.35, 1)
 		love.graphics.setColor(hr, hg, hb, 0.92)
 		love.graphics.print(msg, -msg_tw * 0.5, -msg_th * 0.5)
 		if psx then
@@ -353,8 +352,8 @@ local function draw_banner(banner, stack, img_w, img_h)
 end
 
 function M.draw()
-	if not M.is_active() or not game_access.get() or not runtime().ROOM then return end
-	if runtime().STATE ~= runtime().STATES.TABLE_BOARD then return end
+	if not M.is_active() or not game_access.get() or not game().ROOM then return end
+	if game().STATE ~= game().STATES.TABLE_BOARD then return end
 
 	local stack = stack_layout_pixels()
 	if not stack then return end

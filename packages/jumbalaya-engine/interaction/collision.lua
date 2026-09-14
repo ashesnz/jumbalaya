@@ -1,7 +1,7 @@
 return function(InputRouter)
 local Tables = require("jumbalaya-engine.util.tables")
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 
 function InputRouter:get_cursor_collision(cursor_trans)
@@ -17,14 +17,14 @@ function InputRouter:get_cursor_collision(cursor_trans)
 	end
 
 	-- Early-out: nothing drawn, or cursor outside the padded room rect.
-	if not g().HIT_ORDER[1]
-		or cursor_trans.x - g().ROOM.T.x < -g().DRAW_HASH_BUFF or cursor_trans.x - g().ROOM.T.x > g().TILE_W + g().DRAW_HASH_BUFF
-		or cursor_trans.y - g().ROOM.T.y < -g().DRAW_HASH_BUFF or cursor_trans.y - g().ROOM.T.y > g().TILE_H + g().DRAW_HASH_BUFF then
+	if not game().HIT_ORDER[1]
+		or cursor_trans.x - game().ROOM.T.x < -game().DRAW_HASH_BUFF or cursor_trans.x - game().ROOM.T.x > game().TILE_W + game().DRAW_HASH_BUFF
+		or cursor_trans.y - game().ROOM.T.y < -game().DRAW_HASH_BUFF or cursor_trans.y - game().ROOM.T.y > game().TILE_H + game().DRAW_HASH_BUFF then
 		return
 	end
 
-	for i = #g().HIT_ORDER, 1, -1 do
-		local v = g().HIT_ORDER[i]
+	for i = #game().HIT_ORDER, 1, -1 do
+		local v = game().HIT_ORDER[i]
 		if v and v.collides_with_point and v:collides_with_point(cursor_trans) and not v.REMOVED then
 			self.nodes_at_cursor[#self.nodes_at_cursor + 1] = v
 			if v.states and v.states.collide and v.states.collide.can then
@@ -36,20 +36,20 @@ function InputRouter:get_cursor_collision(cursor_trans)
 end
 
 --- Picks this frame's hover candidate from the collision list (or the
---- gamepad-focus target). Falls back to g().ROOM under locks/interrupts.
+--- gamepad-focus target). Falls back to game().ROOM under locks/interrupts.
 function InputRouter:set_cursor_hover()
 	self.hover_state.T = self.hover_state.T or {}
-	self.hover_state.T.x, self.hover_state.T.y = g().POINTER.T.x, g().POINTER.T.y
-	self.hover_state.time = g().TIMERS.TOTAL
+	self.hover_state.T.x, self.hover_state.T.y = game().POINTER.T.x, game().POINTER.T.y
+	self.hover_state.time = game().TIMERS.TOTAL
 
 	self.hover_state.prev_target = self.hover_state.target
 	self.hover_state.target = nil
 
 	if self.interrupt.focus
-		or ((self.locked) and (not g().SETTINGS.paused or g().screenwipe))
+		or ((self.locked) and (not game().SETTINGS.paused or game().screenwipe))
 		or self.locks.frame
 		or self.COYOTE_FOCUS then
-		self.hover_state.target = g().ROOM
+		self.hover_state.target = game().ROOM
 		return
 	end
 
@@ -75,7 +75,7 @@ function InputRouter:set_cursor_hover()
 	end
 
 	if not self.hover_state.target or (self.dragging.target and not self.HID.touch) then
-		self.hover_state.target = g().ROOM
+		self.hover_state.target = game().ROOM
 	end
 	if self.hover_state.target ~= self.hover_state.prev_target then
 		self.hover_state.handled = false

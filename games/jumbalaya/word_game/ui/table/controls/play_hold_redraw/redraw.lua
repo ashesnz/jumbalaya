@@ -1,6 +1,6 @@
 --[[ word_game/ui/table/controls/play_hold_redraw/redraw.lua - Discard hand and deal replacements ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 local facade = require("word_game.ui.facade")
 local Random = require("jumbalaya-engine.util.random")
@@ -9,9 +9,6 @@ local state = require("word_game.ui.table.controls.play_hold_redraw.state")
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 local function safe_sound(name, pitch, vol)
 	if type(play_sfx) == "function" then
@@ -27,11 +24,11 @@ local function refresh_card_input()
 	if WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
 		WORD_GAME_UI.TableInput.refresh_card_input()
 	else
-		if runtime().dealt_letters and runtime().dealt_letters.set_ranks then
-			runtime().dealt_letters:set_ranks()
+		if game().dealt_letters and game().dealt_letters.set_ranks then
+			game().dealt_letters:set_ranks()
 		end
-		if runtime().pattern_row and runtime().pattern_row.area and runtime().pattern_row.area.set_ranks then
-			runtime().pattern_row.area:set_ranks()
+		if game().pattern_row and game().pattern_row.area and game().pattern_row.area.set_ranks then
+			game().pattern_row.area:set_ranks()
 		end
 	end
 end
@@ -46,8 +43,8 @@ function M.finish_redraw()
 	state.set_animating(false)
 	state.set_block_click(true)
 	refresh_card_input()
-	if runtime().dealt_letters and runtime().dealt_letters.relayout then
-		runtime().dealt_letters:relayout()
+	if game().dealt_letters and game().dealt_letters.relayout then
+		game().dealt_letters:relayout()
 	end
 	if WORD_GAME_UI.TableControls then
 		WORD_GAME_UI.TableControls.sync()
@@ -55,7 +52,7 @@ function M.finish_redraw()
 end
 
 function M.discard_hand_down(on_complete, constants)
-	if not runtime().TIMELINE then
+	if not game().TIMELINE then
 		if on_complete then on_complete() end
 		return 0
 	end
@@ -63,8 +60,8 @@ function M.discard_hand_down(on_complete, constants)
 	recall_placement_cards()
 
 	local cards_to_discard = {}
-	if runtime().dealt_letters and runtime().dealt_letters.cards then
-		for _, card in ipairs(runtime().dealt_letters.cards) do
+	if game().dealt_letters and game().dealt_letters.cards then
+		for _, card in ipairs(game().dealt_letters.cards) do
 			cards_to_discard[#cards_to_discard + 1] = card
 		end
 	end
@@ -75,7 +72,7 @@ function M.discard_hand_down(on_complete, constants)
 		return 0
 	end
 
-	local target_offscreen_y = (runtime().ROOM and (runtime().ROOM.T.y + runtime().ROOM.T.h) or 11) + 2.5
+	local target_offscreen_y = (game().ROOM and (game().ROOM.T.y + game().ROOM.T.h) or 11) + 2.5
 	local stagger = constants.DISCARD_STAGGER
 
 	for i, card in ipairs(cards_to_discard) do
@@ -83,8 +80,8 @@ function M.discard_hand_down(on_complete, constants)
 			mode = "delayed",
 			delay = stagger * (i - 1),
 			func = function()
-				if card.area == runtime().dealt_letters then
-					runtime().dealt_letters:remove_card(card)
+				if card.area == game().dealt_letters then
+					game().dealt_letters:remove_card(card)
 				end
 				if card.T then
 					card.T.y = target_offscreen_y
@@ -106,17 +103,17 @@ function M.discard_hand_down(on_complete, constants)
 		blocking = true,
 		func = function()
 			for _, card in ipairs(cards_to_discard) do
-				if runtime().draw_pile then
-					runtime().draw_pile:emplace(card)
+				if game().draw_pile then
+					game().draw_pile:emplace(card)
 				end
 			end
-			if runtime().draw_pile then
-				runtime().draw_pile:shuffle("play_hold_redraw")
-				runtime().draw_pile:hard_set_T()
+			if game().draw_pile then
+				game().draw_pile:shuffle("play_hold_redraw")
+				game().draw_pile:hard_set_T()
 			end
-			if runtime().dealt_letters then
-				runtime().dealt_letters:relayout()
-				runtime().dealt_letters:hard_set_cards()
+			if game().dealt_letters then
+				game().dealt_letters:relayout()
+				game().dealt_letters:hard_set_cards()
 			end
 			if on_complete then
 				on_complete()

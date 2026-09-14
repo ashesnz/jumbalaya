@@ -1,6 +1,6 @@
 --[[ word_game/ui/play_effects/animate/jumble_next.lua - Puzzle advance animation ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local jumble_fixed_letters = require("word_game.ui.table.jumble_fixed_letters")
 local Easing = require "word_game.ui.effects.easing"
 local definition = require("word_game.ui.play_effects.definition")
@@ -8,12 +8,9 @@ local context = require("word_game.ui.play_effects.animate.context")
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 local function has_event_manager()
-	return runtime().TIMELINE and runtime().TIMELINE.enqueue
+	return game().TIMELINE and game().TIMELINE.enqueue
 end
 
 function M.present_jumble_next(jumble, wr, opts)

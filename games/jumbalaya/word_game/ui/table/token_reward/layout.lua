@@ -1,19 +1,16 @@
 --[[ word_game/ui/table/token_reward/layout.lua - Fly path geometry and sticker quad ]]
 
-local GameRT = require("word_game.ui.util.game_runtime")
+local game = require("word_game.ui.util.game_runtime").game
 local Layout = require("word_game.ui.layout")
 local config = require("word_game.ui.table.token_reward.config")
 
 local M = {}
 
-local function runtime()
-	return GameRT.game()
-end
 
 function M.room_translate()
-	local room = runtime() and runtime().ROOM
+	local room = game() and game().ROOM
 	if not room or not love or not love.graphics then return end
-	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
+	local ts = (game().TILESCALE or 1) * (game().TILESIZE or 1)
 	love.graphics.translate(room.T.w * ts * 0.5, room.T.h * ts * 0.5)
 	love.graphics.rotate(room.T.r or 0)
 	love.graphics.translate(
@@ -23,7 +20,7 @@ function M.room_translate()
 end
 
 function M.timeline_center_px()
-	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
+	local ts = (game().TILESCALE or 1) * (game().TILESIZE or 1)
 	local rect = Layout.timeline_rect()
 	local w = rect.w * ts
 	local h = rect.h * ts
@@ -34,17 +31,17 @@ function M.timeline_center_px()
 end
 
 function M.resolve_target_px()
-	if runtime().draw_pile and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.token_center_px then
-		local cx, cy = WORD_GAME_UI.TableDeck.token_center_px(runtime().draw_pile)
+	if game().draw_pile and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.token_center_px then
+		local cx, cy = WORD_GAME_UI.TableDeck.token_center_px(game().draw_pile)
 		if cx and cy then return cx, cy end
 	end
 	local deck = Layout.deck_rect()
-	local ts = (runtime().TILESCALE or 1) * (runtime().TILESIZE or 1)
+	local ts = (game().TILESCALE or 1) * (game().TILESIZE or 1)
 	return (deck.x + deck.w * 0.5) * ts, deck.y * ts
 end
 
 function M.sticker_quad()
-	local atlas = runtime().TEXTURE_ATLASES and runtime().TEXTURE_ATLASES.coin
+	local atlas = game().TEXTURE_ATLASES and game().TEXTURE_ATLASES.coin
 	if not atlas or not atlas.image then return end
 	local iw, ih = atlas.image:getDimensions()
 	local px, py = atlas.px or iw, atlas.py or ih

@@ -1,6 +1,6 @@
 --[[ app/core/input/card_focus.lua - Optional TABLE_BOARD card-focus hooks (installed at boot) ]]
 local shell = require("jumbalaya-engine.shell")
-local function g() return shell.game() end
+local game = shell.game
 
 
 local M = {
@@ -29,7 +29,7 @@ end
 function M.hand_area()
 	local fn = M.hooks.hand_area
 	if fn then return fn() end
-	for _, value in pairs(g()) do
+	for _, value in pairs(game()) do
 		if type(value) == "table" and value.is_kind and value:is_kind(CardPile)
 			and value.config and value.config.type == 'hand' then
 			return value
