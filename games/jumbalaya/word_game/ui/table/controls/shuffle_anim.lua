@@ -6,7 +6,7 @@ local piles = facade.piles()
 local game = require("word_game.ui.util.game_runtime").game
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
-local runtime = require("app.runtime")
+local bridge = require("app.runtime")
 
 local M = {}
 
@@ -16,6 +16,7 @@ local SHUFFLE_DURATION = 0.44
 local STAGGER = 0.034
 local LIFT_FRAC = 0.07
 
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 function M.is_animating()
 	return animating
 end
@@ -186,7 +187,7 @@ function M.animate(hand, on_complete)
 			hand:snap_VT()
 			hand:hard_set_cards()
 			set_animating(false)
-			local store = runtime.store()
+			local store = bridge.store()
 			if store then
 				piles.release_static_chrome(store, { "hand" })
 			end

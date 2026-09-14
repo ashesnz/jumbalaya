@@ -3,75 +3,75 @@
 local BridgeRuntime = require("app.runtime")
 local function game_access() return BridgeRuntime.game_access() end
 local Funcs = require("app.callbacks.funcs")
-local function g() return BridgeRuntime.game() end
+local function game() return BridgeRuntime.game() end
 
 local M = {}
 
 function M.key_press(controller, key)
     if not _RELEASE_MODE then
-        if key == 'tab' and not g().debug_tools then
-            g().debug_panel = g().debug_panel or DEVTOOLS.DebugPanel(g())
-            g().debug_panel:open()
+        if key == 'tab' and not game().debug_tools then
+            game().debug_panel = game().debug_panel or DEVTOOLS.DebugPanel(game())
+            game().debug_panel:open()
         end
         if key == 'h' then
-            g().debug_UI_toggle = not g().debug_UI_toggle
-        elseif key == 'b' and g().STATE ~= g().STATES.TABLE_BOARD then
-            g():discard_run()
-            g():start_run({})
+            game().debug_UI_toggle = not game().debug_UI_toggle
+        elseif key == 'b' and game().STATE ~= game().STATES.TABLE_BOARD then
+            game():discard_run()
+            game():start_run({})
         elseif key == 'l' then
-            g():discard_run()
-            g().STORED_RUN = read_save_payload(g().SETTINGS.profile..'/'..'save.acs')
-            if g().STORED_RUN ~= nil then g().STORED_RUN = unpack_source(g().STORED_RUN) end
-            g():start_run({savetext = g().STORED_RUN})
+            game():discard_run()
+            game().STORED_RUN = read_save_payload(game().SETTINGS.profile..'/'..'save.acs')
+            if game().STORED_RUN ~= nil then game().STORED_RUN = unpack_source(game().STORED_RUN) end
+            game():start_run({savetext = game().STORED_RUN})
         elseif key == 'j' then
-            g().debug_splash_size_toggle = not g().debug_splash_size_toggle
-            g():discard_run()
-            g():open_main_menu('splash')
+            game().debug_splash_size_toggle = not game().debug_splash_size_toggle
+            game():discard_run()
+            game():open_main_menu('splash')
         elseif key == '8' then
             love.mouse.setVisible(not love.mouse.isVisible())
         elseif key == '9' then
-            g().debug_tooltip_toggle = not g().debug_tooltip_toggle
+            game().debug_tooltip_toggle = not game().debug_tooltip_toggle
         elseif key == 'v' then
-            if not g().prof then
-                g().prof = require 'devtools/profiler'
-                g().prof.start()
+            if not game().prof then
+                game().prof = require 'devtools/profiler'
+                game().prof.start()
             else
-                g().prof:stop()
-                print(g().prof.report())
-                g().prof = nil
+                game().prof:stop()
+                print(game().prof.report())
+                game().prof = nil
             end
         elseif key == 'p' then
-            g().SETTINGS.perf_mode = not g().SETTINGS.perf_mode
+            game().SETTINGS.perf_mode = not game().SETTINGS.perf_mode
         end
     end
 end
 
 function M.key_hold(controller, key, dt)
-    if key == 'r' and not g().SETTINGS.paused and controller.held_key_times[key] > 0.7 then
-        g():queue_settings_write()
+    if key == 'r' and not game().SETTINGS.paused and controller.held_key_times[key] > 0.7 then
+        game():queue_settings_write()
         controller.held_key_times[key] = nil
-        g().SETTINGS.current_setup = 'New Run'
+        game().SETTINGS.current_setup = 'New Run'
         local access = game_access()
         local game = access and access.get()
         if access then access.patch({ viewed_back = nil }) end
-        g().run_setup_seed = game and game.seeded
-        g().forced_seed, g().setup_seed = nil, nil
-        if game and game.seeded then g().forced_seed = game.seed_streams.seed end
-        if g().STAGE == g().STAGES.RUN and Funcs.get("begin_run") then Funcs.dispatch("begin_run") end
-        g().forced_seed = nil
+        game().run_setup_seed = game and game.seeded
+        game().forced_seed, game().setup_seed = nil, nil
+        if game and game.seeded then game().forced_seed = game.seed_streams.seed end
+        if game().STAGE == game().STAGES.RUN and Funcs.get("begin_run") then Funcs.dispatch("begin_run") end
+        game().forced_seed = nil
     end
 end
 
 function M.key_release(controller, key)
     if key == 'a' and controller.held_keys['g'] and not _RELEASE_MODE then
-        g().DEBUG = not g().DEBUG
+        game().DEBUG = not game().DEBUG
     end
-    if key == 'tab' and g().debug_tools then
-        if g().debug_panel then
-            g().debug_panel:close()
+    if key == 'tab' and game().debug_tools then
+        if game().debug_panel then
+            game().debug_panel:close()
         else
-            g().debug_tools:remove()
-            g().debug_tools = nil
+            game().debug_tools:remove()
+            game().debug_tools = nil
         end
     end
 end

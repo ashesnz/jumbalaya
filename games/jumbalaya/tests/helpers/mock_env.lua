@@ -87,18 +87,12 @@ function M.ensure_engine_globals()
 	require("jumbalaya-engine.util.random").install()
 	require("jumbalaya-engine.graphics.draw").install()
 	require("word_game.ui.effects.easing").install_globals()
-	require("jumbalaya-engine.util.tween")
-	require("jumbalaya-engine.scene.node")
-	require("jumbalaya-engine.scene.animated.init")
-	require("jumbalaya-engine.graphics.sprite")
-	require("jumbalaya-engine.graphics.sprite_animator")
-	require("jumbalaya-engine.interaction.router")
+	require("jumbalaya-engine.globals").install()
 end
 
 function M.ensure_card_class()
 	M.ensure_engine_globals()
-	require("word_game.model.cards.card")
-	require("word_game.ui.cards.bind").install()
+	require("app.bootstrap.kind_globals").install_card_types()
 end
 
 function M.install_presentation(overrides)

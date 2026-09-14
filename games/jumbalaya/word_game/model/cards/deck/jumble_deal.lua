@@ -21,8 +21,13 @@ local TableAreas = require("word_game.model.table_areas")
 local core_letter_card = require("jumbalaya_core.cards.letter_card")
 local voucher_discard = require("word_game.model.perks.voucher_discard")
 
-return function(context)
-	local M = context.module
+local M = {}
+local Shared = require("word_game.model.cards.deck.shared")
+local function Deck()
+	return package.loaded["word_game.model.cards.deck"]
+end
+
+
 
 	function M.return_hand_to_deck(on_complete, opts)
 		opts = opts or {}
@@ -44,8 +49,8 @@ return function(context)
 				live_game().dealt_letters:remove_card(card)
 				live_game().draw_pile:emplace(card)
 			end
-			M.shuffle_deck()
-			context.commit_piles({ "hand", "draw" })
+			Deck().shuffle_deck()
+			Shared.commit_piles({ "hand", "draw" })
 			if on_complete then on_complete() end
 			return
 		end
@@ -71,8 +76,8 @@ return function(context)
 				delay = #cards * 0.08 + 0.25,
 				blocking = true,
 				func = function()
-					M.shuffle_deck()
-					context.commit_piles({ "hand", "draw" })
+					Deck().shuffle_deck()
+					Shared.commit_piles({ "hand", "draw" })
 					if on_complete then on_complete() end
 					return true
 				end,
@@ -100,15 +105,15 @@ return function(context)
 		if live_game().recycle_stash.hard_set_cards then
 			live_game().recycle_stash:hard_set_cards()
 		end
-		M.shuffle_deck()
-		context.commit_piles({ "draw", "discard" })
+		Deck().shuffle_deck()
+		Shared.commit_piles({ "draw", "discard" })
 		return true
 	end
 
 	function M.needs_jumble_reshuffle()
-		if not M.is_jumble_deck() then return false end
-		if M.hand_card_count() > 0 then return false end
-		if M.draw_pile_count() > 0 then return false end
+		if not Deck().is_jumble_deck() then return false end
+		if Deck().hand_card_count() > 0 then return false end
+		if Deck().draw_pile_count() > 0 then return false end
 		local placement = live_game().pattern_row and live_game().pattern_row.area and live_game().pattern_row.area.cards
 		if placement and #placement > 0 then return false end
 		local discard_count = (live_game().recycle_stash and live_game().recycle_stash.cards and #live_game().recycle_stash.cards) or 0
@@ -116,17 +121,17 @@ return function(context)
 	end
 
 	function M.try_jumble_reshuffle_and_deal(on_complete)
-		if not M.needs_jumble_reshuffle() then
+		if not Deck().needs_jumble_reshuffle() then
 			if on_complete then on_complete() end
 			return false
 		end
-		if not M.recycle_discard_into_deck() then
+		if not Deck().recycle_discard_into_deck() then
 			if on_complete then on_complete() end
 			return false
 		end
 
 		piles.hydrate_hosts_from_store({ "draw" })
-		local to_deal = math.min(hand_size_cfg.get(), M.draw_pile_count())
+		local to_deal = math.min(hand_size_cfg.get(), Deck().draw_pile_count())
 		for _ = 1, to_deal do
 			local card = live_game().draw_pile:remove_card()
 			if card and live_game().dealt_letters then
@@ -139,7 +144,7 @@ return function(context)
 			live_game().dealt_letters:snap_VT()
 			live_game().dealt_letters:hard_set_cards()
 		end
-		context.commit_piles({ "hand", "draw", "discard" })
+		Shared.commit_piles({ "hand", "draw", "discard" })
 		local j = jumble()
 		if j and j.ensure_playable_puzzle then j.ensure_playable_puzzle() end
 		LayoutRequest.refresh()
@@ -158,9 +163,9 @@ return function(context)
 			end
 		end
 		voucher_discard.reset()
-		M.clear_hand_and_placement()
+		Deck().clear_hand_and_placement()
 		piles.hydrate_hosts_from_store({ "draw" })
-		local to_deal = math.min(hand_size_cfg.get(), M.draw_pile_count())
+		local to_deal = math.min(hand_size_cfg.get(), Deck().draw_pile_count())
 		for _ = 1, to_deal do
 			local card = live_game().draw_pile:remove_card()
 			if card then
@@ -171,15 +176,15 @@ return function(context)
 		live_game().dealt_letters:relayout()
 		live_game().dealt_letters:snap_VT()
 		live_game().dealt_letters:hard_set_cards()
-		context.commit_piles({ "hand", "draw", "pattern" })
+		Shared.commit_piles({ "hand", "draw", "pattern" })
 		local j = jumble()
 		if j and j.ensure_playable_puzzle then j.ensure_playable_puzzle() end
 	end
 
 	function M.draw_jumble_replacement()
 		if not live_game().dealt_letters then return nil end
-		if M.draw_pile_count() == 0 then
-			if M.try_jumble_reshuffle_and_deal() then
+		if Deck().draw_pile_count() == 0 then
+			if Deck().try_jumble_reshuffle_and_deal() then
 				local hand = TableAreas.hand_cards()
 				return hand[#hand]
 			end
@@ -193,7 +198,7 @@ return function(context)
 				live_game().dealt_letters:set_ranks()
 				live_game().dealt_letters:relayout()
 			end
-			context.commit_piles({ "hand", "draw" })
+			Shared.commit_piles({ "hand", "draw" })
 		end
 		if live_game().TIMELINE and live_game().TIMELINE.enqueue then
 			Scheduler.add{
@@ -214,8 +219,8 @@ return function(context)
 					return true
 				end,
 			}
-		elseif context.fly_from_deck_to_hand then
-			context.fly_from_deck_to_hand(card)
+		elseif Shared.fly_from_deck_to_hand then
+			Shared.fly_from_deck_to_hand(card)
 			finish()
 		else
 			live_game().dealt_letters:emplace(card)
@@ -223,4 +228,4 @@ return function(context)
 		end
 		return card
 	end
-end
+return M

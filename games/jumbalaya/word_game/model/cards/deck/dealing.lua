@@ -10,16 +10,21 @@ local live_game = require("word_game.model.live_game")
 
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
-return function(context)
-	local M = context.module
+local M = {}
+local Shared = require("word_game.model.cards.deck.shared")
+local function Deck()
+	return package.loaded["word_game.model.cards.deck"]
+end
+
+
 	local LayoutRequest = require("word_game.model.layout.request")
 	local hand_size_cfg = require("word_game.model.hand_size")
 	local pile_counts = require("jumbalaya_core.cards.pile_counts")
 	local game_access = require("word_game.model.game_access")
 	local piles = require("word_game.model.piles")
 	local TableAreas = require("word_game.model.table_areas")
-	local needs_vowel = context.needs_vowel
-	local take_letter_from_deck = context.take_letter_from_deck
+	local needs_vowel = Shared.needs_vowel
+	local take_letter_from_deck = Shared.take_letter_from_deck
 
 	local function placement_count()
 		return pile_counts.placement_count(TableAreas.pattern_cards())
@@ -38,11 +43,11 @@ return function(context)
 	end
 
 	function M.cards_left()
-		return M.draw_pile_count()
+		return Deck().draw_pile_count()
 	end
 
 	function M.sync_deck_count_display()
-		local count = M.cards_left()
+		local count = Deck().cards_left()
 		live_game().ARGS = live_game().ARGS or {}
 		live_game().ARGS.deck_left_count = count
 		game_access.patch({ deck_left_count = count })
@@ -52,7 +57,7 @@ return function(context)
 		pile_ids = pile_ids or { "hand", "draw", "pattern" }
 		piles.sync_hosts_to_store(nil, pile_ids)
 		piles.release_static_chrome(nil, pile_ids)
-		M.sync_deck_count_display()
+		Deck().sync_deck_count_display()
 	end
 
 	function M.hydrate_pile_hosts(pile_ids)
@@ -63,18 +68,18 @@ return function(context)
 
 	function M.deal_one_to_hand(target_size)
 		target_size = target_size or hand_size_cfg.get()
-		if not live_game().dealt_letters or M.held_count() >= target_size then return false end
+		if not live_game().dealt_letters or Deck().held_count() >= target_size then return false end
 		local card = take_letter_from_deck(needs_vowel())
 		if not card then return false end
-		return context.fly_from_deck_to_hand(card)
+		return Shared.fly_from_deck_to_hand(card)
 	end
 
 	function M.deal_into_hand(target_size, on_complete)
 		target_size = target_size or hand_size_cfg.get()
-		local need = math.max(0, target_size - M.held_count())
+		local need = math.max(0, target_size - Deck().held_count())
 		local function finish()
-			M.ensure_vowel_in_hand()
-			M.commit_pile_hosts({ "hand", "draw" })
+			Deck().ensure_vowel_in_hand()
+			Deck().commit_pile_hosts({ "hand", "draw" })
 			if on_complete then on_complete() end
 		end
 		if need <= 0 then
@@ -84,10 +89,10 @@ return function(context)
 		for _ = 1, need do
 			Scheduler.add{
 				mode = "window",
-				delay = M.DEAL_DELAY,
+				delay = Deck().DEAL_DELAY,
 				blocking = true,
 				func = function()
-					M.deal_one_to_hand(target_size)
+					Deck().deal_one_to_hand(target_size)
 					return true
 				end,
 			}
@@ -111,28 +116,28 @@ return function(context)
 			live_game().dealt_letters.config.selected_limit = hand_size_n
 		end
 		LayoutRequest.refresh()
-		return M.deal_into_hand(hand_size_n, on_complete)
+		return Deck().deal_into_hand(hand_size_n, on_complete)
 	end
 
 	function M.draw_to_hand(target_size)
 		target_size = target_size or hand_size_cfg.get()
-		while live_game().dealt_letters and M.held_count() < target_size do
+		while live_game().dealt_letters and Deck().held_count() < target_size do
 			local card = take_letter_from_deck(needs_vowel())
 			if not card then break end
 			live_game().dealt_letters:emplace(card)
 		end
-		M.ensure_vowel_in_hand()
+		Deck().ensure_vowel_in_hand()
 		if live_game().dealt_letters then
-			M.sanitize_hand()
-			while M.held_count() < target_size do
+			Deck().sanitize_hand()
+			while Deck().held_count() < target_size do
 				local card = take_letter_from_deck(needs_vowel())
 				if not card then break end
 				live_game().dealt_letters:emplace(card)
 			end
-			M.ensure_vowel_in_hand()
+			Deck().ensure_vowel_in_hand()
 			live_game().dealt_letters:set_ranks()
 			live_game().dealt_letters:relayout()
-			M.commit_pile_hosts({ "hand", "draw" })
+			Deck().commit_pile_hosts({ "hand", "draw" })
 		end
 	end
-end
+return M

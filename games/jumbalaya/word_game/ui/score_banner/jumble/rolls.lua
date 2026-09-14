@@ -8,6 +8,7 @@ local effects = require("word_game.ui.score_banner.jumble.effects")
 
 local M = {}
 
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 function M.apply_score_breakdown(state, breakdown, animate, remain_dur)
 	if not breakdown then return end
 	local new_earned = breakdown.earned or 0

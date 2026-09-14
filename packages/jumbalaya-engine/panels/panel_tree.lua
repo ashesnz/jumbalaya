@@ -2,7 +2,7 @@
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 return function(Target)
-function RetainedPanel:find_node_by_id(id, node)
+function Target:find_node_by_id(id, node)
 	node = node or self.root_node
 	if node.config and node.config.id == id then return node end
 	for _, v in pairs(node.children) do
@@ -17,7 +17,7 @@ function RetainedPanel:find_node_by_id(id, node)
 end
 
 --- Collects every element tagged with `config.group == group`.
-function RetainedPanel:get_group(node, group, ingroup)
+function Target:get_group(node, group, ingroup)
 	node = node or self.root_node
 	ingroup = ingroup or {}
 	for _, v in pairs(node.children) do
@@ -31,7 +31,7 @@ end
 
 --- Removes every member of a named group from the tree and relayouts.
 --  Relayout runs at each recursion level so parents shrink as children go.
-function RetainedPanel:remove_group(node, group)
+function Target:remove_group(node, group)
 	node = node or self.root_node
 	for k, v in pairs(node.children) do
 		if self:remove_group(v, group) then node.children[k] = nil end
@@ -49,7 +49,7 @@ end
 
 --- Creates a LayoutNode for `node`, wires inheritance (group/button), recurses
 --- into container children, and attaches the result to its parent's tree.
-function RetainedPanel:attach_node(node, parent)
+function Target:attach_node(node, parent)
 	local ui_e = LayoutNode(parent, self, node.n, node.config)
 
 	-- Children inherit their parent's group tag...

@@ -6,8 +6,7 @@ local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 
 ---@class AnimNode : Node
-AnimNode = Node:derive("AnimNode")
-EaseNode = AnimNode
+local AnimNode = Node:derive("AnimNode")
 
 require("jumbalaya-engine.scene.animated.alignment")(AnimNode)
 require("jumbalaya-engine.scene.animated.transform")(AnimNode)

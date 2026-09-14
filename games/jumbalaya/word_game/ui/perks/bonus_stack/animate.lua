@@ -6,6 +6,7 @@ local facade = require("word_game.ui.facade")
 local layout = require("word_game.ui.perks.bonus_stack.layout")
 
 local function bonus_stack_model()
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	return facade.bonus_stack()
 end
 

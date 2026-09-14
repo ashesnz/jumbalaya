@@ -3,6 +3,7 @@
 local shell = require("jumbalaya-engine.shell")
 local Window = require("jumbalaya-engine.adapters.love2d.window")
 
+local perf_checkpoint = require("jumbalaya-engine.adapters.love2d.display").perf_checkpoint
 function love.run()
 	love.load(love.arg.parseGameArguments(arg), arg)
 	love.timer.step()

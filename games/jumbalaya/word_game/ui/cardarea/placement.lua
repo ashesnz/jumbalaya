@@ -1,4 +1,5 @@
 --[[
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/ui/cardarea/placement.lua - Placement/jumble CardPile type behaviour.
 ]]
 

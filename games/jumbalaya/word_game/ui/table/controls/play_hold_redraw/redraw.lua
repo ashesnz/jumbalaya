@@ -11,6 +11,7 @@ local M = {}
 
 
 local function safe_sound(name, pitch, vol)
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	if type(play_sfx) == "function" then
 		play_sfx(name, pitch, vol)
 	end

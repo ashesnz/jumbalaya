@@ -1,4 +1,5 @@
 --[[
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/ui/play_effects/definition.lua — Shared play flags, banner hooks, and control sync.
 	Inputs: game_access, RunMode, WORD_GAME_UI ScoreBanner/TableControls.
 	Outputs: set_word_score_animating, roll_jumble_banners, BOSS_INTRO constants.

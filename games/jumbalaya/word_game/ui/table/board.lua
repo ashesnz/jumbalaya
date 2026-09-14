@@ -6,12 +6,12 @@
 local facade = require("word_game.ui.facade")
 local Jumble = facade.jumble()
 local Play = facade.jumble_play()
-local game = require("word_game.ui.util.game_runtime").game
+local runtime = require("word_game.ui.util.game_runtime").game
 
 local M = {}
 
 local views_install = require("word_game.ui.views.install")
-local BridgeRuntime = require("app.runtime")
+local bridge = require("app.runtime")
 
 local placement_snap = require("word_game.board.placement.snap")
 local modifier_feedback = require("word_game.ui.feedback.modifier_feedback")
@@ -37,16 +37,16 @@ local function boss_sequence_active()
 end
 
 local function hand_clear_focus_active()
-	return game().HAND_CLEAR_OVERLAY ~= nil
+	return runtime().HAND_CLEAR_OVERLAY ~= nil
 end
 
 function M.is_active()
-	return game().STATE == game().STATES.TABLE_BOARD
+	return runtime().STATE == runtime().STATES.TABLE_BOARD
 end
 
 function M.ensure_store_subscription()
-	if not BridgeRuntime.store() then return nil end
-	local engine = BridgeRuntime.engine()
+	if not bridge.store() then return nil end
+	local engine = bridge.engine()
 	if engine then
 		views_install.install_table_board(engine)
 	end
@@ -58,8 +58,8 @@ function M.table_board_view()
 end
 
 function M.update(game, dt)
-	if game().ARGS and game().ARGS.pending_layout then
-		game().ARGS.pending_layout = false
+	if runtime().ARGS and runtime().ARGS.pending_layout then
+		runtime().ARGS.pending_layout = false
 		Layout.refresh_placement_layout()
 	end
 	if DEVTOOLS and DEVTOOLS.DebugButton then
@@ -106,11 +106,11 @@ function M.draw_spotlight_overlay(game, overlay)
 	if overlay.redraw_banner and WORD_GAME_UI.ScoreBanner then
 		WORD_GAME_UI.ScoreBanner.draw()
 	end
-	if overlay.redraw_tokens and game().draw_pile and not boss_sequence_active()
+	if overlay.redraw_tokens and runtime().draw_pile and not boss_sequence_active()
 		and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.draw then
 		love.graphics.push()
-		game().draw_pile:translate_container()
-		WORD_GAME_UI.TableDeck.draw(game().draw_pile)
+		runtime().draw_pile:translate_container()
+		WORD_GAME_UI.TableDeck.draw(runtime().draw_pile)
 		love.graphics.pop()
 	end
 	if overlay.redraw_confetti and WORD_GAME_UI.Confetti then
@@ -128,10 +128,10 @@ function M.draw_spotlight_overlay(game, overlay)
 		end
 	end
 
-	if overlay.redraw_hand and game().dealt_letters then
+	if overlay.redraw_hand and runtime().dealt_letters then
 		local bonus_stack = WORD_GAME_UI.BonusStackUI
 		for _, v in pairs(game.LIVE.CARD) do
-			if v.area == game().dealt_letters
+			if v.area == runtime().dealt_letters
 				and (not v.parent and v ~= game.INPUT.dragging.target and v ~= game.INPUT.focused.target)
 				and not (bonus_stack and bonus_stack.contains(v)) then
 				love.graphics.push()
@@ -142,15 +142,15 @@ function M.draw_spotlight_overlay(game, overlay)
 		end
 	end
 
-	if overlay.redraw_placement and game().pattern_row and game().pattern_row.draw_run_pass then
-		ensure_placement_pattern_overlay(game().pattern_row)
-		game().pattern_row:draw_run_pass(game)
+	if overlay.redraw_placement and runtime().pattern_row and runtime().pattern_row.draw_run_pass then
+		ensure_placement_pattern_overlay(runtime().pattern_row)
+		runtime().pattern_row:draw_run_pass(game)
 	end
 
-	if overlay.redraw_play and game().hand_action_bar and not game().hand_action_bar.REMOVED then
+	if overlay.redraw_play and runtime().hand_action_bar and not runtime().hand_action_bar.REMOVED then
 		love.graphics.push()
-		game().hand_action_bar:translate_container()
-		game().hand_action_bar:draw()
+		runtime().hand_action_bar:translate_container()
+		runtime().hand_action_bar:draw()
 		love.graphics.pop()
 	end
 
@@ -195,8 +195,8 @@ end
 
 function M.draw_table_controls()
 	if not M.is_active() then return end
-	draw_action_bar(game().table_shuffle_bar)
-	draw_action_bar(game().hand_action_bar)
+	draw_action_bar(runtime().table_shuffle_bar)
+	draw_action_bar(runtime().hand_action_bar)
 end
 
 function M.draw_board(game)
@@ -227,15 +227,15 @@ function M.should_draw_sidebar_deck()
 	if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
 		return true
 	end
-	local store = BridgeRuntime.store()
+	local store = bridge.store()
 	if store then
 		local state = store:get()
 		if state.piles and state.piles.draw then
 			return #state.piles.draw >= 0
 		end
 	end
-	if not game().draw_pile then return false end
-	return #game().draw_pile.cards > 0
+	if not runtime().draw_pile then return false end
+	return #runtime().draw_pile.cards > 0
 end
 
 local function draw_live_cards(cards, controller, skip)
@@ -260,13 +260,13 @@ function M.draw_hand_pass(game)
 
 	local controller = game.INPUT
 	local sidebar_draws_deck = WORD_GAME_UI.Sidebar
-		and game().STAGE == game().STAGES.RUN
-		and game().STATE == game().STATES.TABLE_BOARD
+		and runtime().STAGE == runtime().STAGES.RUN
+		and runtime().STATE == runtime().STATES.TABLE_BOARD
 
 	if M.should_draw_sidebar_deck() and not sidebar_draws_deck then
 		love.graphics.push()
-		if game().draw_pile then
-			game().draw_pile:translate_container()
+		if runtime().draw_pile then
+			runtime().draw_pile:translate_container()
 		end
 		if table_view:should_render_draw_from_store() then
 			local draw_cards = table_view:pile_cards("draw")
@@ -276,15 +276,15 @@ function M.draw_hand_pass(game)
 				table_view:draw_draw_pile()
 			end
 		elseif WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
-			WORD_GAME_UI.TableDeck.draw(game().draw_pile)
+			WORD_GAME_UI.TableDeck.draw(runtime().draw_pile)
 		end
 		love.graphics.pop()
 	end
 
 	if table_view:should_render_hand_from_store() then
 		love.graphics.push()
-		if game().dealt_letters then
-			game().dealt_letters:translate_container()
+		if runtime().dealt_letters then
+			runtime().dealt_letters:translate_container()
 		end
 		local hand_cards = table_view:pile_cards("hand")
 		if hand_cards and #hand_cards > 0 and Card and getmetatable(hand_cards[1]) == Card then
@@ -297,7 +297,7 @@ function M.draw_hand_pass(game)
 
 	local bonus_stack = WORD_GAME_UI.BonusStackUI
 	for _, v in pairs(game.LIVE.CARD) do
-		local from_hand = v.area == game().dealt_letters
+		local from_hand = v.area == runtime().dealt_letters
 		local from_bonus = bonus_stack and bonus_stack.contains(v) and not v.area
 		if (from_hand or from_bonus)
 			and (not v.parent and v ~= controller.dragging.target and v ~= controller.focused.target)
@@ -348,7 +348,7 @@ function M.draw_card_interaction(game)
 	end
 
 	if game.INPUT.focused.target and getmetatable(game.INPUT.focused.target) == Card
-		and (game.INPUT.focused.target.area == game().dealt_letters
+		and (game.INPUT.focused.target.area == runtime().dealt_letters
 			or (bonus_stack and bonus_stack.contains(game.INPUT.focused.target)))
 		and game.INPUT.focused.target ~= game.INPUT.dragging.target then
 		love.graphics.push()

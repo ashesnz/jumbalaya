@@ -7,28 +7,26 @@
 ]]
 -- Package facade for the 52-card letter deck.
 --
--- Initializers run in the same order as the original monolithic module. The
--- private context makes cross-cutting helpers explicit without expanding the
--- public Deck API or introducing globals.
+-- Submodules export closed tables merged here in load order. Cross-module helpers
+-- live on deck/shared.lua. Runtime sibling calls use lazy Deck() in submodules.
 
-local context = {
-	module = {},
+local Deck = {}
+package.loaded["word_game.model.cards.deck"] = Deck
+
+local merge_order = {
+	require("word_game.model.cards.deck.identity"),
+	require("word_game.model.cards.deck.playability"),
+	require("word_game.model.cards.deck.vowels"),
+	require("word_game.model.cards.deck.dealing"),
+	require("word_game.model.cards.deck.lifecycle"),
+	require("word_game.model.cards.deck.jumble"),
+	require("word_game.model.cards.deck.letter_modifiers"),
 }
 
-local Deck = context.module
-
-local initializers = {
-		require("word_game.model.cards.deck.identity"),
-		require("word_game.model.cards.deck.playability"),
-		require("word_game.model.cards.deck.vowels"),
-		require("word_game.model.cards.deck.dealing"),
-		require("word_game.model.cards.deck.lifecycle"),
-		require("word_game.model.cards.deck.jumble"),
-		require("word_game.model.cards.deck.letter_modifiers"),
-}
-
-for _, initialize in ipairs(initializers) do
-	initialize(context)
+for _, mod in ipairs(merge_order) do
+	for k, v in pairs(mod) do
+		Deck[k] = v
+	end
 end
 
 Deck.Registry = require("word_game.model.cards.registry")

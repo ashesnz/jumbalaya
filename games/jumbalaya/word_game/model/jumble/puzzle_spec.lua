@@ -12,18 +12,15 @@ local puzzles_cfg = require("word_game.config.jumble")
 local round_config = require("jumbalaya_core.config.gameplay.round")
 local core = require("jumbalaya_core.jumble.puzzle_spec")
 local game_access = require("word_game.model.game_access")
+local Dictionary = require("dictionary")
 
 local stage_validated_puzzles = {}
 
-local function dictionary_opts()
-	return {
-		is_valid_word = function(word)
-			if not Dictionary then return false end
-			Dictionary.load()
-			return Dictionary.is_valid(word)
-		end,
-	}
-end
+local dictionary_opts = {
+	is_valid_word = function(word)
+		return Dictionary.is_valid(word)
+	end,
+}
 
 for key, value in pairs(core) do
 	if key ~= "word_fits_pattern" and key ~= "normalize_puzzle" then
@@ -35,7 +32,7 @@ M.normalize_puzzle = core.normalize_puzzle
 M.validate_puzzle = core.validate_puzzle
 
 function M.word_fits_pattern(word, puzzle)
-	return core.word_fits_pattern(word, puzzle, dictionary_opts())
+	return core.word_fits_pattern(word, puzzle, dictionary_opts)
 end
 
 local function random_boss_puzzle(words)

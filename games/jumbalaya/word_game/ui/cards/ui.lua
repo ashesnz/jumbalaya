@@ -5,6 +5,7 @@
 local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
 
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 function Card:remove_UI()
     self.tooltip_info = nil
     self.config.h_popup = nil

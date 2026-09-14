@@ -8,8 +8,10 @@ local Components = require "word_game.ui.widgets.components"
 
 local DEFINITIONS = game().DEFINITIONS
 
+local localize = require("word_game.ui.util.localize").localize
+local enumerate_display_modes = require("jumbalaya-engine.adapters.love2d.display").enumerate_display_modes
 function build_options()  
-  local game = game_access.get()
+  local shell = game_access.get()
   local current_seed = nil
   local restart = nil
   local main_menu = nil
@@ -31,9 +33,9 @@ function build_options()
       }},
       {n=game().UI.COLUMN, config={align = "cm", padding = 0, minh = 0.8}, nodes={
         {n=game().UI.COLUMN, config={align = "cm", padding = 0, minh = 0.8}, nodes={
-          {n=game().UI.ROW, config={align = "cm", r = 0.1, colour = game and game.seeded and game().C.RED or game().C.BLACK, minw = 1.8, minh = 0.5, padding = 0.1, emboss = 0.05}, nodes={
+          {n=game().UI.ROW, config={align = "cm", r = 0.1, colour = shell and shell.seeded and game().C.RED or game().C.BLACK, minw = 1.8, minh = 0.5, padding = 0.1, emboss = 0.05}, nodes={
             {n=game().UI.COLUMN, config={align = "cm"}, nodes={
-              {n=game().UI.TEXT, config={ text = tostring(game and game.seed_streams and game.seed_streams.seed or ""), scale = 0.43, colour = game().C.UI.TEXT_LIGHT, shadow = true}}
+              {n=game().UI.TEXT, config={ text = tostring(shell and shell.seed_streams and shell.seed_streams.seed or ""), scale = 0.43, colour = game().C.UI.TEXT_LIGHT, shadow = true}}
             }}
           }}
         }}
@@ -46,7 +48,7 @@ function build_options()
 
   local t = build_generic_options({ contents = {
       settings,
-      game and game.seeded and current_seed or nil,
+      shell and shell.seeded and current_seed or nil,
       restart,
       main_menu,
     }})

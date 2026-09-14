@@ -3,8 +3,7 @@
 local config = require "word_game.board.placement.config"
 local layout = require "word_game.board.placement.layout"
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local game = require("app.runtime").game
 
 local M = {}
 
@@ -30,7 +29,7 @@ local function draw_outline_shimmer(px, py, pw, ph, progress)
 	local envelope = math.sin(progress * math.pi)
 	local pad = config.OUTLINE_PAD
 	local radius = config.CORNER_RADIUS + 2
-	local now = (g().TIMERS and g().TIMERS.REAL) or 0
+	local now = (game().TIMERS and game().TIMERS.REAL) or 0
 
 	love.graphics.setShader()
 

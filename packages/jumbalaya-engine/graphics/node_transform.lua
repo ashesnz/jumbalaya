@@ -23,7 +23,6 @@ function M.push_node_transform(moveable, scale, rotate, offset, _)
 end
 
 function M.install()
-	_G.push_node_transform = M.push_node_transform
 end
 
 return M

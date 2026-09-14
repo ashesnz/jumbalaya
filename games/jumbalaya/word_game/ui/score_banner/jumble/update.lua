@@ -6,6 +6,7 @@ local config = require("word_game.ui.score_banner.jumble.config")
 
 local M = {}
 
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 function M.update(state, dt)
 	dt = dt or (love and love.timer and love.timer.getDelta and math.min(0.05, love.timer.getDelta()) or 0.016)
 	if state.points_roll then

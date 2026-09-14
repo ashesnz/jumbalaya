@@ -1,4 +1,5 @@
 --[[
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/ui/play_effects/hand_clear/init.lua — Stage-clear celebration and marketplace handoff.
 	Inputs: Play module hooks, facade deck/jumble, TIMELINE, Funcs dispatch strings.
 	Outputs: install(Play) wires on_hand_cleared; discard anim, token fly, TradeUI open.

@@ -8,8 +8,13 @@
 -- Card identity, presentation, and area primitives for the letter deck.
 local live_game = require("word_game.model.live_game")
 
-return function(context)
-	local M = context.module
+local M = {}
+local Shared = require("word_game.model.cards.deck.shared")
+local function Deck()
+	return package.loaded["word_game.model.cards.deck"]
+end
+
+
 	local core_identity = require("jumbalaya_core.cards.identity")
 	local core_letter_card = require("jumbalaya_core.cards.letter_card")
 	local LetterPalette = require "word_game.config.visuals.letter_card_palette"
@@ -22,7 +27,7 @@ return function(context)
 	end
 
 	function M.front(letter, color)
-		local key = M.front_key(letter, color)
+		local key = Deck().front_key(letter, color)
 		return key and live_game().LETTERS.faces and live_game().LETTERS.faces[key] or nil
 	end
 
@@ -57,10 +62,10 @@ return function(context)
 		if not front or not front.pos then
 			local letter = card.ability and card.ability.letter
 				or (card.config and card.config.card and card.config.card.letter)
-				or (card.base and card.base.id and M.letter_from_id(card.base.id))
-			local color = M.color_from_card(card)
+				or (card.base and card.base.id and Deck().letter_from_id(card.base.id))
+			local color = Deck().color_from_card(card)
 			if letter then
-				front = M.front(letter, color or "black")
+				front = Deck().front(letter, color or "black")
 			end
 		end
 		if front and front.pos and card.set_sprites then
@@ -70,15 +75,15 @@ return function(context)
 
 	function M.reveal_in_hand(card)
 		if not card then return end
-		if not M.is_letter_card(card) and card.base then
-			local letter = M.letter_from_id(card.base.id)
+		if not Deck().is_letter_card(card) and card.base then
+			local letter = Deck().letter_from_id(card.base.id)
 				or (card.config and card.config.card and card.config.card.letter)
-			local color = M.color_from_card(card)
+			local color = Deck().color_from_card(card)
 			if letter then
-				M.tag_card(card, letter, color)
+				Deck().tag_card(card, letter, color)
 			end
 		end
-		M.restore_letter_face(card)
+		Deck().restore_letter_face(card)
 		card.facing = "front"
 		card.sprite_facing = "front"
 		card.flipping = nil
@@ -96,8 +101,8 @@ return function(context)
 		if not live_game().dealt_letters or not live_game().dealt_letters.cards then return end
 		for i = #live_game().dealt_letters.cards, 1, -1 do
 			local card = live_game().dealt_letters.cards[i]
-			M.reveal_in_hand(card)
-			if not M.is_letter_card(card) then
+			Deck().reveal_in_hand(card)
+			if not Deck().is_letter_card(card) then
 				live_game().dealt_letters:remove_card(card)
 				if card and card.remove then
 					card:remove()
@@ -125,7 +130,7 @@ return function(context)
 		voucher_discard.reset()
 		piles.hydrate_hosts_from_store({ "hand", "draw", "discard", "pattern" })
 		local all = {}
-		for _, area in ipairs(M.all_areas()) do
+		for _, area in ipairs(Deck().all_areas()) do
 			if area and area.cards then
 				for i = #area.cards, 1, -1 do
 					local card = area.cards[i]
@@ -144,10 +149,10 @@ return function(context)
 		end
 		live_game().draw_pile:shuffle("letter_deck_reset")
 		live_game().draw_pile:hard_set_T()
-		if M.commit_pile_hosts then
-			M.commit_pile_hosts({ "hand", "draw", "discard", "pattern" })
-		elseif M.sync_deck_count_display then
-			M.sync_deck_count_display()
+		if Deck().commit_pile_hosts then
+			Deck().commit_pile_hosts({ "hand", "draw", "discard", "pattern" })
+		elseif Deck().sync_deck_count_display then
+			Deck().sync_deck_count_display()
 		end
 	end
 
@@ -163,21 +168,21 @@ return function(context)
 	function M.create_letter_card(letter, color)
 		local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 		color = color or LetterPalette.DEFAULT_FACE_COLOR
-		local front = M.front(letter, color)
+		local front = Deck().front(letter, color)
 		live_game().letter_card_id = (live_game().letter_card_id or 0) + 1
 		local deck_x = (live_game().draw_pile and live_game().draw_pile.T and live_game().draw_pile.T.x) or 0
 		local deck_y = (live_game().draw_pile and live_game().draw_pile.T and live_game().draw_pile.T.y) or 0
 		local card = Card(
 			deck_x, deck_y, live_game().CARD_W or 1, live_game().CARD_H or 1.4,
 			front,
-			M.letter_center(),
+			Deck().letter_center(),
 			{ letter_card_id = live_game().letter_card_id }
 		)
-		M.tag_card(card, letter, color)
+		Deck().tag_card(card, letter, color)
 		card.id = live_game().letter_card_id
 		card.pile_id = card.pile_id or "draw"
 		live_game().letter_inventory = live_game().letter_inventory or {}
 		live_game().letter_inventory[#live_game().letter_inventory + 1] = card
 		return card
 	end
-end
+return M

@@ -2,24 +2,24 @@
 
 local BridgeRuntime = require("app.runtime")
 local function game_access() return BridgeRuntime.game_access() end
-local function g() return BridgeRuntime.game() end
+local function game() return BridgeRuntime.game() end
 
 local M = {}
 
 function M.notify_then_start_run(e)
-	g().OVERLAY_MENU:remove()
-	g().OVERLAY_MENU = nil
+	game().OVERLAY_MENU:remove()
+	game().OVERLAY_MENU = nil
 	M.begin_run(e)
 end
 
 function M.begin_run(e, args)
-	g().SETTINGS.paused = false
+	game().SETTINGS.paused = false
 	if e and e.config.id == 'restart_button' then game_access().patch({ viewed_back = nil }) end
-	g().TIMELINE:flush()
-	g():queue_during_wipe(function()
-		g():discard_run()
-		g():start_run(args)
-		g():start_gameplay_board()
+	game().TIMELINE:flush()
+	game():queue_during_wipe(function()
+		game():discard_run()
+		game():start_run(args)
+		game():start_gameplay_board()
 	end)
 end
 
@@ -32,16 +32,16 @@ function M.begin_time_run(e)
 end
 
 function M.return_to_menu(e)
-	g():queue_wipe_transition({
+	game():queue_wipe_transition({
 		function()
-			g():discard_run()
+			game():discard_run()
 			return true
 		end,
 		{
 			blockable = true,
 			blocking = false,
 			func = function()
-				g():open_main_menu('game')
+				game():open_main_menu('game')
 				return true
 			end,
 		},

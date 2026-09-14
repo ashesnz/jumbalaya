@@ -1,7 +1,7 @@
 --[[ app/core/graphics/particles.lua - CPU particle emitter (ParticleEmitter) ]]
 
-ParticleEmitter = AnimNode:derive("ParticleEmitter")
-Particles = ParticleEmitter
+local AnimNode = require("jumbalaya-engine.scene.animated.init")
+local ParticleEmitter = AnimNode:derive("ParticleEmitter")
 
 require("jumbalaya-engine.graphics.particles_init")(ParticleEmitter)
 require("jumbalaya-engine.graphics.particles_sim")(ParticleEmitter)

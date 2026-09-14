@@ -147,3 +147,11 @@ function refit_viewport(w, h)
 		game().notify_display_changed()
 	end
 end
+
+return {
+	enumerate_display_modes = enumerate_display_modes,
+	collect_fullscreen_options = collect_fullscreen_options,
+	perf_checkpoint = perf_checkpoint,
+	boot_stage = boot_stage,
+	refit_viewport = refit_viewport,
+}

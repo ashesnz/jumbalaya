@@ -4,7 +4,7 @@ local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 return function(Target)
-function LayoutNode:draw_self_decor(parallax_dist)
+function Target:draw_self_decor(parallax_dist)
 	-- Configured outline stroke.
 	if self.config.outline and self.config.outline_colour[4] > 0.01 then
 		NodeTransform.push_node_transform(self, 1)

@@ -30,8 +30,8 @@ function Card:set_sprites(_center, _front)
 		if not self.children.back then
 			local back_atlas = game().TEXTURE_ATLASES["playing_back"] or game().TEXTURE_ATLASES["centers"]
 			local default_back = game().LETTERS.centers and game().LETTERS.centers['deck_alpha']
-			local game = game_access.get()
-			local game_back_pos = game and game[self.back] and game[self.back].pos
+			local shell = game_access.get()
+			local game_back_pos = shell and shell[self.back] and shell[self.back].pos
 			local back_pos = game().TEXTURE_ATLASES["playing_back"] and {x = 0, y = 0}
 				or (self.params.bypass_back or (self.letter_card_id and game_back_pos)
 				or (default_back and default_back.pos) or {x = 0, y = 0})

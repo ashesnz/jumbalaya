@@ -14,6 +14,7 @@ local M = {}
 
 local layout_mod
 
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 function M.bind_layout(mod)
 	layout_mod = mod
 end

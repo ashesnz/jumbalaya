@@ -25,7 +25,7 @@ end
 
 --- Cached rounded-rect vertex sets (fill/shadow/line/emboss variants),
 --- invalidated whenever size, parallax, progress, or speech-ness changes.
-function LayoutNode:draw_pixellated_rect(_type, _parallax, _emboss, _progress)
+function Target:draw_pixellated_rect(_type, _parallax, _emboss, _progress)
 	if not self.pixellated_rect
 		or #self.pixellated_rect[_type].vertices < 1
 		or _parallax ~= self.pixellated_rect.parallax
@@ -97,7 +97,7 @@ end
 
 --- Stroke the cached outline while skipping bottom-edge segments inside
 --- [gap_x1, gap_x2] — used for speech-bubble outlines around the tail.
-function LayoutNode:draw_pixellated_rect_line_with_gap(parallax_dist, gap_x1, gap_x2, bottom_y)
+function Target:draw_pixellated_rect_line_with_gap(parallax_dist, gap_x1, gap_x2, bottom_y)
 	local verts = self.pixellated_rect and self.pixellated_rect.line.vertices
 	if not verts or #verts < 2 then return end
 

@@ -5,7 +5,7 @@ local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 return function(Target)
-function LayoutNode:draw_self()
+function Target:draw_self()
 	if not self.states.visible then
 		if self.config.force_focus then HitOrder.track_hit_target(self) end
 		return

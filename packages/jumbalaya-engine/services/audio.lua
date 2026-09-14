@@ -1,4 +1,5 @@
 --[[
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	jumbalaya-engine/audio.lua - AudioService interface and Love2D adapter.
 ]]
 

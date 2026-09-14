@@ -7,13 +7,13 @@ local BonusStack = require "word_game.model.jumble.bonus_stack"
 local TableAreas = require "word_game.model.table_areas"
 local piles = require("word_game.model.piles")
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local game = require("app.runtime").game
 
 local PlacementWord = require("word_game.model.jumble.placement_word")
 local Jumble = require("word_game.model.jumble")
 
 local function placement_word()
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	return PlacementWord
 end
 local bonus_gutter = require "word_game.board.bonus.gutter"
@@ -56,8 +56,8 @@ end
 function M.point_in_hand(x, y)
 	local dealt = TableAreas.dealt_letters()
 	if not dealt or not dealt.T then return false end
-	local pad_x = (g().CARD_W or 1) * 0.15
-	local pad_y = (g().CARD_H or 1.4) * 0.2
+	local pad_x = (game().CARD_W or 1) * 0.15
+	local pad_y = (game().CARD_H or 1.4) * 0.2
 	return x >= dealt.T.x - pad_x
 		and x <= dealt.T.x + dealt.T.w + pad_x
 		and y >= dealt.T.y - pad_y

@@ -2,7 +2,7 @@
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 return function(Target)
-function LayoutNode:set_values(_T, recalculate)
+function Target:set_values(_T, recalculate)
 	if not recalculate or not self.T then
 		AnimNode.construct(self, {T = _T})
 		self.states.click.can = false

@@ -14,19 +14,24 @@ local Presentation = require("word_game.model.presentation")
 local game_access = require("word_game.model.game_access")
 local LayoutRequest = require("word_game.model.layout.request")
 
-return function(context)
-	local M = context.module
+local M = {}
+local Shared = require("word_game.model.cards.deck.shared")
+local function Deck()
+	return package.loaded["word_game.model.cards.deck"]
+end
+
+
 
 	function M.discard_from_hand(card)
-		if not M.is_jumble_deck() then return false end
+		if not Deck().is_jumble_deck() then return false end
 		if not voucher_discard.can_discard_card(card) then
 			return false
 		end
 
 		local function after_discard()
 			voucher_discard.stash_discarded_card(card)
-			M.draw_jumble_replacement()
-			M.sync_deck_count_display()
+			Deck().draw_jumble_replacement()
+			Deck().sync_deck_count_display()
 			if live_game().dealt_letters then
 				live_game().dealt_letters:hard_set_cards()
 			end
@@ -94,8 +99,8 @@ return function(context)
 
 	function M.refill_jumble_held(target_size)
 		target_size = target_size or hand_size_cfg.get()
-		while M.held_count() < target_size do
-			if not M.draw_jumble_replacement() then break end
+		while Deck().held_count() < target_size do
+			if not Deck().draw_jumble_replacement() then break end
 		end
 		if live_game().dealt_letters then
 			live_game().dealt_letters:set_ranks()
@@ -103,4 +108,4 @@ return function(context)
 		end
 		LayoutRequest.refresh()
 	end
-end
+return M

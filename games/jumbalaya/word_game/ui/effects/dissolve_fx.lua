@@ -6,8 +6,7 @@
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local DissolveFX = {}
 
@@ -33,7 +32,7 @@ function DissolveFX.run(target, opts)
 	local p = opts.particle or {}
 
 	target.dissolve = (mode == 'in') and 1 or 0
-	target.dissolve_colours = opts.colours or {g().C.WHITE}
+	target.dissolve_colours = opts.colours or {game().C.WHITE}
 	target.dissolve_wipe = opts.wipe or 0
 
 	if opts.on_start then opts.on_start(target) end
@@ -91,11 +90,11 @@ DissolveFX.CARD_TRANSFORM_DISSOLVE_TIME = 0.7
 DissolveFX.CARD_TRANSFORM_MATERIALIZE_TIME = 0.6
 
 function DissolveFX.card_transform_dissolve_colours()
-	return { g().C.BLACK, g().C.ORANGE, g().C.RED, g().C.GOLD, g().C.MUTED_GREY }
+	return { game().C.BLACK, game().C.ORANGE, game().C.RED, game().C.GOLD, game().C.MUTED_GREY }
 end
 
 function DissolveFX.card_transform_materialize_colours()
-	return { g().C.BLACK, g().C.ORANGE, g().C.GOLD, g().C.WHITE }
+	return { game().C.BLACK, game().C.ORANGE, game().C.GOLD, game().C.WHITE }
 end
 
 return DissolveFX

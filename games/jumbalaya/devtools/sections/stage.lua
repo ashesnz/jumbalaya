@@ -4,6 +4,7 @@ local layout = require "devtools.layout"
 local round_config = require "jumbalaya_core.config.gameplay.round"
 
 local function shell()
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	return require("devtools.runtime").game()
 end
 local opening_deal = require "word_game.model.jumble_play.opening_deal"

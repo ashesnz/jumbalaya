@@ -1,4 +1,5 @@
 --[[
+local localize = require("word_game.ui.util.localize").localize
 	word_game/ui/card_popups.lua - Card focus UI, hover popups, and tooltips.
 
 	These UI definitions remain global because existing card and event call sites

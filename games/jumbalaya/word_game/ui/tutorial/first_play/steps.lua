@@ -12,6 +12,7 @@ local M = {}
 
 local function build_selections(step, bubble_ui)
 	local selections = { bubble_ui }
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	if step.spotlight == "hand" and game().dealt_letters then
 		selections = { game().dealt_letters, bubble_ui }
 	end

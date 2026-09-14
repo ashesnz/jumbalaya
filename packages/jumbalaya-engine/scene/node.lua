@@ -6,7 +6,7 @@ local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 
 ---@class Node : Kind
-Node = Kind:derive("Node")
+local Node = Kind:derive("Node")
 
 function Node:construct(args)
 	args = args or {}
@@ -60,6 +60,6 @@ require("jumbalaya-engine.scene.node_debug")(Node)
 require("jumbalaya-engine.scene.node_hit")(Node)
 require("jumbalaya-engine.scene.node_lifecycle")(Node)
 
-SceneNode = Node
+local SceneNode = Node
 
 return Node

@@ -1,4 +1,5 @@
 --[[
+local boot_stage = require("jumbalaya-engine.adapters.love2d.display").boot_stage
 	app/startup.lua - Application boot orchestration.
 
 	Game:launch() is the entry after Game:construct() / define_constants().

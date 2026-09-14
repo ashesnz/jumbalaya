@@ -3,6 +3,7 @@
 ]]
 
 local game = require("word_game.ui.util.game_runtime").game
+local AnimNode = require("jumbalaya-engine.scene.animated.init")
 local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 
@@ -32,7 +33,7 @@ local FLIPS_PER_SWAP = 2
 ---@field anim_time number
 ---@field dissolve number|nil
 ---@field dissolve_colours table|nil
-TitleLogo = EaseNode:derive("TitleLogo")
+local TitleLogo = AnimNode:derive("TitleLogo")
 
 TitleLogo.LETTER_ANCHORS = LETTER_ANCHORS
 TitleLogo.CYCLE_TIMINGS = {

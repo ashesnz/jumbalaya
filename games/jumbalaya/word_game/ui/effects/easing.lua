@@ -6,8 +6,7 @@
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local Easing = {}
 
@@ -47,7 +46,7 @@ end
 function Easing.background_colour(options)
     if not options.new_colour then return end
 
-    for key, colour in pairs(g().C.BACKGROUND) do
+    for key, colour in pairs(game().C.BACKGROUND) do
         if key == 'C' or key == 'L' or key == 'D' then
             if options.special_colour and options.tertiary_colour then
                 local colour_key = key == 'L' and 'new_colour'
@@ -73,9 +72,9 @@ function Easing.background_colour(options)
 
     if options.contrast then
         Easing.value{
-            ref_table = g().C.BACKGROUND,
+            ref_table = game().C.BACKGROUND,
             ref_value = 'contrast',
-            mod = options.contrast - g().C.BACKGROUND.contrast,
+            mod = options.contrast - game().C.BACKGROUND.contrast,
             delay = 0.6,
             not_blockable = true,
         }

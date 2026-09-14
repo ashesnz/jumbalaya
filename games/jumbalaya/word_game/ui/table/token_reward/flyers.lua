@@ -14,6 +14,7 @@ local M = {}
 
 
 local function clamp01(t)
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	if t < 0 then return 0 end
 	if t > 1 then return 1 end
 	return t

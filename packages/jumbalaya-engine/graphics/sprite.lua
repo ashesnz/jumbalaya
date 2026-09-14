@@ -3,8 +3,8 @@
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 
-GfxSprite = AnimNode:derive("GfxSprite")
-Sprite = GfxSprite
+local AnimNode = require("jumbalaya-engine.scene.animated.init")
+local GfxSprite = AnimNode:derive("GfxSprite")
 
 function GfxSprite:construct(X, Y, W, H, new_sprite_atlas, sprite_pos)
 	AnimNode.construct(self, X, Y, W, H)

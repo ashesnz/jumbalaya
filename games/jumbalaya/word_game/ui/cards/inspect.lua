@@ -1,4 +1,5 @@
 --[[
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/ui/card_inspect.lua - Hover / click-and-hold to read a letter card.
 
 	Hover or hold without moving: the card scales up in its slot and draws in

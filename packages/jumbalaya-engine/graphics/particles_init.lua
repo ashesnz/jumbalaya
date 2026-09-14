@@ -78,6 +78,6 @@ function ParticleEmitter:construct(X, Y, W, H, config)
 		end
 	end
 
-	if getmetatable(self) == Particles then table.insert(game().LIVE.TRANSFORM, self) end
+	if getmetatable(self) == ParticleEmitter then table.insert(game().LIVE.TRANSFORM, self) end
 end
 end

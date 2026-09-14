@@ -12,6 +12,7 @@ local M = {}
 
 
 local function detach_card_for_stack(card)
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	bonus_stack_ui.detach(card)
 end
 

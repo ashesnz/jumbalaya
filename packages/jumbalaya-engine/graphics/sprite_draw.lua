@@ -68,18 +68,14 @@ function GfxSprite:draw_projected_texture(target)
 end
 
 --- Draws this texture using another object's transform (holographic overlays).
---  The transform stack stays balanced even if drawing fails mid-way.
 function GfxSprite:project_onto(other_obj, ms, mr, mx, my)
 	self.ARGS.draw_from_offset = self.ARGS.draw_from_offset or {}
 	self.ARGS.draw_from_offset.x = mx or 0
 	self.ARGS.draw_from_offset.y = my or 0
 
-	local ok, err = pcall(function()
-		NodeTransform.push_node_transform(other_obj, 1 + (ms or 0), mr or 0, self.ARGS.draw_from_offset, true)
-		self:draw_projected_texture(other_obj)
-	end)
+	NodeTransform.push_node_transform(other_obj, 1 + (ms or 0), mr or 0, self.ARGS.draw_from_offset, true)
+	self:draw_projected_texture(other_obj)
 	love.graphics.pop()
-	if not ok then error(err, 0) end
 end
 
 function GfxSprite:remove()

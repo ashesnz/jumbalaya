@@ -9,6 +9,7 @@ local Funcs = require("app.callbacks.funcs")
 
 local M = {}
 
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 function M.install()
 	Funcs.register("open_options", function(e)
 		game().SETTINGS.paused = true
@@ -90,8 +91,8 @@ function M.install()
 	end)
 
 	Funcs.register("copy_run_seed", function(e)
-		local game = game_access.get()
-		local seed = game and game.seed_streams and game.seed_streams.seed
+		local shell = game_access.get()
+		local seed = shell and shell.seed_streams and shell.seed_streams.seed
 		if not seed then return end
 		if game().F_LOCAL_CLIPBOARD then
 			game().CLIPBOARD = seed

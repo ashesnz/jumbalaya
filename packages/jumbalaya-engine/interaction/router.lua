@@ -4,8 +4,7 @@ local Kind = require("jumbalaya-engine.object")
 local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 
 ---@class InputRouter : Kind
-InputRouter = Kind:derive("InputRouter")
-InputController = InputRouter
+local InputRouter = Kind:derive("InputRouter")
 
 InputRouter._input_actions = nil
 

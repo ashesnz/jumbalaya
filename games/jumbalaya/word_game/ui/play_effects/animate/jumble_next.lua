@@ -10,6 +10,7 @@ local M = {}
 
 
 local function has_event_manager()
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	return game().TIMELINE and game().TIMELINE.enqueue
 end
 

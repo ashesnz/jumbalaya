@@ -3,8 +3,8 @@ local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 --[[ app/core/graphics/sprite_animator.lua - strip-frame animation (GfxAnimator) ]]
 
-GfxAnimator = GfxSprite:derive("GfxAnimator")
-SpriteAnimator = GfxAnimator
+local GfxSprite = require("jumbalaya-engine.graphics.sprite")
+local GfxAnimator = GfxSprite:derive("GfxAnimator")
 
 function GfxAnimator:construct(X, Y, W, H, new_sprite_atlas, sprite_pos)
 	GfxSprite.construct(self, X, Y, W, H, new_sprite_atlas, sprite_pos)

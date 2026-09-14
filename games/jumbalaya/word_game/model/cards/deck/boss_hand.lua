@@ -13,8 +13,13 @@ local card_motion_request = require("word_game.model.card_motion_request")
 local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 local game_access = require("word_game.model.game_access")
 
-return function(deck_module, context)
-	return function(letters, on_complete, opts)
+local M = {}
+local Shared = require("word_game.model.cards.deck.shared")
+local function Deck()
+	return package.loaded["word_game.model.cards.deck"]
+end
+
+function M.deal_boss_hand(letters, on_complete, opts)
 		opts = opts or {}
 		local stagger = opts.fast and 0.04 or 0.1
 		local finish_delay = opts.fast and 0.06 or 0.2
@@ -22,10 +27,10 @@ return function(deck_module, context)
 			if on_complete then on_complete() end
 			return
 		end
-		deck_module.clear_hand_and_placement()
+		Deck().clear_hand_and_placement()
 		local boss_cards = {}
 		for i, letter in ipairs(letters) do
-			local card = deck_module.create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR)
+			local card = Deck().create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR)
 			card.boss_temp = true
 			for pi = #(live_game().letter_inventory or {}), 1, -1 do
 				if live_game().letter_inventory[pi] == card then
@@ -45,8 +50,8 @@ return function(deck_module, context)
 						return true
 					end,
 				}
-			elseif context.fly_from_deck_to_hand then
-				context.fly_from_deck_to_hand(card)
+			elseif Shared.fly_from_deck_to_hand then
+				Shared.fly_from_deck_to_hand(card)
 			else
 				live_game().draw_pile:remove_card(card)
 				live_game().dealt_letters:emplace(card)
@@ -66,10 +71,10 @@ return function(deck_module, context)
 				live_game().dealt_letters:snap_VT()
 				live_game().dealt_letters:hard_set_cards()
 			end
-			if deck_module.commit_pile_hosts then
-				deck_module.commit_pile_hosts({ "hand", "draw", "pattern" })
+			if Deck().commit_pile_hosts then
+				Deck().commit_pile_hosts({ "hand", "draw", "pattern" })
 			else
-				deck_module.sync_deck_count_display()
+				Deck().sync_deck_count_display()
 			end
 			if on_complete then on_complete() end
 		end
@@ -86,5 +91,6 @@ return function(deck_module, context)
 		else
 			finish()
 		end
-	end
 end
+
+return M

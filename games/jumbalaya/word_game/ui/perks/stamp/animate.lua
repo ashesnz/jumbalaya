@@ -15,6 +15,7 @@ local perk_model = facade.perks_registry()
 
 local M = {}
 
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 M.STRIKE_DUR = 1.05
 M.HOLD_DUR = 0.18
 M.RETRACT_DUR = 0.62

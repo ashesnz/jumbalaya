@@ -21,8 +21,8 @@ function M.draw(sb)
 	sb.update(dt)
 	sb.decay_pulse(dt)
 
-	local game = game_access.get()
-	local hud_early = game and game.word_hud
+	local shell = game_access.get()
+	local hud_early = shell and shell.word_hud
 	local mode_early = hud_early and hud_early.banner_mode or "normal"
 	if mode_early ~= "boss_prep" and mode_early ~= "boss_word"
 		and not boss_word_announce.is_active()
@@ -64,7 +64,7 @@ function M.draw(sb)
 
 	local layout = sb.calc_layout(w, h, slant)
 
-	local hud = game and game.word_hud
+	local hud = shell and shell.word_hud
 	local banner_mode = hud and hud.banner_mode or "normal"
 	if banner_mode == "boss_prep" or banner_mode == "boss_word"
 		or boss_word_announce.is_active() then

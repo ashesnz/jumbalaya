@@ -1,12 +1,11 @@
-
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
 --[[
 	word_game.board.placement.config - Tunable constants for the placement row.
 ]]
 
+local game = require("app.runtime").game
+
 local M = {
-	-- Fallback if g().HAND_CARD_SPACING is unset. Played cards use the hand's
+	-- Fallback if game().HAND_CARD_SPACING is unset. Played cards use the hand's
 	-- step so 1–7 letters keep the same overlap instead of stretching.
 	PLACEMENT_CARD_SPACING = 0.78,
 	-- Extra padding on each side of the drop row beyond the tight card cluster.
@@ -27,7 +26,7 @@ function M.boss_slot_spacing()
 end
 
 function M.card_spacing()
-	local shell = g()
+	local shell = game()
 	return (shell and shell.HAND_CARD_SPACING) or M.PLACEMENT_CARD_SPACING
 end
 

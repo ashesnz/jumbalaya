@@ -8,6 +8,7 @@ local feedback = facade.feedback()
 local M = {}
 
 
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 function M.play_hand_clear()
 	local major = (game().pattern_row and game().pattern_row.area)
 		or game().PLAY_ATTACH

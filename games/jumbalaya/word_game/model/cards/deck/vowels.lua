@@ -8,14 +8,19 @@
 -- Vowel guarantees and requested-letter hand adjustments.
 local live_game = require("word_game.model.live_game")
 
-return function(context)
+local M = {}
+local Shared = require("word_game.model.cards.deck.shared")
+local function Deck()
+	return package.loaded["word_game.model.cards.deck"]
+end
+
+
 	local Random = require("jumbalaya-engine.util.random")
-	local M = context.module
 	local hand_size_cfg = require("word_game.model.hand_size")
-	local card_letter = context.card_letter
-	local deck_owns = context.deck_owns
-	local fly_from_deck_to_hand = context.fly_from_deck_to_hand
-	local placement_cards = context.placement_cards
+	local card_letter = Shared.card_letter
+	local deck_owns = Shared.deck_owns
+	local fly_from_deck_to_hand = Shared.fly_from_deck_to_hand
+	local placement_cards = Shared.placement_cards
 
 	local function cards_have_vowel(cards)
 		for _, card in ipairs(cards or {}) do
@@ -31,10 +36,10 @@ return function(context)
 	end
 
 	local function needs_vowel()
-		return not M.held_has_vowel()
+		return not Deck().held_has_vowel()
 	end
 
-	context.needs_vowel = needs_vowel
+	Shared.needs_vowel = needs_vowel
 
 	local function find_consonant(cards)
 		for _, card in ipairs(cards or {}) do
@@ -55,8 +60,8 @@ return function(context)
 
 		local function accept(card)
 			if not card then return nil end
-			M.reveal_in_hand(card)
-			if M.is_letter_card(card) then
+			Deck().reveal_in_hand(card)
+			if Deck().is_letter_card(card) then
 				return card
 			end
 			if card.remove then card:remove() end
@@ -76,7 +81,7 @@ return function(context)
 		return nil
 	end
 
-	context.take_letter_from_deck = take_letter_from_deck
+	Shared.take_letter_from_deck = take_letter_from_deck
 
 	function M.deck_has_vowel()
 		for _, card in ipairs(live_game().draw_pile and live_game().draw_pile.cards or {}) do
@@ -95,18 +100,18 @@ return function(context)
 	end
 
 	function M.ensure_vowel_in_hand()
-		if not live_game().dealt_letters or M.held_has_vowel() then return false end
-		if not M.deck_has_vowel() then return false end
+		if not live_game().dealt_letters or Deck().held_has_vowel() then return false end
+		if not Deck().deck_has_vowel() then return false end
 
 		local target = hand_size_cfg.get()
-		if M.held_count() < target then
+		if Deck().held_count() < target then
 			local card = take_letter_from_deck(true)
 			if card then
 				give_vowel_to_hand(card)
-				if M.held_has_vowel() then return true end
+				if Deck().held_has_vowel() then return true end
 			end
 		end
-		if M.held_has_vowel() then return true end
+		if Deck().held_has_vowel() then return true end
 
 		local swap_card = find_consonant(live_game().dealt_letters.cards) or find_consonant(placement_cards())
 		local vowel_card = take_letter_from_deck(true)
@@ -180,7 +185,7 @@ return function(context)
 
 	function M.find_deck_card(letter)
 		if not letter then return nil end
-		for _, card in ipairs(M.list_deck_cards()) do
+		for _, card in ipairs(Deck().list_deck_cards()) do
 			if card and not card.REMOVED and card_letter(card) == letter then
 				return card
 			end
@@ -191,7 +196,7 @@ return function(context)
 	function M.count_letters_in_deck(letter)
 		if not letter then return 0 end
 		local count = 0
-		for _, card in ipairs(M.list_deck_cards()) do
+		for _, card in ipairs(Deck().list_deck_cards()) do
 			if card and not card.REMOVED and card_letter(card) == letter then
 				count = count + 1
 			end
@@ -209,10 +214,10 @@ return function(context)
 	end
 
 	function M.random_letter(key)
-		return M.letter_from_id(random_index(key or "market_letter", 1, 26))
+		return Deck().letter_from_id(random_index(key or "market_letter", 1, 26))
 	end
 
 	function M.random_letter_color(key)
 		return random_index(key or "market_color", 1, 2) == 1 and "red" or "black"
 	end
-end
+return M

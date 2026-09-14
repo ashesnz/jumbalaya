@@ -1,7 +1,6 @@
---[[ app/callbacks/ui_controls/sliders_cycles.lua - Slider / cycle g().FUNCS registration ]]
+--[[ app/callbacks/ui_controls/sliders_cycles.lua - Slider / cycle game().FUNCS registration ]]
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local game = require("app.runtime").game
 
 local UIControls = require("app.callbacks.controllers.ui_controls")
 local Funcs = require("app.callbacks.funcs")

@@ -1,6 +1,7 @@
 --[[ app/session/draw_passes.lua - Jumbalaya draw passes registered on the engine loop ]]
 
 local DrawPasses = require("jumbalaya-engine.session.draw_passes")
+local perf_checkpoint = require("jumbalaya-engine.adapters.love2d.display").perf_checkpoint
 
 local M = {}
 

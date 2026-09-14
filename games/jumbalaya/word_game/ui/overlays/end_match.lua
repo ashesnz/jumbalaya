@@ -10,6 +10,7 @@ local Tables = require("jumbalaya-engine.util.tables")
 
 local M = {}
 
+local localize = require("word_game.ui.util.localize").localize
 function M.best_jumble_value(stats)
 	stats = stats or {}
 	local pattern = stats.best_puzzle

@@ -8,7 +8,7 @@
 local game = require("word_game.ui.util.game_runtime").game
 local GameFiles = require("app.platform.game_files")
 
-
+local M = {}
 local function ensure_localization()
 	local game = game()
 	if not game then return false end
@@ -20,7 +20,7 @@ local function ensure_localization()
 	return game.localization and game.localization.misc
 end
 
-function init_localization()
+function M.init_localization()
   game().localization.misc.v_dictionary_parsed = {}
   for k, v in pairs(game().localization.misc.v_dictionary or {}) do
     if type(v) == 'table' then
@@ -199,7 +199,7 @@ function each_utf8_char(s)
 	return s:gmatch(utf8.pattern)
 end
 
-function localize(args, misc_cat)
+function M.localize(args, misc_cat)
   if not game() or not game().localization or not game().localization.misc then
     ensure_localization()
   end
@@ -337,3 +337,5 @@ function localize(args, misc_cat)
     end
   end
 end
+
+return M

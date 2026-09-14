@@ -5,6 +5,7 @@ local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
 local perk = facade.perks_registry()
 
+local localize = require("word_game.ui.util.localize").localize
 function get_type_colour(_c, card)
 	if (_c.unlocked == false and not (card and card.bypass_lock)) then
 		return game().C.BLACK

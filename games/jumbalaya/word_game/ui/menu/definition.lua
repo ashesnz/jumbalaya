@@ -13,6 +13,7 @@ local STACK_GAP_PX = 20
 
 local function menu_px_to_tiles(px)
 	local ts = (game().TILESIZE or 1) * (game().TILESCALE or 1)
+local localize = require("word_game.ui.util.localize").localize
 	return px / ts
 end
 

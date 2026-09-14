@@ -8,6 +8,7 @@ local Colour = require("jumbalaya-engine.util.colour")
 
 
 local button_font
+local localize = require("word_game.ui.util.localize").localize
 function alpha_button_font()
   if not button_font then
     local ok, font = pcall(love.graphics.newFont, "resources/fonts/Outfit-Bold.ttf", game().TILESIZE * 7)

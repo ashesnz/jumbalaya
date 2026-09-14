@@ -10,8 +10,13 @@ local live_game = require("word_game.model.live_game")
 local core_letter_card = require("jumbalaya_core.cards.letter_card")
 local game_access = require("word_game.model.game_access")
 
-return function(context)
-	local M = context.module
+local M = {}
+local Shared = require("word_game.model.cards.deck.shared")
+local function Deck()
+	return package.loaded["word_game.model.cards.deck"]
+end
+
+
 	local bonus_return = require("word_game.model.jumble.bonus_return")
 
 	local function reset_deck_pile()
@@ -57,7 +62,7 @@ return function(context)
 	function M.populate_jumble_deck()
 		purge_table_cards()
 		if #(live_game().letter_inventory or {}) == 0 then
-			M.populate_starting_deck()
+			Deck().populate_starting_deck()
 			return
 		end
 		reset_deck_pile()
@@ -79,11 +84,11 @@ return function(context)
 		if live_game().draw_pile.config then
 			live_game().draw_pile.config.card_limit = #live_game().draw_pile.cards
 		end
-		M.shuffle_deck()
+		Deck().shuffle_deck()
 		if live_game().draw_pile.hard_set_T then
 			live_game().draw_pile:hard_set_T()
 		end
-		context.commit_piles({ "hand", "draw", "discard", "pattern" })
+		Shared.commit_piles({ "hand", "draw", "discard", "pattern" })
 	end
 
 	function M.clear_hand_and_placement()
@@ -98,7 +103,7 @@ return function(context)
 				if card.bonus_card then
 					bonus_return.return_card(card)
 				elseif card.boss_temp then
-					M.destroy_card(card)
+					Deck().destroy_card(card)
 				end
 			end
 			area:hard_set_cards()
@@ -110,7 +115,7 @@ return function(context)
 				if card.bonus_card then
 					bonus_return.return_card(card)
 				elseif card.boss_temp then
-					M.destroy_card(card)
+					Deck().destroy_card(card)
 				end
 			end
 		end
@@ -125,9 +130,9 @@ return function(context)
 				if card.area then
 					card.area:remove_card(card)
 				end
-				M.destroy_card(card)
+				Deck().destroy_card(card)
 			end
 		end
 		game_access.dispatch({ type = "JUMBLE_SET_BOSS_CARDS" })
 	end
-end
+return M

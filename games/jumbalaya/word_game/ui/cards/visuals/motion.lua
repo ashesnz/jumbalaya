@@ -7,6 +7,7 @@ local DissolveFX = require "word_game.ui.effects.dissolve_fx"
 local Random = require("jumbalaya-engine.util.random")
 
 
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 function Card:explode(dissolve_colours, explode_time_fac)
     local explode_time = 1.3*(explode_time_fac or 1)*(math.sqrt(game().SETTINGS.GAMESPEED))
     self.dissolve = 0

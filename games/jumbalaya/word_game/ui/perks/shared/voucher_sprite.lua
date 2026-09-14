@@ -1,10 +1,11 @@
 --[[ word_game/ui/perks/shared/voucher_sprite.lua - Moveable perk voucher for UI/market ]]
 
 local perk_voucher = require("word_game.ui.perks.shared.voucher")
+local AnimNode = require("jumbalaya-engine.scene.animated.init")
 local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 
-PerkVoucherSprite = AnimNode:derive("PerkVoucherSprite")
+local PerkVoucherSprite = AnimNode:derive("PerkVoucherSprite")
 
 function PerkVoucherSprite:construct(X, Y, W, H, entry)
 	AnimNode.construct(self, X, Y, W, H)

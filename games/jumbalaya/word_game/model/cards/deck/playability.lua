@@ -1,4 +1,5 @@
 --[[
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/model/cards/deck/playability.lua - Deck ownership, letter counts, deal slide SFX, fly_from_deck_to_hand hook
 
 	Core: jumbalaya_core.cards.playability
@@ -8,8 +9,13 @@
 -- Deck ownership helpers and deal animations (jumble mode; no open-board rerolls).
 local live_game = require("word_game.model.live_game")
 
-return function(context)
-	local M = context.module
+local M = {}
+local Shared = require("word_game.model.cards.deck.shared")
+local function Deck()
+	return package.loaded["word_game.model.cards.deck"]
+end
+
+
 	local core_playability = require("jumbalaya_core.cards.playability")
 
 	local function deck_owns(card)
@@ -23,8 +29,8 @@ return function(context)
 		return card and card.ability and card.ability.letter
 	end
 
-	context.deck_owns = deck_owns
-	context.card_letter = card_letter
+	Shared.deck_owns = deck_owns
+	Shared.card_letter = card_letter
 
 	M.card_letter = card_letter
 	M.deck_owns = deck_owns
@@ -38,7 +44,7 @@ return function(context)
 		return (area and area.cards) or {}
 	end
 
-	context.placement_cards = placement_cards
+	Shared.placement_cards = placement_cards
 
 	local function start_from_pile(card)
 		if not card or not live_game().draw_pile then return end
@@ -66,10 +72,10 @@ return function(context)
 		if card.pulse then
 			card:pulse(0.18, 0.08)
 		end
-		M.play_deal_slide()
-		M.sync_deck_count_display()
+		Deck().play_deal_slide()
+		Deck().sync_deck_count_display()
 		return true
 	end
 
-	context.fly_from_deck_to_hand = fly_from_deck_to_hand
-end
+	Shared.fly_from_deck_to_hand = fly_from_deck_to_hand
+return M

@@ -7,6 +7,7 @@ local LetterPalette = require("word_game.config.visuals.letter_card_palette")
 local trade_busy = require("word_game.ui.trade.busy")
 
 local function trade_model()
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	return facade.trade()
 end
 

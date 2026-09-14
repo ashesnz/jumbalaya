@@ -1,4 +1,5 @@
 --[[
+local localize = require("word_game.ui.util.localize").localize
 	word_game/ui/widgets/ - Reusable UIBox controls and chrome.
 
 	`util/` holds stateless helpers (colour, roll math, localize). This package

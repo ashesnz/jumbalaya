@@ -1,4 +1,5 @@
 --[[
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/ui/character_speech.lua - Typewriter speech bubbles for characters.
 
 	Letters start hidden and appear at full size one-by-one, left to right,

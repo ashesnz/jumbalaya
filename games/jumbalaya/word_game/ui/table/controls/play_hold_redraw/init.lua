@@ -11,6 +11,7 @@ local ring = require("word_game.ui.table.controls.play_hold_redraw.ring")
 
 local M = {}
 
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 M.HOLD_DURATION = 5.0
 M.CLICK_BLOCK = 0.18
 M.DISCARD_STAGGER = 0.05

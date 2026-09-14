@@ -1,6 +1,7 @@
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 
+local refit_viewport = require("jumbalaya-engine.adapters.love2d.display").refit_viewport
 --[[ jumbalaya-engine/adapters/love2d/window.lua - Window callbacks, mobile landscape lock, viewport ]]
 
 local Window = {}

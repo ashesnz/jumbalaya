@@ -13,6 +13,7 @@ local M = {}
 
 
 local function trade_model()
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	return facade.trade()
 end
 

@@ -2,7 +2,7 @@
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 return function(Target)
-function LayoutNode:pulse(amount, rot_amt)
+function Target:pulse(amount, rot_amt)
 	if self.ui_kind == game().UI.OBJECT then
 		if self.config.object then self.config.object:pulse(amount, rot_amt) end
 	else
@@ -10,16 +10,16 @@ function LayoutNode:pulse(amount, rot_amt)
 	end
 end
 
-function LayoutNode:can_drag()
+function Target:can_drag()
 	if self.states.drag.can then return self end
 	return self.panel:can_drag()
 end
 
-function LayoutNode:draw() end
+function Target:draw() end
 
 --- Draws children (skipping draw-layer overrides); `draw_after` flips leaf
 --- draw order so a leaf renders on top of its own subtree.
-function LayoutNode:draw_children(layer)
+function Target:draw_children(layer)
 	if not self.states.visible then return end
 	for k, v in pairs(self.children) do
 		if not v.config.draw_layer and k ~= 'h_popup' and k ~= 'alert' then

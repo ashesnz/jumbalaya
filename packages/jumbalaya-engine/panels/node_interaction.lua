@@ -2,8 +2,9 @@
 local Tables = require("jumbalaya-engine.util.tables")
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 return function(Target)
-function LayoutNode:update(dt)
+function Target:update(dt)
 	game().ARGS.FUNC_TRACKER = game().ARGS.FUNC_TRACKER or {}
 
 	-- button_delay parks the real handler aside for a cooldown window while
@@ -32,14 +33,14 @@ function LayoutNode:update(dt)
 end
 
 --- Elements are hit-testable only while their owning box allows collisions.
-function LayoutNode:collides_with_point(cursor_trans)
+function Target:collides_with_point(cursor_trans)
 	if self.panel.states.collide.can then
 		return Node.collides_with_point(self, cursor_trans)
 	end
 	return false
 end
 
-function LayoutNode:click()
+function Target:click()
 	-- Debounced, visible, non-overlayed, non-disabled buttons only.
 	if self.config.button
 		and (not self.last_clicked or self.last_clicked + 0.1 < game().TIMERS.REAL)
@@ -84,7 +85,7 @@ end
 --- Focus cursor placement; tab strips route into the chosen tab's content.
 ---@return number x
 ---@return number y
-function LayoutNode:put_focused_cursor()
+function Target:put_focused_cursor()
 	if self.config.focus_args and self.config.focus_args.type == 'tab' then
 		for _, v in pairs(self.children) do
 			if v.children[1].config.chosen then
@@ -95,7 +96,7 @@ function LayoutNode:put_focused_cursor()
 	return Node.put_focused_cursor(self)
 end
 
-function LayoutNode:remove()
+function Target:remove()
 	if self.config and self.config.object then
 		if self.config.object.remove then self.config.object:remove() end
 		self.config.object = nil
@@ -110,7 +111,7 @@ function LayoutNode:remove()
 end
 
 --- Builds the configured tooltip popup definition before Node creates it.
-function LayoutNode:hover()
+function Target:hover()
 	if self.config and self.config.on_demand_tooltip then
 		self.config.h_popup = make_tooltip(self.config.on_demand_tooltip)
 		local below = self.T.y > game().ROOM.T.h / 2
@@ -131,14 +132,14 @@ function LayoutNode:hover()
 	Node.hover(self)
 end
 
-function LayoutNode:stop_hover()
+function Target:stop_hover()
 	Node.stop_hover(self)
 	if self.config and self.config.on_demand_tooltip then
 		self.config.h_popup = nil
 	end
 end
 
-function LayoutNode:release(other)
+function Target:release(other)
 	if self.parent then self.parent:release(other) end
 end
 end

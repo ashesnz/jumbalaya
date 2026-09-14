@@ -7,86 +7,88 @@ local timer_layout = require("word_game.ui.perks.timeline_timer.layout")
 
 local clamp01 = timer_layout.clamp01
 
-return function(M)
-	function M.sync_from_model()
+local M = {}
+
+function M.apply(Timer)
+	function Timer.sync_from_model()
 		local g = game_access.get()
 		if not g then return end
 		if g.timeline_duration then
-			M.TOTAL_DURATION = g.timeline_duration
+			Timer.TOTAL_DURATION = g.timeline_duration
 		end
 		if g.timeline_seconds ~= nil then
-			M.time_remaining = g.timeline_seconds
+			Timer.time_remaining = g.timeline_seconds
 		end
 		if g.timeline_active ~= nil then
-			M.is_active = g.timeline_active
+			Timer.is_active = g.timeline_active
 		end
 		if g.timeline_frozen ~= nil then
-			M.frozen_for_reward = g.timeline_frozen
+			Timer.frozen_for_reward = g.timeline_frozen
 		end
-		M.countdown_override = g.timeline_boss_override == true
+		Timer.countdown_override = g.timeline_boss_override == true
 	end
 
-	function M.pause()
+	function Timer.pause()
 		if Timeline then
 			Timeline.pause()
 		end
-		M.sync_from_model()
+		Timer.sync_from_model()
 	end
 
-	function M.resume()
+	function Timer.resume()
 		if Timeline then
 			Timeline.resume()
 		end
-		M.sync_from_model()
+		Timer.sync_from_model()
 	end
 
-	function M.freeze_reward_display(token_amount)
+	function Timer.freeze_reward_display(token_amount)
 		token_amount = math.max(0, math.floor(token_amount or 0))
-		if M.is_progress_mode() then
-			M.progress_score = token_amount
-			M.progress_pending = 0
-			M.display_frac = clamp01(token_amount / math.max(1, M.progress_target or 1))
-			M.display_goal_frac = M.progress_goal_marker_fraction() or 1
-			M.goal_reached = token_amount >= (M.progress_target or 1)
-			M.is_active = false
-			M.frozen_for_reward = true
-			M.mirror_classic_to_game()
+		if Timer.is_progress_mode() then
+			Timer.progress_score = token_amount
+			Timer.progress_pending = 0
+			Timer.display_frac = clamp01(token_amount / math.max(1, Timer.progress_target or 1))
+			Timer.display_goal_frac = Timer.progress_goal_marker_fraction() or 1
+			Timer.goal_reached = token_amount >= (Timer.progress_target or 1)
+			Timer.is_active = false
+			Timer.frozen_for_reward = true
+			Timer.mirror_classic_to_game()
 		else
 			if Timeline then
 				Timeline.freeze(token_amount)
 			end
-			M.sync_from_model()
+			Timer.sync_from_model()
 		end
 	end
 
-	function M.set_time(time_seconds)
+	function Timer.set_time(time_seconds)
 		if Timeline and game_access.get() then
-			local cap = game_access.get().timeline_duration or M.TOTAL_DURATION
+			local cap = game_access.get().timeline_duration or Timer.TOTAL_DURATION
 			game_access.patch({ timeline_seconds = math.max(0, math.min(cap, time_seconds or cap)) })
-			M.sync_from_model()
+			Timer.sync_from_model()
 		else
-			M.time_remaining = math.max(0, math.min(M.TOTAL_DURATION, time_seconds or M.TOTAL_DURATION))
+			Timer.time_remaining = math.max(0, math.min(Timer.TOTAL_DURATION, time_seconds or Timer.TOTAL_DURATION))
 		end
 	end
 
-	function M.add_time(seconds)
+	function Timer.add_time(seconds)
 		if Timeline then
 			Timeline.add_seconds(seconds)
-			M.sync_from_model()
+			Timer.sync_from_model()
 		else
 			seconds = seconds or 0
 			if seconds == 0 then return end
-			M.time_remaining = math.max(0, math.min(M.TOTAL_DURATION, M.time_remaining + seconds))
+			Timer.time_remaining = math.max(0, math.min(Timer.TOTAL_DURATION, Timer.time_remaining + seconds))
 		end
 	end
 
-	function M.fuse_spark_active()
-		return M.time_remaining > 0 and M.time_remaining < M.TOTAL_DURATION
+	function Timer.fuse_spark_active()
+		return Timer.time_remaining > 0 and Timer.time_remaining < Timer.TOTAL_DURATION
 	end
 
-	function M.spawn_fuse_spark(timer_layout_mod)
-		if #M.sparks < 25 and math.random() < 0.65 then
-			table.insert(M.sparks, {
+	function Timer.spawn_fuse_spark(timer_layout_mod)
+		if #Timer.sparks < 25 and math.random() < 0.65 then
+			table.insert(Timer.sparks, {
 				x = (math.random() - 0.5) * 10,
 				y = (math.random() - 0.5) * 6,
 				vx = (math.random() - 0.5) * 35,
@@ -100,3 +102,5 @@ return function(M)
 		end
 	end
 end
+
+return M

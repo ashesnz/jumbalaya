@@ -17,6 +17,7 @@ local SLIDE_DURATION = 0.38
 local ARC_FRAC = 0.12
 local FINISH_PAD = 0.05
 
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 function M.is_animating()
 	return animating
 end

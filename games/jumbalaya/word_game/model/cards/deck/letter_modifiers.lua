@@ -8,8 +8,13 @@
 -- Per-letter marketplace modifiers for deck cards (A–Z).
 local live_game = require("word_game.model.live_game")
 
-return function(context)
-	local M = context.module
+local M = {}
+local Shared = require("word_game.model.cards.deck.shared")
+local function Deck()
+	return package.loaded["word_game.model.cards.deck"]
+end
+
+
 	local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 	local core_modifiers = require("jumbalaya_core.cards.letter_modifiers")
 	local core_letter_card = require("jumbalaya_core.cards.letter_card")
@@ -23,11 +28,11 @@ return function(context)
 	M.has_modified_letter = core_modifiers.has_modified_letter
 
 	local function sync_modified_face(card)
-		local letter = M.card_letter(card)
+		local letter = Deck().card_letter(card)
 		if not letter then return end
 		local color = LetterPalette.MODIFIED_FACE_COLOR
-		M.tag_card(card, letter, color)
-		local front = M.front(letter, color)
+		Deck().tag_card(card, letter, color)
+		local front = Deck().front(letter, color)
 		if front and card.apply_face then
 			card:apply_face(front, false)
 		elseif front and card.set_sprites then
@@ -37,7 +42,7 @@ return function(context)
 
 	function M.apply_to_card(card)
 		if not card or not card.ability then return false end
-		if M.is_modified(card) then return false end
+		if Deck().is_modified(card) then return false end
 		card.ability.modified = true
 		card.edition = nil
 		sync_modified_face(card)
@@ -47,10 +52,10 @@ return function(context)
 	function M.deck_has_modified_letter(letter)
 		letter = letter and letter:upper()
 		for _, card in ipairs(core_letter_card.collect_active_cards(live_game().letter_inventory)) do
-			if M.is_modified(card) and M.card_letter(card) == letter then
+			if Deck().is_modified(card) and Deck().card_letter(card) == letter then
 				return true
 			end
 		end
 		return false
 	end
-end
+return M

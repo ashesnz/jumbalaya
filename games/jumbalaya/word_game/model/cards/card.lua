@@ -43,10 +43,11 @@ local live_game = require("word_game.model.live_game")
 local CardRegistry = require("word_game.model.cards.registry")
 local UIViewHost = require("jumbalaya-engine.panels.view_host")
 local Deck = require("word_game.model.cards.deck")
+local AnimNode = require("jumbalaya-engine.scene.animated.init")
 
-Card = EaseNode:derive("Card")
+local Card = AnimNode:derive("Card")
 
-require "word_game.model.cards.card_ability"
+require("word_game.model.cards.card_ability").install(Card)
 
 --class methods
 
@@ -394,3 +395,4 @@ function Card:remove()
     EaseNode.remove(self)
 end
 
+return Card

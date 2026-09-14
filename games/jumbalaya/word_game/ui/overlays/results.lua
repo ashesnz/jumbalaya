@@ -10,6 +10,7 @@ local Components = require "word_game.ui.widgets.components"
 local Colour = require("jumbalaya-engine.util.colour")
 local Tables = require("jumbalaya-engine.util.tables")
 
+local localize = require("word_game.ui.util.localize").localize
 function build_win()
   local show_win_cta = false
   local eased_green = Tables.deep_clone(game().C.GREEN)

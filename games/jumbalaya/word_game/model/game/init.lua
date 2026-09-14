@@ -8,7 +8,7 @@
 
 local Kind = require("jumbalaya-engine.object")
 
-Game = Kind:derive("Game")
+local Game = Kind:derive("Game")
 
 function Game:construct()
 	require("jumbalaya-engine.shell").bind_game(self)
@@ -46,6 +46,7 @@ function Game:prep_stage(new_stage, new_state, new_game_obj)
 	if love.graphics and love.graphics.getWidth and love.graphics.getHeight then require("jumbalaya-engine.adapters.love2d.window").sync_resize() end
 end
 
+_G.Game = Game
 require "word_game.model.game.run"
 require "word_game.model.game.loop"
 

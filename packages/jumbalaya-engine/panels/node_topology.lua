@@ -2,7 +2,7 @@
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 return function(Target)
-function LayoutNode:print_topology(indent)
+function Target:print_topology(indent)
 	local uit_name = '????'
 	for k, v in pairs(game().UI) do
 		if v == self.ui_kind then uit_name = '' .. k end
@@ -30,7 +30,7 @@ end
 
 --- Snap the freshly-laid-out tree onto its transforms and sync embedded
 --- objects. Capability-guarded so plain Moveables work as objects too.
-function LayoutNode:initialize_VT()
+function Target:initialize_VT()
 	self:move_with_major(0)
 	self:calculate_parallax()
 

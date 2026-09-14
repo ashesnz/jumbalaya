@@ -20,6 +20,8 @@ local TITLE_GARDEN_MOSS = {0.12, 0.24, 0.14, 1}
 
 
 local function settle_main_menu_layout()
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
+local retag_audio = require("jumbalaya-engine.sound.sound").retag_audio
 	if layout_main_menu then
 		layout_main_menu()
 	end

@@ -6,8 +6,7 @@ local AnimNode = require("jumbalaya-engine.scene.animated.init")
 ---@field parent RetainedPanel|LayoutNode|nil
 ---@field ui_kind integer
 ---@field panel RetainedPanel
-LayoutNode = AnimNode:derive("LayoutNode")
-LayoutNode = LayoutNode
+local LayoutNode = AnimNode:derive("LayoutNode")
 
 -- NOTE: constructed function-style (no colon) from RetainedPanel:attach_node.
 function LayoutNode:construct(parent, new_UIBox, new_ui_kind, config)

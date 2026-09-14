@@ -1,6 +1,5 @@
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local game = require("app.runtime").game
 --[[
 	Crash fallback UI and opt-in mail to support@jumbalaya.co.
 
@@ -55,7 +54,7 @@ end
 
 local function report_body(message)
 	local file, function_line, trace = relevant_trace(message)
-	local shell = g()
+	local shell = game()
 	local version = (shell and shell.VERSION) or VERSION or "?"
 	local body = "Jumbalaya crash report\n"
 		.. "version: " .. tostring(version) .. "\n"
@@ -70,7 +69,7 @@ local function report_body(message)
 end
 
 function M.crash_mailto_url(message)
-	local shell = g()
+	local shell = game()
 	local subject = "Jumbalaya crash (" .. tostring((shell and shell.VERSION) or VERSION or "?") .. ")"
 	return "mailto:" .. SUPPORT_EMAIL
 		.. "?subject=" .. encode_mailto(subject)
@@ -78,7 +77,7 @@ function M.crash_mailto_url(message)
 end
 
 function M.crash_reports_opted_in()
-	local shell = g()
+	local shell = game()
 	return shell
 		and shell.SETTINGS
 		and shell.SETTINGS.crashreports
@@ -163,7 +162,7 @@ end
 
 ---@param message any
 function love.errhand(message)
-	if g() and g().F_NO_ERROR_HAND then
+	if game() and game().F_NO_ERROR_HAND then
 		return
 	end
 
@@ -198,7 +197,7 @@ function love.errhand(message)
 	love.audio.stop()
 	love.graphics.reset()
 	love.graphics.setNewFont("resources/fonts/Outfit-Bold.ttf", 20)
-	local shell = g()
+	local shell = game()
 	love.graphics.setBackgroundColor(shell and shell.C and shell.C.BLACK or { 0, 0, 0, 1 })
 	love.graphics.setColor(255, 255, 255, 255)
 	love.graphics.clear(love.graphics.getBackgroundColor())

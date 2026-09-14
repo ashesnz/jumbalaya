@@ -121,7 +121,6 @@ function M.install()
 	_G.teardown_tree = M.teardown_tree
 	_G.key_for_value = M.key_for_value
 	_G.count_keys = M.count_keys
-	_G.compact_array = M.compact_array
 	_G.swap_slots = M.swap_slots
 	_G.dump_table = M.dump_table
 	_G.by_order = M.by_order

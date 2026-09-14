@@ -1,5 +1,5 @@
 --[[
-	app/core/audio/sound.lua - main-thread audio API.
+	jumbalaya-engine/sound/sound.lua - main-thread audio API.
 
 	`play_sfx` is fire-and-forget; `mix_audio` runs every frame to steer the
 	music track, bed intensity, and global pitch. When the worker thread is on
@@ -11,12 +11,14 @@ local MIXER = require("jumbalaya-engine.sound.mixer")
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 
+local M = {}
+
 -- Reused request records: keeps per-frame allocation at zero.
 local play_request, mix_request, retag_request = {}, {}, {}
 
 --- Re-tags every live source with a new game state (e.g. back to the menu),
 --- so splash ducking and pause behaviour follow along.
-function retag_audio(state_tag)
+function M.retag_audio(state_tag)
 	if game().F_SOUND_THREAD then
 		if game().AUDIO_WORKER and game().AUDIO_WORKER.channel then
 			retag_request.op = 'retag'
@@ -29,9 +31,10 @@ function retag_audio(state_tag)
 end
 
 --- Fire-and-forget SFX request; silently no-ops when muted or volume is zero.
-function play_sfx(code, rate, gain)
+function M.play_sfx(code, rate, gain)
 	if game().F_MUTE then return end
-	if not (code and not game().muted and game().SETTINGS.SOUND.volume > 0) then return end
+	local settings = game().SETTINGS
+	if not (code and not game().muted and settings and settings.SOUND and settings.SOUND.volume > 0) then return end
 
 	local req = play_request
 	req.op = 'play'
@@ -55,7 +58,7 @@ end
 
 --- Per-frame mix update. Chooses the desired music track, tracks score-driven
 --- bed intensity, relaxes global pitch back to normal, and dispatches.
-function mix_audio(dt)
+function M.mix_audio(dt)
 	-- Splash screen fades its own layer in/out via this decaying gate.
 	game().SPLASH_VOL = 2 * dt * (game().STATE == game().STATES.SPLASH and 1 or 0) + (game().SPLASH_VOL or 1) * (1 - 2 * dt)
 
@@ -130,3 +133,5 @@ function mix_audio(dt)
 		MIXER.sync_beds(req)
 	end
 end
+
+return M

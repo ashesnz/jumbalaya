@@ -1,4 +1,5 @@
 --[[
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/ui/play_effects/boss_word_intro.lua — Boss-word 3-2-1 intro and hand staging.
 	Inputs: word_round, facade jumble/deck, TimelineTimer, ScoreBanner, effects host.
 	Outputs: present_boss_word(wr, on_complete); countdown via word_feedback.show_boss_countdown.

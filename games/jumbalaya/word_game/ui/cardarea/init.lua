@@ -27,6 +27,8 @@ local lifecycle = require("word_game.ui.cardarea.lifecycle")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local facade = require("word_game.ui.facade")
 
+local AnimNode = require("jumbalaya-engine.scene.animated.init")
+
 local TYPE_HANDLERS = {
 	hand = hand,
 	deck = deck,
@@ -59,7 +61,7 @@ local TYPE_HANDLERS = {
 --- @field draw_card_from fun(self: CardPile, area: CardPile, stay_flipped: boolean|nil, discarded_only: boolean|nil): boolean|nil
 --- @field save fun(self: CardPile): table|nil
 --- @field load fun(self: CardPile, cardAreaTable: table)
-CardPile = EaseNode:derive("CardPile")
+local CardPile = AnimNode:derive("CardPile")
 
 local function table_board()
 	return game().STATE == game().STATES.TABLE_BOARD

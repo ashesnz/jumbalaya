@@ -1,8 +1,10 @@
 
 local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
+local AnimNode = require("jumbalaya-engine.scene.animated.init")
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 --[[
 	app/core/graphics/flow_text.lua - animated per-letter text (FlowText).
 
@@ -16,7 +18,7 @@ local game = shell.game
 	    quiver is layered low-frequency sine noise.
 ]]
 
-FlowText = AnimNode:derive("FlowText")
+local FlowText = AnimNode:derive("FlowText")
 
 -- Golden angle: irrational phase step that keeps per-letter motion from
 -- synchronising.
@@ -434,3 +436,5 @@ function FlowText:draw()
 	HitOrder.track_hit_target(self)
 	self:draw_boundingrect()
 end
+
+return FlowText

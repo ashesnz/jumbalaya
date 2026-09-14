@@ -1,4 +1,5 @@
 --[[
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/model/game/loop.lua - Game:update_match_end — loss transition, pause, saved-run cleanup
 
 	Core: none

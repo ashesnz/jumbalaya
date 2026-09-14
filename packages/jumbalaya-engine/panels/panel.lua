@@ -9,7 +9,7 @@ local game = shell.game
 ---@field definition table
 ---@field root_node LayoutNode
 ---@field parent RetainedPanel|LayoutNode|nil
-RetainedPanel = AnimNode:derive("RetainedPanel")
+local RetainedPanel = AnimNode:derive("RetainedPanel")
 
 function RetainedPanel:construct(args)
 	AnimNode.construct(self, {args.T})

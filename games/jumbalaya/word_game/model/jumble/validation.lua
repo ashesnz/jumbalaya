@@ -9,6 +9,7 @@
 local deck_config = require("jumbalaya_core.cards.deck_config")
 local BonusStack = require("word_game.model.jumble.bonus_stack")
 local live_game = require("word_game.model.live_game")
+local Dictionary = require("dictionary")
 
 local M = {}
 
@@ -26,6 +27,15 @@ local game_access = require("word_game.model.game_access")
 
 local answer_cache = { signature = nil, words = nil }
 
+local dictionary_opts = {
+	is_valid_word = function(word)
+		return Dictionary.is_valid(word)
+	end,
+	for_each_word = function(min_len, max_len, fn)
+		return Dictionary.for_each_word(min_len, max_len, fn)
+	end,
+}
+
 local function starting_letter_counts()
 	local counts = {}
 	local letters = deck_config.STARTING_LETTERS or {}
@@ -35,29 +45,14 @@ local function starting_letter_counts()
 	return counts
 end
 
-local function dictionary_opts()
-	return {
-		is_valid_word = function(word)
-			if not Dictionary then return false end
-			Dictionary.load()
-			return Dictionary.is_valid(word)
-		end,
-		for_each_word = function(min_len, max_len, fn)
-			if not Dictionary then return false end
-			Dictionary.load()
-			return Dictionary.for_each_word(min_len, max_len, fn)
-		end,
-	}
-end
-
 M.letters_needed_from_hand = core.letters_needed_from_hand
 
 function M.hand_can_build_word(hand_counts, word, puzzle)
-	return core.hand_can_build_word(hand_counts, word, puzzle, dictionary_opts())
+	return core.hand_can_build_word(hand_counts, word, puzzle, dictionary_opts)
 end
 
 function M.has_playable_word(hand_counts, puzzle)
-	return core.has_playable_word(hand_counts, puzzle, dictionary_opts())
+	return core.has_playable_word(hand_counts, puzzle, dictionary_opts)
 end
 
 local function answer_signature(hand_counts, puzzle, limit)
@@ -93,14 +88,13 @@ end
 
 function M.find_playable_words(hand_counts, puzzle, limit)
 	puzzle = J().resolve_puzzle(puzzle)
-	if not puzzle or not Dictionary then return {} end
+	if not puzzle then return {} end
 
 	local signature = answer_signature(hand_counts, puzzle, limit)
 	if answer_cache.signature == signature then
 		return answer_cache.words
 	end
 
-	Dictionary.load()
 	local found = {}
 	local min_len = puzzle.kind == "span" and puzzle.min or #puzzle.pattern
 	local max_len = puzzle.kind == "span" and puzzle.max or #puzzle.pattern
@@ -118,7 +112,7 @@ function M.find_playable_words(hand_counts, puzzle, limit)
 end
 
 function M.jumble_hand_counts()
-	if live_game().dealt_letters and live_game().dealt_letters.cards and #live_game().dealt_letters.cards > 0 and Dictionary then
+	if live_game().dealt_letters and live_game().dealt_letters.cards and #live_game().dealt_letters.cards > 0 then
 		return Dictionary.counts_from_cards(live_game().dealt_letters.cards)
 	end
 	return starting_letter_counts()
@@ -153,7 +147,6 @@ function M.debug_answer_cards()
 end
 
 function M.debug_answer_counts()
-	if not Dictionary then return {} end
 	return Dictionary.counts_from_cards(M.debug_answer_cards())
 end
 
@@ -196,8 +189,7 @@ function M.validate_current()
 	end
 	return core.validate_word(j.slots, j.puzzle, {
 		letter_from_card = function(card)
-			if Dictionary then return Dictionary.letter_from_card(card) end
-			return card and card.ability and card.ability.letter
+			return Dictionary.letter_from_card(card)
 		end,
 		adjust_word = function(word, slots)
 			local used_cards = jumble_rules.collect_used_cards(slots)
@@ -205,8 +197,6 @@ function M.validate_current()
 		end,
 		is_word_played = function(word) return round.is_word_played(word) end,
 		is_valid_word = function(word)
-			if not Dictionary then return false end
-			Dictionary.load()
 			return Dictionary.is_valid(word)
 		end,
 	})

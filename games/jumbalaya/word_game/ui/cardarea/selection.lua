@@ -5,6 +5,7 @@ local game = require("word_game.ui.util.game_runtime").game
 local M = {}
 
 local function type_handler(self, handlers)
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	return handlers[self.config.type]
 end
 

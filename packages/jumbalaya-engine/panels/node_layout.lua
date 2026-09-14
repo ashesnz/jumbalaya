@@ -2,7 +2,7 @@
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 return function(Target)
-function LayoutNode:set_wh()
+function Target:set_wh()
 	local padding = (self.config and self.config.padding) or game().UI.padding
 
 	if next(self.children) == nil or self.config.no_fill then
@@ -32,7 +32,7 @@ end
 
 --- Shifts this subtree's role offsets by (x, y) — the mechanism behind
 --- alignment chars.
-function LayoutNode:align(x, y)
+function Target:align(x, y)
 	self.role.offset.y = self.role.offset.y + y
 	self.role.offset.x = self.role.offset.x + x
 	for _, v in pairs(self.children) do
@@ -41,7 +41,7 @@ function LayoutNode:align(x, y)
 end
 
 --- Applies our config.align to each child (c/m/b/r chars), then recurses.
-function LayoutNode:set_alignments()
+function Target:set_alignments()
 	for _, v in pairs(self.children) do
 		if self.config and self.config.align and v.align then
 			local padding = self.config.padding or game().UI.padding
@@ -69,7 +69,7 @@ end
 
 --- Keeps bound text current: lazily builds the drawable, refreshes it when
 --- ref_table[ref_value] changes, recalculating the box when length changes.
-function LayoutNode:update_text()
+function Target:update_text()
 	if self.config.ref_table and self.config.ref_value
 		and self.config.ref_table[self.config.ref_value] ~= self.config.prev_value then
 		self.config.text = tostring(self.config.ref_table[self.config.ref_value])
@@ -94,7 +94,7 @@ end
 
 --- Keeps embedded objects current: hot-swaps via ref bindings, mirrors hover
 --- state between host and object, and handles object-initiated relayouts.
-function LayoutNode:update_object()
+function Target:update_object()
 	if self.config.ref_table and self.config.ref_value
 		and self.config.ref_table[self.config.ref_value] ~= self.config.object then
 		self.config.object = self.config.ref_table[self.config.ref_value]

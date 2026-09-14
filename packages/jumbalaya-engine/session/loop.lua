@@ -5,6 +5,8 @@ local debug_overlay = require("jumbalaya-engine.debug.overlay")
 local Updaters = require("jumbalaya-engine.session.updaters")
 local DrawPasses = require("jumbalaya-engine.session.draw_passes")
 local Tables = require("jumbalaya-engine.util.tables")
+local perf_checkpoint = require("jumbalaya-engine.adapters.love2d.display").perf_checkpoint
+local mix_audio = require("jumbalaya-engine.sound.sound").mix_audio
 
 local function draw_with_container(node)
 	love.graphics.push()

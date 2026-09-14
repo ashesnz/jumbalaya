@@ -8,6 +8,13 @@ local DEFAULT_PROFILE = {
 	bonus_usage = {},
 }
 
+local function run_init_localization()
+	local loc = package.loaded["word_game.ui.util.localize"]
+	if loc and loc.init_localization then
+		loc.init_localization()
+	end
+end
+
 local function recursive_init(defaults, profile)
 	for key, value in pairs(defaults) do
 		if not profile[key] then
@@ -90,6 +97,6 @@ function Game:set_language()
 	if source then
 		local loader = loadstring or load
 		self.localization = assert(loader(source, "@" .. loc_path))()
-		init_localization()
+		run_init_localization()
 	end
 end

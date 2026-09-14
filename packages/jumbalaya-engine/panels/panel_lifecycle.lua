@@ -4,7 +4,7 @@ local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 return function(Target)
-function RetainedPanel:remove()
+function Target:remove()
 	if self == game().OVERLAY_MENU then game().REFRESH_ALERTS = true end
 	self.root_node:remove()
 	local registry = self.config and self.config.instance_type and game().LIVE and game().LIVE[self.config.instance_type] or nil
@@ -17,7 +17,7 @@ function RetainedPanel:remove()
 	AnimNode.remove(self)
 end
 
-function RetainedPanel:draw()
+function Target:draw()
 	-- One draw per frame unless a tutorial overlay forces a redraw.
 	if self.FRAME.RENDER >= game().FRAMES.RENDER
 		and not game().FIRST_PLAY_TUTORIAL_OVERLAY then return end
@@ -46,7 +46,7 @@ end
 
 --- Full relayout from the current definition state. Bumps the major-frame
 --- cache generation so weld offsets recompute against the new geometry.
-function RetainedPanel:recalculate()
+function Target:recalculate()
 	self:calculate_xywh(self.root_node, self.T, true)
 	self.root_node:set_wh()
 	self.root_node:set_alignments()
@@ -57,27 +57,27 @@ function RetainedPanel:recalculate()
 	game().REFRESH_FRAME_MAJOR_CACHE = (game().REFRESH_FRAME_MAJOR_CACHE > 1 and game().REFRESH_FRAME_MAJOR_CACHE - 1 or nil)
 end
 
-function RetainedPanel:move(dt)
+function Target:move(dt)
 	AnimNode.move(self, dt)
 	AnimNode.move(self.root_node, dt)
 end
 
-function RetainedPanel:drag(offset)
+function Target:drag(offset)
 	AnimNode.drag(self, offset)
 	AnimNode.move(self.root_node, game().real_dt)
 end
 
-function RetainedPanel:add_child(node, parent)
+function Target:add_child(node, parent)
 	self:attach_node(node, parent)
 	self:recalculate()
 end
 
-function RetainedPanel:set_container(container)
+function Target:set_container(container)
 	self.root_node:set_container(container)
 	Node.set_container(self, container)
 end
 
-function RetainedPanel:print_topology(indent)
+function Target:print_topology(indent)
 	local out = '| RetainedPanel | - ID:' .. self.ID .. ' w/h:' .. self.T.w .. '/' .. self.T.h
 	out = out .. self.root_node:print_topology(indent or 0)
 	return out

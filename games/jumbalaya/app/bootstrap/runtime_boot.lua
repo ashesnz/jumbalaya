@@ -4,8 +4,7 @@
 
 
 local Timeline = require("word_game.model.run.timeline")
-require "word_game.model.game"
-require "word_game.model.cards"
+require("app.bootstrap.kind_globals").install_game()
 require "word_game.model.game.globals"
 Game()
 require "jumbalaya-engine.adapters.love2d.display"
@@ -27,20 +26,19 @@ require "word_game.ui.cards.tooltip"
 
 local InputActions = require "app.input.actions"
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local game = require("app.runtime").game
 InputController._input_actions = InputActions
 
+require "word_game.model.cards"
 require "app.callbacks.screen_wipe"
 require "app.callbacks.profile"
 require "app.callbacks.settings"
-require "word_game.model.cards.card"
-require("word_game.ui.cards.bind").install()
-require "word_game.ui.cardarea.init"
+require("app.bootstrap.kind_globals").install_card_types()
 
 Dictionary = require "dictionary"
 WORD_GAME = require "word_game"
 require("app.bootstrap.shell_bind").install()
+require("app.bootstrap.kind_globals").install_ui_types()
 
 local views_install = require("word_game.ui.views.install")
 
@@ -50,7 +48,7 @@ DEVTOOLS = require "devtools"
 
 require("app.session.draw_passes").install()
 
-g().consume_board_click = function()
+game().consume_board_click = function()
 	if WORD_GAME_UI.FirstPlayTutorial.consume_click() then
 		return true
 	end
@@ -104,7 +102,7 @@ Updaters.register('post_input', 'card_inspect', function(game, dt)
 	WORD_GAME_UI.CardInspect.update(dt)
 end)
 Updaters.register('post_input', 'word_feedback_queue', function()
-	if g().ARGS and g().ARGS.word_feedback_queue then
+	if game().ARGS and game().ARGS.word_feedback_queue then
 		word_feedback.flush_pending()
 	end
 end)

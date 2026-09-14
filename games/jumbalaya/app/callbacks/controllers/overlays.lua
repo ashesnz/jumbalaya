@@ -3,8 +3,7 @@
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local ViewHost = require("jumbalaya-engine.panels.view_host")
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local game = require("app.runtime").game
 
 local M = {}
 
@@ -23,54 +22,54 @@ end
 
 function M.show_overlay(args)
 	if not args then return end
-	if g().OVERLAY_MENU then g().OVERLAY_MENU:remove() end
-	g().INPUT.locks.frame_set = true
-	g().INPUT.locks.frame = true
-	g().INPUT.press_state.target = nil
-	g().INPUT:shift_context_layer(g().NO_MOD_CURSOR_STACK and 0 or 1)
+	if game().OVERLAY_MENU then game().OVERLAY_MENU:remove() end
+	game().INPUT.locks.frame_set = true
+	game().INPUT.locks.frame = true
+	game().INPUT.press_state.target = nil
+	game().INPUT:shift_context_layer(game().NO_MOD_CURSOR_STACK and 0 or 1)
 
 	args.config = args.config or {}
 	local stable_overlay = args.config.no_jiggle == true
 	args.config = {
 		align = args.config.align or "cm",
 		offset = args.config.offset or (stable_overlay and { x = 0, y = 0 } or { x = 0, y = 10 }),
-		major = args.config.major or g().ROOM_ATTACH,
+		major = args.config.major or game().ROOM_ATTACH,
 		bond = 'Weak',
 		no_esc = args.config.no_esc,
 		no_jiggle = args.config.no_jiggle,
 	}
-	g().OVERLAY_MENU = true
-	g().OVERLAY_MENU = ViewHost.create{
+	game().OVERLAY_MENU = true
+	game().OVERLAY_MENU = ViewHost.create{
 		definition = args.definition,
 		config = args.config
 	}
 
-	g().OVERLAY_MENU.alignment.offset.y = stable_overlay and (args.config.offset.y or 0) or 0
-	if g().ROOM and not stable_overlay then g().ROOM.jiggle = (g().ROOM.jiggle or 0) + 1 end
-	g().OVERLAY_MENU:align_to_major()
+	game().OVERLAY_MENU.alignment.offset.y = stable_overlay and (args.config.offset.y or 0) or 0
+	if game().ROOM and not stable_overlay then game().ROOM.jiggle = (game().ROOM.jiggle or 0) + 1 end
+	game().OVERLAY_MENU:align_to_major()
 	if stable_overlay then
-		g().OVERLAY_MENU.NEW_ALIGNMENT = false
-		g().OVERLAY_MENU.VT.x = g().OVERLAY_MENU.T.x
-		g().OVERLAY_MENU.VT.y = g().OVERLAY_MENU.T.y
-		g().OVERLAY_MENU.VT.w = g().OVERLAY_MENU.T.w
-		g().OVERLAY_MENU.VT.h = g().OVERLAY_MENU.T.h
+		game().OVERLAY_MENU.NEW_ALIGNMENT = false
+		game().OVERLAY_MENU.VT.x = game().OVERLAY_MENU.T.x
+		game().OVERLAY_MENU.VT.y = game().OVERLAY_MENU.T.y
+		game().OVERLAY_MENU.VT.w = game().OVERLAY_MENU.T.w
+		game().OVERLAY_MENU.VT.h = game().OVERLAY_MENU.T.h
 	end
 end
 
 function M.close_overlay()
-	if not g().OVERLAY_MENU then return end
+	if not game().OVERLAY_MENU then return end
 	local ok, components = pcall(require, "word_game.ui.widgets.components")
 	if ok and components and components.clear_dynamic_actions then
 		components.clear_dynamic_actions()
 	end
-	g().INPUT.locks.frame_set = true
-	g().INPUT.locks.frame = true
-	g().INPUT:shift_context_layer(-1000)
-	g().OVERLAY_MENU:remove()
-	g().OVERLAY_MENU = nil
-	g().VIEWING_DECK = nil
-	g().SETTINGS.paused = false
-	g():queue_settings_write()
+	game().INPUT.locks.frame_set = true
+	game().INPUT.locks.frame = true
+	game().INPUT:shift_context_layer(-1000)
+	game().OVERLAY_MENU:remove()
+	game().OVERLAY_MENU = nil
+	game().VIEWING_DECK = nil
+	game().SETTINGS.paused = false
+	game():queue_settings_write()
 end
 
 return M

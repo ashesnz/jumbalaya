@@ -53,9 +53,9 @@ local deps = {
 	ease_out_cubic = ease_out_cubic,
 }
 
-require("word_game.ui.perks.timeline_timer.intro")(M, deps)
-require("word_game.ui.perks.timeline_timer.classic_mode")(M, deps)
-require("word_game.ui.perks.timeline_timer.fuse_mode")(M, deps)
+require("word_game.ui.perks.timeline_timer.intro").apply(M, deps)
+require("word_game.ui.perks.timeline_timer.classic_mode").apply(M, deps)
+require("word_game.ui.perks.timeline_timer.fuse_mode").apply(M)
 
 function M.format_time(time_val)
 	return timer_layout.format_time(M, time_val)

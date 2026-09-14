@@ -4,7 +4,7 @@ local dispatch_wrap = require("app.callbacks.controllers.dispatch_wrap")
 
 local BridgeRuntime = require("app.runtime")
 local Funcs = require("app.callbacks.funcs")
-local function g() return BridgeRuntime.game() end
+local function game() return BridgeRuntime.game() end
 
 local M = {}
 
@@ -12,10 +12,10 @@ local function drag_slider_impl(e)
 	local c = e.children[1]
 	e.states.drag.can = true
 	c.states.drag.can = true
-	if g().INPUT and g().INPUT.dragging.target
-		and (g().INPUT.dragging.target == e or g().INPUT.dragging.target == c) then
+	if game().INPUT and game().INPUT.dragging.target
+		and (game().INPUT.dragging.target == e or game().INPUT.dragging.target == c) then
 		local rt = c.config.ref_table
-		rt.ref_table[rt.ref_value] = math.min(rt.max, math.max(rt.min, rt.min + (rt.max - rt.min) * (g().POINTER.T.x - e.parent.T.x - g().ROOM.T.x) / e.T.w))
+		rt.ref_table[rt.ref_value] = math.min(rt.max, math.max(rt.min, rt.min + (rt.max - rt.min) * (game().POINTER.T.x - e.parent.T.x - game().ROOM.T.x) / e.T.w))
 		rt.text = string.format("%." .. tostring(rt.decimal_places) .. "f", rt.ref_table[rt.ref_value])
 		c.T.w = (rt.ref_table[rt.ref_value] - rt.min) / (rt.max - rt.min) * rt.w
 		c.config.w = c.T.w
@@ -65,8 +65,8 @@ function M.cycle_option(e)
 
 	local new_pip = e.panel:find_node_by_id('pip_' .. e.config.ref_table.current_option, e.parent.parent)
 
-	if old_pip then old_pip.config.colour = g().C.BLACK end
-	if new_pip then new_pip.config.colour = g().C.WHITE end
+	if old_pip then old_pip.config.colour = game().C.BLACK end
+	if new_pip then new_pip.config.colour = game().C.WHITE end
 
 	if e.config.ref_table.opt_callback then
 		Funcs.dispatch(e.config.ref_table.opt_callback, {

@@ -6,10 +6,10 @@ local ViewHost = require("jumbalaya-engine.panels.view_host")
 
 local BridgeRuntime = require("app.runtime")
 local Funcs = require("app.callbacks.funcs")
-local function g() return BridgeRuntime.game() end
+local function game() return BridgeRuntime.game() end
 
 Funcs.register("set_button_pip", function(e)
-	if g().INPUT.HID.controller and e.config.focus_args and not e.children.button_pip then
+	if game().INPUT.HID.controller and e.config.focus_args and not e.children.button_pip then
 		e.children.button_pip = ViewHost.create{
 			definition = make_bind_pip{button = e.config.focus_args.button, scale = e.config.focus_args.scale},
 			config = {
@@ -19,15 +19,15 @@ Funcs.register("set_button_pip", function(e)
 		}
 		e.children.button_pip.states.collide.can = false
 	end
-	if not g().INPUT.HID.controller and e.children.button_pip then
+	if not game().INPUT.HID.controller and e.children.button_pip then
 		e.children.button_pip:remove()
 		e.children.button_pip = nil
 	end
 end)
 
 Funcs.register("pulse_node", function(e)
-	if g().INPUT.text_capture then
-		if (math.floor(g().TIMERS.REAL*2))%2 == 1 then
+	if game().INPUT.text_capture then
+		if (math.floor(game().TIMERS.REAL*2))%2 == 1 then
 			e.config.colour[4] = 0
 		else
 			e.config.colour[4] = 1

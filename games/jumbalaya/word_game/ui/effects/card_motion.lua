@@ -1,4 +1,5 @@
 --[[
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/ui/effects/card_motion.lua — Queued card moves between piles via timeline scheduler.
 	Inputs: Game shell (TIMELINE), card.area, target coordinates in opts.
 	Outputs: CardMotion.move(opts); consumed by presentation card_motion_move handler.
@@ -6,8 +7,7 @@
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 
-local BridgeRuntime = require("app.runtime")
-local function g() return BridgeRuntime.game() end
+local game = require("word_game.ui.util.game_runtime").game
 
 local CardMotion = {}
 
@@ -32,9 +32,9 @@ function CardMotion.move(options)
             end
 
             if not options.mute and drawn then
-                if options.from == g().draw_pile or options.from == g().dealt_letters
-                    or options.from == g().recycle_stash then
-                    g().VIBRATION = g().VIBRATION + 0.6
+                if options.from == game().draw_pile or options.from == game().dealt_letters
+                    or options.from == game().recycle_stash then
+                    game().VIBRATION = game().VIBRATION + 0.6
                 end
                 play_sfx('card_slide1', 0.85 + percent * 0.2 / 100, 0.6 * (options.volume or 1))
             end
