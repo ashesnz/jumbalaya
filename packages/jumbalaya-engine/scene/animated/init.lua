@@ -64,14 +64,20 @@ function AnimNode:draw()
 	self:draw_boundingrect()
 end
 
+local function remove_from_registry(registry, node)
+	for k, v in ipairs(registry) do
+		if v == node then
+			local last = #registry
+			registry[k] = registry[last]
+			registry[last] = nil
+			return
+		end
+	end
+end
+
 function AnimNode:remove()
 	for _, registry in ipairs({ g().TRANSFORMS, g().LIVE.TRANSFORM }) do
-		for k, v in ipairs(registry) do
-			if v == self then
-				table.remove(registry, k)
-				break
-			end
-		end
+		remove_from_registry(registry, self)
 	end
 	Node.remove(self)
 end

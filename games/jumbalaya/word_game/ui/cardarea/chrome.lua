@@ -7,6 +7,23 @@ local UIViewHost = require("jumbalaya-engine.panels.view_host")
 
 local M = {}
 
+local INVISIBLE_AREA_TYPES = {
+	discard = 1,
+	perk = 1,
+	usable = 1,
+	title = 1,
+	title_2 = 1,
+	placement = 1,
+	shelf = 1,
+}
+
+function M.skip_chrome(area)
+	if INVISIBLE_AREA_TYPES[area.config.type] then
+		return true
+	end
+	return area.config.type == 'deck' and area ~= runtime().draw_pile
+end
+
 function M.ensure_area_uibox(area)
 	if area.children.area_uibox then return end
 

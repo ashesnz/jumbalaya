@@ -72,6 +72,13 @@ function M.draw_layer(self, v, draw_card_layer)
 	end
 end
 
+function M.remove_target(self, candidates, card)
+	if card == nil then
+		return candidates[#candidates]
+	end
+	return card
+end
+
 function M.update(self, dt)
 	if self ~= runtime().draw_pile then return end
 	local table_deck = self == runtime().draw_pile and WORD_GAME_UI.TableDeck

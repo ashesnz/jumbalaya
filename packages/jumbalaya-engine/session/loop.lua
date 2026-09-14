@@ -55,9 +55,9 @@ function Game:update(dt)
 		end
 		perf_checkpoint('states', 'update')
 
-		compact_array(self.ANIMATIONS)
+		self.ANIMATIONS = compact_array(self.ANIMATIONS)
 
-		for k, v in pairs(self.ANIMATIONS) do
+		for _, v in ipairs(self.ANIMATIONS) do
 			v:animate(self.real_dt*self.TIME_SCALE)
 		end
 		perf_checkpoint('animate', 'update')
@@ -70,14 +70,16 @@ function Game:update(dt)
 
 		self.smoothing.max_vel = 58*move_dt
 
-		for k, v in ipairs(self.TRANSFORMS) do
+		self.TRANSFORMS = compact_array(self.TRANSFORMS)
+
+		for _, v in ipairs(self.TRANSFORMS) do
 			if v and v.move and v.FRAME and v.FRAME.TRANSFORM and v.FRAME.TRANSFORM < self.FRAMES.TRANSFORM then v:move(move_dt) end
 		end
 		perf_checkpoint('move', 'update')
 
 		Updaters.run('late_board', self, dt)
 
-		for k, v in pairs(self.TRANSFORMS) do
+		for _, v in ipairs(self.TRANSFORMS) do
 			if v and v.update then
 				v:update(dt*self.TIME_SCALE)
 				if v.states and v.states.collide then

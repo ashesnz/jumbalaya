@@ -12,6 +12,13 @@ local voucher_discard = require("word_game.ui.perks.discard_bin")
 
 local M = {}
 
+function M.remove_target(self, candidates, card)
+	if card == nil then
+		return candidates[#candidates]
+	end
+	return card
+end
+
 function M.update(self, dt)
 	if self ~= runtime().recycle_stash then return end
 	voucher_discard.sync_discard_pile_area()

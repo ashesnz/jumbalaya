@@ -19,6 +19,8 @@ local hand = require("word_game.ui.cardarea.hand")
 local deck = require("word_game.ui.cardarea.deck")
 local discard = require("word_game.ui.cardarea.discard")
 local placement = require("word_game.ui.cardarea.placement")
+local shop = require("word_game.ui.cardarea.shop")
+local title = require("word_game.ui.cardarea.title")
 local selection = require("word_game.ui.cardarea.selection")
 local relayout_mod = require("word_game.ui.cardarea.relayout")
 local chrome = require("word_game.ui.cardarea.chrome")
@@ -31,6 +33,11 @@ local TYPE_HANDLERS = {
 	deck = deck,
 	discard = discard,
 	placement = placement,
+	shop = shop,
+	usable = shop,
+	title_2 = shop,
+	title = title,
+	perk = title,
 }
 
 --- @class (partial) CardPile : EaseNode
@@ -176,10 +183,13 @@ function CardPile:remove_card(card, discarded_only)
 	end
 
 	-- Piles draw from the top; rows take the front.
-	if card == nil and (self.config.type == 'discard' or self.config.type == 'deck') then
-		card = candidates[#candidates]
-	elseif card == nil then
-		card = candidates[1]
+	if card == nil then
+		local handler = type_handler(self)
+		if handler and handler.remove_target then
+			card = handler.remove_target(self, candidates, nil)
+		else
+			card = candidates[1]
+		end
 	end
 
 	if not card then
@@ -239,8 +249,6 @@ function CardPile:set_ranks()
 		card.states.collide.can = true
 		if handler and handler.set_card_ranks then
 			handler.set_card_ranks(self, k, card)
-		elseif self.config.type == 'shop' or self.config.type == 'usable' then
-			card.states.drag.can = false
 		else
 			card.states.drag.can = true
 		end
@@ -264,7 +272,7 @@ end
 --- @param dt number seconds since last frame
 function CardPile:update(dt)
 	if self == runtime().dealt_letters then
-		for k, v in pairs(self.cards) do
+		for _, v in ipairs(self.cards) do
 			if v.ability.forced_selection and not self.selected[1] then
 				self:add_selection(v)
 			end
@@ -290,10 +298,7 @@ function CardPile:draw()
 	if not self.cards then return end
 	if runtime().VIEWING_DECK and (self==runtime().draw_pile or self==runtime().dealt_letters) then return end
 
-	self.ARGS.invisible_area_types = self.ARGS.invisible_area_types or {discard=1, perk=1, usable=1, title = 1, title_2 = 1, placement=1, shelf=1}
-	if self.ARGS.invisible_area_types[self.config.type] or
-		(self.config.type == 'deck' and self ~= runtime().draw_pile) then
-	else
+	if not chrome.skip_chrome(self) then
 		chrome.draw_chrome(self)
 	end
 
@@ -303,37 +308,13 @@ function CardPile:draw()
 	track_hit_target(self)
 
 	self.ARGS.draw_layers = self.ARGS.draw_layers or self.config.draw_layers or {'shadow', 'card'}
-	for k, v in ipairs(self.ARGS.draw_layers) do
+	for _, v in ipairs(self.ARGS.draw_layers) do
 		deck.draw_layer(self, v, draw_card_layer)
 		discard.draw_layer(self, v, draw_card_layer)
 		placement.draw_layer(self, v, draw_card_layer)
-
-		if self.config.type == 'usable' or self.config.type == 'shop' or self.config.type == 'title_2' then
-			for i = 1, #self.cards do
-				if self.cards[i] ~= runtime().INPUT.focused.target then
-					if not self.cards[i].selected then
-						draw_card_layer(self.cards[i], v)
-					end
-				end
-			end
-			for i = 1, #self.cards do
-				if self.cards[i] ~= runtime().INPUT.focused.target then
-					if self.cards[i].selected then
-						draw_card_layer(self.cards[i], v)
-					end
-				end
-			end
-		end
-
+		shop.draw_layer(self, v, draw_card_layer)
+		title.draw_layer(self, v, draw_card_layer)
 		hand.draw_layer(self, v, draw_card_layer)
-
-		if self.config.type == 'title' or self.config.type == 'perk' then
-			for i = 1, #self.cards do
-				if self.cards[i] ~= runtime().INPUT.focused.target or self == runtime().dealt_letters then
-					draw_card_layer(self.cards[i], v)
-				end
-			end
-		end
 	end
 end
 
@@ -358,7 +339,7 @@ end
 --- (no animation), used after `hard_set_T` or on load.
 function CardPile:hard_set_cards()
 	if not self.cards then return end
-	for k, card in pairs(self.cards) do
+	for _, card in ipairs(self.cards) do
 		card:hard_set_T()
 		card:calculate_parallax()
 	end
