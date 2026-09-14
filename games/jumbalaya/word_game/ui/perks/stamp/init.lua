@@ -11,25 +11,16 @@ local function runtime() return GameRT.game() end
 
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
-local Layout = require("word_game.ui.layout")
 local run_state = facade.run_state()
-local stamp_layout = require("word_game.ui.perks.stamp.layout")
 local perk_cfg = require("word_game.config.perks")
-local stamp_grid = require("word_game.ui.perks.stamp.grid")
-local stamp_puff = require("word_game.ui.perks.stamp.puff")
-local widgets = require("word_game.ui.widgets")
 local definition = require("word_game.ui.perks.stamp.definition")
 local draw = require("word_game.ui.perks.stamp.draw")
 local animate = require("word_game.ui.perks.stamp.animate")
+local geometry = require("word_game.ui.perks.stamp.geometry")
+local render_pass = require("word_game.ui.perks.stamp.render_pass")
+local widgets = require("word_game.ui.widgets")
 
 local M = {}
-
-local room_translate = stamp_layout.room_translate
-local tile_scale = stamp_layout.tile_scale
-local node_rect_px = stamp_layout.node_rect_px
-local sidebar_width_px = stamp_layout.sidebar_width_px
-local mouse_to_stamp_space = stamp_layout.mouse_to_stamp_space
-local screen_top_px = stamp_layout.screen_top_px
 
 local function refresh_sidebar()
 	if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.refresh then
@@ -37,75 +28,9 @@ local function refresh_sidebar()
 	end
 end
 
-local function layout_stamp_count()
-	return animate.layout_stamp_count()
-end
-
-local function next_slot_index()
-	return animate.next_slot_index()
-end
-
-local function stamp_panel_height_px()
-	return stamp_grid.panel_height_px(nil, layout_stamp_count())
-end
-
-local function stamp_panel_rect_px(layout_count)
-	layout_count = layout_count or layout_stamp_count()
-	local row
-	local views_install = require("word_game.ui.views.install")
-	local sidebar_view = views_install.sidebar_view()
-	if sidebar_view and sidebar_view.find_node_by_id then
-		row = sidebar_view:find_node_by_id("row_stamp_slot")
-	end
-	if not row and runtime().SIDEBAR_HUD and runtime().SIDEBAR_HUD.find_node_by_id then
-		row = runtime().SIDEBAR_HUD:find_node_by_id("row_stamp_slot")
-	end
-	local rx, ry, rw, rh = node_rect_px(row)
-	if not rx then
-		local sidebar = Layout.sidebar_rect()
-		local ts = tile_scale()
-		rx = sidebar.x * ts
-		ry = (sidebar.y + 0.82) * ts
-		rw = sidebar.w * ts
-		rh = stamp_grid.panel_height_px(nil, layout_count)
-	end
-	local w = sidebar_width_px()
-	local h = stamp_grid.panel_height_px(nil, layout_count)
-	local box_h = math.max(rh or h, h)
-	local x = rx + (rw - w) * 0.5
-	local y = ry + (box_h - h) * 0.5
-	return x, y, w, h, layout_count
-end
-
-local function stamp_cell_rect_px(index)
-	index = index or next_slot_index()
-	local count = math.max(index, layout_stamp_count())
-	local panel_x, panel_y, panel_w, panel_h = stamp_panel_rect_px(count)
-	return stamp_grid.cell_rect_px(panel_x, panel_y, panel_w, panel_h, index, count)
-end
-
-local function stamp_target_px(target_index)
-	target_index = target_index or next_slot_index()
-	local x, y, w, h = stamp_cell_rect_px(target_index)
-	return x + w * 0.5, y + h * 0.5, x, y, w, h
-end
-
-local function imprint_index_at(mx, my)
-	local imprints = animate.get_imprints()
-	if #imprints == 0 then return nil end
-	local sx, sy = mouse_to_stamp_space(mx, my)
-	for i = 1, #imprints do
-		local x, y, w, h = stamp_cell_rect_px(i)
-		if sx >= x and sx <= x + w and sy >= y and sy <= y + h then
-			return i
-		end
-	end
-	return nil
-end
-
 animate.init({
-	stamp_target_px = stamp_target_px,
-	screen_top_px = screen_top_px,
+	stamp_target_px = geometry.stamp_target_px,
+	screen_top_px = require("word_game.ui.perks.stamp.layout").screen_top_px,
 	refresh_sidebar = refresh_sidebar,
 	play_pending = function()
 		M.play()
@@ -192,54 +117,7 @@ function M.update(dt)
 end
 
 function M.draw_pass()
-	if runtime().STATE ~= runtime().STATES.TABLE_BOARD or not runtime().ROOM or not love.graphics then return end
-
-	local prev_shader = love.graphics.getShader()
-	local cr, cg, cb, ca = love.graphics.getColor()
-
-	love.graphics.push()
-	love.graphics.setShader()
-	room_translate()
-
-	local imprints = animate.get_imprints()
-	local anim = animate.get_anim()
-	for i, entry in ipairs(imprints) do
-		local x, y, w, h = stamp_cell_rect_px(i)
-		local alpha = 1
-		if anim and i == #imprints and anim.impacted then
-			local imprint_t = math.min(1, (anim.t - animate.STRIKE_DUR) / animate.IMPRINT_DUR)
-			alpha = math.min(1, imprint_t * 2.2)
-		end
-		draw.draw_type_imprint(entry.perk or entry.sprite, x, y, w, h, alpha)
-		local voucher_discard = WORD_GAME_UI.VoucherDiscard
-		if voucher_discard and voucher_discard.draw_voucher_overlay then
-			voucher_discard.draw_voucher_overlay(entry, x, y, w, h)
-		end
-	end
-
-	stamp_puff.draw()
-
-	if anim then
-		local frame = anim
-		local x, y, scale, yaw, pitch, roll, squash_y, phase, approach = animate.stamp_pose(frame.t, frame)
-		local stamp_alpha = 1
-		if phase == "retract" then
-			stamp_alpha = draw.clamp01(1 - (frame.t - animate.STRIKE_DUR - animate.HOLD_DUR) / animate.RETRACT_DUR)
-		end
-
-		if stamp_alpha > 0.02 then
-			draw.draw_shadow(frame.land_cx, frame.land_cy, frame.slot_w, frame.slot_h, approach, stamp_alpha)
-			draw.draw_stamp_3d(x, y, scale, yaw, pitch, squash_y, stamp_alpha, roll)
-		end
-	end
-
-	love.graphics.pop()
-	if prev_shader then
-		love.graphics.setShader(prev_shader)
-	else
-		love.graphics.setShader()
-	end
-	love.graphics.setColor(cr, cg, cb, ca)
+	render_pass.draw_pass()
 end
 
 function M.debug_mesh(ox, oy, scale, yaw, pitch, squash_y, roll)
@@ -255,10 +133,10 @@ function M.debug_draw_imprint(sprite_entry, x, y, w, h, alpha)
 end
 
 function M.debug_next_land_px()
-	local target_index = next_slot_index()
+	local target_index = geometry.next_slot_index()
 	animate.set_pending_target_index(target_index)
 	refresh_sidebar()
-	local _, land_cy, _, slot_y = stamp_target_px(target_index)
+	local _, land_cy, _, slot_y = geometry.stamp_target_px(target_index)
 	animate.set_pending_target_index(nil)
 	return target_index, land_cy, slot_y
 end
@@ -287,7 +165,7 @@ function M.imprint_cell_rects_px()
 	local rects = {}
 	local count = animate.imprint_count()
 	for i = 1, count do
-		local x, y, w, h = stamp_cell_rect_px(i)
+		local x, y, w, h = geometry.stamp_cell_rect_px(i)
 		rects[i] = { x = x, y = y, w = w, h = h }
 	end
 	return rects
@@ -331,7 +209,7 @@ function M.consume_click(mx, my)
 		if not love or not love.mouse or not love.mouse.getPosition then return false end
 		mx, my = love.mouse.getPosition()
 	end
-	local idx = imprint_index_at(mx, my)
+	local idx = geometry.imprint_index_at(mx, my)
 	if not idx then return false end
 
 	M.show_perk_popup(animate.get_imprints()[idx].perk)
@@ -340,13 +218,11 @@ function M.consume_click(mx, my)
 end
 
 function M.imprint_index_at_screen(mx, my)
-	return imprint_index_at(mx, my)
+	return geometry.imprint_index_at(mx, my)
 end
 
 function M.debug_grid_layout(count)
-	local panel_x, panel_y, panel_w = stamp_panel_rect_px()
-	count = count or layout_stamp_count()
-	return stamp_grid.layout(panel_x, panel_y, panel_w, count)
+	return geometry.debug_grid_layout(count)
 end
 
 return M
