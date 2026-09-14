@@ -1,6 +1,8 @@
 --[[ word_game/ui/perks/shared/voucher_sprite.lua - Moveable perk voucher for UI/market ]]
 
 local perk_voucher = require("word_game.ui.perks.shared.voucher")
+local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
+local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 
 PerkVoucherSprite = AnimNode:derive("PerkVoucherSprite")
 
@@ -16,10 +18,10 @@ end
 
 function PerkVoucherSprite:draw_self()
 	if not self.states.visible or not self.entry then return end
-	push_node_transform(self, 1)
+	NodeTransform.push_node_transform(self, 1)
 	perk_voucher.draw(self.entry, 0, 0, self.VT.w, self.VT.h, 1)
 	love.graphics.pop()
-	track_hit_target(self)
+	HitOrder.track_hit_target(self)
 	self:draw_boundingrect()
 end
 

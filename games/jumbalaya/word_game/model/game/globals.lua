@@ -10,6 +10,8 @@ local RuntimeOptions = require("word_game.config.boot.runtime_options")
 local Env = require("word_game.config.boot.env")
 local Palette = require("word_game.config.visuals.palette")
 local Dimensions = require("word_game.config.layout.dimensions")
+local Colour = require("jumbalaya-engine.util.colour")
+local Tables = require("jumbalaya-engine.util.tables")
 
 VERSION = '1.0.0i'
 VERSION = VERSION..'-FULL'
@@ -129,9 +131,9 @@ function Game:define_constants()
     self.VIBRATION = 0
 
     -- The colour system lives in the palette module; this only assembles it.
-    self.C = Palette.build(colour_from_hex)
-    self.C.UI_POINTS = deep_clone(self.C.BLUE)
-    self.C.UI_MULTIPLIER = deep_clone(self.C.RED)
+    self.C = Palette.build(Colour.colour_from_hex)
+    self.C.UI_POINTS = Tables.deep_clone(self.C.BLUE)
+    self.C.UI_MULTIPLIER = Tables.deep_clone(self.C.RED)
     self.UI = {
         TEXT = 1,
         BOX = 2,      -- rounded box

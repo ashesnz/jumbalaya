@@ -7,6 +7,7 @@
 ]]
 
 local live_game = require("word_game.model.live_game")
+local Tables = require("jumbalaya-engine.util.tables")
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local game_access = require("word_game.model.game_access")
@@ -31,7 +32,7 @@ discover_card = M.discover_card
 
 function M.queue_progress_write()
 	live_game().ARGS.progress_payload = live_game().ARGS.progress_payload or {}
-	live_game().ARGS.progress_payload.UDA = clear_table(live_game().ARGS.progress_payload.UDA)
+	live_game().ARGS.progress_payload.UDA = Tables.clear_table(live_game().ARGS.progress_payload.UDA)
 	live_game().ARGS.progress_payload.SETTINGS = live_game().SETTINGS
 	live_game().ARGS.progress_payload.PROFILE = live_game().PROFILES[live_game().SETTINGS.profile]
 

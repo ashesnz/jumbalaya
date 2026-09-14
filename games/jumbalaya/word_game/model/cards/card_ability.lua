@@ -7,6 +7,7 @@
 ]]
 -- Card identity and deck membership.
 local CardRegistry = require("word_game.model.cards.registry")
+local Tables = require("jumbalaya-engine.util.tables")
 
 
 ---@class (partial) Card : EaseNode
@@ -41,7 +42,7 @@ function Card:apply_center(center, initial, delay_sprites)
         effect = center.effect,
         set = center.set,
         bonus = center.config.bonus or 0,
-        extra = deep_clone(center.config.extra),
+        extra = Tables.deep_clone(center.config.extra),
         type = center.config.type or "",
         order = center.order,
         forced_selection = previous and previous.forced_selection or nil,

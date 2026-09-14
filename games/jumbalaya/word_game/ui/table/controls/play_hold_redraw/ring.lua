@@ -3,6 +3,7 @@
 local GameRT = require("word_game.ui.util.game_runtime")
 local button = require("word_game.ui.table.controls.play_hold_redraw.button")
 local state = require("word_game.ui.table.controls.play_hold_redraw.state")
+local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 
 local M = {}
 
@@ -70,7 +71,7 @@ function M.draw(enabled_fn, constants)
 		runtime().ROOM:translate_container()
 	end
 
-	push_node_transform(btn, 1)
+	NodeTransform.push_node_transform(btn, 1)
 	love.graphics.scale(1 / (runtime().TILESIZE or 1))
 
 	local a_top = -math.pi * 0.5

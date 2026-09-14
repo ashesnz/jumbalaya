@@ -94,4 +94,9 @@ function Easing.colour(options)
     end
 end
 
+--- Legacy global for model glue that must not import UI modules.
+function Easing.install_globals()
+    _G.ease_background_colour = Easing.background_colour
+end
+
 return Easing

@@ -7,6 +7,7 @@
 ]]
 
 local BridgeRuntime = require("app.runtime")
+local Tables = require("jumbalaya-engine.util.tables")
 
 local function persistence()
 	return rawget(_G, "WORD_GAME") and WORD_GAME.Persistence
@@ -88,7 +89,7 @@ function Game:discard_run()
 	end
 
 	if self.ROOM then
-		teardown_tree(self.STAGE_OBJECTS[self.STAGE])
+		Tables.teardown_tree(self.STAGE_OBJECTS[self.STAGE])
 		if self.buttons then self.buttons:remove(); self.buttons = nil end
 		if self.deck_preview then self.deck_preview:remove(); self.deck_preview = nil end
 		if self.MAIN_MENU_UI then self.MAIN_MENU_UI:remove(); self.MAIN_MENU_UI = nil end

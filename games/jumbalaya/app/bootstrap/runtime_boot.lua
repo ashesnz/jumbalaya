@@ -22,6 +22,7 @@ local word_feedback = require "word_game.ui.feedback.word_feedback"
 require "word_game.ui.overlays"
 
 require "word_game.ui.effects"
+require("word_game.ui.effects.easing").install_globals()
 require "word_game.ui.cards.tooltip"
 
 local InputActions = require "app.input.actions"

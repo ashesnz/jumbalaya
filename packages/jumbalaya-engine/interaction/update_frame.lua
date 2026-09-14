@@ -4,6 +4,7 @@ local function g() return shell.game() end
 
 
 return function(InputRouter)
+local Tables = require("jumbalaya-engine.util.tables")
 function InputRouter:update_frame(dt)
 	-- Locks: any truthy lock blocks input (with pause/wipe nuances).
 	self.locked = false
@@ -77,10 +78,10 @@ function InputRouter:update_frame(dt)
 
 	self.frame_buttonpress = false
 
-	self.pressed_keys = clear_table(self.pressed_keys)
-	self.released_keys = clear_table(self.released_keys)
-	self.pressed_buttons = clear_table(self.pressed_buttons)
-	self.released_buttons = clear_table(self.released_buttons)
+	self.pressed_keys = Tables.clear_table(self.pressed_keys)
+	self.released_keys = Tables.clear_table(self.released_keys)
+	self.pressed_buttons = Tables.clear_table(self.pressed_buttons)
+	self.released_buttons = Tables.clear_table(self.released_buttons)
 
 	if self.HID.controller then
 		-- Restore saved cursor/focus when returning to a lower menu layer.

@@ -5,6 +5,7 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local LetterFaces = require("word_game.ui.cards.letter_faces")
 local LetterPalette = require("word_game.config.visuals.letter_card_palette")
 local Tables = require("jumbalaya-engine.util.tables")
+local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 
 local function runtime() return GameRT.game() end
 
@@ -200,7 +201,7 @@ function Card:draw(layer)
 			self.children.focused_ui:draw()
 		end
 
-		track_hit_target(self)
+		HitOrder.track_hit_target(self)
 		self:draw_boundingrect()
 	end
 end

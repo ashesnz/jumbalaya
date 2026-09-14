@@ -1,4 +1,5 @@
 return function(InputRouter)
+local Tables = require("jumbalaya-engine.util.tables")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 
@@ -16,8 +17,8 @@ function InputRouter:update_focus(dir)
 		return
 	end
 
-	g().ARGS.focus_list = clear_table(g().ARGS.focus_list)
-	g().ARGS.focusables = clear_table(g().ARGS.focusables)
+	g().ARGS.focus_list = Tables.clear_table(g().ARGS.focus_list)
+	g().ARGS.focusables = Tables.clear_table(g().ARGS.focusables)
 
 	-- Drop the current target once it stops being valid.
 	if self.focused.target then

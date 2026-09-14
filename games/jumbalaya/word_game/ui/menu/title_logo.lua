@@ -3,6 +3,8 @@
 ]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
+local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
+local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local function runtime() return GameRT.game() end
 
 local BASE_W = 933
@@ -171,7 +173,7 @@ function TitleLogo:draw()
 	local canvas_scale_y = self.VT.h / BASE_H
 	local t = self.anim_time
 
-	push_node_transform(self, 1)
+	NodeTransform.push_node_transform(self, 1)
 	self:apply_shader_effect()
 	love.graphics.setColor(runtime().C.WHITE)
 	-- Keep the authored, complete logo intact during its initial reveal. Once
@@ -208,7 +210,7 @@ function TitleLogo:draw()
 	end
 
 	love.graphics.pop()
-	track_hit_target(self)
+	HitOrder.track_hit_target(self)
 	self:draw_boundingrect()
 end
 

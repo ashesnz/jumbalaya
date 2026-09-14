@@ -25,6 +25,7 @@ local selection = require("word_game.ui.cardarea.selection")
 local relayout_mod = require("word_game.ui.cardarea.relayout")
 local chrome = require("word_game.ui.cardarea.chrome")
 local lifecycle = require("word_game.ui.cardarea.lifecycle")
+local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local facade = require("word_game.ui.facade")
 
 local TYPE_HANDLERS = {
@@ -220,7 +221,7 @@ function CardPile:draw()
 	placement.draw_shadows(self)
 
 	self:draw_boundingrect()
-	track_hit_target(self)
+	HitOrder.track_hit_target(self)
 
 	self.ARGS.draw_layers = self.ARGS.draw_layers or self.config.draw_layers or {'shadow', 'card'}
 	for _, v in ipairs(self.ARGS.draw_layers) do

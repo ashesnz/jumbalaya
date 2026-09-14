@@ -8,6 +8,8 @@
 	Presentation: none
 ]]
 
+local Tables = require("jumbalaya-engine.util.tables")
+
 ---@class (partial) Card : EaseNode
 ---@field ability CardAbility
 ---@field base table
@@ -351,7 +353,7 @@ function Card:load(saved)
         self[field] = saved.state[field]
     end
 
-    teardown_tree(self.children)
+    Tables.teardown_tree(self.children)
     self.children = { shadow = EaseNode(0, 0, 0, 0) }
 
     self:set_sprites(self.config.center, self.config.card)
@@ -381,7 +383,7 @@ function Card:remove()
         end
     end
 
-    teardown_tree(self.children)
+    Tables.teardown_tree(self.children)
 
     for k, v in pairs(live_game().LIVE.CARD) do
         if v == self then

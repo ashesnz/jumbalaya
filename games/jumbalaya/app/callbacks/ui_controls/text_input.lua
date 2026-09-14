@@ -2,6 +2,7 @@
 
 local Easing = require "word_game.ui.effects.easing"
 local ViewHost = require("jumbalaya-engine.panels.view_host")
+local Tables = require("jumbalaya-engine.util.tables")
 
 local BridgeRuntime = require("app.runtime")
 local Funcs = require("app.callbacks.funcs")
@@ -103,7 +104,7 @@ Funcs.register("text_field_key",  function(args)
 
   --shortcut to hook config
   local hook_config = g().INPUT.text_capture.config.ref_table
-  hook_config.orig_colour = hook_config.orig_colour or deep_clone(hook_config.colour)
+  hook_config.orig_colour = hook_config.orig_colour or Tables.deep_clone(hook_config.colour)
 
   args.key = args.key or '%'
   args.caps = args.caps or g().INPUT.capslock or hook_config.all_caps --capitalize if caps lock or hook requires
@@ -154,7 +155,7 @@ Funcs.register("text_field_key",  function(args)
   elseif args.key == 'RETURN' then --Release the hook
     if hook.config.ref_table.callback then hook.config.ref_table.callback() end
     hook.parent.parent.config.colour = hook_config.colour
-    local temp_colour = deep_clone(hook_config.orig_colour)
+    local temp_colour = Tables.deep_clone(hook_config.orig_colour)
     hook_config.colour[1] = g().C.WHITE[1]
     hook_config.colour[2] = g().C.WHITE[2]
     hook_config.colour[3] = g().C.WHITE[3]
@@ -245,7 +246,7 @@ function TRANSPOSE_TEXT_INPUT(amount)
   while amount ~= 0 do
     if position_child + dir < 1 or position_child + dir >= #hook.children then break end
     local real_letter = hook.children[position_child+dir].config.id:sub(1, 7) == 'letter_' and hook.children[position_child+dir].config.text ~= ''
-    swap_slots(hook.children, position_child, position_child + dir)
+    Tables.swap_slots(hook.children, position_child, position_child + dir)
     if real_letter then amount = amount - dir end
     position_child = position_child + dir
   end

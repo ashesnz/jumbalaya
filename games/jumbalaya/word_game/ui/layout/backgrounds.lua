@@ -11,6 +11,7 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
+local Easing = require("word_game.ui.effects.easing")
 
 local M = {}
 
@@ -78,9 +79,7 @@ function M.garden()
 		},
 	}})
 
-	if ease_background_colour then
-		ease_background_colour{new_colour = GARDEN_STAGE_MOSS, contrast = 1}
-	end
+	Easing.background_colour{new_colour = GARDEN_STAGE_MOSS, contrast = 1}
 end
 
 function M.swirl()

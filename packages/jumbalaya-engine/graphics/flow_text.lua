@@ -1,4 +1,6 @@
 
+local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
+local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 --[[
@@ -374,7 +376,7 @@ function FlowText:draw()
 	local focused = self.strings[self.active_string]
 
 	if self.shadow then
-		push_node_transform(self, 1)
+		NodeTransform.push_node_transform(self, 1)
 		love.graphics.translate(
 			focused.W_offset + self.text_offset.x * self.font.FONTSCALE / g().TILESIZE,
 			focused.H_offset + self.text_offset.y * self.font.FONTSCALE / g().TILESIZE)
@@ -400,7 +402,7 @@ function FlowText:draw()
 		love.graphics.pop()
 	end
 
-	push_node_transform(self, 1)
+	NodeTransform.push_node_transform(self, 1)
 	love.graphics.translate(
 		focused.W_offset + self.text_offset.x * self.font.FONTSCALE / g().TILESIZE,
 		focused.H_offset + self.text_offset.y * self.font.FONTSCALE / g().TILESIZE)
@@ -429,6 +431,6 @@ function FlowText:draw()
 	end
 	love.graphics.pop()
 
-	track_hit_target(self)
+	HitOrder.track_hit_target(self)
 	self:draw_boundingrect()
 end

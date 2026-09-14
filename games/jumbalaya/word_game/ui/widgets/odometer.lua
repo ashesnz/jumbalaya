@@ -5,6 +5,8 @@ local function runtime() return GameRT.game() end
 
 local Odometer = EaseNode:derive("Odometer")
 local Roll = require("jumbalaya-engine.util.roll")
+local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
+local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 
 local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
 local font_cache = {}
@@ -265,15 +267,15 @@ function Odometer:draw()
 	if not self.states.visible then return end
 
 	if self.text_scale then
-		push_node_transform(self, 1)
+		NodeTransform.push_node_transform(self, 1)
 		self:draw_text_scale()
 		love.graphics.pop()
-		track_hit_target(self)
+		HitOrder.track_hit_target(self)
 		return
 	end
 
 	local w, h = self.VT.w, self.VT.h
-	push_node_transform(self, 1)
+	NodeTransform.push_node_transform(self, 1)
 
 	local num_px = math.max(28, h * (self.pair and 36 or 42))
 	local label_px = math.max(12, h * (self.pair and 12 or 14))
@@ -387,7 +389,7 @@ function Odometer:draw()
 	if prev_font then love.graphics.setFont(prev_font) end
 	love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.pop()
-	track_hit_target(self)
+	HitOrder.track_hit_target(self)
 end
 
 return Odometer

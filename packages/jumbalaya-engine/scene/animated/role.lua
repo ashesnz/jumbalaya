@@ -1,4 +1,5 @@
 
+local Tables = require("jumbalaya-engine.util.tables")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 return function(AnimNode)
@@ -36,7 +37,7 @@ function AnimNode:get_major()
 	if (self.role.role_type ~= 'Major' and self.role.major ~= self)
 		and (self.role.xy_bond ~= 'Weak' and self.role.r_bond ~= 'Weak') then
 		if not self.FRAME.MAJOR or g().REFRESH_FRAME_MAJOR_CACHE then
-			self.FRAME.MAJOR = clear_table(self.FRAME.MAJOR)
+			self.FRAME.MAJOR = Tables.clear_table(self.FRAME.MAJOR)
 			local parent_major = self.role.major:get_major()
 			self.FRAME.MAJOR.major = parent_major.major
 			self.FRAME.MAJOR.offset = self.FRAME.MAJOR.offset or {}
