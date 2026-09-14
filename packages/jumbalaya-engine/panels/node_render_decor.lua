@@ -1,12 +1,13 @@
 
 local Colour = require("jumbalaya-engine.util.colour")
+local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 return function(Target)
 function LayoutNode:draw_self_decor(parallax_dist)
 	-- Configured outline stroke.
 	if self.config.outline and self.config.outline_colour[4] > 0.01 then
-		push_node_transform(self, 1)
+		NodeTransform.push_node_transform(self, 1)
 		love.graphics.scale(1 / g().TILESIZE)
 		love.graphics.setLineWidth(self.config.outline)
 		if self.config.line_emboss then
@@ -38,7 +39,7 @@ function LayoutNode:draw_self_decor(parallax_dist)
 	if self.states.focus.is then
 		self.focus_timer = self.focus_timer or g().TIMERS.REAL
 		local lw = 50 * math.max(0, self.focus_timer - g().TIMERS.REAL + 0.3)^2
-		push_node_transform(self, 1)
+		NodeTransform.push_node_transform(self, 1)
 		love.graphics.scale(1 / g().TILESIZE)
 		love.graphics.setLineWidth(lw + 1.5)
 		love.graphics.setColor(Colour.with_alpha(g().C.WHITE, 0.2 * lw, true))
@@ -53,7 +54,7 @@ function LayoutNode:draw_self_decor(parallax_dist)
 
 	-- Speech-bubble tail fill (plus its shadow when shadows are enabled).
 	if self.config.speech_tail and self.config.colour[4] > 0.01 then
-		push_node_transform(self, 1)
+		NodeTransform.push_node_transform(self, 1)
 		love.graphics.scale(1 / g().TILESIZE)
 		local px, py = self.parallax_shift.x, self.parallax_shift.y
 		local tw, th = self.VT.w * g().TILESIZE, self.VT.h * g().TILESIZE
@@ -72,7 +73,7 @@ function LayoutNode:draw_self_decor(parallax_dist)
 
 	-- Chosen-option marker triangle (shadow pass + red marker).
 	if self.config.chosen then
-		push_node_transform(self, 0.98)
+		NodeTransform.push_node_transform(self, 0.98)
 		love.graphics.scale(1 / g().TILESIZE)
 		if self.config.shadow and g().SETTINGS.GRAPHICS.shadows == 'On' then
 			love.graphics.setColor(0, 0, 0, 0.25 * self.config.colour[4])
@@ -83,7 +84,7 @@ function LayoutNode:draw_self_decor(parallax_dist)
 		end
 		love.graphics.pop()
 
-		push_node_transform(self, 1)
+		NodeTransform.push_node_transform(self, 1)
 		love.graphics.scale(1 / g().TILESIZE)
 		love.graphics.setColor(g().C.RED)
 		love.graphics.polygon('fill', pointer_triangle(

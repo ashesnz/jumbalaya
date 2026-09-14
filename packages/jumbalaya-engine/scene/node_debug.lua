@@ -1,4 +1,5 @@
 
+local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 return function(Node)
@@ -38,7 +39,7 @@ return function(Node)
 	function Node:draw()
 		self:draw_boundingrect()
 		if self.states.visible then
-			track_hit_target(self)
+			HitOrder.track_hit_target(self)
 			for _, child in pairs(self.children) do child:draw() end
 		end
 	end

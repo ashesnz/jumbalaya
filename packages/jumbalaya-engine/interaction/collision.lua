@@ -1,11 +1,12 @@
 return function(InputRouter)
+local Tables = require("jumbalaya-engine.util.tables")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 
 
 function InputRouter:get_cursor_collision(cursor_trans)
-	self.collision_list = clear_table(self.collision_list)
-	self.nodes_at_cursor = clear_table(self.nodes_at_cursor)
+	self.collision_list = Tables.clear_table(self.collision_list)
+	self.nodes_at_cursor = Tables.clear_table(self.nodes_at_cursor)
 
 	if self.COYOTE_FOCUS then return end
 

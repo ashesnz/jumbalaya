@@ -1,4 +1,5 @@
 return function(GfxSprite)
+local Tables = require("jumbalaya-engine.util.tables")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 
@@ -7,7 +8,7 @@ local sprite_util = require("jumbalaya-engine.graphics.sprite_util")
 --- Replaces the render pipeline with an ordered list of shader passes.
 --- Each step: `{shader=, shadow_height=, send={{name=, val=|func=|ref_table=+ref_value=}}, no_tilt=, other_obj=, ms, mr, mx, my}`
 function GfxSprite:define_draw_steps(draw_step_definitions)
-	self.draw_steps = clear_table(self.draw_steps)
+	self.draw_steps = Tables.clear_table(self.draw_steps)
 	for _, definition in ipairs(draw_step_definitions) do
 		self.draw_steps[#self.draw_steps + 1] = {
 			shader = definition.shader or 'dissolve',

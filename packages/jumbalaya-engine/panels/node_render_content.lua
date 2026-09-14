@@ -1,17 +1,19 @@
 
 local Colour = require("jumbalaya-engine.util.colour")
+local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
+local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 return function(Target)
 function LayoutNode:draw_self()
 	if not self.states.visible then
-		if self.config.force_focus then track_hit_target(self) end
+		if self.config.force_focus then HitOrder.track_hit_target(self) end
 		return
 	end
 
 	if self.config.force_focus or self.config.force_collision or self.config.button_UIE
 		or self.config.button or self.states.collide.can then
-		track_hit_target(self)
+		HitOrder.track_hit_target(self)
 	end
 
 	local button_active = true
@@ -57,7 +59,7 @@ function LayoutNode:draw_self()
 
 			if (self.config.button_UIE and button_active)
 				or (not self.config.button_UIE and self.config.shadow and g().SETTINGS.GRAPHICS.shadows == 'On') then
-				push_node_transform(self, 0.97)
+				NodeTransform.push_node_transform(self, 0.97)
 				if self.config.vert then love.graphics.translate(0, self.VT.h); love.graphics.rotate(-math.pi / 2) end
 				if (self.config.shadow or (self.config.button_UIE and button_active))
 					and g().SETTINGS.GRAPHICS.shadows == 'On' then
@@ -73,7 +75,7 @@ function LayoutNode:draw_self()
 				love.graphics.pop()
 			end
 
-			push_node_transform(self, 1)
+			NodeTransform.push_node_transform(self, 1)
 			if self.config.vert then love.graphics.translate(0, self.VT.h); love.graphics.rotate(-math.pi / 2) end
 			if not button_active then
 				love.graphics.setColor(g().C.UI.TEXT_INACTIVE)
@@ -90,7 +92,7 @@ function LayoutNode:draw_self()
 			love.graphics.pop()
 
 		elseif self.ui_kind == g().UI.BOX or self.ui_kind == g().UI.COLUMN or self.ui_kind == g().UI.ROW or self.ui_kind == g().UI.ROOT then
-			push_node_transform(self, 1)
+			NodeTransform.push_node_transform(self, 1)
 			love.graphics.scale(1 / g().TILESIZE)
 
 			-- Drop shadow (slightly smaller, offset by parallax direction).
@@ -168,7 +170,7 @@ function LayoutNode:draw_self()
 			if self.config.focus_with_object and self.config.object.states.focus.is then
 				self.object_focus_timer = self.object_focus_timer or g().TIMERS.REAL
 				local lw = 50 * math.max(0, self.object_focus_timer - g().TIMERS.REAL + 0.3)^2
-				push_node_transform(self, 1)
+				NodeTransform.push_node_transform(self, 1)
 				love.graphics.scale(1 / g().TILESIZE)
 				love.graphics.setLineWidth(lw + 1.5)
 				love.graphics.setColor(Colour.with_alpha(g().C.WHITE, 0.2 * lw, true))

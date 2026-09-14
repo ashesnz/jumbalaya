@@ -1,5 +1,6 @@
 
 local Tables = require("jumbalaya-engine.util.tables")
+local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 return function(Target)
@@ -28,7 +29,7 @@ function RetainedPanel:draw()
 	end
 
 	if self.states.visible then
-		track_hit_target(self)
+		HitOrder.track_hit_target(self)
 		self.root_node:draw_self()
 		self.root_node:draw_children()
 		-- Explicit draw-layer overrides render after the normal tree.

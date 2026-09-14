@@ -1,4 +1,6 @@
 return function(GfxSprite)
+local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
+local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 
@@ -13,11 +15,11 @@ function GfxSprite:draw_self(overlay)
 		self:set_sprite_pos(self.sprite_pos)
 	end
 
-	push_node_transform(self, 1)
+	NodeTransform.push_node_transform(self, 1)
 	self:apply_texture_scale()
 	self:draw_texture(overlay)
 	love.graphics.pop()
-	track_hit_target(self)
+	HitOrder.track_hit_target(self)
 	self:draw_boundingrect()
 	if self.shader_tab then love.graphics.setShader() end
 end
@@ -37,11 +39,11 @@ function GfxSprite:draw(overlay)
 		self:draw_self(overlay)
 	end
 
-	track_hit_target(self)
+	HitOrder.track_hit_target(self)
 	for k, v in pairs(self.children) do
 		if k ~= 'h_popup' then v:draw() end
 	end
-	track_hit_target(self)
+	HitOrder.track_hit_target(self)
 	self:draw_boundingrect()
 end
 
@@ -73,7 +75,7 @@ function GfxSprite:project_onto(other_obj, ms, mr, mx, my)
 	self.ARGS.draw_from_offset.y = my or 0
 
 	local ok, err = pcall(function()
-		push_node_transform(other_obj, 1 + (ms or 0), mr or 0, self.ARGS.draw_from_offset, true)
+		NodeTransform.push_node_transform(other_obj, 1 + (ms or 0), mr or 0, self.ARGS.draw_from_offset, true)
 		self:draw_projected_texture(other_obj)
 	end)
 	love.graphics.pop()

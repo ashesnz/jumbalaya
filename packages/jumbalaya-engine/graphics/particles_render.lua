@@ -1,4 +1,6 @@
 local Tables = require("jumbalaya-engine.util.tables")
+local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
+local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 return function(ParticleEmitter)
 -- Geometry drawers. Each runs with the transform already translated to the
 -- particle position and rotated to its angle; `s` is the current radius.
@@ -20,7 +22,7 @@ local SHAPE_DRAWERS = {
 
 function ParticleEmitter:draw(alpha)
 	alpha = alpha or 1
-	push_node_transform(self, 1)
+	NodeTransform.push_node_transform(self, 1)
 	love.graphics.translate(self.T.w / 2, self.T.h / 2)
 
 	for _, v in pairs(self.particles) do
@@ -42,7 +44,7 @@ function ParticleEmitter:draw(alpha)
 	end
 	love.graphics.pop()
 
-	track_hit_target(self)
+	HitOrder.track_hit_target(self)
 	self:draw_boundingrect()
 end
 
