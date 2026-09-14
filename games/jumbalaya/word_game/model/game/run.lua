@@ -152,10 +152,6 @@ function Game:start_run(args)
     run.selected_back = Back.new(selected_back)
     run.selected_back_key = selected_back
 
-    if ease_background_colour and self.C and self.C.GREEN then
-        ease_background_colour { new_colour = self.C.GREEN, contrast = 1 }
-    end
-
     self.C.UI_POINTS[1], self.C.UI_POINTS[2], self.C.UI_POINTS[3], self.C.UI_POINTS[4] = self.C.BLUE[1], self.C.BLUE[2], self.C.BLUE[3], self.C.BLUE[4]
     self.C.UI_MULTIPLIER[1], self.C.UI_MULTIPLIER[2], self.C.UI_MULTIPLIER[3], self.C.UI_MULTIPLIER[4] = self.C.RED[1], self.C.RED[2], self.C.RED[3], self.C.RED[4]
 

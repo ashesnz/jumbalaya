@@ -28,10 +28,17 @@ end
 function M.load_shaders(game)
 	GameFiles.ensure_mounted()
 	game.SHADERS = {}
-	for _, filename in ipairs(love.filesystem.getDirectoryItems("resources/shaders")) do
+	local items = love.filesystem.getDirectoryItems("resources/shaders") or {}
+	for _, filename in ipairs(items) do
 		if string.sub(filename, -3) == '.fs' then
 			local shader_name = string.sub(filename, 1, -4)
-			game.SHADERS[shader_name] = love.graphics.newShader("resources/shaders/" .. filename)
+			local path = "resources/shaders/" .. filename
+			local ok, shader = pcall(love.graphics.newShader, path)
+			if ok and shader then
+				game.SHADERS[shader_name] = shader
+			elseif game.DEBUG then
+				print("Shader failed to load:", shader_name, shader)
+			end
 		end
 	end
 end

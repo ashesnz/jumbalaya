@@ -16,6 +16,25 @@ local M = {}
 
 local GARDEN_STAGE_MOSS = {0.38, 0.52, 0.36, 1}
 
+local ATLAS_PREFERENCE = { "ui_1", "playing_back", "letter_frame", "letters" }
+
+local function pick_atlas()
+	local atlases = game().TEXTURE_ATLASES
+	if not atlases then return nil end
+	for _, name in ipairs(ATLAS_PREFERENCE) do
+		local atlas = atlases[name]
+		if atlas and atlas.image and atlas.px then
+			return atlas
+		end
+	end
+	for _, atlas in pairs(atlases) do
+		if atlas and atlas.image and atlas.px then
+			return atlas
+		end
+	end
+	return nil
+end
+
 local function remove_current()
 	if game().SPLASH_BACK then
 		game().SPLASH_BACK:remove()
@@ -59,7 +78,7 @@ function M.garden()
 		game().ARGS.spin.amount, game().ARGS.spin.real, game().ARGS.spin.eased = 0, 0, 0
 	end
 
-	local atlas = game().TEXTURE_ATLASES and game().TEXTURE_ATLASES["ui_1"]
+	local atlas = pick_atlas()
 	if not atlas then
 		M.swirl()
 		return
@@ -69,10 +88,14 @@ function M.garden()
 	game().SPLASH_BACK:set_alignment({
 		major = game().ROOM_ATTACH,
 		type = "cm",
+		bond = "Strong",
 		offset = {x = 0, y = 0},
 	})
 	if game().SPLASH_BACK.align_to_major then
 		game().SPLASH_BACK:align_to_major()
+	end
+	if game().SPLASH_BACK.snap_VT then
+		game().SPLASH_BACK:snap_VT()
 	end
 	game().SPLASH_BACK:define_draw_steps({{
 		shader = "garden_leaves",
@@ -99,6 +122,9 @@ function M.swirl()
 	})
 	if game().SPLASH_BACK.align_to_major then
 		game().SPLASH_BACK:align_to_major()
+	end
+	if game().SPLASH_BACK.snap_VT then
+		game().SPLASH_BACK:snap_VT()
 	end
 
 	game().SPLASH_BACK:define_draw_steps({{
