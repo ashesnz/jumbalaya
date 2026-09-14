@@ -9,109 +9,109 @@ local Random = require("jumbalaya-engine.util.random")
 
 local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 function Card:explode(dissolve_colours, explode_time_fac)
-    local explode_time = 1.3*(explode_time_fac or 1)*(math.sqrt(game().SETTINGS.GAMESPEED))
-    self.dissolve = 0
-    self.dissolve_colours = dissolve_colours
-        or {game().C.WHITE}
+		local explode_time = 1.3*(explode_time_fac or 1)*(math.sqrt(game().SETTINGS.GAMESPEED))
+		self.dissolve = 0
+		self.dissolve_colours = dissolve_colours
+				or {game().C.WHITE}
 
-    local start_time = game().TIMERS.TOTAL
-    local percent = 0
-    play_sfx('explosion_buildup1')
-    self.bounce = {
-        scale = 0,
-        r = 0,
-        handled_elsewhere = true,
-        start_time = start_time, 
-        end_time = start_time + explode_time
-    }
+		local start_time = game().TIMERS.TOTAL
+		local percent = 0
+		play_sfx('explosion_buildup1')
+		self.bounce = {
+				scale = 0,
+				r = 0,
+				handled_elsewhere = true,
+				start_time = start_time, 
+				end_time = start_time + explode_time
+		}
 
-    local childParts1 = Particles(0, 0, 0,0, {
-        timer_type = 'TOTAL',
-        timer = 0.01*explode_time,
-        scale = 0.2,
-        speed = 2,
-        lifespan = 0.2*explode_time,
-        attach = self,
-        colours = self.dissolve_colours,
-        fill = true
-    })
-    local childParts2 = nil
+		local childParts1 = Particles(0, 0, 0,0, {
+				timer_type = 'TOTAL',
+				timer = 0.01*explode_time,
+				scale = 0.2,
+				speed = 2,
+				lifespan = 0.2*explode_time,
+				attach = self,
+				colours = self.dissolve_colours,
+				fill = true
+		})
+		local childParts2 = nil
 
-    Scheduler.add{
-        blockable = false,
-        func = (function()
-                if self.bounce then 
-                    percent = (game().TIMERS.TOTAL - start_time)/explode_time
-                    self.bounce.r = 0.05*(math.sin(5*game().TIMERS.TOTAL) + math.cos(0.33 + 41.15332*game().TIMERS.TOTAL) + math.cos(67.12*game().TIMERS.TOTAL))*percent
-                    self.bounce.scale = percent*0.15
-                end
-                if game().TIMERS.TOTAL - start_time > 1.5*explode_time then return true end
-            end)
-    }
-    Scheduler.add{
-        mode = 'tween',
-        blockable = false,
-        ref_table = self,
-        ref_value = 'dissolve',
-        ease_to = 0.3,
-        delay =  0.9*explode_time,
-        func = function(t) return t end
-    }
+		Scheduler.add{
+				blockable = false,
+				func = (function()
+								if self.bounce then 
+										percent = (game().TIMERS.TOTAL - start_time)/explode_time
+										self.bounce.r = 0.05*(math.sin(5*game().TIMERS.TOTAL) + math.cos(0.33 + 41.15332*game().TIMERS.TOTAL) + math.cos(67.12*game().TIMERS.TOTAL))*percent
+										self.bounce.scale = percent*0.15
+								end
+								if game().TIMERS.TOTAL - start_time > 1.5*explode_time then return true end
+						end)
+		}
+		Scheduler.add{
+				mode = 'tween',
+				blockable = false,
+				ref_table = self,
+				ref_value = 'dissolve',
+				ease_to = 0.3,
+				delay =  0.9*explode_time,
+				func = function(t) return t end
+		}
 
-    Scheduler.add{
-        mode = 'delayed',
-        blockable = false,
-        delay =  0.9*explode_time,
-        func = (function()
-            childParts2 = Particles(0, 0, 0,0, {
-                timer_type = 'TOTAL',
-                pulse_max = 30,
-                timer = 0.003,
-                scale = 0.6,
-                speed = 15,
-                lifespan = 0.5,
-                attach = self,
-                colours = self.dissolve_colours,
-            })
-            childParts2:set_role({r_bond = 'Weak'})
-            Scheduler.add{
-                mode = 'tween',
-                blockable = false,
-                ref_table = self,
-                ref_value = 'dissolve',
-                ease_to = 1,
-                delay =  0.1*explode_time,
-                func = function(t) return t end
-            }
-            self:pulse()
-            game().VIBRATION = game().VIBRATION + 1
-            play_sfx('explosion_release1')
-            childParts1:fade(0.3*explode_time) return true end)
-    }
+		Scheduler.add{
+				mode = 'delayed',
+				blockable = false,
+				delay =  0.9*explode_time,
+				func = (function()
+						childParts2 = Particles(0, 0, 0,0, {
+								timer_type = 'TOTAL',
+								pulse_max = 30,
+								timer = 0.003,
+								scale = 0.6,
+								speed = 15,
+								lifespan = 0.5,
+								attach = self,
+								colours = self.dissolve_colours,
+						})
+						childParts2:set_role({r_bond = 'Weak'})
+						Scheduler.add{
+								mode = 'tween',
+								blockable = false,
+								ref_table = self,
+								ref_value = 'dissolve',
+								ease_to = 1,
+								delay =  0.1*explode_time,
+								func = function(t) return t end
+						}
+						self:pulse()
+						game().VIBRATION = game().VIBRATION + 1
+						play_sfx('explosion_release1')
+						childParts1:fade(0.3*explode_time) return true end)
+		}
 
-    Scheduler.add{
-        mode = 'delayed',
-        blockable = false,
-        delay =  1.4*explode_time,
-        func = function()
-            Scheduler.add{
-                mode = 'tween',
-                blockable = false, 
-                blocking = false,
-                ref_value = 'scale',
-                ref_table = childParts2,
-                ease_to = 0,
-                delay = 0.1*explode_time
-            }
-            return true end
-    }
+		Scheduler.add{
+				mode = 'delayed',
+				blockable = false,
+				delay =  1.4*explode_time,
+				func = function()
+						Scheduler.add{
+								mode = 'tween',
+								blockable = false, 
+								blocking = false,
+								ref_value = 'scale',
+								ref_table = childParts2,
+								ease_to = 0,
+								delay = 0.1*explode_time
+						}
+						return true end
+		}
 
-    Scheduler.add{
-        mode = 'delayed',
-        blockable = false,
-        delay =  1.5*explode_time,
-        func = function() self:remove() return true end
-    }
+		Scheduler.add{
+				mode = 'delayed',
+				blockable = false,
+				delay =  1.5*explode_time,
+				func = function() self:remove() return true end
+		}
 end
 
 function Card:shatter()
@@ -183,38 +183,38 @@ function Card:begin_materialize(dissolve_colours, silent, timefac)
 end
 
 function Card:flip()
-    if self.facing == 'front' then 
-        self.flipping = 'f2b'
-        self.facing='back'
-        self.pinch.x = true
-    elseif self.facing == 'back' then
-        self.ability.wheel_flipped = nil
-        self.flipping = 'b2f'
-        self.facing='front'
-        self.pinch.x = true
-    end
+		if self.facing == 'front' then 
+				self.flipping = 'f2b'
+				self.facing='back'
+				self.pinch.x = true
+		elseif self.facing == 'back' then
+				self.ability.wheel_flipped = nil
+				self.flipping = 'b2f'
+				self.facing='front'
+				self.pinch.x = true
+		end
 end
 
 function Card:hard_set_T(X, Y, W, H)
-    local x = (X or self.T.x)
-    local y = (Y or self.T.y)
-    local w = (W or self.T.w)
-    local h = (H or self.T.h)
-    EaseNode.hard_set_T(self,x, y, w, h)
-    if self.children.front then self.children.front:hard_set_T(x, y, w, h) end
-    self.children.back:hard_set_T(x, y, w, h)
-    self.children.center:hard_set_T(x, y, w, h)
+		local x = (X or self.T.x)
+		local y = (Y or self.T.y)
+		local w = (W or self.T.w)
+		local h = (H or self.T.h)
+		EaseNode.hard_set_T(self,x, y, w, h)
+		if self.children.front then self.children.front:hard_set_T(x, y, w, h) end
+		self.children.back:hard_set_T(x, y, w, h)
+		self.children.center:hard_set_T(x, y, w, h)
 end
 
 function Card:move(dt)
-    EaseNode.move(self, dt)
-    if self.children.h_popup then
-        self.children.h_popup:set_alignment(self:align_h_popup())
-    end
+		EaseNode.move(self, dt)
+		if self.children.h_popup then
+				self.children.h_popup:set_alignment(self:align_h_popup())
+		end
 end
 
 function Card:pulse(scale, rot_amount)
-    local rot_amt = rot_amount and 0.4*Random.pick_random({rot_amount, -rot_amount}) or Random.pick_random({0.16, -0.16})
-    scale = scale and scale*0.4 or 0.11
-    EaseNode.pulse(self, scale, rot_amt)
+		local rot_amt = rot_amount and 0.4*Random.pick_random({rot_amount, -rot_amount}) or Random.pick_random({0.16, -0.16})
+		scale = scale and scale*0.4 or 0.11
+		EaseNode.pulse(self, scale, rot_amt)
 end

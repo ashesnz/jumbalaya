@@ -1,1 +1,19 @@
-Steam not available — running without Steam integration
+Error: ...e/Jumbalaya/games/jumbalaya/word_game/model/game/run.lua:26: attempt to index global 'Game' (a nil value)
+stack traceback:
+	[love "boot.lua"]:352: in function '__newindex'
+	...e/Jumbalaya/games/jumbalaya/word_game/model/game/run.lua:26: in main chunk
+	[C]: in function 'require'
+	.../Jumbalaya/games/jumbalaya/word_game/model/game/init.lua:49: in main chunk
+	[C]: in function 'require'
+	...Jumbalaya/games/jumbalaya/app/bootstrap/kind_globals.lua:10: in function 'install_game'
+	...Jumbalaya/games/jumbalaya/app/bootstrap/runtime_boot.lua:7: in main chunk
+	[C]: in function 'require'
+	...mbalaya/games/jumbalaya/app/bootstrap/engine_adapter.lua:7: in function 'install'
+	.../Source/home/Jumbalaya/games/jumbalaya/app/bootstrap.lua:7: in main chunk
+	[C]: in function 'require'
+	main.lua:35: in main chunk
+	[C]: in function 'require'
+	[love "boot.lua"]:323: in function <[love "boot.lua"]:126>
+	[C]: in function 'xpcall'
+	[love "boot.lua"]:362: in function <[love "boot.lua"]:355>
+	[C]: in function 'xpcall'

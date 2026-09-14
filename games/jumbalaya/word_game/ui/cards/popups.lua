@@ -1,5 +1,4 @@
 --[[
-local localize = require("word_game.ui.util.localize").localize
 	word_game/ui/card_popups.lua - Card focus UI, hover popups, and tooltips.
 
 	These UI definitions remain global because existing card and event call sites
@@ -16,214 +15,214 @@ local Tables = require("jumbalaya-engine.util.tables")
 local DEFINITIONS = game().DEFINITIONS
 
 function DEFINITIONS.card_focus_ui(card)
-  local card_width = card.T.w
+	local card_width = card.T.w
 
-  local face_highlight_colour = Tables.deep_clone(game().C.WHITE)
-  face_highlight_colour[4] = 1.5
-  if game().dealt_letters and card.area == game().dealt_letters then Easing.value{ref_table = face_highlight_colour, ref_value = 4, mod = -1.5, timer = 'REAL', delay = 0.2, ease = 'quad'} end
+	local face_highlight_colour = Tables.deep_clone(game().C.WHITE)
+	face_highlight_colour[4] = 1.5
+	if game().dealt_letters and card.area == game().dealt_letters then Easing.value{ref_table = face_highlight_colour, ref_value = 4, mod = -1.5, timer = 'REAL', delay = 0.2, ease = 'quad'} end
 
-  local t_card_norm = {x = card.T.x + card.T.w/2 - game().ROOM.T.w/2, y = card.T.y + card.T.h/2 - game().ROOM.T.h/2}
+	local t_card_norm = {x = card.T.x + card.T.w/2 - game().ROOM.T.w/2, y = card.T.y + card.T.h/2 - game().ROOM.T.h/2}
 
-  local base_background = UIViewHost.create{
-    T = {card.VT.x,card.VT.y,0,0},
-    definition = 
-      (not game().dealt_letters or card.area ~= game().dealt_letters) and {n=game().UI.ROOT, config = {align = 'cm', minw = card_width + 0.3, minh = card.T.h + 0.3, r = 0.1, colour = Colour.with_alpha(game().C.BLACK, 0.7), outline_colour = Colour.tint(game().C.MUTED_GREY, 0.5), outline = 1.5, line_emboss = 0.8}, nodes={
-        {n=game().UI.ROW, config={id = 'ATTACH_TO_ME'}, nodes={}}
-      }} or 
-      {n=game().UI.ROOT, config = {align = 'cm', minw = card_width, minh = card.T.h, r = 0.1, colour = face_highlight_colour}, nodes={
-        {n=game().UI.ROW, config={id = 'ATTACH_TO_ME'}, nodes={}}
-      }},
-    config = {
-        align = 'cm',
-        offset = {x= 0.007*t_card_norm.x*card.T.w, y = 0.007*t_card_norm.y*card.T.h}, 
-        parent = card,
-        r_bond = (not game().dealt_letters or card.area ~= game().dealt_letters) and 'Weak' or 'Strong'
-      }
-  }
+	local base_background = UIViewHost.create{
+		T = {card.VT.x,card.VT.y,0,0},
+		definition = 
+			(not game().dealt_letters or card.area ~= game().dealt_letters) and {n=game().UI.ROOT, config = {align = 'cm', minw = card_width + 0.3, minh = card.T.h + 0.3, r = 0.1, colour = Colour.with_alpha(game().C.BLACK, 0.7), outline_colour = Colour.tint(game().C.MUTED_GREY, 0.5), outline = 1.5, line_emboss = 0.8}, nodes={
+				{n=game().UI.ROW, config={id = 'ATTACH_TO_ME'}, nodes={}}
+			}} or 
+			{n=game().UI.ROOT, config = {align = 'cm', minw = card_width, minh = card.T.h, r = 0.1, colour = face_highlight_colour}, nodes={
+				{n=game().UI.ROW, config={id = 'ATTACH_TO_ME'}, nodes={}}
+			}},
+		config = {
+				align = 'cm',
+				offset = {x= 0.007*t_card_norm.x*card.T.w, y = 0.007*t_card_norm.y*card.T.h}, 
+				parent = card,
+				r_bond = (not game().dealt_letters or card.area ~= game().dealt_letters) and 'Weak' or 'Strong'
+			}
+	}
 
-  base_background.set_alignment = function()
-    local card_norm = {x = card.T.x + card.T.w/2 - game().ROOM.T.w/2, y = card.T.y + card.T.h/2 - game().ROOM.T.h/2}
-    EaseNode.set_alignment(card.children.focused_ui, {offset = {x= 0.007*card_norm.x*card.T.w, y = 0.007*card_norm.y*card.T.h}})
-  end
+	base_background.set_alignment = function()
+		local card_norm = {x = card.T.x + card.T.w/2 - game().ROOM.T.w/2, y = card.T.y + card.T.h/2 - game().ROOM.T.h/2}
+		EaseNode.set_alignment(card.children.focused_ui, {offset = {x= 0.007*card_norm.x*card.T.w, y = 0.007*card_norm.y*card.T.h}})
+	end
 
-  return base_background
+	return base_background
 end
 
 
 function desc_from_rows(desc_nodes, empty, maxw)
-  local t = {}
-  for k, v in ipairs(desc_nodes) do
-    t[#t+1] = {n=game().UI.ROW, config={align = "cm", maxw = maxw}, nodes=v}
-  end
-  return {n=game().UI.ROW, config={align = "cm", colour = empty and game().C.CLEAR or game().C.UI.BACKGROUND_WHITE, r = 0.1, padding = 0.04, minw = 2, minh = 0.8, emboss = not empty and 0.05 or nil, filler = true}, nodes={
-    {n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes=t}
-  }}
+	local t = {}
+	for k, v in ipairs(desc_nodes) do
+		t[#t+1] = {n=game().UI.ROW, config={align = "cm", maxw = maxw}, nodes=v}
+	end
+	return {n=game().UI.ROW, config={align = "cm", colour = empty and game().C.CLEAR or game().C.UI.BACKGROUND_WHITE, r = 0.1, padding = 0.04, minw = 2, minh = 0.8, emboss = not empty and 0.05 or nil, filler = true}, nodes={
+		{n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes=t}
+	}}
 end
 
 
 function transparent_multiline_text(desc_nodes)
-  local t = {}
-  for k, v in ipairs(desc_nodes) do
-    t[#t+1] = {n=game().UI.ROW, config={align = "cm"}, nodes=v}
-  end
-  return {n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes=t}
+	local t = {}
+	for k, v in ipairs(desc_nodes) do
+		t[#t+1] = {n=game().UI.ROW, config={align = "cm"}, nodes=v}
+	end
+	return {n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes=t}
 end
 
 
 function rows_to_infotip(desc_nodes, name)
-  local t = {}
-  for k, v in ipairs(desc_nodes) do
-    t[#t+1] = {n=game().UI.ROW, config={align = "cm"}, nodes=v}
-  end
-  return {n=game().UI.ROW, config={align = "cm", colour = Colour.tint(game().C.GREY, 0.15), r = 0.1}, nodes={
-    {n=game().UI.ROW, config={align = "tm", minh = 0.36, padding = 0.03}, nodes={{n=game().UI.TEXT, config={text = name, scale = 0.32, colour = game().C.UI.TEXT_LIGHT}}}},
-    {n=game().UI.ROW, config={align = "cm", minw = 1.5, minh = 0.4, r = 0.1, padding = 0.05, colour = game().C.WHITE}, nodes={{n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes=t}}}
-  }}
+	local t = {}
+	for k, v in ipairs(desc_nodes) do
+		t[#t+1] = {n=game().UI.ROW, config={align = "cm"}, nodes=v}
+	end
+	return {n=game().UI.ROW, config={align = "cm", colour = Colour.tint(game().C.GREY, 0.15), r = 0.1}, nodes={
+		{n=game().UI.ROW, config={align = "tm", minh = 0.36, padding = 0.03}, nodes={{n=game().UI.TEXT, config={text = name, scale = 0.32, colour = game().C.UI.TEXT_LIGHT}}}},
+		{n=game().UI.ROW, config={align = "cm", minw = 1.5, minh = 0.4, r = 0.1, padding = 0.05, colour = game().C.WHITE}, nodes={{n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes=t}}}
+	}}
 end
 
 
 function clear_overlay_infotip()
-  if not game().OVERLAY_MENU then return end
-  local infotip = game().OVERLAY_MENU:find_node_by_id('overlay_menu_infotip')
-  if infotip and infotip.config.object then
-    infotip.config.object:remove()
-    infotip.config.object = EaseNode()
-  end
+	if not game().OVERLAY_MENU then return end
+	local infotip = game().OVERLAY_MENU:find_node_by_id('overlay_menu_infotip')
+	if infotip and infotip.config.object then
+		infotip.config.object:remove()
+		infotip.config.object = EaseNode()
+	end
 end
 
 function overlay_infotip(text_rows)
-  local t = {}
-  if type(text_rows) ~= 'table' then text_rows = {"ERROR"} end
-  for k, v in ipairs(text_rows) do
-    t[#t+1] = {n=game().UI.ROW, config={align = "cm"}, nodes={
-      {n=game().UI.TEXT, config={text = v,colour = game().C.UI.TEXT_LIGHT, scale = 0.45, bounce = true, shadow = true, lang = text_rows.lang}}
-    }}
-  end
-  return {n=game().UI.ROOT, config={align = "cm", colour = game().C.CLEAR, padding = 0.1}, nodes=t}
+	local t = {}
+	if type(text_rows) ~= 'table' then text_rows = {"ERROR"} end
+	for k, v in ipairs(text_rows) do
+		t[#t+1] = {n=game().UI.ROW, config={align = "cm"}, nodes={
+			{n=game().UI.TEXT, config={text = v,colour = game().C.UI.TEXT_LIGHT, scale = 0.45, bounce = true, shadow = true, lang = text_rows.lang}}
+		}}
+	end
+	return {n=game().UI.ROOT, config={align = "cm", colour = game().C.CLEAR, padding = 0.1}, nodes=t}
 end
 
 
 function name_from_rows(name_nodes, background_colour)
-  if not name_nodes or (type(name_nodes) ~= 'table') or not next(name_nodes) then return end
-  return {n=game().UI.ROW, config={align = "cm", padding = 0.05, r = 0.1, colour = background_colour, emboss = background_colour and 0.05 or nil}, nodes=name_nodes}
+	if not name_nodes or (type(name_nodes) ~= 'table') or not next(name_nodes) then return end
+	return {n=game().UI.ROW, config={align = "cm", padding = 0.05, r = 0.1, colour = background_colour, emboss = background_colour and 0.05 or nil}, nodes=name_nodes}
 end
 
 
 function DEFINITIONS.card_h_popup(card)
-  if card.tooltip_info then
-    local tip = card.tooltip_info
-    local debuffed = card.debuff
-    local card_type_colour = get_type_colour(card.config.center or card.config, card)
-    local card_type_background = 
-        (tip.card_type == 'Locked' and game().C.BLACK) or 
-        ((tip.card_type == 'Undiscovered') and Colour.shade(game().C.MUTED_GREY, 0.3)) or 
-        (tip.card_type == 'Enhanced' or tip.card_type == 'Default') and Colour.shade(game().C.BLACK, 0.1) or
-        (debuffed and Colour.shade(game().C.BLACK, 0.1)) or 
-        (card_type_colour and Colour.shade(game().C.BLACK, 0.1)) or
-        game().C.SET[tip.card_type] or
-        {0, 1, 1, 1}
+	if card.tooltip_info then
+		local tip = card.tooltip_info
+		local debuffed = card.debuff
+		local card_type_colour = get_type_colour(card.config.center or card.config, card)
+		local card_type_background = 
+				(tip.card_type == 'Locked' and game().C.BLACK) or 
+				((tip.card_type == 'Undiscovered') and Colour.shade(game().C.MUTED_GREY, 0.3)) or 
+				(tip.card_type == 'Enhanced' or tip.card_type == 'Default') and Colour.shade(game().C.BLACK, 0.1) or
+				(debuffed and Colour.shade(game().C.BLACK, 0.1)) or 
+				(card_type_colour and Colour.shade(game().C.BLACK, 0.1)) or
+				game().C.SET[tip.card_type] or
+				{0, 1, 1, 1}
 
-    local outer_padding = 0.05
-    local card_type = localize('term_'..string.lower(tip.card_type))
+		local outer_padding = 0.05
+		local card_type = localize('term_'..string.lower(tip.card_type))
 
-    if tip.card_type == 'Companion' or (tip.badges and tip.badges.force_rarity) then card_type = ({localize('term_common'), localize('term_uncommon'), localize('term_rare'), localize('term_legendary')})[card.config.center.rarity] end
-    if tip.card_type == 'Enhanced' then card_type = localize{type = 'name_text', key = card.config.center.key, set = 'Enhanced'} end
-    card_type = (debuffed and tip.card_type ~= 'Enhanced') and localize('term_debuffed') or card_type
+		if tip.card_type == 'Companion' or (tip.badges and tip.badges.force_rarity) then card_type = ({localize('term_common'), localize('term_uncommon'), localize('term_rare'), localize('term_legendary')})[card.config.center.rarity] end
+		if tip.card_type == 'Enhanced' then card_type = localize{type = 'name_text', key = card.config.center.key, set = 'Enhanced'} end
+		card_type = (debuffed and tip.card_type ~= 'Enhanced') and localize('term_debuffed') or card_type
 
-    local disp_type, is_letter_face = 
-              (tip.card_type ~= 'Locked' and tip.card_type ~= 'Undiscovered' and tip.card_type ~= 'Default') or debuffed,
-              tip.card_type == 'Enhanced' or tip.card_type == 'Default'
+		local disp_type, is_letter_face = 
+							(tip.card_type ~= 'Locked' and tip.card_type ~= 'Undiscovered' and tip.card_type ~= 'Default') or debuffed,
+							tip.card_type == 'Enhanced' or tip.card_type == 'Default'
 
-    local info_boxes = {}
-    local badges = {}
+		local info_boxes = {}
+		local badges = {}
 
-    if tip.badges.card_type or tip.badges.force_rarity then
-      badges[#badges + 1] = make_badge(card_type, card_type_colour, nil, 1.2)
-    end
+		if tip.badges.card_type or tip.badges.force_rarity then
+			badges[#badges + 1] = make_badge(card_type, card_type_colour, nil, 1.2)
+		end
 
-    if tip.info then
-      for k, v in ipairs(tip.info) do
-        info_boxes[#info_boxes+1] =
-        {n=game().UI.ROW, config={align = "cm"}, nodes={
-        {n=game().UI.ROW, config={align = "cm", colour = Colour.tint(game().C.MUTED_GREY, 0.5), r = 0.1, padding = 0.05, emboss = 0.05}, nodes={
-          rows_to_infotip(v, v.name),
-        }}
-      }}
-      end
-    end
+		if tip.info then
+			for k, v in ipairs(tip.info) do
+				info_boxes[#info_boxes+1] =
+				{n=game().UI.ROW, config={align = "cm"}, nodes={
+				{n=game().UI.ROW, config={align = "cm", colour = Colour.tint(game().C.MUTED_GREY, 0.5), r = 0.1, padding = 0.05, emboss = 0.05}, nodes={
+					rows_to_infotip(v, v.name),
+				}}
+			}}
+			end
+		end
 
-    return {n=game().UI.ROOT, config = {align = 'cm', colour = game().C.CLEAR}, nodes={
-      {n=game().UI.COLUMN, config={align = "cm", func = 'show_infotip',object = EaseNode(),ref_table = next(info_boxes) and info_boxes or nil}, nodes={
-        {n=game().UI.ROW, config={padding = outer_padding, r = 0.12, colour = Colour.tint(game().C.MUTED_GREY, 0.5), emboss = 0.07}, nodes={
-          {n=game().UI.ROW, config={align = "cm", padding = 0.07, r = 0.1, colour = Colour.with_alpha(card_type_background, 0.8)}, nodes={
-            name_from_rows(tip.name, is_letter_face and game().C.WHITE or nil),
-            desc_from_rows(tip.main),
-            badges[1] and {n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes=badges} or nil,
-          }}
-        }}
-      }},
-    }}
-  end
+		return {n=game().UI.ROOT, config = {align = 'cm', colour = game().C.CLEAR}, nodes={
+			{n=game().UI.COLUMN, config={align = "cm", func = 'show_infotip',object = EaseNode(),ref_table = next(info_boxes) and info_boxes or nil}, nodes={
+				{n=game().UI.ROW, config={padding = outer_padding, r = 0.12, colour = Colour.tint(game().C.MUTED_GREY, 0.5), emboss = 0.07}, nodes={
+					{n=game().UI.ROW, config={align = "cm", padding = 0.07, r = 0.1, colour = Colour.with_alpha(card_type_background, 0.8)}, nodes={
+						name_from_rows(tip.name, is_letter_face and game().C.WHITE or nil),
+						desc_from_rows(tip.main),
+						badges[1] and {n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes=badges} or nil,
+					}}
+				}}
+			}},
+		}}
+	end
 end
 
 
 function make_badge(_string, _badge_col, _text_col, scaling)
-  scaling = scaling or 1
-  return {n=game().UI.ROW, config={align = "cm"}, nodes={
-    {n=game().UI.ROW, config={align = "cm", colour = _badge_col or game().C.GREEN, r = 0.1, minw = 2, minh = 0.4*scaling, emboss = 0.05, padding = 0.03*scaling}, nodes={
-      {n=game().UI.BOX, config={h=0.1,w=0.03}},
-      {n=game().UI.OBJECT, config={object = FlowText({string = _string or 'ERROR', colours = {_text_col or game().C.WHITE},float = true, shadow = true, offset_y = -0.05, silent = true, spacing = 1, scale = 0.33*scaling})}},
-      {n=game().UI.BOX, config={h=0.1,w=0.03}},
-    }}
-  }}
+	scaling = scaling or 1
+	return {n=game().UI.ROW, config={align = "cm"}, nodes={
+		{n=game().UI.ROW, config={align = "cm", colour = _badge_col or game().C.GREEN, r = 0.1, minw = 2, minh = 0.4*scaling, emboss = 0.05, padding = 0.03*scaling}, nodes={
+			{n=game().UI.BOX, config={h=0.1,w=0.03}},
+			{n=game().UI.OBJECT, config={object = FlowText({string = _string or 'ERROR', colours = {_text_col or game().C.WHITE},float = true, shadow = true, offset_y = -0.05, silent = true, spacing = 1, scale = 0.33*scaling})}},
+			{n=game().UI.BOX, config={h=0.1,w=0.03}},
+		}}
+	}}
 end
 
 
 function build_detailed_tooltip(_center)
-  local full_UI_table = {
-      main = {},
-      info = {},
-      type = {},
-      name = 'done',
-      badges = {}
-  }
-  local desc = generate_card_ui(_center, full_UI_table, nil, _center.set, nil)
-  return {n=game().UI.ROOT, config={align = "cm", colour = game().C.CLEAR}, nodes={
-    {n=game().UI.ROW, config={align = "cm", colour = Colour.tint(game().C.MUTED_GREY, 0.5), r = 0.1, padding = 0.05, emboss = 0.05}, nodes={
-      rows_to_infotip(desc.info[1], desc.info[1].name),
-    }}
-  }}
+	local full_UI_table = {
+			main = {},
+			info = {},
+			type = {},
+			name = 'done',
+			badges = {}
+	}
+	local desc = generate_card_ui(_center, full_UI_table, nil, _center.set, nil)
+	return {n=game().UI.ROOT, config={align = "cm", colour = game().C.CLEAR}, nodes={
+		{n=game().UI.ROW, config={align = "cm", colour = Colour.tint(game().C.MUTED_GREY, 0.5), r = 0.1, padding = 0.05, emboss = 0.05}, nodes={
+			rows_to_infotip(desc.info[1], desc.info[1].name),
+		}}
+	}}
 end
 
 
 function make_tooltip(tooltip)
-  local title = tooltip.title or nil
-  local text = tooltip.text or {}
-  local rows = {}
-  if title then
-      local r = {n=game().UI.ROW, config={align = "cm"}, nodes={
-          {n=game().UI.COLUMN, config={align = "cm"}, nodes={
-              {n=game().UI.TEXT, config={text = title,colour = game().C.UI.TEXT_DARK, scale = 0.4}}}}}}
-      table.insert(rows, r)
-  end
-  for i = 1, #text do
-    if type(text[i]) == 'table' then
-      local r = {n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes={
-        {n=game().UI.TEXT, config={ref_table = text[i].ref_table, ref_value = text[i].ref_value,colour = game().C.UI.TEXT_DARK, scale = 0.4}}}}
-      table.insert(rows, r)
-    else
-      local r = {n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes={
-              {n=game().UI.TEXT, config={text = text[i],colour = game().C.UI.TEXT_DARK, scale = 0.4}}}}
-      table.insert(rows, r)
-    end
-  end
-  if tooltip.filler then 
-    table.insert(rows, tooltip.filler.func(tooltip.filler.args))
-  end
-  local t = {
-      n=game().UI.ROOT, config = {align = "cm", padding = 0.05, r=0.1, colour = game().C.RED, emboss = 0.05}, nodes=
-      {{n=game().UI.COLUMN, config={align = "cm", padding = 0.05, r = 0.1, colour = game().C.WHITE, emboss = 0.05}, nodes=rows}}}
-  return t
+	local title = tooltip.title or nil
+	local text = tooltip.text or {}
+	local rows = {}
+	if title then
+			local r = {n=game().UI.ROW, config={align = "cm"}, nodes={
+					{n=game().UI.COLUMN, config={align = "cm"}, nodes={
+							{n=game().UI.TEXT, config={text = title,colour = game().C.UI.TEXT_DARK, scale = 0.4}}}}}}
+			table.insert(rows, r)
+	end
+	for i = 1, #text do
+		if type(text[i]) == 'table' then
+			local r = {n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes={
+				{n=game().UI.TEXT, config={ref_table = text[i].ref_table, ref_value = text[i].ref_value,colour = game().C.UI.TEXT_DARK, scale = 0.4}}}}
+			table.insert(rows, r)
+		else
+			local r = {n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes={
+							{n=game().UI.TEXT, config={text = text[i],colour = game().C.UI.TEXT_DARK, scale = 0.4}}}}
+			table.insert(rows, r)
+		end
+	end
+	if tooltip.filler then 
+		table.insert(rows, tooltip.filler.func(tooltip.filler.args))
+	end
+	local t = {
+			n=game().UI.ROOT, config = {align = "cm", padding = 0.05, r=0.1, colour = game().C.RED, emboss = 0.05}, nodes=
+			{{n=game().UI.COLUMN, config={align = "cm", padding = 0.05, r = 0.1, colour = game().C.WHITE, emboss = 0.05}, nodes=rows}}}
+	return t
 end
 
 

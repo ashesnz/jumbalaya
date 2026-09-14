@@ -7,7 +7,6 @@ local LetterPalette = require("word_game.config.visuals.letter_card_palette")
 local Tables = require("jumbalaya-engine.util.tables")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 
-
 local function letter_card_tint(card)
 	if card.bonus_card then
 		return LetterPalette.fill(LetterPalette.BONUS_FACE_COLOR)
@@ -21,7 +20,38 @@ local function draw_bonus_gold_shimmer(card)
 	center:apply_shader_effect("gold_seal", nil, card.ARGS and card.ARGS.send_to_shader)
 end
 
+--- Resting table cards skip dissolve/tilt shaders until hover, drag, or FX need them.
+function Card:is_shader_idle()
+	if self.states.hover.is or self.states.focus.is or self.states.drag.is then
+		return false
+	end
+	if self.selected or self.inspecting then return false end
+	if self.debuff or self.greyed or self.bonus_card then return false end
+	if self.dissolve and math.abs(self.dissolve) > 0.001 then return false end
+	if self.dissolve_wipe and self.dissolve_wipe > 0 then return false end
+	if self.ambient_tilt then return false end
+	if self.bounce and (self.bounce.x ~= 0 or self.bounce.y ~= 0 or self.bounce.r ~= 0) then return false end
+	return true
+end
+
+local function draw_sprite(sprite, overlay)
+	if overlay then
+		sprite:draw(overlay)
+	else
+		sprite:draw()
+	end
+end
+
+local function apply_dissolve(sprite, card, tint)
+	if tint then
+		sprite:apply_shader_effect("dissolve", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, tint)
+	else
+		sprite:apply_shader_effect("dissolve")
+	end
+end
+
 function Card:sync_shadow_state()
+	if self:is_shader_idle() then return end
 	self.ARGS.send_to_shader = self.ARGS.send_to_shader or {}
 	self.ARGS.send_to_shader[1] = math.min(self.VT.r*3, 1) + game().TIMERS.REAL/(28) + (self.bounce and self.bounce.r*20 or 0) + self.tilt_var.amt
 	self.ARGS.send_to_shader[2] = game().TIMERS.REAL
@@ -33,11 +63,12 @@ end
 
 function Card:draw_shadow()
 	local wants_shadow = not self.no_shadow
-		and game().SETTINGS.GRAPHICS.shadows == 'On'
-		and self.ability.effect ~= 'Glass Card'
+		and game().SETTINGS.GRAPHICS.shadows == "On"
+		and self.ability.effect ~= "Glass Card"
 		and not self.greyed
-		and ((self.area and self.area ~= game().recycle_stash and self.area.config.type ~= 'deck')
+		and ((self.area and self.area ~= game().recycle_stash and self.area.config.type ~= "deck")
 			or not self.area or self.states.drag.is)
+		and not self:is_shader_idle()
 
 	if wants_shadow then
 		self.shadow_height = (self.selected or self.states.drag.is) and 0.35
@@ -92,17 +123,27 @@ function Card:draw_front()
 	if not self.greyed then
 		if LetterFaces.is_letter_card(self) then
 			local tint = letter_card_tint(self)
-			self.children.center:apply_shader_effect('dissolve', nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, tint)
-			if self.bonus_card then
-				draw_bonus_gold_shimmer(self)
-			end
-			if self.children.front then
-				self.children.front:apply_shader_effect('dissolve')
+			if self:is_shader_idle() then
+				draw_sprite(self.children.center)
+				if self.children.front then draw_sprite(self.children.front) end
+			else
+				apply_dissolve(self.children.center, self, tint)
+				if self.bonus_card then
+					draw_bonus_gold_shimmer(self)
+				end
+				if self.children.front then
+					apply_dissolve(self.children.front, self)
+				end
 			end
 		else
-			self.children.center:apply_shader_effect('dissolve')
-			if self.children.front then
-				self.children.front:apply_shader_effect('dissolve')
+			if self:is_shader_idle() then
+				draw_sprite(self.children.center)
+				if self.children.front then draw_sprite(self.children.front) end
+			else
+				apply_dissolve(self.children.center, self)
+				if self.children.front then
+					apply_dissolve(self.children.front, self)
+				end
 			end
 		end
 	end
@@ -125,13 +166,15 @@ end
 
 function Card:draw_back()
 	local overlay = game().C.WHITE
-	if self.area and self.area.config.type == 'deck' then
+	if self.area and self.area.config.type == "deck" then
 		overlay = {0.5 + ((#self.area.cards - self.slot)%7)/50,
 			0.5 + ((#self.area.cards - self.slot)%7)/50,
 			0.5 + ((#self.area.cards - self.slot)%7)/50, 1}
-		self.children.back:draw(overlay)
+		draw_sprite(self.children.back, overlay)
+	elseif self:is_shader_idle() then
+		draw_sprite(self.children.back)
 	else
-		self.children.back:apply_shader_effect('dissolve')
+		apply_dissolve(self.children.back, self)
 	end
 end
 
@@ -156,7 +199,9 @@ function Card:draw(layer)
 	if not self.states.visible then return end
 
 	if layer == 'shadow' or layer == 'both' then
-		self:sync_shadow_state()
+		if not self:is_shader_idle() then
+			self:sync_shadow_state()
+		end
 	end
 
 	game().shared_shadow = self.sprite_facing == 'front' and self.children.center or self.children.back
@@ -170,7 +215,9 @@ function Card:draw(layer)
 			self.children.focused_ui:draw()
 		end
 
-		self:update_tilt()
+		if not self:is_shader_idle() then
+			self:update_tilt()
+		end
 
 		if self.children.particles then self.children.particles:draw() end
 		self:draw_market_widgets()

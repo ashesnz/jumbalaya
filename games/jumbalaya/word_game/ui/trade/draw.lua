@@ -1,6 +1,7 @@
 --[[ word_game/ui/trade/draw.lua - Marketplace backdrop rendering ]]
 
 local game = require("word_game.ui.util.game_runtime").game
+local quad_cache = require("word_game.ui.trade.quad_cache")
 
 local M = {}
 
@@ -16,7 +17,6 @@ function M.backdrop_pass(ctx)
 	local room = game().ROOM and game().ROOM.T
 	if not room then return end
 	local ts = (game().TILESCALE or 1) * (game().TILESIZE or 1)
-	local iw, ih = atlas.image:getDimensions()
 	local rw = room.w * ts
 	local rh = room.h * ts
 
@@ -49,12 +49,11 @@ function M.backdrop_pass(ctx)
 	-- Aspect-preserving "cover" fill, cropped with a Quad (no scissor needed):
 	-- uniform scale fills the whole modal boundary and the source rectangle is
 	-- cropped symmetrically so nothing spills outside the modal.
-	local scale = math.max(dw / iw, dh / ih)
-	local crop_w = math.min(iw, dw / scale)
-	local crop_h = math.min(ih, dh / scale)
-	local qx = (iw - crop_w) * 0.5
-	local qy = (ih - crop_h) * 0.5
-	local quad = love.graphics.newQuad(qx, qy, crop_w, crop_h, iw, ih)
+	local quad, scale = quad_cache.cover_quad(atlas.image, dw, dh)
+	if not quad then
+		love.graphics.pop()
+		return
+	end
 	love.graphics.draw(atlas.image, quad, dx, dy, 0, scale, scale)
 	love.graphics.pop()
 	if prev_shader and love.graphics.setShader then

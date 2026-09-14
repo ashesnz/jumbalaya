@@ -2,11 +2,12 @@
 local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local AnimNode = require("jumbalaya-engine.scene.animated.init")
+local Envelopes = require("jumbalaya-engine.graphics.flow_text_envelopes")
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 --[[
-	app/core/graphics/flow_text.lua - animated per-letter text (FlowText).
+	jumbalaya-engine/graphics/flow_text.lua - animated per-letter text (FlowText).
 
 	Animation model (deliberately unlike the original engine's):
 	  - Reveal uses an ease-out-back "spring" envelope; letters overshoot
@@ -19,26 +20,6 @@ local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 ]]
 
 local FlowText = AnimNode:derive("FlowText")
-
--- Golden angle: irrational phase step that keeps per-letter motion from
--- synchronising.
-local GOLDEN_ANGLE = 2.399963229728653
-
---- Ease-out-back curve: fast rise, brief overshoot above 1, settle at 1.
-local function spring_rise(t)
-	if t <= 0 then return 0 end
-	if t >= 1 then return 1 end
-	local c = 1.35
-	t = t - 1
-	return t * t * ((c + 1) * t + c) + 1
-end
-
---- Smoothstep fade, used for the reveal-out envelope.
-local function smoothstep(t)
-	if t <= 0 then return 0 end
-	if t >= 1 then return 1 end
-	return t * t * (3 - 2 * t)
-end
 
 function FlowText:construct(config)
 	config = config or {}
@@ -264,7 +245,7 @@ function FlowText:align_letters()
 			local cycle_len = self.config.min_cycle_time or 1
 			local raw = math.min(1, math.max(
 				cycle_len - (now - self.fade_started_at) * self.config.pop_out / cycle_len, 0))
-			letter.pop_in = smoothstep(raw)
+			letter.pop_in = Envelopes.smoothstep(raw)
 			if k == letter_count and raw <= 0 and #self.strings > 1 then self.cycle_pending = true end
 		elseif self.config.pop_in then
 			-- Staggered spring reveal: letter k starts one wave-slot after k-1.
@@ -272,7 +253,7 @@ function FlowText:align_letters()
 			local raw = (now - self.config.pop_in - self.shown_at)
 				* #self.string * self.reveal_speed - k + 1
 			raw = math.min(1, math.max(raw, self.config.min_cycle_time == 0 and 1 or 0))
-			letter.pop_in = spring_rise(raw)
+			letter.pop_in = Envelopes.spring_rise(raw)
 
 			-- Rising edge plays a pitched tick (skip offscreen / thin out long strings).
 			if prev_pop_in <= 0 and letter.pop_in > 0 and not self.silent
@@ -302,47 +283,28 @@ function FlowText:align_letters()
 		-- Fan rotation across the string plus a slow breathing sway
 		-- (rotate==2 mirrors direction).
 		if self.config.rotate then
-			local dir = self.config.rotate == 2 and -1 or 1
-			letter.r = dir * (0.18 * (k - mid) / letter_count
-				+ 0.03 * math.sin(1.7 * now + k * GOLDEN_ANGLE))
+			letter.r = Envelopes.rotate_sway(k, mid, letter_count, now, self.config.rotate)
 		end
 
-		-- Pulse: a gaussian bell travelling across letter indices.
 		if self.config.pulse then
-			local p = self.config.pulse
-			local head = (now - p.start) * p.speed
-			local d = (head - k) / math.max(p.width * 0.5, 0.001)
-			local bell = math.exp(-d * d)
-			letter.scale = letter.scale + 1.5 * p.amount * bell
-			letter.r = letter.r + (letter.scale - 1) * 0.02 * (k - mid)
-			if head > letter_count + p.width then self.config.pulse = nil end
+			local scale, extra_r, done = Envelopes.pulse_scale(now, self.config.pulse, k, mid, letter_count)
+			letter.scale = letter.scale + scale - 1
+			letter.r = letter.r + extra_r
+			if done then self.config.pulse = nil end
 		end
 
-		-- Quiver: nervous jitter from layered low-frequency noise.
 		if self.config.quiver then
-			local q = self.config.quiver
-			local wobble = math.sin(now * q.speed * 23.7 + k * 12.9898)
-				+ 0.5 * math.cos(now * q.speed * 41.3 + k * 78.233)
-				+ 0.25 * math.sin(now * q.speed * 67.1 + k * 39.425)
-			letter.scale = letter.scale + 0.08 * q.amount
-			letter.r = letter.r + 0.22 * q.amount * wobble
+			local scale_delta, r_delta = Envelopes.quiver_motion(now, self.config.quiver, k)
+			letter.scale = letter.scale + scale_delta
+			letter.r = letter.r + r_delta
 		end
 
 		if self.config.float then
-			-- Two incommensurate cosine drifts, phase-shifted by the golden angle.
-			letter.offset.y = math.sqrt(self.scale)
-				* (2 + (self.font.FONTSCALE / game().TILESIZE) * 1500
-					* (math.cos(2.6 * now + k * GOLDEN_ANGLE)
-						+ 0.3 * math.sin(4.3 * now + k * 1.618)))
+			letter.offset.y = Envelopes.float_offset(now, k, self.scale, self.font.FONTSCALE, game().TILESIZE)
 				+ 60 * (letter.scale - 1)
 		end
 		if self.config.bump then
-			-- Hop train: each letter performs a raised-cosine hop per cycle,
-			-- smoothed so takeoff/landing ease in and out.
-			local phase = (self.hop_rate * now + k * GOLDEN_ANGLE / (2 * math.pi)) % 1
-			local hop = math.sin(phase * math.pi)
-			hop = hop * hop * (3 - 2 * hop)
-			letter.offset.y = self.hop_height * math.sqrt(self.scale) * 12 * hop
+			letter.offset.y = Envelopes.bump_offset(now, k, self.hop_rate, self.hop_height, self.scale)
 		end
 	end
 end
