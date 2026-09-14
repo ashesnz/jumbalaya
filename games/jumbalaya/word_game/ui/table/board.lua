@@ -65,15 +65,8 @@ end
 function M.draw_board(game)
 	if game.pattern_row then
 		ensure_placement_pattern_overlay(game.pattern_row)
-		local table_view = M.ensure_store_subscription()
-		if table_view and table_view:should_render_pattern_from_store() then
-			love.graphics.push()
-			if game.pattern_row.area then
-				game.pattern_row.area:translate_container()
-			end
-			table_view:draw_pattern()
-			love.graphics.pop()
-		elseif game.pattern_row.draw_run_pass then
+		-- Pattern slots use live Card hosts + jumble geometry, not store PileView rows.
+		if game.pattern_row.draw_run_pass then
 			game.pattern_row:draw_run_pass(game)
 		end
 		M.draw_hand_pass(game)

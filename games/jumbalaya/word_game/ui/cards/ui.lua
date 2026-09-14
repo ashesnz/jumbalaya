@@ -172,11 +172,37 @@ function Card:stop_hover()
 end
 
 
+local function hand_cards(hand)
+		if hand and hand.cards and #hand.cards > 0 then
+				return hand.cards
+		end
+		local board = WORD_GAME_UI.TableBoard
+		local view = board and board.table_board_view and board.table_board_view()
+		return view and view:pile_cards("hand") or {}
+end
+
+local function is_hand_letter(card)
+		local hand = game().dealt_letters
+		if not hand or not card then return false end
+		if card.area == hand or card.pile_id == "hand" then return true end
+		for _, c in ipairs(hand_cards(hand)) do
+				if c == card then return true end
+		end
+		return false
+end
+
 function Card:drag()
 		local hand = game().dealt_letters
-		if hand and self.area == hand and hand.add_selection and hand.selected[1] ~= self then
-				hand:clear_selection()
-				hand:add_selection(self, true)
+		if hand and is_hand_letter(self) and hand.add_selection then
+				if hand.selected[1] ~= self then
+						for _, c in ipairs(hand_cards(hand)) do
+								if c ~= self and c.selected then
+										c:set_selected(false)
+								end
+						end
+						hand:clear_selection()
+						hand:add_selection(self, true)
+				end
 		end
 		AnimNode.drag(self)
 end

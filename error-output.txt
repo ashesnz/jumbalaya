@@ -1,1 +1,31 @@
 Steam not available — running without Steam integration
+=== Jumbalaya Error ===
+...Jumbalaya/games/jumbalaya/word_game/ui/cards/inspect.lua:149: attempt to call global 'play_sfx' (a nil value)
+
+stack traceback:
+	...rce/home/Jumbalaya/games/jumbalaya/app/error_handler.lua:170: in function 'handler'
+	[love "boot.lua"]:352: in function 'play_sfx'
+	...Jumbalaya/games/jumbalaya/word_game/ui/cards/inspect.lua:149: in function 'update'
+	...Jumbalaya/games/jumbalaya/app/bootstrap/runtime_boot.lua:102: in function 'fn'
+	...Jumbalaya/packages/jumbalaya-engine/session/updaters.lua:41: in function 'run'
+	...ome/Jumbalaya/packages/jumbalaya-engine/session/loop.lua:94: in function 'update'
+	.../packages/jumbalaya-engine/adapters/love2d/lifecycle.lua:120: in function 'update'
+	.../packages/jumbalaya-engine/adapters/love2d/lifecycle.lua:43: in function <.../packages/jumbalaya-engine/adapters/love2d/lifecycle.lua:15>
+	[C]: in function 'xpcall'
+	[love "boot.lua"]:377: in function <[love "boot.lua"]:344>
+=== Jumbalaya Error ===
+...Jumbalaya/games/jumbalaya/word_game/ui/cards/inspect.lua:149: attempt to call global 'play_sfx' (a nil value)
+
+stack traceback:
+	...rce/home/Jumbalaya/games/jumbalaya/app/error_handler.lua:170: in function 'handler'
+	[love "boot.lua"]:352: in function 'play_sfx'
+	...Jumbalaya/games/jumbalaya/word_game/ui/cards/inspect.lua:149: in function 'update'
+	...Jumbalaya/games/jumbalaya/app/bootstrap/runtime_boot.lua:102: in function 'fn'
+	...Jumbalaya/packages/jumbalaya-engine/session/updaters.lua:41: in function 'run'
+	...ome/Jumbalaya/packages/jumbalaya-engine/session/loop.lua:94: in function 'update'
+	.../packages/jumbalaya-engine/adapters/love2d/lifecycle.lua:120: in function 'update'
+	.../packages/jumbalaya-engine/adapters/love2d/lifecycle.lua:43: in function <.../packages/jumbalaya-engine/adapters/love2d/lifecycle.lua:15>
+	[C]: in function 'xpcall'
+	[love "boot.lua"]:377: in function <[love "boot.lua"]:344>
+
+Error log saved to: /Users/ashwin/Library/Application Support/LOVE/Jumbalaya/error.log

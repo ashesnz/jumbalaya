@@ -231,6 +231,9 @@ function M.release_static_chrome(store, pile_ids)
 				if keep[card] then
 					retained[#retained + 1] = card
 				elseif card and card.remove_from_area then
+					if host.remove_selection then
+						host:remove_selection(card, true)
+					end
 					card:remove_from_area()
 				end
 			end

@@ -125,6 +125,7 @@ function M.setup()
 		DYN_UI = { BOSS_MAIN = { 1, 1, 1, 1 }, BOSS_DARK = { 0, 0, 0, 1 }, MAIN = { 0.22, 0.32, 0.35, 1 } },
 	}
 	S.UI = S.UI or { ROOT = 1, ROW = 2, COL = 3, TEXT = 4, OBJECT = 5, BOX = 6 }
+	S.UI.padding = S.UI.padding or 0.05
 	S.TILE_W = S.TILE_W or 20
 	S.TILE_H = S.TILE_H or 11
 	S.CARD_W = S.CARD_W or 1
@@ -350,6 +351,14 @@ function M.reset_game()
 		pcall(function() S.SIDEBAR_HUD:remove() end)
 	end
 	S.SIDEBAR_HUD = nil
+	S.SCENE_ROOTS = {}
+	S.LIVE = S.LIVE or {}
+	S.LIVE.CARD = {}
+	S.LIVE.CARDPILE = {}
+	S.LIVE.NODE = S.LIVE.NODE or {}
+	S.LIVE.TRANSFORM = S.LIVE.TRANSFORM or {}
+	S.LIVE.SPRITE = S.LIVE.SPRITE or {}
+	S.letter_inventory = {}
 	local jg = S.pattern_row and S.pattern_row.jumble_geometry
 	S.pattern_row = {
 		relayout = function() end,

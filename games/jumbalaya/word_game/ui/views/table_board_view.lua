@@ -113,7 +113,8 @@ function TableBoardView:should_render_draw_from_store()
 end
 
 function TableBoardView:should_render_pattern_from_store()
-	return self:should_render_pile_from_store("pattern")
+	-- Jumble placement positions cards per-slot; store pile view is a flat row only.
+	return false
 end
 
 function TableBoardView:hand_rect()
