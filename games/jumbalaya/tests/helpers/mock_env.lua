@@ -81,13 +81,12 @@ function M.ensure_engine_globals()
 
 	require("jumbalaya-engine.util.colour").install()
 	_G.ease_background_colour = _G.ease_background_colour or function() end
-	_G.push_node_transform = _G.push_node_transform or function() end
-	_G.track_hit_target = _G.track_hit_target or function() end
 
 	require("jumbalaya-engine.object")
 	require("jumbalaya-engine.util.tables").install()
 	require("jumbalaya-engine.util.geometry").install()
 	require("jumbalaya-engine.util.random").install()
+	require("jumbalaya-engine.graphics.draw").install()
 	require("jumbalaya-engine.util.tween")
 	require("jumbalaya-engine.scene.node")
 	require("jumbalaya-engine.scene.animated.init")

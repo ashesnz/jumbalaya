@@ -7,6 +7,7 @@ local facade = require("word_game.ui.facade")
 local widgets = require("word_game.ui.widgets")
 local state = facade.run_state()
 local Easing = require("word_game.ui.effects.easing")
+local Tables = require("jumbalaya-engine.util.tables")
 
 local M = {}
 
@@ -78,7 +79,7 @@ function M.overlay_definition(won)
 		title = won and "YOU WIN!" or "GAME OVER"
 	end
 	local title_col = won and runtime().C.GOLD or runtime().C.RED
-	local eased = deep_clone(title_col)
+	local eased = Tables.deep_clone(title_col)
 	eased[4] = 0
 	Easing.value{ref_table = eased, ref_value = 4, mod = 0.8, floored = true}
 

@@ -5,6 +5,7 @@ local function runtime() return GameRT.game() end
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local Components = require "word_game.ui.widgets.components"
 local UIViewHost = require("jumbalaya-engine.panels.view_host")
+local Colour = require("jumbalaya-engine.util.colour")
 
 
 local button_font
@@ -42,7 +43,7 @@ end
 function build_card_alert(args)
   args = args or {}
   return {n=runtime().UI.ROOT, config = {align = 'cm', colour = runtime().C.CLEAR, refresh_movement = true}, nodes={
-      {n=runtime().UI.ROW, config={align = "cm", r = 0.15, minw = 0.42, minh = 0.42, colour = args.no_bg and runtime().C.CLEAR or args.bg_col or (args.red_bad and shade(runtime().C.RED, 0.1) or runtime().C.RED), draw_layer = 1, emboss = 0.05, refresh_movement = true}, nodes={
+      {n=runtime().UI.ROW, config={align = "cm", r = 0.15, minw = 0.42, minh = 0.42, colour = args.no_bg and runtime().C.CLEAR or args.bg_col or (args.red_bad and Colour.shade(runtime().C.RED, 0.1) or runtime().C.RED), draw_layer = 1, emboss = 0.05, refresh_movement = true}, nodes={
         {n=runtime().UI.OBJECT, config={object = FlowText({string = args.text or '!', colours = {runtime().C.WHITE},shadow = true, rotate = true,H_offset = args.y_offset or 0,bump_rate = args.text and 3 or 7, bump_amount = args.bump_amount or 3, bump = true,maxw = args.maxw, text_rot = args.text_rot or  0.2, spacing = 3*(args.scale or 1), scale = args.scale or 0.48})}}
       }},
   }}

@@ -5,6 +5,9 @@
 ]]
 
 local GameRT = require("word_game.ui.util.game_runtime")
+local Tables = require("jumbalaya-engine.util.tables")
+local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
+local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local function runtime() return GameRT.game() end
 
 local ComicBurst = EaseNode:derive("ComicBurst")
@@ -235,7 +238,7 @@ function ComicBurst:draw()
 	local cr, cg, cb, ca = love.graphics.getColor()
 
 	love.graphics.setShader()
-	push_node_transform(self, 1)
+	NodeTransform.push_node_transform(self, 1)
 	love.graphics.translate(self.VT.w / 2, self.VT.h / 2)
 	ComicBurst.paint(self)
 	love.graphics.pop()
@@ -245,7 +248,7 @@ function ComicBurst:draw()
 	end
 	love.graphics.setColor(cr, cg, cb, ca)
 
-	track_hit_target(self)
+	HitOrder.track_hit_target(self)
 	self:draw_boundingrect()
 end
 
@@ -257,7 +260,7 @@ function ComicBurst:remove()
 			end
 		end
 	end
-	teardown_tree(self.children)
+	Tables.teardown_tree(self.children)
 	EaseNode.remove(self)
 end
 

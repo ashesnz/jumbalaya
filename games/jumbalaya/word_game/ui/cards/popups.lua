@@ -10,13 +10,15 @@ local function runtime() return GameRT.game() end
 
 local Easing = require "word_game.ui.effects.easing"
 local UIViewHost = require("jumbalaya-engine.panels.view_host")
+local Colour = require("jumbalaya-engine.util.colour")
+local Tables = require("jumbalaya-engine.util.tables")
 
 local DEFINITIONS = runtime().DEFINITIONS
 
 function DEFINITIONS.card_focus_ui(card)
   local card_width = card.T.w
 
-  local face_highlight_colour = deep_clone(runtime().C.WHITE)
+  local face_highlight_colour = Tables.deep_clone(runtime().C.WHITE)
   face_highlight_colour[4] = 1.5
   if runtime().dealt_letters and card.area == runtime().dealt_letters then Easing.value{ref_table = face_highlight_colour, ref_value = 4, mod = -1.5, timer = 'REAL', delay = 0.2, ease = 'quad'} end
 
@@ -25,7 +27,7 @@ function DEFINITIONS.card_focus_ui(card)
   local base_background = UIViewHost.create{
     T = {card.VT.x,card.VT.y,0,0},
     definition = 
-      (not runtime().dealt_letters or card.area ~= runtime().dealt_letters) and {n=runtime().UI.ROOT, config = {align = 'cm', minw = card_width + 0.3, minh = card.T.h + 0.3, r = 0.1, colour = with_alpha(runtime().C.BLACK, 0.7), outline_colour = tint(runtime().C.MUTED_GREY, 0.5), outline = 1.5, line_emboss = 0.8}, nodes={
+      (not runtime().dealt_letters or card.area ~= runtime().dealt_letters) and {n=runtime().UI.ROOT, config = {align = 'cm', minw = card_width + 0.3, minh = card.T.h + 0.3, r = 0.1, colour = Colour.with_alpha(runtime().C.BLACK, 0.7), outline_colour = Colour.tint(runtime().C.MUTED_GREY, 0.5), outline = 1.5, line_emboss = 0.8}, nodes={
         {n=runtime().UI.ROW, config={id = 'ATTACH_TO_ME'}, nodes={}}
       }} or 
       {n=runtime().UI.ROOT, config = {align = 'cm', minw = card_width, minh = card.T.h, r = 0.1, colour = face_highlight_colour}, nodes={
@@ -73,7 +75,7 @@ function rows_to_infotip(desc_nodes, name)
   for k, v in ipairs(desc_nodes) do
     t[#t+1] = {n=runtime().UI.ROW, config={align = "cm"}, nodes=v}
   end
-  return {n=runtime().UI.ROW, config={align = "cm", colour = tint(runtime().C.GREY, 0.15), r = 0.1}, nodes={
+  return {n=runtime().UI.ROW, config={align = "cm", colour = Colour.tint(runtime().C.GREY, 0.15), r = 0.1}, nodes={
     {n=runtime().UI.ROW, config={align = "tm", minh = 0.36, padding = 0.03}, nodes={{n=runtime().UI.TEXT, config={text = name, scale = 0.32, colour = runtime().C.UI.TEXT_LIGHT}}}},
     {n=runtime().UI.ROW, config={align = "cm", minw = 1.5, minh = 0.4, r = 0.1, padding = 0.05, colour = runtime().C.WHITE}, nodes={{n=runtime().UI.ROW, config={align = "cm", padding = 0.03}, nodes=t}}}
   }}
@@ -114,10 +116,10 @@ function DEFINITIONS.card_h_popup(card)
     local card_type_colour = get_type_colour(card.config.center or card.config, card)
     local card_type_background = 
         (tip.card_type == 'Locked' and runtime().C.BLACK) or 
-        ((tip.card_type == 'Undiscovered') and shade(runtime().C.MUTED_GREY, 0.3)) or 
-        (tip.card_type == 'Enhanced' or tip.card_type == 'Default') and shade(runtime().C.BLACK, 0.1) or
-        (debuffed and shade(runtime().C.BLACK, 0.1)) or 
-        (card_type_colour and shade(runtime().C.BLACK, 0.1)) or
+        ((tip.card_type == 'Undiscovered') and Colour.shade(runtime().C.MUTED_GREY, 0.3)) or 
+        (tip.card_type == 'Enhanced' or tip.card_type == 'Default') and Colour.shade(runtime().C.BLACK, 0.1) or
+        (debuffed and Colour.shade(runtime().C.BLACK, 0.1)) or 
+        (card_type_colour and Colour.shade(runtime().C.BLACK, 0.1)) or
         runtime().C.SET[tip.card_type] or
         {0, 1, 1, 1}
 
@@ -143,7 +145,7 @@ function DEFINITIONS.card_h_popup(card)
       for k, v in ipairs(tip.info) do
         info_boxes[#info_boxes+1] =
         {n=runtime().UI.ROW, config={align = "cm"}, nodes={
-        {n=runtime().UI.ROW, config={align = "cm", colour = tint(runtime().C.MUTED_GREY, 0.5), r = 0.1, padding = 0.05, emboss = 0.05}, nodes={
+        {n=runtime().UI.ROW, config={align = "cm", colour = Colour.tint(runtime().C.MUTED_GREY, 0.5), r = 0.1, padding = 0.05, emboss = 0.05}, nodes={
           rows_to_infotip(v, v.name),
         }}
       }}
@@ -152,8 +154,8 @@ function DEFINITIONS.card_h_popup(card)
 
     return {n=runtime().UI.ROOT, config = {align = 'cm', colour = runtime().C.CLEAR}, nodes={
       {n=runtime().UI.COLUMN, config={align = "cm", func = 'show_infotip',object = EaseNode(),ref_table = next(info_boxes) and info_boxes or nil}, nodes={
-        {n=runtime().UI.ROW, config={padding = outer_padding, r = 0.12, colour = tint(runtime().C.MUTED_GREY, 0.5), emboss = 0.07}, nodes={
-          {n=runtime().UI.ROW, config={align = "cm", padding = 0.07, r = 0.1, colour = with_alpha(card_type_background, 0.8)}, nodes={
+        {n=runtime().UI.ROW, config={padding = outer_padding, r = 0.12, colour = Colour.tint(runtime().C.MUTED_GREY, 0.5), emboss = 0.07}, nodes={
+          {n=runtime().UI.ROW, config={align = "cm", padding = 0.07, r = 0.1, colour = Colour.with_alpha(card_type_background, 0.8)}, nodes={
             name_from_rows(tip.name, is_letter_face and runtime().C.WHITE or nil),
             desc_from_rows(tip.main),
             badges[1] and {n=runtime().UI.ROW, config={align = "cm", padding = 0.03}, nodes=badges} or nil,
@@ -187,7 +189,7 @@ function build_detailed_tooltip(_center)
   }
   local desc = generate_card_ui(_center, full_UI_table, nil, _center.set, nil)
   return {n=runtime().UI.ROOT, config={align = "cm", colour = runtime().C.CLEAR}, nodes={
-    {n=runtime().UI.ROW, config={align = "cm", colour = tint(runtime().C.MUTED_GREY, 0.5), r = 0.1, padding = 0.05, emboss = 0.05}, nodes={
+    {n=runtime().UI.ROW, config={align = "cm", colour = Colour.tint(runtime().C.MUTED_GREY, 0.5), r = 0.1, padding = 0.05, emboss = 0.05}, nodes={
       rows_to_infotip(desc.info[1], desc.info[1].name),
     }}
   }}

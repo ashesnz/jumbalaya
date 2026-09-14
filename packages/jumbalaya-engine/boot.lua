@@ -21,7 +21,7 @@ function M.install()
 	require("jumbalaya-engine.util.geometry").install()
 	require("jumbalaya-engine.util.random").install()
 	require("jumbalaya-engine.util.colour").install()
-	require "jumbalaya-engine.graphics.draw"
+	require("jumbalaya-engine.graphics.draw").install()
 	require "jumbalaya-engine.adapters.love2d.display"
 	require "jumbalaya-engine.sound.sound"
 	require("jumbalaya-engine.util.number_format").install()

@@ -4,6 +4,7 @@ local GameRT = require("word_game.ui.util.game_runtime")
 local function runtime() return GameRT.game() end
 
 local Components = require("word_game.ui.widgets.components")
+local Colour = require("jumbalaya-engine.util.colour")
 
 local DEFINITIONS = runtime().DEFINITIONS
 
@@ -134,7 +135,7 @@ function M.build_profile_button()
   if runtime().F_DISP_USERNAME then
     for c in each_utf8_char(runtime().F_DISP_USERNAME) do
       local leng = runtime().LANGUAGES['all1'].font.FONT:hasGlyphs(c)
-      letters[#letters+1] = {n=runtime().UI.TEXT, config={lang = runtime().LANGUAGES[leng and 'all1' or 'all2'],text = c, scale = 0.3, colour = blend_colours(runtime().C.GREEN, runtime().C.WHITE, 0.7), shadow = true}}
+      letters[#letters+1] = {n=runtime().UI.TEXT, config={lang = runtime().LANGUAGES[leng and 'all1' or 'all2'],text = c, scale = 0.3, colour = Colour.blend_colours(runtime().C.GREEN, runtime().C.WHITE, 0.7), shadow = true}}
     end
   end
 
@@ -148,7 +149,7 @@ function M.build_profile_button()
         {n=runtime().UI.TEXT, config={text = localize('term_profile'), scale = 0.4, colour = runtime().C.UI.TEXT_LIGHT, shadow = true}}
       }},
       {n=runtime().UI.ROW, config={align = "cm"}, nodes={
-        {n=runtime().UI.COLUMN, config={align = "cm", padding = 0.15, minw = 2, minh = 0.8, maxw = 2, r = 0.1, hover = true, colour = blend_colours(runtime().C.WHITE, runtime().C.GREY, 0.2), button = 'profile_select', shadow = true}, nodes={
+        {n=runtime().UI.COLUMN, config={align = "cm", padding = 0.15, minw = 2, minh = 0.8, maxw = 2, r = 0.1, hover = true, colour = Colour.blend_colours(runtime().C.WHITE, runtime().C.GREY, 0.2), button = 'profile_select', shadow = true}, nodes={
           {n=runtime().UI.TEXT, config={ref_table = runtime().PROFILES[runtime().SETTINGS.profile], ref_value = 'name', scale = 0.4, colour = runtime().C.UI.TEXT_LIGHT, shadow = true}}
         }},
       }}
@@ -255,7 +256,7 @@ function DEFINITIONS.language_selector()
   local t = build_generic_options({contents ={
     {n=runtime().UI.ROW, config={align = "cm", padding = 0.05}, nodes=rows},
     {n=runtime().UI.ROW, config={align = "cm", padding = 0.05}, nodes={
-      {n=runtime().UI.COLUMN, config={align = "cm", padding = 0.1, minw = 4, maxw = 4, r = 0.1, minh = 0.8, colour = blend_colours(runtime().C.GREEN, runtime().C.GREY, 0.4)}, nodes={
+      {n=runtime().UI.COLUMN, config={align = "cm", padding = 0.1, minw = 4, maxw = 4, r = 0.1, minh = 0.8, colour = Colour.blend_colours(runtime().C.GREEN, runtime().C.GREY, 0.4)}, nodes={
         {n=runtime().UI.OBJECT, config={object = discord}},
         {n=runtime().UI.TEXT, config={text = runtime().LANG.button, scale = 0.45, colour = runtime().C.UI.TEXT_LIGHT, shadow = true}}
       }},

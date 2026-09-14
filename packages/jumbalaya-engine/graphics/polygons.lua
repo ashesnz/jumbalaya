@@ -1,7 +1,10 @@
 
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
-function pointer_triangle(x, y, w, h, vert)
+
+local M = {}
+
+function M.pointer_triangle(x, y, w, h, vert)
 	local scale = 2
 	if vert then
 		x = x + math.min(0.6 * math.sin(g().TIMERS.REAL * 9) * scale + 0.2, 0)
@@ -22,7 +25,7 @@ end
 --- Polygon points for the tail under a speech-bubble box.
 --  `kind == 'mouth'` anchors along the bottom edge (`along`, clamped) with a
 --  drop depth from `reach`; the default variant hangs from 14% of the width.
-function get_speech_bubble_tail(x, y, w, h, kind, reach, along)
+function M.get_speech_bubble_tail(x, y, w, h, kind, reach, along)
 	local scale = 2.4
 	local by = y + h
 	if kind == 'mouth' then
@@ -35,6 +38,14 @@ function get_speech_bubble_tail(x, y, w, h, kind, reach, along)
 	return {bx - 1.5 * scale, by, bx + 1.5 * scale, by, bx, by + 3.4 * scale}
 end
 
-function get_speech_bubble_tail_bl(x, y, w, h)
-	return get_speech_bubble_tail(x, y, w, h, 'bl')
+function M.get_speech_bubble_tail_bl(x, y, w, h)
+	return M.get_speech_bubble_tail(x, y, w, h, 'bl')
 end
+
+function M.install()
+	_G.pointer_triangle = M.pointer_triangle
+	_G.get_speech_bubble_tail = M.get_speech_bubble_tail
+	_G.get_speech_bubble_tail_bl = M.get_speech_bubble_tail_bl
+end
+
+return M

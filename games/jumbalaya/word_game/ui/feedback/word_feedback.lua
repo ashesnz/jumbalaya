@@ -11,6 +11,8 @@ local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
 local ComicBurst = require("word_game.ui.feedback.comic_burst")
 local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
+local Colour = require("jumbalaya-engine.util.colour")
+local Tables = require("jumbalaya-engine.util.tables")
 
 local RunMode = facade.run_mode()
 
@@ -24,7 +26,7 @@ function M.spawn_attention(args)
 	args = args or {}
 	args.text = args.text or 'test'
 	args.scale = args.scale or 1
-	args.colour = deep_clone(args.colour or runtime().C.WHITE)
+	args.colour = Tables.deep_clone(args.colour or runtime().C.WHITE)
 	args.hold = (args.hold or 0) + 0.1 * ((runtime() and runtime().TIME_SCALE) or 1)
 	args.pos = args.pos or { x = 0, y = 0 }
 	args.align = args.align or 'cm'
@@ -33,11 +35,11 @@ function M.spawn_attention(args)
 	args.fade = 1
 
 	if args.cover then
-		args.cover_colour = deep_clone(args.cover_colour or runtime().C.RED)
-		args.cover_colour_l = deep_clone(tint(args.cover_colour, 0.2))
-		args.cover_colour_d = deep_clone(shade(args.cover_colour, 0.2))
+		args.cover_colour = Tables.deep_clone(args.cover_colour or runtime().C.RED)
+		args.cover_colour_l = Tables.deep_clone(Colour.tint(args.cover_colour, 0.2))
+		args.cover_colour_d = Tables.deep_clone(Colour.shade(args.cover_colour, 0.2))
 	else
-		args.cover_colour = deep_clone(runtime().C.CLEAR)
+		args.cover_colour = Tables.deep_clone(runtime().C.CLEAR)
 	end
 
 	args.uibox_config = {
@@ -87,7 +89,7 @@ function M.spawn_attention(args)
 					radius = args.burst_radius or 0.62,
 				})
 			elseif args.backdrop_colour then
-				args.backdrop_colour = deep_clone(args.backdrop_colour)
+				args.backdrop_colour = Tables.deep_clone(args.backdrop_colour)
 				Particles(args.pos.x, args.pos.y, 0, 0, {
 					timer_type = 'TOTAL',
 					timer = 5,

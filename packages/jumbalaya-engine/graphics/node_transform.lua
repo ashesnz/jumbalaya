@@ -1,7 +1,10 @@
 
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
-function push_node_transform(moveable, scale, rotate, offset, _)
+
+local M = {}
+
+function M.push_node_transform(moveable, scale, rotate, offset, _)
 	love.graphics.push()
 	love.graphics.scale(g().TILESCALE * g().TILESIZE)
 	local parallax = moveable.parallax_shift
@@ -18,3 +21,9 @@ function push_node_transform(moveable, scale, rotate, offset, _)
 		-scale * moveable.VT.h * moveable.VT.scale / 2)
 	love.graphics.scale(moveable.VT.scale * scale)
 end
+
+function M.install()
+	_G.push_node_transform = M.push_node_transform
+end
+
+return M

@@ -4,6 +4,7 @@
 local GameRT = require("word_game.ui.util.game_runtime")
 local LetterFaces = require("word_game.ui.cards.letter_faces")
 local LetterPalette = require("word_game.config.visuals.letter_card_palette")
+local Tables = require("jumbalaya-engine.util.tables")
 
 local function runtime() return GameRT.game() end
 
@@ -181,7 +182,7 @@ function Card:draw(layer)
 		end
 
 		if self.children.overwrite and self.tilt_var then
-			self.children.overwrite.overwrite_tilt_var = deep_clone(self.tilt_var)
+			self.children.overwrite.overwrite_tilt_var = Tables.deep_clone(self.tilt_var)
 		end
 
 		self:draw_leftover_children()

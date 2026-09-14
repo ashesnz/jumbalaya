@@ -4,6 +4,8 @@ local function runtime() return GameRT.game() end
 
 local Components = require "word_game.ui.widgets.components"
 local UIViewHost = require("jumbalaya-engine.panels.view_host")
+local Colour = require("jumbalaya-engine.util.colour")
+local Tables = require("jumbalaya-engine.util.tables")
 
 function make_tab_strip(args)
   args = args or {}
@@ -64,8 +66,8 @@ end
 
 function make_text_field(args)
   args = args or {}
-  args.colour = deep_clone(args.colour) or deep_clone(runtime().C.BLUE)
-  args.hooked_colour = deep_clone(args.hooked_colour) or shade(deep_clone(runtime().C.BLUE), 0.3)
+  args.colour = Tables.deep_clone(args.colour) or Tables.deep_clone(runtime().C.BLUE)
+  args.hooked_colour = Tables.deep_clone(args.hooked_colour) or Colour.shade(Tables.deep_clone(runtime().C.BLUE), 0.3)
   args.w = args.w or 2.5
   args.h = args.h or 0.7
   args.text_scale = args.text_scale or 0.4
@@ -82,9 +84,9 @@ function make_text_field(args)
   end
   args.text = text
 
-  local position_text_colour = tint(deep_clone(runtime().C.BLUE), 0.4)
+  local position_text_colour = Colour.tint(Tables.deep_clone(runtime().C.BLUE), 0.4)
 
-  ui_letters[#ui_letters+1] = {n=runtime().UI.TEXT, config={ref_table = args, ref_value = 'current_prompt_text', scale = args.text_scale, colour = tint(deep_clone(args.colour), 0.4), id = 'prompt'}}
+  ui_letters[#ui_letters+1] = {n=runtime().UI.TEXT, config={ref_table = args, ref_value = 'current_prompt_text', scale = args.text_scale, colour = Colour.tint(Tables.deep_clone(args.colour), 0.4), id = 'prompt'}}
   ui_letters[#ui_letters+1] = {n=runtime().UI.BOX, config={r = 0.03,w=0.1, h=0.4, colour = position_text_colour, id = 'position', func = 'pulse_node'}}
 
   local t =

@@ -8,10 +8,12 @@ local function runtime() return GameRT.game() end
 local NumberFormat = require("jumbalaya-engine.util.number_format")
 local Easing = require "word_game.ui.effects.easing"
 local Components = require "word_game.ui.widgets.components"
+local Colour = require("jumbalaya-engine.util.colour")
+local Tables = require("jumbalaya-engine.util.tables")
 
 function build_win()
   local show_win_cta = false
-  local eased_green = deep_clone(runtime().C.GREEN)
+  local eased_green = Tables.deep_clone(runtime().C.GREEN)
   eased_green[4] = 0
   Easing.value{ref_table = eased_green, ref_value = 4, mod = 0.5, not_blockable = true}
   local t = build_generic_options({ padding = 0, bg_colour = eased_green , colour = runtime().C.BLACK, outline_colour = runtime().C.FINISH, no_back = true, no_esc = true, contents = {
@@ -83,7 +85,7 @@ end
 function build_game_over()
   local show_lose_cta = false
 
-  local eased_red = deep_clone(runtime().C.RED)
+  local eased_red = Tables.deep_clone(runtime().C.RED)
   eased_red[4] = 0
   Easing.value{ref_table = eased_red, ref_value = 4, mod = 0.8, not_blockable = true}
   local t = build_generic_options({ bg_colour = eased_red ,no_back = true, padding = 0, contents = {
@@ -188,7 +190,7 @@ function build_round_scores_row(score, text_colour)
       {n=runtime().UI.OBJECT, config={object = FlowText({string = {NumberFormat.number_format(game.round_scores[score].amt)}, colours = {text_colour or runtime().C.FILTER},shadow = true, float = true, scale = NumberFormat.score_number_scale(0.6, game.round_scores[score].amt)})}},
     }
   end
-  return {n=runtime().UI.ROW, config={align = "cm", padding = 0.05, r = 0.1, colour = shade(runtime().C.MUTED_GREY, 0.1), emboss = 0.05, func = check_high_score and 'high_score_alert' or nil, id = score}, nodes={
+  return {n=runtime().UI.ROW, config={align = "cm", padding = 0.05, r = 0.1, colour = Colour.shade(runtime().C.MUTED_GREY, 0.1), emboss = 0.05, func = check_high_score and 'high_score_alert' or nil, id = score}, nodes={
     {n=runtime().UI.COLUMN, config={align = "cm", padding = 0.02, minw = label_w, maxw = label_w}, nodes={
         {n=runtime().UI.TEXT, config={text = label, scale = label_scale, colour = runtime().C.UI.TEXT_LIGHT, shadow = true}},
     }},
