@@ -11,6 +11,7 @@ local felt = require("word_game.ui.layout.felt")
 local sidebar_layout = require("word_game.ui.sidebar.layout")
 local placement = require("word_game.ui.layout.placement")
 local request = require("word_game.ui.layout.request")
+local backgrounds = require("word_game.ui.layout.backgrounds")
 
 local M = {}
 
@@ -25,5 +26,10 @@ for k, v in pairs(placement) do
 end
 
 M.request_refresh = request.refresh
+
+function M.run_backgrounds()
+	backgrounds.run()
+	request.refresh()
+end
 
 return M

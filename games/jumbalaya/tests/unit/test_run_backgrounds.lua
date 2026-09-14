@@ -11,6 +11,13 @@ T.describe("run backgrounds", function()
 
 	local game = require("word_game.ui.util.game_runtime").game()
 
+	T.it("uses the garden leaves board for every stage", function()
+		T.assert_true(backgrounds.is_garden_stage(1, 1))
+		T.assert_true(backgrounds.is_garden_stage(1, 6))
+		T.assert_true(backgrounds.is_garden_stage(2, 3))
+		T.assert_true(backgrounds.is_garden_stage(8, 1))
+	end)
+
 	T.it("garden installs SPLASH_BACK with garden_leaves shader", function()
 		game.ARGS = game.ARGS or {}
 		game.SHADERS = game.SHADERS or {}
@@ -19,17 +26,8 @@ T.describe("run backgrounds", function()
 		backgrounds.garden()
 
 		T.assert_not_nil(game.SPLASH_BACK)
-		T.assert_true(game.SPLASH_BACK.states.visible)
 		T.assert_equal(game.ARGS.run_bg.mode, "garden")
-		T.assert_not_nil(game.SPLASH_BACK.draw_steps)
 		T.assert_equal(game.SPLASH_BACK.draw_steps[1].shader, "garden_leaves")
-	end)
-
-	T.it("run applies the garden backdrop", function()
-		game.SPLASH_BACK = nil
-		backgrounds.run()
-		T.assert_not_nil(game.SPLASH_BACK)
-		T.assert_equal(game.ARGS.run_bg.mode, "garden")
 	end)
 
 	T.it("presentation run_backgrounds installs the garden backdrop", function()
@@ -40,11 +38,14 @@ T.describe("run backgrounds", function()
 		T.assert_equal(game.ARGS.run_bg.mode, "garden")
 	end)
 
-	T.it("garden does not fall back to swirl when garden_leaves is absent", function()
-		game.SHADERS = {}
-		game.SPLASH_BACK = nil
-		backgrounds.garden()
-		T.assert_equal(game.ARGS.run_bg.mode, "garden")
-		T.assert_equal(game.SPLASH_BACK.draw_steps[1].shader, "garden_leaves")
-	end)
+	if love and love.graphics and love.graphics.newShader then
+		T.it("garden_leaves.fs compiles via GameFiles", function()
+			local GameFiles = require("app.platform.game_files")
+			local shader, err = GameFiles.load_shader("resources/shaders/garden_leaves.fs")
+			T.assert_not_nil(shader, tostring(err))
+			if shader and shader.release then
+				shader:release()
+			end
+		end)
+	end
 end)

@@ -25,20 +25,30 @@ local function resolve_asset_path(filename, alternates)
 	return asset_path(filename)
 end
 
+function M.load_shader(game, shader_name)
+	local rel_path = "resources/shaders/" .. shader_name .. ".fs"
+	local shader, err = GameFiles.load_shader(rel_path)
+	if shader then
+		game.SHADERS = game.SHADERS or {}
+		game.SHADERS[shader_name] = shader
+		return true
+	end
+	print("Jumbalaya: shader failed to load:", shader_name, err)
+	return false
+end
+
 function M.load_shaders(game)
 	GameFiles.ensure_mounted()
 	game.SHADERS = {}
-	local items = love.filesystem.getDirectoryItems("resources/shaders") or {}
-	for _, filename in ipairs(items) do
+	for _, filename in ipairs(love.filesystem.getDirectoryItems("resources/shaders") or {}) do
 		if string.sub(filename, -3) == '.fs' then
-			local shader_name = string.sub(filename, 1, -4)
-			local path = "resources/shaders/" .. filename
-			local ok, shader = pcall(love.graphics.newShader, path)
-			if ok and shader then
-				game.SHADERS[shader_name] = shader
-			elseif game.DEBUG then
-				print("Shader failed to load:", shader_name, shader)
-			end
+			M.load_shader(game, string.sub(filename, 1, -4))
+		end
+	end
+	-- Repo-root `love .` can yield an empty listing; load critical shaders from disk.
+	for _, shader_name in ipairs({ "garden_leaves", "background" }) do
+		if not game.SHADERS[shader_name] then
+			M.load_shader(game, shader_name)
 		end
 	end
 end

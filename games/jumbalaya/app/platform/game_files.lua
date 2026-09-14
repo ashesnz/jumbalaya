@@ -50,6 +50,23 @@ function M.exists(rel_path)
 	return false
 end
 
+--- Load a pixel shader from the game tree (mounted love FS or disk fallback).
+function M.load_shader(rel_path)
+	M.ensure_mounted()
+	if love.filesystem and love.filesystem.getInfo(rel_path) then
+		return love.graphics.newShader(rel_path)
+	end
+	local code = M.read(rel_path)
+	if not code or code == "" then
+		return nil, "missing shader file: " .. rel_path
+	end
+	local ok, shader = pcall(love.graphics.newShader, code)
+	if not ok then
+		return nil, shader
+	end
+	return shader
+end
+
 --- Load through love FS when mounted, otherwise from disk via FileData.
 function M.load_image(rel_path, opts)
 	M.ensure_mounted()

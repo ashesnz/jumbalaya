@@ -19,6 +19,7 @@ function M.begin_run(e, args)
 	game():queue_during_wipe(function()
 		game():discard_run()
 		game():start_run(args)
+		WORD_GAME_UI.Layout.run_backgrounds()
 		game():start_gameplay_board()
 	end)
 end

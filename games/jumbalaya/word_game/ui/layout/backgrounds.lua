@@ -8,6 +8,7 @@
 ]]
 
 local game = require("word_game.ui.util.game_runtime").game
+local GameFiles = require("app.platform.game_files")
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local Easing = require("word_game.ui.effects.easing")
@@ -15,24 +16,24 @@ local Easing = require("word_game.ui.effects.easing")
 local M = {}
 
 local GARDEN_STAGE_MOSS = {0.38, 0.52, 0.36, 1}
+--- Garden (falling leaves) board for all stages (1-1 through 8-3).
+function M.is_garden_stage(_set, _hand_index)
+	return true
+end
 
-local ATLAS_PREFERENCE = { "ui_1", "playing_back", "letter_frame", "letters" }
-
-local function pick_atlas()
-	local atlases = game().TEXTURE_ATLASES
-	if not atlases then return nil end
-	for _, name in ipairs(ATLAS_PREFERENCE) do
-		local atlas = atlases[name]
-		if atlas and atlas.image and atlas.px then
-			return atlas
-		end
+local function ensure_garden_leaves_shader()
+	local g = game()
+	g.SHADERS = g.SHADERS or {}
+	if g.SHADERS.garden_leaves then
+		return true
 	end
-	for _, atlas in pairs(atlases) do
-		if atlas and atlas.image and atlas.px then
-			return atlas
-		end
+	local shader, err = GameFiles.load_shader("resources/shaders/garden_leaves.fs")
+	if shader then
+		g.SHADERS.garden_leaves = shader
+		return true
 	end
-	return nil
+	print("Jumbalaya: garden_leaves shader failed to load:", err)
+	return false
 end
 
 local function remove_current()
@@ -78,25 +79,19 @@ function M.garden()
 		game().ARGS.spin.amount, game().ARGS.spin.real, game().ARGS.spin.eased = 0, 0, 0
 	end
 
-	local atlas = pick_atlas()
+	local atlas = game().TEXTURE_ATLASES and game().TEXTURE_ATLASES["ui_1"]
 	if not atlas then
-		M.swirl()
 		return
 	end
+
+	ensure_garden_leaves_shader()
 
 	game().SPLASH_BACK = Sprite(-30, -6, game().ROOM.T.w + 60, game().ROOM.T.h + 12, atlas, {x = 2, y = 0})
 	game().SPLASH_BACK:set_alignment({
 		major = game().ROOM_ATTACH,
 		type = "cm",
-		bond = "Strong",
 		offset = {x = 0, y = 0},
 	})
-	if game().SPLASH_BACK.align_to_major then
-		game().SPLASH_BACK:align_to_major()
-	end
-	if game().SPLASH_BACK.snap_VT then
-		game().SPLASH_BACK:snap_VT()
-	end
 	game().SPLASH_BACK:define_draw_steps({{
 		shader = "garden_leaves",
 		send = {
@@ -113,19 +108,18 @@ function M.swirl()
 	game().ARGS.run_bg.mode = "swirl"
 	ensure_spin_event()
 
-	game().SPLASH_BACK = Sprite(-30, -6, game().ROOM.T.w + 60, game().ROOM.T.h + 12, game().TEXTURE_ATLASES["ui_1"], {x = 2, y = 0})
+	local atlas = game().TEXTURE_ATLASES and game().TEXTURE_ATLASES["ui_1"]
+	if not atlas then
+		return
+	end
+
+	game().SPLASH_BACK = Sprite(-30, -6, game().ROOM.T.w + 60, game().ROOM.T.h + 12, atlas, {x = 2, y = 0})
 	game().SPLASH_BACK:set_alignment({
 		major = game().ROOM_ATTACH,
 		type = "cm",
 		bond = "Strong",
 		offset = {x = 0, y = 0},
 	})
-	if game().SPLASH_BACK.align_to_major then
-		game().SPLASH_BACK:align_to_major()
-	end
-	if game().SPLASH_BACK.snap_VT then
-		game().SPLASH_BACK:snap_VT()
-	end
 
 	game().SPLASH_BACK:define_draw_steps({{
 		shader = "background",
@@ -142,7 +136,9 @@ function M.swirl()
 end
 
 function M.stage(set, hand_index)
-	M.garden()
+	if M.is_garden_stage(set, hand_index) then
+		M.garden()
+	end
 end
 
 function M.run()

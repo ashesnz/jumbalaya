@@ -20,6 +20,7 @@ function Game:boot_initial_screen()
 		or (self.SETTINGS and self.SETTINGS.title_screen == false)
 	if skip_title then
 		self:start_run({})
+		WORD_GAME_UI.Layout.run_backgrounds()
 		self:start_gameplay_board()
 	else
 		self:open_main_menu()
