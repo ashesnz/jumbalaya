@@ -57,6 +57,7 @@ function M.install()
 	_G.ParticleEmitter = M.ParticleEmitter
 	_G.Particles = M.Particles
 	_G.FlowText = M.FlowText
+	_G.utf8 = require("jumbalaya-engine.util.utf8")
 end
 
 return M

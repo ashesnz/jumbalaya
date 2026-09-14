@@ -7,7 +7,8 @@ local ENGINE_ALLOW = {
 }
 
 local WORD_GAME_ALLOW = {
-	["word_game/ui/effects/easing.lua"] = true,
+	["games/jumbalaya/word_game/ui/effects/easing.lua"] = true,
+	["games/jumbalaya/word_game/model/game/init.lua"] = true,
 }
 
 local function read_file(path)

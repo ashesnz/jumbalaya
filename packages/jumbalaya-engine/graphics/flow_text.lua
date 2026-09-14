@@ -3,6 +3,7 @@ local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local AnimNode = require("jumbalaya-engine.scene.animated.init")
 local Envelopes = require("jumbalaya-engine.graphics.flow_text_envelopes")
+local Utf8 = require("jumbalaya-engine.util.utf8")
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
@@ -134,7 +135,7 @@ function FlowText:update_text(first_pass)
 				local index = 1
 				self.strings[k].letters = {}
 
-				for _, c in utf8.chars(v) do
+				for _, c in Utf8.chars(v) do
 					local old_letter = old_letters and old_letters[index] or nil
 					-- Preserve an existing letter's scale across rebuilds so
 					-- mid-animation updates don't reset decoration progress.

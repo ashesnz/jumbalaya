@@ -1,10 +1,10 @@
 --[[ word_game/ui/table/controls/layout.lua - Hand shuffle/play button positioning ]]
 
 local game = require("word_game.ui.util.game_runtime").game
-local shell = facade.shell()
 
 local felt_layout = require("word_game.ui.layout.felt")
 local facade = require("word_game.ui.facade")
+local shell = facade.shell()
 local definition = require("word_game.ui.table.controls.definition")
 local TableControlsView = require("word_game.ui.views.table_controls_view")
 

@@ -46,6 +46,9 @@ function Game:prep_stage(new_stage, new_state, new_game_obj)
 	if love.graphics and love.graphics.getWidth and love.graphics.getHeight then require("jumbalaya-engine.adapters.love2d.window").sync_resize() end
 end
 
+-- run/loop/globals mixins attach via global Game during this require; kind_globals
+-- assigns _G.Game again once the module returns.
+_G.Game = Game
 require "word_game.model.game.run"
 require "word_game.model.game.loop"
 

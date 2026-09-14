@@ -18,6 +18,7 @@ end)
 
 local jumble_fixed_letters = require("word_game.ui.table.jumble_fixed_letters")
 local felt = require("word_game.ui.layout.felt")
+local hand_area = require("word_game.ui.cardarea.hand")
 
 local function ensure_placement_pattern_overlay(pt)
 	if not pt or pt.draw_pattern_overlay then return end
@@ -47,6 +48,7 @@ function M.table_board_view()
 end
 
 function M.update(game, dt)
+	M.ensure_store_subscription()
 	update_passes.run(game, dt, ensure_placement_pattern_overlay)
 end
 
@@ -144,12 +146,15 @@ function M.draw_hand_pass(game)
 		love.graphics.pop()
 	end
 
-	if table_view:should_render_hand_from_store() then
+	if hand_area.store_renders_hand() then
 		love.graphics.push()
 		if runtime().dealt_letters then
 			runtime().dealt_letters:translate_container()
 		end
-		local hand_cards = table_view:pile_cards("hand")
+		local hand_cards = runtime().dealt_letters and runtime().dealt_letters.cards
+		if not hand_cards or #hand_cards == 0 then
+			hand_cards = table_view:pile_cards("hand")
+		end
 		if hand_cards and #hand_cards > 0 and Card and getmetatable(hand_cards[1]) == Card then
 			draw_live_cards(hand_cards, controller)
 		else
@@ -160,9 +165,10 @@ function M.draw_hand_pass(game)
 
 	local bonus_stack = WORD_GAME_UI.BonusStackUI
 	for _, v in pairs(game.LIVE.CARD) do
-		local from_hand = v.area == runtime().dealt_letters
 		local from_bonus = bonus_stack and bonus_stack.contains(v) and not v.area
-		if (from_hand or from_bonus)
+		-- Hand cards render via CardPile (scene pass) or draw_hand_pass above — never here.
+		local draw_from_live = from_bonus
+		if draw_from_live
 			and (not v.parent and v ~= controller.dragging.target and v ~= controller.focused.target)
 			and not (WORD_GAME_UI.CardInspect and WORD_GAME_UI.CardInspect.is(v)) then
 			love.graphics.push()

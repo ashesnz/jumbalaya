@@ -51,7 +51,18 @@ function M.relayout(self)
 end
 
 local function store_renders_draw()
-	local board = WORD_GAME_UI.TableBoard
+	if not table_board() then return false end
+	if WORD_GAME and WORD_GAME.store then
+		local store = WORD_GAME.store()
+		if store then
+			local state = store:get()
+			local pile = state and state.piles and state.piles.draw
+			if pile and #pile > 0 then
+				return true
+			end
+		end
+	end
+	local board = WORD_GAME_UI and WORD_GAME_UI.TableBoard
 	local view = board and board.table_board_view and board.table_board_view()
 	return view and view:should_render_draw_from_store()
 end

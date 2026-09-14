@@ -36,8 +36,19 @@ function M.relayout(self)
 	end
 end
 
-local function store_renders_hand()
-	local board = WORD_GAME_UI.TableBoard
+function M.store_renders_hand()
+	if not table_board() then return false end
+	if WORD_GAME and WORD_GAME.store then
+		local store = WORD_GAME.store()
+		if store then
+			local state = store:get()
+			local pile = state and state.piles and state.piles.hand
+			if pile and #pile > 0 then
+				return true
+			end
+		end
+	end
+	local board = WORD_GAME_UI and WORD_GAME_UI.TableBoard
 	local view = board and board.table_board_view and board.table_board_view()
 	return view and view:should_render_hand_from_store()
 end
@@ -57,7 +68,7 @@ end
 
 function M.draw_layer(self, v, draw_card_layer)
 	if self.config.type ~= 'hand' then return end
-	if store_renders_hand() then return end
+	if M.store_renders_hand() then return end
 	local resting, hopping = {}, {}
 	for i = 1, #self.cards do
 		local card = self.cards[i]

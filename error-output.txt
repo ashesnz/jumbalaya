@@ -1,19 +1,33 @@
-Error: ...e/Jumbalaya/games/jumbalaya/word_game/model/game/run.lua:26: attempt to index global 'Game' (a nil value)
+Steam not available — running without Steam integration
+=== Jumbalaya Error ===
+...alaya/games/jumbalaya/word_game/board/placement/snap.lua:326: attempt to call global 'play_sfx' (a nil value)
+
 stack traceback:
-	[love "boot.lua"]:352: in function '__newindex'
-	...e/Jumbalaya/games/jumbalaya/word_game/model/game/run.lua:26: in main chunk
-	[C]: in function 'require'
-	.../Jumbalaya/games/jumbalaya/word_game/model/game/init.lua:49: in main chunk
-	[C]: in function 'require'
-	...Jumbalaya/games/jumbalaya/app/bootstrap/kind_globals.lua:10: in function 'install_game'
-	...Jumbalaya/games/jumbalaya/app/bootstrap/runtime_boot.lua:7: in main chunk
-	[C]: in function 'require'
-	...mbalaya/games/jumbalaya/app/bootstrap/engine_adapter.lua:7: in function 'install'
-	.../Source/home/Jumbalaya/games/jumbalaya/app/bootstrap.lua:7: in main chunk
-	[C]: in function 'require'
-	main.lua:35: in main chunk
-	[C]: in function 'require'
-	[love "boot.lua"]:323: in function <[love "boot.lua"]:126>
+	...rce/home/Jumbalaya/games/jumbalaya/app/error_handler.lua:170: in function 'handler'
+	[love "boot.lua"]:352: in function 'play_sfx'
+	...alaya/games/jumbalaya/word_game/board/placement/snap.lua:326: in function 'try_snap_card'
+	...home/Jumbalaya/games/jumbalaya/word_game/ui/cards/ui.lua:183: in function 'stop_drag'
+	...ackages/jumbalaya-engine/interaction/update_interact.lua:39: in function 'update_interact'
+	...mbalaya/packages/jumbalaya-engine/interaction/router.lua:100: in function 'update'
+	...ome/Jumbalaya/packages/jumbalaya-engine/session/loop.lua:93: in function 'update'
+	.../packages/jumbalaya-engine/adapters/love2d/lifecycle.lua:120: in function 'update'
+	.../packages/jumbalaya-engine/adapters/love2d/lifecycle.lua:43: in function <.../packages/jumbalaya-engine/adapters/love2d/lifecycle.lua:15>
 	[C]: in function 'xpcall'
-	[love "boot.lua"]:362: in function <[love "boot.lua"]:355>
+	[love "boot.lua"]:377: in function <[love "boot.lua"]:344>
+=== Jumbalaya Error ===
+...alaya/games/jumbalaya/word_game/board/placement/snap.lua:326: attempt to call global 'play_sfx' (a nil value)
+
+stack traceback:
+	...rce/home/Jumbalaya/games/jumbalaya/app/error_handler.lua:170: in function 'handler'
+	[love "boot.lua"]:352: in function 'play_sfx'
+	...alaya/games/jumbalaya/word_game/board/placement/snap.lua:326: in function 'try_snap_card'
+	...home/Jumbalaya/games/jumbalaya/word_game/ui/cards/ui.lua:183: in function 'stop_drag'
+	...ackages/jumbalaya-engine/interaction/update_interact.lua:39: in function 'update_interact'
+	...mbalaya/packages/jumbalaya-engine/interaction/router.lua:100: in function 'update'
+	...ome/Jumbalaya/packages/jumbalaya-engine/session/loop.lua:93: in function 'update'
+	.../packages/jumbalaya-engine/adapters/love2d/lifecycle.lua:120: in function 'update'
+	.../packages/jumbalaya-engine/adapters/love2d/lifecycle.lua:43: in function <.../packages/jumbalaya-engine/adapters/love2d/lifecycle.lua:15>
 	[C]: in function 'xpcall'
+	[love "boot.lua"]:377: in function <[love "boot.lua"]:344>
+
+Error log saved to: /Users/ashwin/Library/Application Support/LOVE/Jumbalaya/error.log
