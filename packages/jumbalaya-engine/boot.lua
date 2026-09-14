@@ -17,16 +17,14 @@ function M.install()
 
 	require "jumbalaya-engine.globals".install()
 
-	require "jumbalaya-engine.util.tables"
-	require "jumbalaya-engine.util.geometry"
-	require "jumbalaya-engine.util.random"
-	require "jumbalaya-engine.util.colour"
+	require("jumbalaya-engine.util.tables").install()
+	require("jumbalaya-engine.util.geometry").install()
+	require("jumbalaya-engine.util.random").install()
+	require("jumbalaya-engine.util.colour").install()
 	require "jumbalaya-engine.graphics.draw"
 	require "jumbalaya-engine.adapters.love2d.display"
 	require "jumbalaya-engine.sound.sound"
-	local NumberFormat = require "jumbalaya-engine.util.number_format"
-	number_format = NumberFormat.number_format
-	score_number_scale = NumberFormat.score_number_scale
+	require("jumbalaya-engine.util.number_format").install()
 
 	require "jumbalaya-engine.panels"
 	require "jumbalaya-engine.graphics.particles"

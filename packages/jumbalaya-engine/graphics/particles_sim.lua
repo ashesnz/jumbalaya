@@ -1,4 +1,5 @@
 return function(ParticleEmitter)
+local Random = require("jumbalaya-engine.util.random")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 
@@ -36,8 +37,8 @@ local function spawn(self)
 		size = 0.08 + 0.27 * math.random(),
 		age = 0,
 		life = self.lifespan * (0.75 + 0.5 * math.random()),
-		colour = pick_random(self.colours),
-		shape = pick_random(self.shapes),
+		colour = Random.pick_random(self.colours),
+		shape = Random.pick_random(self.shapes),
 		env = 0,
 	}
 end

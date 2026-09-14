@@ -1,4 +1,5 @@
 
+local Tables = require("jumbalaya-engine.util.tables")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 return function(Target)
@@ -104,7 +105,7 @@ function LayoutNode:remove()
 		g().INPUT.text_capture = nil
 	end
 
-	teardown_tree(self.children)
+	Tables.teardown_tree(self.children)
 	AnimNode.remove(self)
 end
 

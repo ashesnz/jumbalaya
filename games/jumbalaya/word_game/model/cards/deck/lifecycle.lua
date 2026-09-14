@@ -9,6 +9,7 @@
 local live_game = require("word_game.model.live_game")
 
 return function(context)
+	local Random = require("jumbalaya-engine.util.random")
 	local M = context.module
 	local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 	local deck_config = require("jumbalaya_core.cards.deck_config")
@@ -91,8 +92,8 @@ return function(context)
 
 	function M.common_weighted_letter()
 		local bag = deck_config.weighted_letter_bag()
-		local letter = deck_config.pick_weighted_letter(bag, seeded_random("trade_letter", 1, #bag))
-		local color = (seeded_random("trade_color", 1, 2) == 1) and "red" or "black"
+		local letter = deck_config.pick_weighted_letter(bag, Random.seeded_random("trade_letter", 1, #bag))
+		local color = (Random.seeded_random("trade_color", 1, 2) == 1) and "red" or "black"
 		return letter, color
 	end
 

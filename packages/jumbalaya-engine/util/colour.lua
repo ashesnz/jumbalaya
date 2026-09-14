@@ -1,19 +1,24 @@
 --[[
-	app/core/util/colour.lua - colour parsing and blending.
+	jumbalaya-engine/util/colour.lua - colour parsing and blending.
 
 	Colours are `{r, g, b, a}` tables with 0..1 components. These helpers sit
-	at the engine level (the UI renderer itself uses them), so they are also
-	installed as globals while game code migrates to module requires.
+	at the engine level (the UI renderer itself uses them), so boot installs
+	them as globals while game code migrates to module requires.
+
+	Prefer `local Colour = require("jumbalaya-engine.util.colour")` in new code.
+	Boot calls `Colour.install()` for legacy global aliases.
 ]]
 
 -- Channel defaults applied when an operand omits one: grey for RGB, opaque
 -- for alpha.
 local CHANNEL_DEFAULTS = {0.5, 0.5, 0.5, 1}
 
+local M = {}
+
 --- Parses a 6- or 8-digit hex string (`"RRGGBB"` / `"RRGGBBAA"`).
 ---@param hex string
 ---@return table {r, g, b, a}
-function colour_from_hex(hex)
+function M.colour_from_hex(hex)
 	if #hex <= 6 then hex = hex .. "FF" end
 	local _, _, r, g, b, a = hex:find('(%x%x)(%x%x)(%x%x)(%x%x)')
 	return {(tonumber(r, 16) or 0) / 255, (tonumber(g, 16) or 0) / 255,
@@ -25,7 +30,7 @@ end
 ---@param second table
 ---@param weight number 0..1
 ---@return table
-function blend_colours(first, second, weight)
+function M.blend_colours(first, second, weight)
 	local blended = {}
 	for channel = 1, 4 do
 		local fa = first[channel] or CHANNEL_DEFAULTS[channel]
@@ -48,7 +53,7 @@ end
 
 --- Washes a colour out toward white.
 ---@param unpacked boolean return components loose instead of as a table
-function tint(colour, amount, unpacked)
+function M.tint(colour, amount, unpacked)
 	local shifted = shift_channels(colour, amount, true)
 	if unpacked then return shifted[1], shifted[2], shifted[3], shifted[4] end
 	return shifted
@@ -56,7 +61,7 @@ end
 
 --- Sinks a colour toward black.
 ---@param unpacked boolean return components loose instead of as a table
-function shade(colour, amount, unpacked)
+function M.shade(colour, amount, unpacked)
 	local shifted = shift_channels(colour, amount, false)
 	if unpacked then return shifted[1], shifted[2], shifted[3], shifted[4] end
 	return shifted
@@ -64,15 +69,18 @@ end
 
 --- Recolours a colour with `alpha`, keeping its channels.
 ---@param unpacked boolean return components loose instead of as a table
-function with_alpha(colour, alpha, unpacked)
+function M.with_alpha(colour, alpha, unpacked)
 	if unpacked then return colour[1], colour[2], colour[3], alpha end
 	return {colour[1], colour[2], colour[3], alpha}
 end
 
-return {
-	colour_from_hex = colour_from_hex,
-	blend_colours = blend_colours,
-	tint = tint,
-	shade = shade,
-	with_alpha = with_alpha,
-}
+--- Install legacy global aliases expected by Love2D boot and card class mixins.
+function M.install()
+	_G.colour_from_hex = M.colour_from_hex
+	_G.blend_colours = M.blend_colours
+	_G.tint = M.tint
+	_G.shade = M.shade
+	_G.with_alpha = M.with_alpha
+end
+
+return M

@@ -1,4 +1,5 @@
 
+local Tables = require("jumbalaya-engine.util.tables")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 return function(Target)
@@ -11,7 +12,7 @@ function RetainedPanel:remove()
 			if v == self then table.remove(registry, k) end
 		end
 	end
-	teardown_tree(self.children)
+	Tables.teardown_tree(self.children)
 	AnimNode.remove(self)
 end
 

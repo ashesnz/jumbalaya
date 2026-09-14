@@ -1,18 +1,23 @@
-local shell = require("jumbalaya-engine.shell")
-
 --[[
-	app/core/util/random.lua - seeded streams and general randomness.
+	jumbalaya-engine/util/random.lua - seeded streams and general randomness.
 
 	Gameplay rolls flow through named streams kept in the game snapshot's `seed_streams`,
 	so a run started under a given seed replays identically. The numeric
 	constants below double as part of that replay contract: altering one
 	alters every roll that follows it.
+
+	Prefer `local Random = require("jumbalaya-engine.util.random")` in new code.
+	Boot calls `Random.install()` for legacy global aliases.
 ]]
+
+local shell = require("jumbalaya-engine.shell")
+
+local M = {}
 
 --- In-place Fisher-Yates. Lists of cards are pre-ordered by `sort_id`, so
 --  the result never depends on how Lua happens to iterate the table.
 ---@param list table array to shuffle, mutated
-function shuffle_seeded(list, seed)
+function M.shuffle_seeded(list, seed)
 	if seed then math.randomseed(seed) end
 
 	if list[1] and list[1].sort_id then
@@ -39,7 +44,7 @@ end
 --- Draws a uniformly random element of any table; returns value and key.
 ---@param t table
 ---@return any, any
-function pick_random(t, seed)
+function M.pick_random(t, seed)
 	if seed then math.randomseed(seed) end
 
 	local entries = {}
@@ -60,7 +65,7 @@ local CODE_BANDS = {
 
 --- Builds a random identifier of `length` characters.
 ---@return string uppercase code
-function random_code(length, seed)
+function M.random_code(length, seed)
 	if seed then math.randomseed(seed) end
 	local chars = {}
 	for _ = 1, length do
@@ -75,7 +80,7 @@ function random_code(length, seed)
 end
 
 --- Folds a string into [0, 1). Bytes are consumed back to front.
-function hash_text(str)
+function M.hash_text(str)
 	local num = 1
 	for i = #str, 1, -1 do
 		num = ((1.1239285023 / num) * string.byte(str, i) * math.pi + math.pi * i) % 1
@@ -87,14 +92,14 @@ end
 --- born from `hash_text(key .. run seed)`; each step applies a Marsaglia-style
 --- twist blended with the hashed run seed, so separate runs diverge while a
 --- single run stays replayable.
-function advance_seed(key)
+function M.advance_seed(key)
 	if key == 'seed' then return math.random() end
 
 	local game = shell.snapshot()
 	if not game then return math.random() end
 	local streams = game.seed_streams
 	if not streams[key] then
-		streams[key] = hash_text(key .. (streams.seed or ''))
+		streams[key] = M.hash_text(key .. (streams.seed or ''))
 	end
 
 	streams[key] =
@@ -105,9 +110,21 @@ end
 
 --- Seeded roll: `key` names a stream (string) or is used as a raw seed.
 --- With `min`/`max`, yields an inclusive integer; otherwise [0, 1).
-function seeded_random(key, min, max)
-	if type(key) == 'string' then key = advance_seed(key) end
+function M.seeded_random(key, min, max)
+	if type(key) == 'string' then key = M.advance_seed(key) end
 	math.randomseed(key)
 	if min and max then return math.random(min, max) end
 	return math.random()
 end
+
+--- Install legacy global aliases expected by Love2D boot and card class mixins.
+function M.install()
+	_G.shuffle_seeded = M.shuffle_seeded
+	_G.pick_random = M.pick_random
+	_G.random_code = M.random_code
+	_G.hash_text = M.hash_text
+	_G.advance_seed = M.advance_seed
+	_G.seeded_random = M.seeded_random
+end
+
+return M

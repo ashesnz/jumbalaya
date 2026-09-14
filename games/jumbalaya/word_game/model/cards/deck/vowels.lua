@@ -9,6 +9,7 @@
 local live_game = require("word_game.model.live_game")
 
 return function(context)
+	local Random = require("jumbalaya-engine.util.random")
 	local M = context.module
 	local hand_size_cfg = require("word_game.model.hand_size")
 	local card_letter = context.card_letter
@@ -199,10 +200,7 @@ return function(context)
 	end
 
 	local function random_index(key, min, max)
-		if type(seeded_random) == "function" then
-			return seeded_random(key, min, max)
-		end
-		return math.random(min, max)
+		return Random.seeded_random(key, min, max)
 	end
 
 	function M.random_vowel_letter(key)

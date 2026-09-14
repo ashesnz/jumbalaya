@@ -14,6 +14,7 @@ local game_access = require("word_game.model.game_access")
 local deck = require("word_game.model.cards.deck")
 local store_ops = require("word_game.model.store_ops")
 local LetterPalette = require("word_game.config.visuals.letter_card_palette")
+local Random = require("jumbalaya-engine.util.random")
 
 local M = {}
 
@@ -39,8 +40,8 @@ end
 
 local function rand_float(key)
 	local game = game_state()
-	if type(advance_seed) == "function" and game and game.seed_streams then
-		return advance_seed(key)
+	if game and game.seed_streams then
+		return Random.advance_seed(key)
 	end
 	return math.random()
 end

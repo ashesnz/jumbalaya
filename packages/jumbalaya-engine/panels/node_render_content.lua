@@ -1,4 +1,5 @@
 
+local Colour = require("jumbalaya-engine.util.colour")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 return function(Target)
@@ -114,7 +115,7 @@ function LayoutNode:draw_self()
 
 			-- Embossed lip above the fill surface.
 			if self.config.emboss then
-				love.graphics.setColor(shade(self.config.colour, self.states.hover.is and 0.5 or 0.3, true))
+				love.graphics.setColor(Colour.shade(self.config.colour, self.states.hover.is and 0.5 or 0.3, true))
 				self:draw_pixellated_rect('emboss', parallax_dist, self.config.emboss)
 			end
 
@@ -123,7 +124,7 @@ function LayoutNode:draw_self()
 			local collided_button = self.config.button_UIE or self
 			self.ARGS.button_colours = self.ARGS.button_colours or {}
 			self.ARGS.button_colours[1] = self.config.button_delay
-				and blend_colours(self.config.colour, g().C.L_BLACK, 0.5) or self.config.colour
+				and Colour.blend_colours(self.config.colour, g().C.L_BLACK, 0.5) or self.config.colour
 			self.ARGS.button_colours[2] =
 				(((collided_button.config.hover and collided_button.states.hover.is)
 					or (collided_button.last_clicked and collided_button.last_clicked > g().TIMERS.REAL - 0.1))
@@ -170,10 +171,10 @@ function LayoutNode:draw_self()
 				push_node_transform(self, 1)
 				love.graphics.scale(1 / g().TILESIZE)
 				love.graphics.setLineWidth(lw + 1.5)
-				love.graphics.setColor(with_alpha(g().C.WHITE, 0.2 * lw, true))
+				love.graphics.setColor(Colour.with_alpha(g().C.WHITE, 0.2 * lw, true))
 				self:draw_pixellated_rect('fill', parallax_dist)
 				love.graphics.setColor(self.config.colour[4] > 0
-					and blend_colours(g().C.WHITE, self.config.colour, 0.8) or g().C.WHITE)
+					and Colour.blend_colours(g().C.WHITE, self.config.colour, 0.8) or g().C.WHITE)
 				self:draw_pixellated_rect('line', parallax_dist)
 				love.graphics.pop()
 			else

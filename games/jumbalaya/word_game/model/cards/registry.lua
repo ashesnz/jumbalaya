@@ -7,6 +7,7 @@
 ]]
 
 local live_game = require("word_game.model.live_game")
+local Random = require("jumbalaya-engine.util.random")
 
 local M = {}
 
@@ -54,7 +55,7 @@ function M.random_wipe_card()
 	local faces = M.faces()
 	local centers = M.centers()
 	if not faces or not centers then return nil, nil end
-	return pick_random(faces), centers.letter_base
+	return Random.pick_random(faces), centers.letter_base
 end
 
 return M

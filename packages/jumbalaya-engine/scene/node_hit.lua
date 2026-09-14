@@ -1,4 +1,5 @@
 
+local Geometry = require("jumbalaya-engine.util.geometry")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 return function(Node)
@@ -19,13 +20,13 @@ return function(Node)
 		if self.container ~= self then
 			if math.abs(self.container.T.r) < 0.1 then
 				t.x, t.y = -self.container.T.w / 2, -self.container.T.h / 2
-				shift_point(p, t)
-				rotate_point(p, self.container.T.r)
+				Geometry.shift_point(p, t)
+				Geometry.rotate_point(p, self.container.T.r)
 				t.x, t.y = self.container.T.w / 2 - self.container.T.x, self.container.T.h / 2 - self.container.T.y
-				shift_point(p, t)
+				Geometry.shift_point(p, t)
 			else
 				t.x, t.y = -self.container.T.x, -self.container.T.y
-				shift_point(p, t)
+				Geometry.shift_point(p, t)
 			end
 		end
 
@@ -51,10 +52,10 @@ return function(Node)
 
 		p.x, p.y = point.x, point.y
 		t.x, t.y = -self.container.T.w / 2, -self.container.T.h / 2
-		shift_point(p, t)
-		rotate_point(p, self.container.T.r)
+		Geometry.shift_point(p, t)
+		Geometry.rotate_point(p, self.container.T.r)
 		t.x, t.y = self.container.T.w / 2 - self.container.T.x, self.container.T.h / 2 - self.container.T.y
-		shift_point(p, t)
+		Geometry.shift_point(p, t)
 
 		if kind == "Click" then
 			self.click_offset.x = p.x - self.T.x

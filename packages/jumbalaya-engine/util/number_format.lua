@@ -43,4 +43,10 @@ function M.score_number_scale(scale, amount)
 	return 0.75 * (scale or 1)
 end
 
+--- Install legacy global aliases expected by Love2D boot and card class mixins.
+function M.install()
+	_G.number_format = M.number_format
+	_G.score_number_scale = M.score_number_scale
+end
+
 return M

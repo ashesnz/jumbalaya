@@ -24,9 +24,8 @@ local title = require("word_game.ui.cardarea.title")
 local selection = require("word_game.ui.cardarea.selection")
 local relayout_mod = require("word_game.ui.cardarea.relayout")
 local chrome = require("word_game.ui.cardarea.chrome")
+local lifecycle = require("word_game.ui.cardarea.lifecycle")
 local facade = require("word_game.ui.facade")
-local Deck = facade.deck()
-local Jumble = facade.jumble()
 
 local TYPE_HANDLERS = {
 	hand = hand,
@@ -120,96 +119,12 @@ function CardPile:construct(X, Y, W, H, config)
 	end
 end
 
---- Inserts `card` into this area (front if `location == 'front'` or this is
---- a 'deck', otherwise appended to the back), flips it face-up unless it
---- should stay flipped, re-ranks and re-lays-out cards, and fires
---- deck/companion-related unlock checks.
---- @param card table the Card instance to add
---- @param location string|nil 'front' to insert at index 1
---- @param stay_flipped boolean|nil if true, don't auto-flip a face-down card
 function CardPile:emplace(card, location, stay_flipped)
-	if table_board() and card and card.bonus_card and (self == runtime().dealt_letters or self == runtime().draw_pile) then
-		local origin_slot, origin_insert
-		if Jumble.slot_for_card then
-			origin_slot, origin_insert = Jumble.slot_for_card(card)
-		end
-		facade.board_snap().restore_bonus_card(runtime().pattern_row, card, origin_slot, origin_insert)
-		return
-	end
-	if location == 'front' or self.config.type == 'deck' then
-		table.insert(self.cards, 1, card)
-	else
-		self.cards[#self.cards+1] = card
-	end
-	if table_board() then
-		-- Pile art comes from the back sprite. Cards stay face-up and lerp into place.
-		if self == runtime().dealt_letters and Deck.reveal_in_hand then
-			Deck.reveal_in_hand(card)
-		end
-	elseif card.facing == 'back' and self.config.type ~= 'discard' and self.config.type ~= 'deck' and not stay_flipped then
-		card:flip()
-	elseif self == runtime().dealt_letters and stay_flipped then
-		card.ability.wheel_flipped = true
-	end
-
-	-- The deck pile is unbounded: overfilling just raises its own limit.
-	if self == runtime().draw_pile and #self.cards > self.config.card_limit then
-		self.config.card_limit = #self.cards
-	end
-
-	card:set_card_area(self)
-	self:set_ranks()
-	self:relayout()
-
+	lifecycle.emplace(self, card, location, stay_flipped)
 end
 
---- Removes and returns a card from this area. If `card` isn't given, removes
---- the "natural" card to draw from for this area type (top of deck/discard,
---- or first card otherwise), optionally restricted to already-discarded cards.
---- @param card table|nil specific card to remove; if nil, an implicit choice is made
---- @param discarded_only boolean|nil if true (and `card` is nil), only consider discarded cards
---- @return table|nil card the removed card, or nil if none matched
 function CardPile:remove_card(card, discarded_only)
-	if not self.cards then return end
-
-	local candidates = self.cards
-	if discarded_only then
-		candidates = {}
-		for _, candidate in ipairs(self.cards) do
-			if candidate.ability and candidate.ability.discarded then
-				candidates[#candidates + 1] = candidate
-			end
-		end
-	end
-
-	-- Piles draw from the top; rows take the front.
-	if card == nil then
-		local handler = type_handler(self)
-		if handler and handler.remove_target then
-			card = handler.remove_target(self, candidates, nil)
-		else
-			card = candidates[1]
-		end
-	end
-
-	if not card then
-		self:set_ranks()
-		return
-	end
-	for i = #self.cards,1,-1 do
-		if self.cards[i] == card then
-			local handler = type_handler(self)
-			if handler and handler.on_remove_card then
-				handler.on_remove_card(self, card)
-			end
-			card:remove_from_area()
-			table.remove(self.cards, i)
-			self:remove_selection(card, true)
-			break
-		end
-	end
-	self:set_ranks()
-	return card
+	return lifecycle.remove_card(self, card, discarded_only, type_handler)
 end
 
 -- ============ Selection & Highlighting ============
@@ -345,52 +260,16 @@ function CardPile:hard_set_cards()
 	end
 end
 
---- Deterministically shuffles `self.cards` using the game's seeded PRNG
---- (`shuffle_seeded`/`advance_seed`), so shuffles are reproducible from a seed
---- rather than using `math.random` directly.
---- @param _seed string|nil shuffle seed suffix (default 'shuffle')
 function CardPile:shuffle(_seed)
-	shuffle_seeded(self.cards, advance_seed(_seed or 'shuffle'))
-	self:set_ranks()
+	lifecycle.shuffle(self, _seed)
 end
 
---- Sorts `self.cards` in place by the given method (or the last-used one).
---- @param method string|nil one of 'desc'|'asc'|'color desc'|'color asc'|'order'
 function CardPile:sort(method)
-	self.config.sort = method or self.config.sort
-	if self.config.sort == 'desc' then
-		table.sort(self.cards, function (a, b) return a:get_nominal() > b:get_nominal() end )
-	elseif self.config.sort == 'asc' then
-		table.sort(self.cards, function (a, b) return a:get_nominal() < b:get_nominal() end )
-	elseif self.config.sort == 'color desc' or self.config.sort == 'suit desc' then
-		table.sort(self.cards, function (a, b) return a:get_nominal('color') > b:get_nominal('color') end )
-	elseif self.config.sort == 'color asc' or self.config.sort == 'suit asc' then
-		table.sort(self.cards, function (a, b) return a:get_nominal('color') < b:get_nominal('color') end )
-	elseif self.config.sort == 'order' then
-		table.sort(self.cards, function (a, b) return (a.config.card.order or a.config.center.order) < (b.config.card.order or b.config.center.order) end )
-	end
+	lifecycle.sort(self, method)
 end
 
---- Moves a card from `area` into this area (e.g. deck -> hand). Respects
---- this area's card limit unless it's the deck or hand. Applies
---- "stay flipped" modifier-driven "stay flipped" (face-down draw) rules.
---- @param area table source CardPile
---- @param stay_flipped boolean|nil force the drawn card to stay face-down
---- @param discarded_only boolean|nil only draw from already-discarded cards in `area`
---- @return boolean|nil success true if a card was moved
 function CardPile:draw_card_from(area, stay_flipped, discarded_only)
-	if area:is_kind(CardPile) then
-		if #self.cards < self.config.card_limit or self == runtime().draw_pile or self == runtime().dealt_letters then
-			local card = area:remove_card(nil, discarded_only)
-			if card then
-				if area == runtime().recycle_stash then
-					card.T.r = 0
-				end
-				self:emplace(card)
-				return true
-			end
-		end
-	end
+	return lifecycle.draw_card_from(self, area, stay_flipped, discarded_only)
 end
 
 --- Click handler for area-level clicks (not individual cards) - currently
@@ -411,66 +290,16 @@ function CardPile:release(dragged)
 	end
 end
 
---- Serializes this area's cards and config for save-game persistence.
---- @return table|nil save_data {cards = {...}, config = self.config}
 function CardPile:save()
-	if not self.cards then return end
-	local cardAreaTable = {
-		cards = {},
-		config = self.config,
-	}
-	for i = 1, #self.cards do
-		cardAreaTable.cards[#cardAreaTable.cards + 1] = self.cards[i]:save()
-	end
-
-	return cardAreaTable
+	return lifecycle.save(self)
 end
 
---- Restores this area's cards/config from save data produced by `:save()`.
---- Rebuilds every `Card` instance from scratch rather than mutating existing
---- ones.
---- @param cardAreaTable table save data as produced by `CardPile:save`
 function CardPile:load(cardAreaTable)
-
-	teardown_tree(self.cards or {})
-	self.cards = {}
-	teardown_tree(self.children or {})
-	self.children = {}
-	self.selected = {}
-
-	self.config = cardAreaTable.config
-
-	for i = 1, #cardAreaTable.cards do
-		local card = Card(0, 0, runtime().CARD_W, runtime().CARD_H, runtime().LETTERS.faces.empty, runtime().LETTERS.centers.letter_base, nil)
-		card:load(cardAreaTable.cards[i])
-		self.cards[#self.cards + 1] = card
-		if card.selected then
-			self.selected[#self.selected + 1] = card
-		end
-		card:set_card_area(self)
-	end
-	self:set_ranks()
-	self:relayout()
-	self:hard_set_cards()
+	lifecycle.load(self, cardAreaTable)
 end
 
---- Tears down this area: removes all cards/children, unregisters from
---- `runtime().LIVE.CARDPILE`, then calls the base `EaseNode:remove`.
 function CardPile:remove()
-	local handler = type_handler(self)
-	if handler and handler.on_remove then
-		handler.on_remove(self)
-	end
-	teardown_tree(self.cards or {})
-	self.cards = nil
-	teardown_tree(self.children or {})
-	self.children = nil
-	for k, v in pairs(runtime().LIVE.CARDPILE) do
-		if v == self then
-			table.remove(runtime().LIVE.CARDPILE, k)
-		end
-	end
-	EaseNode.remove(self)
+	lifecycle.remove(self, type_handler)
 end
 
 return CardPile

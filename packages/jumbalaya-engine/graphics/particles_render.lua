@@ -1,3 +1,4 @@
+local Tables = require("jumbalaya-engine.util.tables")
 return function(ParticleEmitter)
 -- Geometry drawers. Each runs with the transform already translated to the
 -- particle position and rotated to its angle; `s` is the current radius.
@@ -55,7 +56,7 @@ function ParticleEmitter:remove()
 		end
 	end
 
-	teardown_tree(self.children)
+	Tables.teardown_tree(self.children)
 	AnimNode.remove(self)
 end
 end

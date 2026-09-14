@@ -20,6 +20,7 @@ local Round = require("word_game.model.round")
 local Deck = require("word_game.model.cards.deck")
 local Back = require("word_game.model.cards.deck.back")
 local SaveSchema = require("word_game.model.persistence.save_schema")
+local Random = require("jumbalaya-engine.util.random")
 
 --- Tear down run-scoped UI and caches (delegates to RunScope).
 function Game:teardown_run_ui()
@@ -175,11 +176,11 @@ function Game:start_run(args)
             + memory_entropy
         math.randomseed(runtime_entropy)
         math.random()
-        run.seed_streams.seed = args.seed or random_code(8, runtime_entropy)
+        run.seed_streams.seed = args.seed or Random.random_code(8, runtime_entropy)
     end
 
-    for k, v in pairs(run.seed_streams) do if v == 0 then run.seed_streams[k] = hash_text(k..run.seed_streams.seed) end end
-    run.seed_streams.hashed_seed = hash_text(run.seed_streams.seed)
+    for k, v in pairs(run.seed_streams) do if v == 0 then run.seed_streams[k] = Random.hash_text(k..run.seed_streams.seed) end end
+    run.seed_streams.hashed_seed = Random.hash_text(run.seed_streams.seed)
 
     self:queue_settings_write()
     self.INPUT.locks.load = true

@@ -1,4 +1,5 @@
 
+local Random = require("jumbalaya-engine.util.random")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 return function(AnimNode)
@@ -10,7 +11,7 @@ function AnimNode:pulse(amount, rot_amt)
 		scale = 0,
 		scale_amt = amount,
 		r = 0,
-		r_amt = ((rot_amt or pick_random({0.6 * amount, -0.6 * amount})) or 0),
+		r_amt = ((rot_amt or Random.pick_random({0.6 * amount, -0.6 * amount})) or 0),
 		start_time = start_time,
 		end_time = start_time + 0.4,
 	}

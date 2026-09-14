@@ -1,4 +1,5 @@
 return function(AnimNode)
+local Geometry = require("jumbalaya-engine.util.geometry")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 
@@ -34,10 +35,10 @@ function AnimNode:drag(offset)
 		p.y = g().INPUT.cursor_position.y / (g().TILESCALE * g().TILESIZE)
 
 		t.x, t.y = -self.container.T.w / 2, -self.container.T.h / 2
-		shift_point(p, t)
-		rotate_point(p, self.container.T.r)
+		Geometry.shift_point(p, t)
+		Geometry.rotate_point(p, self.container.T.r)
 		t.x, t.y = self.container.T.w / 2 - self.container.T.x, self.container.T.h / 2 - self.container.T.y
-		shift_point(p, t)
+		Geometry.shift_point(p, t)
 
 		offset = offset or self.click_offset
 

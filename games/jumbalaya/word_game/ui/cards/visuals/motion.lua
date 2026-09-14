@@ -4,6 +4,7 @@
 local GameRT = require("word_game.ui.util.game_runtime")
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local DissolveFX = require "word_game.ui.effects.dissolve_fx"
+local Random = require("jumbalaya-engine.util.random")
 
 local function runtime() return GameRT.game() end
 
@@ -213,7 +214,7 @@ function Card:move(dt)
 end
 
 function Card:pulse(scale, rot_amount)
-    local rot_amt = rot_amount and 0.4*pick_random({rot_amount, -rot_amount}) or pick_random({0.16, -0.16})
+    local rot_amt = rot_amount and 0.4*Random.pick_random({rot_amount, -rot_amount}) or Random.pick_random({0.16, -0.16})
     scale = scale and scale*0.4 or 0.11
     EaseNode.pulse(self, scale, rot_amt)
 end

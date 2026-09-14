@@ -3,6 +3,7 @@
 local GameRT = require("word_game.ui.util.game_runtime")
 local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 local facade = require("word_game.ui.facade")
+local Random = require("jumbalaya-engine.util.random")
 local button = require("word_game.ui.table.controls.play_hold_redraw.button")
 local state = require("word_game.ui.table.controls.play_hold_redraw.state")
 
@@ -19,10 +20,7 @@ local function safe_sound(name, pitch, vol)
 end
 
 local function safe_random(seed_key)
-	if type(seeded_random) == "function" then
-		return seeded_random(seed_key)
-	end
-	return math.random()
+	return Random.seeded_random(seed_key)
 end
 
 local function refresh_card_input()

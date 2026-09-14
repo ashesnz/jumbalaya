@@ -4,6 +4,7 @@ local save_queue = require("jumbalaya-engine.persistence.save_queue")
 local debug_overlay = require("jumbalaya-engine.debug.overlay")
 local Updaters = require("jumbalaya-engine.session.updaters")
 local DrawPasses = require("jumbalaya-engine.session.draw_passes")
+local Tables = require("jumbalaya-engine.util.tables")
 
 local function draw_with_container(node)
 	love.graphics.push()
@@ -55,7 +56,7 @@ function Game:update(dt)
 		end
 		perf_checkpoint('states', 'update')
 
-		self.ANIMATIONS = compact_array(self.ANIMATIONS)
+		self.ANIMATIONS = Tables.compact_array(self.ANIMATIONS)
 
 		for _, v in ipairs(self.ANIMATIONS) do
 			v:animate(self.real_dt*self.TIME_SCALE)
@@ -70,7 +71,7 @@ function Game:update(dt)
 
 		self.smoothing.max_vel = 58*move_dt
 
-		self.TRANSFORMS = compact_array(self.TRANSFORMS)
+		self.TRANSFORMS = Tables.compact_array(self.TRANSFORMS)
 
 		for _, v in ipairs(self.TRANSFORMS) do
 			if v and v.move and v.FRAME and v.FRAME.TRANSFORM and v.FRAME.TRANSFORM < self.FRAMES.TRANSFORM then v:move(move_dt) end

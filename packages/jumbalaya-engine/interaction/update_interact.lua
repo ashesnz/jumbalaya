@@ -1,4 +1,5 @@
 return function(InputRouter)
+local Geometry = require("jumbalaya-engine.util.geometry")
 local shell = require("jumbalaya-engine.shell")
 local function g() return shell.game() end
 
@@ -44,7 +45,7 @@ function InputRouter:update_interact(dt)
 			-- Respect per-node click timeout (scaled by game speed).
 			local down = self.press_state.target
 			if not down.click_timeout or down.click_timeout * g().TIME_SCALE > self.release_state.time - self.press_state.time then
-				if point_distance(self.press_state.T, self.release_state.T) < g().MIN_CLICK_DIST then
+				if Geometry.point_distance(self.press_state.T, self.release_state.T) < g().MIN_CLICK_DIST then
 					if down.states.click.can then
 						self.clicked.target = down
 						self.clicked.handled = false

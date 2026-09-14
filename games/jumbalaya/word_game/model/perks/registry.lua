@@ -10,13 +10,14 @@ local cfg = require("word_game.config.perks")
 local core = require("jumbalaya_core.perks.registry")
 local game_access = require("word_game.model.game_access")
 local run_state = require("word_game.model.run.state")
+local Random = require("jumbalaya-engine.util.random")
 
 local M = {}
 
 local function rand_float(key)
 	local game = game_access.get()
-	if type(advance_seed) == "function" and game and game.seed_streams then
-		return advance_seed(key)
+	if game and game.seed_streams then
+		return Random.advance_seed(key)
 	end
 	return math.random()
 end
