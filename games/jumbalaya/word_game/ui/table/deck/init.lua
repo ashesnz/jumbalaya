@@ -1,10 +1,10 @@
 --[[
-local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/ui/table/deck/ - Draw pile as a pack sitting on the table.
 
 	2.5D table view: cards lie flat, camera looks slightly down from the front.
 ]]
 
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 
 local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")

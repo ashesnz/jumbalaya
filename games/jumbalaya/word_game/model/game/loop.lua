@@ -1,11 +1,12 @@
 --[[
-local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/model/game/loop.lua - Game:update_match_end — loss transition, pause, saved-run cleanup
 
 	Core: none
 	Store: none
 	Presentation: match_ended
 ]]
+
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 
 local live_game = require("word_game.model.live_game")
 

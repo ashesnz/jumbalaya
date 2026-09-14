@@ -105,6 +105,10 @@ function TableBoardView:should_render_pile_from_store(pile_id)
 end
 
 function TableBoardView:should_render_hand_from_store()
+	local host = self:legacy_host("hand")
+	if host and host.cards and #host.cards > 0 then
+		return false
+	end
 	return self:should_render_pile_from_store("hand")
 end
 

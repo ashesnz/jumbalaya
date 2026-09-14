@@ -160,8 +160,10 @@ function M.draw_card_interaction(game)
 		love.graphics.pop()
 	end
 
+	local pattern_area = runtime().pattern_row and runtime().pattern_row.area
 	if game.INPUT.focused.target and getmetatable(game.INPUT.focused.target) == Card
 		and (game.INPUT.focused.target.area == runtime().dealt_letters
+			or (pattern_area and game.INPUT.focused.target.area == pattern_area)
 			or (bonus_stack and bonus_stack.contains(game.INPUT.focused.target)))
 		and game.INPUT.focused.target ~= game.INPUT.dragging.target then
 		love.graphics.push()

@@ -71,6 +71,9 @@ function M.garden()
 		type = "cm",
 		offset = {x = 0, y = 0},
 	})
+	if game().SPLASH_BACK.align_to_major then
+		game().SPLASH_BACK:align_to_major()
+	end
 	game().SPLASH_BACK:define_draw_steps({{
 		shader = "garden_leaves",
 		send = {
@@ -89,11 +92,14 @@ function M.swirl()
 
 	game().SPLASH_BACK = Sprite(-30, -6, game().ROOM.T.w + 60, game().ROOM.T.h + 12, game().TEXTURE_ATLASES["ui_1"], {x = 2, y = 0})
 	game().SPLASH_BACK:set_alignment({
-		major = game().dealt_letters,
+		major = game().ROOM_ATTACH,
 		type = "cm",
 		bond = "Strong",
 		offset = {x = 0, y = 0},
 	})
+	if game().SPLASH_BACK.align_to_major then
+		game().SPLASH_BACK:align_to_major()
+	end
 
 	game().SPLASH_BACK:define_draw_steps({{
 		shader = "background",

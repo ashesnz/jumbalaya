@@ -1,11 +1,11 @@
 --[[
-local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/ui/card_inspect.lua - Hover / click-and-hold to read a letter card.
 
 	Hover or hold without moving: the card scales up in its slot and draws in
 	the foreground. Move past a threshold while held: cancel inspect and drag.
 ]]
 
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
 local game = require("word_game.ui.util.game_runtime").game

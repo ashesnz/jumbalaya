@@ -173,6 +173,9 @@ function M.set_screen_positions(opts)
 		if WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.mark_layout_settle then
 			WORD_GAME_UI.TableControls.mark_layout_settle(4)
 		end
+		if WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
+			WORD_GAME_UI.TableInput.refresh_card_input()
+		end
 	end
 	if game().STAGE == game().STAGES.MAIN_MENU and layout_main_menu then
 		layout_main_menu()
@@ -197,6 +200,9 @@ function M.refresh_placement_layout()
 	end
 	if WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.mark_layout_settle then
 		WORD_GAME_UI.TableControls.mark_layout_settle(4)
+	end
+	if WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
+		WORD_GAME_UI.TableInput.refresh_card_input()
 	end
 end
 

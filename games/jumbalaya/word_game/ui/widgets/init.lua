@@ -1,11 +1,11 @@
 --[[
-local localize = require("word_game.ui.util.localize").localize
 	word_game/ui/widgets/ - Reusable UIBox controls and chrome.
 
 	`util/` holds stateless helpers (colour, roll math, localize). This package
 	builds `game().DEFINITIONS.*` and shared control nodes loaded from game boot.
 ]]
 
+local localize = require("word_game.ui.util.localize").localize
 local game = require("word_game.ui.util.game_runtime").game
 local Funcs = require("app.callbacks.funcs")
 

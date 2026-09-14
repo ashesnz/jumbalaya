@@ -1,10 +1,11 @@
 --[[
-local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/ui/character_speech.lua - Typewriter speech bubbles for characters.
 
 	Letters start hidden and appear at full size one-by-one, left to right,
 	with a paper tick — like a typewriter on the white bubble.
 ]]
+
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 local game = require("word_game.ui.util.game_runtime").game
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"

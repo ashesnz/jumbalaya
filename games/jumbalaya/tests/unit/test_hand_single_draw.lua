@@ -10,6 +10,7 @@ local store_ops = require("word_game.model.store_ops")
 local SceneRoots = require("jumbalaya-engine.scene.roots")
 
 local HAND_SIZE = 7
+local HAND_DRAW_LAYERS = 2 -- CardPile:draw() renders shadow + card layers
 
 local function install_ui_facade()
 	if not _G.Game then
@@ -203,15 +204,17 @@ local function assert_no_hand_scene_roots(game, hand_cards)
 	end
 end
 
-local function assert_single_draw(counts, hand_cards)
+local function assert_single_draw(counts, hand_cards, draws_per_card)
+	draws_per_card = draws_per_card or 1
+	local expected_total = HAND_SIZE * draws_per_card
 	local total = total_draws(counts, hand_cards)
-	T.assert_equal(total, HAND_SIZE, string.format(
+	T.assert_equal(total, expected_total, string.format(
 		"expected %d hand card draws, got %d",
-		HAND_SIZE,
+		expected_total,
 		total
 	))
 	for index, card in ipairs(hand_cards) do
-		T.assert_equal(counts[card] or 0, 1, string.format(
+		T.assert_equal(counts[card] or 0, draws_per_card, string.format(
 			"hand card %d drawn %d times",
 			index,
 			counts[card] or 0
@@ -232,7 +235,7 @@ T.describe("hand single draw", function()
 		local hand_cards = game.dealt_letters.cards
 		local counts = install_draw_counter(hand_cards)
 		simulate_table_board_frame(game)
-		assert_single_draw(counts, hand_cards)
+		assert_single_draw(counts, hand_cards, HAND_DRAW_LAYERS)
 	end)
 
 	T.it("draws each hand card once after commit clears the host but store retains seven", function()
@@ -261,6 +264,6 @@ T.describe("hand single draw", function()
 
 		local counts = install_draw_counter(hand_cards)
 		simulate_table_board_frame(game)
-		assert_single_draw(counts, hand_cards)
+		assert_single_draw(counts, hand_cards, HAND_DRAW_LAYERS)
 	end)
 end)

@@ -15,6 +15,17 @@ local function run_init_localization()
 	end
 end
 
+local function load_font_spec(spec)
+	local ok, font
+	if GameFiles.exists(spec.file) then
+		ok, font = pcall(love.graphics.newFont, spec.file, spec.render_scale)
+	end
+	if not ok or not font then
+		font = love.graphics.newFont(spec.render_scale)
+	end
+	spec.FONT = font
+end
+
 local function recursive_init(defaults, profile)
 	for key, value in pairs(defaults) do
 		if not profile[key] then
@@ -81,9 +92,7 @@ function Game:set_language()
 			{ file = "resources/fonts/Outfit-Bold.ttf", render_scale = self.TILESIZE * 7, TEXT_HEIGHT_SCALE = 0.7, TEXT_OFFSET = { x = 0, y = -28 }, FONTSCALE = 0.12, squish = 1, DESCSCALE = 1 },
 		}
 		for _, v in ipairs(self.FONTS) do
-			if love.filesystem.getInfo(v.file) then
-				v.FONT = love.graphics.newFont(v.file, v.render_scale)
-			end
+			load_font_spec(v)
 		end
 		for _, v in pairs(self.LANGUAGES) do
 			v.font = self.FONTS[v.font]

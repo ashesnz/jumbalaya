@@ -1,10 +1,11 @@
 --[[
-local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/ui/perks/stamp/init.lua - 3D rubber-stamp strike onto the sidebar.
 
 	Stamps the row below Set/Hand with a sidebar-wide wooden block, then leaves a
 	horizontal perk imprint on the side panel.
 ]]
+
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 
 
 local game = require("word_game.ui.util.game_runtime").game

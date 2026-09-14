@@ -36,6 +36,10 @@ function M.relayout(self)
 	end
 end
 
+function M.set_card_ranks(_self, _k, card)
+	card.states.drag.can = true
+end
+
 function M.can_select(_self, _card)
 	return true
 end
@@ -51,7 +55,6 @@ end
 
 function M.draw_layer(self, v, draw_card_layer)
 	if self.config.type ~= 'hand' then return end
-	if table_board() then return end
 	local resting, hopping = {}, {}
 	for i = 1, #self.cards do
 		local card = self.cards[i]

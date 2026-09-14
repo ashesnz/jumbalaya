@@ -22,6 +22,32 @@ local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 
 local FlowText = AnimNode:derive("FlowText")
 
+local function default_font_spec(render_scale)
+	render_scale = render_scale or (game().TILESIZE or 20) * 7
+	return {
+		FONT = love.graphics.newFont(render_scale),
+		TEXT_OFFSET = { x = 0, y = -28 },
+		FONTSCALE = 0.12,
+		TEXT_HEIGHT_SCALE = 0.7,
+		squish = 1,
+		DESCSCALE = 1,
+	}
+end
+
+local function resolve_font(config)
+	local spec = config.font
+	if not (spec and spec.FONT) then
+		local lang_font = game().LANG and game().LANG.font
+		if lang_font and lang_font.FONT then
+			spec = lang_font
+		end
+	end
+	if not (spec and spec.FONT) then
+		spec = default_font_spec(spec and spec.render_scale)
+	end
+	return spec
+end
+
 function FlowText:construct(config)
 	config = config or {}
 	self.config = config
@@ -30,7 +56,7 @@ function FlowText:construct(config)
 	self.reveal_speed = config.pop_in_rate or 2.5
 	self.hop_rate = config.bump_rate or 3.1
 	self.hop_height = config.bump_amount or 1
-	self.font = config.font or game().LANG.font
+	self.font = resolve_font(config)
 
 	if config.string and type(config.string) ~= 'table' then config.string = {config.string} end
 	self.string = (config.string and type(config.string) == 'table' and config.string[1]) or {'JUMBALAYA'}
@@ -103,7 +129,8 @@ function FlowText:update_text(first_pass)
 			local part_scale = 1
 
 			if type(v) == 'table' and (v.ref_table or v.string) then
-				new_string = (v.prefix or '') .. tostring(v.ref_table and v.ref_table[v.ref_value] or v.string) .. (v.suffix or '')
+				local resolved = v.ref_table and v.ref_table[v.ref_value] or v.string
+				new_string = (v.prefix or '') .. tostring(resolved ~= nil and resolved or '') .. (v.suffix or '')
 				part_a = #(v.prefix or '')
 				part_b = #new_string - #(v.suffix or '')
 				if v.scale then part_scale = v.scale end
@@ -112,6 +139,8 @@ function FlowText:update_text(first_pass)
 					inner_colour = v.colour or nil
 				end
 				v = new_string
+			elseif type(v) ~= 'string' then
+				v = tostring(v ~= nil and v or '')
 			end
 
 			self.strings[k] = self.strings[k] or {}
@@ -136,31 +165,33 @@ function FlowText:update_text(first_pass)
 				self.strings[k].letters = {}
 
 				for _, c in Utf8.chars(v) do
-					local old_letter = old_letters and old_letters[index] or nil
-					-- Preserve an existing letter's scale across rebuilds so
-					-- mid-animation updates don't reset decoration progress.
-					local letter = {
-						letter = love.graphics.newText(self.font.FONT, c),
-						char = c,
-						scale = old_letter and old_letter.scale or part_scale,
-					}
-					self.strings[k].letters[index] = letter
+					if c and c ~= '' then
+						local old_letter = old_letters and old_letters[index] or nil
+						-- Preserve an existing letter's scale across rebuilds so
+						-- mid-animation updates don't reset decoration progress.
+						local letter = {
+							letter = love.graphics.newText(self.font.FONT, c),
+							char = c,
+							scale = old_letter and old_letter.scale or part_scale,
+						}
+						self.strings[k].letters[index] = letter
 
-					local tx = self.font.FONT:getWidth(c) * self.scale * part_scale * game().TILESCALE * self.font.FONTSCALE
-						+ 2.7 * (self.config.spacing or 0) * game().TILESCALE * self.font.FONTSCALE
-					local ty = self.font.FONT:getHeight(c) * self.scale * part_scale * game().TILESCALE * self.font.FONTSCALE * self.font.TEXT_HEIGHT_SCALE
+						local tx = self.font.FONT:getWidth(c) * self.scale * part_scale * game().TILESCALE * self.font.FONTSCALE
+							+ 2.7 * (self.config.spacing or 0) * game().TILESCALE * self.font.FONTSCALE
+						local ty = self.font.FONT:getHeight(c) * self.scale * part_scale * game().TILESCALE * self.font.FONTSCALE * self.font.TEXT_HEIGHT_SCALE
 
-					letter.offset = old_letter and old_letter.offset or {x = 0, y = 0}
-					letter.dims = {x = tx / (self.font.FONTSCALE * game().TILESCALE), y = ty / (self.font.FONTSCALE * game().TILESCALE)}
-					letter.pop_in = first_pass and (old_letter and old_letter.pop_in or (self.config.pop_in and 0 or 1)) or 1
-					letter.prefix = index <= part_a and outer_colour or nil
-					letter.suffix = index > part_b and outer_colour or nil
-					letter.colour = inner_colour or nil
-					if k > 1 then letter.pop_in = 0 end -- background strings start hidden
+						letter.offset = old_letter and old_letter.offset or {x = 0, y = 0}
+						letter.dims = {x = tx / (self.font.FONTSCALE * game().TILESCALE), y = ty / (self.font.FONTSCALE * game().TILESCALE)}
+						letter.pop_in = first_pass and (old_letter and old_letter.pop_in or (self.config.pop_in and 0 or 1)) or 1
+						letter.prefix = index <= part_a and outer_colour or nil
+						letter.suffix = index > part_b and outer_colour or nil
+						letter.colour = inner_colour or nil
+						if k > 1 then letter.pop_in = 0 end -- background strings start hidden
 
-					width = width + tx / (game().TILESIZE * game().TILESCALE)
-					height = math.max(ty / (game().TILESIZE * game().TILESCALE), height)
-					index = index + 1
+						width = width + tx / (game().TILESIZE * game().TILESCALE)
+						height = math.max(ty / (game().TILESIZE * game().TILESCALE), height)
+						index = index + 1
+					end
 				end
 
 				self.strings[k].W = width

@@ -1,10 +1,10 @@
 --[[
-local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/ui/effects/card_motion.lua — Queued card moves between piles via timeline scheduler.
 	Inputs: Game shell (TIMELINE), card.area, target coordinates in opts.
 	Outputs: CardMotion.move(opts); consumed by presentation card_motion_move handler.
 ]]
 
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 
 local game = require("word_game.ui.util.game_runtime").game

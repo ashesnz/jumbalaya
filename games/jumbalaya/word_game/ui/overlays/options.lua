@@ -10,6 +10,16 @@ local DEFINITIONS = game().DEFINITIONS
 
 local localize = require("word_game.ui.util.localize").localize
 local enumerate_display_modes = require("jumbalaya-engine.adapters.love2d.display").enumerate_display_modes
+
+local function cycler_option_index(options, value)
+	for index, option in ipairs(options) do
+		if option == value
+			or (type(option) == 'number' and type(value) == 'number' and math.abs(option - value) < 0.001) then
+			return index
+		end
+	end
+	return 1
+end
 function build_options()  
 	local shell = game_access.get()
 	local current_seed = nil
@@ -94,7 +104,13 @@ end
 function DEFINITIONS.settings_tab(tab)
 	if tab == 'Game' then
 		return {n=game().UI.ROOT, config={align = "cm", padding = 0.05, colour = game().C.CLEAR}, nodes={
-			Components.cycler({label = localize('ui_set_gamespeed'),scale = 0.8, options = {0.5, 1, 2, 4}, onChange = 'change_gamespeed', current_option = (game().SETTINGS.GAMESPEED == 0.5 and 1 or game().SETTINGS.GAMESPEED == 4 and 4 or game().SETTINGS.GAMESPEED + 1)}),
+			Components.cycler({
+				label = localize('ui_set_gamespeed'),
+				scale = 0.8,
+				options = { 0.5, 1, 2, 4 },
+				onChange = 'change_gamespeed',
+				current_option = cycler_option_index({ 0.5, 1, 2, 4 }, game().SETTINGS.GAMESPEED or 1),
+			}),
 			game().F_RUMBLE and Components.toggle({label = localize('ui_set_rumble'), ref_table = game().SETTINGS, ref_value = 'rumble'}) or nil,
 			Components.slider({label = localize('ui_set_screenshake'),width = 4, height = 0.4, ref_table = game().SETTINGS, ref_value = 'screenshake', min = 0, max = 100}),
 			game().F_CRASH_REPORTS and Components.toggle({label = localize('ui_set_crash_reports'), ref_table = game().SETTINGS, ref_value = 'crashreports', info = localize('opt_crash_report_info')}) or nil,

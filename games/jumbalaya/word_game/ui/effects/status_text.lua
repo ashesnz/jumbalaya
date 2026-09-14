@@ -1,10 +1,11 @@
 --[[
-local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
-local localize = require("word_game.ui.util.localize").localize
 	word_game/ui/effects/status_text.lua — Data-driven status lines on moveables.
 	Inputs: node attach points, status payload tables, TIMELINE.
 	Outputs: status_text.show/update helpers for deck and pile chrome.
 ]]
+
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
+local localize = require("word_game.ui.util.localize").localize
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 

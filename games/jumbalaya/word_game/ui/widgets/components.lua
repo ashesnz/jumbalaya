@@ -228,8 +228,17 @@ function Components.cycler(def)
 	def = def or {}
 	def.colour = def.colour or game().C.RED
 	def.options = def.options or {'Option 1', 'Option 2'}
-	def.current_option = def.current_option or 1
-	def.current_option_val = def.options[def.current_option]
+	local option_count = #def.options
+	local current_option = tonumber(def.current_option) or 1
+	if current_option < 1 or current_option > option_count then
+		current_option = 1
+	end
+	def.current_option = current_option
+	def.current_option_val = def.options[current_option]
+	if def.current_option_val == nil then
+		def.current_option = 1
+		def.current_option_val = def.options[1] or ''
+	end
 	-- Engine's cycle handler dispatches through `opt_callback`; `onChange`
 	-- is the public name (and accepts closures via resolve_action).
 	def.opt_callback = resolve_action(def.onChange or def.opt_callback, nil, def.id and (def.id .. "_cycle"))
@@ -288,7 +297,7 @@ function Components.cycler(def)
 			or {n=game().UI.COLUMN, config={id = 'cycle_main', align = "cm", minw = def.w, minh = def.h, r = CHROME.radius, padding = 0.05, colour = def.colour, hover = true, hover_colour = def.hover_colour or game().C.UI.BUTTON_HOVER, can_collide = true, on_demand_tooltip = def.on_demand_tooltip}, nodes={
 				{n=game().UI.ROW, config={align = "cm"}, nodes={
 					{n=game().UI.ROW, config={align = "cm"}, nodes={
-						{n=game().UI.OBJECT, config={object = FlowText({string = {{ref_table = def, ref_value = "current_option_val"}}, colours = {game().C.UI.TEXT_LIGHT}, pop_in = 0, pop_in_rate = 8, reset_pop_in = true, shadow = true, float = true, silent = true, bump = true, scale = def.text_scale, non_recalc = true})}},
+						{n=game().UI.OBJECT, config={object = FlowText({string = {{ref_table = def, ref_value = "current_option_val"}}, font = alpha_button_font(), colours = {game().C.UI.TEXT_LIGHT}, pop_in = 0, pop_in_rate = 8, reset_pop_in = true, shadow = true, float = true, silent = true, bump = true, scale = def.text_scale, non_recalc = true})}},
 					}},
 					{n=game().UI.ROW, config={align = "cm", minh = 0.05}, nodes={}},
 					not disabled and choice_pips or nil,

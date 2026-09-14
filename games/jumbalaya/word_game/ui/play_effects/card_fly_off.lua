@@ -1,10 +1,10 @@
 --[[
-local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/ui/play_effects/card_fly_off.lua — Played cards fly off-screen (recycle stash).
 	Inputs: played Card instances, Busy flags, TIMELINE.
 	Outputs: stash_played_card, fly_off batch helpers; reset() for tests.
 ]]
 
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 local game = require("word_game.ui.util.game_runtime").game
 
 local facade = require("word_game.ui.facade")

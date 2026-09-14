@@ -148,25 +148,33 @@ function M.draw_hand_pass(game)
 			end
 		elseif WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
 			WORD_GAME_UI.TableDeck.draw(runtime().draw_pile)
+		elseif runtime().draw_pile then
+			runtime().draw_pile:draw()
 		end
 		love.graphics.pop()
 	end
 
-	local hand_cards = runtime().dealt_letters and runtime().dealt_letters.cards
-	if not hand_cards or #hand_cards == 0 then
-		hand_cards = table_view:pile_cards("hand")
+	local hand = runtime().dealt_letters
+	if hand and #(hand.cards or {}) == 0 then
+		facade.piles().hydrate_hosts_from_store({ "hand" })
 	end
-	if hand_cards and #hand_cards > 0 then
+	if hand and hand.cards and #hand.cards > 0 then
 		love.graphics.push()
-		if runtime().dealt_letters then
-			runtime().dealt_letters:translate_container()
-		end
-		if Card and getmetatable(hand_cards[1]) == Card then
-			draw_hand_cards(hand_cards, controller)
-		else
-			table_view:draw_hand()
-		end
+		hand:translate_container()
+		hand:draw()
 		love.graphics.pop()
+	else
+		local hand_cards = table_view and table_view:pile_cards("hand")
+		if hand_cards and #hand_cards > 0 then
+			love.graphics.push()
+			if hand then hand:translate_container() end
+			if Card and getmetatable(hand_cards[1]) == Card then
+				draw_hand_cards(hand_cards, controller)
+			else
+				table_view:draw_hand()
+			end
+			love.graphics.pop()
+		end
 	end
 
 	local bonus_stack = WORD_GAME_UI.BonusStackUI
