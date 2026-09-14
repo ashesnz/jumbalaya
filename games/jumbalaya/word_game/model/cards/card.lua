@@ -9,6 +9,7 @@
 ]]
 
 local Tables = require("jumbalaya-engine.util.tables")
+local SceneRoots = require("jumbalaya-engine.scene.roots")
 
 ---@class (partial) Card : EaseNode
 ---@field ability CardAbility
@@ -222,6 +223,7 @@ end
 function Card:remove_from_area()
     self.area = nil
     self:set_scene_parent(nil)
+    SceneRoots.unregister(self)
     self.parallax_shift = {x = 0, y = 0}
 end
 

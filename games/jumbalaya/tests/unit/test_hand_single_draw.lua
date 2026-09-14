@@ -7,6 +7,7 @@ local piles = require("word_game.model.piles")
 local TableAreas = require("word_game.model.table_areas")
 local pile_counts = require("jumbalaya_core.cards.pile_counts")
 local store_ops = require("word_game.model.store_ops")
+local SceneRoots = require("jumbalaya-engine.scene.roots")
 
 local HAND_SIZE = 7
 
@@ -61,12 +62,17 @@ local function make_hand_card(game, id, letter)
 		flip = function() end,
 		set_card_area = function(self, area)
 			self.area = area
+			SceneRoots.set_parent(self, area)
 		end,
 		remove_from_area = function(self)
 			self.area = nil
+			SceneRoots.set_parent(self, nil)
+			SceneRoots.unregister(self)
 		end,
 	}
 	setmetatable(card, Card)
+	card._live_registry = "transform"
+	SceneRoots.register(card, "transform")
 	game.letter_inventory = game.letter_inventory or {}
 	game.letter_inventory[#game.letter_inventory + 1] = card
 	game.LIVE.CARD[#game.LIVE.CARD + 1] = card
@@ -181,6 +187,22 @@ local function total_draws(counts, hand_cards)
 	return total
 end
 
+local function scene_root_contains(game, card)
+	for _, root in ipairs(game.SCENE_ROOTS or {}) do
+		if root == card then return true end
+	end
+	return false
+end
+
+local function assert_no_hand_scene_roots(game, hand_cards)
+	for index, card in ipairs(hand_cards) do
+		T.assert_false(scene_root_contains(game, card), string.format(
+			"hand card %d must not be a scene root after commit",
+			index
+		))
+	end
+end
+
 local function assert_single_draw(counts, hand_cards)
 	local total = total_draws(counts, hand_cards)
 	T.assert_equal(total, HAND_SIZE, string.format(
@@ -223,6 +245,7 @@ T.describe("hand single draw", function()
 		piles.commit_hosts(store, { "hand", "draw" })
 		T.assert_equal(#game.dealt_letters.cards, 0)
 		T.assert_equal(#store:get().piles.hand, HAND_SIZE)
+		assert_no_hand_scene_roots(game, hand_cards)
 
 		local counts = install_draw_counter(hand_cards)
 		simulate_table_board_frame(game)
