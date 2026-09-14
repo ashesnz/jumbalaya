@@ -11,9 +11,9 @@ local game = require("app.runtime").game
 
 local PlacementWord = require("word_game.model.jumble.placement_word")
 local Jumble = require("word_game.model.jumble")
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 
 local function placement_word()
-local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	return PlacementWord
 end
 local bonus_gutter = require "word_game.board.bonus.gutter"

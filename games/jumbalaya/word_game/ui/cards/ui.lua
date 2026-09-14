@@ -172,6 +172,16 @@ function Card:stop_hover()
 end
 
 
+function Card:drag()
+		local hand = game().dealt_letters
+		if hand and self.area == hand and hand.add_selection and hand.selected[1] ~= self then
+				hand:clear_selection()
+				hand:add_selection(self, true)
+		end
+		AnimNode.drag(self)
+end
+
+
 function Card:stop_drag()
 		SceneNode.stop_drag(self)
 		if self.area == game().dealt_letters
