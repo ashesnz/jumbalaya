@@ -1,6 +1,7 @@
 --[[ word_game/ui/menu/layout.lua - Main menu layout and measurement ]]
 
 local game = require("word_game.ui.util.game_runtime").game
+local shell = require("word_game.ui.facade").shell()
 
 local M = {}
 
@@ -303,7 +304,7 @@ function M.layout_main_menu_title()
 			game().SPLASH_LOGO:align_to_major()
 		end
 	end
-	game().main_menu_logo_applied_scale = layout.scale
+	shell.set_main_menu_logo_applied_scale(layout.scale)
 end
 
 function M.layout_main_menu()

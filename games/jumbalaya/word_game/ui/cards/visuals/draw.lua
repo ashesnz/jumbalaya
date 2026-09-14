@@ -2,6 +2,7 @@
 
 ---@class (partial) Card : EaseNode
 local game = require("word_game.ui.util.game_runtime").game
+local shell = require("word_game.ui.facade").shell()
 local LetterFaces = require("word_game.ui.cards.letter_faces")
 local LetterPalette = require("word_game.config.visuals.letter_card_palette")
 local Tables = require("jumbalaya-engine.util.tables")
@@ -204,7 +205,7 @@ function Card:draw(layer)
 		end
 	end
 
-	game().shared_shadow = self.sprite_facing == 'front' and self.children.center or self.children.back
+	shell.set_shared_shadow(self.sprite_facing == 'front' and self.children.center or self.children.back)
 
 	if layer == 'shadow' or layer == 'both' then
 		self:draw_shadow()

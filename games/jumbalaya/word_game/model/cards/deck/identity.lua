@@ -7,6 +7,7 @@
 ]]
 -- Card identity, presentation, and area primitives for the letter deck.
 local live_game = require("word_game.model.live_game")
+local shell = require("word_game.model.shell_access")
 
 local M = {}
 local Shared = require("word_game.model.cards.deck.shared")
@@ -169,20 +170,20 @@ end
 		local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 		color = color or LetterPalette.DEFAULT_FACE_COLOR
 		local front = Deck().front(letter, color)
-		live_game().letter_card_id = (live_game().letter_card_id or 0) + 1
+		local id = shell.next_letter_card_id()
 		local deck_x = (live_game().draw_pile and live_game().draw_pile.T and live_game().draw_pile.T.x) or 0
 		local deck_y = (live_game().draw_pile and live_game().draw_pile.T and live_game().draw_pile.T.y) or 0
 		local card = Card(
 			deck_x, deck_y, live_game().CARD_W or 1, live_game().CARD_H or 1.4,
 			front,
 			Deck().letter_center(),
-			{ letter_card_id = live_game().letter_card_id }
+			{ letter_card_id = id }
 		)
 		Deck().tag_card(card, letter, color)
-		card.id = live_game().letter_card_id
+		card.id = id
 		card.pile_id = card.pile_id or "draw"
-		live_game().letter_inventory = live_game().letter_inventory or {}
-		live_game().letter_inventory[#live_game().letter_inventory + 1] = card
+		local inventory = shell.ensure_letter_inventory()
+		inventory[#inventory + 1] = card
 		return card
 	end
 return M

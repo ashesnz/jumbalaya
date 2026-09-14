@@ -9,6 +9,7 @@
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
 local game = require("word_game.ui.util.game_runtime").game
+local shell = require("word_game.ui.facade").shell()
 
 local M = {}
 local Easing = require "word_game.ui.effects.easing"
@@ -55,7 +56,7 @@ function M.begin()
 	if game_access.get() then
 		game_access.patch({ word_score_animating = true })
 	end
-	game().under_overlay = true
+	shell.set_under_overlay(true)
 	stop_drag()
 
 	overlay_colour[4] = 0

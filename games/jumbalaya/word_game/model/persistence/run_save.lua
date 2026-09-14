@@ -7,6 +7,7 @@
 ]]
 
 local live_game = require("word_game.model.live_game")
+local shell = require("word_game.model.shell_access")
 
 local TableAreas = require("word_game.model.table_areas")
 local game_access = require("word_game.model.game_access")
@@ -36,7 +37,8 @@ local function materialize_saved_card(cdata)
 end
 
 function M.rebuild_card_inventory()
-	live_game().letter_inventory = {}
+	shell.set_letter_inventory({})
+	local inventory = shell.ensure_letter_inventory()
 	local seen = {}
 	local max_id = 0
 	local piles = {
@@ -52,18 +54,18 @@ function M.rebuild_card_inventory()
 				local id = card.letter_card_id or card.id
 				if id and not seen[id] then
 					seen[id] = true
-					live_game().letter_inventory[#live_game().letter_inventory + 1] = card
+					inventory[#inventory + 1] = card
 					if id > max_id then max_id = id end
 				end
 			end
 		end
 	end
-	live_game().letter_card_id = max_id
+	shell.set_letter_card_id(max_id)
 	local draw_pile = TableAreas.draw_pile()
-	if draw_pile and draw_pile.config and #live_game().letter_inventory > 0 then
-		draw_pile.config.card_limit = math.max(draw_pile.config.card_limit or 52, #live_game().letter_inventory)
+	if draw_pile and draw_pile.config and #inventory > 0 then
+		draw_pile.config.card_limit = math.max(draw_pile.config.card_limit or 52, #inventory)
 	end
-	game_access.patch({ starting_deck_size = #live_game().letter_inventory })
+	game_access.patch({ starting_deck_size = #inventory })
 end
 
 function M.restore_card_areas(save_table)

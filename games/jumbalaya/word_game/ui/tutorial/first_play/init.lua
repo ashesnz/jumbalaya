@@ -1,6 +1,7 @@
 --[[ word_game/ui/tutorial/first_play/init.lua - One-time welcome tutorial facade ]]
 
 local game = require("word_game.ui.util.game_runtime").game
+local shell = require("word_game.ui.facade").shell()
 local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 local Easing = require("word_game.ui.effects.easing")
 local UIViewHost = require("jumbalaya-engine.panels.view_host")
@@ -60,7 +61,7 @@ function M.begin()
 	session.set_active(true)
 	session.reset_step_index()
 	session.stop_drag()
-	game().under_overlay = true
+	shell.set_under_overlay(true)
 
 	local overlay_colour = session.overlay_colour()
 	overlay_colour[4] = 0

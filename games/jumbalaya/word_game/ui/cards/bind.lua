@@ -9,6 +9,8 @@ function M.install()
 	installed = true
 	require "word_game.ui.cards.visuals"
 	require "word_game.ui.cards.ui"
+	require("word_game.ui.cards.alerts").install()
+	require("word_game.ui.cards.align").install()
 end
 
 return M

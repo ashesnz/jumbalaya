@@ -28,6 +28,7 @@ local M = {
 	VoucherDiscard = require("word_game.model.perks.voucher_discard"),
 	Persistence = require("word_game.model.persistence"),
 	GameAccess = require("word_game.model.game_access"),
+	Shell = require("word_game.model.shell_access"),
 }
 
 function M._bind_store(store)

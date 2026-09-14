@@ -10,6 +10,7 @@
 ]]
 
 local live_game = require("word_game.model.live_game")
+local shell = require("word_game.model.shell_access")
 
 local game_access = require("word_game.model.game_access")
 local store_ops = require("word_game.model.store_ops")
@@ -78,8 +79,7 @@ function M.reset_args()
 end
 
 function M.reset_globals()
-	live_game().letter_inventory = {}
-	live_game().letter_card_id = 0
+	shell.reset_letter_registry()
 	if live_game().LIVE then
 		local wipe_card = live_game().screenwipecard
 		live_game().LIVE.CARD = {}

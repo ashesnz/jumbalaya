@@ -1,7 +1,7 @@
 --[[
 	word_game/model/cards/card.lua - Card EaseNode subclass: construct/apply_face, letter_inventory, removal
 
-	Mixins: card_ability.lua; ui/cards/visuals.lua and ui/cards/ui.lua at boot.
+	Mixins: card_ability.lua; ui/cards/visuals, ui, alerts, align at boot.
 
 	Core: none
 	Store: none
@@ -40,8 +40,8 @@ local Tables = require("jumbalaya-engine.util.tables")
 ---@field add_to_deck fun(self: Card, from_debuff: boolean|nil)
 ---@field remove_from_deck fun(self: Card, from_debuff: boolean|nil)
 local live_game = require("word_game.model.live_game")
+local shell = require("word_game.model.shell_access")
 local CardRegistry = require("word_game.model.cards.registry")
-local UIViewHost = require("jumbalaya-engine.panels.view_host")
 local Deck = require("word_game.model.cards.deck")
 local AnimNode = require("jumbalaya-engine.scene.animated.init")
 
@@ -51,9 +51,7 @@ require("word_game.model.cards.card_ability").install(Card)
 
 --class methods
 
---- Static scalar defaults shared by every new card. Mutable defaults
---- (tilt_var, discard_pos, children) are built per-instance in construct()
---- so instances never alias each other's tables.
+--- Static scalar defaults shared by every new card.
 local CARD_SCHEMA = {
     -- interaction
     click_timeout = 0.3,
@@ -105,8 +103,7 @@ function Card:construct(X, Y, W, H, card, center, params)
     self.no_ui = self.config.card.no_ui
 
     -- Identity / ordering.
-    live_game().sort_id = (live_game().sort_id or 0) + 1
-    self.sort_id = live_game().sort_id
+    self.sort_id = shell.next_sort_id()
     self.unique_val = 1 - self.ID / 1603301
     self.edition = nil
     self.area = nil
@@ -135,26 +132,6 @@ function Card:construct(X, Y, W, H, card, center, params)
 
     if getmetatable(self) == Card then
         table.insert(live_game().LIVE.CARD, self)
-    end
-end
-
---- Shows/hides the "new item discovered" alert badge on collection screens
---- (companions/perks/usables/editions only).
-function Card:update_alert()
-    if (self.ability.set == 'Companion' or self.ability.set == 'Perk' or self.ability.usable or self.ability.set == 'Finish') then 
-        if self.area and self.area.config.collection and self.config.center then
-            if self.config.center.alerted and self.children.alert  then
-                self.children.alert:remove()
-                self.children.alert = nil
-            elseif not self.config.center.alerted and not self.children.alert and self.config.center.discovered then
-                self.children.alert = UIViewHost.create{
-                    definition = build_card_alert(), 
-                    config = {align=(self.ability.set == 'Perk' and (self.config.center.order%2)==1) and "tli" or "tri",
-                            offset = {x = (self.ability.set == 'Perk' and (self.config.center.order%2)==1) and 0.1 or -0.1, y = 0.1},
-                            parent = self}
-                }
-            end
-        end
     end
 end
 
@@ -249,19 +226,7 @@ function Card:remove_from_area()
 end
 
 
-function Card:align()  
-    if self.children.floating_sprite then 
-        self.children.floating_sprite.T.y = self.T.y
-        self.children.floating_sprite.T.x = self.T.x
-        self.children.floating_sprite.T.r = self.T.r
-    end
-
-    if self.children.focused_ui then self.children.focused_ui:set_alignment() end
-end
-
-
--- Fields round-tripped verbatim between save and load. Anything not listed
--- here is rebuilt by construct()/apply_* on load instead of restored.
+-- Fields round-tripped verbatim between save and load.
 local SAVED_FIELDS = {
     "no_ui", "facing", "sprite_facing", "selected", "debuff",
     "slot", "added_to_deck", "label", "letter_card_id", "base", "sort_id",

@@ -125,6 +125,10 @@ function M.table_areas()
 	return load("word_game.model.table_areas")
 end
 
+function M.shell()
+	return (WORD_GAME and WORD_GAME.Shell) or load("word_game.model.shell_access")
+end
+
 function M.layout_request()
 	return load("word_game.model.layout.request")
 end

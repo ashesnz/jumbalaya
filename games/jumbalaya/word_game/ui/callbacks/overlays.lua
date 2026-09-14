@@ -3,6 +3,7 @@
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
 local game = require("word_game.ui.util.game_runtime").game
+local shell = facade.shell()
 
 local UIViewHost = require("jumbalaya-engine.panels.view_host")
 local Funcs = require("app.callbacks.funcs")
@@ -35,7 +36,7 @@ function M.install()
 
 	Funcs.register("profile_select", function(e)
 		game().SETTINGS.paused = true
-		game().focused_profile = game().SETTINGS.profile
+		shell.set_focused_profile(game().SETTINGS.profile)
 
 		for i = 1, 3 do
 			if i ~= game().focused_profile and love.filesystem.getInfo(i..'/'..'profile.acs') then game():load_profile(i) end

@@ -7,6 +7,7 @@
 ]]
 -- Drafting, cutting, weighted selection, and deck listing.
 local live_game = require("word_game.model.live_game")
+local shell = require("word_game.model.shell_access")
 
 local M = {}
 local Shared = require("word_game.model.cards.deck.shared")
@@ -35,8 +36,7 @@ end
 
  function M.populate_starting_deck()
  	live_game().draw_pile.config = live_game().draw_pile.config or {}
-		live_game().letter_inventory = {}
-		live_game().letter_card_id = 0
+		shell.reset_letter_registry()
 		live_game().draw_pile.cards = {}
 		for _, letter in ipairs(Deck().STARTING_LETTERS) do
 			live_game().draw_pile:emplace(Deck().create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR))

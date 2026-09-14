@@ -2,6 +2,8 @@
 
 ---@class (partial) Card : EaseNode
 local game = require("word_game.ui.util.game_runtime").game
+local facade = require("word_game.ui.facade")
+local shell = facade.shell()
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local DissolveFX = require "word_game.ui.effects.dissolve_fx"
 local Random = require("jumbalaya-engine.util.random")
@@ -170,7 +172,7 @@ function Card:begin_materialize(dissolve_colours, silent, timefac)
 	})
 	if not silent then
 		if not game().last_materialized or game().last_materialized +0.01 < game().TIMERS.REAL or game().last_materialized > game().TIMERS.REAL then
-			game().last_materialized = game().TIMERS.REAL
+			shell.set_last_materialized(game().TIMERS.REAL)
 			Scheduler.add{
 				blockable = false,
 				func = function()

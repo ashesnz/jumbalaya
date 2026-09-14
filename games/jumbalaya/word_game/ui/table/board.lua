@@ -1,17 +1,14 @@
---[[
-	word_game/ui/table/board.lua - TABLE_BOARD update and draw coordinator.
-]]
-
+--[[ word_game/ui/table/board.lua - TABLE_BOARD update and draw coordinator ]]
 
 local facade = require("word_game.ui.facade")
-local Jumble = facade.jumble()
-local Play = facade.jumble_play()
 local runtime = require("word_game.ui.util.game_runtime").game
 
 local M = {}
 
 local views_install = require("word_game.ui.views.install")
 local bridge = require("app.runtime")
+local update_passes = require("word_game.ui.table.board_update_passes")
+local draw_passes = require("word_game.ui.table.board_draw_passes")
 
 local placement_snap = require("word_game.board.placement.snap")
 local modifier_feedback = require("word_game.ui.feedback.modifier_feedback")
@@ -21,24 +18,16 @@ end)
 
 local jumble_fixed_letters = require("word_game.ui.table.jumble_fixed_letters")
 local felt = require("word_game.ui.layout.felt")
-local Layout = require("word_game.ui.layout")
-local play_effects = require("word_game.ui.play_effects")
 
 local function ensure_placement_pattern_overlay(pt)
 	if not pt or pt.draw_pattern_overlay then return end
 	pt.draw_pattern_overlay = function(session)
-		if not (Jumble.is_active()) then return end
+		if not (facade.jumble().is_active()) then return end
 		jumble_fixed_letters.draw(session)
 	end
 end
 
-local function boss_sequence_active()
-	return felt.is_boss_sequence()
-end
-
-local function hand_clear_focus_active()
-	return runtime().HAND_CLEAR_OVERLAY ~= nil
-end
+draw_passes.bind_pattern_overlay(ensure_placement_pattern_overlay)
 
 function M.is_active()
 	return runtime().STATE == runtime().STATES.TABLE_BOARD
@@ -58,145 +47,19 @@ function M.table_board_view()
 end
 
 function M.update(game, dt)
-	if runtime().ARGS and runtime().ARGS.pending_layout then
-		runtime().ARGS.pending_layout = false
-		Layout.refresh_placement_layout()
-	end
-	if DEVTOOLS and DEVTOOLS.DebugButton then
-		DEVTOOLS.DebugButton.sync()
-	end
-		if WORD_GAME_UI.TableControls then
-			WORD_GAME_UI.TableControls.sync()
-		end
-		if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
-			WORD_GAME_UI.Sidebar.sync_visibility()
-		end
-		if Jumble.is_active() then
-			if Jumble.update_timer() then
-				if Play.end_jumble_hand then
-					Play.end_jumble_hand()
-					if play_effects.present_end_jumble_sidebar then
-						play_effects.present_end_jumble_sidebar()
-					end
-				end
-			end
-		end
-	if WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.update then
-		WORD_GAME_UI.BossWordAnnounce.update(dt)
-	end
-	if game.pattern_row then
-		ensure_placement_pattern_overlay(game.pattern_row)
-		game.pattern_row:update(dt)
-	end
-	if WORD_GAME_UI.TimelineTimer and WORD_GAME_UI.TimelineTimer.update then
-		WORD_GAME_UI.TimelineTimer.update(dt)
-	end
+	update_passes.run(game, dt, ensure_placement_pattern_overlay)
 end
 
 function M.draw_spotlight_overlay(game, overlay)
-	if not overlay then return end
-	love.graphics.push()
-	overlay:translate_container()
-	overlay:draw()
-	love.graphics.pop()
-
-	if overlay.redraw_portrait and WORD_GAME_UI.TimelineTimer then
-		WORD_GAME_UI.TimelineTimer.draw()
-	end
-	if overlay.redraw_banner and WORD_GAME_UI.ScoreBanner then
-		WORD_GAME_UI.ScoreBanner.draw()
-	end
-	if overlay.redraw_tokens and runtime().draw_pile and not boss_sequence_active()
-		and WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.draw then
-		love.graphics.push()
-		runtime().draw_pile:translate_container()
-		WORD_GAME_UI.TableDeck.draw(runtime().draw_pile)
-		love.graphics.pop()
-	end
-	if overlay.redraw_confetti and WORD_GAME_UI.Confetti then
-		WORD_GAME_UI.Confetti.draw_pass()
-	end
-	if overlay.redraw_token_reward and WORD_GAME_UI.TokenReward then
-		WORD_GAME_UI.TokenReward.draw_pass()
-	end
-	if overlay.redraw_attention then
-		if WORD_GAME_UI.FloatUpText then
-			WORD_GAME_UI.FloatUpText.draw_pass()
-		end
-		if WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.draw_pass then
-			WORD_GAME_UI.BossWordAnnounce.draw_pass()
-		end
-	end
-
-	if overlay.redraw_hand and runtime().dealt_letters then
-		local bonus_stack = WORD_GAME_UI.BonusStackUI
-		for _, v in pairs(game.LIVE.CARD) do
-			if v.area == runtime().dealt_letters
-				and (not v.parent and v ~= game.INPUT.dragging.target and v ~= game.INPUT.focused.target)
-				and not (bonus_stack and bonus_stack.contains(v)) then
-				love.graphics.push()
-				v:translate_container()
-				v:draw()
-				love.graphics.pop()
-			end
-		end
-	end
-
-	if overlay.redraw_placement and runtime().pattern_row and runtime().pattern_row.draw_run_pass then
-		ensure_placement_pattern_overlay(runtime().pattern_row)
-		runtime().pattern_row:draw_run_pass(game)
-	end
-
-	if overlay.redraw_play and runtime().hand_action_bar and not runtime().hand_action_bar.REMOVED then
-		love.graphics.push()
-		runtime().hand_action_bar:translate_container()
-		runtime().hand_action_bar:draw()
-		love.graphics.pop()
-	end
-
-	if overlay.redraw_timeline and WORD_GAME_UI.TimelineTimer then
-		WORD_GAME_UI.TimelineTimer.draw()
-	end
-
-	if not overlay.selections then return end
-	for _, v in ipairs(overlay.selections) do
-		if v and not v.REMOVED then
-			love.graphics.push()
-			v:translate_container()
-			v:draw()
-			if v.draw_children then
-				v:draw_self()
-				v:draw_children()
-			end
-			love.graphics.pop()
-		end
-	end
+	draw_passes.draw_spotlight_overlay(game, overlay)
 end
 
 function M.draw_hud()
-	if WORD_GAME_UI.TimelineTimer then
-		WORD_GAME_UI.TimelineTimer.draw()
-	end
-	if WORD_GAME_UI.ScoreBanner then
-		WORD_GAME_UI.ScoreBanner.draw()
-	end
-	if M.is_active() then
-		M.draw_debug_answers()
-	end
-end
-
-local function draw_action_bar(bar)
-	if not bar or bar.REMOVED then return end
-	love.graphics.push()
-	bar:translate_container()
-	bar:draw()
-	love.graphics.pop()
+	draw_passes.draw_hud(M.is_active(), M.draw_debug_answers)
 end
 
 function M.draw_table_controls()
-	if not M.is_active() then return end
-	draw_action_bar(runtime().table_shuffle_bar)
-	draw_action_bar(runtime().hand_action_bar)
+	draw_passes.draw_table_controls(M.is_active())
 end
 
 function M.draw_board(game)
@@ -223,7 +86,7 @@ function M.draw_board(game)
 end
 
 function M.should_draw_sidebar_deck()
-	if boss_sequence_active() then return false end
+	if felt.is_boss_sequence() then return false end
 	if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.uses_table_draw() then
 		return true
 	end
@@ -311,63 +174,20 @@ function M.draw_hand_pass(game)
 end
 
 function M.draw_reward_passes()
-	if hand_clear_focus_active() then return end
-	if WORD_GAME_UI.Confetti then
-		WORD_GAME_UI.Confetti.draw_pass()
-	end
-	if WORD_GAME_UI.TokenReward then
-		WORD_GAME_UI.TokenReward.draw_pass()
-	end
-	if WORD_GAME_UI.PerkStamp then
-		WORD_GAME_UI.PerkStamp.draw_pass()
-	end
+	draw_passes.draw_reward_passes()
 end
 
-function M.draw_attention_passes(game)
-	if hand_clear_focus_active() then return end
-	if WORD_GAME_UI.FloatUpText then
-		WORD_GAME_UI.FloatUpText.draw_pass()
-	end
-	if WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.draw_pass then
-		WORD_GAME_UI.BossWordAnnounce.draw_pass()
-	end
+function M.draw_attention_passes()
+	draw_passes.draw_attention_passes()
 end
 
 function M.draw_card_interaction(game)
-	if WORD_GAME_UI.FirstPlayTutorial and WORD_GAME_UI.FirstPlayTutorial.is_active()
-		and WORD_GAME_UI.FirstPlayTutorial.is_active() then
-		return
-	end
-	if not game.pattern_row then return end
-	local bonus_stack = WORD_GAME_UI.BonusStackUI
-	if game.INPUT.dragging.target and game.INPUT.dragging.target ~= game.INPUT.focused.target then
-		love.graphics.push()
-		game.INPUT.dragging.target:translate_container()
-		game.INPUT.dragging.target:draw()
-		love.graphics.pop()
-	end
-
-	if game.INPUT.focused.target and getmetatable(game.INPUT.focused.target) == Card
-		and (game.INPUT.focused.target.area == runtime().dealt_letters
-			or (bonus_stack and bonus_stack.contains(game.INPUT.focused.target)))
-		and game.INPUT.focused.target ~= game.INPUT.dragging.target then
-		love.graphics.push()
-		game.INPUT.focused.target:translate_container()
-		game.INPUT.focused.target:draw()
-		love.graphics.pop()
-	end
-	if WORD_GAME_UI.CardInspect then
-		WORD_GAME_UI.CardInspect.draw_foreground()
-	end
-	local voucher_discard = WORD_GAME_UI.VoucherDiscard
-	if voucher_discard and voucher_discard.draw_voucher_foreground then
-		voucher_discard.draw_voucher_foreground()
-	end
+	draw_passes.draw_card_interaction(game)
 end
 
 function M.draw_debug_answers()
 	local text = "AVAILABLE ANSWERS\n"
-	local jumble = Jumble
+	local jumble = facade.jumble()
 	if jumble and jumble.is_active() and jumble.find_playable_words then
 		local counts = jumble.debug_answer_counts and jumble.debug_answer_counts()
 			or (jumble.jumble_hand_counts and jumble.jumble_hand_counts() or {})

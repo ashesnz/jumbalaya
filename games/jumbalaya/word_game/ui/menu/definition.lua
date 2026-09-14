@@ -1,6 +1,7 @@
 --[[ word_game/ui/menu/definition.lua - Main menu UI definitions ]]
 
 local game = require("word_game.ui.util.game_runtime").game
+local shell = require("word_game.ui.facade").shell()
 
 local Components = require("word_game.ui.widgets.components")
 local Colour = require("jumbalaya-engine.util.colour")
@@ -36,27 +37,28 @@ local function menu_mode_chrome()
 end
 
 function DEFINITIONS.profile_select()
-	game().focused_profile = game().focused_profile or game().SETTINGS.profile or 1
+	shell.ensure_focused_profile(game().SETTINGS.profile or 1)
 
-	local t =   build_generic_options({padding = 0,contents ={
+	local focused = shell.focused_profile()
+	local t = build_generic_options({padding = 0, contents = {
 			{n=game().UI.ROW, config={align = "cm", padding = 0, draw_layer = 1, minw = 4}, nodes={
 				make_tab_strip(
 				{tabs = {
 						{
 								label = 1,
-								chosen = game().focused_profile == 1,
+								chosen = focused == 1,
 								tab_definition_function = DEFINITIONS.profile_option,
 								tab_definition_function_args = 1
 						},
 						{
 								label = 2,
-								chosen = game().focused_profile == 2,
+								chosen = focused == 2,
 								tab_definition_function = DEFINITIONS.profile_option,
 								tab_definition_function_args = 2
 						},
 						{
 								label = 3,
-								chosen = game().focused_profile == 3,
+								chosen = focused == 3,
 								tab_definition_function = DEFINITIONS.profile_option,
 								tab_definition_function_args = 3
 						}
@@ -69,8 +71,8 @@ end
 
 
 function DEFINITIONS.profile_option(_profile)
-	game().focused_profile = _profile
-	local packed = read_save_payload(game().focused_profile..'/'..'profile.acs')
+	shell.set_focused_profile(_profile)
+	local packed = read_save_payload(shell.focused_profile()..'/'..'profile.acs')
 	local profile_data = packed and unpack_source(packed) or nil
 	if profile_data then
 		profile_data.name = profile_data.name or ("P".._profile)

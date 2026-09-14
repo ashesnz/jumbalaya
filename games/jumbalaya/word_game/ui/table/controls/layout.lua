@@ -1,6 +1,7 @@
 --[[ word_game/ui/table/controls/layout.lua - Hand shuffle/play button positioning ]]
 
 local game = require("word_game.ui.util.game_runtime").game
+local shell = facade.shell()
 
 local felt_layout = require("word_game.ui.layout.felt")
 local facade = require("word_game.ui.facade")
@@ -227,12 +228,10 @@ function M.ensure(visible, sync_visibility)
 	local size = definition.button_size()
 	pos_sig = nil
 	locked_anchors = nil
-	game().table_shuffle_bar = TableControlsView.create_shuffle_bar(size)
-	game().hand_action_bar = TableControlsView.create_play_bar(size)
-
-	game().table_shuffle_button = game().table_shuffle_bar
-	game().hand_play_button = game().hand_action_bar
-	game().PLAY_WORD_UI = game().hand_action_bar
+	shell.set_table_control_bars(
+		TableControlsView.create_shuffle_bar(size),
+		TableControlsView.create_play_bar(size)
+	)
 
 	M.sync_position()
 	sync_visibility()
@@ -241,19 +240,7 @@ end
 function M.destroy()
 	pos_sig = nil
 	locked_anchors = nil
-	if game().table_shuffle_bar then
-		game().table_shuffle_bar:remove()
-		game().table_shuffle_bar = nil
-	end
-	if game().hand_action_bar then
-		game().hand_action_bar:remove()
-		game().hand_action_bar = nil
-	end
-	game().table_shuffle_button = nil
-	game().hand_play_button = nil
-	if game().PLAY_WORD_UI then
-		game().PLAY_WORD_UI = nil
-	end
+	shell.destroy_table_control_bars()
 end
 
 return M
