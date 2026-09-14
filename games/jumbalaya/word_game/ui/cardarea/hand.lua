@@ -42,6 +42,19 @@ local function store_renders_hand()
 	return view and view:should_render_hand_from_store()
 end
 
+function M.can_select(_self, _card)
+	return true
+end
+
+function M.update(self, _dt)
+	if self ~= game().dealt_letters then return end
+	for _, card in ipairs(self.cards) do
+		if card.ability.forced_selection and not self.selected[1] then
+			self:add_selection(card)
+		end
+	end
+end
+
 function M.draw_layer(self, v, draw_card_layer)
 	if self.config.type ~= 'hand' then return end
 	if store_renders_hand() then return end

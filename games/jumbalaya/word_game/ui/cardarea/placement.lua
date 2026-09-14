@@ -1,12 +1,15 @@
 --[[
-local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	word_game/ui/cardarea/placement.lua - Placement/jumble CardPile type behaviour.
 ]]
 
-
 local game = require("word_game.ui.util.game_runtime").game
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 
 local M = {}
+
+function M.can_select(_self, _card)
+	return not game().INPUT.HID.controller
+end
 
 function M.add_selection(self, card, silent)
 	if #self.selected >= self.config.selected_limit then

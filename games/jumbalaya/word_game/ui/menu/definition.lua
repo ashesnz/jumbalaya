@@ -4,6 +4,8 @@ local game = require("word_game.ui.util.game_runtime").game
 
 local Components = require("word_game.ui.widgets.components")
 local Colour = require("jumbalaya-engine.util.colour")
+local localize = require("word_game.ui.util.localize").localize
+local each_utf8_char = require("word_game.ui.util.localize").each_utf8_char
 
 local DEFINITIONS = game().DEFINITIONS
 
@@ -13,7 +15,6 @@ local STACK_GAP_PX = 20
 
 local function menu_px_to_tiles(px)
 	local ts = (game().TILESIZE or 1) * (game().TILESCALE or 1)
-local localize = require("word_game.ui.util.localize").localize
 	return px / ts
 end
 

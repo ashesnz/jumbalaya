@@ -1,35 +1,29 @@
 --[[ word_game/ui/cardarea/selection.lua - Card selection and highlight rules ]]
 
 local game = require("word_game.ui.util.game_runtime").game
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 
 local M = {}
 
 local function type_handler(self, handlers)
-local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	return handlers[self.config.type]
 end
 
+local function default_add_selection(self, card, silent)
+	if #self.selected >= self.config.selected_limit then
+		return
+	end
+	self.selected[#self.selected + 1] = card
+	card:set_selected(true)
+	if not silent then
+		play_sfx("card_slide1")
+	end
+end
+
 function M.can_select(self, card, handlers)
-	if self.config.type == 'hand' then
-		return true
-	end
-	if self.config.type == 'placement' and not game().INPUT.HID.controller then
-		return true
-	end
 	local handler = type_handler(self, handlers)
 	if handler and handler.can_select then
-		if handler.can_select(self, card) then
-			return true
-		end
-	end
-	if game().INPUT.HID.controller then
-		return false
-	else
-		if self.config.type == 'usable' or
-			(self.config.type == 'shop' and self.config.selected_limit > 0)
-		then
-				return true
-		end
+		return handler.can_select(self, card)
 	end
 	return false
 end
@@ -39,25 +33,14 @@ function M.add_selection(self, card, silent, handlers)
 	if handler and handler.add_selection then
 		return handler.add_selection(self, card, silent)
 	end
-
-	if self.config.type == 'shop' then
-		if self.selected[1] then self:remove_selection(self.selected[1]) end
-	elseif self.config.type == 'usable' then
-		if #self.selected >= self.config.selected_limit then
-			self:remove_selection(self.selected[1])
-		end
-	elseif #self.selected >= self.config.selected_limit then
-		return
-	end
-
-	self.selected[#self.selected + 1] = card
-	card:set_selected(true)
-	if not silent then play_sfx('card_slide1') end
+	return default_add_selection(self, card, silent)
 end
 
 function M.remove_selection(self, card, force)
-	if (not force) and  card and card.ability.forced_selection and self == game().dealt_letters then return end
-	for i = #self.selected,1,-1 do
+	if (not force) and card and card.ability.forced_selection and self == game().dealt_letters then
+		return
+	end
+	for i = #self.selected, 1, -1 do
 		if self.selected[i] == card then
 			table.remove(self.selected, i)
 			break

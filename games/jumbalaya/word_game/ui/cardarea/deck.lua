@@ -18,6 +18,10 @@ local function face_down_in_pile(card)
 	end
 end
 
+function M.emplace_at_front(self, location)
+	return location == "front" or self.config.type == "deck"
+end
+
 function M.set_card_ranks(self, k, card)
 	if k > 1 then
 		card.states.drag.can = false

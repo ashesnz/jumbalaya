@@ -6,6 +6,7 @@ local audit = require("tests.helpers.pile_boundary_audit")
 local piles = require("word_game.model.piles")
 local pile_selectors = require("jumbalaya_core.store.selectors.piles")
 local Store = require("jumbalaya_core.store")
+local shell = require("jumbalaya-engine.shell")
 local word_game = require("word_game")
 
 T.describe("pile boundaries", function()
@@ -18,6 +19,11 @@ T.describe("pile boundaries", function()
 
 	T.it("cardarea package does not import gameplay rules modules", function()
 		local violations = audit.cardarea_gameplay_imports()
+		T.assert_equal(#violations, 0, table.concat(violations, ", "))
+	end)
+
+	T.it("SYNC_PILES is dispatched only from piles.lua", function()
+		local violations = audit.direct_sync_piles_dispatch()
 		T.assert_equal(#violations, 0, table.concat(violations, ", "))
 	end)
 
@@ -46,5 +52,57 @@ T.describe("pile boundaries", function()
 		local pattern = pile_selectors.pattern_cards(state)
 		T.assert_equal(pattern[2].id, 4)
 		T.assert_equal(pattern[2].pile_id, "pattern")
+	end)
+
+	T.it("sync_hosts_to_store snapshots CardPile hosts into store piles", function()
+		local store = Store.new({
+			piles = {
+				hand = {},
+				draw = {},
+				pattern = {},
+				bonus = {},
+				discard = {},
+			},
+		})
+		word_game._bind_store(store)
+		local game = shell.game() or {}
+		shell.bind_game(game)
+		game.dealt_letters = {
+			cards = {
+				{ id = 7, letter_card_id = 7, ability = { letter = "E" } },
+			},
+		}
+		game.draw_pile = { cards = {} }
+		game.recycle_stash = { cards = {} }
+
+		piles.sync_hosts_to_store(store, { "hand" })
+		local state = store:get()
+		T.assert_equal(#pile_selectors.hand_cards(state), 1)
+		T.assert_equal(state.piles.hand[1].id, 7)
+		T.assert_equal(state.piles.hand[1].ability.letter, "E")
+	end)
+
+	T.it("commit_hosts syncs store then clears resting host cards", function()
+		local store = Store.new({
+			piles = {
+				hand = {},
+				draw = {},
+				pattern = {},
+				bonus = {},
+				discard = {},
+			},
+		})
+		word_game._bind_store(store)
+		local game = shell.game() or {}
+		shell.bind_game(game)
+		local resting = { id = 3, letter_card_id = 3, ability = { letter = "A" } }
+		game.dealt_letters = { cards = { resting } }
+		game.draw_pile = { cards = {} }
+		game.recycle_stash = { cards = {} }
+
+		piles.commit_hosts(store, { "hand" })
+		local state = store:get()
+		T.assert_equal(#pile_selectors.hand_cards(state), 1)
+		T.assert_equal(#game.dealt_letters.cards, 0)
 	end)
 end)

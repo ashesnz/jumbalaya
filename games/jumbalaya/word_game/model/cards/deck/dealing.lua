@@ -55,8 +55,7 @@ end
 
 	function M.commit_pile_hosts(pile_ids)
 		pile_ids = pile_ids or { "hand", "draw", "pattern" }
-		piles.sync_hosts_to_store(nil, pile_ids)
-		piles.release_static_chrome(nil, pile_ids)
+		piles.commit_hosts(nil, pile_ids)
 		Deck().sync_deck_count_display()
 	end
 

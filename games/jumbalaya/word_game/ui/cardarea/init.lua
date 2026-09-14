@@ -1,14 +1,9 @@
 --[[
 	word_game/ui/cardarea/init.lua - `CardPile`: a region that owns and lays out `Card` instances.
 
-	One class, many roles: `self.config.type` (e.g. 'hand', 'deck',
-	'discard', 'shop', 'placement', 'usable', 'perk', 'title')
-	controls almost all per-instance behaviour - drag rules (`set_ranks`),
-	layout math (`relayout`), draw ordering (`draw`), and selection rules.
-	When adding a new area type, search for the existing
-	`self.config.type ==` branches across this file first, since behaviour
-	for a type is usually spread across several methods rather than
-	centralized.
+	Per-type behaviour lives in TYPE_HANDLERS modules (hand, deck, discard, placement,
+	shop, title). init.lua dispatches draw/update/selection/lifecycle through the active
+	handler only — do not add new `config.type` branches here.
 ]]
 
 
@@ -122,7 +117,7 @@ function CardPile:construct(X, Y, W, H, config)
 end
 
 function CardPile:emplace(card, location, stay_flipped)
-	lifecycle.emplace(self, card, location, stay_flipped)
+	lifecycle.emplace(self, card, location, stay_flipped, type_handler)
 end
 
 function CardPile:remove_card(card, discarded_only)
@@ -188,28 +183,19 @@ end
 
 --- @param dt number seconds since last frame
 function CardPile:update(dt)
-	if self == game().dealt_letters then
-		for _, v in ipairs(self.cards) do
-			if v.ability.forced_selection and not self.selected[1] then
-				self:add_selection(v)
-			end
-		end
+	local handler = type_handler(self)
+	if handler and handler.update then
+		handler.update(self, dt)
 	end
-	deck.update(self, dt)
-	discard.update(self, dt)
-	--Check and see if controller is being used
-	if game().INPUT.HID.controller and self ~= game().dealt_letters then self:clear_selection() end
+	if game().INPUT.HID.controller and self ~= game().dealt_letters then
+		self:clear_selection()
+	end
 	self.config.temp_limit = math.max(#self.cards, self.config.card_limit)
 	self.config.card_count = #self.cards
 end
 
---- Draws this area's optional card-count UI badge, then draws its cards.
---- Draw order/grouping is type-specific (see the `self.config.type ==`
---- branches below): decks draw back-to-front skipping most middle cards for
---- performance, placement/usable/shop areas draw non-selected cards
---- before selected ones (so selected cards render on top), discard only
---- bothers drawing cards that have visibly animated away from the pile
---- center, and hand/title/perk areas just draw in order.
+--- Draws this area's optional card-count UI badge, then draws its cards via the
+--- active type handler (draw order, shadows, store-backed skip rules).
 function CardPile:draw()
 	if not self.states.visible then return end
 	if not self.cards then return end
@@ -219,19 +205,19 @@ function CardPile:draw()
 		chrome.draw_chrome(self)
 	end
 
-	placement.draw_shadows(self)
+	local handler = type_handler(self)
+	if handler and handler.draw_shadows then
+		handler.draw_shadows(self)
+	end
 
 	self:draw_boundingrect()
 	HitOrder.track_hit_target(self)
 
 	self.ARGS.draw_layers = self.ARGS.draw_layers or self.config.draw_layers or {'shadow', 'card'}
 	for _, v in ipairs(self.ARGS.draw_layers) do
-		deck.draw_layer(self, v, draw_card_layer)
-		discard.draw_layer(self, v, draw_card_layer)
-		placement.draw_layer(self, v, draw_card_layer)
-		shop.draw_layer(self, v, draw_card_layer)
-		title.draw_layer(self, v, draw_card_layer)
-		hand.draw_layer(self, v, draw_card_layer)
+		if handler and handler.draw_layer then
+			handler.draw_layer(self, v, draw_card_layer)
+		end
 	end
 end
 

@@ -15,7 +15,7 @@ local function table_board()
 	return game().STATE == game().STATES.TABLE_BOARD
 end
 
-function M.emplace(self, card, location, stay_flipped)
+function M.emplace(self, card, location, stay_flipped, type_handler)
 	if table_board() and card and card.bonus_card and (self == game().dealt_letters or self == game().draw_pile) then
 		local origin_slot, origin_insert
 		if Jumble.slot_for_card then
@@ -24,7 +24,12 @@ function M.emplace(self, card, location, stay_flipped)
 		facade.board_snap().restore_bonus_card(game().pattern_row, card, origin_slot, origin_insert)
 		return
 	end
-	if location == 'front' or self.config.type == 'deck' then
+	local at_front = location == "front"
+	local handler = type_handler and type_handler(self)
+	if handler and handler.emplace_at_front then
+		at_front = handler.emplace_at_front(self, location)
+	end
+	if at_front then
 		table.insert(self.cards, 1, card)
 	else
 		self.cards[#self.cards+1] = card

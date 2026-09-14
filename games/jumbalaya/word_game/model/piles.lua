@@ -174,6 +174,16 @@ function M.sync_hosts_to_store(store, pile_ids)
 	dispatch_piles(store, piles)
 end
 
+--- Canonical write path after batch host mutations: snapshot hosts to store, then
+--- drop resting cards from hosts (keep drag/focus targets). Prefer this or
+--- move_card for gameplay ownership — do not mutate store.piles directly.
+---@param store table|nil
+---@param pile_ids string[]|nil
+function M.commit_hosts(store, pile_ids)
+	M.sync_hosts_to_store(store, pile_ids)
+	M.release_static_chrome(store, pile_ids)
+end
+
 --- Copy resting store cards into empty pile hosts so deal/shuffle can mutate hosts.
 ---@param pile_ids string[]|nil
 function M.hydrate_hosts_from_store(pile_ids)

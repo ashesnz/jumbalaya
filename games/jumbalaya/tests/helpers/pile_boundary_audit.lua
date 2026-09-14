@@ -87,4 +87,28 @@ function M.cardarea_gameplay_imports()
 	return scan_forbidden("word_game/ui/cardarea", CARDAREA_FORBIDDEN)
 end
 
+local SYNC_PILES_ALLOWLIST = {
+	["word_game/model/piles.lua"] = true,
+}
+
+function M.direct_sync_piles_dispatch()
+	local violations = {}
+	for _, abs in ipairs(list_lua_files("word_game")) do
+		local rel = rel_path(abs)
+		if SYNC_PILES_ALLOWLIST[rel] then
+			goto continue
+		end
+		local content = read_file(abs)
+		if content then
+			local body = strip_comments(content)
+			if body:find('"SYNC_PILES"') or body:find("'SYNC_PILES'") then
+				violations[#violations + 1] = rel
+			end
+		end
+		::continue::
+	end
+	table.sort(violations)
+	return violations
+end
+
 return M
