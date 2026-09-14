@@ -1,6 +1,7 @@
 
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
+local SceneRoots = require("jumbalaya-engine.scene.roots")
 return function(ParticleEmitter)
 -- Shape palette available to emitters. Each particle picks one at birth;
 -- render draws discs, diamonds, triangles, or rings accordingly.
@@ -25,7 +26,7 @@ function ParticleEmitter:construct(X, Y, W, H, config)
 			bond = 'Strong',
 		}
 		table.insert(self.role.major.children, self)
-		self.parent = self.role.major
+		SceneRoots.set_parent(self, self.role.major)
 		self.T.x = self.role.major.T.x + self.padding
 		self.T.y = self.role.major.T.y + self.padding
 		if self.fill then
@@ -77,7 +78,5 @@ function ParticleEmitter:construct(X, Y, W, H, config)
 			self:move(step)
 		end
 	end
-
-	if getmetatable(self) == ParticleEmitter then table.insert(game().LIVE.TRANSFORM, self) end
 end
 end

@@ -8,6 +8,7 @@ local M = {}
 
 local phases = {
 	early_frame = {},
+	simulation = {},
 	early_board = {},
 	late_board = {},
 	post_input = {},

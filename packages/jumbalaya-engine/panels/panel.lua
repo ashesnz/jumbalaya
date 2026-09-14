@@ -38,7 +38,7 @@ function RetainedPanel:construct(args)
 		self.states.collide.can =
 			(args.config.can_collide == nil) and true or args.config.can_collide
 
-		self.parent = self.config.parent
+		self:set_scene_parent(self.config.parent)
 	end
 
 	-- Build the element tree, measure it, then stretch + align it.

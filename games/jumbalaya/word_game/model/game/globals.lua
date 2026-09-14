@@ -118,6 +118,7 @@ function Game:define_constants()
         CARDPILE = {},
         ALERT = {}
     }
+    self.SCENE_ROOTS = {}
     self.ANIM_SHEETS = {}
     self.TEXTURE_ATLASES = {}
     self.TRANSFORMS = {}

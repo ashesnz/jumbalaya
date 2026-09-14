@@ -1,6 +1,8 @@
 --[[ jumbalaya-engine/scene/animated/init.lua - eased visible transform (VT follows T) ]]
 
 local Node = require("jumbalaya-engine.scene.node")
+local SceneRoots = require("jumbalaya-engine.scene.roots")
+local Tables = require("jumbalaya-engine.util.tables")
 
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
@@ -53,9 +55,8 @@ function AnimNode:construct(X, Y, W, H)
 	self:calculate_parallax()
 
 	table.insert(game().TRANSFORMS, self)
-	if getmetatable(self) == AnimNode then
-		table.insert(game().LIVE.TRANSFORM, self)
-	end
+	table.insert(game().LIVE.TRANSFORM, self)
+	SceneRoots.register(self, "transform")
 end
 
 function AnimNode:draw()
@@ -63,21 +64,10 @@ function AnimNode:draw()
 	self:draw_boundingrect()
 end
 
-local function remove_from_registry(registry, node)
-	for k, v in ipairs(registry) do
-		if v == node then
-			local last = #registry
-			registry[k] = registry[last]
-			registry[last] = nil
-			return
-		end
-	end
-end
-
 function AnimNode:remove()
-	for _, registry in ipairs({ game().TRANSFORMS, game().LIVE.TRANSFORM }) do
-		remove_from_registry(registry, self)
-	end
+	SceneRoots.unregister(self)
+	Tables.remove_swap_last(game().TRANSFORMS, self)
+	Tables.remove_swap_last(game().LIVE.TRANSFORM, self)
 	Node.remove(self)
 end
 

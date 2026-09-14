@@ -75,9 +75,6 @@ function Odometer:construct(config)
 		wh_bond = "Weak",
 		scale_bond = "Weak",
 	}
-	if getmetatable(self) == Odometer then
-		table.insert(game().LIVE.TRANSFORM, self)
-	end
 end
 
 function Odometer:current_value()

@@ -125,9 +125,9 @@ function Card:construct(X, Y, W, H, card, center, params)
     self.children.back.VT.w = 0
     self.children.center.VT.w = 0
 
-    if self.children.front then self.children.front.parent = self; self.children.front.parallax_shift = nil end
-    self.children.back.parent = self; self.children.back.parallax_shift = nil
-    self.children.center.parent = self; self.children.center.parallax_shift = nil
+    if self.children.front then self.children.front:set_scene_parent(self); self.children.front.parallax_shift = nil end
+    self.children.back:set_scene_parent(self); self.children.back.parallax_shift = nil
+    self.children.center:set_scene_parent(self); self.children.center.parallax_shift = nil
 
     -- Intentionally left unset (checked purely for truthiness elsewhere).
     self.slot = nil
@@ -237,14 +237,14 @@ end
 
 function Card:set_card_area(area)
     self.area = area
-    self.parent = area
+    self:set_scene_parent(area)
     self.parallax_shift = area.parallax_shift
 end
 
 
 function Card:remove_from_area()
     self.area = nil
-    self.parent = nil
+    self:set_scene_parent(nil)
     self.parallax_shift = {x = 0, y = 0}
 end
 

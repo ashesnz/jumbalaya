@@ -58,6 +58,20 @@ function M.compact_array(t)
 	return kept
 end
 
+--- Removes the first matching value with swap-with-last (O(1) for dense arrays).
+function M.remove_swap_last(registry, wanted)
+	if not registry or not wanted then return false end
+	for index, value in ipairs(registry) do
+		if value == wanted then
+			local last = #registry
+			registry[index] = registry[last]
+			registry[last] = nil
+			return true
+		end
+	end
+	return false
+end
+
 --- Exchanges two slots in place; silently ignores missing arguments.
 function M.swap_slots(t, i, j)
 	if not t or not i or not j then return end

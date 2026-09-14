@@ -1,6 +1,8 @@
 return function(Node)
 	local shell = require("jumbalaya-engine.shell")
 	local game = shell.game
+	local SceneRoots = require("jumbalaya-engine.scene.roots")
+	local Tables = require("jumbalaya-engine.util.tables")
 
 	function Node:drag()
 		if not (self.config and self.config.d_popup) then return end
@@ -22,12 +24,7 @@ return function(Node)
 
 	function Node:stop_drag()
 		if not self.children.d_popup then return end
-		for k, v in pairs(game().LIVE.POPUP) do
-			if v == self.children.d_popup then
-				table.remove(game().LIVE.POPUP, k)
-				break
-			end
-		end
+		Tables.remove_swap_last(game().LIVE.POPUP, self.children.d_popup)
 		self.children.d_popup:remove()
 		self.children.d_popup = nil
 	end
@@ -59,14 +56,18 @@ return function(Node)
 		self.container = container
 	end
 
+	function Node:set_scene_parent(parent)
+		SceneRoots.set_parent(self, parent)
+	end
+
 	function Node:remove()
-		for _, registry in ipairs({ game().LIVE and game().LIVE.POPUP, game().LIVE and game().LIVE.NODE, game().STAGE_OBJECTS and game().STAGE_OBJECTS[game().STAGE] }) do
-			for k, v in ipairs(registry or {}) do
-				if v == self then
-					table.remove(registry, k)
-					break
-				end
-			end
+		SceneRoots.unregister(self)
+		for _, registry in ipairs({
+			game().LIVE and game().LIVE.POPUP,
+			game().LIVE and game().LIVE.NODE,
+			game().STAGE_OBJECTS and game().STAGE_OBJECTS[game().STAGE],
+		}) do
+			Tables.remove_swap_last(registry or {}, self)
 		end
 
 		if self.children then

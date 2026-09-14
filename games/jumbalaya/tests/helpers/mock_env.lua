@@ -50,6 +50,7 @@ function M.ensure_engine_globals()
 		CARDAREA = {},
 		ALERT = {},
 	}
+	S.SCENE_ROOTS = S.SCENE_ROOTS or {}
 	S.TRANSFORMS = S.TRANSFORMS or {}
 	S.ANIMATIONS = S.ANIMATIONS or {}
 	S.ANIMATION_FPS = S.ANIMATION_FPS or 10

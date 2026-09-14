@@ -81,7 +81,7 @@ function Target:attach_node(node, parent)
 
 	if not parent then
 		self.root_node = ui_e
-		self.root_node.parent = self
+		self.root_node:set_scene_parent(self)
 	else
 		table.insert(parent.children, ui_e)
 	end

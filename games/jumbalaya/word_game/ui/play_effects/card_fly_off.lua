@@ -66,7 +66,7 @@ local function detach_card(card)
 		card:remove_from_area()
 	else
 		card.area = nil
-		card.parent = nil
+		card:set_scene_parent(nil)
 	end
 	if card.states and card.states.drag then
 		card.states.drag.can = false

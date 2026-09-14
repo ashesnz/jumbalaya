@@ -7,6 +7,7 @@
 local Tables = require("jumbalaya-engine.util.tables")
 local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
+local SceneRoots = require("jumbalaya-engine.scene.roots")
 local burst = require("word_game.ui.feedback.comic_burst.burst")
 
 local ComicBurst = EaseNode:derive("ComicBurst")
@@ -37,7 +38,7 @@ function ComicBurst:construct(X, Y, W, H, config)
 			bond = "Strong",
 		})
 		table.insert(self.role.major.children, self)
-		self.parent = self.role.major
+		SceneRoots.set_parent(self, self.role.major)
 	end
 
 	self.states.hover.can = false

@@ -98,8 +98,6 @@ function FlowText:construct(config)
 		wh_bond = 'Weak',
 		scale_bond = 'Weak',
 	}
-
-	if getmetatable(self) == FlowText then table.insert(game().LIVE.TRANSFORM, self) end
 end
 
 function FlowText:update(dt)

@@ -115,7 +115,7 @@ function Target:update_object()
 
 	if self.config.object and self.config.object.ui_object_updated then
 		self.config.object.ui_object_updated = nil
-		self.config.object.parent = self
+		self.config.object:set_scene_parent(self)
 		self.config.object:set_role(self.config.role or {role_type = 'Minor', major = self})
 		self.config.object:move_with_major(0)
 		if self.config.object.non_recalc then

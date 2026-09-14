@@ -4,6 +4,7 @@ local Kind = require("jumbalaya-engine.object")
 
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
+local SceneRoots = require("jumbalaya-engine.scene.roots")
 
 ---@class Node : Kind
 local Node = Kind:derive("Node")
@@ -50,6 +51,7 @@ function Node:construct(args)
 
 	if getmetatable(self) == Node then
 		table.insert(game().LIVE.NODE, self)
+		SceneRoots.register(self, "node")
 	end
 	if not game().STAGE_OBJECT_INTERRUPT then
 		table.insert(game().STAGE_OBJECTS[game().STAGE], self)
