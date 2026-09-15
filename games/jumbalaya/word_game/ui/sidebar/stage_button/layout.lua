@@ -164,10 +164,7 @@ function M.draw(rect)
 	local w = widget()
 	if not rect or not w.visible then return end
 	if not love or not love.graphics then return end
-	local attach = game().SIDEBAR_ATTACH and game().SIDEBAR_ATTACH.T
-	local ox = (attach and attach.x) or 0
-	local oy = (attach and attach.y) or 0
-	local x, y, rw, rh = ox + rect.x, oy + rect.y, rect.w, rect.h
+	local x, y, rw, rh = rect.x, rect.y, rect.w, rect.h
 	local colour = w.panel_colour or M.red_colour()
 	love.graphics.push()
 	love.graphics.translate(x + rw * 0.5, y + rh * 0.5)

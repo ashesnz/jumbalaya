@@ -1,7 +1,5 @@
 --[[ word_game/ui/score_banner/draw/init.lua - Jumble score banner rendering ]]
 
-local facade = require("word_game.ui.facade")
-local game_access = facade.game_access()
 local game = require("word_game.ui.util.game_runtime").game
 local Layout = require("word_game.ui.layout")
 local felt_layout = require("word_game.ui.layout.felt")
@@ -14,15 +12,14 @@ local M = {}
 
 
 function M.draw(sb)
-	if not game_access.get() or not game().ROOM then return end
+	if not game().ROOM then return end
 	if game().STATE ~= game().STATES.TABLE_BOARD then return end
 
 	local dt = math.min(0.05, love.timer.getDelta())
 	sb.update(dt)
 	sb.decay_pulse(dt)
 
-	local shell = game_access.get()
-	local hud_early = shell and shell.word_hud
+	local hud_early = sb.state()
 	local mode_early = hud_early and hud_early.banner_mode or "normal"
 	if mode_early ~= "boss_prep" and mode_early ~= "boss_word"
 		and not boss_word_announce.is_active()
@@ -64,7 +61,7 @@ function M.draw(sb)
 
 	local layout = sb.calc_layout(w, h, slant)
 
-	local hud = shell and shell.word_hud
+	local hud = sb.state()
 	local banner_mode = hud and hud.banner_mode or "normal"
 	if banner_mode == "boss_prep" or banner_mode == "boss_word"
 		or boss_word_announce.is_active() then

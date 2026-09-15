@@ -130,7 +130,7 @@ function M.draw_hand_pass(game)
 	if not table_view then return end
 
 	local controller = game.INPUT
-	local sidebar_draws_deck = WORD_GAME_UI.Sidebar
+	local sidebar_draws_deck = runtime().SIDEBAR_HUD
 		and runtime().STAGE == runtime().STAGES.RUN
 		and runtime().STATE == runtime().STATES.TABLE_BOARD
 

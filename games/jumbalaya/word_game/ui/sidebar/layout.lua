@@ -53,10 +53,9 @@ function M.end_run_slot_size()
 end
 
 local function layout_rows()
-	local views_install = require("word_game.ui.views.install")
-	local view = views_install.sidebar_view()
-	if view and view.layout then
-		return view:layout()
+	if game().SIDEBAR_HUD and game().SIDEBAR_HUD.find_node_by_id then
+		local hud_layout = require("word_game.ui.sidebar.hud_layout")
+		return hud_layout.compute()
 	end
 	return require("word_game.ui.sidebar.hud_layout").compute()
 end

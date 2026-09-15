@@ -29,7 +29,7 @@ function M.install()
 		if game.STAGE == game.STAGES.RUN and game.STATE == game.STATES.TABLE_BOARD and WORD_GAME_UI.TableBoard then
 			WORD_GAME_UI.TableBoard.draw_hud()
 			if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.draw then
-				WORD_GAME_UI.Sidebar.draw()
+				WORD_GAME_UI.Sidebar:draw()
 			end
 			WORD_GAME_UI.TableBoard.draw_board(game)
 		end

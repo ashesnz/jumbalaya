@@ -40,8 +40,6 @@ WORD_GAME = require "word_game"
 require("app.bootstrap.shell_bind").install()
 require("app.bootstrap.kind_globals").install_ui_types()
 
-local views_install = require("word_game.ui.views.install")
-
 require "app.callbacks.registry"
 
 DEVTOOLS = require "devtools"
@@ -54,12 +52,6 @@ game().consume_board_click = function()
 	end
 	if WORD_GAME_UI.PerkStamp.consume_click() then
 		return true
-	end
-	if WORD_GAME_UI.SidebarStageButton.consume_click then
-		local view = views_install.sidebar_view()
-		if view and view.consume_click and view:consume_click() then
-			return true
-		end
 	end
 	return false
 end

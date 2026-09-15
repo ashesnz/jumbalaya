@@ -10,7 +10,8 @@ local hud_definition = require("word_game.ui.sidebar.hud_definition")
 local StageLabel = require("word_game.ui.score_banner.stage_label")
 local sidebar_callbacks = require("word_game.ui.sidebar.callbacks")
 local table_discard = require("word_game.ui.perks.discard_bin")
-local views_install = require("word_game.ui.views.install")
+local Panels = require("jumbalaya-engine.panels")
+local TableDeck = require("word_game.ui.table.deck")
 
 local function deck_mod()
 	return facade.deck()
@@ -25,6 +26,7 @@ WordSidebar.roll_to_next_hand = function()
 		StageLabel.roll_to_next_hand()
 	end
 end
+WordSidebar.hud_definition = hud_definition.hud_definition
 WordSidebar.relayout = hud_definition.relayout
 
 local function sync_hand_controls()
@@ -33,9 +35,13 @@ local function sync_hand_controls()
 	end
 end
 
-local function sidebar_view()
-	return views_install.sidebar_view()
-end
+local REQUIRED_SIDEBAR_ROWS = {
+	"row_sidebar_spacer",
+	"row_stamp_slot",
+	"row_deck",
+	"row_deck_count",
+	"row_end_run",
+}
 
 function WordSidebar.is_hidden()
 	return felt.is_boss_sequence()
@@ -49,39 +55,69 @@ function WordSidebar.sync_visibility()
 	end
 end
 
+local function draw_sidebar_deck()
+	if not TableDeck.uses_table_draw() or not game().draw_pile then return end
+	local deck_rect = Layout.deck_rect()
+	if not deck_rect then return end
+	local pile = game().draw_pile
+	pile.T.x = deck_rect.x
+	pile.T.y = deck_rect.y
+	pile.T.w = deck_rect.w
+	pile.T.h = deck_rect.h
+	if pile.hard_set_T then
+		pile:hard_set_T(deck_rect.x, deck_rect.y, deck_rect.w, deck_rect.h)
+	end
+	TableDeck.draw(pile)
+end
+
 function WordSidebar:ensure()
 	if WordSidebar.is_hidden() then
 		self:destroy()
 		return nil
 	end
 	if game().STAGE ~= game().STAGES.RUN then return end
-	local BridgeRuntime = require("app.runtime")
-	local engine = BridgeRuntime.engine()
-	if engine then
-		views_install.install_sidebar(engine)
-	end
 	if not game().ROOM_ATTACH then return end
 
-	local view = sidebar_view()
-	if not view then return nil end
+	if game().SIDEBAR_HUD then
+		for _, row_id in ipairs(REQUIRED_SIDEBAR_ROWS) do
+			if not game().SIDEBAR_HUD:find_node_by_id(row_id) then
+				self:destroy()
+				break
+			end
+		end
+	end
+	if game().SIDEBAR_HUD then
+		deck_mod().sync_deck_count_display()
+		sync_hand_controls()
+		hud_definition.sync_end_run_row()
+		table_discard.sync_voucher_counter(true)
+		return game().SIDEBAR_HUD
+	end
 
-	view:ensure_deck_count()
-	view:relayout()
-	game().SIDEBAR_HUD = view
+	Layout.update_sidebar_attach()
+	game().SIDEBAR_HUD = Panels.create({
+		definition = hud_definition.hud_definition(),
+		config = {
+			align = "tri",
+			offset = { x = 0, y = 0 },
+			major = game().SIDEBAR_ATTACH or game().ROOM_ATTACH,
+			wh_bond = "Weak",
+		},
+	})
+	game().SIDEBAR_HUD:recalculate()
 	deck_mod().sync_deck_count_display()
 	sync_hand_controls()
 	hud_definition.sync_end_run_row()
 	table_discard.sync_voucher_counter(true)
 	Layout.set_screen_positions()
-	return view
+	return game().SIDEBAR_HUD
 end
 
 function WordSidebar:destroy()
-	local view = sidebar_view()
-	if view and view.remove then
-		view:remove()
+	if game().SIDEBAR_HUD then
+		game().SIDEBAR_HUD:remove()
+		game().SIDEBAR_HUD = nil
 	end
-	game().SIDEBAR_HUD = nil
 end
 
 function WordSidebar:refresh()
@@ -89,7 +125,7 @@ function WordSidebar:refresh()
 		self:destroy()
 		return
 	end
-	if not sidebar_view() then
+	if not game().SIDEBAR_HUD then
 		if game().STATE == game().STATES.TABLE_BOARD then
 			self:ensure()
 		end
@@ -101,16 +137,15 @@ end
 function WordSidebar:draw()
 	if WordSidebar.is_hidden() then return end
 	if game().STAGE ~= game().STAGES.RUN then return end
-	local view = sidebar_view()
-	if not view then
+	if game().STATE ~= game().STATES.TABLE_BOARD then return end
+	if not game().SIDEBAR_HUD then
 		self:ensure()
-		view = sidebar_view()
 	end
-	if not view or not view.draw then return end
-	if not game().SIDEBAR_ATTACH then return end
+	if not game().SIDEBAR_HUD or not game().SIDEBAR_ATTACH then return end
 	love.graphics.push()
 	game().SIDEBAR_ATTACH:translate_container()
-	view:draw()
+	game().SIDEBAR_HUD:draw()
+	draw_sidebar_deck()
 	love.graphics.pop()
 end
 
@@ -123,7 +158,7 @@ function WordSidebar.ensure_table_board()
 end
 
 function WordSidebar.rebuild()
-	if sidebar_view() then
+	if game().SIDEBAR_HUD then
 		hud_definition.relayout()
 	else
 		WordSidebar:ensure()
