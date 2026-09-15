@@ -18,12 +18,29 @@ local function draw_spotlight_overlay(game, overlay)
 	end
 end
 
+local function draw_live_uibox(game)
+	local live = game.LIVE and game.LIVE.UIBOX
+	if not live then return end
+	for _, panel in pairs(live) do
+		if panel.REMOVED then goto continue end
+		local is_special = panel.flop_overlay or panel.spawn_attention or panel.parent
+			or panel == game.OVERLAY_MENU or panel == game.screenwipe
+			or panel == game.FIRST_PLAY_TUTORIAL_OVERLAY
+			or panel == game.debug_tools
+		if not is_special then
+			draw_with_container(panel)
+		end
+		::continue::
+	end
+end
+
 function M.install()
 	DrawPasses.register('board', 'table_hud', function(game)
 		local show_background = (not game.OVERLAY_MENU) or (not game.F_HIDE_BG)
 		if not show_background then return end
 
 		perf_checkpoint('primitives', 'draw')
+		draw_live_uibox(game)
 		perf_checkpoint('panels', 'draw')
 
 		if game.STAGE == game.STAGES.RUN and game.STATE == game.STATES.TABLE_BOARD and WORD_GAME_UI.TableBoard then

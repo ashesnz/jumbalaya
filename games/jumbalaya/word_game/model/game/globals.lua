@@ -116,7 +116,8 @@ function Game:define_constants()
         POPUP = {},
         CARD = {},
         CARDPILE = {},
-        ALERT = {}
+        ALERT = {},
+        UIBOX = {},
     }
     self.SCENE_ROOTS = {}
     self.ANIM_SHEETS = {}

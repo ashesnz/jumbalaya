@@ -42,6 +42,7 @@
 ---| "stage_backgrounds"
 ---| "stage_label_force_sync"
 ---| "stage_label_sync"
+---| "table_board_prime"
 ---| "table_deck_reset"
 ---| "timeline_apply_seconds"
 ---| "timeline_reset"
@@ -86,6 +87,7 @@
 	stage_backgrounds (set, hand_index) — layout — composed from hand_started, round_restore_from_save
 	stage_label_force_sync () — score_banner — composed from round_restore_from_save
 	stage_label_sync () — score_banner — composed from hand_started
+	table_board_prime () — sidebar — model/game/run.lua
 	table_deck_reset () — sidebar — model/cards/deck/identity.lua
 	timeline_apply_seconds () — timeline — handler only (no emit site)
 	timeline_reset () — timeline — model/round/init.lua; composed from hand_started, round_restore_from_save

@@ -49,6 +49,7 @@ function M.ensure_engine_globals()
 		CARD = {},
 		CARDAREA = {},
 		ALERT = {},
+		UIBOX = {},
 	}
 	S.SCENE_ROOTS = S.SCENE_ROOTS or {}
 	S.TRANSFORMS = S.TRANSFORMS or {}

@@ -102,6 +102,7 @@ function WordSidebar:ensure()
 			offset = { x = 0, y = 0 },
 			major = game().SIDEBAR_ATTACH or game().ROOM_ATTACH,
 			wh_bond = "Weak",
+			instance_type = "UIBOX",
 		},
 	})
 	game().SIDEBAR_HUD:recalculate()
@@ -141,10 +142,9 @@ function WordSidebar:draw()
 	if not game().SIDEBAR_HUD then
 		self:ensure()
 	end
-	if not game().SIDEBAR_HUD or not game().SIDEBAR_ATTACH then return end
+	if not game().SIDEBAR_ATTACH then return end
 	love.graphics.push()
 	game().SIDEBAR_ATTACH:translate_container()
-	game().SIDEBAR_HUD:draw()
 	draw_sidebar_deck()
 	love.graphics.pop()
 end

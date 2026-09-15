@@ -16,12 +16,9 @@ function M.begin_run(e, args)
 	game().SETTINGS.paused = false
 	if e and e.config.id == 'restart_button' then game_access().patch({ viewed_back = nil }) end
 	game().TIMELINE:flush()
-	game():queue_during_wipe(function()
-		game():discard_run()
-		game():start_run(args)
-		WORD_GAME_UI.Layout.run_backgrounds()
-		game():start_gameplay_board()
-	end)
+	game():discard_run()
+	game():start_run(args)
+	game():start_gameplay_board()
 end
 
 function M.begin_classic_run(e)

@@ -1,5 +1,7 @@
 --[[ word_game/ui/presentation/handlers/sidebar.lua - Sidebar HUD presentation hooks ]]
 
+local board_prime = require("word_game.ui.table.board_prime")
+
 local M = {}
 
 function M.register(Presentation, ctx)
@@ -22,6 +24,10 @@ function M.register(Presentation, ctx)
 		if ui.Sidebar then
 			ui.Sidebar:ensure()
 		end
+	end)
+
+	Presentation.on("table_board_prime", function()
+		board_prime.prime()
 	end)
 
 	Presentation.on("sidebar_clear_hand", function()

@@ -3,14 +3,12 @@
 
 	Core: jumbalaya_core.store.default_state (via RunScope)
 	Store: game_access.patch on round start; word_round owned by round/init
-	Presentation: layout_refresh, table_board_ready (via LayoutRequest / install hooks)
+	Presentation: table_board_prime, run_board_ready
 ]]
 
 local live_game = require("word_game.model.live_game")
 
-local LayoutRequest = require("word_game.model.layout.request")
 local Presentation = require("word_game.model.presentation")
-local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local RunScope = require "word_game.model.run.scope"
 local RunMode = require "word_game.model.run.mode"
 local game_access = require "word_game.model.game_access"
@@ -47,23 +45,10 @@ function Game:start_gameplay_board()
     local opening_deal = require "word_game.model.jumble_play.opening_deal"
     opening_deal.deal()
 
-    Presentation.emit("sidebar_ensure")
+    Presentation.emit("table_board_prime")
     Deck.sync_deck_count_display()
-    -- Layout after HUD / hand controls exist so hand + placement anchors match.
-    LayoutRequest.refresh()
 
     if self.TIMELINE then
-        Scheduler.add{
-            mode = "delayed",
-            delay = 0,
-            blocking = false,
-            func = function()
-                if self.STATE == self.STATES.TABLE_BOARD and self.STAGE == self.STAGES.RUN then
-                    LayoutRequest.refresh()
-                end
-                return true
-            end,
-        }
         Presentation.emit("run_board_ready")
     end
 end
@@ -179,18 +164,6 @@ function Game:start_run(args)
     run.seed_streams.hashed_seed = Random.hash_text(run.seed_streams.seed)
 
     self:queue_settings_write()
-    self.INPUT.locks.load = true
-    Scheduler.add{
-        persistent = true,
-        mode = 'delayed',
-        blocking = false,blockable = false,
-        delay = 3.5,
-        timer = 'TOTAL',
-        func = function()
-            self.INPUT.locks.load = nil
-          return true
-        end
-      }
 
     local hand_size = hand_size_cfg.get()
 
@@ -233,8 +206,6 @@ function Game:start_run(args)
 
     Presentation.emit("run_backgrounds")
 
-    Scheduler.delayed{delay = 0.5}
-
     if not saveTable then
         self.draw_pile:shuffle()
         self.draw_pile:hard_set_T()
@@ -243,16 +214,12 @@ function Game:start_run(args)
     self.draw_pile:relayout()
     self.draw_pile:hard_set_cards()
 
-    Presentation.emit("sidebar_ensure")
-    apply_run_layout()
-
     if saveTable then
         restore_card_areas(saveTable)
         self.STATE = saveTable.STATE or self.STATES.TABLE_BOARD
         self.STATE_COMPLETE = true
-        LayoutRequest.refresh()
-        Presentation.emit("sidebar_ensure")
         Round.restore_from_save()
+        Presentation.emit("table_board_prime")
         self.INPUT.locks.load = nil
     end
 
