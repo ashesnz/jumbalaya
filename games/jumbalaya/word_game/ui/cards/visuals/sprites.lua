@@ -52,11 +52,13 @@ function Card:set_sprites(_center, _front)
 			and LetterFaces.is_letter_face(_front)
 		if is_letter then
 			local frame_atlas = LetterFaces.frame_atlas()
+				or (game().TEXTURE_ATLASES and game().TEXTURE_ATLASES.letter_frame)
 			local letters_atlas = LetterFaces.letters_atlas()
 			local glyph_pos = _front.pos or LetterFaces.glyph_pos(_front.letter)
 
-			if frame_atlas and self.children.center then
+			if self.children.center then
 				self.children.center.atlas = frame_atlas
+					or self.children.center.atlas
 				self.children.center:set_sprite_pos({ x = 0, y = 0 })
 			end
 

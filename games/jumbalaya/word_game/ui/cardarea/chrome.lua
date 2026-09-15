@@ -8,6 +8,7 @@ local M = {}
 
 local INVISIBLE_AREA_TYPES = {
 	discard = 1,
+	hand = 1,
 	perk = 1,
 	usable = 1,
 	title = 1,

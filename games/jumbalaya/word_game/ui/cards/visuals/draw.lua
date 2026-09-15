@@ -12,7 +12,9 @@ local function letter_card_tint(card)
 	if card.bonus_card then
 		return LetterPalette.fill(LetterPalette.BONUS_FACE_COLOR)
 	end
-	return LetterFaces.fill_color(card.base and card.base.color)
+	local color_key = (card.base and card.base.color)
+		or (card.ability and card.ability.letter_color)
+	return LetterFaces.fill_color(color_key)
 end
 
 local function draw_bonus_gold_shimmer(card)
@@ -52,7 +54,6 @@ local function apply_dissolve(sprite, card, tint)
 end
 
 function Card:sync_shadow_state()
-	if self:is_shader_idle() then return end
 	self.ARGS.send_to_shader = self.ARGS.send_to_shader or {}
 	self.ARGS.send_to_shader[1] = math.min(self.VT.r*3, 1) + game().TIMERS.REAL/(28) + (self.bounce and self.bounce.r*20 or 0) + self.tilt_var.amt
 	self.ARGS.send_to_shader[2] = game().TIMERS.REAL
@@ -69,7 +70,6 @@ function Card:draw_shadow()
 		and not self.greyed
 		and ((self.area and self.area ~= game().recycle_stash and self.area.config.type ~= "deck")
 			or not self.area or self.states.drag.is)
-		and not self:is_shader_idle()
 
 	if wants_shadow then
 		self.shadow_height = (self.selected or self.states.drag.is) and 0.35
@@ -124,17 +124,12 @@ function Card:draw_front()
 	if not self.greyed then
 		if LetterFaces.is_letter_card(self) then
 			local tint = letter_card_tint(self)
-			if self:is_shader_idle() then
-				draw_sprite(self.children.center)
-				if self.children.front then draw_sprite(self.children.front) end
-			else
-				apply_dissolve(self.children.center, self, tint)
-				if self.bonus_card then
-					draw_bonus_gold_shimmer(self)
-				end
-				if self.children.front then
-					apply_dissolve(self.children.front, self)
-				end
+			apply_dissolve(self.children.center, self, tint)
+			if self.bonus_card then
+				draw_bonus_gold_shimmer(self)
+			end
+			if self.children.front then
+				apply_dissolve(self.children.front, self)
 			end
 		else
 			if self:is_shader_idle() then
@@ -200,9 +195,7 @@ function Card:draw(layer)
 	if not self.states.visible then return end
 
 	if layer == 'shadow' or layer == 'both' then
-		if not self:is_shader_idle() then
-			self:sync_shadow_state()
-		end
+		self:sync_shadow_state()
 	end
 
 	shell.set_shared_shadow(self.sprite_facing == 'front' and self.children.center or self.children.back)
@@ -216,9 +209,7 @@ function Card:draw(layer)
 			self.children.focused_ui:draw()
 		end
 
-		if not self:is_shader_idle() then
-			self:update_tilt()
-		end
+		self:update_tilt()
 
 		if self.children.particles then self.children.particles:draw() end
 		self:draw_market_widgets()
@@ -242,10 +233,6 @@ function Card:draw(layer)
 			self.children.overwrite:draw('card')
 			game().OVERLAY_TINT = nil
 			love.graphics.pop()
-		end
-
-		if self.area == game().dealt_letters and self.children.focused_ui then
-			self.children.focused_ui:draw()
 		end
 
 		HitOrder.track_hit_target(self)

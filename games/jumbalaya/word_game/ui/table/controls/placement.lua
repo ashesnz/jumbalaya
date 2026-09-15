@@ -20,7 +20,10 @@ function M.try_play()
 		end
 		return
 	end
-	if WORD_GAME_UI.PlayHoldRedraw.consume_click() then return end
+	local hold_redraw = WORD_GAME_UI.PlayHoldRedraw
+	if hold_redraw and hold_redraw.consume_click and hold_redraw.consume_click() then
+		return
+	end
 	play_resolution.resolve(facade.jumble_play())
 end
 

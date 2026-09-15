@@ -7,7 +7,6 @@
 
 local game = require("word_game.ui.util.game_runtime").game
 
-local Easing = require "word_game.ui.effects.easing"
 local UIViewHost = require("jumbalaya-engine.panels.view_host")
 local Colour = require("jumbalaya-engine.util.colour")
 local Tables = require("jumbalaya-engine.util.tables")
@@ -15,34 +14,34 @@ local Tables = require("jumbalaya-engine.util.tables")
 local DEFINITIONS = game().DEFINITIONS
 
 function DEFINITIONS.card_focus_ui(card)
-	local card_width = card.T.w
+	-- Hand letter tiles never wear the white gamepad focus plate (working-version G.hand).
+	if game().dealt_letters and card.area == game().dealt_letters then
+		return nil
+	end
 
-	local face_highlight_colour = Tables.deep_clone(game().C.WHITE)
-	face_highlight_colour[4] = 1.5
-	if game().dealt_letters and card.area == game().dealt_letters then Easing.value{ref_table = face_highlight_colour, ref_value = 4, mod = -1.5, timer = 'REAL', delay = 0.2, ease = 'quad'} end
+	local card_width = card.T.w
 
 	local t_card_norm = {x = card.T.x + card.T.w/2 - game().ROOM.T.w/2, y = card.T.y + card.T.h/2 - game().ROOM.T.h/2}
 
 	local base_background = UIViewHost.create{
 		T = {card.VT.x,card.VT.y,0,0},
 		definition = 
-			(not game().dealt_letters or card.area ~= game().dealt_letters) and {n=game().UI.ROOT, config = {align = 'cm', minw = card_width + 0.3, minh = card.T.h + 0.3, r = 0.1, colour = Colour.with_alpha(game().C.BLACK, 0.7), outline_colour = Colour.tint(game().C.MUTED_GREY, 0.5), outline = 1.5, line_emboss = 0.8}, nodes={
-				{n=game().UI.ROW, config={id = 'ATTACH_TO_ME'}, nodes={}}
-			}} or 
-			{n=game().UI.ROOT, config = {align = 'cm', minw = card_width, minh = card.T.h, r = 0.1, colour = face_highlight_colour}, nodes={
+			{n=game().UI.ROOT, config = {align = 'cm', minw = card_width + 0.3, minh = card.T.h + 0.3, r = 0.1, colour = Colour.with_alpha(game().C.BLACK, 0.7), outline_colour = Colour.tint(game().C.MUTED_GREY, 0.5), outline = 1.5, line_emboss = 0.8}, nodes={
 				{n=game().UI.ROW, config={id = 'ATTACH_TO_ME'}, nodes={}}
 			}},
 		config = {
 				align = 'cm',
 				offset = {x= 0.007*t_card_norm.x*card.T.w, y = 0.007*t_card_norm.y*card.T.h}, 
 				parent = card,
-				r_bond = (not game().dealt_letters or card.area ~= game().dealt_letters) and 'Weak' or 'Strong'
+				r_bond = 'Weak'
 			}
 	}
 
 	base_background.set_alignment = function()
 		local card_norm = {x = card.T.x + card.T.w/2 - game().ROOM.T.w/2, y = card.T.y + card.T.h/2 - game().ROOM.T.h/2}
-		EaseNode.set_alignment(card.children.focused_ui, {offset = {x= 0.007*card_norm.x*card.T.w, y = 0.007*card_norm.y*card.T.h}})
+		EaseNode.set_alignment(card.children.focused_ui, {
+			offset = {x = 0.007 * card_norm.x * card.T.w, y = 0.007 * card_norm.y * card.T.h},
+		})
 	end
 
 	return base_background

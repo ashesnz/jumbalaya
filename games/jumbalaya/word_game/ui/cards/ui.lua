@@ -145,8 +145,9 @@ function Card:hover()
 				play_sfx('hover_card', math.random()*0.2 + 0.9, 0.35)
 		end
 
-		-- The gamepad-focused card gets a persistent highlight frame.
-		if self.states.focus.is and not self.children.focused_ui then
+		-- Hand letter cards skip the focus chrome; placement uses drag, not focus rings.
+		if self.states.focus.is and not self.children.focused_ui
+				and not (is_letter and self.area == game().dealt_letters) then
 				self.children.focused_ui = game().DEFINITIONS.card_focus_ui(self)
 		end
 

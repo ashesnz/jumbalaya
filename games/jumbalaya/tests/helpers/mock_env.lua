@@ -121,9 +121,13 @@ function M.setup()
 		GREEN = { 0, 1, 0, 1 },
 		GOLD = { 1, 0.8, 0, 1 },
 		WHITE = { 1, 1, 1, 1 },
-		UI = { TRANSPARENT_DARK = { 0, 0, 0, 0.5 }, TEXT_LIGHT = { 1, 1, 1, 1 } },
 		DYN_UI = { BOSS_MAIN = { 1, 1, 1, 1 }, BOSS_DARK = { 0, 0, 0, 1 }, MAIN = { 0.22, 0.32, 0.35, 1 } },
 	}
+	S.C.UI = S.C.UI or {}
+	S.C.UI.TRANSPARENT_DARK = S.C.UI.TRANSPARENT_DARK or { 0, 0, 0, 0.5 }
+	S.C.UI.TEXT_LIGHT = S.C.UI.TEXT_LIGHT or { 1, 1, 1, 1 }
+	S.C.UI.OUTLINE_LIGHT = S.C.UI.OUTLINE_LIGHT or { 1, 1, 1, 0.35 }
+	S.C.UI.BACKGROUND_DARK = S.C.UI.BACKGROUND_DARK or { 0.1, 0.1, 0.12, 1 }
 	S.UI = S.UI or { ROOT = 1, ROW = 2, COL = 3, TEXT = 4, OBJECT = 5, BOX = 6 }
 	S.UI.padding = S.UI.padding or 0.05
 	S.TILE_W = S.TILE_W or 20
@@ -159,11 +163,12 @@ function M.setup()
 		locks = {},
 		hover_state = { T = { x = 0, y = 0 }, time = 0 },
 		cursor_position = { x = 0, y = 0 },
-		shift_context_layer = function() end,
 		focus_cursor_stack = {},
 		focus_cursor_stack_level = 1,
-		snap_to = function() end,
 	}
+	S.INPUT.shift_context_layer = S.INPUT.shift_context_layer or function() end
+	S.INPUT.snap_to = S.INPUT.snap_to or function() end
+	S.INPUT.add_to_registry = S.INPUT.add_to_registry or function() end
 	_G.pick_random = _G.pick_random or function(t)
 		if not t then return nil end
 		if #t > 0 then return t[1] end

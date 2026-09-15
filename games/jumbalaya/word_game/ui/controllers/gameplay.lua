@@ -28,8 +28,8 @@ function M.return_placement_cards(e)
 end
 
 function M.play_placement_word(e)
-	action_dispatch.dispatch_func("play_placement_word", M.play_word_extra())
 	TableControls.play(e)
+	action_dispatch.dispatch_func("play_placement_word", M.play_word_extra())
 end
 
 function M.jumble_next(e)
