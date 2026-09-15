@@ -57,10 +57,11 @@ function RetainedPanel:construct(args)
 
 	self.root_node:initialize_VT(true)
 	if getmetatable(self) == RetainedPanel then
-		if args.config and args.config.instance_type then
-			if game().LIVE and game().LIVE[args.config.instance_type] then
-				table.insert(game().LIVE[args.config.instance_type], self)
-			end
+		local live = game().LIVE
+		if live then
+			local registry_key = (args.config and args.config.instance_type) or "UIBOX"
+			live[registry_key] = live[registry_key] or {}
+			table.insert(live[registry_key], self)
 		end
 	end
 end

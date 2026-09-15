@@ -35,6 +35,16 @@ local function sync_hand_controls()
 	end
 end
 
+local function ensure_uibox_registry(hud)
+	local live = game().LIVE
+	if not live then return end
+	live.UIBOX = live.UIBOX or {}
+	for _, panel in pairs(live.UIBOX) do
+		if panel == hud then return end
+	end
+	table.insert(live.UIBOX, hud)
+end
+
 local REQUIRED_SIDEBAR_ROWS = {
 	"row_sidebar_spacer",
 	"row_stamp_slot",
@@ -95,6 +105,7 @@ function WordSidebar:ensure()
 	end
 
 	Layout.update_sidebar_attach()
+	local room = game().ROOM or game().ROOM_ATTACH
 	game().SIDEBAR_HUD = Panels.create({
 		definition = hud_definition.hud_definition(),
 		config = {
@@ -102,9 +113,15 @@ function WordSidebar:ensure()
 			offset = { x = 0, y = 0 },
 			major = game().SIDEBAR_ATTACH or game().ROOM_ATTACH,
 			wh_bond = "Weak",
-			instance_type = "UIBOX",
 		},
 	})
+	if room and game().SIDEBAR_HUD.set_container then
+		game().SIDEBAR_HUD:set_container(room)
+	end
+	if game().SIDEBAR_HUD.align_to_major then
+		game().SIDEBAR_HUD:align_to_major()
+	end
+	ensure_uibox_registry(game().SIDEBAR_HUD)
 	game().SIDEBAR_HUD:recalculate()
 	deck_mod().sync_deck_count_display()
 	sync_hand_controls()
@@ -141,6 +158,13 @@ function WordSidebar:draw()
 	if game().STATE ~= game().STATES.TABLE_BOARD then return end
 	if not game().SIDEBAR_HUD then
 		self:ensure()
+	end
+	local hud = game().SIDEBAR_HUD
+	if hud and not hud.REMOVED then
+		love.graphics.push()
+		hud:translate_container()
+		hud:draw()
+		love.graphics.pop()
 	end
 	if not game().SIDEBAR_ATTACH then return end
 	love.graphics.push()

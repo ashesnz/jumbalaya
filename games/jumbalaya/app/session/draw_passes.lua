@@ -23,6 +23,8 @@ local function draw_live_uibox(game)
 	if not live then return end
 	for _, panel in pairs(live) do
 		if panel.REMOVED then goto continue end
+		-- SIDEBAR_HUD draws in WORD_GAME_UI.Sidebar:draw (room transform + deck art).
+		if panel == game.SIDEBAR_HUD then goto continue end
 		local is_special = panel.flop_overlay or panel.spawn_attention or panel.parent
 			or panel == game.OVERLAY_MENU or panel == game.screenwipe
 			or panel == game.FIRST_PLAY_TUTORIAL_OVERLAY

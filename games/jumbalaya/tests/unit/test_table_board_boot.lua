@@ -162,6 +162,31 @@ T.describe("table board boot", function()
 		T.assert_true(listed, "SIDEBAR_HUD should be registered on LIVE.UIBOX")
 	end)
 
+	T.it("sidebar draw uses panel translate_container not SIDEBAR_ATTACH", function()
+		install_table_board_ui()
+		board_prime.prime()
+
+		local hud = shell.game().SIDEBAR_HUD
+		T.assert_not_nil(hud)
+		local translate_calls = 0
+		local orig_translate = hud.translate_container
+		hud.translate_container = function(self)
+			translate_calls = translate_calls + 1
+			if orig_translate then orig_translate(self) end
+		end
+		local attach_calls = 0
+		local attach = shell.game().SIDEBAR_ATTACH
+		local orig_attach_translate = attach.translate_container
+		attach.translate_container = function(self)
+			attach_calls = attach_calls + 1
+			if orig_attach_translate then orig_attach_translate(self) end
+		end
+
+		_G.WORD_GAME_UI.Sidebar:draw()
+		T.assert_true(translate_calls > 0, "sidebar HUD should draw via panel translate_container")
+		T.assert_true(attach_calls > 0, "deck art should still use SIDEBAR_ATTACH")
+	end)
+
 	T.it("sidebar rows and deck counter exist before first draw", function()
 		install_table_board_ui()
 		board_prime.prime()
