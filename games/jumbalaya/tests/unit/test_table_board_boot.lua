@@ -213,6 +213,19 @@ T.describe("table board boot", function()
 		T.assert_equal(play_btn.config.button, "play_placement_word")
 	end)
 
+	T.it("sidebar is not ensured when game is not in TABLE_BOARD state", function()
+		local game = install_table_board_ui()
+		game.SIDEBAR_HUD = nil
+		game.STATE = game.STATES.MENU
+
+		_G.WORD_GAME_UI.Sidebar:ensure()
+		T.assert_nil(game.SIDEBAR_HUD, "sidebar should remain nil outside TABLE_BOARD state")
+
+		game.STATE = game.STATES.TABLE_BOARD
+		_G.WORD_GAME_UI.Sidebar:ensure()
+		T.assert_not_nil(game.SIDEBAR_HUD, "sidebar should be instantiated in TABLE_BOARD state")
+	end)
+
 	T.it("begin_run starts gameplay without scheduling a screen wipe overlay", function()
 		mock_env.setup()
 		local lifecycle = require("app.callbacks.controllers.run_lifecycle")

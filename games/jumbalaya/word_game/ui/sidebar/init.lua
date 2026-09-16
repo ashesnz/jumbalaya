@@ -86,6 +86,7 @@ function WordSidebar:ensure()
 		return nil
 	end
 	if game().STAGE ~= game().STAGES.RUN then return end
+	if game().STATE ~= game().STATES.TABLE_BOARD then return end
 	if not game().ROOM_ATTACH then return end
 
 	if game().SIDEBAR_HUD then

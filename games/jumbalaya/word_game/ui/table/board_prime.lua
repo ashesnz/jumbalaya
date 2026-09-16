@@ -66,6 +66,10 @@ function M.prime()
 	local facade_ui = ui()
 	if not facade_ui then return false end
 
+	local g = game()
+	g.STAGE = g.STAGE or g.STAGES.RUN
+	g.STATE = g.STATE or g.STATES.TABLE_BOARD
+
 	if facade_ui.Sidebar and facade_ui.Sidebar.ensure then
 		facade_ui.Sidebar:ensure()
 	end
