@@ -210,17 +210,10 @@ function WordSidebar:draw()
 		end
 		love.graphics.push()
 		hud:translate_container()
-		-- DEBUG: force panel to redraw this frame (temporarily bypass FRAME cache)
-		local prev_render = hud.FRAME and hud.FRAME.RENDER
+		-- Sidebar is drawn through this dedicated path rather than draw_live_uibox,
+		-- so the panel's per-frame render cache must be reset to ensure it draws.
 		if hud.FRAME then hud.FRAME.RENDER = -1 end
 		hud:draw()
-		if hud.FRAME then hud.FRAME.RENDER = prev_render end
-		-- DEBUG: visible marker so we can see where the sidebar panel is drawn
-		love.graphics.setColor(1, 0, 0, 0.5)
-		local units = (game().TILESIZE or 1) * (game().TILESCALE or 1)
-		love.graphics.rectangle("fill", 0, 0, hud.T.w * units, hud.T.h * units)
-		love.graphics.setColor(1, 1, 1, 1)
-		sidebar_log("draw() marker drawn w=" .. tostring(hud.T.w * units) .. " h=" .. tostring(hud.T.h * units))
 		love.graphics.pop()
 	else
 		sidebar_log("draw() no panel to draw")
@@ -234,11 +227,6 @@ function WordSidebar:draw()
 	love.graphics.push()
 	attach:translate_container()
 	draw_sidebar_deck()
-	-- DEBUG: blue marker for the deck attach area
-	love.graphics.setColor(0, 0, 1, 0.5)
-	local units = (game().TILESIZE or 1) * (game().TILESCALE or 1)
-	love.graphics.rectangle("fill", 0, 0, attach.T.w * units, attach.T.h * units)
-	love.graphics.setColor(1, 1, 1, 1)
 	love.graphics.pop()
 end
 

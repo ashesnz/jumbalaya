@@ -187,6 +187,25 @@ T.describe("table board boot", function()
 		T.assert_true(attach_calls > 0, "deck art should still use SIDEBAR_ATTACH")
 	end)
 
+	T.it("sidebar draw bypasses panel per-frame cache so it renders every call", function()
+		install_table_board_ui()
+		board_prime.prime()
+
+		local hud = shell.game().SIDEBAR_HUD
+		T.assert_not_nil(hud)
+		local draw_calls = 0
+		local orig_draw = hud.draw
+		hud.draw = function(self)
+			draw_calls = draw_calls + 1
+			if orig_draw then orig_draw(self) end
+		end
+
+		-- Simulate that the panel was already marked as rendered this frame.
+		hud.FRAME.RENDER = shell.game().FRAMES.RENDER
+		_G.WORD_GAME_UI.Sidebar:draw()
+		T.assert_equal(draw_calls, 1, "Sidebar:draw must call hud:draw even when FRAME cache is current")
+	end)
+
 	T.it("sidebar rows and deck counter exist before first draw", function()
 		install_table_board_ui()
 		board_prime.prime()

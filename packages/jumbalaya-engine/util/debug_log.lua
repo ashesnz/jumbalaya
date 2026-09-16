@@ -16,16 +16,6 @@ local function desktop_path()
 	return nil
 end
 
-local function save_dir_path()
-	if love and love.filesystem and love.filesystem.getSaveDirectory then
-		local dir = love.filesystem.getSaveDirectory()
-		if dir then
-			return dir .. "/sidebar_debug.log"
-		end
-	end
-	return nil
-end
-
 function M.log(msg)
 	local timestamp = os.date("%H:%M:%S")
 	local line = timestamp .. " " .. tostring(msg)
