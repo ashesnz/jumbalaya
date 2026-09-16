@@ -20,6 +20,9 @@ function M.install()
 	if WORD_GAME and WORD_GAME._bind_engine then
 		WORD_GAME._bind_engine(engine_instance)
 	end
+	local views_install = require("word_game.ui.views.install")
+	views_install.install_sidebar(engine_instance)
+	require("jumbalaya-engine.util.debug_log").print_locations()
 	return engine_instance
 end
 

@@ -4,6 +4,7 @@ local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
 local game = require("word_game.ui.util.game_runtime").game
 local config = require("word_game.ui.layout.felt.config")
+local sidebar_log = require("jumbalaya-engine.util.debug_log").log
 
 local M = {}
 
@@ -26,10 +27,18 @@ end
 
 function M.window_width_tiles()
 	local ts = (game().TILESIZE or 1) * (game().TILESCALE or 1)
+	local px
 	if love and love.graphics and love.graphics.getWidth then
-		return love.graphics.getWidth() / ts
+		px = love.graphics.getWidth()
 	end
-	return game().TILE_W or 20
+	local result
+	if px and px > 0 then
+		result = px / ts
+	else
+		result = (game().TILE_W or 20) + 2 * (game().ROOM_PADDING_W or 1)
+	end
+	sidebar_log("window_width_tiles px=" .. tostring(px) .. " ts=" .. tostring(ts) .. " result=" .. tostring(result))
+	return result
 end
 
 function M.sidebar_right_x()

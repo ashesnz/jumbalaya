@@ -213,17 +213,32 @@ T.describe("table board boot", function()
 		T.assert_equal(play_btn.config.button, "play_placement_word")
 	end)
 
-	T.it("sidebar is not ensured when game is not in TABLE_BOARD state", function()
+	T.it("sidebar view is installed and exposes row geometry when panel is missing", function()
 		local game = install_table_board_ui()
 		game.SIDEBAR_HUD = nil
-		game.STATE = game.STATES.MENU
+		local views_install = require("word_game.ui.views.install")
+		local Engine = require("jumbalaya-engine")
+		local store = require("word_game.model.store_ops").store()
+		views_install.install_sidebar({ store = store, renderer = Engine.Renderer.love2d() })
 
-		_G.WORD_GAME_UI.Sidebar:ensure()
-		T.assert_nil(game.SIDEBAR_HUD, "sidebar should remain nil outside TABLE_BOARD state")
+		local view = views_install.sidebar_view()
+		T.assert_not_nil(view, "sidebar view should be installed")
+		T.assert_not_nil(view:find_node_by_id("row_deck"), "sidebar view should expose deck row geometry")
+		T.assert_not_nil(view:find_node_by_id("row_deck_count"), "sidebar view should expose deck counter geometry")
+		T.assert_not_nil(view:find_node_by_id("end_run_button"), "sidebar view should expose end run button geometry")
+	end)
 
-		game.STATE = game.STATES.TABLE_BOARD
-		_G.WORD_GAME_UI.Sidebar:ensure()
-		T.assert_not_nil(game.SIDEBAR_HUD, "sidebar should be instantiated in TABLE_BOARD state")
+	T.it("sidebar layout falls back to designed room width when window width is unavailable", function()
+		local game = install_table_board_ui()
+		local felt_sidebar = require("word_game.ui.layout.felt.sidebar")
+		local orig_width = love.graphics.getWidth
+		love.graphics.getWidth = function() return 0 end
+		local width_tiles = felt_sidebar.window_width_tiles()
+		love.graphics.getWidth = orig_width
+
+		T.assert_true(width_tiles > 0, "window_width_tiles must be positive when getWidth returns 0")
+		T.assert_equal(width_tiles, (game.TILE_W or 20) + 2 * (game.ROOM_PADDING_W or 1),
+			"window_width_tiles should fall back to designed room width")
 	end)
 
 	T.it("begin_run starts gameplay without scheduling a screen wipe overlay", function()

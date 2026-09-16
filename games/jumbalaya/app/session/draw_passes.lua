@@ -2,6 +2,7 @@
 
 local DrawPasses = require("jumbalaya-engine.session.draw_passes")
 local perf_checkpoint = require("jumbalaya-engine.adapters.love2d.display").perf_checkpoint
+local sidebar_log = require("jumbalaya-engine.util.debug_log").log
 
 local M = {}
 
@@ -48,9 +49,14 @@ function M.install()
 		if game.STAGE == game.STAGES.RUN and game.STATE == game.STATES.TABLE_BOARD and WORD_GAME_UI.TableBoard then
 			WORD_GAME_UI.TableBoard.draw_hud()
 			if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.draw then
+				sidebar_log("draw_passes calling Sidebar:draw")
 				WORD_GAME_UI.Sidebar:draw()
+			else
+				sidebar_log("draw_passes no Sidebar to draw")
 			end
 			WORD_GAME_UI.TableBoard.draw_board(game)
+		else
+			sidebar_log("draw_passes skipped board pass STAGE=" .. tostring(game.STAGE) .. " STATE=" .. tostring(game.STATE) .. " TableBoard=" .. tostring(WORD_GAME_UI and WORD_GAME_UI.TableBoard ~= nil))
 		end
 
 		if WORD_GAME_UI.TableBoard then
