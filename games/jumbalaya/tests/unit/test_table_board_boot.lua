@@ -162,7 +162,7 @@ T.describe("table board boot", function()
 		T.assert_true(listed, "SIDEBAR_HUD should be registered on LIVE.UIBOX")
 	end)
 
-	T.it("sidebar draw uses panel translate_container not SIDEBAR_ATTACH", function()
+	T.it("sidebar draw uses panel translate_container and draw_pile for deck art", function()
 		install_table_board_ui()
 		board_prime.prime()
 
@@ -174,17 +174,28 @@ T.describe("table board boot", function()
 			translate_calls = translate_calls + 1
 			if orig_translate then orig_translate(self) end
 		end
-		local attach_calls = 0
-		local attach = shell.game().SIDEBAR_ATTACH
-		local orig_attach_translate = attach.translate_container
-		attach.translate_container = function(self)
-			attach_calls = attach_calls + 1
-			if orig_attach_translate then orig_attach_translate(self) end
+		local pile_calls = 0
+		local pile = shell.game().draw_pile
+		local orig_pile_translate = pile.translate_container
+		pile.translate_container = function(self)
+			pile_calls = pile_calls + 1
+			if orig_pile_translate then orig_pile_translate(self) end
 		end
 
 		_G.WORD_GAME_UI.Sidebar:draw()
 		T.assert_true(translate_calls > 0, "sidebar HUD should draw via panel translate_container")
-		T.assert_true(attach_calls > 0, "deck art should still use SIDEBAR_ATTACH")
+		T.assert_true(pile_calls > 0, "deck art should use draw_pile translate_container")
+	end)
+
+	T.it("deck_rect is anchored inside the sidebar column", function()
+		install_table_board_ui()
+		board_prime.prime()
+		local Layout = require("word_game.ui.layout")
+		local sidebar = Layout.sidebar_rect()
+		local deck = Layout.deck_rect()
+		T.assert_not_nil(deck)
+		T.assert_true(deck.x >= sidebar.x - 0.02, "deck should not sit left of sidebar")
+		T.assert_true(deck.x + deck.w <= sidebar.x + sidebar.w + 0.02, "deck should not extend past sidebar")
 	end)
 
 	T.it("sidebar draw bypasses panel per-frame cache so it renders every call", function()

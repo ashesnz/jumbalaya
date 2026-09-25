@@ -6,6 +6,7 @@ local game = require("word_game.ui.util.game_runtime").game
 
 local Engine = require("jumbalaya-engine")
 local Layout = require("word_game.ui.layout")
+local sidebar_layout = require("word_game.ui.sidebar.layout")
 local hud_layout = require("word_game.ui.sidebar.hud_layout")
 local table_discard = require("word_game.ui.perks.discard_bin")
 local stage_button = require("word_game.ui.sidebar.stage_button")
@@ -204,6 +205,7 @@ function SidebarView:find_node_by_id(id)
 	end
 	local rect = hud_layout.slot_rect(self:layout(), id)
 	if not rect then return nil end
+	rect = sidebar_layout.to_world_rect(rect)
 	return {
 		config = { id = id },
 		T = { x = rect.x, y = rect.y, w = rect.w, h = rect.h },

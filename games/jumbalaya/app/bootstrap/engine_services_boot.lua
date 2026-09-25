@@ -22,7 +22,6 @@ function M.install()
 	end
 	local views_install = require("word_game.ui.views.install")
 	views_install.install_sidebar(engine_instance)
-	require("jumbalaya-engine.util.debug_log").print_locations()
 	return engine_instance
 end
 

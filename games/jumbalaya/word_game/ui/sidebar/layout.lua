@@ -60,16 +60,32 @@ local function layout_rows()
 	return require("word_game.ui.sidebar.hud_layout").compute()
 end
 
+function M.panel_origin()
+	local sidebar = M.sidebar_rect()
+	return sidebar.x, sidebar.y
+end
+
+function M.to_world_rect(rect)
+	if not rect then return nil end
+	local ox, oy = M.panel_origin()
+	return {
+		x = (rect.x or 0) + ox,
+		y = (rect.y or 0) + oy,
+		w = rect.w,
+		h = rect.h,
+	}
+end
+
 local function slot_rect(row_id, w, h)
 	local layout = layout_rows()
 	local rect = require("word_game.ui.sidebar.hud_layout").slot_rect(layout, row_id)
 	if rect then
-		return {
+		return M.to_world_rect({
 			x = rect.x + math.max(0, ((rect.w or w) - w) * 0.5),
 			y = rect.y + math.max(0, ((rect.h or h) - h) * 0.5),
 			w = w,
 			h = h,
-		}
+		})
 	end
 	return nil
 end
@@ -92,11 +108,10 @@ function M.deck_rect()
 	local rect = slot_rect("row_deck", w, h)
 	if rect then return rect end
 
-	local panel = felt.panel_rect()
-	local col_x, col_w = panel.x, panel.w
+	local sidebar = M.sidebar_rect()
 	return {
-		x = col_x + math.max(0, (col_w - w) * 0.5),
-		y = game().TILE_H - h - 0.22,
+		x = sidebar.x + math.max(0, (sidebar.w - w) * 0.5),
+		y = sidebar.y + sidebar.h - h - M.sidebar_bottom_edge(),
 		w = w,
 		h = h,
 	}

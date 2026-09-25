@@ -17,9 +17,6 @@ local function deck_mod()
 	return facade.deck()
 end
 
-local debug_log = require("jumbalaya-engine.util.debug_log")
-local sidebar_log = debug_log.log
-
 local WordSidebar = {}
 
 WordSidebar.roll_to_next_hand = function()
@@ -69,20 +66,9 @@ function WordSidebar.sync_visibility()
 end
 
 local function draw_sidebar_deck()
-	if not TableDeck.uses_table_draw() then
-		sidebar_log("draw_sidebar_deck skipped: uses_table_draw=false")
-		return
-	end
-	if not game().draw_pile then
-		sidebar_log("draw_sidebar_deck skipped: no draw_pile")
-		return
-	end
+	if not TableDeck.uses_table_draw() or not game().draw_pile then return end
 	local deck_rect = Layout.deck_rect()
-	if not deck_rect then
-		sidebar_log("draw_sidebar_deck skipped: no deck_rect")
-		return
-	end
-	sidebar_log("draw_sidebar_deck drawing deck_rect=" .. tostring(deck_rect.x) .. "," .. tostring(deck_rect.y) .. "," .. tostring(deck_rect.w) .. "," .. tostring(deck_rect.h))
+	if not deck_rect then return end
 	local pile = game().draw_pile
 	pile.T.x = deck_rect.x
 	pile.T.y = deck_rect.y
@@ -95,18 +81,14 @@ local function draw_sidebar_deck()
 end
 
 function WordSidebar:ensure()
-	sidebar_log("ensure() called: STAGE=" .. tostring(game().STAGE) .. " STATE=" .. tostring(game().STATE) .. " hidden=" .. tostring(WordSidebar.is_hidden()) .. " ROOM_ATTACH=" .. tostring(game().ROOM_ATTACH ~= nil))
 	if WordSidebar.is_hidden() then
-		sidebar_log("ensure() early return: hidden")
 		self:destroy()
 		return nil
 	end
 	if game().STAGE ~= game().STAGES.RUN then
-		sidebar_log("ensure() early return: STAGE ~= RUN")
 		return
 	end
 	if not game().ROOM_ATTACH then
-		sidebar_log("ensure() early return: no ROOM_ATTACH")
 		return
 	end
 
@@ -119,7 +101,6 @@ function WordSidebar:ensure()
 		end
 	end
 	if game().SIDEBAR_HUD then
-		sidebar_log("ensure() using existing SIDEBAR_HUD")
 		deck_mod().sync_deck_count_display()
 		sync_hand_controls()
 		hud_definition.sync_end_run_row()
@@ -129,7 +110,6 @@ function WordSidebar:ensure()
 
 	Layout.update_sidebar_attach()
 	local room = game().ROOM or game().ROOM_ATTACH
-	sidebar_log("ensure() creating panel: SIDEBAR_ATTACH x=" .. tostring(game().SIDEBAR_ATTACH and game().SIDEBAR_ATTACH.T.x) .. " y=" .. tostring(game().SIDEBAR_ATTACH and game().SIDEBAR_ATTACH.T.y))
 	local ok, panel = pcall(Panels.create, {
 		definition = hud_definition.hud_definition(),
 		config = {
@@ -140,11 +120,9 @@ function WordSidebar:ensure()
 		},
 	})
 	if not ok then
-		sidebar_log("ensure() Panels.create FAILED: " .. tostring(panel))
 		return nil
 	end
 	game().SIDEBAR_HUD = panel
-	sidebar_log("ensure() panel created, T=" .. tostring(game().SIDEBAR_HUD and game().SIDEBAR_HUD.T and (game().SIDEBAR_HUD.T.x .. "," .. game().SIDEBAR_HUD.T.y .. "," .. game().SIDEBAR_HUD.T.w .. "," .. game().SIDEBAR_HUD.T.h)))
 	if room and game().SIDEBAR_HUD.set_container then
 		game().SIDEBAR_HUD:set_container(room)
 	end
@@ -183,31 +161,14 @@ function WordSidebar:refresh()
 end
 
 function WordSidebar:draw()
-	sidebar_log("draw() called: STAGE=" .. tostring(game().STAGE) .. " STATE=" .. tostring(game().STATE) .. " hidden=" .. tostring(WordSidebar.is_hidden()) .. " SIDEBAR_HUD=" .. tostring(game().SIDEBAR_HUD ~= nil))
-	if WordSidebar.is_hidden() then
-		sidebar_log("draw() early return: hidden")
-		return
-	end
-	if game().STAGE ~= game().STAGES.RUN then
-		sidebar_log("draw() early return: STAGE ~= RUN")
-		return
-	end
-	if game().STATE ~= game().STATES.TABLE_BOARD then
-		sidebar_log("draw() early return: STATE ~= TABLE_BOARD")
-		return
-	end
+	if WordSidebar.is_hidden() then return end
+	if game().STAGE ~= game().STAGES.RUN then return end
+	if game().STATE ~= game().STATES.TABLE_BOARD then return end
 	if not game().SIDEBAR_HUD then
-		sidebar_log("draw() no SIDEBAR_HUD, calling ensure()")
 		self:ensure()
 	end
 	local hud = game().SIDEBAR_HUD
 	if hud and not hud.REMOVED then
-		local root = hud.root_node
-		sidebar_log("draw() drawing panel at T=" .. tostring(hud.T.x) .. "," .. tostring(hud.T.y) .. "," .. tostring(hud.T.w) .. "," .. tostring(hud.T.h) .. " visible=" .. tostring(hud.states and hud.states.visible) .. " children=" .. tostring(hud.children and #hud.children))
-		sidebar_log("draw() panel FRAME.RENDER=" .. tostring(hud.FRAME and hud.FRAME.RENDER) .. " FRAMES.RENDER=" .. tostring(game().FRAMES and game().FRAMES.RENDER))
-		if root then
-			sidebar_log("draw() root visible=" .. tostring(root.states and root.states.visible) .. " colour=" .. tostring(root.config and root.config.colour) .. " VT=" .. tostring(root.VT and (root.VT.x .. "," .. root.VT.y .. "," .. root.VT.w .. "," .. root.VT.h)))
-		end
 		love.graphics.push()
 		hud:translate_container()
 		-- Sidebar is drawn through this dedicated path rather than draw_live_uibox,
@@ -215,17 +176,10 @@ function WordSidebar:draw()
 		if hud.FRAME then hud.FRAME.RENDER = -1 end
 		hud:draw()
 		love.graphics.pop()
-	else
-		sidebar_log("draw() no panel to draw")
 	end
-	if not game().SIDEBAR_ATTACH then
-		sidebar_log("draw() no SIDEBAR_ATTACH")
-		return
-	end
-	local attach = game().SIDEBAR_ATTACH
-	sidebar_log("draw() deck attach T=" .. tostring(attach.T.x) .. "," .. tostring(attach.T.y) .. "," .. tostring(attach.T.w) .. "," .. tostring(attach.T.h))
+	if not game().draw_pile then return end
 	love.graphics.push()
-	attach:translate_container()
+	game().draw_pile:translate_container()
 	draw_sidebar_deck()
 	love.graphics.pop()
 end

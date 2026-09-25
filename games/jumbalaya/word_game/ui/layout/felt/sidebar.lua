@@ -4,7 +4,6 @@ local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
 local game = require("word_game.ui.util.game_runtime").game
 local config = require("word_game.ui.layout.felt.config")
-local sidebar_log = require("jumbalaya-engine.util.debug_log").log
 
 local M = {}
 
@@ -37,7 +36,6 @@ function M.window_width_tiles()
 	else
 		result = (game().TILE_W or 20) + 2 * (game().ROOM_PADDING_W or 1)
 	end
-	sidebar_log("window_width_tiles px=" .. tostring(px) .. " ts=" .. tostring(ts) .. " result=" .. tostring(result))
 	return result
 end
 
