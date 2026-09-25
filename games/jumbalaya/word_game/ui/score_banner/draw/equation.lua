@@ -6,12 +6,13 @@ local fonts = require("word_game.ui.score_banner.fonts")
 
 local M = {}
 
-function M.draw(sb, cx, ts, h)
+function M.draw(sb, ts, h)
 	if sb.hide_points_to_get or felt_layout.is_boss_sequence() then return end
 
 	local remaining = sb.points_to_get or 0
 	local got = sb.points_got or 0
-	if remaining <= 0 and got <= 0 then return end
+	local earned = sb.points_earned or 0
+	if remaining <= 0 and got <= 0 and earned <= 0 then return end
 
 	local to_get_txt = sb.format_score_equation and sb.format_score_equation()
 		or string.format("%d Earnt + %d = %d Remaining",
@@ -29,7 +30,7 @@ function M.draw(sb, cx, ts, h)
 	end
 	local to_get_th = to_get_font:getHeight()
 
-	local to_get_cx, to_get_cy = sb.calc_points_to_get_pos(cx, ts)
+	local to_get_cx, to_get_cy = sb.calc_points_to_get_pos(ts)
 	local to_get_tx = to_get_cx - to_get_tw * 0.5
 	local to_get_ty = to_get_cy - to_get_th * 0.5
 

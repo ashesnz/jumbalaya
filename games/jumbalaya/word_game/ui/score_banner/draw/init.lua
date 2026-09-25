@@ -78,9 +78,10 @@ function M.draw(sb)
 	end
 
 	chips.draw(sb, layout, w, h)
-	equation.draw(sb, cx, ts, h)
 
 	love.graphics.pop()
+	equation.draw(sb, ts, h)
+
 	love.graphics.pop()
 	if prev_shader and love.graphics.setShader then
 		love.graphics.setShader(prev_shader)

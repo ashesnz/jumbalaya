@@ -89,6 +89,14 @@ function M.prime()
 	if facade_ui.TimelineTimer and facade_ui.TimelineTimer.sync_from_model then
 		facade_ui.TimelineTimer.sync_from_model()
 	end
+	if facade_ui.ScoreBanner then
+		if facade_ui.ScoreBanner.snap_to_actual then
+			facade_ui.ScoreBanner.snap_to_actual()
+		end
+		if facade_ui.ScoreBanner.sync_points_to_get_preview then
+			facade_ui.ScoreBanner.sync_points_to_get_preview(false)
+		end
+	end
 	if g.ARGS then
 		g.ARGS.pending_layout = false
 	end

@@ -119,18 +119,27 @@ function M.get_multi_growth(cur_multi)
 	return 1.0 + math.min(0.28, step * 0.18)
 end
 
-function M.calc_points_to_get_pos(cx, ts)
+function M.calc_points_to_get_pos(ts)
 	ts = ts or ((game() and game().TILESCALE or 1) * (game() and game().TILESIZE or 1))
 	local area = game() and game().pattern_row and game().pattern_row.area
 	local felt = Layout.felt_rect()
+	local play_col = Layout.play_column and Layout.play_column() or felt
+	local center_x = (play_col.x + play_col.w * 0.5) * ts
+
 	local card_bottom = (area and area.T and area.T.y and area.T.h)
 		and ((area.T.y + area.T.h) * ts)
 		or ((felt.y + 2.0) * ts)
-	local hand_top = (game() and game().dealt_letters and game().dealt_letters.T and game().dealt_letters.T.y)
-		and (game().dealt_letters.T.y * ts)
-		or ((felt.y + felt.h - 2.5) * ts)
+
+	local hand_top
+	if game() and game().dealt_letters and game().dealt_letters.T and game().dealt_letters.T.y then
+		hand_top = game().dealt_letters.T.y * ts
+	else
+		local hand_h = (game().CARD_H or 1.4) * 0.95
+		hand_top = (game().TILE_H - hand_h - 0.25) * ts
+	end
+
 	local gap_cy = (card_bottom + hand_top) * 0.5 - ts * config.POINTS_TO_GET_RAISE
-	return cx or ((felt.x + felt.w * 0.5) * ts), gap_cy
+	return center_x, gap_cy
 end
 
 return M

@@ -256,6 +256,25 @@ T.describe("table board boot", function()
 		T.assert_true(board_prime.table_controls_ready(), "prime should install play and shuffle bars")
 	end)
 
+	T.it("table_board_prime syncs score equation above the dealt hand", function()
+		install_table_board_ui()
+		board_prime.prime()
+
+		local sb = WORD_GAME_UI.ScoreBanner
+		T.assert_not_nil(sb)
+		sb.sync_points_to_get_preview(false)
+		T.assert_true((sb.points_to_get or 0) > 0, "points to get should be populated at hand start")
+
+		local game = shell.game()
+		local ts = game.TILESCALE * game.TILESIZE
+		local _, gap_cy = sb.calc_points_to_get_pos(ts)
+		local hand_top = game.dealt_letters.T.y * ts
+		local pattern = game.pattern_row.area
+		local pattern_bottom = (pattern.T.y + pattern.T.h) * ts
+		T.assert_true(gap_cy > pattern_bottom, "equation should sit below the pattern row")
+		T.assert_true(gap_cy < hand_top, "equation should sit above the dealt hand")
+	end)
+
 	T.it("sidebar view is installed and exposes row geometry when panel is missing", function()
 		local game = install_table_board_ui()
 		game.SIDEBAR_HUD = nil
