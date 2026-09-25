@@ -70,6 +70,8 @@ function M.draw_board(game)
 			game.pattern_row:draw_run_pass(game)
 		end
 		M.draw_hand_pass(game)
+	end
+	if M.is_active() then
 		M.draw_table_controls()
 	end
 	local bonus_stack_ui = WORD_GAME_UI.BonusStackUI

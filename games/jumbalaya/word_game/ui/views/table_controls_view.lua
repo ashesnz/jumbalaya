@@ -26,23 +26,31 @@ local function wrap_bar(inner)
 	view.VT = inner.VT
 	view.root_node = inner.root_node
 	view.config = inner.config
+	view.states = inner.states
 	view.REMOVED = inner.REMOVED
+	view.FRAME = inner.FRAME
 	return view
 end
 
 function TableControlsView.create_bar(button_def, size, config)
+	config = config or {
+		align = "cm",
+		major = game().ROOM_ATTACH,
+		offset = { x = 0, y = 0 },
+		instance_type = "table_control_bar",
+	}
+	config.instance_type = config.instance_type or "table_control_bar"
 	local inner = Panels.create({
 		definition = {
 			n = game().UI.ROOT,
 			config = { align = "cm", colour = game().C.CLEAR, minw = size, minh = size },
 			nodes = { button_def },
 		},
-		config = config or {
-			align = "cm",
-			major = game().ROOM_ATTACH,
-			offset = { x = 0, y = 0 },
-		},
+		config = config,
 	})
+	if inner.states then
+		inner.states.visible = true
+	end
 	return wrap_bar(inner)
 end
 
@@ -57,9 +65,11 @@ function TableControlsView.create_play_bar(size, config)
 end
 
 function TableControlsView:draw()
-	if self._inner then
-		self._inner:draw()
+	if not self._inner or self._inner.REMOVED then return end
+	if self._inner.FRAME then
+		self._inner.FRAME.RENDER = -1
 	end
+	self._inner:draw()
 end
 
 function TableControlsView:recalculate()
@@ -69,7 +79,9 @@ function TableControlsView:recalculate()
 	self.VT = self._inner.VT
 	self.root_node = self._inner.root_node
 	self.config = self._inner.config
+	self.states = self._inner.states
 	self.REMOVED = self._inner.REMOVED
+	self.FRAME = self._inner.FRAME
 end
 
 function TableControlsView:remove()

@@ -219,6 +219,7 @@ function M.ensure(visible, sync_visibility)
 		and game().table_shuffle_bar:find_node_by_id("hand_shuffle_button")
 	if has_play and has_shuffle then
 		sync_visibility()
+		M.sync_position()
 		return
 	end
 	if game().hand_action_bar or game().table_shuffle_bar then

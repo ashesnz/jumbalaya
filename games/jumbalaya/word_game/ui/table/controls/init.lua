@@ -78,6 +78,17 @@ local function action_visible()
 	return M.visible()
 end
 
+local function sync_bar_host(bar, show)
+	if not bar then return end
+	local inner = bar._inner or bar
+	if inner.states then
+		inner.states.visible = show
+	end
+	if bar.states and bar.states ~= inner.states then
+		bar.states.visible = show
+	end
+end
+
 local function sync_shuffle_button(shuffle_btn, show)
 	if not shuffle_btn then return end
 	if not show then
@@ -118,11 +129,14 @@ local function sync_play_button(play_btn, show)
 end
 
 function M.sync_visibility(_opts)
+	local show = action_visible()
+	sync_bar_host(game().table_shuffle_bar, show)
+	sync_bar_host(game().hand_action_bar, show)
 	if game().table_shuffle_bar and not game().table_shuffle_bar.REMOVED then
-		sync_shuffle_button(M.shuffle_button_uie(), action_visible())
+		sync_shuffle_button(M.shuffle_button_uie(), show)
 	end
 	if game().hand_action_bar and not game().hand_action_bar.REMOVED then
-		sync_play_button(M.play_button_uie(), action_visible())
+		sync_play_button(M.play_button_uie(), show)
 	end
 end
 

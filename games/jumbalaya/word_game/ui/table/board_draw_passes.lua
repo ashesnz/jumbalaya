@@ -111,6 +111,10 @@ end
 
 local function draw_action_bar(bar)
 	if not bar or bar.REMOVED then return end
+	local inner = bar._inner or bar
+	if inner.FRAME then
+		inner.FRAME.RENDER = -1
+	end
 	love.graphics.push()
 	bar:translate_container()
 	bar:draw()

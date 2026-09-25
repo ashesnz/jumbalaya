@@ -25,6 +25,8 @@ local function draw_live_uibox(game)
 		if panel.REMOVED then goto continue end
 		-- SIDEBAR_HUD draws in WORD_GAME_UI.Sidebar:draw (room transform + deck art).
 		if panel == game.SIDEBAR_HUD then goto continue end
+		-- Play/shuffle bars draw in TableBoard.draw_table_controls.
+		if panel.config and panel.config.instance_type == "table_control_bar" then goto continue end
 		local is_special = panel.flop_overlay or panel.spawn_attention or panel.parent
 			or panel == game.OVERLAY_MENU or panel == game.screenwipe
 			or panel == game.FIRST_PLAY_TUTORIAL_OVERLAY
