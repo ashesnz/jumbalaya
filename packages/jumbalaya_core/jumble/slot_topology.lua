@@ -94,26 +94,211 @@ local function span_hand_counts(j, before, after, single)
 	return middle, 0
 end
 
-function M.span_active_len(j)
-	if not j or not j.puzzle or j.puzzle.kind ~= "span" then return 3 end
-	local puzzle = j.puzzle
-	local before, after, single = M.span_parts(j.slots)
-	if puzzle.center and before and after then
-		local visible_before, visible_after = span_hand_counts(j, before, after, single)
-		local anchor_tiles = #(puzzle.prefix or "") + #(puzzle.center or "") + #(puzzle.suffix or "")
-		if anchor_tiles <= 0 then anchor_tiles = 1 end
-		local active = anchor_tiles + visible_before + visible_after
-		return math.min(puzzle.max, math.max(puzzle.min, active))
+local function compact_cards(list)
+	local out = {}
+	if not list then return out end
+	local max_i = #list
+	for k, _ in pairs(list) do
+		if type(k) == "number" and k > max_i then
+			max_i = k
+		end
 	end
-
-	local middle = select(1, span_hand_counts(j, before, after, single))
-	local anchor_tiles = #(puzzle.prefix or "") + #(puzzle.suffix or "")
-	if anchor_tiles <= 0 then anchor_tiles = 1 end
-	local active = anchor_tiles + middle
-	return math.min(puzzle.max, math.max(puzzle.min, active))
+	for i = 1, max_i do
+		local card = list[i]
+		if card ~= nil and not card.REMOVED then
+			if not (card.states and card.states.visible == false) then
+				out[#out + 1] = card
+			end
+		end
+	end
+	return out
 end
 
-function M.fixed_letter_items(j, active_len)
+local function collect_span_cards(j)
+	local before, after, single = M.span_parts(j.slots)
+	if j.puzzle and j.puzzle.center and before and after then
+		local cards = {}
+		for _, card in ipairs(compact_cards(before.cards)) do
+			cards[#cards + 1] = card
+		end
+		for _, card in ipairs(compact_cards(after.cards)) do
+			cards[#cards + 1] = card
+		end
+		return cards, before, after, single
+	end
+	if single then
+		return compact_cards(single.cards), before, after, single
+	end
+	local cards = {}
+	for _, slot in ipairs(j.slots or {}) do
+		if slot.kind == "span" then
+			for _, card in ipairs(compact_cards(slot.cards)) do
+				cards[#cards + 1] = card
+			end
+		end
+	end
+	return cards, before, after, single
+end
+
+--- Play-row letters. After Play, `span.cards` can still hold the previous word
+--- while the pattern area is empty or has a new drop. When `extra_cards` is
+--- passed (the live pattern pile), it is the only list that counts — otherwise
+--- a leftover A plus a new E becomes C A E T (a wider row with a hole).
+local function placed_span_cards(j, extra_cards)
+	local _, before, after, single = collect_span_cards(j)
+	if extra_cards ~= nil then
+		return compact_cards(extra_cards), before, after, single
+	end
+	return collect_span_cards(j)
+end
+
+local function strip_empties(cells)
+	local packed = {}
+	for _, cell in ipairs(cells) do
+		if cell.kind ~= "empty" then
+			packed[#packed + 1] = cell
+		end
+	end
+	return packed
+end
+
+--- Ordered play-row tiles.
+--- Empty row: pad `_` to `puzzle.min` (C _ T). Any placed letter: pack, no `_`.
+function M.span_cells(j, extra_cards)
+	if not j or not j.puzzle or j.puzzle.kind ~= "span" then
+		return {}
+	end
+	local puzzle = j.puzzle
+	local cards, before, after = placed_span_cards(j, extra_cards)
+	local cells = {}
+	local function push_fixed(text, anchor)
+		for i = 1, #text do
+			cells[#cells + 1] = { kind = "fixed", char = text:sub(i, i), anchor = anchor }
+		end
+	end
+	local function push_cards(list)
+		for i, card in ipairs(list or {}) do
+			cells[#cells + 1] = { kind = "card", card = card, span_index = i }
+		end
+	end
+	local function push_empties(n)
+		for _ = 1, n do
+			cells[#cells + 1] = { kind = "empty", char = "_" }
+		end
+	end
+
+	if puzzle.center and before and after then
+		local before_cards = compact_cards(before.cards)
+		local after_cards = compact_cards(after.cards)
+		local placed = #before_cards + #after_cards
+		push_fixed(puzzle.prefix or "", "prefix")
+		push_cards(before_cards)
+		if placed == 0 then
+			local visible_before, visible_after = span_hand_counts(j, before, after, nil)
+			push_empties(math.max(0, visible_before - #before_cards))
+			push_fixed(puzzle.center or "", "center")
+			push_cards(after_cards)
+			push_empties(math.max(0, visible_after - #after_cards))
+		else
+			push_fixed(puzzle.center or "", "center")
+			push_cards(after_cards)
+		end
+		push_fixed(puzzle.suffix or "", "suffix")
+		return cells
+	end
+
+	if puzzle.center then
+		local pre = puzzle.prefix or ""
+		local suf = puzzle.suffix or ""
+		local center = puzzle.center or ""
+		local min_len = puzzle.min or 3
+		local center_idx = M.center_slot_index(j, 0)
+		push_fixed(pre, "prefix")
+		if #cards == 0 then
+			push_empties(math.max(0, center_idx - 1 - #pre))
+		end
+		push_fixed(center, "center")
+		if #cards == 0 then
+			local used = #cells
+			push_empties(math.max(0, min_len - used - #suf))
+		end
+		push_fixed(suf, "suffix")
+		if #cards > 0 then
+			return strip_empties(cells)
+		end
+		return cells
+	end
+
+	local pre = puzzle.prefix or ""
+	local suf = puzzle.suffix or ""
+	local n_cards = #cards
+	-- Fill the `_` hole with the first letter (C _ T + E → CET). Never keep
+	-- a pad after a card (not C E _ T). Extra letters grow the word (CART).
+	local empties = 0
+	if n_cards == 0 then
+		empties = math.max(0, (puzzle.min or 3) - #pre - #suf)
+	end
+	push_fixed(pre, "prefix")
+	push_cards(cards)
+	push_empties(empties)
+	push_fixed(suf, "suffix")
+	local max_len = puzzle.max or 7
+	while #cells > max_len do
+		cells[#cells] = nil
+	end
+	if n_cards > 0 then
+		return strip_empties(cells)
+	end
+	return cells
+end
+
+--- How many letter tiles the play row should show right now.
+--- C _ T empty → 3; CAT → 3; CART → 4; after play clears letters → C _ T again.
+function M.span_active_len(j, extra_cards)
+	local cells = M.span_cells(j, extra_cards)
+	if #cells > 0 then
+		return #cells
+	end
+	if not j or not j.puzzle or j.puzzle.kind ~= "span" then
+		return 3
+	end
+	return j.puzzle.min or 3
+end
+
+--- Index in `span.cards` for a drop on play-row cell `cell_i`.
+--- `after_center` is true when the pointer is on the right half of that cell.
+function M.span_insert_pos(j, cell_i, after_center, extra_cards)
+	local cells = M.span_cells(j, extra_cards)
+	if #cells == 0 then
+		return 1
+	end
+	cell_i = math.max(1, math.min(#cells, tonumber(cell_i) or 1))
+	local cards_before = 0
+	for i = 1, cell_i - 1 do
+		if cells[i].kind == "card" then
+			cards_before = cards_before + 1
+		end
+	end
+	local cell = cells[cell_i]
+	if not cell then
+		return cards_before + 1
+	end
+	if cell.kind == "empty" then
+		return cards_before + 1
+	end
+	if cell.kind == "card" then
+		if after_center then
+			return cards_before + 2
+		end
+		return cards_before + 1
+	end
+	if cell.anchor == "prefix" then
+		return 1
+	end
+	return cards_before + 1
+end
+
+function M.fixed_letter_items(j, active_len, extra_cards)
 	local skew = M.FIXED_LETTER_SKEW
 	local items = {}
 	local has_first = false
@@ -123,39 +308,23 @@ function M.fixed_letter_items(j, active_len)
 
 	local puzzle = j.puzzle
 	if puzzle and puzzle.kind == "span" then
-		active_len = active_len or M.span_active_len(j)
-		if puzzle.prefix and #puzzle.prefix > 0 then
-			has_first = true
-			for k = 1, #puzzle.prefix do
+		local cells = M.span_cells(j, extra_cards)
+		for i, cell in ipairs(cells) do
+			if cell.kind == "fixed" then
+				if cell.anchor == "prefix" and #items == 0 then
+					has_first = true
+				end
+				if cell.anchor == "suffix" then
+					has_last = true
+				end
+				local n_suf = #(puzzle.suffix or "")
+				local suffix_k = cell.anchor == "suffix" and (i - (#cells - n_suf)) or nil
 				table.insert(items, {
-					char = puzzle.prefix:sub(k, k),
-					pos = k,
-					position_label = tostring(k),
-					anchor = "prefix",
-				})
-			end
-		end
-		if puzzle.center and #puzzle.center > 0 then
-			local before = select(1, M.span_parts(j.slots))
-			local center_start = M.center_slot_index(j, before and #(before.cards or {}) or 0)
-			for k = 1, #puzzle.center do
-				table.insert(items, {
-					char = puzzle.center:sub(k, k),
-					pos = center_start + k - 1,
-					position_label = tostring(center_start + k - 1),
-					anchor = "center",
-				})
-			end
-		end
-		if puzzle.suffix and #puzzle.suffix > 0 then
-			has_last = true
-			local n_suf = #puzzle.suffix
-			for k = 1, n_suf do
-				table.insert(items, {
-					char = puzzle.suffix:sub(k, k),
-					pos = active_len - n_suf + k,
-					position_label = k == n_suf and "∞" or ("∞-" .. tostring(n_suf - k)),
-					anchor = "suffix",
+					char = cell.char,
+					pos = i,
+					position_label = cell.anchor == "suffix" and suffix_k == n_suf and "∞"
+						or (cell.anchor == "suffix" and n_suf > 1 and ("∞-" .. tostring(n_suf - suffix_k)) or tostring(i)),
+					anchor = cell.anchor,
 				})
 			end
 		end

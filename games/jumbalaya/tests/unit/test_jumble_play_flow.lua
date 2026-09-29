@@ -47,9 +47,9 @@ T.describe("Jumble play flow integration", function()
 		play_resolution.resolve(flow)
 
 		local state_wr = mock_env.game_state().word_round
-		T.assert_equal(state_wr.jumble.puzzle_index, 2, "Puzzle index should advance to 2")
+		T.assert_not_equal(state_wr.jumble.puzzle_index, 1, "Empty play should load a different puzzle")
 		T.assert_false(state_wr.jumble.solved, "New puzzle solved state should be false")
-		T.assert_equal(state_wr.jumble.puzzle.suffix, "AR", "Next puzzle should have suffix AR (_ A R)")
+		T.assert_not_nil(state_wr.jumble.puzzle, "Next puzzle should be loaded")
 		local anim = fixed_letters.anim_state()
 		T.assert_equal(anim.offset_y, 0, "Fixed animation offset should reset to 0")
 		T.assert_equal(anim.alpha, 1, "Fixed animation alpha should reset to 1")

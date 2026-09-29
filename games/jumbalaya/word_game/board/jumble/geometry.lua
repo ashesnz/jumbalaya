@@ -199,61 +199,18 @@ function M.relayout(session)
 		end
 	end
 
-	local span_cards = {}
-	for _, slot in ipairs(j.slots) do
-		if slot.kind == "blank" and slot.card then
-			span_cards[#span_cards + 1] = slot.card
-		elseif slot.kind == "span" then
-			for _, card in ipairs(slot.cards or {}) do
-				span_cards[#span_cards + 1] = card
-			end
-		end
-	end
-
 	if j.puzzle and j.puzzle.kind == "span" then
 		local card_w = slot_card_dims(session)
-		local active_len = M.span_active_len(j)
-		local centers = M.span_centers(session, active_len)
-		local puzzle = j.puzzle
-		local before, after, single = topology.span_parts(j.slots)
-		if puzzle.center and before and after then
-			local before_n = #(before.cards or {})
-			local after_n = #(after.cards or {})
-			local center_idx = topology.center_slot_index(j, before_n)
-			local after_start = center_idx + #(puzzle.center or "")
-			for i, card in ipairs(before.cards or {}) do
-				if not card.states.drag.is then
-					local cx = centers[center_idx - before_n + i - 1]
-					if cx then
-						card.T.r = 0
-						card.T.x = cx - card_w * 0.5
-						card.T.y = M.card_row_y(area, card.T.h)
-						snap_card(card)
-					end
-				end
-			end
-			for i, card in ipairs(after.cards or {}) do
-				if not card.states.drag.is then
-					local cx = centers[after_start + i - 1]
-					if cx then
-						card.T.r = 0
-						card.T.x = cx - card_w * 0.5
-						card.T.y = M.card_row_y(area, card.T.h)
-						snap_card(card)
-					end
-				end
-			end
-		else
-			local card_offset = #(puzzle.prefix or "")
-			for i, card in ipairs(span_cards) do
-				if not card.states.drag.is then
-					local cx = centers[i + card_offset]
-					if cx then
-						card.T.r = 0
-						card.T.x = cx - card_w * 0.5
-						card.T.y = M.card_row_y(area, card.T.h)
-						snap_card(card)
-					end
+		local cells = topology.span_cells(j, area.cards)
+		local centers = M.span_centers(session, #cells)
+		for i, cell in ipairs(cells) do
+			if cell.kind == "card" and cell.card and not (cell.card.states and cell.card.states.drag and cell.card.states.drag.is) then
+				local cx = centers[i]
+				if cx then
+					cell.card.T.r = 0
+					cell.card.T.x = cx - card_w * 0.5
+					cell.card.T.y = M.card_row_y(area, cell.card.T.h)
+					snap_card(cell.card)
 				end
 			end
 		end

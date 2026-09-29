@@ -322,4 +322,64 @@ T.describe("jumble row letter packing", function()
 		}
 		T.assert_equal(geo.area_width(ctx), 2 * config.row_width_for_slots(7))
 	end)
+
+	T.it("packs C_T as three flush tiles inside the seven-card tray, then four for CENT", function()
+		mock_env.reset_game()
+		local geo = require("word_game.board.jumble.geometry")
+		local session = {
+			area = { T = { x = 0, y = 0, w = 20, h = 3 }, cards = {} },
+			ctx = {
+				card_w = function() return 2 end,
+				card_h = function() return 2.75 end,
+			},
+		}
+		local three = geo.span_centers(session, 3)
+		T.assert_equal(#three, 3)
+		T.assert_equal(three[3] - three[1], 4, "C to T is two card-widths, not the full tray")
+		T.assert_equal((three[1] + three[3]) / 2, 10, "three-letter word stays centered")
+		local four = geo.span_centers(session, 4)
+		T.assert_equal(#four, 4)
+		T.assert_equal(four[4] - four[1], 6, "CENT is three card-widths from C to T")
+		T.assert_equal((four[1] + four[4]) / 2, 10, "four-letter word stays centered")
+	end)
+
+	T.it("packs E flush on C _ T after a scored word, even if span.cards was cleared", function()
+		local Topology = require("jumbalaya_core.jumble.slot_topology")
+		local PuzzleSpec = require("jumbalaya_core.jumble.puzzle_spec")
+		local Slots = require("jumbalaya_core.jumble.slots")
+		local geo = require("word_game.board.jumble.geometry")
+		local puzzle = PuzzleSpec.resolve_puzzle({ span = { "C", "T" }, min = 3, max = 7 })
+		local slots = Slots.parse_slots(puzzle)
+		local e = {
+			ability = { letter = "E" },
+			T = { x = 0, y = 0, w = 2, h = 2.75, r = 0 },
+			states = { drag = { is = false } },
+		}
+		local j = { puzzle = puzzle, slots = slots, puzzle_words = { "CAT" } }
+		local session = {
+			area = { T = { x = 0, y = 0, w = 20, h = 3 }, cards = { e } },
+			ctx = {
+				card_w = function() return 2 end,
+				card_h = function() return 2.75 end,
+			},
+		}
+		local empty_cells = Topology.span_cells(j, {})
+		T.assert_equal(empty_cells[2].kind, "empty", "Play reset still shows C _ T")
+
+		local cells = Topology.span_cells(j, session.area.cards)
+		T.assert_equal(#cells, 3)
+		T.assert_equal(cells[1].kind, "fixed")
+		T.assert_equal(cells[2].kind, "card")
+		T.assert_equal(cells[3].kind, "fixed")
+		for _, cell in ipairs(cells) do
+			T.assert_false(cell.kind == "empty", "E must not leave a hole before T")
+		end
+		local three = geo.span_centers(session, #cells)
+		T.assert_equal(three[3] - three[1], 4, "CET is flush after the second drop")
+		local ghost = { ability = { letter = "A" }, T = { w = 2, h = 2.75 } }
+		j.slots[2].cards = { ghost }
+		local packed = Topology.span_cells(j, session.area.cards)
+		T.assert_equal(#packed, 3, "ghost A from CAT must not expand the row")
+		T.assert_equal(geo.span_centers(session, #packed)[3] - geo.span_centers(session, #packed)[1], 4)
+	end)
 end)

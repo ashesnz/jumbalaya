@@ -57,7 +57,9 @@ function M.sync_placement_cards(slots)
 			area.cards[#area.cards + 1] = slot.card
 		elseif slot.kind == "span" then
 			for _, card in ipairs(slot.cards or {}) do
-				area.cards[#area.cards + 1] = card
+				if card and not card.REMOVED and not (card.states and card.states.visible == false) then
+					area.cards[#area.cards + 1] = card
+				end
 			end
 		end
 	end
@@ -104,33 +106,23 @@ function M.blank_slot_index_for_x(session, x)
 		if #(span.cards or {}) >= (span.max or 0) then
 			return nil
 		end
-		local active_len = topology.span_active_len(j)
-		local centers = geo.span_centers(session, active_len)
-		local puzzle = j.puzzle
-		local card_start = #(puzzle.prefix or "") + 1
-		local card_end = active_len - #(puzzle.suffix or "")
-		local n_cards = #(span.cards or {})
-		local insert_pos = n_cards + 1
-		if n_cards > 0 and card_end >= card_start then
-			if x <= centers[card_start] then
-				insert_pos = 1
-			elseif x >= centers[card_start + n_cards - 1] then
-				insert_pos = n_cards + 1
-			elseif n_cards > 1 then
-				for i = 1, n_cards - 1 do
-					local left = card_start + i - 1
-					local right = card_start + i
-					local mid = (centers[left] + centers[right]) / 2
-					if x < mid then
-						insert_pos = i
-						break
-					else
-						insert_pos = i + 1
-					end
+		local extra = session.area and session.area.cards
+		local cells = topology.span_cells(j, extra)
+		local centers = geo.span_centers(session, #cells)
+		local cell_i = 1
+		local best = math.huge
+		for i = 1, #cells do
+			local cx = centers[i]
+			if cx then
+				local dist = math.abs(x - cx)
+				if dist < best then
+					best = dist
+					cell_i = i
 				end
 			end
 		end
-		return span_i, insert_pos
+		local after_center = centers[cell_i] ~= nil and x >= centers[cell_i]
+		return span_i, topology.span_insert_pos(j, cell_i, after_center, session.area and session.area.cards)
 	end
 
 	local slot_i = geo.slot_index_at_x(session, x)
@@ -241,6 +233,23 @@ function M.assign_card_to_blank(slot_index, card, insert_pos)
 			return false
 		end
 		slot.cards = slot.cards or {}
+		local dense = {}
+		local max_i = #slot.cards
+		for k, _ in pairs(slot.cards) do
+			if type(k) == "number" and k > max_i then
+				max_i = k
+			end
+		end
+		for i = 1, max_i do
+			local existing = slot.cards[i]
+			if existing ~= nil and not existing.REMOVED then
+				dense[#dense + 1] = existing
+			end
+		end
+		slot.cards = dense
+		if insert_pos and insert_pos > #slot.cards + 1 then
+			insert_pos = #slot.cards + 1
+		end
 		if insert_pos and insert_pos >= 1 and insert_pos <= #slot.cards + 1 then
 			table.insert(slot.cards, insert_pos, card)
 		else

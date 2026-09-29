@@ -51,6 +51,123 @@ T.describe("jumbalaya_core jumble patterns", function()
 		T.assert_equal(slots[3].max, 5)
 	end)
 
+	T.it("C…T stays three tiles for CAT, expands for CENT, and resets after play", function()
+		local puzzle = PuzzleSpec.resolve_puzzle({ span = { "C", "T" }, min = 3, max = 7 })
+		local slots = Slots.parse_slots(puzzle)
+		local j = { puzzle = puzzle, slots = slots }
+		local span
+		for _, slot in ipairs(slots) do
+			if slot.kind == "span" then
+				span = slot
+				break
+			end
+		end
+		T.assert_not_nil(span)
+		T.assert_equal(Topology.span_active_len(j), 3, "empty C _ T shows three tiles")
+		local items = Topology.fixed_letter_items(j)
+		T.assert_equal(items[1].char, "C")
+		T.assert_equal(items[1].pos, 1)
+		T.assert_equal(items[#items].char, "T")
+		T.assert_equal(items[#items].pos, 3)
+		local cells = Topology.span_cells(j)
+		T.assert_equal(cells[1].kind, "fixed")
+		T.assert_equal(cells[2].kind, "empty")
+		T.assert_equal(cells[2].char, "_")
+		T.assert_equal(cells[3].kind, "fixed")
+
+		span.cards = { { ability = { letter = "A" } } }
+		T.assert_equal(Topology.span_active_len(j), 3, "CAT still uses three tiles")
+		cells = Topology.span_cells(j)
+		T.assert_equal(#cells, 3)
+		T.assert_equal(cells[1].kind, "fixed")
+		T.assert_equal(cells[2].kind, "card")
+		T.assert_equal(cells[3].kind, "fixed")
+		items = Topology.fixed_letter_items(j)
+		T.assert_equal(items[#items].pos, 3)
+		T.assert_equal(Topology.span_insert_pos(j, 2, false), 1, "drop left of A stays a 3-letter word")
+
+		span.cards = { { ability = { letter = "A" } }, { ability = { letter = "R" } } }
+		cells = Topology.span_cells(j)
+		T.assert_equal(#cells, 4, "CART expands with no leftover _")
+		T.assert_equal(cells[1].kind, "fixed")
+		T.assert_equal(cells[2].kind, "card")
+		T.assert_equal(cells[3].kind, "card")
+		T.assert_equal(cells[4].kind, "fixed")
+
+		span.cards = {}
+		cells = Topology.span_cells(j)
+		T.assert_equal(cells[2].kind, "empty")
+		T.assert_equal(cells[2].char, "_")
+		T.assert_equal(Topology.span_insert_pos(j, 2, true), 1, "first letter after play fills C_T")
+
+		span.cards = { { ability = { letter = "E" } } }
+		cells = Topology.span_cells(j)
+		T.assert_equal(#cells, 3, "CET stays three tiles")
+		T.assert_equal(cells[2].kind, "card")
+		T.assert_equal(Topology.span_insert_pos(j, 2, true), 2, "N to the right of E is CENT")
+		T.assert_equal(Topology.span_insert_pos(j, 2, false), 1, "N to the left of E is CNET")
+		T.assert_equal(Topology.span_insert_pos(j, 1, true), 1, "drop on C inserts at the left")
+		T.assert_equal(Topology.span_insert_pos(j, 3, false), 2, "drop on T appends")
+
+		Slots.clear_blank_cards(slots)
+		j.puzzle_words = { "CAT" }
+		cells = Topology.span_cells(j)
+		T.assert_equal(#cells, 3, "after Play, empty row is C _ T again")
+		T.assert_equal(cells[2].kind, "empty")
+
+		span.cards = { { ability = { letter = "E" } } }
+		cells = Topology.span_cells(j)
+		T.assert_equal(#cells, 3, "second word CET has no leftover _")
+		T.assert_equal(cells[1].kind, "fixed")
+		T.assert_equal(cells[2].kind, "card")
+		T.assert_equal(cells[3].kind, "fixed")
+		for _, cell in ipairs(cells) do
+			T.assert_false(cell.kind == "empty", "no _ after a letter is placed")
+		end
+
+		cells = Topology.span_cells({
+			puzzle = puzzle,
+			slots = { { kind = "span", cards = {}, min = 1, max = 5 } },
+			puzzle_words = { "CAT" },
+		}, { { ability = { letter = "E" } } })
+		T.assert_equal(#cells, 3, "pattern-area E packs even if span.cards was cleared")
+		T.assert_equal(cells[2].kind, "card")
+		for _, cell in ipairs(cells) do
+			T.assert_false(cell.kind == "empty", "area letter must drop the _ hole")
+		end
+
+		local ghost = { ability = { letter = "A" } }
+		local e = { ability = { letter = "E" } }
+		cells = Topology.span_cells({
+			puzzle = puzzle,
+			slots = { { kind = "span", cards = { ghost }, min = 1, max = 5 } },
+			puzzle_words = { "CAT" },
+		}, { e })
+		T.assert_equal(#cells, 3, "stale A from last word must not widen CET to four tiles")
+		T.assert_equal(cells[2].card, e)
+		for _, cell in ipairs(cells) do
+			T.assert_false(cell.kind == "empty")
+			T.assert_false(cell.card == ghost, "ghost letter from last play must not occupy a tile")
+		end
+
+		span.cards = {}
+		j.puzzle_words = {}
+		T.assert_equal(Topology.span_active_len(j), 3, "fresh puzzle shows C _ T again")
+		items = Topology.fixed_letter_items(j)
+		T.assert_equal(items[#items].pos, 3)
+
+		span.cards = { { ability = { letter = "E" } }, { ability = { letter = "N" } } }
+		T.assert_equal(Topology.span_active_len(j), 4, "CENT expands to four tiles")
+		items = Topology.fixed_letter_items(j)
+		T.assert_equal(items[1].pos, 1)
+		T.assert_equal(items[#items].pos, 4)
+
+		Slots.clear_blank_cards(slots)
+		T.assert_equal(Topology.span_active_len(j), 3, "clearing CENT returns to three tiles")
+		items = Topology.fixed_letter_items(j)
+		T.assert_equal(items[#items].pos, 3)
+	end)
+
 	T.it("computes span active length for suffix anchors", function()
 		local p_ar = PuzzleSpec.resolve_puzzle({ suffix = "AR", min = 3, max = 7 })
 		local j = {
@@ -65,6 +182,50 @@ T.describe("jumbalaya_core jumble patterns", function()
 		T.assert_equal(Topology.span_active_len(j), 3)
 		table.insert(j.slots[1].cards, { ability = { letter = "T" } })
 		T.assert_equal(Topology.span_active_len(j), 4)
+	end)
+
+	T.it("shows _ N T until a letter is placed, then packs ANT", function()
+		local puzzle = PuzzleSpec.resolve_puzzle({ suffix = "NT", min = 3, max = 7 })
+		local slots = Slots.parse_slots(puzzle)
+		local j = { puzzle = puzzle, slots = slots }
+		local cells = Topology.span_cells(j)
+		T.assert_equal(#cells, 3)
+		T.assert_equal(cells[1].kind, "empty")
+		T.assert_equal(cells[1].char, "_")
+		T.assert_equal(cells[2].char, "N")
+		T.assert_equal(cells[3].char, "T")
+
+		local span = slots[1]
+		span.cards = { { ability = { letter = "A" } } }
+		cells = Topology.span_cells(j)
+		T.assert_equal(#cells, 3)
+		T.assert_equal(cells[1].kind, "card")
+		T.assert_equal(cells[2].kind, "fixed")
+		T.assert_equal(cells[3].kind, "fixed")
+	end)
+
+	T.it("drops leftover _ holes on a prefix puzzle once any letter is placed", function()
+		local puzzle = PuzzleSpec.resolve_puzzle({ prefix = "C", min = 3, max = 7 })
+		local slots = Slots.parse_slots(puzzle)
+		local j = { puzzle = puzzle, slots = slots }
+		local cells = Topology.span_cells(j)
+		T.assert_equal(cells[1].char, "C")
+		T.assert_equal(cells[2].kind, "empty")
+		T.assert_equal(cells[3].kind, "empty")
+
+		local span = slots[2]
+		span.cards = { { ability = { letter = "A" } } }
+		cells = Topology.span_cells(j)
+		T.assert_equal(#cells, 2, "CA has no leftover _")
+		T.assert_equal(cells[1].kind, "fixed")
+		T.assert_equal(cells[2].kind, "card")
+
+		span.cards = {}
+		j.puzzle_words = { "CAT" }
+		cells = Topology.span_cells(j)
+		T.assert_equal(cells[1].char, "C")
+		T.assert_equal(cells[2].kind, "empty")
+		T.assert_equal(cells[3].kind, "empty")
 	end)
 
 	T.it("validates unfilled blanks without G", function()

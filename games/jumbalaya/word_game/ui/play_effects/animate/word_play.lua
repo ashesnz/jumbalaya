@@ -15,8 +15,13 @@ function M.present_word_play_after_cards(jumble, j, result, on_hand_cleared, on_
 	local end_hand = result.cleared and RunMode.ends_hand_on_target()
 
 	local function after_cards_cleared()
-		jumble.clear_blank_cards(j.slots)
-		jumble.sync_placement_cards(j.slots)
+		local live = jumble.state and jumble.state()
+		local slots = (live and live.slots) or (j and j.slots)
+		if slots then
+			jumble.clear_blank_cards(slots)
+			jumble.sync_placement_cards(slots)
+		end
+		definition.align_placement_table()
 		if end_hand then
 			j.total_score = result.new_score
 			definition.add_points(result.word_pts)

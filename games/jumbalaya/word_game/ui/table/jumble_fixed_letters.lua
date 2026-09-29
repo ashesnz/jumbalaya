@@ -59,7 +59,9 @@ function M.draw(session)
 	local tile_h = card_h * ts
 
 	love.graphics.setFont(font)
-	local active_len = j.puzzle and j.puzzle.kind == "span" and geo.span_active_len(j) or nil
+	local extra_cards = area.cards
+	local span_cells = j.puzzle and j.puzzle.kind == "span" and topology.span_cells(j, extra_cards) or nil
+	local active_len = span_cells and #span_cells or nil
 	local span_centers = active_len and geo.span_centers(session, active_len) or nil
 	local rigid_centers = not span_centers and geo.slot_centers(session) or nil
 
@@ -149,11 +151,23 @@ function M.draw(session)
 		end
 	end
 
-	local items = topology.fixed_letter_items(j, active_len)
+	local items = topology.fixed_letter_items(j, active_len, extra_cards)
 	if is_boss and rigid_centers then
 		for _, slot in ipairs(j.slots) do
 			if slot.kind == "blank" and not slot.card then
 				draw_blank_underline(rigid_centers[slot.index])
+			end
+		end
+	elseif span_centers then
+		for i, cell in ipairs(span_cells or {}) do
+			if cell.kind == "empty" then
+				draw_single_card(span_centers[i], cell.char or "_", 0, nil)
+			end
+		end
+	elseif rigid_centers then
+		for _, slot in ipairs(j.slots) do
+			if slot.kind == "blank" and not slot.card then
+				draw_single_card(rigid_centers[slot.index], "_", 0, nil)
 			end
 		end
 	end

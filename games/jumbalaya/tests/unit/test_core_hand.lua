@@ -52,12 +52,21 @@ T.describe("jumbalaya_core jumble hand", function()
 		T.assert_equal(wr.mode, "jumble")
 	end)
 
-	T.it("advances to the next puzzle in the list", function()
+	T.it("advances to a different puzzle at random", function()
 		local puzzles = sample_puzzles()
 		local wr = { set = 1, hand_index = 1, target = 25, jumble = { puzzle_index = 1, puzzle_points = 0, puzzle_words = {} } }
 		Hand.start_hand(wr, { puzzle_list = puzzles })
 		Hand.advance_puzzle(wr, puzzles)
 		T.assert_equal(wr.jumble.puzzle_index, 2)
+
+		local third = PuzzleSpec.resolve_puzzle({ suffix = "NT", min = 3, max = 7 })
+		puzzles[#puzzles + 1] = third
+		wr.jumble.puzzle_index = 2
+		local orig_random = math.random
+		math.random = function() return 1 end
+		Hand.advance_puzzle(wr, puzzles)
+		math.random = orig_random
+		T.assert_equal(wr.jumble.puzzle_index, 1)
 	end)
 
 	T.it("prepares and reveals boss word state", function()

@@ -124,7 +124,18 @@ end
 
 function M.advance_puzzle(wr, puzzle_list)
 	if not wr or not wr.jumble then return end
-	M.load_puzzle(wr, wr.jumble.puzzle_index + 1, puzzle_list)
+	puzzle_list = puzzle_list or {}
+	local n = #puzzle_list
+	if n == 0 then return end
+	local current = wr.jumble.puzzle_index or 1
+	local index = 1
+	if n > 1 then
+		index = math.random(n - 1)
+		if index >= current then
+			index = index + 1
+		end
+	end
+	M.load_puzzle(wr, index, puzzle_list)
 end
 
 return M
