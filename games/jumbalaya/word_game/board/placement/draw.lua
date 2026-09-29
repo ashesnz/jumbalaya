@@ -22,7 +22,7 @@ function M.shadows(session)
 
 	love.graphics.setColor(0, 0, 0, BACKDROP_FILL_ALPHA)
 	love.graphics.rectangle('fill', px, py, pw, ph, config.CORNER_RADIUS, config.CORNER_RADIUS)
-	love.graphics.setColor(1, 1, 1, BACKDROP_LINE_ALPHA)
+	love.graphics.setColor(0, 0, 0, BACKDROP_LINE_ALPHA)
 	love.graphics.setLineWidth(1.5)
 	love.graphics.rectangle('line', px, py, pw, ph, config.CORNER_RADIUS, config.CORNER_RADIUS)
 

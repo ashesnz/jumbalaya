@@ -38,5 +38,18 @@ T.describe("engine loop", function()
 			SceneRoots.unregister(root)
 			T.assert_equal(#game.SCENE_ROOTS, 0)
 		end)
+
+		T.it("never draws glued card-layer sprites as scene roots", function()
+			local game = shell.game() or {}
+			shell.bind_game(game)
+			game.SCENE_ROOTS = {}
+
+			local glued = {
+				states = { visible = true },
+				role = { role_type = "Glued" },
+			}
+			SceneRoots.register(glued, "transform")
+			T.assert_equal(#game.SCENE_ROOTS, 0, "raw letter_frame sprites must not paint themselves")
+		end)
 	end)
 end)

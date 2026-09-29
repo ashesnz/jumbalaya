@@ -1,7 +1,6 @@
---[[ letter_card_faces.lua - Shared letter-card atlas + runtime tint helpers ]]
+--[[ letter_faces.lua - Letter-card atlases and face colour ]]
 
 local game = require("word_game.ui.util.game_runtime").game
-
 local Palette = require "word_game.config.visuals.letter_card_palette"
 
 local M = {}
@@ -21,14 +20,34 @@ function M.fill_color(color_key)
 	return Palette.fill(color_key)
 end
 
+function M.color_key_for_card(card)
+	if not card then
+		return Palette.DEFAULT_FACE_COLOR
+	end
+	if card.bonus_card then
+		return Palette.BONUS_FACE_COLOR
+	end
+	return (card.base and card.base.color)
+		or (card.ability and card.ability.letter_color)
+		or (card.config and card.config.card and card.config.card.color)
+		or Palette.DEFAULT_FACE_COLOR
+end
+
+function M.tint_for_card(card)
+	return M.fill_color(M.color_key_for_card(card))
+end
+
 function M.is_letter_face(front)
 	return type(front) == "table" and type(front.letter) == "string" and #front.letter == 1
 end
 
 function M.is_letter_card(card)
-	if not card or not card.config then return false end
-	local front = card.config.card
-	return M.is_letter_face(front)
+	if not card then return false end
+	if M.is_letter_face(card.config and card.config.card) then
+		return true
+	end
+	local letter = card.ability and card.ability.letter
+	return type(letter) == "string" and #letter == 1
 end
 
 function M.atlas(name)
@@ -43,7 +62,7 @@ function M.letters_atlas()
 	return M.atlas("letters")
 end
 
---- Composite one card face in screen space (marketplace fly FX, etc.).
+--- Marketplace fly FX: coloured frame, then the letter glyph.
 function M.draw_composite(x, y, rot, pw, ph, letter, color_key, alpha)
 	if not love or not love.graphics then return end
 	local frame_atlas = M.frame_atlas()
@@ -54,7 +73,6 @@ function M.draw_composite(x, y, rot, pw, ph, letter, color_key, alpha)
 
 	local pos = M.glyph_pos(letter)
 	local fill = M.fill_color(color_key)
-	local fa, fb, fc = fill[1], fill[2], fill[3]
 	local a = alpha or 1
 
 	local function draw_layer(atlas, sprite_pos, tint)
@@ -67,7 +85,7 @@ function M.draw_composite(x, y, rot, pw, ph, letter, color_key, alpha)
 		love.graphics.draw(atlas.image, quad, x, y, rot or 0, pw / cell_w, ph / cell_h, cell_w * 0.5, cell_h * 0.5)
 	end
 
-	draw_layer(frame_atlas, { x = 0, y = 0 }, { fa, fb, fc })
+	draw_layer(frame_atlas, { x = 0, y = 0 }, fill)
 	draw_layer(letters_atlas, pos, { 1, 1, 1 })
 end
 

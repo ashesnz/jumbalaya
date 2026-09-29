@@ -16,7 +16,6 @@ local OWNED_FIELDS = {
 	letter_card_id = true,
 	sort_id = true,
 	under_overlay = true,
-	shared_shadow = true,
 	last_materialized = true,
 	main_menu_logo_applied_scale = true,
 	focused_profile = true,

@@ -5,10 +5,22 @@ local game_access = facade.game_access()
 ---@class (partial) Card : EaseNode
 local game = require("word_game.ui.util.game_runtime").game
 local LetterFaces = require("word_game.ui.cards.letter_faces")
-local LetterPalette = require("word_game.config.visuals.letter_card_palette")
 
 
 local FLAT_LETTER_SETS = { Default = true, Enhanced = true }
+
+local function bind_atlas(sprite, atlas, pos)
+	if not sprite or not atlas then return end
+	sprite.atlas = atlas
+	sprite.scale = {
+		x = atlas.px or (sprite.scale and sprite.scale.x) or 71,
+		y = atlas.py or (sprite.scale and sprite.scale.y) or 95,
+	}
+	if sprite.refresh_scale then
+		sprite:refresh_scale()
+	end
+	sprite:set_sprite_pos(pos)
+end
 
 function Card:set_sprites(_center, _front)
 	if _center and _center.set then
@@ -16,8 +28,7 @@ function Card:set_sprites(_center, _front)
 		local pos = _center.pos
 
 		if self.children.center then
-			self.children.center.atlas = atlas
-			self.children.center:set_sprite_pos(pos)
+			bind_atlas(self.children.center, atlas, pos)
 		else
 			self.children.center = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, atlas, pos)
 			self.children.center.states.hover = self.states.hover
@@ -57,15 +68,12 @@ function Card:set_sprites(_center, _front)
 			local glyph_pos = _front.pos or LetterFaces.glyph_pos(_front.letter)
 
 			if self.children.center then
-				self.children.center.atlas = frame_atlas
-					or self.children.center.atlas
-				self.children.center:set_sprite_pos({ x = 0, y = 0 })
+				bind_atlas(self.children.center, frame_atlas or self.children.center.atlas, { x = 0, y = 0 })
 			end
 
 			if letters_atlas then
 				if self.children.front then
-					self.children.front.atlas = letters_atlas
-					self.children.front:set_sprite_pos(glyph_pos)
+					bind_atlas(self.children.front, letters_atlas, glyph_pos)
 				else
 					self.children.front = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, letters_atlas, glyph_pos)
 					self.children.front.states.hover = self.states.hover
@@ -79,8 +87,7 @@ function Card:set_sprites(_center, _front)
 			local face_atlas = game().TEXTURE_ATLASES[_front.atlas] or game().TEXTURE_ATLASES.letters
 			local face_pos = self.config.card and self.config.card.pos
 			if self.children.front then
-				self.children.front.atlas = face_atlas
-				self.children.front:set_sprite_pos(face_pos)
+				bind_atlas(self.children.front, face_atlas, face_pos)
 			else
 				self.children.front = Sprite(self.T.x, self.T.y, self.T.w, self.T.h, face_atlas, face_pos)
 				self.children.front.states.hover = self.states.hover

@@ -25,6 +25,8 @@ local function qualifies(node)
 	if not node or node.REMOVED then return false end
 	if not node._live_registry then return false end
 	if node.parent then return false end
+	-- Glued sprites (card frame, letter, back) are drawn by the card.
+	if node.role and node.role.role_type == "Glued" then return false end
 	if node.states and node.states.visible == false then return false end
 	return true
 end

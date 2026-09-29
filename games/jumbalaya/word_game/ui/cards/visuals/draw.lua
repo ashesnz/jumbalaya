@@ -1,21 +1,10 @@
---[[ word_game/ui/cards/visuals/draw.lua - Card shadow, tilt, and draw passes ]]
+--[[ word_game/ui/cards/visuals/draw.lua - Card tilt and draw passes ]]
 
 ---@class (partial) Card : EaseNode
 local game = require("word_game.ui.util.game_runtime").game
-local shell = require("word_game.ui.facade").shell()
 local LetterFaces = require("word_game.ui.cards.letter_faces")
-local LetterPalette = require("word_game.config.visuals.letter_card_palette")
 local Tables = require("jumbalaya-engine.util.tables")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
-
-local function letter_card_tint(card)
-	if card.bonus_card then
-		return LetterPalette.fill(LetterPalette.BONUS_FACE_COLOR)
-	end
-	local color_key = (card.base and card.base.color)
-		or (card.ability and card.ability.letter_color)
-	return LetterFaces.fill_color(color_key)
-end
 
 local function draw_bonus_gold_shimmer(card)
 	local center = card.children and card.children.center
@@ -45,11 +34,41 @@ local function draw_sprite(sprite, overlay)
 	end
 end
 
+local function apply_named_shader(sprite, shader, send, overlay)
+	sprite:apply_shader_effect(shader, nil, send, nil, nil, nil, nil, nil, nil, nil, nil, overlay)
+end
+
 local function apply_dissolve(sprite, card, tint)
 	if tint then
-		sprite:apply_shader_effect("dissolve", nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, tint)
+		apply_named_shader(sprite, "dissolve", nil, tint)
 	else
 		sprite:apply_shader_effect("dissolve")
+	end
+end
+
+--- Letter face: coloured JumbalayaCardFrame, then the letter glyph on top.
+local function draw_letter_face(card)
+	local fill = LetterFaces.tint_for_card(card)
+	if not card.greyed then
+		apply_dissolve(card.children.center, card, fill)
+		if card.bonus_card then
+			draw_bonus_gold_shimmer(card)
+		end
+		if card.children.front then
+			apply_dissolve(card.children.front, card)
+		end
+	end
+	if card.debuff then
+		apply_named_shader(card.children.center, "debuff", card.ARGS.send_to_shader, fill)
+		if card.children.front then
+			apply_named_shader(card.children.front, "debuff", card.ARGS.send_to_shader)
+		end
+	end
+	if card.greyed then
+		apply_named_shader(card.children.center, "played", card.ARGS.send_to_shader, fill)
+		if card.children.front then
+			apply_named_shader(card.children.front, "played", card.ARGS.send_to_shader)
+		end
 	end
 end
 
@@ -60,25 +79,6 @@ function Card:sync_shadow_state()
 
 	for _, child in pairs(self.children) do
 		child.VT.scale = self.VT.scale
-	end
-end
-
-function Card:draw_shadow()
-	local wants_shadow = not self.no_shadow
-		and game().SETTINGS.GRAPHICS.shadows == "On"
-		and self.ability.effect ~= "Glass Card"
-		and not self.greyed
-		and ((self.area and self.area ~= game().recycle_stash and self.area.config.type ~= "deck")
-			or not self.area or self.states.drag.is)
-
-	if wants_shadow then
-		self.shadow_height = (self.selected or self.states.drag.is) and 0.35
-			or (self.area and self.area.config.type == 'title_2') and 0.04
-			or 0.1
-		if self.inspecting then
-			self.shadow_height = self.shadow_height + 0.22
-		end
-		game().shared_shadow:apply_shader_effect('dissolve', self.shadow_height)
 	end
 end
 
@@ -121,41 +121,33 @@ function Card:draw_market_widgets()
 end
 
 function Card:draw_front()
+	if LetterFaces.is_letter_card(self) then
+		draw_letter_face(self)
+		return
+	end
+
 	if not self.greyed then
-		if LetterFaces.is_letter_card(self) then
-			local tint = letter_card_tint(self)
-			apply_dissolve(self.children.center, self, tint)
-			if self.bonus_card then
-				draw_bonus_gold_shimmer(self)
-			end
+		if self:is_shader_idle() then
+			draw_sprite(self.children.center)
+			if self.children.front then draw_sprite(self.children.front) end
+		else
+			apply_dissolve(self.children.center, self)
 			if self.children.front then
 				apply_dissolve(self.children.front, self)
-			end
-		else
-			if self:is_shader_idle() then
-				draw_sprite(self.children.center)
-				if self.children.front then draw_sprite(self.children.front) end
-			else
-				apply_dissolve(self.children.center, self)
-				if self.children.front then
-					apply_dissolve(self.children.front, self)
-				end
 			end
 		end
 	end
 
-	if self.debuff or self.greyed then
-		if self.debuff then
-			self.children.center:apply_shader_effect('debuff', nil, self.ARGS.send_to_shader)
-			if self.children.front then
-				self.children.front:apply_shader_effect('debuff', nil, self.ARGS.send_to_shader)
-			end
+	if self.debuff then
+		apply_named_shader(self.children.center, "debuff", self.ARGS.send_to_shader)
+		if self.children.front then
+			apply_named_shader(self.children.front, "debuff", self.ARGS.send_to_shader)
 		end
-		if self.greyed then
-			self.children.center:apply_shader_effect('played', nil, self.ARGS.send_to_shader)
-			if self.children.front then
-				self.children.front:apply_shader_effect('played', nil, self.ARGS.send_to_shader)
-			end
+	end
+	if self.greyed then
+		apply_named_shader(self.children.center, "played", self.ARGS.send_to_shader)
+		if self.children.front then
+			apply_named_shader(self.children.front, "played", self.ARGS.send_to_shader)
 		end
 	end
 end
@@ -194,15 +186,15 @@ function Card:draw(layer)
 	self.hover_tilt = 1
 	if not self.states.visible then return end
 
-	if layer == 'shadow' or layer == 'both' then
-		self:sync_shadow_state()
+	if self.children.back and self.children.back.states then
+		self.children.back.states.visible = self.sprite_facing ~= "front"
 	end
 
-	shell.set_shared_shadow(self.sprite_facing == 'front' and self.children.center or self.children.back)
-
-	if layer == 'shadow' or layer == 'both' then
-		self:draw_shadow()
+	if layer == 'shadow' then
+		return
 	end
+
+	self:sync_shadow_state()
 
 	if layer == 'card' or layer == 'both' then
 		if self.area ~= game().dealt_letters and self.children.focused_ui then

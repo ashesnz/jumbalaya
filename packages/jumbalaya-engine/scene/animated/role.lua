@@ -1,5 +1,6 @@
 
 local Tables = require("jumbalaya-engine.util.tables")
+local SceneRoots = require("jumbalaya-engine.scene.roots")
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 return function(AnimNode)
@@ -28,6 +29,7 @@ function AnimNode:set_role(args)
 		draw_major = args.draw_major or self.role.draw_major,
 	}
 	if self.role.role_type == 'Major' then self.role.major = nil end
+	SceneRoots.sync(self)
 end
 
 --- Walks up the weld chain returning the top Major plus the accumulated

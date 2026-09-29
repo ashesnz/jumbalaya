@@ -87,10 +87,6 @@ function M.set_under_overlay(on)
 	live_game().under_overlay = on and true or false
 end
 
-function M.set_shared_shadow(node)
-	live_game().shared_shadow = node
-end
-
 function M.set_last_materialized(time)
 	live_game().last_materialized = time
 end
