@@ -24,13 +24,6 @@ local function snap_moveable(moveable)
 end
 
 function M.card_area_width()
-	if game().pattern_row and game().pattern_row.area and game().pattern_row.area.T and (game().pattern_row.area.T.w or 0) > 0 then
-		return game().pattern_row.area.T.w
-	end
-	local placement_area = game().pattern_row and game().pattern_row.area
-	if placement_area and placement_area.T and (placement_area.T.w or 0) > 0 then
-		return placement_area.T.w
-	end
 	local ok, playout = pcall(require, "word_game.board.placement.layout")
 	if ok and playout and playout.area_width then
 		local pctx = {
@@ -40,6 +33,9 @@ function M.card_area_width()
 		}
 		local w = playout.area_width(pctx)
 		if w and w > 0 then return w end
+	end
+	if game().pattern_row and game().pattern_row.area and game().pattern_row.area.T and (game().pattern_row.area.T.w or 0) > 0 then
+		return game().pattern_row.area.T.w
 	end
 	return 6.0
 end
@@ -72,7 +68,7 @@ end
 function M.banner_rect()
 	local col = felt.play_column()
 	local slot_h = felt.togo_h()
-	local w = col.w * 0.62
+	local w = M.card_area_width()
 	local h = slot_h * 0.72
 	return {
 		x = col.x + (col.w - w) * 0.5,

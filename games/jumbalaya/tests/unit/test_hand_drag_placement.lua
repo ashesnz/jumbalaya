@@ -301,3 +301,25 @@ T.describe("pattern row placement", function()
 		T.assert_true(card_in_pattern_area(session.area, card), "placed card stays on pattern host")
 	end)
 end)
+
+T.describe("jumble row letter packing", function()
+	T.it("packs play-row letters flush and grows the word instead of leaving a gutter", function()
+		mock_env.reset_game()
+		local game = shell.game()
+		game.CARD_W = 2
+		game.HAND_CARD_SPACING = 0.78
+		local geo = require("word_game.board.jumble.geometry")
+		T.assert_equal(geo.span_slot_spacing(), 1)
+		T.assert_equal(geo.group_width(2, 1, geo.span_slot_spacing()), 2)
+		T.assert_equal(geo.group_width(2, 2, geo.span_slot_spacing()), 4)
+		T.assert_equal(geo.group_width(2, 3, geo.span_slot_spacing()), 6)
+		local config = require("word_game.board.placement.config")
+		T.assert_equal(config.row_width_for_slots(7), 7.6)
+		local ctx = {
+			card_w = function() return 2 end,
+			card_h = function() return 2.75 end,
+			card_limit = function() return 7 end,
+		}
+		T.assert_equal(geo.area_width(ctx), 2 * config.row_width_for_slots(7))
+	end)
+end)

@@ -7,8 +7,10 @@ local hand_size_cfg = require("word_game.model.hand_size")
 
 local M = {}
 
-local SPAN_SLOT_GAP = 0.07
-local SPAN_SLOT_SPACING = 1.0 + SPAN_SLOT_GAP
+--- Flush tiles. The visible word grows via span_active_len, not extra gutters.
+function M.span_slot_spacing()
+	return config.play_slot_spacing()
+end
 
 local function row_slot_cap()
 	return hand_size_cfg.get()
@@ -108,30 +110,20 @@ function M.group_width(card_w, count, spacing)
 end
 
 function M.area_width(ctx)
-	local slots = M.slot_count()
 	local j = jumble_state()
-	if j and j.puzzle and j.puzzle.kind == "span" then
-		local spacing = SPAN_SLOT_SPACING
-		local group_w = M.group_width(ctx:card_w(), slots, spacing)
-		return group_w + 2 * ctx:card_w() * config.ROW_EDGE_PADDING
-	end
 	if is_boss_row(j) then
 		local total = boss_row_metrics(ctx, M.slot_count())
 		return total
 	end
-	-- Non-boss rigid rows longer than the hand cap compress into seven-card width.
-	local cap = row_slot_cap()
-	if slots > cap then
-		slots = cap
-	end
-	return ctx:card_w() * config.row_width_for_slots(slots)
+	-- Always a 7-card tray. Letters pack flush inside it; the border does not move.
+	return ctx:card_w() * config.row_width_for_slots(row_slot_cap())
 end
 
 function M.span_centers(session, active_len)
 	local area = session.area
 	if not area then return {} end
 	local card_w = slot_card_dims(session)
-	local spacing = SPAN_SLOT_SPACING
+	local spacing = M.span_slot_spacing()
 	local group_w = M.group_width(card_w, active_len, spacing)
 	local start_x = area.T.x + (area.T.w - group_w) / 2
 	local centers = {}
@@ -162,7 +154,7 @@ function M.slot_centers(session)
 	end
 	local cap = row_slot_cap()
 	local card_w = session.ctx:card_w()
-	local spacing = config.card_spacing()
+	local spacing = config.play_slot_spacing()
 	local group_w = M.group_width(card_w, count, spacing)
 	if count > cap then
 		card_w = slot_card_dims(session)

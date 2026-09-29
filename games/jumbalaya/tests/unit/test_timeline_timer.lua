@@ -113,6 +113,8 @@ T.describe("Timeline Timer & Shape Math", function()
 		T.assert_true(rect.h > 0.5, "Timeline height must be positive")
 		T.assert_almost_equal(rect.x + rect.w * 0.5, col.x + col.w * 0.5, 0.01, "Timeline must be centered horizontally on play column")
 		T.assert_almost_equal(rect.w, layout.card_area_width(), 0.001, "Timeline width must match card area width")
+		local banner = layout.banner_rect()
+		T.assert_almost_equal(banner.w, rect.w, 0.001, "Score banner width must match the play row")
 	end)
 
 

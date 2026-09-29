@@ -5,8 +5,7 @@
 local game = require("app.runtime").game
 
 local M = {
-	-- Fallback if game().HAND_CARD_SPACING is unset. Played cards use the hand's
-	-- step so 1–7 letters keep the same overlap instead of stretching.
+	-- Hand fan still overlaps. The play row packs flush and grows with the word.
 	PLACEMENT_CARD_SPACING = 0.78,
 	-- Extra padding on each side of the drop row beyond the tight card cluster.
 	ROW_EDGE_PADDING = 0.3,
@@ -30,13 +29,18 @@ function M.card_spacing()
 	return (shell and shell.HAND_CARD_SPACING) or M.PLACEMENT_CARD_SPACING
 end
 
+--- Flush play-row step. Extra letters lengthen the row; they do not add a gutter.
+function M.play_slot_spacing()
+	return 1.0
+end
+
 function M.row_width_for_slots(slots)
-	return 1 + math.max(slots - 1, 0) * M.card_spacing() + 2 * M.ROW_EDGE_PADDING
+	return 1 + math.max(slots - 1, 0) * M.play_slot_spacing() + 2 * M.ROW_EDGE_PADDING
 end
 
 function M.placed_cards_width(card_w, count)
 	if count <= 1 then return card_w end
-	return card_w + (count - 1) * card_w * M.card_spacing()
+	return card_w + (count - 1) * card_w * M.play_slot_spacing()
 end
 
 return M
