@@ -16,15 +16,33 @@ local M = {}
 -- Reused request records: keeps per-frame allocation at zero.
 local play_request, mix_request, retag_request = {}, {}, {}
 
+--- True only when the audio worker is actually serving the mix channel.
+--- `F_SOUND_THREAD` alone is not enough: the worker script lives outside the
+--- Love source tree, so it often never starts — dropping every play/mix.
+local function audio_thread_live()
+	local g = game()
+	if not g or not g.F_SOUND_THREAD then
+		return false
+	end
+	local worker = g.AUDIO_WORKER
+	if not (worker and worker.channel) then
+		return false
+	end
+	if worker.thread and worker.thread.isRunning and not worker.thread:isRunning() then
+		return false
+	end
+	return true
+end
+
+M.audio_thread_live = audio_thread_live
+
 --- Re-tags every live source with a new game state (e.g. back to the menu),
 --- so splash ducking and pause behaviour follow along.
 function M.retag_audio(state_tag)
-	if game().F_SOUND_THREAD then
-		if game().AUDIO_WORKER and game().AUDIO_WORKER.channel then
-			retag_request.op = 'retag'
-			retag_request.state_tag = state_tag
-			game().AUDIO_WORKER.channel:push(retag_request)
-		end
+	if audio_thread_live() then
+		retag_request.op = 'retag'
+		retag_request.state_tag = state_tag
+		game().AUDIO_WORKER.channel:push(retag_request)
 	else
 		MIXER.retag(state_tag)
 	end
@@ -47,10 +65,8 @@ function M.play_sfx(code, rate, gain)
 	req.splash_gain = game().SPLASH_VOL
 	req.in_overlay = not (not game().OVERLAY_MENU)
 
-	if game().F_SOUND_THREAD then
-		if game().AUDIO_WORKER and game().AUDIO_WORKER.channel then
-			game().AUDIO_WORKER.channel:push(req)
-		end
+	if audio_thread_live() then
+		game().AUDIO_WORKER.channel:push(req)
 	else
 		MIXER.play(req, false)
 	end
@@ -59,6 +75,9 @@ end
 --- Per-frame mix update. Chooses the desired music track, tracks score-driven
 --- bed intensity, relaxes global pitch back to normal, and dispatches.
 function M.mix_audio(dt)
+	if not (game() and game().SETTINGS and game().SETTINGS.SOUND) then
+		return
+	end
 	-- Splash screen fades its own layer in/out via this decaying gate.
 	game().SPLASH_VOL = 2 * dt * (game().STATE == game().STATES.SPLASH and 1 or 0) + (game().SPLASH_VOL or 1) * (1 - 2 * dt)
 
@@ -124,10 +143,8 @@ function M.mix_audio(dt)
 	req.splash_gain = game().SPLASH_VOL
 	req.in_overlay = not (not game().OVERLAY_MENU)
 
-	if game().F_SOUND_THREAD then
-		if game().AUDIO_WORKER and game().AUDIO_WORKER.channel then
-			game().AUDIO_WORKER.channel:push(req)
-		end
+	if audio_thread_live() then
+		game().AUDIO_WORKER.channel:push(req)
 	else
 		MIXER.refresh(req)
 		MIXER.sync_beds(req)
