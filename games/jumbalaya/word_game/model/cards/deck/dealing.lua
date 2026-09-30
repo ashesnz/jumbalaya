@@ -65,9 +65,16 @@ end
 
 	M.DEAL_DELAY = 0.14
 
+	local function refill_need(target_size)
+		local held = Deck().held_count()
+		local need = math.max(0, target_size - held)
+		return math.min(need, Deck().draw_pile_count())
+	end
+
 	function M.deal_one_to_hand(target_size)
 		target_size = target_size or hand_size_cfg.get()
 		if not live_game().dealt_letters or Deck().held_count() >= target_size then return false end
+		if Deck().draw_pile_count() <= 0 then return false end
 		local card = take_letter_from_deck(needs_vowel())
 		if not card then return false end
 		return Shared.fly_from_deck_to_hand(card)
@@ -75,7 +82,7 @@ end
 
 	function M.deal_into_hand(target_size, on_complete)
 		target_size = target_size or hand_size_cfg.get()
-		local need = math.max(0, target_size - Deck().held_count())
+		local need = refill_need(target_size)
 		local function finish()
 			Deck().ensure_vowel_in_hand()
 			Deck().commit_pile_hosts({ "hand", "draw" })
@@ -85,26 +92,34 @@ end
 			finish()
 			return 0
 		end
-		for _ = 1, need do
+		local timeline = live_game().TIMELINE
+		if timeline and timeline.enqueue then
+			for _ = 1, need do
+				Scheduler.add{
+					mode = "window",
+					delay = Deck().DEAL_DELAY,
+					blocking = true,
+					func = function()
+						Deck().deal_one_to_hand(target_size)
+						return true
+					end,
+				}
+			end
 			Scheduler.add{
-				mode = "window",
-				delay = Deck().DEAL_DELAY,
+				mode = "delayed",
+				delay = 0.08,
 				blocking = true,
 				func = function()
-					Deck().deal_one_to_hand(target_size)
+					finish()
 					return true
 				end,
 			}
+		else
+			for _ = 1, need do
+				Deck().deal_one_to_hand(target_size)
+			end
+			finish()
 		end
-		Scheduler.add{
-			mode = "delayed",
-			delay = 0.08,
-			blocking = true,
-			func = function()
-				finish()
-				return true
-			end,
-		}
 		return need
 	end
 

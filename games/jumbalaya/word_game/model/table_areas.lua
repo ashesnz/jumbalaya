@@ -91,6 +91,15 @@ function M.recycle_cards(state)
 end
 
 function M.pattern_cards(state)
+	-- Live pattern area is authoritative while it exists, including when empty
+	-- after play. Falling back to a stale store pile would keep held_count at 7
+	-- and block hand refill from the draw pile.
+	if state == nil then
+		local area = live_game() and live_game().pattern_row and live_game().pattern_row.area
+		if area then
+			return area.cards or {}
+		end
+	end
 	return pile_or_host(state, "pattern", function()
 		return live_game() and live_game().pattern_row and live_game().pattern_row.area
 			and live_game().pattern_row.area.cards or {}
