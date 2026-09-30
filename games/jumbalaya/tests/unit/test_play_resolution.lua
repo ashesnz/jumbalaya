@@ -78,6 +78,36 @@ T.describe("play resolution", function()
 		effects.show_puzzle_bank_feedback = orig_feedback
 	end)
 
+	T.it("clears the hand when banked score meets the classic stage target", function()
+		local play = require("word_game.model.jumble_play")
+		local resolution = require("word_game.ui.play_effects.resolution")
+		local wr = base_wr()
+		wr.target = 25
+		wr.jumble.solved = true
+		wr.jumble.puzzle_points = 25
+		wr.jumble.puzzle_multi = 1.0
+		wr.jumble.total_score = 0
+		mock_env.publish_game({
+			word_round = wr,
+			word_score_animating = false,
+			run_mode = "classic",
+		})
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.Jumble = require("word_game.model.jumble")
+		WORD_GAME.Play = play
+
+		local cleared
+		play.on_hand_cleared = function()
+			cleared = true
+		end
+
+		local result = resolution.resolve(play, { instant = true })
+		T.assert_equal(result.kind, "bank_puzzle")
+		T.assert_true(result.cleared)
+		T.assert_true(cleared, "meeting the target should celebrate and hand off to the marketplace")
+		T.assert_equal(mock_env.game_state().word_round.jumble.puzzle_index, 1)
+	end)
+
 	T.it("banks a scored puzzle when the live row is empty but slots still list old cards", function()
 		local play = require("word_game.model.jumble_play")
 		local resolution = require("word_game.ui.play_effects.resolution")

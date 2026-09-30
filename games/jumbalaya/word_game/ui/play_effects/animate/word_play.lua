@@ -26,7 +26,9 @@ function M.present_word_play_after_cards(jumble, j, result, on_hand_cleared, on_
 			definition.add_points(result.word_pts)
 			definition.set_word_score_animating(true)
 			definition.align_placement_table()
-			on_hand_cleared()
+			if on_hand_cleared then
+				on_hand_cleared()
+			end
 			if on_complete then
 				on_complete({ word = result.word, points = result.new_pts, multi = result.new_multi })
 			end

@@ -36,7 +36,9 @@ function M.resolve(play_module, opts)
 		if ends_hand_on_target(result.cleared) then
 			effects.set_word_score_animating(true)
 			effects.add_points(result.puzzle_total)
-			play_module.on_hand_cleared()
+			if play_module.on_hand_cleared then
+				play_module.on_hand_cleared()
+			end
 		else
 			effects.show_puzzle_bank_feedback(result.puzzle_total)
 			opts.instant = opts.instant ~= false

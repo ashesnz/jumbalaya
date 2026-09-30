@@ -143,10 +143,6 @@ function M.open_then_dealer()
 		return
 	end
 	session_state.reset(trade_model.roll_offer())
-	if affordability.cannot_afford_anything(session_state.offer(), session_state.session()) then
-		M.finish_trade()
-		return
-	end
 	M.open_overlay()
 end
 

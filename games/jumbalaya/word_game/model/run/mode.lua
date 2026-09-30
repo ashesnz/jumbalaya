@@ -60,9 +60,9 @@ function M.is_time_run()
 	return not M.is_classic()
 end
 
---- Classic lets the player keep scoring on the same puzzle after the target is met.
+--- Meeting the stage target ends the hand in both classic and time run.
 function M.ends_hand_on_target()
-	return not M.is_classic()
+	return true
 end
 
 function M.classic_stage_complete()
