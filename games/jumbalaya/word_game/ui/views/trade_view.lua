@@ -17,32 +17,15 @@ local function trade_signature(state)
 	)
 end
 
-local function delegate_index(view, key)
-	local own = TradeView[key]
-	if own ~= nil then return own end
-	local inner = view._inner
-	if inner then return inner[key] end
-	return nil
-end
-
---- Marketplace body host: wraps retained panel in the views layer.
+--- Marketplace body host: a real retained panel (same as LayoutView on
+--- working-version). A thin proxy here makes set_role/hard_set_T write the
+--- wrapper instead of the inner tree, which misaligns cards and buttons.
 function TradeView.create_marketplace_body(ctx, config, definition)
 	local trade_definition = require("word_game.ui.trade.definition")
-	local inner = Panels.create({
+	return Panels.create({
 		definition = definition or trade_definition.marketplace_body_definition(ctx),
 		config = config or { offset = { x = 0, y = 0 }, align = "cm" },
 	})
-	local view = setmetatable({
-		_inner = inner,
-		store = nil,
-		_signature = nil,
-		_revision = 0,
-	}, TradeView)
-	setmetatable(view, { __index = function(t, k) return delegate_index(t, k) end })
-	view.T = inner.T
-	view.VT = inner.VT
-	view.root_node = inner.root_node
-	return view
 end
 
 function TradeView.new(opts)
