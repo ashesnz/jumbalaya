@@ -142,6 +142,18 @@ end
 
 function M.draw_attention_passes()
 	if hand_clear_focus_active() then return end
+	local game = runtime()
+	local live = game.LIVE and game.LIVE.UIBOX
+	if live then
+		for _, panel in pairs(live) do
+			if panel and not panel.REMOVED and panel.spawn_attention then
+				love.graphics.push()
+				panel:translate_container()
+				panel:draw()
+				love.graphics.pop()
+			end
+		end
+	end
 	if WORD_GAME_UI.FloatUpText then
 		WORD_GAME_UI.FloatUpText.draw_pass()
 	end
