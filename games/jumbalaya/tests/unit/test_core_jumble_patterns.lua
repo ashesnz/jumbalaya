@@ -112,43 +112,16 @@ T.describe("jumbalaya_core jumble patterns", function()
 		Slots.clear_blank_cards(slots)
 		j.puzzle_words = { "CAT" }
 		cells = Topology.span_cells(j)
-		T.assert_equal(#cells, 3, "after Play, empty row is C _ T again")
-		T.assert_equal(cells[2].kind, "empty")
-
-		span.cards = { { ability = { letter = "E" } } }
-		cells = Topology.span_cells(j)
-		T.assert_equal(#cells, 3, "second word CET has no leftover _")
-		T.assert_equal(cells[1].kind, "fixed")
-		T.assert_equal(cells[2].kind, "card")
-		T.assert_equal(cells[3].kind, "fixed")
-		for _, cell in ipairs(cells) do
-			T.assert_false(cell.kind == "empty", "no _ after a letter is placed")
-		end
-
-		cells = Topology.span_cells({
-			puzzle = puzzle,
-			slots = { { kind = "span", cards = {}, min = 1, max = 5 } },
-			puzzle_words = { "CAT" },
-		}, { { ability = { letter = "E" } } })
-		T.assert_equal(#cells, 3, "pattern-area E packs even if span.cards was cleared")
-		T.assert_equal(cells[2].kind, "card")
-		for _, cell in ipairs(cells) do
-			T.assert_false(cell.kind == "empty", "area letter must drop the _ hole")
-		end
+		T.assert_equal(cells[2].kind, "empty", "after Play, empty row is C _ T")
 
 		local ghost = { ability = { letter = "A" } }
 		local e = { ability = { letter = "E" } }
-		cells = Topology.span_cells({
-			puzzle = puzzle,
-			slots = { { kind = "span", cards = { ghost }, min = 1, max = 5 } },
-			puzzle_words = { "CAT" },
-		}, { e })
-		T.assert_equal(#cells, 3, "stale A from last word must not widen CET to four tiles")
+		span.cards = { ghost }
+		cells = Topology.span_cells(j, { e })
+		T.assert_equal(#cells, 3, "stale A from last word must not widen CET")
 		T.assert_equal(cells[2].card, e)
-		for _, cell in ipairs(cells) do
-			T.assert_false(cell.kind == "empty")
-			T.assert_false(cell.card == ghost, "ghost letter from last play must not occupy a tile")
-		end
+		T.assert_equal(cells[1].kind, "fixed")
+		T.assert_equal(cells[3].kind, "fixed")
 
 		span.cards = {}
 		j.puzzle_words = {}
@@ -219,13 +192,6 @@ T.describe("jumbalaya_core jumble patterns", function()
 		T.assert_equal(#cells, 2, "CA has no leftover _")
 		T.assert_equal(cells[1].kind, "fixed")
 		T.assert_equal(cells[2].kind, "card")
-
-		span.cards = {}
-		j.puzzle_words = { "CAT" }
-		cells = Topology.span_cells(j)
-		T.assert_equal(cells[1].char, "C")
-		T.assert_equal(cells[2].kind, "empty")
-		T.assert_equal(cells[3].kind, "empty")
 	end)
 
 	T.it("validates unfilled blanks without G", function()

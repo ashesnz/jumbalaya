@@ -21,7 +21,6 @@ function M.present_word_play_after_cards(jumble, j, result, on_hand_cleared, on_
 			jumble.clear_blank_cards(slots)
 			jumble.sync_placement_cards(slots)
 		end
-		definition.align_placement_table()
 		if end_hand then
 			j.total_score = result.new_score
 			definition.add_points(result.word_pts)

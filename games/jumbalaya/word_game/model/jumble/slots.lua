@@ -57,7 +57,7 @@ function M.sync_placement_cards(slots)
 			area.cards[#area.cards + 1] = slot.card
 		elseif slot.kind == "span" then
 			for _, card in ipairs(slot.cards or {}) do
-				if card and not card.REMOVED and not (card.states and card.states.visible == false) then
+				if card and not card.REMOVED then
 					area.cards[#area.cards + 1] = card
 				end
 			end
@@ -122,7 +122,7 @@ function M.blank_slot_index_for_x(session, x)
 			end
 		end
 		local after_center = centers[cell_i] ~= nil and x >= centers[cell_i]
-		return span_i, topology.span_insert_pos(j, cell_i, after_center, session.area and session.area.cards)
+		return span_i, topology.span_insert_pos(j, cell_i, after_center, extra)
 	end
 
 	local slot_i = geo.slot_index_at_x(session, x)

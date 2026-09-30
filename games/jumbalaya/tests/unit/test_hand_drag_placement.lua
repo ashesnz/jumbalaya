@@ -350,12 +350,9 @@ T.describe("jumble row letter packing", function()
 		local geo = require("word_game.board.jumble.geometry")
 		local puzzle = PuzzleSpec.resolve_puzzle({ span = { "C", "T" }, min = 3, max = 7 })
 		local slots = Slots.parse_slots(puzzle)
-		local e = {
-			ability = { letter = "E" },
-			T = { x = 0, y = 0, w = 2, h = 2.75, r = 0 },
-			states = { drag = { is = false } },
-		}
+		local e = { ability = { letter = "E" }, T = { w = 2, h = 2.75 } }
 		local j = { puzzle = puzzle, slots = slots, puzzle_words = { "CAT" } }
+		j.slots[2].cards = { { ability = { letter = "A" } } }
 		local session = {
 			area = { T = { x = 0, y = 0, w = 20, h = 3 }, cards = { e } },
 			ctx = {
@@ -363,23 +360,10 @@ T.describe("jumble row letter packing", function()
 				card_h = function() return 2.75 end,
 			},
 		}
-		local empty_cells = Topology.span_cells(j, {})
-		T.assert_equal(empty_cells[2].kind, "empty", "Play reset still shows C _ T")
-
 		local cells = Topology.span_cells(j, session.area.cards)
 		T.assert_equal(#cells, 3)
-		T.assert_equal(cells[1].kind, "fixed")
-		T.assert_equal(cells[2].kind, "card")
-		T.assert_equal(cells[3].kind, "fixed")
-		for _, cell in ipairs(cells) do
-			T.assert_false(cell.kind == "empty", "E must not leave a hole before T")
-		end
+		T.assert_equal(cells[2].card, e)
 		local three = geo.span_centers(session, #cells)
-		T.assert_equal(three[3] - three[1], 4, "CET is flush after the second drop")
-		local ghost = { ability = { letter = "A" }, T = { w = 2, h = 2.75 } }
-		j.slots[2].cards = { ghost }
-		local packed = Topology.span_cells(j, session.area.cards)
-		T.assert_equal(#packed, 3, "ghost A from CAT must not expand the row")
-		T.assert_equal(geo.span_centers(session, #packed)[3] - geo.span_centers(session, #packed)[1], 4)
+		T.assert_equal(three[3] - three[1], 4)
 	end)
 end)

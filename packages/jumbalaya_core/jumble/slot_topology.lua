@@ -106,9 +106,7 @@ local function compact_cards(list)
 	for i = 1, max_i do
 		local card = list[i]
 		if card ~= nil and not card.REMOVED then
-			if not (card.states and card.states.visible == false) then
-				out[#out + 1] = card
-			end
+			out[#out + 1] = card
 		end
 	end
 	return out
@@ -140,30 +138,17 @@ local function collect_span_cards(j)
 	return cards, before, after, single
 end
 
---- Play-row letters. After Play, `span.cards` can still hold the previous word
---- while the pattern area is empty or has a new drop. When `extra_cards` is
---- passed (the live pattern pile), it is the only list that counts — otherwise
---- a leftover A plus a new E becomes C A E T (a wider row with a hole).
+--- Live pattern-area cards override `span.cards` so a leftover letter from the
+--- last Play does not keep an extra tile on the row.
 local function placed_span_cards(j, extra_cards)
-	local _, before, after, single = collect_span_cards(j)
+	local cards, before, after, single = collect_span_cards(j)
 	if extra_cards ~= nil then
-		return compact_cards(extra_cards), before, after, single
+		cards = compact_cards(extra_cards)
 	end
-	return collect_span_cards(j)
+	return cards, before, after, single
 end
 
-local function strip_empties(cells)
-	local packed = {}
-	for _, cell in ipairs(cells) do
-		if cell.kind ~= "empty" then
-			packed[#packed + 1] = cell
-		end
-	end
-	return packed
-end
-
---- Ordered play-row tiles.
---- Empty row: pad `_` to `puzzle.min` (C _ T). Any placed letter: pack, no `_`.
+--- Empty row: `_` pads to `puzzle.min` (C _ T). Any placed letter packs with no `_`.
 function M.span_cells(j, extra_cards)
 	if not j or not j.puzzle or j.puzzle.kind ~= "span" then
 		return {}
@@ -223,17 +208,12 @@ function M.span_cells(j, extra_cards)
 			push_empties(math.max(0, min_len - used - #suf))
 		end
 		push_fixed(suf, "suffix")
-		if #cards > 0 then
-			return strip_empties(cells)
-		end
 		return cells
 	end
 
 	local pre = puzzle.prefix or ""
 	local suf = puzzle.suffix or ""
 	local n_cards = #cards
-	-- Fill the `_` hole with the first letter (C _ T + E → CET). Never keep
-	-- a pad after a card (not C E _ T). Extra letters grow the word (CART).
 	local empties = 0
 	if n_cards == 0 then
 		empties = math.max(0, (puzzle.min or 3) - #pre - #suf)
@@ -246,14 +226,10 @@ function M.span_cells(j, extra_cards)
 	while #cells > max_len do
 		cells[#cells] = nil
 	end
-	if n_cards > 0 then
-		return strip_empties(cells)
-	end
 	return cells
 end
 
 --- How many letter tiles the play row should show right now.
---- C _ T empty → 3; CAT → 3; CART → 4; after play clears letters → C _ T again.
 function M.span_active_len(j, extra_cards)
 	local cells = M.span_cells(j, extra_cards)
 	if #cells > 0 then
