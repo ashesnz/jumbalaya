@@ -9,6 +9,7 @@ local game_access = facade.game_access()
 local shell = facade.shell()
 local geometry = require("word_game.ui.feedback.word_feedback_geometry")
 local spawn = require("word_game.ui.feedback.word_feedback_spawn")
+local Layout = require("word_game.ui.layout")
 
 local RunMode = facade.run_mode()
 
@@ -16,36 +17,89 @@ local M = {}
 
 local INVALID_WORD_TEXT = "Not a valid word!"
 local MUST_PLAY_TEXT = "Word must be played!"
+local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
+local SHADOW = { 0.07, 0.05, 0.08, 0.92 }
+local DEFAULT_RED = { 1, 0.18, 0.22, 1 }
+
+local overlay_font
+local messages = {}
+
+local function board_font()
+	if overlay_font then return overlay_font end
+	local ok, font = pcall(love.graphics.newFont, FONT_FILE, 42)
+	if not ok or not font then
+		font = love.graphics.newFont(42)
+	end
+	font:setFilter("linear", "linear")
+	overlay_font = font
+	return font
+end
+
+local function fallback_rect(offset_y)
+	offset_y = offset_y or 0
+	local felt = Layout.felt_rect and Layout.felt_rect()
+	if felt then
+		return {
+			x = felt.x,
+			y = felt.y + felt.h * 0.38 + offset_y,
+			w = felt.w,
+			h = 0.85,
+		}
+	end
+	return {
+		x = 1.2,
+		y = 4.0 + offset_y,
+		w = (game().TILE_W or 20) - 2.4,
+		h = 0.85,
+	}
+end
+
+local function board_message_rect(offset_y)
+	offset_y = offset_y or 0
+	local gap = geometry.hand_gap_metrics()
+	if gap then
+		local h = math.max(0.7, gap.inner_h)
+		return {
+			x = gap.cx - math.max(6, gap.gap_w) * 0.5,
+			y = gap.cy - h * 0.5 + offset_y,
+			w = math.max(6, gap.gap_w),
+			h = h,
+		}
+	end
+	local row = geometry.hand_dealt_metrics()
+	if row then
+		local h = 0.75
+		return {
+			x = row.left,
+			y = row.top - h - 0.1 + offset_y,
+			w = math.max(6, row.w),
+			h = h,
+		}
+	end
+	return fallback_rect(offset_y)
+end
+
+local function push_message(text, colour, hold, rect)
+	if not text or text == "" then return end
+	messages[#messages + 1] = {
+		text = tostring(text),
+		colour = colour or (game().C and game().C.RED) or DEFAULT_RED,
+		x = rect.x,
+		y = rect.y,
+		w = rect.w,
+		h = rect.h,
+		age = 0,
+		life = hold or 1.6,
+		alpha = 1,
+	}
+end
 
 function M.spawn_attention(args)
 	spawn.spawn_attention(args)
 end
 
 function M.show(text, colour, hold, offset_y)
-	local spawn_fn = M.spawn_attention
-	local gap = geometry.hand_gap_metrics()
-	if not gap then
-		if spawn_fn then
-			spawn_fn({ text = text, scale = 0.5, hold = hold or 1.5,
-				align = "cm", colour = colour or game().C.RED })
-		end
-		return
-	end
-	if not spawn_fn then return end
-	local scale = math.min(0.68, math.max(0.36, gap.inner_h * 1.45))
-	spawn_fn({
-		text = text,
-		scale = scale,
-		maxw = gap.gap_w,
-		hold = hold or 1.5,
-		align = "cm",
-		major = game().ROOM_ATTACH,
-		offset = {
-			x = gap.cx - game().TILE_W * 0.5,
-			y = gap.cy - game().TILE_H * 0.5 + (offset_y or 0),
-		},
-		colour = colour or game().C.RED,
-	})
+	push_message(text, colour, hold, board_message_rect(offset_y))
 end
 
 function M.show_hand_centered(text, colour, hold, offset_y)
@@ -54,20 +108,11 @@ function M.show_hand_centered(text, colour, hold, offset_y)
 		M.show(text, colour, hold, offset_y)
 		return
 	end
-	if not spawn_attention then return end
-	local scale = math.min(0.72, math.max(0.38, row.inner_h * 1.35))
-	spawn_attention({
-		text = text,
-		scale = scale,
-		maxw = row.gap_w,
-		hold = hold or 1.5,
-		align = "cm",
-		major = game().ROOM_ATTACH,
-		offset = {
-			x = row.cx - game().TILE_W * 0.5,
-			y = row.cy - game().TILE_H * 0.5 + (offset_y or 0),
-		},
-		colour = colour or game().C.RED,
+	push_message(text, colour, hold, {
+		x = row.left,
+		y = row.top + (offset_y or 0),
+		w = math.max(6, row.w),
+		h = math.max(0.7, row.inner_h * 0.45),
 	})
 end
 
@@ -113,23 +158,13 @@ function M.show_above_hand_centered(text, colour, hold, offset_y)
 		M.show(text, colour, hold, offset_y)
 		return
 	end
-	if not spawn_attention then return end
-	local zone_h = math.max(0.18, row.inner_h * 0.34)
-	local margin = math.max(0.06, row.inner_h * 0.08)
-	local cy = row.top - margin - zone_h * 0.5
-	local scale = math.min(0.78, math.max(0.42, zone_h * 1.55))
-	spawn_attention({
-		text = text,
-		scale = scale,
-		maxw = row.gap_w,
-		hold = hold or 1.5,
-		align = "cm",
-		major = game().ROOM_ATTACH,
-		offset = {
-			x = row.cx - game().TILE_W * 0.5,
-			y = cy - game().TILE_H * 0.5 + (offset_y or 0),
-		},
-		colour = colour or game().C.RED,
+	local h = math.max(0.7, row.inner_h * 0.34)
+	local margin = math.max(0.08, row.inner_h * 0.08)
+	push_message(text, colour, hold, {
+		x = row.left,
+		y = row.top - margin - h + (offset_y or 0),
+		w = math.max(6, row.w),
+		h = h,
 	})
 end
 
@@ -144,11 +179,11 @@ function M.show_classic_proceed(opts)
 end
 
 function M.show_invalid()
-	M.show(INVALID_WORD_TEXT, game().C.RED, 1.6)
+	M.show(INVALID_WORD_TEXT, game().C.RED, 1.8)
 end
 
 function M.show_must_play()
-	M.show(MUST_PLAY_TEXT, game().C.RED, 1.6)
+	M.show(MUST_PLAY_TEXT, game().C.RED, 1.8)
 end
 
 function M.is_invalid_reason(reason)
@@ -188,6 +223,72 @@ function M.flush_pending()
 	for _, item in ipairs(pending) do
 		M.show(item.text, item.colour, item.hold, item.offset_y)
 	end
+end
+
+function M.active_count()
+	return #messages
+end
+
+function M.clear()
+	messages = {}
+end
+
+function M.draw_pass()
+	local dt = 0.016
+	if love and love.timer and love.timer.getDelta then
+		dt = math.min(0.05, love.timer.getDelta() or 0.016)
+	end
+	for i = #messages, 1, -1 do
+		local msg = messages[i]
+		msg.age = msg.age + dt
+		local fade_at = msg.life * 0.5
+		if msg.age <= fade_at then
+			msg.alpha = 1
+		else
+			msg.alpha = math.max(0, 1 - (msg.age - fade_at) / math.max(0.01, msg.life - fade_at))
+		end
+		if msg.age >= msg.life or msg.alpha <= 0 then
+			table.remove(messages, i)
+		end
+	end
+	if #messages == 0 then return end
+
+	local g = game()
+	if not g or not g.ROOM or not g.ROOM.translate_container then return end
+	local ts = (g.TILESCALE or 1) * (g.TILESIZE or 20)
+	local font = board_font()
+	local prev_font = love.graphics.getFont()
+	local cr, cg, cb, ca = love.graphics.getColor()
+	local prev_shader = love.graphics.getShader()
+
+	love.graphics.push()
+	love.graphics.setShader()
+	g.ROOM:translate_container()
+	love.graphics.setFont(font)
+	for _, msg in ipairs(messages) do
+		local a = msg.alpha or 1
+		local c = msg.colour or DEFAULT_RED
+		local x = msg.x * ts
+		local y = msg.y * ts
+		local w = msg.w * ts
+		if g.DEBUG then
+			love.graphics.setColor(1, 0, 0, 0.35 * a)
+			love.graphics.rectangle("line", x, y, w, msg.h * ts)
+		end
+		love.graphics.setColor(SHADOW[1], SHADOW[2], SHADOW[3], SHADOW[4] * a)
+		love.graphics.printf(msg.text, x + 2, y + 2, w, "center")
+		love.graphics.setColor(c[1], c[2], c[3], (c[4] or 1) * a)
+		love.graphics.printf(msg.text, x, y, w, "center")
+	end
+	love.graphics.pop()
+
+	if prev_shader then
+		love.graphics.setShader(prev_shader)
+	else
+		love.graphics.setShader()
+	end
+	if prev_font then love.graphics.setFont(prev_font) end
+	love.graphics.setColor(cr, cg, cb, ca)
 end
 
 spawn_attention = M.spawn_attention

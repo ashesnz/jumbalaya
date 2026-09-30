@@ -154,6 +154,7 @@ function M.draw_attention_passes()
 			end
 		end
 	end
+	require("word_game.ui.feedback.word_feedback").draw_pass()
 	if WORD_GAME_UI.FloatUpText then
 		WORD_GAME_UI.FloatUpText.draw_pass()
 	end
