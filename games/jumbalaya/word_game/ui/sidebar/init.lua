@@ -201,13 +201,12 @@ function WordSidebar.rebuild()
 end
 
 function WordSidebar.end_run()
-	local stage_btn = WORD_GAME_UI.SidebarStageButton
-	if stage_btn and stage_btn.press then
-		stage_btn.press()
-		return
-	end
 	if WORD_GAME_UI.VoucherDiscard and WORD_GAME_UI.VoucherDiscard.end_run then
-		WORD_GAME_UI.VoucherDiscard.end_run()
+		return WORD_GAME_UI.VoucherDiscard.end_run()
+	end
+	local Match = facade.match()
+	if Match and Match.end_run then
+		return Match.end_run({ won = false })
 	end
 end
 

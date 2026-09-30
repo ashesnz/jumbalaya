@@ -321,4 +321,34 @@ T.describe("table board boot", function()
 		T.assert_nil(game.screenwipe, "new run should not block HUD behind a screen wipe")
 		T.assert_nil(game.INPUT.locks.wipe, "wipe lock should not be set when starting a run")
 	end)
+
+	T.it("notify_then_start_run closes overlay then begins without the click node", function()
+		mock_env.setup()
+		local lifecycle = require("app.callbacks.controllers.run_lifecycle")
+		local ViewHost = require("jumbalaya-engine.panels.view_host")
+		local game = shell.game()
+		game.TIMELINE = Scheduler()
+		game.SETTINGS = game.SETTINGS or { paused = true }
+		game.INPUT = game.INPUT or { locks = {} }
+		game.INPUT.shift_context_layer = function() end
+		game.queue_settings_write = function() end
+		game.discard_run = function() end
+		game.start_run = function() end
+		game.start_gameplay_board = function() end
+		game.OVERLAY_MENU = ViewHost.wrap({
+			T = { w = 1, h = 1 },
+			VT = {},
+			config = { id = "overlay" },
+			children = {},
+			root_node = {},
+			REMOVED = false,
+			remove = function() end,
+		})
+		local overlay_button = { config = { id = "from_game_over", button = "notify_then_start_run" } }
+
+		lifecycle.notify_then_start_run(overlay_button)
+
+		T.assert_nil(game.OVERLAY_MENU, "match overlay must close before the next run")
+		T.assert_equal(game.SETTINGS.paused, false)
+	end)
 end)

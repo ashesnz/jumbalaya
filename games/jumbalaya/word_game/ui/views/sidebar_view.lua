@@ -277,7 +277,9 @@ function SidebarView:draw(renderer)
 end
 
 function SidebarView:consume_click(mx, my)
-	return stage_button.consume_click(mx, my, self:layout().end_button)
+	local layout = require("word_game.ui.sidebar.layout")
+	local rect = layout.to_world_rect(self:layout().end_button) or layout.end_run_rect()
+	return stage_button.consume_click(mx, my, rect)
 end
 
 function SidebarView:ensure_deck_count()

@@ -68,7 +68,7 @@
 	jumble_hud_refresh () — score_banner — model/jumble/hand.lua; re-emitted from PLAY_RESOLVED
 	layout_refresh () — layout — handler only (prefer LayoutRequest.refresh in model)
 	layout_refresh_placement () — layout — composed from boss_puzzle_revealed
-	match_ended (won) — play — model/game/loop.lua
+	match_ended (won) — play — model/run/match.lua; fallback Game:update_match_end
 	puzzle_applied () — play — model/jumble/hand.lua
 	round_restore_from_save (wr) — play — model/round/init.lua
 	run_backgrounds () — layout — model/game/run.lua

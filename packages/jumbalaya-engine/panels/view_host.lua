@@ -7,16 +7,31 @@ local ViewHost = {}
 ViewHost.__index = ViewHost
 
 local function delegate_index(view, key)
-	if ViewHost[key] ~= nil then
-		return ViewHost[key]
+	local method = rawget(ViewHost, key)
+	if method ~= nil then
+		return method
 	end
 	local own = rawget(view, key)
 	if own ~= nil then
 		return own
 	end
-	local inner = view._inner
-	if inner then
-		return inner[key]
+	local inner = rawget(view, "_inner")
+	while inner ~= nil and inner ~= view do
+		local inner_own = rawget(inner, key)
+		if inner_own ~= nil then
+			return inner_own
+		end
+		local mt = getmetatable(inner)
+		local idx = mt and mt.__index
+		if idx == delegate_index then
+			inner = rawget(inner, "_inner")
+		elseif type(idx) == "table" then
+			return idx[key]
+		elseif type(idx) == "function" then
+			return idx(inner, key)
+		else
+			return nil
+		end
 	end
 	return nil
 end

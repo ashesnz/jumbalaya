@@ -3,7 +3,6 @@
 local game = require("word_game.ui.util.game_runtime").game
 
 local facade = require("word_game.ui.facade")
-local InputLock = facade.input_lock()
 local Match = facade.match()
 local rules = require("word_game.ui.perks.discard_bin.rules")
 local counter = require("word_game.ui.perks.discard_bin.counter")
@@ -19,8 +18,6 @@ function M.should_show_end_run()
 end
 
 function M.end_run()
-	if rules.voucher_discard_unlocked() and not counter.is_full() then return false end
-	if InputLock.is_table_busy() then return false end
 	return Match.end_run({ won = false })
 end
 

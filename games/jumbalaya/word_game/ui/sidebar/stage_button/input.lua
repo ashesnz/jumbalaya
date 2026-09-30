@@ -4,7 +4,6 @@ local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
 local table_discard = require("word_game.ui.perks.discard_bin")
-local action_dispatch = require("app.input.action_dispatch")
 local Funcs = require("app.callbacks.funcs")
 local state = require("word_game.ui.sidebar.stage_button.state")
 local animate = require("word_game.ui.sidebar.stage_button.animate")
@@ -34,11 +33,7 @@ function M.point_in_button(rect, tx, ty)
 	if not rect or not w.visible then return false end
 	tx, ty = tx or pointer_tile()
 	if not tx or not ty then return false end
-	local attach = game().SIDEBAR_ATTACH and game().SIDEBAR_ATTACH.T
-	if not attach then return false end
-	local x = attach.x + rect.x
-	local y = attach.y + rect.y
-	return tx >= x and tx <= x + rect.w and ty >= y and ty <= y + rect.h
+	return tx >= rect.x and tx <= rect.x + rect.w and ty >= rect.y and ty <= rect.y + rect.h
 end
 
 local function commit_pending_score()
@@ -90,10 +85,10 @@ function M.consume_click(mx, my, rect)
 	if game().OVERLAY_MENU then return false end
 	local w = widget()
 	if not w.visible then return false end
+	rect = rect or require("word_game.ui.sidebar.layout").end_run_rect()
 	if not M.point_in_button(rect, mx, my) then return false end
 	local action = w.button_action
 	if action and Funcs.get(action) then
-		action_dispatch.dispatch_func(action)
 		Funcs.dispatch(action)
 		return true
 	end

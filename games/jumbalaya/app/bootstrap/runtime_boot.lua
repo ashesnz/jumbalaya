@@ -53,6 +53,13 @@ game().consume_board_click = function()
 	if WORD_GAME_UI.PerkStamp.consume_click() then
 		return true
 	end
+	local sidebar_view = require("word_game.ui.views.install").sidebar_view()
+	if sidebar_view and sidebar_view.consume_click and sidebar_view:consume_click() then
+		return true
+	end
+	if WORD_GAME_UI.SidebarStageButton and WORD_GAME_UI.SidebarStageButton.consume_click then
+		return WORD_GAME_UI.SidebarStageButton.consume_click()
+	end
 	return false
 end
 

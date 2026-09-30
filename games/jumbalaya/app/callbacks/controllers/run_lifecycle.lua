@@ -6,15 +6,17 @@ local function game() return BridgeRuntime.game() end
 
 local M = {}
 
-function M.notify_then_start_run(e)
-	game().OVERLAY_MENU:remove()
-	game().OVERLAY_MENU = nil
-	M.begin_run(e)
+function M.notify_then_start_run(_e)
+	-- Overlay click nodes die with OVERLAY_MENU; never pass them into begin_run.
+	local overlays = require("app.callbacks.controllers.overlays")
+	overlays.close_overlay()
+	M.begin_run(nil)
 end
 
 function M.begin_run(e, args)
 	game().SETTINGS.paused = false
-	if e and e.config.id == 'restart_button' then game_access().patch({ viewed_back = nil }) end
+	local config = e and (rawget(e, "config") or e.config)
+	if config and config.id == 'restart_button' then game_access().patch({ viewed_back = nil }) end
 	game().TIMELINE:flush()
 	game():discard_run()
 	game():start_run(args)

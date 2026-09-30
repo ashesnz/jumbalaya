@@ -74,6 +74,10 @@ function M.register(Presentation, ctx)
 	end)
 
 	Presentation.on("match_ended", function(won)
+		if ui.EndMatch and ui.EndMatch.open then
+			ui.EndMatch.open(won)
+			return
+		end
 		local overlay_def
 		if ui.EndMatch and ui.EndMatch.overlay_definition then
 			overlay_def = ui.EndMatch.overlay_definition(won)
