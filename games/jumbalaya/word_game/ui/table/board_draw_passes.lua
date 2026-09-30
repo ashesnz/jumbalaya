@@ -164,8 +164,7 @@ function M.draw_attention_passes()
 end
 
 function M.draw_card_interaction(game)
-	if WORD_GAME_UI.FirstPlayTutorial and WORD_GAME_UI.FirstPlayTutorial.is_active()
-		and WORD_GAME_UI.FirstPlayTutorial.is_active() then
+	if WORD_GAME_UI.FirstPlayTutorial and WORD_GAME_UI.FirstPlayTutorial.is_active() then
 		return
 	end
 	if not game.pattern_row then return end

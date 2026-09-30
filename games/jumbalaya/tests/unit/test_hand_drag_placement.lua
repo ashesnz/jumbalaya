@@ -366,4 +366,48 @@ T.describe("jumble row letter packing", function()
 		local three = geo.span_centers(session, #cells)
 		T.assert_equal(three[3] - three[1], 4)
 	end)
+
+	T.it("draws empty C _ T gaps as underlines instead of placeholder tiles", function()
+		mock_env.reset_game()
+		local PuzzleSpec = require("jumbalaya_core.jumble.puzzle_spec")
+		local Slots = require("jumbalaya_core.jumble.slots")
+		local puzzle = PuzzleSpec.resolve_puzzle({ span = { "C", "T" }, min = 3, max = 7 })
+		mock_env.publish_game({
+			word_round = {
+				mode = "jumble",
+				jumble = {
+					puzzle = puzzle,
+					slots = Slots.parse_slots(puzzle),
+				},
+			},
+		})
+		T.assert_not_nil(jumble.state() and jumble.state().slots)
+		local tiles, underlines = 0, 0
+		local orig_rect = love.graphics.rectangle
+		local orig_poly = love.graphics.polygon
+		local orig_line = love.graphics.line
+		love.graphics.rectangle = function(mode)
+			if mode == "fill" then tiles = tiles + 1 end
+		end
+		love.graphics.polygon = function(mode)
+			if mode == "fill" then tiles = tiles + 1 end
+		end
+		love.graphics.line = function()
+			underlines = underlines + 1
+		end
+		require("word_game.ui.table.jumble_fixed_letters").draw({
+			jumble_geometry = require("word_game.board.jumble.geometry"),
+			area = { T = { x = 0, y = 0, w = 20, h = 3 }, cards = {} },
+			ctx = {
+				card_w = function() return 2 end,
+				card_h = function() return 2.75 end,
+				tile_scale = function() return 20 end,
+			},
+		})
+		love.graphics.rectangle = orig_rect
+		love.graphics.polygon = orig_poly
+		love.graphics.line = orig_line
+		T.assert_equal(tiles, 2, "only the two fixed letters should be tiles")
+		T.assert_equal(underlines, 1, "the empty gap should be an underline")
+	end)
 end)

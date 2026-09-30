@@ -55,9 +55,9 @@ local function update_pattern_row(game, dt, ensure_placement_pattern_overlay)
 	game.pattern_row:update(dt)
 end
 
-local function update_timeline()
+local function update_timeline(dt)
 	if WORD_GAME_UI.TimelineTimer and WORD_GAME_UI.TimelineTimer.update then
-		WORD_GAME_UI.TimelineTimer.update()
+		WORD_GAME_UI.TimelineTimer.update(dt)
 	end
 end
 
@@ -68,7 +68,7 @@ function M.run(game, dt, ensure_placement_pattern_overlay)
 	update_jumble_timer()
 	update_boss_announce(dt)
 	update_pattern_row(game, dt, ensure_placement_pattern_overlay)
-	update_timeline()
+	update_timeline(dt)
 end
 
 return M

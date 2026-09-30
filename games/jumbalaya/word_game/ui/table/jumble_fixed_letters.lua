@@ -84,21 +84,6 @@ function M.draw(session)
 		love.graphics.setLineWidth(1)
 	end
 
-	local function draw_tile_body(position_label, char)
-		love.graphics.setColor(0.12, 0.18, 0.28, 0.92 * alpha)
-		love.graphics.rectangle("fill", -tile_w / 2, -tile_h / 2, tile_w, tile_h, 8, 8)
-		love.graphics.setColor(1, 1, 1, 0.95 * alpha)
-		local tw = font:getWidth(char)
-		local th = font:getHeight()
-		love.graphics.print(char, -tw / 2, -th / 2)
-		if position_label then
-			love.graphics.setFont(label_font)
-			love.graphics.setColor(1, 1, 1, 0.9 * alpha)
-			love.graphics.print(position_label, -tile_w / 2 + 3, -tile_h / 2 + 2)
-			love.graphics.setFont(font)
-		end
-	end
-
 	local function draw_single_card(cx, char, rotation, position_label)
 		if not cx or char == "" then return end
 		local px = cx * ts
@@ -152,22 +137,16 @@ function M.draw(session)
 	end
 
 	local items = topology.fixed_letter_items(j, active_len, extra_cards)
-	if is_boss and rigid_centers then
-		for _, slot in ipairs(j.slots) do
-			if slot.kind == "blank" and not slot.card then
-				draw_blank_underline(rigid_centers[slot.index])
-			end
-		end
-	elseif span_centers then
+	if span_centers then
 		for i, cell in ipairs(span_cells or {}) do
 			if cell.kind == "empty" then
-				draw_single_card(span_centers[i], cell.char or "_", 0, nil)
+				draw_blank_underline(span_centers[i])
 			end
 		end
 	elseif rigid_centers then
 		for _, slot in ipairs(j.slots) do
 			if slot.kind == "blank" and not slot.card then
-				draw_single_card(rigid_centers[slot.index], "_", 0, nil)
+				draw_blank_underline(rigid_centers[slot.index])
 			end
 		end
 	end

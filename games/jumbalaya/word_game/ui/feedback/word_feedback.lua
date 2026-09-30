@@ -102,24 +102,9 @@ function M.show(text, colour, hold, offset_y)
 	push_message(text, colour, hold, board_message_rect(offset_y))
 end
 
-function M.show_hand_centered(text, colour, hold, offset_y)
-	local row = geometry.hand_dealt_metrics()
-	if not row then
-		M.show(text, colour, hold, offset_y)
-		return
-	end
-	push_message(text, colour, hold, {
-		x = row.left,
-		y = row.top + (offset_y or 0),
-		w = math.max(6, row.w),
-		h = math.max(0.7, row.inner_h * 0.45),
-	})
-end
-
 function M.show_screen_centered(text, colour, hold, offset_y)
-	if not spawn_attention then return end
 	local scale = math.min(0.82, math.max(0.48, (game().TILE_H or 11) * 0.055))
-	spawn_attention({
+	M.spawn_attention({
 		text = text,
 		scale = scale,
 		maxw = (game().TILE_W or 20) * 0.72,
@@ -135,8 +120,7 @@ function M.show_screen_centered(text, colour, hold, offset_y)
 end
 
 function M.show_boss_countdown(text, hold)
-	if not spawn_attention then return end
-	spawn_attention({
+	M.spawn_attention({
 		text = text,
 		scale = 2.6,
 		hold = hold or 0.85,
@@ -149,22 +133,6 @@ function M.show_boss_countdown(text, hold)
 		bump_amount = 2.4,
 		pulse_amount = 0.9,
 		noisy = true,
-	})
-end
-
-function M.show_above_hand_centered(text, colour, hold, offset_y)
-	local row = geometry.hand_dealt_metrics()
-	if not row then
-		M.show(text, colour, hold, offset_y)
-		return
-	end
-	local h = math.max(0.7, row.inner_h * 0.34)
-	local margin = math.max(0.08, row.inner_h * 0.08)
-	push_message(text, colour, hold, {
-		x = row.left,
-		y = row.top - margin - h + (offset_y or 0),
-		w = math.max(6, row.w),
-		h = h,
 	})
 end
 
@@ -271,10 +239,6 @@ function M.draw_pass()
 		local x = msg.x * ts
 		local y = msg.y * ts
 		local w = msg.w * ts
-		if g.DEBUG then
-			love.graphics.setColor(1, 0, 0, 0.35 * a)
-			love.graphics.rectangle("line", x, y, w, msg.h * ts)
-		end
 		love.graphics.setColor(SHADOW[1], SHADOW[2], SHADOW[3], SHADOW[4] * a)
 		love.graphics.printf(msg.text, x + 2, y + 2, w, "center")
 		love.graphics.setColor(c[1], c[2], c[3], (c[4] or 1) * a)
@@ -290,7 +254,5 @@ function M.draw_pass()
 	if prev_font then love.graphics.setFont(prev_font) end
 	love.graphics.setColor(cr, cg, cb, ca)
 end
-
-spawn_attention = M.spawn_attention
 
 return M

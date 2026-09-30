@@ -218,6 +218,25 @@ T.describe("Timeline Timer & Shape Math", function()
 		T.assert_equal(tt.format_progress_label(), "3 / 50", "Label should include in-progress puzzle score")
 	end)
 
+	T.it("table board update pass forwards dt to the slider", function()
+		mock_env.reset_game()
+		local received
+		local orig_timer = WORD_GAME_UI.TimelineTimer
+		WORD_GAME_UI.TimelineTimer = {
+			update = function(dt)
+				received = dt
+			end,
+		}
+		local jumble = require("word_game.model.jumble")
+		local orig_active = jumble.is_active
+		jumble.is_active = function() return false end
+		local passes = require("word_game.ui.table.board_update_passes")
+		passes.run({}, 0.016, function() end)
+		jumble.is_active = orig_active
+		WORD_GAME_UI.TimelineTimer = orig_timer
+		T.assert_equal(received, 0.016, "Slider lerp needs the frame dt from the board pass")
+	end)
+
 	T.it("engages smoke only after the third word on the same puzzle", function()
 		mock_env.reset_game()
 		local tt = require("word_game.ui.perks.timeline_timer")

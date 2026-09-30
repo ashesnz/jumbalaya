@@ -17,21 +17,25 @@ function M.apply_score_breakdown(state, breakdown, animate, remain_dur)
 
 	state.points_earned = new_earned
 
-	local old_got = state.points_got or 0
-	if animate and old_got ~= new_got and not state.got_roll then
-		M.roll_got_preview(state, old_got, new_got, 0.18)
-	else
-		state.points_got = new_got
-		state.got_roll = nil
+	local function follow_roll(roll_key, field, new_val, start_fn, dur)
+		local roll = state[roll_key]
+		if animate then
+			if roll and roll.to == new_val then
+				return
+			end
+			local from_val = state[field] or 0
+			if from_val == new_val and not roll then
+				return
+			end
+			start_fn(state, from_val, new_val, dur)
+			return
+		end
+		state[field] = new_val
+		state[roll_key] = nil
 	end
 
-	local old_rem = state.points_to_get or new_rem
-	if animate and old_rem ~= new_rem and not state.to_get_roll then
-		M.roll_points_to_get(state, old_rem, new_rem, remain_dur or 0.18)
-	else
-		state.points_to_get = new_rem
-		state.to_get_roll = nil
-	end
+	follow_roll("got_roll", "points_got", new_got, M.roll_got_preview, 0.18)
+	follow_roll("to_get_roll", "points_to_get", new_rem, M.roll_points_to_get, remain_dur or 0.18)
 end
 
 function M.sync_points_to_get_preview(state, animate, opts)

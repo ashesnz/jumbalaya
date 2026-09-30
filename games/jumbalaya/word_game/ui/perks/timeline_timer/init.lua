@@ -105,7 +105,9 @@ function M.reset(duration)
 end
 
 function M.update(dt)
-	dt = dt or 0
+	if dt == nil then
+		dt = love and love.timer and love.timer.getDelta and math.min(0.05, love.timer.getDelta()) or 0
+	end
 	M.sync_from_model()
 	M.update_intro_anim(dt)
 	if M.is_progress_mode() then

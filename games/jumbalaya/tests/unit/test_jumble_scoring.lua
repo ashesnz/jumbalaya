@@ -161,6 +161,31 @@ T.describe("Jumble scoring and odometer", function()
 		T.assert_equal(sb.points_to_get, 15, "Display points to get reached 15")
 	end)
 
+	T.it("keeps a points-to-get roll when preview syncs again during play resolution", function()
+		local sb = require("word_game.ui.score_banner")
+		mock_env.patch_game({
+			word_round = {
+				target = 20,
+				jumble = { total_score = 5, puzzle_points = 0, puzzle_multi = 1.0 },
+			},
+		})
+		sb.reset_jumble_score()
+		T.assert_equal(sb.points_to_get, 15)
+
+		mock_env.patch_game({
+			word_round = {
+				target = 20,
+				jumble = { total_score = 5, puzzle_points = 3, puzzle_multi = 1.0 },
+			},
+		})
+		sb.sync_points_to_get_preview(true)
+		T.assert_not_nil(sb.to_get_roll, "First PLAY_RESOLVED sync should start a roll")
+		sb.sync_points_to_get_preview(true, { remain_dur = 0.4 })
+		T.assert_not_nil(sb.to_get_roll, "Second banner sync must not snap the in-flight roll")
+		T.assert_equal(sb.to_get_roll.to, 12)
+		T.assert_equal(sb.points_to_get, 15, "Displayed remaining should still be rolling from 15")
+	end)
+
 	T.it("updates points to get when placement cards change", function()
 		local sb = require("word_game.ui.score_banner")
 		local placement_word = require("word_game.model.jumble.placement_word")
