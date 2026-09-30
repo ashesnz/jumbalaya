@@ -25,6 +25,18 @@ function M.bind(trade_host)
 	host = trade_host
 end
 
+local function dismiss_debug_panel()
+	local g = game()
+	if not g then return end
+	if g.debug_panel and g.debug_panel.is_open and g.debug_panel:is_open() then
+		g.debug_panel:close()
+		return
+	end
+	if g.debug_tools and not g.debug_tools.REMOVED then
+		g.debug_tools:remove()
+		g.debug_tools = nil
+	end
+end
 
 function M.def_ctx()
 	return {
@@ -63,6 +75,7 @@ function M.finish_trade()
 end
 
 function M.open_overlay()
+	dismiss_debug_panel()
 	local shell = require("app.runtime")
 	local engine = shell.engine()
 	if engine then
@@ -109,7 +122,8 @@ function M.rebuild_overlay()
 end
 
 function M.refresh_overlay()
-	if affordability.cannot_afford_anything(session_state.offer(), session_state.session()) then
+	if not session_state.is_standalone()
+		and affordability.cannot_afford_anything(session_state.offer(), session_state.session()) then
 		M.finish_trade()
 		return
 	end
@@ -127,10 +141,6 @@ end
 function M.open_standalone()
 	session_state.set_standalone(true)
 	session_state.reset(facade.trade().roll_offer())
-	if affordability.cannot_afford_anything(session_state.offer(), session_state.session()) then
-		M.finish_trade()
-		return
-	end
 	M.open_overlay()
 end
 

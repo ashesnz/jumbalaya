@@ -21,6 +21,9 @@ local function update_devtools()
 	if DEVTOOLS and DEVTOOLS.DebugButton then
 		DEVTOOLS.DebugButton.sync()
 	end
+	if DEVTOOLS and DEVTOOLS.MarketplaceButton then
+		DEVTOOLS.MarketplaceButton.sync()
+	end
 end
 
 local function sync_table_chrome()

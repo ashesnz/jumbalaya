@@ -24,11 +24,14 @@ function M.marketplace_content_nodes(ctx)
 	local session = ctx.get_session()
 	trade_model().sync_offer_cards(offer)
 	local add = offer.add or offer
-	local scale = M.MARKET_CARD_SCALE
+	local letters = add.letters or {}
+	local layout = trade_layout.market_layout_metrics(#letters, M.MARKET_CARD_SCALE)
+	local scale = layout.scale
+	ctx.market_layout = layout
 	local nodes = {
-		chrome.close_cross_node(scale),
-		{ n = game().UI.ROW, config = { minh = 40 / (game().TILESIZE or 64) }, nodes = {} },
-		action_nodes.card_row(add.letters, session, ctx.host, scale, deck_model, trade_model),
+		chrome.close_cross_node(layout.grid_w),
+		{ n = game().UI.ROW, config = { minh = 0.08 }, nodes = {} },
+		action_nodes.card_row(letters, session, ctx.host, scale, deck_model, trade_model, layout),
 	}
 
 	if offer.showdown then
@@ -43,7 +46,10 @@ function M.marketplace_content_nodes(ctx)
 			}},
 		}}
 		if remove and remove.letters and #remove.letters > 0 then
-			nodes[#nodes + 1] = action_nodes.card_row(remove.letters, session, ctx.host, scale, deck_model, trade_model)
+			local remove_layout = trade_layout.market_layout_metrics(#remove.letters, scale)
+			nodes[#nodes + 1] = action_nodes.card_row(
+				remove.letters, session, ctx.host, remove_layout.scale, deck_model, trade_model, remove_layout
+			)
 			nodes[#nodes + 1] = chrome.status_or_skip(
 				session.remove_done,
 				session.removed == "skipped" and "Remove skipped" or "Card removed",
@@ -65,10 +71,14 @@ function M.marketplace_content_nodes(ctx)
 end
 
 function M.marketplace_body_definition(ctx)
+	local content = M.marketplace_content_nodes(ctx)
+	local layout = ctx.market_layout
+	local minh = layout and layout.body_minh or trade_layout.body_min_height(M.MARKET_CARD_SCALE, 1)
+	local minw = layout and layout.grid_w or trade_layout.grid_width(3, M.MARKET_CARD_SCALE)
 	return {
 		n = game().UI.ROOT,
-		config = { align = "cm", colour = game().C.CLEAR },
-		nodes = M.marketplace_content_nodes(ctx),
+		config = { align = "cm", colour = game().C.CLEAR, minw = minw, minh = minh },
+		nodes = content,
 	}
 end
 

@@ -21,10 +21,12 @@
 ]]
 
 local registry = require "devtools.registry"
+require "devtools.marketplace_button"
 
 return {
 	DebugPanel = require "devtools.panel",
 	DebugButton = require "devtools.debug_button",
+	MarketplaceButton = require "devtools.marketplace_button",
 	register_section = registry.register,
 	layout = require "devtools.layout",
 }

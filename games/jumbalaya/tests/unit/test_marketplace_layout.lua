@@ -58,8 +58,9 @@ T.describe("marketplace layout", function()
 		T.assert_nil(rawget(body, "_inner"), "marketplace body must be the panel, not a proxy wrapper")
 		T.assert_not_nil(body.T)
 		T.assert_not_nil(body.root_node)
-		local minw = 3.8 * game.CARD_W * def.MARKET_CARD_SCALE
-		T.assert_true(body.T.w + 1e-6 >= minw, "body width should reserve the three-card row")
+		local trade_layout = require("word_game.ui.trade.layout")
+		local metrics = trade_layout.market_layout_metrics(3, def.MARKET_CARD_SCALE)
+		T.assert_true(body.T.w + 1e-6 >= metrics.grid_w, "body width should reserve the three-card grid")
 		local live = game.LIVE and game.LIVE.UIBOX
 		if live then
 			for _, panel in ipairs(live) do

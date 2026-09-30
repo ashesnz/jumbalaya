@@ -107,8 +107,8 @@ function M.status_or_skip(done, done_text, skip_func)
 	}}
 end
 
-function M.close_cross_node(market_card_scale)
-	return { n = game().UI.ROW, config = { align = "cr", minw = 3.8 * game().CARD_W * market_card_scale }, nodes = {
+function M.close_cross_node(grid_w)
+	return { n = game().UI.ROW, config = { align = "cr", minw = grid_w }, nodes = {
 		{ n = game().UI.COLUMN, config = {
 			align = "cm", minw = 0.72, minh = 0.72, r = 0.16, padding = 0.1,
 			hover = true, colour = game().C.RED, hover_colour = game().C.UI.BUTTON_HOVER,

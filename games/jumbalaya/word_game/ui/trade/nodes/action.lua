@@ -21,7 +21,7 @@ local function action_button(item, action, cost, colour, disabled, market_card_s
 	}}
 end
 
-function M.action_column(item, session_state, host, market_card_scale, deck_model, trade_model)
+function M.action_column(item, session_state, host, market_card_scale, deck_model, trade_model, column_minh)
 	local add_cost = host.session_add_cost(session_state)
 	local add_disabled = host.is_action_disabled("add", item, session_state)
 	local modify_disabled = host.is_action_disabled("modifier", item, session_state)
@@ -56,24 +56,47 @@ function M.action_column(item, session_state, host, market_card_scale, deck_mode
 	column_nodes[#column_nodes + 1] = { n = game().UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
 		action_button(item, "modifier", 30, game().C.GOLD, modify_disabled, market_card_scale),
 	}}
-	return { n = game().UI.COLUMN, config = { align = "cm", padding = 0.28, minw = game().CARD_W * market_card_scale + 0.7 }, nodes = column_nodes }
+	return { n = game().UI.COLUMN, config = {
+		align = "cm",
+		padding = 0.2,
+		minw = game().CARD_W * market_card_scale + 0.7,
+		minh = column_minh,
+	}, nodes = column_nodes }
 end
 
-function M.card_row(items, session_state, host, market_card_scale, deck_model, trade_model)
+local function card_row_slice(items, session_state, host, market_card_scale, deck_model, trade_model, layout)
 	local cards = {}
+	local column_minh = layout and layout.column_minh
+	local grid_w = layout and layout.grid_w
 	for _, item in ipairs(items or {}) do
-		cards[#cards + 1] = M.action_column(item, session_state, host, market_card_scale, deck_model, trade_model)
-		cards[#cards + 1] = { n = game().UI.COLUMN, config = { minw = 0.5 }, nodes = {} }
-	end
-	if #cards > 0 then
-		cards[#cards] = nil
+		cards[#cards + 1] = M.action_column(
+			item, session_state, host, market_card_scale, deck_model, trade_model, column_minh
+		)
 	end
 	return { n = game().UI.ROW, config = {
 		align = "cm",
 		padding = 0.12,
-		minh = 3.4 * game().CARD_H * market_card_scale,
-		minw = 3.8 * game().CARD_W * market_card_scale,
+		minh = column_minh,
+		minw = grid_w,
 	}, nodes = cards }
+end
+
+function M.card_row(items, session_state, host, market_card_scale, deck_model, trade_model, layout)
+	layout = layout or {}
+	local columns = math.max(1, layout.columns or 3)
+	local row_nodes = {}
+	local list = items or {}
+	for start = 1, #list, columns do
+		local slice = {}
+		for i = start, math.min(start + columns - 1, #list) do
+			slice[#slice + 1] = list[i]
+		end
+		row_nodes[#row_nodes + 1] = card_row_slice(slice, session_state, host, market_card_scale, deck_model, trade_model, layout)
+	end
+	if #row_nodes == 1 then
+		return row_nodes[1]
+	end
+	return { n = game().UI.COLUMN, config = { align = "cm", padding = 0.1 }, nodes = row_nodes }
 end
 
 return M
