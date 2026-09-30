@@ -20,7 +20,7 @@ function M.key_press(controller, key)
             game():start_run({})
         elseif key == 'l' then
             game():discard_run()
-            game().STORED_RUN = read_save_payload(game().SETTINGS.profile..'/'..'save.acs')
+            game().STORED_RUN = read_game_save(game().SETTINGS.profile .. '/save')
             if game().STORED_RUN ~= nil then game().STORED_RUN = unpack_source(game().STORED_RUN) end
             game():start_run({savetext = game().STORED_RUN})
         elseif key == 'j' then

@@ -1,6 +1,7 @@
 
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
+local AudioSource = require("jumbalaya-engine.adapters.love2d.audio_source")
 --[[
 	app/core/audio/mixer.lua - the mixing engine behind both audio runtimes.
 
@@ -44,28 +45,24 @@ local function audio_available()
 	return love and love.audio and love.audio.newSource
 end
 
---- Creates a decoded source, or nil when the file is missing/unreadable
---- (e.g. an asset that was culled but is still requested by game code).
-local function load_source(code, kind)
-	local ok, source = pcall(love.audio.newSource,
-		"resources/sounds/" .. code .. '.ogg',
-		(kind ~= 'sfx') and "stream" or "static")
-	return ok and source or nil
-end
-
 local function new_source(code, kind)
-	return load_source(code, kind)
+	return AudioSource.new_source(code, kind)
 end
 
 --- Warms every .ogg under resources/sounds through its decoder so first-play
 --- hitches disappear. `log` receives progress lines for the loading screen.
 function MIXER.preload(log)
-	for _, filename in ipairs(love.filesystem.getDirectoryItems("resources/sounds")) do
+	local listing = AudioSource.list_ogg_files()
+	if not listing or #listing == 0 then
+		log("audio preload failed - resources/sounds missing (love FS and disk)")
+		return
+	end
+	for _, filename in ipairs(listing) do
 		if string.sub(filename, -4) == '.ogg' then
 			log('audio file - ' .. filename)
 			local code = string.sub(filename, 1, -5)
 			local kind = MIXER.classify(code)
-			local sound = load_source(code, kind)
+			local sound = new_source(code, kind)
 			if not sound then
 				log('audio file skipped - ' .. filename)
 			else
@@ -139,6 +136,11 @@ end
 --- Applies current settings to one source. Music crossfades toward/away from
 --- the desired track (time constant ~dt*3); SFX hold static volume with a
 --- splash-state duck and release their voice when silenced.
+local function volume_scale(settings, key)
+	if not settings then return 0 end
+	return (tonumber(settings[key]) or 0) / 100.0
+end
+
 function MIXER.apply(entry, req)
 	if not entry.sound or not audio_available() then return end
 	local settings = req.settings
@@ -147,10 +149,13 @@ function MIXER.apply(entry, req)
 	if kind == 'music' then
 		entry.fade_level = entry.fade_level or 0
 		local target = (entry.code == req.track) and 1 or 0
-		local blend = (req.dt or 0) * 3
+		local blend = math.min(1, (req.dt or 0) * 3)
+		if target == 1 and entry.fade_level <= 0 and blend > 0 then
+			entry.fade_level = math.max(entry.fade_level, 0.25)
+		end
 		entry.fade_level = target * blend + (1 - blend) * entry.fade_level
 		entry.sound:setVolume(entry.fade_level * entry.base_gain
-			* (settings.volume / 100.0) * (settings.music_volume / 100.0))
+			* volume_scale(settings, "volume") * volume_scale(settings, "music_volume"))
 		entry.sound:setPitch(entry.base_rate * (req.pitch_mod or 1))
 		-- Fully faded non-desired tracks pause to free a mixer voice.
 		if entry.fade_level <= 0.001 and entry.code ~= req.track and entry.sound:isPlaying() then
@@ -163,8 +168,8 @@ function MIXER.apply(entry, req)
 			entry.applied_rate = entry.base_rate
 		end
 		local gain = entry.base_gain
-			* (settings.volume / 100.0)
-			* (settings.game_sounds_volume / 100.0)
+			* volume_scale(settings, "volume")
+			* volume_scale(settings, "game_sounds_volume")
 		if entry.state_tag == SPLASH_STATE_ID then gain = gain * (req.splash_gain or 1) end
 		if gain <= 0 then
 			entry.sound:stop()
@@ -233,8 +238,8 @@ function MIXER.sync_beds(req)
 	for code, entries in pairs(pool) do
 		local control = req.beds[code]
 		if control then
-			local needs_start = control.gain * (req.settings.volume / 100.0)
-				* (req.settings.game_sounds_volume / 100.0) > 0
+			local needs_start = control.gain * volume_scale(req.settings, "volume")
+				* volume_scale(req.settings, "game_sounds_volume") > 0
 
 			for _, entry in ipairs(entries) do
 				if entry.sound and entry.sound:isPlaying() then

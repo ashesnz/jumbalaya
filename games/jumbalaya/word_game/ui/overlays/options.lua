@@ -69,29 +69,39 @@ end
 function build_settings()
 	local tabs = {}
 	tabs[#tabs+1] = {
+		tab_id = 'Game',
 		label = localize('ui_set_game'),
 		chosen = true,
 		tab_definition_function = game().DEFINITIONS.settings_tab,
-		tab_definition_function_args = 'Game'
+		tab_definition_function_args = 'Game',
 	}
 	if game().F_VIDEO_SETTINGS then   tabs[#tabs+1] = {
+			tab_id = 'Video',
 			label = localize('ui_set_video'),
+			chosen = false,
 			tab_definition_function = game().DEFINITIONS.settings_tab,
-			tab_definition_function_args = 'Video'
+			tab_definition_function_args = 'Video',
 		}
 	end
 	tabs[#tabs+1] = {
+		tab_id = 'Graphics',
 		label = localize('ui_set_graphics'),
+		chosen = false,
 		tab_definition_function = game().DEFINITIONS.settings_tab,
-		tab_definition_function_args = 'Graphics'
+		tab_definition_function_args = 'Graphics',
 	}
 	tabs[#tabs+1] = {
+		tab_id = 'Audio',
 		label = localize('ui_set_audio'),
+		chosen = false,
 		tab_definition_function = game().DEFINITIONS.settings_tab,
-		tab_definition_function_args = 'Audio'
+		tab_definition_function_args = 'Audio',
 	}
 
-	local t = build_generic_options({back_func = 'open_options',contents = {make_tab_strip(
+	local t = build_generic_options({
+		back_func = 'close_overlay',
+		back_label = localize('ui_close'),
+		contents = {make_tab_strip(
 		{tabs = tabs,
 		tab_h = 7.05,
 		tab_alignment = 'tm',
@@ -103,11 +113,15 @@ end
 
 function DEFINITIONS.settings_tab(tab)
 	if tab == 'Game' then
+		if type(game().SETTINGS.screenshake) ~= 'number' then
+			game().SETTINGS.screenshake = 50
+		end
 		return {n=game().UI.ROOT, config={align = "cm", padding = 0.05, colour = game().C.CLEAR}, nodes={
 			Components.cycler({
 				label = localize('ui_set_gamespeed'),
 				scale = 0.8,
-				options = { 0.5, 1, 2, 4 },
+				no_pips = true,
+				options = { '0.5x', '1x', '2x', '4x' },
 				onChange = 'change_gamespeed',
 				current_option = cycler_option_index({ 0.5, 1, 2, 4 }, game().SETTINGS.GAMESPEED or 1),
 			}),

@@ -56,7 +56,9 @@ function delete_saved_run()
 	local g = game()
 	if not g then return end
 	local profile_id = (g.SETTINGS and g.SETTINGS.profile) or 1
-	love.filesystem.remove(profile_id..'/save.acs')
+	local SavePaths = require("jumbalaya-engine.persistence.save_paths")
+	love.filesystem.remove(SavePaths.write_path_for(profile_id .. '/save'))
+	love.filesystem.remove(SavePaths.legacy_path_for(profile_id .. '/save'))
 	g.STORED_RUN = nil
 	if g.WRITE_FLAGS then g.WRITE_FLAGS.run = nil end
 	if g.DISK_WORKER and g.DISK_WORKER.channel then
@@ -131,6 +133,13 @@ function Game:queue_settings_write()
 	self.WRITE_FLAGS = self.WRITE_FLAGS or {}
 	self.WRITE_FLAGS.settings = true
 	self.WRITE_FLAGS.update_queued = true
+end
+
+function Game:flush_settings_to_disk()
+	if self.F_NO_SAVING then return end
+	self:queue_settings_write()
+	self.WRITE_FLAGS.force = true
+	require("jumbalaya-engine.persistence.save_queue").update()
 end
 
 function Game:queue_metrics_write()

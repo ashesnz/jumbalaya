@@ -22,9 +22,15 @@ end
 --- wrapper instead of the inner tree, which misaligns cards and buttons.
 function TradeView.create_marketplace_body(ctx, config, definition)
 	local trade_definition = require("word_game.ui.trade.definition")
+	config = config or {}
+	config.offset = config.offset or { x = 0, y = 0 }
+	config.align = config.align or "cm"
+	-- Embedded in OVERLAY_MENU only — must not register in LIVE.UIBOX or the
+	-- board pass draws it first and the per-frame draw guard skips overlay paint.
+	config.skip_live_registry = true
 	return Panels.create({
 		definition = definition or trade_definition.marketplace_body_definition(ctx),
-		config = config or { offset = { x = 0, y = 0 }, align = "cm" },
+		config = config,
 	})
 end
 

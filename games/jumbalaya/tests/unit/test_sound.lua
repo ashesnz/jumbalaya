@@ -9,7 +9,7 @@ T.describe("sound dispatch", function()
 		mock_env.setup()
 		local sound = require("jumbalaya-engine.sound.sound")
 		local game = shell.game()
-		game.F_SOUND_THREAD = true
+		game.F_SOUND_THREAD = false
 		game.F_MUTE = false
 		game.muted = nil
 		game.AUDIO_WORKER = nil

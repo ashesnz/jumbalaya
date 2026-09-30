@@ -13,6 +13,7 @@ local M = {
 
 function M.love_conf(t)
 	t.console = not M.RELEASE_MODE
+	t.identity = "jumbalaya"
 	t.window.title = "Jumbalaya"
 	t.title = "Jumbalaya"
 	-- Landscape defaults; width must exceed height so LÖVE picks landscape on mobile.

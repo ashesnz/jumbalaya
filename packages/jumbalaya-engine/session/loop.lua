@@ -100,7 +100,9 @@ function Game:render_scene_pass()
 			draw_with_container(node)
 		end
 	end
-	if self.SPLASH_LOGO then draw_with_container(self.SPLASH_LOGO) end
+	if self.SPLASH_LOGO and not (self.SPLASH_LOGO.states and self.SPLASH_LOGO.states.visible == false) then
+		draw_with_container(self.SPLASH_LOGO)
+	end
 end
 
 function Game:present_frame()

@@ -63,6 +63,17 @@ end
 --  Plain source payloads (starting with `'return'`) pass through untouched.
 ---@param path string
 ---@return string|nil
+--- Load a logical save slot (e.g. "settings", "1/save"); accepts `.jmb` or legacy `.acs`.
+function read_game_save(relative)
+	local SavePaths = require("jumbalaya-engine.persistence.save_paths")
+	return read_save_payload(SavePaths.read_path_for(relative))
+end
+
+function write_game_save(relative, data)
+	local SavePaths = require("jumbalaya-engine.persistence.save_paths")
+	write_save_file(SavePaths.write_path_for(relative), data)
+end
+
 function read_save_payload(path)
 	if not love.filesystem.getInfo(path) then return end
 
@@ -90,5 +101,7 @@ return {
 	pack_to_source = pack_to_source,
 	unpack_source = unpack_source,
 	read_save_payload = read_save_payload,
+	read_game_save = read_game_save,
+	write_game_save = write_game_save,
 	write_save_file = write_save_file,
 }

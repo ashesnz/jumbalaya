@@ -13,6 +13,15 @@ local game = shell.game
 
 local M = {}
 
+local function sound_settings_snapshot(sound)
+	if not sound then return sound end
+	return {
+		volume = tonumber(sound.volume) or 0,
+		music_volume = tonumber(sound.music_volume) or 0,
+		game_sounds_volume = tonumber(sound.game_sounds_volume) or 0,
+	}
+end
+
 -- Reused request records: keeps per-frame allocation at zero.
 local play_request, mix_request, retag_request = {}, {}, {}
 
@@ -29,6 +38,9 @@ local function audio_thread_live()
 		return false
 	end
 	if worker.thread and worker.thread.isRunning and not worker.thread:isRunning() then
+		return false
+	end
+	if worker.ready ~= true then
 		return false
 	end
 	return true
@@ -52,7 +64,8 @@ end
 function M.play_sfx(code, rate, gain)
 	if game().F_MUTE then return end
 	local settings = game().SETTINGS
-	if not (code and not game().muted and settings and settings.SOUND and settings.SOUND.volume > 0) then return end
+	local master = settings and settings.SOUND and tonumber(settings.SOUND.volume) or 0
+	if not (code and not game().muted and master > 0) then return end
 
 	local req = play_request
 	req.op = 'play'
@@ -61,7 +74,7 @@ function M.play_sfx(code, rate, gain)
 	req.gain = gain
 	req.pitch_mod = game().PITCH_MOD
 	req.state_tag = game().STATE
-	req.settings = game().SETTINGS.SOUND
+	req.settings = sound_settings_snapshot(settings.SOUND)
 	req.splash_gain = game().SPLASH_VOL
 	req.in_overlay = not (not game().OVERLAY_MENU)
 
@@ -139,7 +152,7 @@ function M.mix_audio(dt)
 	req.beds = beds
 	req.pitch_mod = game().PITCH_MOD
 	req.state_tag = game().STATE
-	req.settings = game().SETTINGS.SOUND
+	req.settings = sound_settings_snapshot(game().SETTINGS.SOUND)
 	req.splash_gain = game().SPLASH_VOL
 	req.in_overlay = not (not game().OVERLAY_MENU)
 

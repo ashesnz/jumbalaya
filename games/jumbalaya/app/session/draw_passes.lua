@@ -72,7 +72,7 @@ function M.install()
 	DrawPasses.register('menu', 'overlays', function(game)
 		local show_background = (not game.OVERLAY_MENU) or (not game.F_HIDE_BG)
 
-		if game.STAGE == game.STAGES.MAIN_MENU then
+		if game.STAGE == game.STAGES.MAIN_MENU and not game.OVERLAY_MENU then
 			if game.MAIN_MENU_UI and not game.MAIN_MENU_UI.REMOVED then
 				draw_with_container(game.MAIN_MENU_UI)
 			end

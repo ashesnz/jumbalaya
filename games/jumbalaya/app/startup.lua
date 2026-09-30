@@ -10,17 +10,21 @@ require "app.startup.menu_boot"
 require "app.startup.profile"
 require "app.startup.window"
 require "app.startup.dealing"
+require "app.startup.audio"
 
 function Game:launch()
-	local settings = read_save_payload('settings.acs')
+	local settings = read_game_save('settings')
 	local settings_ver = nil
 	if settings then
 		local settings_file = unpack_source(settings)
 		if self.VERSION >= '1.0.0' and (love.system.getOS() == 'Windows') and ((not settings_file.version) or (settings_file.version < '1.0.0')) then
 			for i = 1, 3 do
-				love.filesystem.remove(i..'/'..'profile.acs')
-				love.filesystem.remove(i..'/'..'save.acs')
-				love.filesystem.remove(i..'/'..'meta.acs')
+				love.filesystem.remove(i .. '/profile.jmb')
+				love.filesystem.remove(i .. '/profile.acs')
+				love.filesystem.remove(i .. '/save.jmb')
+				love.filesystem.remove(i .. '/save.acs')
+				love.filesystem.remove(i .. '/meta.jmb')
+				love.filesystem.remove(i .. '/meta.acs')
 				love.filesystem.remove(i..'')
 			end
 			for k, v in pairs(settings_file) do
@@ -39,14 +43,20 @@ function Game:launch()
 	self.SETTINGS.version = settings_ver or self.VERSION
 	self.SETTINGS.paused = nil
 
-	local sound = self.SETTINGS.SOUND or {}
-	self.SETTINGS.SOUND = sound
-	if (sound.volume or 0) == 0 and (sound.game_sounds_volume or 0) == 0 then
-		sound.volume = 50
-		sound.game_sounds_volume = 100
+	if type(self.SETTINGS.SOUND) ~= 'table' then
+		self.SETTINGS.SOUND = {}
 	end
-	if not sound.music_volume or sound.music_volume == 0 then
-		sound.music_volume = 60
+	local sound = self.SETTINGS.SOUND
+	if type(self.SETTINGS.screenshake) ~= 'number' then
+		self.SETTINGS.screenshake = 50
+	end
+	sound.volume = tonumber(sound.volume) or 100
+	sound.music_volume = tonumber(sound.music_volume) or 100
+	sound.game_sounds_volume = tonumber(sound.game_sounds_volume) or 100
+	if sound.volume == 0 and sound.music_volume == 0 and sound.game_sounds_volume == 0 then
+		sound.volume = 100
+		sound.music_volume = 100
+		sound.game_sounds_volume = 100
 	end
 
 	boot_stage('start', 'settings', 0.1)
@@ -79,6 +89,7 @@ function Game:launch()
 
 		boot_stage('audio worker', 'save worker', 0.22)
 	end
+	self:boot_audio()
 
 	boot_stage('window init', 'save worker')
 	if love.thread and love.thread.newThread and (not love.filesystem.getInfo or love.filesystem.getInfo('app/persistence/worker.lua')) then

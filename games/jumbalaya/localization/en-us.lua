@@ -63,6 +63,7 @@ return {
     ["ui_options_cap"]="OPTIONS",
     ["ui_quit_cap"]="QUIT",
     ["ui_back"]="Back",
+    ["ui_close"]="Close",
     ["term_enter_text"]="Enter Text",
     ["term_swapped_ex"]="Swapped!",
     ["hdr_score_hand"]="Best Hand",

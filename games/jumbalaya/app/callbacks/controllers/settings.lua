@@ -50,8 +50,10 @@ function M.change_window_cycle_UI()
 	end
 end
 
+local GAME_SPEED_STEPS = { 0.5, 1, 2, 4 }
+
 function M.change_gamespeed(args)
-	game().SETTINGS.GAMESPEED = args.to_val
+	game().SETTINGS.GAMESPEED = GAME_SPEED_STEPS[args.to_key] or args.to_val
 end
 
 function M.change_shadows(args)

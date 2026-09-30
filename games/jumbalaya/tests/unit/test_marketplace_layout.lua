@@ -60,6 +60,12 @@ T.describe("marketplace layout", function()
 		T.assert_not_nil(body.root_node)
 		local minw = 3.8 * game.CARD_W * def.MARKET_CARD_SCALE
 		T.assert_true(body.T.w + 1e-6 >= minw, "body width should reserve the three-card row")
+		local live = game.LIVE and game.LIVE.UIBOX
+		if live then
+			for _, panel in ipairs(live) do
+				T.assert_true(panel ~= body, "embedded marketplace body must not register in LIVE.UIBOX")
+			end
+		end
 		if body.remove then
 			body:remove()
 		end

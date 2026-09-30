@@ -19,6 +19,16 @@ function M.modal_minh()
 	return felt and felt.h or 1
 end
 
+--- Modal width (tiles) tracks the play column so card rows fit on all aspect ratios.
+function M.modal_minw()
+	local felt = Layout.felt_rect and Layout.felt_rect()
+	return felt and math.max(felt.w, 8) or 12
+end
+
+function M.modal_padding()
+	return 0.12
+end
+
 function M.room_translate()
 	local room = game() and game().ROOM
 	if not room or not love or not love.graphics then return end

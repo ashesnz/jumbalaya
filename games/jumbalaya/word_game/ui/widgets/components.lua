@@ -297,7 +297,14 @@ function Components.cycler(def)
 			or {n=game().UI.COLUMN, config={id = 'cycle_main', align = "cm", minw = def.w, minh = def.h, r = CHROME.radius, padding = 0.05, colour = def.colour, hover = true, hover_colour = def.hover_colour or game().C.UI.BUTTON_HOVER, can_collide = true, on_demand_tooltip = def.on_demand_tooltip}, nodes={
 				{n=game().UI.ROW, config={align = "cm"}, nodes={
 					{n=game().UI.ROW, config={align = "cm"}, nodes={
-						{n=game().UI.OBJECT, config={object = FlowText({string = {{ref_table = def, ref_value = "current_option_val"}}, font = alpha_button_font(), colours = {game().C.UI.TEXT_LIGHT}, pop_in = 0, pop_in_rate = 8, reset_pop_in = true, shadow = true, float = true, silent = true, bump = true, scale = def.text_scale, non_recalc = true})}},
+						{n=game().UI.TEXT, config={
+							ref_table = def,
+							ref_value = 'current_option_val',
+							scale = def.text_scale,
+							font = alpha_button_font(),
+							colour = game().C.UI.TEXT_LIGHT,
+							shadow = true,
+						}},
 					}},
 					{n=game().UI.ROW, config={align = "cm", minh = 0.05}, nodes={}},
 					not disabled and choice_pips or nil,

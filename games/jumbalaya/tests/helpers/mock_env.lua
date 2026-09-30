@@ -265,6 +265,8 @@ function M.setup()
 	_G.WORD_GAME_UI = _G.WORD_GAME_UI or {}
 	_G.Tween = _G.Tween or function(def) return def end
 	_G.read_save_payload = _G.read_save_payload or function() return nil end
+	_G.read_game_save = _G.read_game_save or _G.read_save_payload
+	_G.write_game_save = _G.write_game_save or function() end
 	_G.unpack_source = _G.unpack_source or function(_str) return {} end
 	S.TIMELINE = Scheduler()
 	_G.play_sfx = _G.play_sfx or function() end

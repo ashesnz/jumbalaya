@@ -38,8 +38,9 @@ function M.install()
 		game().SETTINGS.paused = true
 		shell.set_focused_profile(game().SETTINGS.profile)
 
+		local SavePaths = require("jumbalaya-engine.persistence.save_paths")
 		for i = 1, 3 do
-			if i ~= game().focused_profile and love.filesystem.getInfo(i..'/'..'profile.acs') then game():load_profile(i) end
+			if i ~= game().focused_profile and SavePaths.exists(i .. '/profile') then game():load_profile(i) end
 		end
 		game():load_profile(game().focused_profile)
 

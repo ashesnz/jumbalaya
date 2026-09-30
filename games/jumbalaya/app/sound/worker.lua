@@ -8,11 +8,11 @@ require "love.filesystem"
 
 if love.system.getOS() == "OS X" then jit.off() end
 
-local root = love.filesystem.getSource()
-package.path = root .. "/../../packages/?.lua;"
-	.. root .. "/../../packages/?/init.lua;"
-	.. root .. "/?.lua;"
-	.. root .. "/?/init.lua;"
-	.. package.path
-
-require("jumbalaya-engine.sound.manager")
+local log = love.thread.getChannel("alpha_audio_log")
+local ok, err = pcall(function()
+	require("app.sound.install_paths")
+	require("jumbalaya-engine.sound.manager")
+end)
+if not ok then
+	log:push("error:" .. tostring(err))
+end

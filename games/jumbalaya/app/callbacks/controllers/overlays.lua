@@ -7,6 +7,65 @@ local game = require("app.runtime").game
 
 local M = {}
 
+--- Title logo + mode buttons only belong on the bare main menu (Classic / Time Run).
+local function sync_main_menu_title_visibility()
+	local g = game()
+	if g.STAGE ~= g.STAGES.MAIN_MENU then return end
+	local show = not g.OVERLAY_MENU
+	if g.SPLASH_LOGO and g.SPLASH_LOGO.states then
+		g.SPLASH_LOGO.states.visible = show
+	end
+	if g.title_top and g.title_top.states then
+		g.title_top.states.visible = show
+	end
+end
+
+local DEFAULT_SETTINGS_TAB_ID = 'tab_but_Game'
+
+local function sync_trade_marketplace_body(overlay)
+	local host = overlay:find_node_by_id("trade_marketplace_body")
+	if not host or not host.config or not host.config.object then return end
+	local body = host.config.object
+	if body.set_scene_parent then
+		body:set_scene_parent(host)
+	end
+	if body.align_to_major then
+		body:align_to_major()
+	end
+	if body.recalculate then
+		body:recalculate()
+	end
+	if host.panel and host.panel.recalculate then
+		host.panel:recalculate()
+	end
+end
+
+local function activate_default_settings_tab()
+	local overlay = game().OVERLAY_MENU
+	if not overlay then return end
+	local shoulders = overlay:find_node_by_id('tab_shoulders')
+	if not shoulders then return end
+
+	local default_node = overlay:find_node_by_id(DEFAULT_SETTINGS_TAB_ID)
+	if not default_node then
+		local first = shoulders.children[1]
+		default_node = first and first.children[1]
+	end
+	if not default_node or not default_node.config or not default_node.config.ref_table then return end
+
+	for _, outer in ipairs(shoulders.children) do
+		local inner = outer.children and outer.children[1]
+		if inner and inner.config and inner.config.choice then
+			local chosen = inner == default_node
+			inner.config.chosen = chosen
+			if inner.config.ref_table then
+				inner.config.ref_table.chosen = chosen
+			end
+		end
+	end
+	M.switch_tab(default_node)
+end
+
 function M.switch_tab(e)
 	if not e then return end
 	clear_overlay_infotip()
@@ -54,6 +113,17 @@ function M.show_overlay(args)
 		game().OVERLAY_MENU.VT.w = game().OVERLAY_MENU.T.w
 		game().OVERLAY_MENU.VT.h = game().OVERLAY_MENU.T.h
 	end
+	local tab_contents = game().OVERLAY_MENU:find_node_by_id('tab_contents')
+	if tab_contents and tab_contents.config.object and tab_contents.config.object.recalculate then
+		tab_contents.config.object:set_scene_parent(tab_contents)
+		tab_contents.config.object:align_to_major()
+		tab_contents.panel:recalculate()
+	end
+	sync_trade_marketplace_body(game().OVERLAY_MENU)
+	if game().OVERLAY_MENU:find_node_by_id('tab_shoulders') then
+		activate_default_settings_tab()
+	end
+	sync_main_menu_title_visibility()
 end
 
 function M.close_overlay()
@@ -70,6 +140,7 @@ function M.close_overlay()
 	game().VIEWING_DECK = nil
 	game().SETTINGS.paused = false
 	game():queue_settings_write()
+	sync_main_menu_title_visibility()
 end
 
 return M

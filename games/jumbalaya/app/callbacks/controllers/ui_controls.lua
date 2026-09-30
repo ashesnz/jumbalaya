@@ -20,6 +20,9 @@ local function drag_slider_impl(e)
 		c.T.w = (rt.ref_table[rt.ref_value] - rt.min) / (rt.max - rt.min) * rt.w
 		c.config.w = c.T.w
 		if rt.callback then Funcs.dispatch(rt.callback, rt) end
+		if rt.ref_table == game().SETTINGS.SOUND and game().queue_settings_write then
+			game():queue_settings_write()
+		end
 	end
 end
 
@@ -33,6 +36,9 @@ function M.slider_step(e, per)
 		rt.text = string.format("%." .. tostring(rt.decimal_places) .. "f", rt.ref_table[rt.ref_value])
 		c.T.w = (rt.ref_table[rt.ref_value] - rt.min) / (rt.max - rt.min) * rt.w
 		c.config.w = c.T.w
+		if rt.ref_table == game().SETTINGS.SOUND and game().queue_settings_write then
+			game():queue_settings_write()
+		end
 	end
 end
 

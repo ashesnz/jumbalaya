@@ -58,6 +58,13 @@ function M.install()
 	_G.Particles = M.Particles
 	_G.FlowText = M.FlowText
 	_G.utf8 = require("jumbalaya-engine.util.utf8")
+	local pack = require("jumbalaya-engine.util.pack")
+	_G.pack_to_source = pack.pack_to_source
+	_G.unpack_source = pack.unpack_source
+	_G.read_save_payload = pack.read_save_payload
+	_G.read_game_save = pack.read_game_save
+	_G.write_game_save = pack.write_game_save
+	_G.write_save_file = pack.write_save_file
 end
 
 return M

@@ -72,7 +72,7 @@ end
 
 function DEFINITIONS.profile_option(_profile)
 	shell.set_focused_profile(_profile)
-	local packed = read_save_payload(shell.focused_profile()..'/'..'profile.acs')
+	local packed = read_game_save(shell.focused_profile() .. '/profile')
 	local profile_data = packed and unpack_source(packed) or nil
 	if profile_data then
 		profile_data.name = profile_data.name or ("P".._profile)

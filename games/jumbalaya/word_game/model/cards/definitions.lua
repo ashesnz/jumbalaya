@@ -110,9 +110,13 @@ function Game:load_card_definitions()
 	-------------------------------------
 	local profile_id = (live_game().SETTINGS and live_game().SETTINGS.profile) or (self.SETTINGS and self.SETTINGS.profile) or 1
 	if not love.filesystem.getInfo(profile_id .. "") then love.filesystem.createDirectory(profile_id .. "") end
-	if not love.filesystem.getInfo(profile_id .. "/" .. "meta.acs") then love.filesystem.append(profile_id .. "/" .. "meta.acs", "return {}") end
+	local SavePaths = require("jumbalaya-engine.persistence.save_paths")
+	local meta_rel = profile_id .. "/meta"
+	if not love.filesystem.getInfo(SavePaths.read_path_for(meta_rel)) then
+		love.filesystem.append(SavePaths.write_path_for(meta_rel), "return {}")
+	end
 
-	local meta = unpack_source(read_save_payload(profile_id .. "/" .. "meta.acs") or "return {}")
+	local meta = unpack_source(read_game_save(meta_rel) or "return {}")
 	meta.unlocked = meta.unlocked or {}
 	meta.discovered = meta.discovered or {}
 	meta.alerted = meta.alerted or {}

@@ -5,6 +5,7 @@ local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
 local chrome = require("word_game.ui.trade.nodes.chrome")
 local action_nodes = require("word_game.ui.trade.nodes.action")
+local trade_layout = require("word_game.ui.trade.layout")
 
 local function trade_model()
 	return facade.trade()
@@ -73,10 +74,14 @@ end
 
 function M.build_overlay_definition(ctx)
 	local TradeView = require("word_game.ui.views.trade_view")
+	local minw = trade_layout.modal_minw()
+	local minh = ctx.modal_minh()
 	return build_generic_options({
-		minw = 12,
-		minh = ctx.modal_minh(),
-		padding = 0.35,
+		root_minw = minw + 1.5,
+		root_minh = minh + 1.5,
+		minw = minw,
+		minh = minh,
+		padding = trade_layout.modal_padding(),
 		bg_colour = game().C.CLEAR,
 		outline_colour = game().C.CLEAR,
 		colour = game().C.CLEAR,

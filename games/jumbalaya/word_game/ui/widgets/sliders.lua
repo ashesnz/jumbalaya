@@ -45,8 +45,20 @@ function make_tab_strip(args)
 
 	for k, v in ipairs(args.tabs) do
 		if v.chosen then args.current = {k = k, v = v} end
-		tab_buttons[#tab_buttons+1] = Components.button({id = 'tab_but_'..(v.label or ''), ref_table = v, onClick = 'switch_tab', label = {v.label}, height = 0.8*args.scale, width = 2.5*args.scale, col = true, choice = true, textSize = args.text_scale, chosen = v.chosen, onTick = v.func, focus_args = {type = 'none'}})
+		local tab_key = v.tab_id or v.tab_definition_function_args or v.label or tostring(k)
+		tab_buttons[#tab_buttons+1] = Components.button({id = 'tab_but_'..tab_key, ref_table = v, onClick = 'switch_tab', label = {v.label}, height = 0.8*args.scale, width = 2.5*args.scale, col = true, choice = true, textSize = args.text_scale, chosen = v.chosen == true, onTick = v.func, focus_args = {type = 'none'}})
 	end
+	if not args.current and args.tabs[1] then
+		args.tabs[1].chosen = true
+		args.current = { k = 1, v = args.tabs[1] }
+	end
+
+	local initial_tab = args.current and args.current.v
+	local initial_definition
+	if initial_tab and initial_tab.tab_definition_function then
+		initial_definition = initial_tab.tab_definition_function(initial_tab.tab_definition_function_args)
+	end
+	initial_definition = initial_definition or {n=game().UI.ROOT, config={align = "cm", colour = game().C.CLEAR}, nodes={}}
 
 	local t =
 	{n=game().UI.ROW, config={padding = 0.0, align = "cm", colour = game().C.CLEAR}, nodes={
@@ -56,7 +68,7 @@ function make_tab_strip(args)
 			(#args.tabs > 1 and not args.no_shoulders) and {n=game().UI.COLUMN, config={minw = 0.7,align = "cm", colour = game().C.CLEAR,func = 'set_button_pip', focus_args = {button = 'rightshoulder', type = 'none', orientation = 'cm', scale = 0.7, offset = {x = 0.1, y = 0}}}, nodes = {}} or nil,
 		}},
 		{n=game().UI.ROW, config={align = args.tab_alignment, padding = args.padding or 0.1, no_fill = true, minh = args.tab_h, minw = args.tab_w}, nodes={
-			{n=game().UI.OBJECT, config={id = 'tab_contents', object = UIViewHost.create{definition = args.current.v.tab_definition_function(args.current.v.tab_definition_function_args), config = {offset = {x=0,y=0}}}}}
+			{n=game().UI.OBJECT, config={id = 'tab_contents', object = UIViewHost.create{definition = initial_definition, config = {offset = {x=0,y=0}, type = 'cm'}}}}
 		}},
 	}}
 

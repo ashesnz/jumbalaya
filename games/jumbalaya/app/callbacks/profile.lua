@@ -9,17 +9,18 @@ local BridgeRuntime = require("app.runtime")
 local Funcs = require("app.callbacks.funcs")
 local function game() return BridgeRuntime.game() end
 local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
+local SavePaths = require("jumbalaya-engine.persistence.save_paths")
 ---@param e table
 Funcs.register("can_resume_run",  function(e)
   if e.config.func then --refers to this function, or 'can_resume_run', so this doesn't run repeatedly
     local _can_continue = nil
-    local savefile = love.filesystem.getInfo(game().SETTINGS.profile..'/'..'save.acs')
+    local savefile = SavePaths.exists(game().SETTINGS.profile .. '/save')
     if savefile == nil then
         e.config.colour = game().C.UI.BACKGROUND_INACTIVE
         e.config.button = nil
     else
       if not game().STORED_RUN then
-        game().STORED_RUN = read_save_payload(game().SETTINGS.profile..'/'..'save.acs')
+        game().STORED_RUN = read_game_save(game().SETTINGS.profile .. '/save')
         if game().STORED_RUN ~= nil then game().STORED_RUN = unpack_source(game().STORED_RUN) end
       end
       local domain = rawget(_G, "WORD_GAME")
@@ -79,7 +80,7 @@ Funcs.register("load_profile",  function(delete_prof_data)
 end)
 
 Funcs.register("can_delete_profile",  function(e)
-  game().CHECK_PROFILE_DATA = game().CHECK_PROFILE_DATA or love.filesystem.getInfo(game().focused_profile..'/'..'profile.acs')
+  game().CHECK_PROFILE_DATA = game().CHECK_PROFILE_DATA or SavePaths.exists(game().focused_profile .. '/profile')
   if (not game().CHECK_PROFILE_DATA) or e.config.disable_button then
       game().CHECK_PROFILE_DATA = false
       e.config.colour = game().C.UI.BACKGROUND_INACTIVE
@@ -105,9 +106,13 @@ Funcs.register("delete_profile",  function(e)
 
     play_sfx('generic1', 1, 0.4)
   else
-    love.filesystem.remove(game().focused_profile..'/'..'profile.acs')
-    love.filesystem.remove(game().focused_profile..'/'..'save.acs')
-    love.filesystem.remove(game().focused_profile..'/'..'meta.acs')
+    local pid = game().focused_profile
+    love.filesystem.remove(SavePaths.write_path_for(pid .. '/profile'))
+    love.filesystem.remove(SavePaths.legacy_path_for(pid .. '/profile'))
+    love.filesystem.remove(SavePaths.write_path_for(pid .. '/save'))
+    love.filesystem.remove(SavePaths.legacy_path_for(pid .. '/save'))
+    love.filesystem.remove(SavePaths.write_path_for(pid .. '/meta'))
+    love.filesystem.remove(SavePaths.legacy_path_for(pid .. '/meta'))
     love.filesystem.remove(game().focused_profile..'')
     game().STORED_RUN = nil
     game().DISCOVER_TALLIES = nil

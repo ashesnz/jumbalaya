@@ -107,6 +107,9 @@ end
 function love.quit()
 	local game = shell.game()
 	if not game then return end
+	if game.flush_settings_to_disk then
+		game:flush_settings_to_disk()
+	end
 	if game.AUDIO_WORKER then
 		game.AUDIO_WORKER.channel:push({ op = "stop" })
 	end

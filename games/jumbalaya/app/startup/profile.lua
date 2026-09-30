@@ -43,7 +43,7 @@ local function load_profile_data(profile_index)
 	if not game.PROFILES[profile_index] then profile_index = 1 end
 	game.SETTINGS.profile = profile_index
 
-	local info = read_save_payload(profile_index .. "/profile.acs")
+	local info = read_game_save(profile_index .. "/profile")
 	if info ~= nil then
 		for k, v in pairs(unpack_source(info)) do
 			game.PROFILES[game.SETTINGS.profile][k] = v

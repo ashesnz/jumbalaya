@@ -48,8 +48,8 @@ function Game:define_constants()
     self.SETTINGS = RuntimeOptions.settings()
 
     local os_name = love.system.getOS()
-    if os_name == 'iOS' or os_name == 'Android' then
-        -- Mobile: lower memory use and avoid audio thread issues on LÖVE iOS.
+    if os_name == 'iOS' or os_name == 'Android' or os_name == 'OS X' then
+        -- Mobile / macOS: avoid love.thread audio (preload + mix on main thread).
         self.F_SOUND_THREAD = false
         self.F_VERBOSE = false
         self.SETTINGS.GRAPHICS.texture_scaling = 1
