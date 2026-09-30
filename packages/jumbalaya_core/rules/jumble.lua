@@ -4,13 +4,21 @@ local perk_math = require("jumbalaya_core.rules.perk_math")
 
 local M = {}
 
+local function is_live_card(card)
+	return card ~= nil and not card.REMOVED
+end
+
 function M.placed_count(slots)
 	local count = 0
 	for _, slot in ipairs(slots or {}) do
-		if slot.kind == "blank" and slot.card then
+		if slot.kind == "blank" and is_live_card(slot.card) then
 			count = count + 1
-		elseif slot.kind == "span" and slot.cards then
-			count = count + #slot.cards
+		elseif slot.kind == "span" then
+			for _, card in ipairs(slot.cards or {}) do
+				if is_live_card(card) then
+					count = count + 1
+				end
+			end
 		end
 	end
 	return count
@@ -19,11 +27,13 @@ end
 function M.collect_used_cards(slots)
 	local used = {}
 	for _, slot in ipairs(slots or {}) do
-		if slot.kind == "blank" and slot.card then
+		if slot.kind == "blank" and slot.card and not slot.card.REMOVED then
 			used[#used + 1] = slot.card
 		elseif slot.kind == "span" then
 			for _, card in ipairs(slot.cards or {}) do
-				used[#used + 1] = card
+				if card and not card.REMOVED then
+					used[#used + 1] = card
+				end
 			end
 		end
 	end

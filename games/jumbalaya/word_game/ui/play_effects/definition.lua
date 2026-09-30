@@ -114,7 +114,9 @@ function M.roll_jumble_banners(result)
 end
 
 function M.show_validation_error(err)
-	if word_feedback.is_invalid_reason(err) then
+	if word_feedback.is_must_play_reason(err) then
+		word_feedback.show_must_play()
+	elseif word_feedback.is_invalid_reason(err) then
 		word_feedback.show_invalid()
 	else
 		word_feedback.show(err or "Cannot play", game().C.RED)

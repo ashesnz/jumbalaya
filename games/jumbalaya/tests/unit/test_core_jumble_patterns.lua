@@ -203,7 +203,7 @@ T.describe("jumbalaya_core jumble patterns", function()
 		}
 		local word, err = Validation.validate_word(slots, puzzle, dict_opts())
 		T.assert_nil(word)
-		T.assert_equal(err, "Must play a word or skip entirely")
+		T.assert_equal(err, "Word must be played!")
 	end)
 
 	T.it("reports letters needed from hand for span puzzles", function()

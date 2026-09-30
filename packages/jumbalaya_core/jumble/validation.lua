@@ -4,6 +4,8 @@ local puzzle_spec = require("jumbalaya_core.jumble.puzzle_spec")
 
 local M = {}
 
+M.EMPTY_PLAY_ERROR = "Word must be played!"
+
 local function can_supply(hand_counts, needed)
 	for letter, n in pairs(needed or {}) do
 		if (hand_counts[letter] or 0) < n then
@@ -69,7 +71,7 @@ function M.validate_word(slots, puzzle, opts)
 		return nil, "No puzzle"
 	end
 	if not require("jumbalaya_core.jumble.slots").all_blanks_filled(slots, puzzle) then
-		return nil, "Must play a word or skip entirely"
+		return nil, M.EMPTY_PLAY_ERROR
 	end
 	local slots_mod = require("jumbalaya_core.jumble.slots")
 	local word = slots_mod.build_word(slots, opts.letter_from_card)

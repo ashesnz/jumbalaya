@@ -63,6 +63,7 @@ T.describe("Jumble play flow integration", function()
 				puzzle_index = 1,
 				solved = false,
 				total_score = 0,
+				puzzle_words = {},
 				slots = {
 					{ kind = "fixed", letter = "C" },
 					{ kind = "span", cards = {}, min = 1, max = 5 },
@@ -74,8 +75,18 @@ T.describe("Jumble play flow integration", function()
 		mock_env.patch_game({ word_round = wr, word_score_animating = false })
 
 		local play_resolution = require("word_game.ui.play_effects.resolution")
-		play_resolution.resolve(flow)
+		local effects = require("word_game.ui.play_effects")
+		local shown
+		local orig = effects.show_validation_error
+		effects.show_validation_error = function(err)
+			shown = err
+		end
+		local result = play_resolution.resolve(flow)
+		effects.show_validation_error = orig
 
+		T.assert_equal(result.kind, "invalid")
+		T.assert_equal(result.err, "Word must be played!")
+		T.assert_equal(shown, "Word must be played!")
 		T.assert_equal(wr.jumble.puzzle_index, 1, "Puzzle index should stay 1")
 		T.assert_false(wr.jumble.solved, "Puzzle should remain unsolved")
 	end)

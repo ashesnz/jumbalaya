@@ -18,6 +18,7 @@ local core = require("jumbalaya_core.rules.jumble")
 local core_play = require("jumbalaya_core.rules.play")
 local placement_preview = require("jumbalaya_core.jumble.placement_preview")
 local game_access = require("word_game.model.game_access")
+local live_game = require("word_game.model.live_game")
 
 local M = {}
 
@@ -41,7 +42,21 @@ local function word_round_ref(wr)
 	return wr or game_access.word_round()
 end
 
-M.placed_count = core.placed_count
+local function live_placed_count(slots)
+	local area = live_game() and live_game().pattern_row and live_game().pattern_row.area
+	if area then
+		local count = 0
+		for _, card in ipairs(area.cards or {}) do
+			if card and not card.REMOVED then
+				count = count + 1
+			end
+		end
+		return count
+	end
+	return core.placed_count(slots)
+end
+
+M.placed_count = live_placed_count
 M.collect_used_cards = core.collect_used_cards
 M.score_remaining = core.score_remaining
 M.puzzle_total = core.puzzle_total

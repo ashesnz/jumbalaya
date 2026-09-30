@@ -44,8 +44,9 @@ T.describe("play resolution", function()
 		local result = resolution.resolve(play)
 		T.assert_not_nil(result)
 		T.assert_equal(result.kind, "invalid")
+		T.assert_equal(result.err, "Word must be played!")
 		T.assert_equal(base_wr().jumble.puzzle_index, 1)
-		T.assert_not_nil(shown)
+		T.assert_equal(shown, "Word must be played!")
 
 		effects.show_validation_error = orig
 	end)
@@ -73,6 +74,41 @@ T.describe("play resolution", function()
 		T.assert_equal(result.kind, "bank_puzzle")
 		T.assert_not_equal(mock_env.game_state().word_round.jumble.puzzle_index, 1)
 		T.assert_equal(feedback, 4)
+
+		effects.show_puzzle_bank_feedback = orig_feedback
+	end)
+
+	T.it("banks a scored puzzle when the live row is empty but slots still list old cards", function()
+		local play = require("word_game.model.jumble_play")
+		local resolution = require("word_game.ui.play_effects.resolution")
+		local effects = require("word_game.ui.play_effects")
+		local shell = require("jumbalaya-engine.shell")
+		local feedback
+		local orig_feedback = effects.show_puzzle_bank_feedback
+		effects.show_puzzle_bank_feedback = function(total)
+			feedback = total
+		end
+
+		local wr = base_wr()
+		wr.jumble.solved = false
+		wr.jumble.puzzle_words = { "CAT" }
+		wr.jumble.puzzle_points = 3
+		wr.jumble.puzzle_multi = 1.0
+		wr.jumble.slots[2].cards = { { ability = { letter = "A" }, REMOVED = true } }
+
+		local game = shell.game()
+		game.pattern_row = game.pattern_row or {}
+		game.pattern_row.area = { T = { x = 0, y = 0, w = 8, h = 1 }, cards = {} }
+
+		mock_env.publish_game({ word_round = wr, word_score_animating = false, run_mode = "time_run" })
+		WORD_GAME = WORD_GAME or {}
+		WORD_GAME.Jumble = require("word_game.model.jumble")
+		WORD_GAME.Play = play
+
+		local result = resolution.resolve(play, { instant = true })
+		T.assert_equal(result.kind, "bank_puzzle")
+		T.assert_not_equal(mock_env.game_state().word_round.jumble.puzzle_index, 1)
+		T.assert_equal(feedback, 3)
 
 		effects.show_puzzle_bank_feedback = orig_feedback
 	end)

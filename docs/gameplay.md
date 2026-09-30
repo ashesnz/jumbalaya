@@ -155,7 +155,7 @@ When the puzzle is solved but slots are empty (already played words this puzzle)
 2. Banks `floor(puzzle_points × puzzle_multi)` into the stage total.
 3. If target reached → stage cleared; else → next puzzle (`Flow.jumble_next` with slide animation).
 
-Pressing **Play** on an empty, unsolved puzzle shows **“Must play a word or skip entirely”**.
+Pressing **Play** on an empty, unsolved puzzle shows **“Word must be played!”**.
 
 ### Word rules
 

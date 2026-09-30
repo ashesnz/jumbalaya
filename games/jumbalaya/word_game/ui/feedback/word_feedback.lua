@@ -15,23 +15,25 @@ local RunMode = facade.run_mode()
 local M = {}
 
 local INVALID_WORD_TEXT = "Not a valid word!"
+local MUST_PLAY_TEXT = "Word must be played!"
 
 function M.spawn_attention(args)
 	spawn.spawn_attention(args)
 end
 
 function M.show(text, colour, hold, offset_y)
+	local spawn_fn = M.spawn_attention
 	local gap = geometry.hand_gap_metrics()
 	if not gap then
-		if spawn_attention then
-			spawn_attention({ text = text, scale = 0.5, hold = hold or 1.5,
+		if spawn_fn then
+			spawn_fn({ text = text, scale = 0.5, hold = hold or 1.5,
 				align = "cm", colour = colour or game().C.RED })
 		end
 		return
 	end
-	if not spawn_attention then return end
+	if not spawn_fn then return end
 	local scale = math.min(0.68, math.max(0.36, gap.inner_h * 1.45))
-	spawn_attention({
+	spawn_fn({
 		text = text,
 		scale = scale,
 		maxw = gap.gap_w,
@@ -145,8 +147,17 @@ function M.show_invalid()
 	M.show(INVALID_WORD_TEXT, game().C.RED, 1.6)
 end
 
+function M.show_must_play()
+	M.show(MUST_PLAY_TEXT, game().C.RED, 1.6)
+end
+
 function M.is_invalid_reason(reason)
 	return reason == "Not a valid word" or reason == "Does not match"
+end
+
+function M.is_must_play_reason(reason)
+	return reason == MUST_PLAY_TEXT
+		or reason == "Must play a word or skip entirely"
 end
 
 function M.hand_dealt_metrics()

@@ -3,6 +3,7 @@
 local jumble_rules = require("jumbalaya_core.rules.jumble")
 local ModifierEffects = require("jumbalaya_core.rules.letter_modifier_effects")
 local PerkEffects = require("jumbalaya_core.rules.perk_effects")
+local Validation = require("jumbalaya_core.jumble.validation")
 
 local M = {}
 
@@ -31,7 +32,8 @@ function M.evaluate(j, wr, opts)
 	local target = opts.round_target(wr)
 	local run_mode = opts.run_mode or "time_run"
 
-	if placed == 0 and j.solved then
+	local puzzle_has_word = j.solved or #(j.puzzle_words or {}) > 0
+	if placed == 0 and puzzle_has_word then
 		if opts.on_puzzle_bank then
 			opts.on_puzzle_bank(j, wr)
 		end
@@ -61,6 +63,10 @@ function M.evaluate(j, wr, opts)
 			puzzle_label = puzzle_label(j),
 			post_target_doubled = post_target and raw_puzzle_total > 0,
 		}
+	end
+
+	if placed == 0 then
+		return { kind = "invalid", err = Validation.EMPTY_PLAY_ERROR }
 	end
 
 	local word, err = opts.validate_current()

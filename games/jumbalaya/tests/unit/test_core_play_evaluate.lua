@@ -50,4 +50,43 @@ T.describe("jumbalaya_core play evaluate", function()
 		T.assert_equal(result.word, "CAT")
 		T.assert_true(recorded)
 	end)
+
+	T.it("rejects empty play before any word with Word must be played", function()
+		local wr = Fixtures.jumble_word_round({ target = 20 })
+		local j = wr.jumble
+		local result = Play.evaluate(j, wr, {
+			play_blocked = function() return false end,
+			placed_count = function() return 0 end,
+			round_target = function() return 20 end,
+			run_mode = "time_run",
+			validate_current = function()
+				error("empty play should not validate a word")
+			end,
+			collect_used_cards = function() return {} end,
+		})
+		T.assert_equal(result.kind, "invalid")
+		T.assert_equal(result.err, "Word must be played!")
+	end)
+
+	T.it("banks an empty row after a word even if solved was cleared", function()
+		local wr = Fixtures.jumble_word_round({ target = 20 })
+		local j = wr.jumble
+		j.solved = false
+		j.puzzle_words = { "CAT" }
+		j.puzzle_points = 3
+		j.puzzle_multi = 1.0
+		local result = Play.evaluate(j, wr, {
+			play_blocked = function() return false end,
+			placed_count = function() return 0 end,
+			round_target = function() return 20 end,
+			run_mode = "time_run",
+			on_puzzle_bank = function() end,
+			validate_current = function()
+				error("scored empty play should bank, not validate")
+			end,
+			collect_used_cards = function() return {} end,
+		})
+		T.assert_equal(result.kind, "bank_puzzle")
+		T.assert_equal(result.puzzle_total, 3)
+	end)
 end)
