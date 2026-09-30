@@ -10,6 +10,7 @@ local game = require("word_game.ui.util.game_runtime").game
 local UIViewHost = require("jumbalaya-engine.panels.view_host")
 local Colour = require("jumbalaya-engine.util.colour")
 local Tables = require("jumbalaya-engine.util.tables")
+local localize = require("word_game.ui.util.localize").localize
 
 local DEFINITIONS = game().DEFINITIONS
 

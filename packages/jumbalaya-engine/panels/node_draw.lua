@@ -1,5 +1,6 @@
 
 local shell = require("jumbalaya-engine.shell")
+local AnimNode = require("jumbalaya-engine.scene.animated.init")
 local game = shell.game
 return function(Target)
 function Target:pulse(amount, rot_amt)

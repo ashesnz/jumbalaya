@@ -9,15 +9,9 @@ function Target:print_topology(indent)
 	end
 	local out = '\n' .. string.rep('  ', indent or 0) .. '| ' .. uit_name .. ' | - ID:' .. self.ID .. ' w/h:' .. self.T.w .. '/' .. self.T.h
 	if uit_name == 'O' then
-		out = out .. ' OBJ:' .. (
-			getmetatable(self.config.object) == CardPile and 'CardPile' or
-			getmetatable(self.config.object) == Card and 'Card' or
-			getmetatable(self.config.object) == RetainedPanel and 'RetainedPanel' or
-			getmetatable(self.config.object) == Particles and 'Particles' or
-			getmetatable(self.config.object) == FlowText and 'FlowText' or
-			getmetatable(self.config.object) == Sprite and 'Sprite' or
-			getmetatable(self.config.object) == SpriteAnimator and 'SpriteAnimator' or
-			'OTHER')
+		local mt = getmetatable(self.config.object)
+		local kind = type(mt) == "table" and mt.kind_name or nil
+		out = out .. ' OBJ:' .. (kind or 'OTHER')
 	elseif uit_name == 'T' then
 		out = out .. ' TEXT:' .. (self.config.text or 'REF')
 	end

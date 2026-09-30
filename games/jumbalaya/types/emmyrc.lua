@@ -14,6 +14,9 @@
 	move them behind facade-only accessors.
 
 	CI runs `emmylua_check . --severity error`; local refactors use `--severity warn`.
+
+	Boot Kind aliases installed by `jumbalaya-engine.globals.install` and
+	`app/bootstrap/kind_globals.lua` are listed in `.emmyrc.json` → `diagnostics.globals`.
 ]]
 
 ---@meta

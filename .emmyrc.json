@@ -23,7 +23,31 @@
   "diagnostics": {
     "globals": [
       "unlock_card",
-      "discover_card"
+      "discover_card",
+      "Kind",
+      "Node",
+      "AnimNode",
+      "EaseNode",
+      "SceneNode",
+      "Sprite",
+      "GfxSprite",
+      "SpriteAnimator",
+      "GfxAnimator",
+      "Tween",
+      "Scheduler",
+      "InputRouter",
+      "InputController",
+      "RetainedPanel",
+      "LayoutNode",
+      "ParticleEmitter",
+      "Particles",
+      "FlowText",
+      "Game",
+      "Card",
+      "CardPile",
+      "TitleLogo",
+      "PerkVoucherSprite",
+      "localize"
     ],
     "disable": [
       "inject-field",

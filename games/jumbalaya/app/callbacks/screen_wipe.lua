@@ -1,5 +1,6 @@
 -- Application screen transitions and their particle effects.
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
+local FlowText = require("jumbalaya-engine.graphics.flow_text")
 
 local BridgeRuntime = require("app.runtime")
 local Funcs = require("app.callbacks.funcs")
