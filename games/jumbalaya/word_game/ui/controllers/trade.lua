@@ -12,17 +12,14 @@ function M.on_close(_e)
 end
 
 function M.on_market_add(e)
-	action_dispatch.dispatch_func("trade_market_add")
 	market_actions.on_add(e)
 end
 
 function M.on_market_remove(e)
-	action_dispatch.dispatch_func("trade_market_remove")
 	market_actions.on_remove(e)
 end
 
 function M.on_market_modify(e)
-	action_dispatch.dispatch_func("trade_market_modify")
 	market_actions.on_modify(e)
 end
 

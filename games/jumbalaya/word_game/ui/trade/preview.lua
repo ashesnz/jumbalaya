@@ -23,11 +23,8 @@ function M.ensure(item, card_w, card_h)
 		scale_card(item.preview, card_w, card_h)
 		return item.preview
 	end
-	if item.card and not item.card.REMOVED then
-		item.preview = item.card
-		scale_card(item.preview, card_w, card_h)
-		return item.preview
-	end
+	-- Never embed the live deck card: it keeps draw-pile/world transforms and
+	-- renders outside the marketplace cell (often the right-hand offer column).
 	if not Card then return nil end
 	local g = game()
 	local letter = item.letter
@@ -46,6 +43,15 @@ function M.ensure(item, card_w, card_h)
 		{}
 	)
 	deck.tag_card(card, letter, color)
+	if item.card and not item.card.REMOVED and deck.is_modified and deck.is_modified(item.card) then
+		deck.apply_to_card(card)
+	end
+	if card.hard_set_T then
+		card:hard_set_T(0, 0, card_w, card_h)
+	end
+	if card.set_scene_parent then
+		card:set_scene_parent(nil)
+	end
 	card.states.drag.can = false
 	card.states.hover.can = false
 	card.states.click.can = false

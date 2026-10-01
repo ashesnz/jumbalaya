@@ -7,8 +7,6 @@
 ]]
 
 local economy = require("jumbalaya_core.config.gameplay.economy")
-local round_config = require("jumbalaya_core.config.gameplay.round")
-local letter_tiers = require("jumbalaya_core.config.gameplay.letter_tiers")
 local state = require("word_game.model.run.state")
 local game_access = require("word_game.model.game_access")
 local deck = require("word_game.model.cards.deck")
@@ -46,22 +44,6 @@ local function rand_float(key)
 	return math.random()
 end
 
-local function rand_int(key, min, max)
-	if max <= min then return min end
-	local n = max - min + 1
-	local idx = min + math.floor(rand_float(key) * n)
-	if idx > max then idx = max end
-	return idx
-end
-
-local function copy_letters(letters)
-	local out = {}
-	for i, letter in ipairs(letters) do
-		out[i] = letter
-	end
-	return out
-end
-
 function M.item_in_deck(item)
 	return item and item.card and not item.card.REMOVED and true or false
 end
@@ -86,19 +68,11 @@ function M.can_afford(cost)
 end
 
 function M.sync_offer_cards(offer_table)
-	if not offer_table then return end
-	local lists = {}
-	if offer_table.add and offer_table.add.letters then
-		lists[#lists + 1] = offer_table.add.letters
-	end
-	if offer_table.remove and offer_table.remove.letters then
-		lists[#lists + 1] = offer_table.remove.letters
-	end
-	for _, letters in ipairs(lists) do
-		for _, item in ipairs(letters) do
-			if item and item.letter then
-				item.card = deck.find_deck_card(item.letter)
-			end
+	local letters = offer_table and offer_table.add and offer_table.add.letters
+	if not letters then return end
+	for _, item in ipairs(letters) do
+		if item and item.letter then
+			item.card = deck.find_deck_card(item.letter)
 		end
 	end
 end
@@ -106,11 +80,6 @@ end
 function M.can_use()
 	local rs = state.get()
 	return rs and not rs.trade_used_this_hand
-end
-
-function M.is_showdown_market()
-	local wr = game_access.word_round()
-	return wr and round_config.is_showdown(wr.hand_index, wr.set) and true or false
 end
 
 local function make_market_item(letter)
@@ -121,61 +90,6 @@ local function make_market_item(letter)
 	}
 	item.card = deck.find_deck_card(letter)
 	return item
-end
-
-local function roll_add_offer()
-	local tiers = letter_tiers.TIERS
-	local count = economy.TRADE_IN or 2
-	local eligible = {}
-	for i, tier in ipairs(tiers) do
-		if #(tier.letters) >= 1 then
-			eligible[#eligible + 1] = i
-		end
-	end
-	local row = eligible[rand_int("market_row", 1, #eligible)]
-	local tier = tiers[row]
-	local pool = copy_letters(tier.letters)
-	local picks = {}
-	for i = 1, count do
-		local idx = rand_int("market_letter", 1, #pool)
-		local letter = pool[idx]
-		if #pool > 1 then
-			table.remove(pool, idx)
-		end
-		picks[#picks + 1] = make_market_item(letter)
-	end
-	return {
-		mode = "add",
-		row = row,
-		value = tier.value,
-		pool = tier.letters,
-		letters = picks,
-	}
-end
-
-local function roll_remove_offer()
-	local count = economy.TRADE_IN or 2
-	local pool = deck.list_deck_cards()
-	if #pool < 1 then
-		return nil
-	end
-	local picks = {}
-	local n = math.min(count, #pool)
-	for _ = 1, n do
-		local idx = rand_int("market_remove", 1, #pool)
-		local card = table.remove(pool, idx)
-		picks[#picks + 1] = {
-			mode = "remove",
-			card = card,
-			letter = deck.card_letter(card),
-			color = deck.color_from_card(card),
-			ap = card.base and card.base.letter_index or 0,
-		}
-	end
-	return {
-		mode = "remove",
-		letters = picks,
-	}
 end
 
 --- Three distinct cards: one vowel plus two random A–Z letters (no duplicates).
@@ -249,24 +163,34 @@ end
 function M.apply(item, opts)
 	if not item then return false, "No card selected" end
 	local action = (opts and opts.action) or item.action or item.mode or "add"
+	if action == "remove" or action == "modifier" then
+		if item.letter then
+			item.card = deck.find_deck_card(item.letter)
+		end
+	end
 	if action == "remove" then
-		if not M.item_in_deck(item) then
+		if not M.can_remove(item) then
 			return false, "Card not in deck"
+		end
+		if not M.can_afford(M.ACTION_COSTS.remove) then
+			return false, "Not enough tokens"
 		end
 		return M.remove_card(item, opts)
 	end
 	if action == "modifier" then
-		if not M.item_in_deck(item) then
+		if not M.can_modify(item) then
+			if M.item_in_deck(item) and item.card and deck.is_modified(item.card) then
+				return false, "Card is already modified"
+			end
 			return false, "Card not in deck"
-		end
-		if not item.card or deck.is_modified(item.card) then
-			return false, "Card is already modified"
 		end
 		if not state.spend_tokens(M.ACTION_COSTS.modifier) then return false, "Not enough tokens" end
 		deck.apply_to_card(item.card)
 		mark_trade_used()
 		return true, item.card
 	end
+	if not M.can_add(item) then return false, "No letter selected" end
+	if not M.can_afford(M.ACTION_COSTS.add) then return false, "Not enough tokens" end
 	return M.add_letter(item, { cost = (opts and opts.cost) or M.ACTION_COSTS.add, defer_used = opts and opts.defer_used })
 end
 

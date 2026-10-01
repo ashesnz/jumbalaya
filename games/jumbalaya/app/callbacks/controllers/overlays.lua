@@ -23,9 +23,8 @@ end
 local DEFAULT_SETTINGS_TAB_ID = 'tab_but_Game'
 
 local function sync_trade_marketplace(overlay)
-	local ok, layout_sync = pcall(require, "word_game.ui.trade.layout_sync")
-	if ok and layout_sync and layout_sync.sync_overlay then
-		layout_sync.sync_overlay(overlay)
+	if overlay and overlay.recalculate then
+		overlay:recalculate()
 	end
 end
 
