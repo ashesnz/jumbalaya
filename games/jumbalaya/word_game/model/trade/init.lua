@@ -66,6 +66,25 @@ function M.item_in_deck(item)
 	return item and item.card and not item.card.REMOVED and true or false
 end
 
+function M.can_add(item)
+	return item and item.letter and true or false
+end
+
+function M.can_remove(item)
+	return M.item_in_deck(item)
+end
+
+function M.can_modify(item)
+	if not M.item_in_deck(item) then return false end
+	return item.card and not deck.is_modified(item.card)
+end
+
+function M.can_afford(cost)
+	local rs = state.get()
+	if not rs then return false end
+	return (rs.tokens or 0) >= (cost or 0)
+end
+
 function M.sync_offer_cards(offer_table)
 	if not offer_table then return end
 	local lists = {}
@@ -183,7 +202,7 @@ function M.roll_offer()
 
 	picks[#picks + 1] = make_market_item(take_unique("market_vowel", deck.random_vowel_letter))
 	for i = 1, 2 do
-		picks[#picks + 1] = make_market_item(take_unique("market_letter_" .. i, deck.random_letter))
+		picks[#picks + 1] = make_market_item(take_unique("market_consonant_" .. i, deck.random_consonant_letter))
 	end
 
 	return {

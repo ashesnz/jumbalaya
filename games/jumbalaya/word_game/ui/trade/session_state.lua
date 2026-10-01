@@ -1,54 +1,38 @@
---[[ word_game/ui/trade/session_state.lua - Marketplace offer + per-visit session ]]
+--[[ word_game/ui/trade/session_state.lua - Marketplace open flags and active offer ]]
+
+local preview = require("word_game.ui.trade.preview")
 
 local M = {}
 
-local offer
-local session
+local open = false
 local standalone = false
+local offer = nil
 
-function M.offer()
-	return offer
-end
-
-function M.session()
-	return session
+function M.is_open()
+	return open
 end
 
 function M.is_standalone()
 	return standalone
 end
 
-function M.set_standalone(value)
-	standalone = value == true
+function M.offer()
+	return offer
 end
 
-function M.reset(rolled)
-	offer = rolled
-	session = {
-		add_done = false,
-		remove_done = true,
-		added = nil,
-		removed = nil,
-		add_cost_bonus = 0,
-		modified = {},
-		removing = {},
-	}
-	if rolled and rolled.showdown and not rolled.remove then
-		session.remove_done = true
-	end
+function M.set_offer(next_offer)
+	offer = next_offer
 end
 
-function M.session_complete()
-	return session and session.add_done and session.remove_done
-end
-
-function M.broke_after_last_action()
-	return session and session.broke_after_action or false
+function M.mark_open(standalone_mode)
+	open = true
+	standalone = standalone_mode == true
 end
 
 function M.teardown()
+	preview.teardown_offer(offer)
 	offer = nil
-	session = nil
+	open = false
 	standalone = false
 end
 

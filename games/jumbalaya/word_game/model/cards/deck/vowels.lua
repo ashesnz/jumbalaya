@@ -208,9 +208,21 @@ end
 		return Random.seeded_random(key, min, max)
 	end
 
+	local VOWELS = { "A", "E", "I", "O", "U" }
+	M.VOWELS = VOWELS
+
+	local CONSONANTS = {
+		"B", "C", "D", "F", "G", "H", "J", "K", "L", "M",
+		"N", "P", "Q", "R", "S", "T", "V", "W", "X", "Y", "Z",
+	}
+	M.CONSONANTS = CONSONANTS
+
 	function M.random_vowel_letter(key)
-		local vowels = { "A", "E", "I", "O", "U" }
-		return vowels[random_index(key or "market_vowel", 1, #vowels)]
+		return VOWELS[random_index(key or "market_vowel", 1, #VOWELS)]
+	end
+
+	function M.random_consonant_letter(key)
+		return CONSONANTS[random_index(key or "market_consonant", 1, #CONSONANTS)]
 	end
 
 	function M.random_letter(key)

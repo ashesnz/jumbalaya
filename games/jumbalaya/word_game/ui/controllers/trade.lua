@@ -1,11 +1,30 @@
---[[ word_game/ui/controllers/trade.lua - Phase 4 trade game().FUNCS controller ]]
-
-local game = require("word_game.ui.util.game_runtime").game
+--[[ word_game/ui/controllers/trade.lua - Marketplace overlay controls ]]
 
 local action_dispatch = require("app.input.action_dispatch")
 local TradeUI = require("word_game.ui.trade")
+local market_actions = require("word_game.ui.trade.actions")
 
 local M = {}
+
+function M.on_close(_e)
+	action_dispatch.dispatch_func("trade_close")
+	TradeUI.close()
+end
+
+function M.on_market_add(e)
+	action_dispatch.dispatch_func("trade_market_add")
+	market_actions.on_add(e)
+end
+
+function M.on_market_remove(e)
+	action_dispatch.dispatch_func("trade_market_remove")
+	market_actions.on_remove(e)
+end
+
+function M.on_market_modify(e)
+	action_dispatch.dispatch_func("trade_market_modify")
+	market_actions.on_modify(e)
+end
 
 function M.on_pick(e)
 	action_dispatch.dispatch_func("trade_pick")

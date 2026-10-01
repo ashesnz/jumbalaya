@@ -226,12 +226,22 @@ Perks are collected as sidebar stamps for display. Gameplay effects are **not wi
 
 ### The Trade (Card Marketplace)
 
-Opens after every cleared stage except the winning one. **Free.**
+Opens after every cleared stage except the winning one (debug panel can open it anytime in dev builds). Spend **tokens** on one action per visit.
 
-| Stage type | Offer |
-|------------|-------|
-| Standard (×1, ×2) | Pick 1 of 2 letters from a random row, or Skip |
-| Showdown (×3) | Separate **Add** and **Remove** rows; both must be resolved |
+Each visit rolls **three random letter cards** in a row on the marketplace modal:
+
+- **1 vowel** (A, E, I, O, or U)
+- **2 consonants** (the other 21 letters)
+
+Under each card are three actions (token cost shown with the coin icon):
+
+| Action | Cost | Effect |
+|--------|-----:|--------|
+| **Add** | 10 | Adds that letter to your run deck (draw pile). |
+| **Remove** | 20 | Removes that letter from your run deck. Disabled (greyed out) if you do not own the letter. |
+| **Modify** | 30 | Applies that letter’s marketplace modifier to the matching deck card. Requires the letter in your deck and an unmodified copy. |
+
+After you complete one action (or close the modal), play continues to the next stage deal when the marketplace opened from hand clear.
 
 ---
 

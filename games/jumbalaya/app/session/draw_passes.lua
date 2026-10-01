@@ -5,6 +5,13 @@ local perf_checkpoint = require("jumbalaya-engine.adapters.love2d.display").perf
 
 local M = {}
 
+local function trade_marketplace_open()
+	return WORD_GAME_UI
+		and WORD_GAME_UI.TradeUI
+		and WORD_GAME_UI.TradeUI.is_open
+		and WORD_GAME_UI.TradeUI.is_open()
+end
+
 local function draw_with_container(node)
 	love.graphics.push()
 	node:translate_container()
@@ -47,7 +54,8 @@ function M.install()
 		draw_live_uibox(game)
 		perf_checkpoint('panels', 'draw')
 
-		if game.STAGE == game.STAGES.RUN and game.STATE == game.STATES.TABLE_BOARD and WORD_GAME_UI.TableBoard then
+		if not trade_marketplace_open()
+			and game.STAGE == game.STAGES.RUN and game.STATE == game.STATES.TABLE_BOARD and WORD_GAME_UI.TableBoard then
 			WORD_GAME_UI.TableBoard.draw_hud()
 			if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.draw then
 				WORD_GAME_UI.Sidebar:draw()
@@ -55,7 +63,7 @@ function M.install()
 			WORD_GAME_UI.TableBoard.draw_board(game)
 		end
 
-		if WORD_GAME_UI.TableBoard then
+		if WORD_GAME_UI.TableBoard and not trade_marketplace_open() then
 			WORD_GAME_UI.TableBoard.draw_reward_passes()
 			WORD_GAME_UI.TableBoard.draw_attention_passes(game)
 		end
@@ -85,14 +93,7 @@ function M.install()
 		end
 
 		if game.OVERLAY_MENU and game.OVERLAY_MENU ~= game.INPUT.dragging.target then
-			if WORD_GAME_UI.TradeUI and WORD_GAME_UI.TradeUI.backdrop_pass then
-				WORD_GAME_UI.TradeUI.backdrop_pass()
-			end
 			draw_with_container(game.OVERLAY_MENU)
-		end
-		if (show_background or game.OVERLAY_MENU)
-			and WORD_GAME_UI.TradeUI and WORD_GAME_UI.TradeUI.draw_pass then
-			WORD_GAME_UI.TradeUI.draw_pass()
 		end
 
 		if game.debug_tools and game.debug_tools ~= game.INPUT.dragging.target then
@@ -107,13 +108,18 @@ function M.install()
 			game.ALERT_ON_SCREEN = true
 		end
 
-		if game.STAGE == game.STAGES.RUN and game.STATE == game.STATES.TABLE_BOARD and WORD_GAME_UI.TableBoard then
+		if game.STAGE == game.STAGES.RUN and game.STATE == game.STATES.TABLE_BOARD and WORD_GAME_UI.TableBoard
+			and not game.OVERLAY_MENU then
 			WORD_GAME_UI.TableBoard.draw_card_interaction(game)
 		end
 
 		for _, popup in pairs(game.LIVE.POPUP) do draw_with_container(popup) end
 
 		if game.screenwipe then draw_with_container(game.screenwipe) end
+
+		if trade_marketplace_open() and WORD_GAME_UI.TradeUI.draw_modal_on_top then
+			WORD_GAME_UI.TradeUI.draw_modal_on_top()
+		end
 
 		love.graphics.push()
 		game.POINTER:translate_container()
@@ -123,7 +129,7 @@ function M.install()
 		game.POINTER:draw()
 		love.graphics.pop()
 
-		if WORD_GAME_UI.PlayHoldRedraw then
+		if WORD_GAME_UI.PlayHoldRedraw and not trade_marketplace_open() then
 			WORD_GAME_UI.PlayHoldRedraw.draw()
 		end
 

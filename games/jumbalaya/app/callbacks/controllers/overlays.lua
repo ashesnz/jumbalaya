@@ -22,21 +22,10 @@ end
 
 local DEFAULT_SETTINGS_TAB_ID = 'tab_but_Game'
 
-local function sync_trade_marketplace_body(overlay)
-	local host = overlay:find_node_by_id("trade_marketplace_body")
-	if not host or not host.config or not host.config.object then return end
-	local body = host.config.object
-	if body.set_scene_parent then
-		body:set_scene_parent(host)
-	end
-	if body.align_to_major then
-		body:align_to_major()
-	end
-	if body.recalculate then
-		body:recalculate()
-	end
-	if host.panel and host.panel.recalculate then
-		host.panel:recalculate()
+local function sync_trade_marketplace(overlay)
+	local ok, layout_sync = pcall(require, "word_game.ui.trade.layout_sync")
+	if ok and layout_sync and layout_sync.sync_overlay then
+		layout_sync.sync_overlay(overlay)
 	end
 end
 
@@ -119,7 +108,7 @@ function M.show_overlay(args)
 		tab_contents.config.object:align_to_major()
 		tab_contents.panel:recalculate()
 	end
-	sync_trade_marketplace_body(game().OVERLAY_MENU)
+	sync_trade_marketplace(game().OVERLAY_MENU)
 	if game().OVERLAY_MENU:find_node_by_id('tab_shoulders') then
 		activate_default_settings_tab()
 	end

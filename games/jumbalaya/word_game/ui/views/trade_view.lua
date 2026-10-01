@@ -29,7 +29,7 @@ function TradeView.create_marketplace_body(ctx, config, definition)
 	-- board pass draws it first and the per-frame draw guard skips overlay paint.
 	config.skip_live_registry = true
 	return Panels.create({
-		definition = definition or trade_definition.marketplace_body_definition(ctx),
+		definition = definition or trade_definition.build_overlay_definition(),
 		config = config,
 	})
 end

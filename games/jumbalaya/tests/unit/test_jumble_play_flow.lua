@@ -91,14 +91,9 @@ T.describe("Jumble play flow integration", function()
 		T.assert_false(wr.jumble.solved, "Puzzle should remain unsolved")
 	end)
 
-	T.it("raises add cost for every marketplace card after each purchase", function()
-		local trade_ui = require("word_game.ui.trade")
-		local session_state = { add_cost_bonus = 0 }
-		T.assert_equal(trade_ui.session_add_cost(session_state), 10, "Initial add cost should be 10 tokens")
-		session_state.add_cost_bonus = 10
-		T.assert_equal(trade_ui.session_add_cost(session_state), 20, "All cards should cost 10 more after one add")
-		session_state.add_cost_bonus = 20
-		T.assert_equal(trade_ui.session_add_cost(session_state), 30, "All cards should cost 10 more after two adds")
+	T.it("uses core economy trade add cost", function()
+		local economy = require("jumbalaya_core.config.gameplay.economy")
+		T.assert_equal(economy.TRADE_ADD_COST, 10)
 	end)
 
 	T.it("updates the token counter while the marketplace hides the table deck area", function()

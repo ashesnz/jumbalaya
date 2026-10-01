@@ -82,6 +82,17 @@ function Target:calculate_xywh(node, _T, recalculate, _scale)
 			for _, v in ipairs(node.children) do
 				if getmetatable(v) == LayoutNode then
 					if v.config and v.config.scale then v.config.scale = v.config.scale * fac end
+					if v.config and v.config.draw_layer then
+						local box = {
+							x = node_t.x + padding,
+							y = node_t.y + padding,
+							w = math.max(node_t.w or 0, node.config.minw or 0) - 2 * padding,
+							h = math.max(node_t.h or 0, node.config.minh or 0) - 2 * padding,
+						}
+						if box.w < 0 then box.w = node.config.minw or 0 end
+						if box.h < 0 then box.h = node.config.minh or 0 end
+						self:calculate_xywh(v, box, recalculate, fac)
+					else
 					local child_w, child_h = self:calculate_xywh(v, content, recalculate, fac)
 					if child_h and child_w then
 						if v.ui_kind == game().UI.ROW then
@@ -100,6 +111,7 @@ function Target:calculate_xywh(node, _T, recalculate, _scale)
 								content.h = content.h + v.config.emboss
 							end
 						end
+					end
 					end
 				end
 			end
