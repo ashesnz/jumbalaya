@@ -73,7 +73,7 @@ T.describe("marketplace", function()
 		T.assert_equal(stage.config.minh, modal.h)
 	end)
 
-	T.it("defines five grid rows: cards, modifiers, then add/remove/modify", function()
+	T.it("defines five grid rows: modifiers, cards, then add/remove/modify", function()
 		mock_env.reset_game()
 		mock_env.patch_game({
 			run_state = { tokens = 100, perks = {}, trade_used_this_hand = false },
@@ -88,7 +88,7 @@ T.describe("marketplace", function()
 		local frame = layout.modal_frame()
 		local grid_mod = require("word_game.ui.trade.columns")
 		local grid_def = grid_mod.build_grid(frame)
-		local frac = grid_mod.ROW_HEIGHT_FRAC
+		local metrics = grid_mod.layout_metrics(frame)
 		local cards_row = find_def_node(grid_def, "trade_marketplace_cards_row")
 		local modifier_row = find_def_node(grid_def, "trade_marketplace_modifier_row")
 		local add_row = find_def_node(grid_def, "trade_marketplace_add_row")
@@ -103,9 +103,12 @@ T.describe("marketplace", function()
 		T.assert_equal(#(grid_def.nodes or {}), 5)
 		T.assert_equal(#(cards_row.nodes or {}), 3)
 		T.assert_equal(#(modifier_row.nodes or {}), 3)
-		T.assert_true(math.abs(cards_row.config.minh - frame.h * frac.cards) < 0.02)
-		T.assert_true(math.abs(modifier_row.config.minh - frame.h * frac.modifier) < 0.02)
-		T.assert_true(math.abs(add_row.config.minh - frame.h * frac.button) < 0.02)
+		T.assert_equal(grid_def.nodes[1].config.id, "trade_marketplace_modifier_row")
+		T.assert_equal(grid_def.nodes[2].config.id, "trade_marketplace_cards_row")
+		T.assert_true(math.abs(cards_row.config.minh - metrics.cards_h) < 0.02)
+		T.assert_true(math.abs(modifier_row.config.minh - metrics.modifier_h) < 0.02)
+		T.assert_true(math.abs(add_row.config.minh - metrics.button_h) < 0.02)
+		T.assert_true(grid_mod.sum_row_min_heights(grid_def) <= frame.h - 2 * grid_mod.GRID_PADDING + 0.02)
 
 		local items = offer.items()
 		for index = 1, 3 do
@@ -119,8 +122,67 @@ T.describe("marketplace", function()
 		local btn_col = first_col and first_col.nodes and first_col.nodes[1]
 		T.assert_equal(btn_col.config.ref_table.market_index, 1)
 		T.assert_equal(btn_col.config.button, "trade_market_add")
+		T.assert_equal(btn_col.config.minw, metrics.button_minw)
+		T.assert_true(btn_col.config.maxw <= metrics.col_w + 0.001)
 
 		session_state.teardown()
+	end)
+
+	T.it("keeps grid rows and controls inside the modal frame across room sizes", function()
+		setup_marketplace_game()
+		local layout = require("word_game.ui.trade.layout")
+		local columns = require("word_game.ui.trade.columns")
+		local game = shell.game()
+		local rooms = {
+			{ w = 20, h = 11 },
+			{ w = 16, h = 9 },
+			{ w = 24, h = 13 },
+			{ w = 12, h = 7 },
+		}
+		for _, room in ipairs(rooms) do
+			game.ROOM.T.w = room.w
+			game.ROOM.T.h = room.h
+			local frame = layout.modal_frame()
+			local metrics = columns.layout_metrics(frame)
+			T.assert_true(
+				metrics.total_row_h <= metrics.inner_h + 0.001,
+				string.format("row stack taller than frame (%.2f > %.2f) at %dx%d",
+					metrics.total_row_h, metrics.inner_h, room.w, room.h)
+			)
+			T.assert_true(metrics.button_minw <= metrics.col_w + 0.001)
+			T.assert_true(metrics.market_card_w <= metrics.col_w + 0.001)
+
+			local grid_def = columns.build_grid(frame)
+			T.assert_equal(grid_def.config.minw, frame.w)
+			T.assert_equal(grid_def.config.maxw, frame.w)
+			T.assert_equal(grid_def.config.minh, frame.h)
+			T.assert_equal(grid_def.config.maxh, frame.h)
+			T.assert_true(columns.sum_row_min_heights(grid_def) <= frame.h - 2 * columns.GRID_PADDING + 0.02)
+
+			for _, row in ipairs(grid_def.nodes or {}) do
+				T.assert_equal(row.config.maxw, frame.w)
+				T.assert_true((row.config.minh or 0) <= frame.h)
+			end
+
+			for col_index = 1, 3 do
+				local card_node = find_def_node(grid_def, "trade_market_card_" .. col_index)
+				if card_node and card_node.config.w then
+					T.assert_true(card_node.config.w <= metrics.col_w + 0.001)
+				end
+			end
+		end
+	end)
+
+	T.it("layout source constrains marketplace grid to the art frame", function()
+		local paths = require("bootstrap_paths").resolve()
+		local file = io.open(paths.path_under_repo(
+			"games", "jumbalaya", "word_game", "ui", "trade", "columns.lua"), "r")
+		T.assert_not_nil(file)
+		local src = file:read("*a")
+		file:close()
+		T.assert_true(src:find("layout_metrics"), "grid should derive sizes from layout_metrics")
+		T.assert_true(src:find("maxh = frame%.h"), "grid should cap height to the modal frame")
+		T.assert_true(src:find("ACTION_BUTTON_WIDTH_FRAC"), "buttons should scale to column width")
 	end)
 
 	T.it("does not alias live deck cards for marketplace previews", function()

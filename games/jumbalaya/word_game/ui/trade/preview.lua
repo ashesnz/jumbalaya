@@ -36,8 +36,8 @@ function M.ensure(item, card_w, card_h)
 	local front = deck.front(letter, color)
 	local card = Card(
 		0, 0,
-		card_w or (g.CARD_W or 1) * 0.82,
-		card_h or (g.CARD_H or 1.4) * 0.82,
+		card_w or g.CARD_W or 1,
+		card_h or g.CARD_H or 1.4,
 		front,
 		center,
 		{}
