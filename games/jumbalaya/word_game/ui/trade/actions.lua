@@ -1,8 +1,8 @@
 --[[ word_game/ui/trade/actions.lua - Marketplace add / remove / modify handlers ]]
 
 local facade = require("word_game.ui.facade")
-local TradeUI = require("word_game.ui.trade")
 local offer_mod = require("word_game.ui.trade.offer")
+local refresh = require("word_game.ui.trade.refresh")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 
 local M = {}
@@ -36,11 +36,14 @@ local function apply_action(e, action)
 		word_feedback.show(err or "Could not complete action")
 		return
 	end
-	local deck = facade.deck()
-	if deck and deck.sync_deck_count_display then
-		deck.sync_deck_count_display()
+	local costs = trade.ACTION_COSTS
+	local spent = costs.add
+	if action == "remove" then
+		spent = costs.remove
+	elseif action == "modifier" then
+		spent = costs.modifier
 	end
-	TradeUI.close()
+	refresh.after_tokens_changed({ spent = spent })
 end
 
 function M.on_add(e)

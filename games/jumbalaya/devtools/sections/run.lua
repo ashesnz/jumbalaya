@@ -33,9 +33,6 @@ return {
 			delete_saved_run()
 			if ctx.game and ctx.game.discard_run then ctx.game:discard_run() end
 		end)
-		panel:action("add_tokens", function(ctx)
-			if ctx:is_run_stage() then grant_debug_tokens(10) end
-		end)
 		panel:action("add_tokens_100", function(ctx)
 			if ctx:is_run_stage() then grant_debug_tokens(100) end
 		end)
@@ -68,7 +65,6 @@ return {
 		}
 		for _, row in ipairs(layout.button_columns({
 			{label = "Delete Save", action = "delete_save"},
-			{label = "+10 Tokens", action = "add_tokens"},
 			{label = "+100 Tokens", action = "add_tokens_100"},
 			{label = "Background", action = "toggle_background"},
 			{label = "Lose Run", action = "lose_game"},

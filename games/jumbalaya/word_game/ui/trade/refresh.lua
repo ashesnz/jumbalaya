@@ -5,24 +5,31 @@ local facade = require("word_game.ui.facade")
 local session_state = require("word_game.ui.trade.session_state")
 local offer_mod = require("word_game.ui.trade.offer")
 local columns = require("word_game.ui.trade.columns")
+local lifecycle = require("word_game.ui.trade.lifecycle")
 
 local M = {}
 
-local function refresh_token_display()
-	local ui = rawget(_G, "WORD_GAME_UI")
-	if not ui or not ui.TableDeck then return end
-	if ui.TableDeck.uses_table_draw and ui.TableDeck.uses_table_draw() then
-		if ui.TableDeck.sync_token_display then
-			ui.TableDeck.sync_token_display()
-		end
-	end
-end
-
-local function refresh_hand_and_deck()
+local function refresh_sidebar_counters(spent_tokens)
 	local deck = facade.deck()
 	if deck and deck.sync_deck_count_display then
 		deck.sync_deck_count_display()
 	end
+	local ui = rawget(_G, "WORD_GAME_UI")
+	if ui and ui.TableDeck then
+		if spent_tokens and spent_tokens > 0 and ui.TableDeck.spend_tokens_display then
+			ui.TableDeck.spend_tokens_display(spent_tokens)
+		elseif ui.TableDeck.sync_token_display then
+			ui.TableDeck.sync_token_display()
+		end
+	end
+	local g = game()
+	local hud = g and g.SIDEBAR_HUD
+	if hud and not hud.REMOVED and hud.recalculate then
+		hud:recalculate()
+	end
+end
+
+local function refresh_hand_and_deck()
 	local ui = rawget(_G, "WORD_GAME_UI")
 	if ui and ui.TableInput and ui.TableInput.refresh_card_input then
 		ui.TableInput.refresh_card_input()
@@ -44,10 +51,18 @@ local function refresh_marketplace_affordance()
 	end
 end
 
-function M.after_tokens_changed()
-	refresh_token_display()
+function M.close_if_nothing_affordable()
+	if not session_state.is_open() then return end
+	if columns.any_action_affordable() then return end
+	lifecycle.close()
+end
+
+function M.after_tokens_changed(opts)
+	opts = opts or {}
+	refresh_sidebar_counters(opts.spent)
 	refresh_hand_and_deck()
 	refresh_marketplace_affordance()
+	M.close_if_nothing_affordable()
 end
 
 return M

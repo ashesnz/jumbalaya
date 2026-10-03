@@ -157,6 +157,16 @@ function M.can_click_modify(item)
 	return trade.can_modify(item) and trade.can_afford(trade.ACTION_COSTS.modifier)
 end
 
+function M.any_action_affordable()
+	local items = offer_mod.items()
+	for _, item in ipairs(items) do
+		if M.can_click_add(item) or M.can_click_remove(item) or M.can_click_modify(item) then
+			return true
+		end
+	end
+	return false
+end
+
 function M.set_action_button_enabled(btn_col, enabled, func_name)
 	if not btn_col or not btn_col.config then return end
 	local g = game()

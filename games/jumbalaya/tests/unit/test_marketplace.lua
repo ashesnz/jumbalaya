@@ -252,6 +252,160 @@ T.describe("marketplace", function()
 		T.assert_equal(consonant_count, 2)
 	end)
 
+	T.it("after_tokens_changed refreshes sidebar deck count and token display", function()
+		mock_env.reset_game()
+		mock_env.patch_game({
+			run_state = { tokens = 50, perks = {}, trade_used_this_hand = false },
+		})
+		local shell = require("jumbalaya-engine.shell")
+		local game = shell.game()
+		game.ARGS = game.ARGS or {}
+		game.ARGS.deck_left_count = 42
+
+		local recalculated = false
+		game.SIDEBAR_HUD = {
+			REMOVED = false,
+			recalculate = function()
+				recalculated = true
+			end,
+		}
+
+		local spend_calls = 0
+		_G.WORD_GAME_UI = _G.WORD_GAME_UI or {}
+		_G.WORD_GAME_UI.TableDeck = {
+			spend_tokens_display = function(amount)
+				spend_calls = spend_calls + 1
+				T.assert_equal(amount, 10)
+			end,
+			sync_token_display = function() end,
+		}
+
+		local refresh = require("word_game.ui.trade.refresh")
+		refresh.after_tokens_changed({ spent = 10 })
+
+		T.assert_true(recalculated, "sidebar HUD should recalculate for Cards left text")
+		T.assert_equal(spend_calls, 1)
+
+		game.SIDEBAR_HUD = nil
+	end)
+
+	T.it("marketplace actions do not force-close the overlay", function()
+		local paths = require("bootstrap_paths").resolve()
+		local file = io.open(paths.path_under_repo(
+			"games", "jumbalaya", "word_game", "ui", "trade", "actions.lua"), "r")
+		T.assert_not_nil(file)
+		local src = file:read("*a")
+		file:close()
+		T.assert_false(src:find("TradeUI%.close"), "close only when nothing is affordable (refresh.lua)")
+	end)
+
+	local function stub_marketplace_facade(spend_on_apply)
+		local facade = require("word_game.ui.facade")
+		local game_access = require("word_game.model.game_access")
+		local economy = require("jumbalaya_core.config.gameplay.economy")
+		local orig_trade = facade.trade
+		local orig_deck = facade.deck
+		facade.trade = function()
+			local trade = orig_trade()
+			return setmetatable({
+				apply = function()
+					game_access.dispatch({
+						type = "RUN_STATE_SPEND_TOKENS",
+						amount = spend_on_apply or economy.TRADE_ADD_COST,
+					})
+					return true
+				end,
+			}, { __index = trade })
+		end
+		facade.deck = function()
+			return { sync_deck_count_display = function() end }
+		end
+		return function()
+			facade.trade = orig_trade
+			facade.deck = orig_deck
+		end
+	end
+
+	T.it("keeps marketplace open after add when tokens remain", function()
+		mock_env.reset_game()
+		mock_env.patch_game({
+			run_state = { tokens = 100, perks = {}, trade_used_this_hand = false },
+		})
+		_G.WORD_GAME_UI = _G.WORD_GAME_UI or {}
+		_G.WORD_GAME_UI.TableDeck = { uses_table_draw = function() return false end }
+
+		local restore_facade = stub_marketplace_facade()
+		local session_state = require("word_game.ui.trade.session_state")
+		local actions = require("word_game.ui.trade.actions")
+		local lifecycle = require("word_game.ui.trade.lifecycle")
+		local close_calls = 0
+		local orig_close = lifecycle.close
+		lifecycle.close = function()
+			close_calls = close_calls + 1
+		end
+
+		session_state.mark_open(true)
+		session_state.set_offer({
+			add = {
+				mode = "market",
+				letters = {
+					{ letter = "A", mode = "market" },
+					{ letter = "B", mode = "market" },
+					{ letter = "C", mode = "market" },
+				},
+			},
+		})
+
+		actions.on_add({ config = { ref_table = { market_index = 1 } } })
+
+		T.assert_true(session_state.is_open(), "overlay stays open while add actions remain affordable")
+		T.assert_equal(close_calls, 0)
+
+		lifecycle.close = orig_close
+		restore_facade()
+		session_state.teardown()
+	end)
+
+	T.it("closes marketplace after add when no action stays affordable", function()
+		mock_env.reset_game()
+		mock_env.patch_game({
+			run_state = { tokens = 10, perks = {}, trade_used_this_hand = false },
+		})
+		_G.WORD_GAME_UI = _G.WORD_GAME_UI or {}
+		_G.WORD_GAME_UI.TableDeck = { uses_table_draw = function() return false end }
+
+		local restore_facade = stub_marketplace_facade()
+		local session_state = require("word_game.ui.trade.session_state")
+		local actions = require("word_game.ui.trade.actions")
+		local lifecycle = require("word_game.ui.trade.lifecycle")
+		local closed = false
+		local orig_close = lifecycle.close
+		lifecycle.close = function()
+			closed = true
+			orig_close()
+		end
+
+		session_state.mark_open(true)
+		session_state.set_offer({
+			add = {
+				mode = "market",
+				letters = {
+					{ letter = "A", mode = "market" },
+					{ letter = "B", mode = "market" },
+					{ letter = "C", mode = "market" },
+				},
+			},
+		})
+
+		actions.on_add({ config = { ref_table = { market_index = 1 } } })
+
+		T.assert_true(closed, "overlay closes when broke after add")
+		T.assert_false(session_state.is_open())
+
+		lifecycle.close = orig_close
+		restore_facade()
+	end)
+
 	T.it("apply add spends tokens when affordable", function()
 		mock_env.reset_game()
 		mock_env.patch_game({
@@ -335,10 +489,12 @@ T.describe("marketplace", function()
 		local add_row = find_def_node(grid_def, "trade_marketplace_add_row")
 		local btn_col = add_row.nodes[1].nodes[1]
 		T.assert_nil(btn_col.config.button, "add should be disabled with zero tokens")
+		T.assert_false(columns.any_action_affordable(), "no tokens means no affordable actions")
 
 		game_access.dispatch({ type = "RUN_STATE_ADD_TOKENS", amount = 100 })
 		columns.sync_action_affordance(root)
 		T.assert_equal(btn_col.config.button, "trade_market_add")
+		T.assert_true(columns.any_action_affordable())
 
 		session_state.teardown()
 	end)
