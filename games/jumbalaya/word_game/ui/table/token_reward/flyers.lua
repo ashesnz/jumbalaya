@@ -77,6 +77,9 @@ local function finish()
 		state.add_tokens(session.tokens_left())
 		session.set_tokens_left(0)
 	end
+	if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.sync_token_display then
+		WORD_GAME_UI.TableDeck.sync_token_display()
+	end
 	local cb = session.on_done()
 	session.reset()
 	if cb then cb() end
@@ -86,6 +89,7 @@ function M.try_award(callback)
 	if session.is_active() then return true end
 	if not capture.is_eligible() then return false end
 
+	capture.capture_reward({ refresh = true })
 	local amount = capture.earned_amount()
 	if amount <= 0 then
 		session.set_captured_time(nil)

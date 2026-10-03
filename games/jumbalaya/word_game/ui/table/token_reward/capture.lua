@@ -7,19 +7,33 @@ local session = require("word_game.ui.table.token_reward.session")
 
 local Timeline = facade.timeline()
 local RunMode = facade.run_mode()
+local core_jumble = require("jumbalaya_core.rules.jumble")
 
 local M = {}
 
+--- Banked stage score including the current puzzle (matches classic fuse / 35 of 25 UI).
 local function banked_score()
 	local wr = game_access.word_round()
 	local j = wr and wr.jumble
-	return (j and j.total_score) or 0
+	if not j then return 0 end
+	return core_jumble.committed_earned(j)
+end
+
+local function freeze_classic_timer()
+	local tt = WORD_GAME_UI.TimelineTimer
+	if tt then
+		tt.is_active = false
+		if tt.sync_progress then tt.sync_progress() end
+	end
 end
 
 function M.is_eligible()
 	local wr = game_access.word_round()
 	if not wr then return false end
 	if RunMode.is_classic() then
+		return true
+	end
+	if banked_score() > 0 then
 		return true
 	end
 	return round_config.is_token_reward_hand(wr.set, wr.hand_index)
@@ -32,7 +46,7 @@ function M.earned_amount()
 	if session.captured_time() ~= nil then
 		return math.floor(session.captured_time())
 	end
-	if RunMode.is_classic() then
+	if RunMode.is_classic() or banked_score() > 0 then
 		return math.floor(banked_score())
 	end
 	if Timeline then
@@ -44,14 +58,18 @@ end
 function M.capture_reward(opts)
 	opts = opts or {}
 	if not M.is_eligible() then return end
-	if RunMode.is_classic() then
-		if session.captured_score() ~= nil and not opts.refresh then return end
-		session.set_captured_score(banked_score())
-		local tt = WORD_GAME_UI.TimelineTimer
-		if tt then
-			tt.is_active = false
-			if tt.sync_progress then tt.sync_progress() end
+	local score = opts.score
+	if score == nil then
+		score = banked_score()
+	else
+		score = math.floor(score)
+	end
+	if RunMode.is_classic() or score > 0 then
+		if session.captured_score() ~= nil and not opts.refresh and opts.score == nil then
+			return
 		end
+		session.set_captured_score(math.floor(score))
+		freeze_classic_timer()
 		return
 	end
 	if session.captured_time() ~= nil then return end

@@ -29,6 +29,13 @@ M.BOSS_INTRO = {
 	},
 }
 
+local function cleared_stage_score(result)
+	if not result then return nil end
+	if result.new_total ~= nil then return result.new_total end
+	if result.new_score ~= nil then return result.new_score end
+	return nil
+end
+
 function M.capture_token_timer_if_cleared(cleared, opts)
 	opts = opts or {}
 	if not cleared or not RunMode.ends_hand_on_target() then return end
@@ -36,8 +43,15 @@ function M.capture_token_timer_if_cleared(cleared, opts)
 		and WORD_GAME_UI.HandClearFocus and WORD_GAME_UI.HandClearFocus.begin then
 		WORD_GAME_UI.HandClearFocus.begin()
 	end
+	local score = opts.cleared_score
+	if score == nil and opts.result then
+		score = cleared_stage_score(opts.result)
+	end
 	if WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.capture_reward then
-		WORD_GAME_UI.TokenReward.capture_reward()
+		WORD_GAME_UI.TokenReward.capture_reward({
+			refresh = true,
+			score = score,
+		})
 	elseif WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.capture_timer then
 		WORD_GAME_UI.TokenReward.capture_timer()
 	end
