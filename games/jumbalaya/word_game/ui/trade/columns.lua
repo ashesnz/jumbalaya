@@ -12,16 +12,13 @@ local GRID_ROWS = 5
 local GRID_COLS = 3
 local GRID_PADDING = 0.02
 
--- Relative row weights (normalized to fill the frame height).
-local ROW_HEIGHT_FRAC = {
-	modifier = 0.14,
-	cards = 0.34,
-	button = 0.17,
-}
-
 local MARKET_CARD_SCALE = 0.5
-local CARD_ROW_DROP_PX = 50
+local CARDS_ABOVE_BUTTON_GAP_PX = 10
+local MODIFIER_ABOVE_CARD_GAP_PX = 12
+local MODIFIER_ROW_HEIGHT_PX = 48
 local ACTION_BUTTON_WIDTH_FRAC = 0.88
+local ACTION_BUTTON_ROW_MINH = 0.44
+local BUTTON_STACK_GAP_PX = 20
 
 local function marketplace_px_to_tiles(px)
 	local g = game()
@@ -39,28 +36,38 @@ local function market_card_dimensions()
 	return w * MARKET_CARD_SCALE, h * MARKET_CARD_SCALE
 end
 
-local function row_weight_sum()
-	return ROW_HEIGHT_FRAC.modifier + ROW_HEIGHT_FRAC.cards + 3 * ROW_HEIGHT_FRAC.button
-end
-
 --- Row/column metrics that always fit inside `frame` (tiles).
 function M.layout_metrics(frame)
 	local frame_h = frame.h
 	local frame_w = frame.w
 	local col_w = frame_w / GRID_COLS
 	local inner_h = frame_h - 2 * GRID_PADDING
-	local weight_sum = row_weight_sum()
 
-	local modifier_h = inner_h * (ROW_HEIGHT_FRAC.modifier / weight_sum)
-	local cards_h = inner_h * (ROW_HEIGHT_FRAC.cards / weight_sum)
-	local button_h = inner_h * (ROW_HEIGHT_FRAC.button / weight_sum)
-	local total_row_h = modifier_h + cards_h + 3 * button_h
+	local market_w, market_h = market_card_dimensions()
+	local cards_gap = marketplace_px_to_tiles(CARDS_ABOVE_BUTTON_GAP_PX)
+	local cards_h = market_h + cards_gap
 
-	local _, market_h = market_card_dimensions()
-	local card_drop_cap = marketplace_px_to_tiles(CARD_ROW_DROP_PX)
-	local card_drop = math.min(card_drop_cap, math.max(0, cards_h - market_h * 1.02))
+	local button_gap = marketplace_px_to_tiles(BUTTON_STACK_GAP_PX)
+	local button_h = ACTION_BUTTON_ROW_MINH
+	local button_stack_h = 3 * button_h + 2 * button_gap
 
-	local market_w, _ = market_card_dimensions()
+	local modifier_gap = marketplace_px_to_tiles(MODIFIER_ABOVE_CARD_GAP_PX)
+	local modifier_h = marketplace_px_to_tiles(MODIFIER_ROW_HEIGHT_PX)
+
+	local content_h = modifier_h + modifier_gap + cards_h + button_stack_h
+	if content_h > inner_h + 0.01 and content_h > 0 then
+		local scale = inner_h / content_h
+		modifier_h = modifier_h * scale
+		modifier_gap = modifier_gap * scale
+		cards_h = math.max(market_h * 0.5, cards_h * scale)
+		button_h = button_h * scale
+		button_gap = button_gap * scale
+		button_stack_h = 3 * button_h + 2 * button_gap
+		content_h = modifier_h + modifier_gap + cards_h + button_stack_h
+	end
+	local top_spacer_h = math.max(0, inner_h - content_h)
+	local total_row_h = top_spacer_h + content_h
+
 	local button_minw = col_w * ACTION_BUTTON_WIDTH_FRAC
 
 	return {
@@ -68,15 +75,24 @@ function M.layout_metrics(frame)
 		frame_h = frame_h,
 		col_w = col_w,
 		inner_h = inner_h,
+		top_spacer_h = top_spacer_h,
 		modifier_h = modifier_h,
+		modifier_gap = modifier_gap,
 		cards_h = cards_h,
-		card_drop = card_drop,
+		cards_gap = cards_gap,
 		button_h = button_h,
+		button_gap = button_gap,
+		button_stack_h = button_stack_h,
+		content_h = content_h,
 		total_row_h = total_row_h,
 		market_card_w = market_w,
 		market_card_h = market_h,
 		button_minw = button_minw,
 	}
+end
+
+local function modifier_text_colour()
+	return game().C.BLACK or { 0, 0, 0, 1 }
 end
 
 local function coin_sprite(size)
@@ -129,7 +145,7 @@ local function action_button(label, cost, func_name, enabled, col_index, col_w)
 		align = "cm",
 		minw = btn_w,
 		maxw = col_w * 0.96,
-		minh = 0.44,
+		minh = ACTION_BUTTON_ROW_MINH,
 		padding = 0.035,
 		r = 0.1,
 		colour = colour,
@@ -173,17 +189,10 @@ local function modifier_label(letter)
 	return deck.modifier_description(letter) or deck.modifier_ui_text(letter) or ""
 end
 
-local function card_cell(item, index, col_w, row_h, card_drop)
+local function card_cell(item, index, col_w, row_h)
 	local card_w, card_h = market_card_dimensions()
 	local card = preview.ensure(item, card_w, card_h)
-	local nodes = {
-		{ n = game().UI.BOX, config = {
-			w = 0.01,
-			h = card_drop,
-			colour = game().C.CLEAR,
-			shadow = false,
-		}},
-	}
+	local nodes = {}
 	if card then
 		nodes[#nodes + 1] = { n = game().UI.OBJECT, config = {
 			id = "trade_market_card_" .. index,
@@ -201,22 +210,21 @@ local function card_cell(item, index, col_w, row_h, card_drop)
 			shadow = true,
 		}}
 	end
-	return grid_cell(nodes, col_w, row_h, "trade_market_cell_card_" .. index, "m")
+	return grid_cell(nodes, col_w, row_h, "trade_market_cell_card_" .. index, "bm")
 end
 
 local function modifier_cell(item, index, col_w, row_h)
 	local mod_text = modifier_label(item.letter)
-	local text_colour = game().C.UI and game().C.UI.TEXT_LIGHT or game().C.WHITE
 	return grid_cell({
 		{ n = game().UI.TEXT, config = {
 			id = "trade_market_modifier_" .. index,
 			text = mod_text,
 			scale = 0.2,
 			maxw = col_w * 0.95,
-			colour = text_colour,
+			colour = modifier_text_colour(),
 			shadow = false,
 		}},
-	}, col_w, row_h, "trade_market_cell_modifier_" .. index)
+	}, col_w, row_h, "trade_market_cell_modifier_" .. index, "bm")
 end
 
 local function column_row(row_id, col_w, row_h, items, cell_builder, ...)
@@ -250,10 +258,23 @@ local function action_row(row_id, label, cost, func_name, items, col_w, row_h, a
 		minw = col_w * GRID_COLS,
 		maxw = col_w * GRID_COLS,
 		minh = row_h,
-		padding = 0.01,
+		padding = 0,
 		colour = game().C.CLEAR,
 		shadow = false,
 	}, nodes = cells }
+end
+
+--- Empty ROW spacer — grid COLUMN only stacks ROW children vertically.
+local function spacer_row(frame_w, gap_h, id)
+	return { n = game().UI.ROW, config = {
+		id = id,
+		align = "cm",
+		minw = frame_w,
+		maxw = frame_w,
+		minh = gap_h,
+		colour = game().C.CLEAR,
+		shadow = false,
+	}, nodes = {} }
 end
 
 function M.build_grid(frame)
@@ -267,40 +288,49 @@ function M.build_grid(frame)
 	local metrics = M.layout_metrics(frame)
 	local col_w = metrics.col_w
 
-	local rows = {
-		column_row("trade_marketplace_modifier_row", col_w, metrics.modifier_h, items, modifier_cell),
-		column_row("trade_marketplace_cards_row", col_w, metrics.cards_h, items, card_cell, metrics.card_drop),
-		action_row(
-			"trade_marketplace_add_row",
-			"Add",
-			costs.add,
-			"trade_market_add",
-			items,
-			col_w,
-			metrics.button_h,
-			function(item) return trade.can_add(item) and trade.can_afford(costs.add) end
-		),
-		action_row(
-			"trade_marketplace_remove_row",
-			"Remove",
-			costs.remove,
-			"trade_market_remove",
-			items,
-			col_w,
-			metrics.button_h,
-			function(item) return trade.can_remove(item) and trade.can_afford(costs.remove) end
-		),
-		action_row(
-			"trade_marketplace_modify_row",
-			"Modify",
-			costs.modifier,
-			"trade_market_modify",
-			items,
-			col_w,
-			metrics.button_h,
-			function(item) return trade.can_modify(item) and trade.can_afford(costs.modifier) end
-		),
-	}
+	local add_row = action_row(
+		"trade_marketplace_add_row",
+		"Add",
+		costs.add,
+		"trade_market_add",
+		items,
+		col_w,
+		metrics.button_h,
+		function(item) return trade.can_add(item) and trade.can_afford(costs.add) end
+	)
+	local remove_row = action_row(
+		"trade_marketplace_remove_row",
+		"Remove",
+		costs.remove,
+		"trade_market_remove",
+		items,
+		col_w,
+		metrics.button_h,
+		function(item) return trade.can_remove(item) and trade.can_afford(costs.remove) end
+	)
+	local modify_row = action_row(
+		"trade_marketplace_modify_row",
+		"Modify",
+		costs.modifier,
+		"trade_market_modify",
+		items,
+		col_w,
+		metrics.button_h,
+		function(item) return trade.can_modify(item) and trade.can_afford(costs.modifier) end
+	)
+
+	local rows = {}
+	if metrics.top_spacer_h > 0.001 then
+		rows[#rows + 1] = spacer_row(frame.w, metrics.top_spacer_h, "trade_marketplace_top_spacer")
+	end
+	rows[#rows + 1] = column_row("trade_marketplace_modifier_row", col_w, metrics.modifier_h, items, modifier_cell)
+	rows[#rows + 1] = spacer_row(frame.w, metrics.modifier_gap, "trade_marketplace_modifier_card_gap")
+	rows[#rows + 1] = column_row("trade_marketplace_cards_row", col_w, metrics.cards_h, items, card_cell)
+	rows[#rows + 1] = add_row
+	rows[#rows + 1] = spacer_row(frame.w, metrics.button_gap, "trade_marketplace_button_gap_1")
+	rows[#rows + 1] = remove_row
+	rows[#rows + 1] = spacer_row(frame.w, metrics.button_gap, "trade_marketplace_button_gap_2")
+	rows[#rows + 1] = modify_row
 
 	return {
 		n = game().UI.COLUMN,
@@ -335,12 +365,16 @@ end
 M.GRID_DRAW_LAYER = GRID_LAYER
 M.GRID_ROWS = GRID_ROWS
 M.GRID_COLS = GRID_COLS
-M.ROW_HEIGHT_FRAC = ROW_HEIGHT_FRAC
 M.GRID_PADDING = GRID_PADDING
+M.ACTION_BUTTON_ROW_MINH = ACTION_BUTTON_ROW_MINH
+M.BUTTON_STACK_GAP_PX = BUTTON_STACK_GAP_PX
 M.hand_card_dimensions = hand_card_dimensions
 M.market_card_dimensions = market_card_dimensions
 M.MARKET_CARD_SCALE = MARKET_CARD_SCALE
-M.CARD_ROW_DROP_PX = CARD_ROW_DROP_PX
+M.CARDS_ABOVE_BUTTON_GAP_PX = CARDS_ABOVE_BUTTON_GAP_PX
+M.MODIFIER_ABOVE_CARD_GAP_PX = MODIFIER_ABOVE_CARD_GAP_PX
+M.MODIFIER_ROW_HEIGHT_PX = MODIFIER_ROW_HEIGHT_PX
+M.modifier_text_colour = modifier_text_colour
 M.ACTION_BUTTON_WIDTH_FRAC = ACTION_BUTTON_WIDTH_FRAC
 
 return M

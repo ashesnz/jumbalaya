@@ -120,6 +120,9 @@ function M.install()
 		if trade_marketplace_open() and WORD_GAME_UI.TradeUI.draw_modal_on_top then
 			WORD_GAME_UI.TradeUI.draw_modal_on_top()
 		end
+		if trade_marketplace_open() and WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.draw then
+			WORD_GAME_UI.Sidebar:draw()
+		end
 
 		love.graphics.push()
 		game.POINTER:translate_container()

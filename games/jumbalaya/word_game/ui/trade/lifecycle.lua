@@ -7,6 +7,7 @@ local facade = require("word_game.ui.facade")
 local Play = facade.jumble_play()
 local session_state = require("word_game.ui.trade.session_state")
 local offer = require("word_game.ui.trade.offer")
+local trade_layout = require("word_game.ui.trade.layout")
 
 local M = {}
 
@@ -54,7 +55,7 @@ function M.open_overlay()
 		definition = host.definition(),
 		config = {
 			no_esc = true,
-			offset = { x = 0, y = 0 },
+			offset = trade_layout.modal_overlay_offset(),
 			no_jiggle = true,
 		},
 	})

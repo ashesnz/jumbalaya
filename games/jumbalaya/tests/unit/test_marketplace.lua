@@ -30,14 +30,17 @@ local function setup_marketplace_game()
 		px = 1408,
 		py = 768,
 	}
-	game.UI = game.UI or {
+		game.UI = game.UI or {
 		TEXT = 1, BOX = 2, COLUMN = 3, ROW = 4, OBJECT = 5, ROOT = 7, padding = 0,
 	}
+	game.TILESIZE = 20
+	game.TILESCALE = 1
 	game.C = game.C or {}
 	game.C.CLEAR = game.C.CLEAR or { 0, 0, 0, 0 }
 	game.C.RED = game.C.RED or { 1, 0.2, 0.2, 1 }
 	game.C.WHITE = game.C.WHITE or { 1, 1, 1, 1 }
 	game.C.GOLD = game.C.GOLD or { 1, 0.8, 0, 1 }
+	game.C.BLACK = game.C.BLACK or { 0, 0, 0, 1 }
 	game.C.UI = game.C.UI or {
 		BUTTON = { 0.1, 0.5, 0.4, 1 },
 		BUTTON_HOVER = { 0.2, 0.6, 0.5, 1 },
@@ -92,22 +95,27 @@ T.describe("marketplace", function()
 		local cards_row = find_def_node(grid_def, "trade_marketplace_cards_row")
 		local modifier_row = find_def_node(grid_def, "trade_marketplace_modifier_row")
 		local add_row = find_def_node(grid_def, "trade_marketplace_add_row")
+		local gap_1 = find_def_node(grid_def, "trade_marketplace_button_gap_1")
 		local remove_row = find_def_node(grid_def, "trade_marketplace_remove_row")
 		local modify_row = find_def_node(grid_def, "trade_marketplace_modify_row")
 
 		T.assert_not_nil(cards_row)
 		T.assert_not_nil(modifier_row)
+		T.assert_not_nil(gap_1)
 		T.assert_not_nil(add_row)
 		T.assert_not_nil(remove_row)
 		T.assert_not_nil(modify_row)
-		T.assert_equal(#(grid_def.nodes or {}), 5)
+		local modifier_card_gap = find_def_node(grid_def, "trade_marketplace_modifier_card_gap")
+		T.assert_not_nil(modifier_card_gap)
+		T.assert_true(math.abs(modifier_card_gap.config.minh - metrics.modifier_gap) < 0.02)
+		local expected_rows = 8 + (metrics.top_spacer_h > 0.001 and 1 or 0)
+		T.assert_equal(#(grid_def.nodes or {}), expected_rows)
 		T.assert_equal(#(cards_row.nodes or {}), 3)
 		T.assert_equal(#(modifier_row.nodes or {}), 3)
-		T.assert_equal(grid_def.nodes[1].config.id, "trade_marketplace_modifier_row")
-		T.assert_equal(grid_def.nodes[2].config.id, "trade_marketplace_cards_row")
 		T.assert_true(math.abs(cards_row.config.minh - metrics.cards_h) < 0.02)
 		T.assert_true(math.abs(modifier_row.config.minh - metrics.modifier_h) < 0.02)
 		T.assert_true(math.abs(add_row.config.minh - metrics.button_h) < 0.02)
+		T.assert_true(math.abs(gap_1.config.minh - metrics.button_gap) < 0.02)
 		T.assert_true(grid_mod.sum_row_min_heights(grid_def) <= frame.h - 2 * grid_mod.GRID_PADDING + 0.02)
 
 		local items = offer.items()
@@ -116,6 +124,7 @@ T.describe("marketplace", function()
 			T.assert_not_nil(mod_node, "modifier label for column " .. index)
 			local expected = Modifiers.modifier_description(items[index].letter)
 			T.assert_equal(mod_node.config.text, expected)
+			T.assert_equal(mod_node.config.colour, grid_mod.modifier_text_colour())
 		end
 
 		local first_col = add_row.nodes and add_row.nodes[1]
@@ -145,7 +154,7 @@ T.describe("marketplace", function()
 			local frame = layout.modal_frame()
 			local metrics = columns.layout_metrics(frame)
 			T.assert_true(
-				metrics.total_row_h <= metrics.inner_h + 0.001,
+				math.abs(metrics.total_row_h - metrics.inner_h) < 0.02,
 				string.format("row stack taller than frame (%.2f > %.2f) at %dx%d",
 					metrics.total_row_h, metrics.inner_h, room.w, room.h)
 			)
@@ -183,6 +192,27 @@ T.describe("marketplace", function()
 		T.assert_true(src:find("layout_metrics"), "grid should derive sizes from layout_metrics")
 		T.assert_true(src:find("maxh = frame%.h"), "grid should cap height to the modal frame")
 		T.assert_true(src:find("ACTION_BUTTON_WIDTH_FRAC"), "buttons should scale to column width")
+		T.assert_true(src:find("BUTTON_STACK_GAP_PX"), "action rows should use fixed pixel gaps")
+		T.assert_true(src:find("MODIFIER_ABOVE_CARD_GAP_PX"), "modifier rows should sit just above cards")
+		T.assert_true(src:find("modifier_text_colour"), "modifier copy should use marketplace text colour")
+		T.assert_false(src:find("trade_marketplace_button_stack"), "buttons must be ROW siblings, not a nested COLUMN")
+	end)
+
+	T.it("spaces modifier text and action buttons with fixed pixel gaps", function()
+		setup_marketplace_game()
+		local layout = require("word_game.ui.trade.layout")
+		local columns = require("word_game.ui.trade.columns")
+		local frame = layout.modal_frame()
+		local metrics = columns.layout_metrics(frame)
+		local grid_def = columns.build_grid(frame)
+		local gap = find_def_node(grid_def, "trade_marketplace_button_gap_1")
+		local mod_gap = find_def_node(grid_def, "trade_marketplace_modifier_card_gap")
+		T.assert_not_nil(gap)
+		T.assert_not_nil(mod_gap)
+		T.assert_true(metrics.button_gap > 0)
+		T.assert_true(metrics.modifier_gap > 0)
+		T.assert_true(math.abs(gap.config.minh - metrics.button_gap) < 0.02)
+		T.assert_true(math.abs(mod_gap.config.minh - metrics.modifier_gap) < 0.02)
 	end)
 
 	T.it("does not alias live deck cards for marketplace previews", function()
@@ -235,6 +265,25 @@ T.describe("marketplace", function()
 		T.assert_false(trade.can_remove({ letter = "Q", card = nil }))
 	end)
 
+	T.it("reserves sidebar space and trims modal width in layout source", function()
+		local paths = require("bootstrap_paths").resolve()
+		local layout_file = io.open(paths.path_under_repo(
+			"games", "jumbalaya", "word_game", "ui", "trade", "layout.lua"), "r")
+		T.assert_not_nil(layout_file)
+		local layout_src = layout_file:read("*a")
+		layout_file:close()
+		T.assert_true(layout_src:find("MODAL_EXTRA_TRIM_PX"))
+		T.assert_true(layout_src:find("play_column"))
+		T.assert_true(layout_src:find("modal_overlay_offset"))
+
+		local lifecycle_file = io.open(paths.path_under_repo(
+			"games", "jumbalaya", "word_game", "ui", "trade", "lifecycle.lua"), "r")
+		T.assert_not_nil(lifecycle_file)
+		local life_src = lifecycle_file:read("*a")
+		lifecycle_file:close()
+		T.assert_true(life_src:find("modal_overlay_offset"))
+	end)
+
 	T.it("paints the marketplace modal after table chrome", function()
 		local paths = require("bootstrap_paths").resolve()
 		local file = io.open(paths.path_under_repo("games", "jumbalaya", "app", "session", "draw_passes.lua"), "r")
@@ -245,6 +294,7 @@ T.describe("marketplace", function()
 		local pointer_pos = src:find("game.POINTER:draw")
 		T.assert_true(modal_pos and pointer_pos and modal_pos < pointer_pos)
 		T.assert_true(src:find("trade_marketplace_open"))
+		T.assert_true(src:find("Sidebar:draw"), "sidebar should paint while marketplace is open")
 	end)
 
 	T.it("registers marketplace action callbacks", function()
