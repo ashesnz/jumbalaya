@@ -25,22 +25,18 @@ end
 
 function M.on_pick(e)
 	action_dispatch.dispatch_func("trade_pick")
-	TradeUI.on_pick(e)
 end
 
 function M.on_skip_add(e)
 	action_dispatch.dispatch_func("trade_skip_add")
-	TradeUI.on_skip_add(e)
 end
 
 function M.on_skip_remove(e)
 	action_dispatch.dispatch_func("trade_skip_remove")
-	TradeUI.on_skip_remove(e)
 end
 
 function M.on_skip(e)
 	action_dispatch.dispatch_func("trade_skip")
-	TradeUI.on_skip_add(e)
 end
 
 return M

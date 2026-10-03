@@ -175,6 +175,12 @@ function M.apply(item, opts)
 		if not M.can_afford(M.ACTION_COSTS.remove) then
 			return false, "Not enough tokens"
 		end
+		if opts and opts.defer_effect then
+			local cost = (opts and opts.cost) or M.ACTION_COSTS.remove
+			if not state.spend_tokens(cost) then return false, "Not enough tokens" end
+			mark_trade_used()
+			return true
+		end
 		return M.remove_card(item, opts)
 	end
 	if action == "modifier" then
@@ -184,6 +190,14 @@ function M.apply(item, opts)
 			end
 			return false, "Card not in deck"
 		end
+		if not M.can_afford(M.ACTION_COSTS.modifier) then
+			return false, "Not enough tokens"
+		end
+		if opts and opts.defer_effect then
+			if not state.spend_tokens(M.ACTION_COSTS.modifier) then return false, "Not enough tokens" end
+			mark_trade_used()
+			return true
+		end
 		if not state.spend_tokens(M.ACTION_COSTS.modifier) then return false, "Not enough tokens" end
 		deck.apply_to_card(item.card)
 		mark_trade_used()
@@ -191,7 +205,46 @@ function M.apply(item, opts)
 	end
 	if not M.can_add(item) then return false, "No letter selected" end
 	if not M.can_afford(M.ACTION_COSTS.add) then return false, "Not enough tokens" end
+	if opts and opts.defer_effect then
+		local cost = (opts and opts.cost) or M.ACTION_COSTS.add
+		if not state.spend_tokens(cost) then return false, "Not enough tokens" end
+		mark_trade_used()
+		return true
+	end
 	return M.add_letter(item, { cost = (opts and opts.cost) or M.ACTION_COSTS.add, defer_used = opts and opts.defer_used })
+end
+
+function M.finalize_add(item)
+	if not item or not item.letter then return false end
+	local card = deck.draft_letter(item.letter, item.color)
+	item.card = card
+	return true, card
+end
+
+function M.finalize_remove(item)
+	if item and item.letter then
+		item.card = deck.find_deck_card(item.letter)
+	end
+	local target = item and item.card
+	if not target or target.REMOVED then
+		return false, "No card selected"
+	end
+	deck.destroy_card(target)
+	item.card = nil
+	return true
+end
+
+function M.finalize_modifier(item)
+	if item and item.letter then
+		item.card = deck.find_deck_card(item.letter)
+	end
+	if not item or not item.card or item.card.REMOVED then
+		return false, "Card not in deck"
+	end
+	if not deck.apply_to_card(item.card) then
+		return false, "Could not modify card"
+	end
+	return true, item.card
 end
 
 function M.mark_used()

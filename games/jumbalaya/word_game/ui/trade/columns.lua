@@ -38,10 +38,6 @@ local function market_card_dimensions()
 	return w * MARKET_CARD_SCALE, h * MARKET_CARD_SCALE
 end
 
-function M.market_card_dimensions()
-	return market_card_dimensions()
-end
-
 --- Row/column metrics that always fit inside `frame` (tiles).
 function M.layout_metrics(frame)
 	local frame_h = frame.h
@@ -445,10 +441,6 @@ function M.build_grid(frame)
 		},
 		nodes = rows,
 	}
-end
-
-function M.build_columns(frame)
-	return M.build_grid(frame)
 end
 
 function M.sum_row_min_heights(grid_def)

@@ -259,8 +259,23 @@ T.describe("marketplace", function()
 		T.assert_not_nil(file)
 		local src = file:read("*a")
 		file:close()
-		T.assert_true(src:find("card_fly.start_add_fly"))
+		T.assert_true(src:find("card_fly.start"))
+		T.assert_true(src:find("defer_effect"))
 		T.assert_true(src:find("sync_deck_count_display"))
+	end)
+
+	T.it("defer_effect add spends tokens without drafting immediately", function()
+		mock_env.reset_game()
+		mock_env.patch_game({
+			run_state = { tokens = 20, perks = {}, trade_used_this_hand = false },
+		})
+		local trade = require("word_game.model.trade.init")
+		local state = require("word_game.model.run.state")
+		local item = { letter = "Q", mode = "market", color = "red" }
+		local ok = trade.apply(item, { action = "add", defer_effect = true })
+		T.assert_true(ok)
+		T.assert_nil(item.card)
+		T.assert_equal(state.tokens(), 10)
 	end)
 
 	T.it("card fly animation completes and clears trade_ui_busy", function()
@@ -284,21 +299,12 @@ T.describe("marketplace", function()
 			end,
 		}
 
-		local card = {
-			T = { x = 0, y = 0, w = 0.5, h = 0.7 },
-			states = { visible = true, drag = { can = true }, hover = { can = true }, click = { can = true }, collide = { can = true } },
-			hard_set_T = function(self, x, y, w, h)
-				self.T.x, self.T.y, self.T.w, self.T.h = x, y, w, h
-			end,
-			set_scene_parent = function() end,
-			set_container = function() end,
-			remove = function(self) self.REMOVED = true end,
-		}
-		local item = { letter = "Z", preview = card }
+		local item = { letter = "Z", color = "red" }
 		local done = false
 		local card_fly = require("word_game.ui.trade.card_fly")
 		card_fly.reset()
-		T.assert_true(card_fly.start_add_fly({
+		T.assert_true(card_fly.start({
+			kind = "add",
 			item = item,
 			market_index = 2,
 			on_complete = function() done = true end,
@@ -368,13 +374,23 @@ T.describe("marketplace", function()
 		facade.trade = function()
 			local trade = orig_trade()
 			return setmetatable({
-				apply = function()
+				apply = function(_, opts)
+					if opts and opts.defer_effect then
+						game_access.dispatch({
+							type = "RUN_STATE_SPEND_TOKENS",
+							amount = spend_on_apply or economy.TRADE_ADD_COST,
+						})
+						return true
+					end
 					game_access.dispatch({
 						type = "RUN_STATE_SPEND_TOKENS",
 						amount = spend_on_apply or economy.TRADE_ADD_COST,
 					})
 					return true
 				end,
+				finalize_add = function() return true end,
+				finalize_remove = function() return true end,
+				finalize_modifier = function() return true end,
 			}, { __index = trade })
 		end
 		facade.deck = function()
@@ -388,6 +404,7 @@ T.describe("marketplace", function()
 
 	T.it("keeps marketplace open after add when tokens remain", function()
 		mock_env.reset_game()
+		mock_env.ensure_card_class()
 		mock_env.patch_game({
 			run_state = { tokens = 100, perks = {}, trade_used_this_hand = false },
 		})
@@ -432,6 +449,7 @@ T.describe("marketplace", function()
 
 	T.it("closes marketplace after add when no action stays affordable", function()
 		mock_env.reset_game()
+		mock_env.ensure_card_class()
 		mock_env.patch_game({
 			run_state = { tokens = 10, perks = {}, trade_used_this_hand = false },
 		})

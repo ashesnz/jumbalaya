@@ -58,8 +58,5 @@ end
 function M.draw_pass()
 	card_fly.draw()
 end
-function M.on_pick(_e) end
-function M.on_skip_add(_e) M.close() end
-function M.on_skip_remove(_e) M.close() end
 
 return M
