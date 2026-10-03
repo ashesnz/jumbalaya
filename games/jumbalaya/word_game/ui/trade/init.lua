@@ -4,6 +4,7 @@ local trade_definition = require("word_game.ui.trade.definition")
 local session_state = require("word_game.ui.trade.session_state")
 local lifecycle = require("word_game.ui.trade.lifecycle")
 local modal_draw = require("word_game.ui.trade.modal_draw")
+local refresh = require("word_game.ui.trade.refresh")
 
 local M = {}
 
@@ -35,6 +36,10 @@ end
 
 function M.teardown_run()
 	session_state.teardown()
+end
+
+function M.refresh_after_tokens_changed()
+	refresh.after_tokens_changed()
 end
 
 -- Legacy no-ops (handlers removed; catalog / updaters may still reference these).

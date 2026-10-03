@@ -8,10 +8,24 @@ local Funcs = require("app.callbacks.funcs")
 
 local M = {}
 
+local function grant_debug_tokens(amount)
+	local state = WORD_GAME and WORD_GAME.Run and WORD_GAME.Run.State
+	if not state or state.add_tokens(amount) <= 0 then
+		return
+	end
+	if WORD_GAME_UI and WORD_GAME_UI.TradeUI and WORD_GAME_UI.TradeUI.refresh_after_tokens_changed then
+		WORD_GAME_UI.TradeUI.refresh_after_tokens_changed()
+	end
+end
+
 Funcs.register("DT_show_trade", function()
 	if WORD_GAME_UI and WORD_GAME_UI.TradeUI and WORD_GAME_UI.TradeUI.open then
 		WORD_GAME_UI.TradeUI.open()
 	end
+end)
+
+Funcs.register("DT_add_tokens_100", function()
+	grant_debug_tokens(100)
 end)
 
 local function shell()
@@ -51,7 +65,10 @@ function M.ensure()
 			n = game.UI.ROOT,
 			config = { align = "cm" },
 			nodes = {
-				layout.button("Market", "show_trade"),
+				{ n = game.UI.COLUMN, config = { align = "cm", padding = 0.04 }, nodes = {
+					layout.button("Market", "show_trade"),
+					layout.button("+100 Tok", "add_tokens_100"),
+				}},
 			},
 		},
 		config = {

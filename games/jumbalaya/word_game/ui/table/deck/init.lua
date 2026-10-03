@@ -51,6 +51,10 @@ function M.spend_tokens_display(amount)
 	tokens.spend_tokens_display(M, amount)
 end
 
+function M.sync_token_display()
+	tokens.sync_to_store(M)
+end
+
 function M.is_token_highlighted()
 	return tokens.is_token_highlighted(M)
 end

@@ -51,6 +51,22 @@ function M.spend_tokens_display(deck, amount)
 	deck.token_highlight = TOKEN_HIGHLIGHT_TIME
 end
 
+function M.sync_to_store(deck)
+	local actual = state.tokens()
+	if deck.token_roll then
+		deck.token_roll.to = actual
+		return
+	end
+	local cur = deck.token_display
+	if cur == nil then
+		deck.token_display = actual
+		return
+	end
+	if cur ~= actual then
+		M.start_token_roll(deck, cur, actual)
+	end
+end
+
 function M.is_token_highlighted(deck)
 	return (deck.token_highlight or 0) > 0
 end
