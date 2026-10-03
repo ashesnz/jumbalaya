@@ -33,6 +33,14 @@ function M.start_token_roll(deck, from, to)
 	end
 end
 
+function M.set_count_immediate(deck, count)
+	count = math.floor(count or 0)
+	deck.token_roll = nil
+	deck.token_pending = 0
+	deck.token_display = count
+	deck.token_highlight = TOKEN_HIGHLIGHT_TIME * 0.35
+end
+
 function M.bump_token_display(deck)
 	deck.token_pending = (deck.token_pending or 0) + 1
 	if not deck.token_roll then

@@ -21,8 +21,6 @@ end
 function M.get()
 	local game = game_access.get()
 	if not game then return nil end
-	local run = live_game().RUN
-	if run and run.active == false then return nil end
 	if not game.run_state then
 		game_access.dispatch({ type = "RUN_STATE_INIT" })
 		game = game_access.get()

@@ -110,9 +110,9 @@ function M.update(dt)
 	end
 	M.sync_from_model()
 	M.update_intro_anim(dt)
-	if M.is_progress_mode() then
+	if M.is_progress_mode() or M.score_roll then
 		M.update_classic(dt)
-	else
+	elseif not M.is_progress_mode() then
 		M.sync_from_model()
 	end
 

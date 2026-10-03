@@ -18,6 +18,10 @@ local tokens_left = 0
 local grant_per_flyer = 1
 local grant_on_land = true
 local fly_from_x, fly_from_y, fly_to_x, fly_to_y
+local reward_amount = 0
+local tokens_granted = 0
+local sync_score_roll = false
+local fly_stagger = nil
 
 function M.flyers()
 	return flyers
@@ -149,6 +153,42 @@ function M.fly_to()
 	return fly_to_x, fly_to_y
 end
 
+function M.reward_amount()
+	return reward_amount
+end
+
+function M.set_reward_amount(value)
+	reward_amount = math.max(0, math.floor(value or 0))
+end
+
+function M.tokens_granted()
+	return tokens_granted
+end
+
+function M.set_tokens_granted(value)
+	tokens_granted = math.max(0, math.floor(value or 0))
+end
+
+function M.add_tokens_granted(delta)
+	tokens_granted = tokens_granted + math.max(0, math.floor(delta or 0))
+end
+
+function M.sync_score_roll()
+	return sync_score_roll
+end
+
+function M.set_sync_score_roll(value)
+	sync_score_roll = value == true
+end
+
+function M.fly_stagger()
+	return fly_stagger
+end
+
+function M.set_fly_stagger(value)
+	fly_stagger = value
+end
+
 function M.reset()
 	active = false
 	Busy.set("token_reward_busy", false)
@@ -163,6 +203,10 @@ function M.reset()
 	tokens_left = 0
 	grant_per_flyer = 1
 	grant_on_land = true
+	reward_amount = 0
+	tokens_granted = 0
+	sync_score_roll = false
+	fly_stagger = nil
 end
 
 return M

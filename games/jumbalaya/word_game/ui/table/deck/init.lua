@@ -47,6 +47,10 @@ function M.bump_token_display()
 	tokens.bump_token_display(M)
 end
 
+function M.set_token_count_immediate(count)
+	tokens.set_count_immediate(M, count)
+end
+
 function M.spend_tokens_display(amount)
 	tokens.spend_tokens_display(M, amount)
 end

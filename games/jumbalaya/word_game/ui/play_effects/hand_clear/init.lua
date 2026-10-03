@@ -10,7 +10,7 @@ local facade = require("word_game.ui.facade")
 local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 local play_effects = require("word_game.ui.play_effects")
 local Funcs = require("app.callbacks.funcs")
-local discard = require("word_game.ui.play_effects.hand_clear.discard")
+local clear_table = require("word_game.ui.play_effects.hand_clear.clear_table")
 local celebrate = require("word_game.ui.play_effects.hand_clear.celebrate")
 local after_clear = require("word_game.ui.play_effects.hand_clear.after_clear")
 
@@ -46,7 +46,7 @@ function M.install(play_module)
 		if WORD_GAME_UI.Confetti and not opts.boss_cleared then
 			WORD_GAME_UI.Confetti.burst()
 		end
-		discard.discard_remaining_hand()
+		clear_table.clear_now()
 
 		local function play_clear_sequence()
 			local outcome = play_module.resolve_after_clear(opts)

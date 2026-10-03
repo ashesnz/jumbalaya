@@ -52,4 +52,12 @@ function M.reset()
 	session.reset()
 end
 
+function M.on_classic_score_tick(score_left)
+	flyers.on_classic_score_tick(score_left)
+end
+
+function M.on_classic_score_roll_done()
+	flyers.on_classic_score_roll_done()
+end
+
 return M

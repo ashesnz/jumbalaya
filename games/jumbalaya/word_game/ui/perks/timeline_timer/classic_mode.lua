@@ -269,11 +269,13 @@ function M.apply(Timer, deps)
 	end
 
 	function Timer.update_classic(dt)
-		if not Timer.is_progress_mode() then return end
 		if Timer.score_roll then
 			local roll, cur = Roll.tick_integer(Timer.score_roll, dt, function()
 				if play_sfx then
 					play_sfx("card_tick", 0.55, 0.32)
+				end
+				if WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.on_classic_score_tick and roll then
+					WORD_GAME_UI.TokenReward.on_classic_score_tick(roll.last_val)
 				end
 			end)
 			Timer.score_roll = roll
@@ -282,8 +284,14 @@ function M.apply(Timer, deps)
 			end
 			if not roll then
 				apply_score_roll_value(Timer.progress_score or 0)
+				if WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.on_classic_score_roll_done then
+					WORD_GAME_UI.TokenReward.on_classic_score_roll_done()
+				end
 			end
-		elseif not Timer.frozen_for_reward then
+			return
+		end
+		if not Timer.is_progress_mode() then return end
+		if not Timer.frozen_for_reward then
 			Timer.sync_progress()
 		end
 		local target_frac = Timer.progress_total_fraction()

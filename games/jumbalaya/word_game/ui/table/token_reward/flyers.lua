@@ -53,6 +53,34 @@ local function spawn_flyer()
 	}
 end
 
+local function refresh_token_display()
+	if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.set_token_count_immediate then
+		WORD_GAME_UI.TableDeck.set_token_count_immediate(state.tokens())
+	end
+end
+
+function M.grant_up_to(earned)
+	earned = math.max(0, math.floor(earned or 0))
+	while session.tokens_granted() < earned do
+		session.add_tokens_granted(1)
+		state.add_tokens(1)
+		refresh_token_display()
+	end
+end
+
+function M.on_classic_score_tick(score_left)
+	if not session.is_active() or not session.sync_score_roll() then return end
+	local amount = session.reward_amount()
+	if amount <= 0 then return end
+	local earned = amount - math.floor((score_left or 0) + 0.5)
+	M.grant_up_to(earned)
+end
+
+function M.on_classic_score_roll_done()
+	if not session.is_active() or not session.sync_score_roll() then return end
+	M.grant_up_to(session.reward_amount())
+end
+
 local function on_flyer_landed()
 	if session.grant_on_land() then
 		local grant = math.min(session.grant_per_flyer(), session.tokens_left())
@@ -73,9 +101,13 @@ local function on_flyer_landed()
 end
 
 local function finish()
-	if session.grant_on_land() and session.tokens_left() > 0 then
-		state.add_tokens(session.tokens_left())
-		session.set_tokens_left(0)
+	if session.sync_score_roll() then
+		M.grant_up_to(session.reward_amount())
+	else
+		if session.grant_on_land() and session.tokens_left() > 0 then
+			state.add_tokens(session.tokens_left())
+			session.set_tokens_left(0)
+		end
 	end
 	if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.sync_token_display then
 		WORD_GAME_UI.TableDeck.sync_token_display()
@@ -99,13 +131,22 @@ function M.try_award(callback)
 
 	local tt = WORD_GAME_UI.TimelineTimer
 	local flyer_count = math.min(amount, config.MAX_REWARD_FLYERS)
-	local fly_duration = config.FLY_DUR + config.STAGGER * math.max(0, flyer_count - 1)
 	local score_roll_dur = math.min(
 		config.SCORE_ROLL_MAX,
 		math.max(config.SCORE_ROLL_MIN, amount * config.SCORE_ROLL_SEC_PER_POINT)
 	)
-	if RunMode.is_classic() and tt and tt.start_score_roll then
+	local fly_stagger = score_roll_dur / math.max(1, flyer_count)
+	local fuse_payout = session.captured_time() ~= nil
+	local sync_score = amount > 0 and not fuse_payout and tt and type(tt.start_score_roll) == "function"
+	session.set_reward_amount(amount)
+	session.set_tokens_granted(0)
+	session.set_sync_score_roll(sync_score)
+	session.set_fly_stagger(fly_stagger)
+	if sync_score then
 		tt.start_score_roll(amount, 0, score_roll_dur)
+		if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.set_token_count_immediate then
+			WORD_GAME_UI.TableDeck.set_token_count_immediate(state.tokens())
+		end
 	elseif tt and tt.freeze_reward_display then
 		tt.freeze_reward_display(amount)
 	elseif tt then
@@ -128,7 +169,7 @@ function M.try_award(callback)
 	session.reset_spawn_acc()
 	session.set_on_done(callback)
 	session.set_active(true)
-	session.set_grant_on_land(true)
+	session.set_grant_on_land(not sync_score)
 	local end_x, end_y = layout.resolve_target_px()
 	session.set_fly_route(layout.timeline_center_px(), end_x, end_y)
 
@@ -183,9 +224,10 @@ function M.update(dt)
 	if not session.is_active() then return end
 	dt = dt or (game() and game().real_dt) or 0.016
 
+	local stagger = session.fly_stagger() or config.STAGGER
 	session.add_spawn_acc(dt)
-	while session.spawned() < session.total() and session.spawn_acc() >= config.STAGGER do
-		session.subtract_spawn_acc(config.STAGGER)
+	while session.spawned() < session.total() and session.spawn_acc() >= stagger do
+		session.subtract_spawn_acc(stagger)
 		session.add_spawned()
 		spawn_flyer()
 	end
@@ -208,6 +250,14 @@ function M.update(dt)
 	end
 
 	if session.spawned() >= session.total() and session.landed() >= session.total() and #flyers == 0 then
+		if session.sync_score_roll() then
+			M.on_classic_score_roll_done()
+			local tt = WORD_GAME_UI.TimelineTimer
+			if tt then
+				tt.score_roll = nil
+				tt.progress_score = 0
+			end
+		end
 		finish()
 	end
 end
