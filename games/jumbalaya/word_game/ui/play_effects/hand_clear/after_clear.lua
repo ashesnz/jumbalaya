@@ -30,7 +30,7 @@ function M.handle_after_clear(play_module, opts, outcome, set_score_animating)
 		if WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.set_banner_mode then
 			WORD_GAME_UI.ScoreBanner.set_banner_mode("normal")
 		end
-		play_module.begin_next_hand_after_boss()
+		WORD_GAME_UI.TradeUI.open_then_dealer()
 		return
 	end
 	if outcome == "boss_hand_advanced" then
@@ -43,7 +43,7 @@ function M.handle_after_clear(play_module, opts, outcome, set_score_animating)
 		if WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.set_banner_mode then
 			WORD_GAME_UI.ScoreBanner.set_banner_mode("normal")
 		end
-		play_module.begin_next_hand_after_boss()
+		WORD_GAME_UI.TradeUI.open_then_dealer()
 		return
 	end
 	if outcome == "boss_next" then

@@ -27,6 +27,14 @@ end
 function M.install(play_module)
 	function play_module.on_hand_cleared(opts)
 		opts = opts or {}
+		local wr = game_access.word_round()
+		if wr then
+			opts.cleared_label = string.format(
+				"Round %d-%d cleared!",
+				wr.set or 1,
+				wr.hand_index or 1
+			)
+		end
 		play_module.prepare_hand_clear(opts)
 		if game_access.get() then
 			set_score_animating(true)
@@ -47,9 +55,9 @@ function M.install(play_module)
 					mode = "instant",
 					func = function()
 						if opts.boss_cleared then
-							celebrate.play_boss_clear()
+							celebrate.play_boss_clear(opts.cleared_label)
 						else
-							celebrate.play_hand_clear()
+							celebrate.play_hand_clear(opts.cleared_label)
 						end
 						Scheduler.add{
 							mode = "delayed",
@@ -64,9 +72,9 @@ function M.install(play_module)
 				}
 			else
 				if opts.boss_cleared then
-					celebrate.play_boss_clear()
+					celebrate.play_boss_clear(opts.cleared_label)
 				else
-					celebrate.play_hand_clear()
+					celebrate.play_hand_clear(opts.cleared_label)
 				end
 				after_clear.handle_after_clear(play_module, opts, outcome, set_score_animating)
 			end

@@ -67,13 +67,6 @@ function M.open_standalone()
 end
 
 function M.open_then_dealer()
-	local rs = facade.run_state().get()
-	local trade_model = facade.trade()
-	if (rs and rs.trade_used_this_hand) or not trade_model.can_use() then
-		session_state.teardown()
-		Play.continue_after_dealer()
-		return
-	end
 	session_state.mark_open(false)
 	M.open_overlay()
 end

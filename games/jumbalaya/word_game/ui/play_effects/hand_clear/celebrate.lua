@@ -9,14 +9,14 @@ local M = {}
 
 
 local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
-function M.play_hand_clear()
+function M.play_hand_clear(cleared_label)
 	local major = (game().pattern_row and game().pattern_row.area)
 		or game().PLAY_ATTACH
 		or game().ROOM_ATTACH
 	if WORD_GAME_UI.Confetti then
 		WORD_GAME_UI.Confetti.burst()
 	end
-	feedback.show("Hand Cleared", game().C.GOLD, 1.8, 0.15)
+	feedback.show(cleared_label or "Hand Cleared", game().C.GOLD, 1.8, 0.15)
 	play_sfx("applause", 1, 0.9)
 	play_sfx("timpani", 0.92, 0.9)
 	play_sfx("card_tick", 0.6, 0.5)
@@ -25,11 +25,11 @@ function M.play_hand_clear()
 	end
 end
 
-function M.play_boss_clear()
+function M.play_boss_clear(cleared_label)
 	if WORD_GAME_UI.Confetti then
 		WORD_GAME_UI.Confetti.burst()
 	end
-	feedback.show("Boss Defeated!", game().C.GOLD, 1.8, 0.15)
+	feedback.show(cleared_label or "Boss Defeated!", game().C.GOLD, 1.8, 0.15)
 	play_sfx("applause", 1, 0.9)
 	play_sfx("timpani", 0.92, 0.9)
 end
