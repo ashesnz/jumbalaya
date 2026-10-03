@@ -252,6 +252,66 @@ T.describe("marketplace", function()
 		T.assert_equal(consonant_count, 2)
 	end)
 
+	T.it("add action flies the preview card into the deck before refreshing", function()
+		local paths = require("bootstrap_paths").resolve()
+		local file = io.open(paths.path_under_repo(
+			"games", "jumbalaya", "word_game", "ui", "trade", "actions.lua"), "r")
+		T.assert_not_nil(file)
+		local src = file:read("*a")
+		file:close()
+		T.assert_true(src:find("card_fly.start_add_fly"))
+		T.assert_true(src:find("sync_deck_count_display"))
+	end)
+
+	T.it("card fly animation completes and clears trade_ui_busy", function()
+		mock_env.reset_game()
+		local shell = require("jumbalaya-engine.shell")
+		local game = shell.game()
+		game.ROOM = game.ROOM or {
+			T = { x = 0, y = 0, w = 20, h = 11, r = 0 },
+			translate_container = function() end,
+		}
+		game.CARD_W = 1
+		game.CARD_H = 1.4
+		game.OVERLAY_MENU = {
+			find_node_by_id = function(_, id)
+				if id == "trade_market_card_2" then
+					return {
+						T = { x = 4, y = 2, w = 0.5, h = 0.7 },
+						config = { object = { states = { visible = true } } },
+					}
+				end
+			end,
+		}
+
+		local card = {
+			T = { x = 0, y = 0, w = 0.5, h = 0.7 },
+			states = { visible = true, drag = { can = true }, hover = { can = true }, click = { can = true }, collide = { can = true } },
+			hard_set_T = function(self, x, y, w, h)
+				self.T.x, self.T.y, self.T.w, self.T.h = x, y, w, h
+			end,
+			set_scene_parent = function() end,
+			set_container = function() end,
+			remove = function(self) self.REMOVED = true end,
+		}
+		local item = { letter = "Z", preview = card }
+		local done = false
+		local card_fly = require("word_game.ui.trade.card_fly")
+		card_fly.reset()
+		T.assert_true(card_fly.start_add_fly({
+			item = item,
+			market_index = 2,
+			on_complete = function() done = true end,
+		}))
+		local Busy = require("word_game.model.run.busy")
+		T.assert_true(Busy.on("trade_ui_busy"))
+		card_fly.update(1)
+		T.assert_false(card_fly.is_active())
+		T.assert_false(Busy.on("trade_ui_busy"))
+		T.assert_true(done)
+		card_fly.reset()
+	end)
+
 	T.it("after_tokens_changed refreshes sidebar deck count and token display", function()
 		mock_env.reset_game()
 		mock_env.patch_game({
@@ -356,13 +416,17 @@ T.describe("marketplace", function()
 			},
 		})
 
+		local card_fly = require("word_game.ui.trade.card_fly")
+		card_fly.reset()
 		actions.on_add({ config = { ref_table = { market_index = 1 } } })
+		card_fly.update(1)
 
 		T.assert_true(session_state.is_open(), "overlay stays open while add actions remain affordable")
 		T.assert_equal(close_calls, 0)
 
 		lifecycle.close = orig_close
 		restore_facade()
+		card_fly.reset()
 		session_state.teardown()
 	end)
 
@@ -397,13 +461,17 @@ T.describe("marketplace", function()
 			},
 		})
 
+		local card_fly = require("word_game.ui.trade.card_fly")
+		card_fly.reset()
 		actions.on_add({ config = { ref_table = { market_index = 1 } } })
+		card_fly.update(1)
 
 		T.assert_true(closed, "overlay closes when broke after add")
 		T.assert_false(session_state.is_open())
 
 		lifecycle.close = orig_close
 		restore_facade()
+		card_fly.reset()
 	end)
 
 	T.it("apply add spends tokens when affordable", function()

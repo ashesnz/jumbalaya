@@ -1,6 +1,7 @@
 --[[ word_game/ui/trade/session_state.lua - Marketplace open flags and active offer ]]
 
 local preview = require("word_game.ui.trade.preview")
+local card_fly = require("word_game.ui.trade.card_fly")
 
 local M = {}
 
@@ -30,6 +31,7 @@ function M.mark_open(standalone_mode)
 end
 
 function M.teardown()
+	card_fly.reset()
 	preview.teardown_offer(offer)
 	offer = nil
 	open = false

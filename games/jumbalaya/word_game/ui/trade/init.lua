@@ -5,6 +5,7 @@ local session_state = require("word_game.ui.trade.session_state")
 local lifecycle = require("word_game.ui.trade.lifecycle")
 local modal_draw = require("word_game.ui.trade.modal_draw")
 local refresh = require("word_game.ui.trade.refresh")
+local card_fly = require("word_game.ui.trade.card_fly")
 
 local M = {}
 
@@ -42,11 +43,21 @@ function M.refresh_after_tokens_changed()
 	refresh.after_tokens_changed()
 end
 
--- Legacy no-ops (handlers removed; catalog / updaters may still reference these).
-function M.step_card_fly(_dt) end
-function M.is_flying() return false end
-function M.is_transforming() return false end
-function M.draw_pass() end
+function M.step_card_fly(dt)
+	card_fly.update(dt)
+end
+
+function M.is_flying()
+	return card_fly.is_active()
+end
+
+function M.is_transforming()
+	return card_fly.is_active()
+end
+
+function M.draw_pass()
+	card_fly.draw()
+end
 function M.on_pick(_e) end
 function M.on_skip_add(_e) M.close() end
 function M.on_skip_remove(_e) M.close() end

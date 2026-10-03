@@ -6,6 +6,7 @@ local session_state = require("word_game.ui.trade.session_state")
 local offer_mod = require("word_game.ui.trade.offer")
 local columns = require("word_game.ui.trade.columns")
 local lifecycle = require("word_game.ui.trade.lifecycle")
+local card_fly = require("word_game.ui.trade.card_fly")
 
 local M = {}
 
@@ -53,6 +54,7 @@ end
 
 function M.close_if_nothing_affordable()
 	if not session_state.is_open() then return end
+	if card_fly.is_active() then return end
 	if columns.any_action_affordable() then return end
 	lifecycle.close()
 end

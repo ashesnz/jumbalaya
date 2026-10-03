@@ -61,6 +61,23 @@ function M.ensure(item, card_w, card_h)
 	return card
 end
 
+function M.refresh_market_slot(menu, index)
+	if not menu or not menu.find_node_by_id then return end
+	local offer_mod = require("word_game.ui.trade.offer")
+	local items = offer_mod.items()
+	local item = items[index]
+	local node = menu:find_node_by_id("trade_market_card_" .. index)
+	if not node or not node.config or not item then return end
+	local g = game()
+	local card_w = (g.CARD_W or 1) * 0.5
+	local card_h = (g.CARD_H or 1.4) * 0.5
+	local card = M.ensure(item, card_w, card_h)
+	node.config.object = card
+	if card and card.states then
+		card.states.visible = true
+	end
+end
+
 function M.teardown_offer(offer)
 	local letters = offer and offer.add and offer.add.letters
 	if not letters then return end

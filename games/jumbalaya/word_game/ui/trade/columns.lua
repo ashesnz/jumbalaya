@@ -38,6 +38,10 @@ local function market_card_dimensions()
 	return w * MARKET_CARD_SCALE, h * MARKET_CARD_SCALE
 end
 
+function M.market_card_dimensions()
+	return market_card_dimensions()
+end
+
 --- Row/column metrics that always fit inside `frame` (tiles).
 function M.layout_metrics(frame)
 	local frame_h = frame.h
@@ -188,6 +192,23 @@ end
 
 function M.sync_action_affordance(root)
 	if not root or not root.find_node_by_id then return end
+	if facade.busy().on("trade_ui_busy") then
+		local rows = {
+			"trade_marketplace_add_row",
+			"trade_marketplace_remove_row",
+			"trade_marketplace_modify_row",
+		}
+		for _, row_id in ipairs(rows) do
+			local row = root:find_node_by_id(row_id)
+			if row then
+				for _, cell in ipairs(child_list(row)) do
+					local btn_col = child_list(cell)[1]
+					M.set_action_button_enabled(btn_col, false, nil)
+				end
+			end
+		end
+		return
+	end
 	local items = offer_mod.items()
 	while #items < GRID_COLS do
 		items[#items + 1] = { letter = "?", mode = "market" }
