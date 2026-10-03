@@ -278,6 +278,126 @@ T.describe("marketplace", function()
 		T.assert_equal(state.tokens(), 10)
 	end)
 
+	T.it("discard_item_preview removes standalone marketplace preview cards", function()
+		local preview = require("word_game.ui.trade.preview")
+		local removed = false
+		local item = {
+			preview_is_standalone = true,
+			preview = { REMOVED = false, remove = function() removed = true end },
+		}
+		preview.discard_item_preview(item)
+		T.assert_true(removed)
+		T.assert_nil(item.preview)
+	end)
+
+	T.it("reset completes a pending fly without refreshing the overlay slot", function()
+		mock_env.reset_game()
+		local shell = require("jumbalaya-engine.shell")
+		local game = shell.game()
+		game.ROOM = game.ROOM or {
+			T = { x = 0, y = 0, w = 20, h = 11, r = 0 },
+			translate_container = function() end,
+		}
+		game.CARD_W = 1
+		game.CARD_H = 1.4
+		game.OVERLAY_MENU = {
+			REMOVED = false,
+			find_node_by_id = function(_, id)
+				if id == "trade_market_card_2" then
+					return { T = { x = 4, y = 2, w = 0.5, h = 0.7 }, config = {} }
+				end
+			end,
+		}
+		local done = false
+		local card_fly = require("word_game.ui.trade.card_fly")
+		card_fly.reset()
+		T.assert_true(card_fly.start({
+			kind = "add",
+			item = { letter = "M", color = "red" },
+			market_index = 2,
+			on_complete = function() done = true end,
+		}))
+		card_fly.reset()
+		T.assert_true(done)
+		T.assert_false(card_fly.is_active())
+	end)
+
+	T.it("modify fly restores deck card visibility only after finalize", function()
+		mock_env.reset_game()
+		local shell = require("jumbalaya-engine.shell")
+		local game = shell.game()
+		game.ROOM = game.ROOM or {
+			T = { x = 0, y = 0, w = 20, h = 11, r = 0 },
+			translate_container = function() end,
+		}
+		game.CARD_W = 1
+		game.CARD_H = 1.4
+		game.OVERLAY_MENU = {
+			find_node_by_id = function(_, id)
+				if id == "trade_market_card_1" then
+					return { T = { x = 4, y = 2, w = 0.5, h = 0.7 }, config = {} }
+				end
+			end,
+		}
+		local hidden = { states = { visible = false }, REMOVED = false }
+		local finalized = false
+		local card_fly = require("word_game.ui.trade.card_fly")
+		card_fly.reset()
+		T.assert_true(card_fly.start({
+			kind = "modify",
+			item = { letter = "R", color = "red", card = hidden },
+			market_index = 1,
+			on_complete = function()
+				finalized = true
+			end,
+		}))
+		T.assert_false(hidden.states.visible)
+		card_fly.update(1)
+		T.assert_true(finalized)
+		T.assert_true(hidden.states.visible)
+		card_fly.reset()
+	end)
+
+	T.it("remove fly does not restore deck card visibility after landing", function()
+		mock_env.reset_game()
+		local shell = require("jumbalaya-engine.shell")
+		local game = shell.game()
+		game.ROOM = game.ROOM or {
+			T = { x = 0, y = 0, w = 20, h = 11, r = 0 },
+			translate_container = function() end,
+		}
+		game.CARD_W = 1
+		game.CARD_H = 1.4
+		game.OVERLAY_MENU = {
+			find_node_by_id = function(_, id)
+				if id == "trade_market_card_1" then
+					return {
+						T = { x = 4, y = 2, w = 0.5, h = 0.7 },
+						config = {},
+					}
+				end
+			end,
+		}
+		local hidden = { states = { visible = false } }
+		local destroyed = false
+		local card_fly = require("word_game.ui.trade.card_fly")
+		card_fly.reset()
+		T.assert_true(card_fly.start({
+			kind = "remove",
+			item = { letter = "K", color = "red", card = hidden },
+			market_index = 1,
+			on_complete = function()
+				destroyed = true
+				hidden.states.visible = false
+				hidden.REMOVED = true
+			end,
+		}))
+		card_fly.update(1)
+		T.assert_true(destroyed)
+		T.assert_false(hidden.states.visible)
+		card_fly.reset()
+	end)
+
 	T.it("card fly animation completes and clears trade_ui_busy", function()
 		mock_env.reset_game()
 		local shell = require("jumbalaya-engine.shell")

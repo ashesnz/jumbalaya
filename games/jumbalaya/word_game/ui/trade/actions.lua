@@ -46,10 +46,13 @@ local function finalize_trade(trade, action, item)
 	return trade.finalize_modifier(item)
 end
 
-local function after_success(trade, action, item, spent)
+local function after_success(_trade, _action, _item, spent)
 	local deck = facade.deck()
 	if deck and deck.sync_deck_count_display then
 		deck.sync_deck_count_display()
+	end
+	if WORD_GAME_UI and WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
+		WORD_GAME_UI.TableInput.refresh_card_input()
 	end
 	refresh.after_tokens_changed({ spent = spent })
 end

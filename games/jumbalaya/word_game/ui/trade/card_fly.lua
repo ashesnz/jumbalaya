@@ -28,11 +28,6 @@ local function tile_scale()
 	return (g.TILESIZE or 20) * (g.TILESCALE or 1)
 end
 
-local function market_card_size_tiles()
-	local g = game()
-	return (g.CARD_W or 1) * MARKET_CARD_SCALE, (g.CARD_H or 1.4) * MARKET_CARD_SCALE
-end
-
 local function deck_card_size_tiles()
 	local g = game()
 	return g.CARD_W or 1, g.CARD_H or 1.4
@@ -49,13 +44,24 @@ local function node_tiles_xywh(node)
 end
 
 local function market_card_node(menu, market_index)
-	if not menu or not menu.find_node_by_id then return nil end
+	if not menu or not menu.find_node_by_id then return end
 	return menu:find_node_by_id("trade_market_card_" .. market_index)
 end
 
-local function clear_market_slot(node)
-	if not node or not node.config then return end
-	node.config.object = nil
+local function set_market_slot_object_visible(menu, index, visible)
+	if not menu or not menu.find_node_by_id then return end
+	local node = menu:find_node_by_id("trade_market_card_" .. index)
+	if node and node.config and node.config.object and node.config.object.states then
+		node.config.object.states.visible = visible
+	end
+end
+
+local function prepare_market_slot_for_fly(menu, index, item)
+	preview.discard_item_preview(item)
+	if menu and index then
+		preview.refresh_market_slot(menu, index)
+		set_market_slot_object_visible(menu, index, false)
+	end
 end
 
 local function letter_color_key(item, deck_card)
@@ -109,29 +115,49 @@ function M.is_active()
 	return active ~= nil
 end
 
-function M.reset()
-	if active and active.hidden_card then
-		set_card_visible(active.hidden_card, true)
+--- Only modify unhides the live deck card; remove must stay gone after finalize.
+local function restore_hidden_card(state)
+	if not state or not state.hidden_card or state.kind ~= "modify" then
+		return
 	end
+	if state.hidden_card.REMOVED then
+		return
+	end
+	set_card_visible(state.hidden_card, true)
+end
+
+local function complete_state(state, refresh_slot)
+	if not state then return end
+	if refresh_slot and state.menu and state.market_index then
+		local menu = state.menu
+		if not menu.REMOVED and menu.find_node_by_id then
+			preview.refresh_market_slot(menu, state.market_index)
+			set_market_slot_object_visible(menu, state.market_index, true)
+		end
+	end
+	if state.on_complete then
+		state.on_complete()
+	end
+	restore_hidden_card(state)
+end
+
+function M.reset()
+	if not active then
+		Busy.set("trade_ui_busy", false)
+		return
+	end
+	local state = active
 	active = nil
 	Busy.set("trade_ui_busy", false)
+	complete_state(state, false)
 end
 
 local function finish()
 	if not active then return end
 	local state = active
-	if state.hidden_card then
-		set_card_visible(state.hidden_card, true)
-	end
 	active = nil
 	Busy.set("trade_ui_busy", false)
-
-	if state.menu and state.market_index then
-		preview.refresh_market_slot(state.menu, state.market_index)
-	end
-	if state.on_complete then
-		state.on_complete()
-	end
+	complete_state(state, true)
 end
 
 local function begin_fly(state)
@@ -156,30 +182,31 @@ function M.start(opts)
 	local sx, sy, sw, sh = node_tiles_xywh(slot_node)
 	if not sx then return false end
 
-	local deck = Layout.deck_rect()
+	local deck_rect = Layout.deck_rect()
 	local dw, dh = deck_card_size_tiles()
-	local tx = deck.x + (deck.w - dw) * 0.5
-	local ty = deck.y + (deck.h - dh) * 0.5
+	local tx = deck_rect.x + (deck_rect.w - dw) * 0.5
+	local ty = deck_rect.y + (deck_rect.h - dh) * 0.5
 
 	local letter = item.letter
 	local deck_card = item.card
 	local color_from = letter_color_key(item, deck_card)
 	local color_to = LetterPalette.MODIFIED_FACE_COLOR
 
-	clear_market_slot(slot_node)
-	if item.preview then
-		item.preview = nil
-		item.preview_is_standalone = nil
-	end
+	prepare_market_slot_for_fly(menu, market_index, item)
 
 	local hidden_card = nil
 	if kind == "remove" or kind == "modify" then
-		if item.letter then
+		deck_card = item.card
+		if (not deck_card or deck_card.REMOVED) and item.letter then
 			deck_card = facade.deck().find_deck_card(item.letter)
 			item.card = deck_card
 		end
 		hidden_card = deck_card
-		set_card_visible(hidden_card, false)
+		if hidden_card and not hidden_card.REMOVED then
+			set_card_visible(hidden_card, false)
+		else
+			hidden_card = nil
+		end
 	end
 
 	if kind == "remove" then
@@ -220,7 +247,6 @@ function M.start(opts)
 		return true
 	end
 
-	-- add: marketplace slot → deck (draft happens after landing)
 	begin_fly({
 		kind = "add",
 		letter = letter,

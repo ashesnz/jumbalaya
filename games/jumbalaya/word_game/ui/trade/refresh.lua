@@ -47,6 +47,9 @@ local function refresh_marketplace_affordance()
 		trade.sync_offer_cards(offer)
 	end
 	columns.sync_action_affordance(menu)
+	if card_fly.is_active() then
+		return
+	end
 	if menu.recalculate then
 		menu:recalculate()
 	end

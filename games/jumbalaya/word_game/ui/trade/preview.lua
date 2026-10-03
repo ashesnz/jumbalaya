@@ -61,6 +61,20 @@ function M.ensure(item, card_w, card_h)
 	return card
 end
 
+function M.discard_item_preview(item)
+	if not item then return end
+	local card = item.preview
+	if item.preview_is_standalone and card and not card.REMOVED then
+		if card.remove then
+			card:remove()
+		else
+			card.REMOVED = true
+		end
+	end
+	item.preview = nil
+	item.preview_is_standalone = nil
+end
+
 function M.refresh_market_slot(menu, index)
 	if not menu or not menu.find_node_by_id then return end
 	local offer_mod = require("word_game.ui.trade.offer")
@@ -72,8 +86,11 @@ function M.refresh_market_slot(menu, index)
 	local card_w = (g.CARD_W or 1) * 0.5
 	local card_h = (g.CARD_H or 1.4) * 0.5
 	local card = M.ensure(item, card_w, card_h)
+	if not card then
+		return
+	end
 	node.config.object = card
-	if card and card.states then
+	if card.states then
 		card.states.visible = true
 	end
 end
