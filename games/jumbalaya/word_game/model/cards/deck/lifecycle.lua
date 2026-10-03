@@ -52,10 +52,12 @@ end
 
 	 function M.draft_letter(letter, color)
 	 	live_game().draw_pile.config = live_game().draw_pile.config or {}
-	 local card = Deck().create_letter_card(letter, color)
+		local card = Deck().create_letter_card(letter, color)
 		live_game().draw_pile:emplace(card)
-	 live_game().draw_pile.config.card_limit = (live_game().draw_pile.config.card_limit or #Deck().STARTING_LETTERS) + 1
-		if Deck().commit_pile_hosts then
+		live_game().draw_pile.config.card_limit = (live_game().draw_pile.config.card_limit or #Deck().STARTING_LETTERS) + 1
+		if Deck().reconcile_draw_pile_from_inventory then
+			Deck().reconcile_draw_pile_from_inventory()
+		elseif Deck().commit_pile_hosts then
 			Deck().commit_pile_hosts({ "draw" })
 		else
 			Deck().sync_deck_count_display()

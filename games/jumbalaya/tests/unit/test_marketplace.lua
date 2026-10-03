@@ -278,6 +278,24 @@ T.describe("marketplace", function()
 		T.assert_equal(state.tokens(), 10)
 	end)
 
+	T.it("draft_letter reconciles draw pile store after marketplace add", function()
+		local paths = require("bootstrap_paths").resolve()
+		local lifecycle_path = paths.path_under_repo(
+			"games", "jumbalaya", "word_game", "model", "cards", "deck", "lifecycle.lua")
+		local jumble_path = paths.path_under_repo(
+			"games", "jumbalaya", "word_game", "model", "cards", "deck", "jumble_lifecycle.lua")
+		local life_f = io.open(lifecycle_path, "r")
+		local jumble_f = io.open(jumble_path, "r")
+		T.assert_not_nil(life_f)
+		T.assert_not_nil(jumble_f)
+		local life_src = life_f:read("*a")
+		local jumble_src = jumble_f:read("*a")
+		life_f:close()
+		jumble_f:close()
+		T.assert_true(life_src:find("reconcile_draw_pile_from_inventory"))
+		T.assert_true(jumble_src:find("function M.reconcile_draw_pile_from_inventory"))
+	end)
+
 	T.it("discard_item_preview removes standalone marketplace preview cards", function()
 		local preview = require("word_game.ui.trade.preview")
 		local removed = false

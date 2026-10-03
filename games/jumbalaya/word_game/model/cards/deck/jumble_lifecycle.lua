@@ -9,6 +9,7 @@
 local live_game = require("word_game.model.live_game")
 local core_letter_card = require("jumbalaya_core.cards.letter_card")
 local game_access = require("word_game.model.game_access")
+local piles = require("word_game.model.piles")
 
 local M = {}
 local Shared = require("word_game.model.cards.deck.shared")
@@ -57,6 +58,51 @@ end
 	function M.is_jumble_deck()
 		local wr = game_access.word_round()
 		return wr and wr.mode == "jumble"
+	end
+
+	--- Ensure every inventory draw candidate is reflected in the draw pile store snapshot.
+	--- Needed after marketplace draft: commit_hosts clears the draw host for chrome.
+	function M.reconcile_draw_pile_from_inventory()
+		if not M.is_jumble_deck() then return end
+		local g = live_game()
+		local draw = g.draw_pile
+		if not draw or not draw.emplace then return end
+
+		piles.hydrate_hosts_from_store({ "draw" })
+
+		local function card_in_draw(card)
+			for _, c in ipairs(draw.cards or {}) do
+				if c == card then return true end
+			end
+			return false
+		end
+
+		local draw_limit = 0
+		for _, card in ipairs(core_letter_card.collect_active_cards(g.letter_inventory)) do
+			if not core_letter_card.is_jumble_draw_candidate(card) then
+				goto continue
+			end
+			draw_limit = draw_limit + 1
+			local area = card.area
+			if area and area ~= draw then
+				goto continue
+			end
+			if not card_in_draw(card) then
+				if card.remove_from_area then
+					card:remove_from_area()
+				end
+				draw:emplace(card)
+			end
+			::continue::
+		end
+
+		draw.config = draw.config or {}
+		draw.config.card_limit = math.max(draw.config.card_limit or 0, draw_limit)
+		if draw.hard_set_T then
+			draw:hard_set_T()
+		end
+		Shared.commit_piles({ "draw" })
+		Deck().sync_deck_count_display()
 	end
 
 	function M.populate_jumble_deck()
