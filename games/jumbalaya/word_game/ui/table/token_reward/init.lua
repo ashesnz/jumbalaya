@@ -24,8 +24,8 @@ function M.capture_timer()
 	M.capture_reward()
 end
 
-function M.capture_reward()
-	capture.capture_reward()
+function M.capture_reward(opts)
+	capture.capture_reward(opts)
 end
 
 function M.is_active()

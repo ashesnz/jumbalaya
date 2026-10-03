@@ -6,6 +6,8 @@ local game_access = facade.game_access()
 local RunMode = facade.run_mode()
 local StageLabel = require("word_game.ui.score_banner.stage_label")
 local timer_layout = require("word_game.ui.perks.timeline_timer.layout")
+local Roll = require("jumbalaya-engine.util.roll")
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 
 local clamp01 = timer_layout.clamp01
 
@@ -249,26 +251,37 @@ function M.apply(Timer, deps)
 		Timer.goal_reached = from >= (Timer.progress_target or 1)
 		Timer.is_active = false
 		Timer.frozen_for_reward = true
-		Timer.score_roll = { from = from, to = to, t = 0, dur = duration }
+		local roll = Roll.begin(from, to, duration, { integer = true })
+		Timer.score_roll = roll
+		if not roll then
+			Timer.progress_score = to
+		end
+	end
+
+	local function apply_score_roll_value(val)
+		Timer.progress_score = val
+		Timer.progress_pending = 0
+		local target = math.max(1, Timer.progress_target or 1)
+		Timer.display_frac = clamp01(val / target)
+		if Timer.goal_reached then
+			Timer.display_goal_frac = clamp01(target / math.max(target, val))
+		end
 	end
 
 	function Timer.update_classic(dt)
 		if not Timer.is_progress_mode() then return end
 		if Timer.score_roll then
-			local roll = Timer.score_roll
-			roll.t = roll.t + dt
-			local u = deps.ease_out_cubic(roll.t / roll.dur)
-			local val = roll.from + (roll.to - roll.from) * u
-			Timer.progress_score = val
-			Timer.progress_pending = 0
-			local target = math.max(1, Timer.progress_target or 1)
-			Timer.display_frac = clamp01(val / target)
-			if Timer.goal_reached then
-				Timer.display_goal_frac = clamp01(target / math.max(target, val))
+			local roll, cur = Roll.tick_integer(Timer.score_roll, dt, function()
+				if play_sfx then
+					play_sfx("card_tick", 0.55, 0.32)
+				end
+			end)
+			Timer.score_roll = roll
+			if cur ~= nil then
+				apply_score_roll_value(cur)
 			end
-			if roll.t >= roll.dur then
-				Timer.progress_score = roll.to
-				Timer.score_roll = nil
+			if not roll then
+				apply_score_roll_value(Timer.progress_score or 0)
 			end
 		elseif not Timer.frozen_for_reward then
 			Timer.sync_progress()

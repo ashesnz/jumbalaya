@@ -52,6 +52,12 @@ local function update_boss_announce(dt)
 	end
 end
 
+local function update_token_reward(dt)
+	if WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.update then
+		WORD_GAME_UI.TokenReward.update(dt)
+	end
+end
+
 local function update_pattern_row(game, dt, ensure_placement_pattern_overlay)
 	if not game.pattern_row then return end
 	ensure_placement_pattern_overlay(game.pattern_row)
@@ -72,6 +78,7 @@ function M.run(game, dt, ensure_placement_pattern_overlay)
 	update_boss_announce(dt)
 	update_pattern_row(game, dt, ensure_placement_pattern_overlay)
 	update_timeline(dt)
+	update_token_reward(dt)
 end
 
 return M

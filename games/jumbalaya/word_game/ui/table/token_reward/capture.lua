@@ -41,10 +41,11 @@ function M.earned_amount()
 	return 0
 end
 
-function M.capture_reward()
+function M.capture_reward(opts)
+	opts = opts or {}
 	if not M.is_eligible() then return end
 	if RunMode.is_classic() then
-		if session.captured_score() ~= nil then return end
+		if session.captured_score() ~= nil and not opts.refresh then return end
 		session.set_captured_score(banked_score())
 		local tt = WORD_GAME_UI.TimelineTimer
 		if tt then

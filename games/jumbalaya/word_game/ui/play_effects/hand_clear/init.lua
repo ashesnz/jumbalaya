@@ -80,9 +80,14 @@ function M.install(play_module)
 			end
 		end
 
-		if not opts.boss_cleared
-			and WORD_GAME_UI.TokenReward.try_award(play_clear_sequence) then
-			return
+		local token_reward = WORD_GAME_UI.TokenReward
+		if token_reward then
+			if opts.boss_cleared and token_reward.capture_reward then
+				token_reward.capture_reward({ refresh = true })
+			end
+			if token_reward.try_award(play_clear_sequence) then
+				return
+			end
 		end
 		play_clear_sequence()
 	end
