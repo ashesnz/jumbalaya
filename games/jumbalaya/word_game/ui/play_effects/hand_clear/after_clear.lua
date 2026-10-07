@@ -19,6 +19,9 @@ function M.handle_after_clear(play_module, opts, outcome, set_score_animating)
 		return
 	end
 	if outcome == "boss_bonus_hand" then
+		if WORD_GAME_UI.PerkStamp and WORD_GAME_UI.PerkStamp.queue_after_boss_clear then
+			WORD_GAME_UI.PerkStamp.queue_after_boss_clear()
+		end
 		local wr = game_access.word_round()
 		local bonus_stack = WORD_GAME_UI.BonusStackUI
 		if bonus_stack and bonus_stack.finalize_for_bonus_hand then
@@ -34,6 +37,9 @@ function M.handle_after_clear(play_module, opts, outcome, set_score_animating)
 		return
 	end
 	if outcome == "boss_hand_advanced" then
+		if WORD_GAME_UI.PerkStamp and WORD_GAME_UI.PerkStamp.queue_after_boss_clear then
+			WORD_GAME_UI.PerkStamp.queue_after_boss_clear()
+		end
 		if Deck.destroy_boss_cards then
 			Deck.destroy_boss_cards()
 		end

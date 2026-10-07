@@ -44,6 +44,14 @@ T.describe("jumbalaya_core round", function()
 		T.assert_equal(action, "win")
 	end)
 
+	T.it("unlocks stamp perks from set 2 onward", function()
+		local round_cfg = require("jumbalaya_core.config.gameplay.round")
+		T.assert_false(round_cfg.stamp_perks_unlocked(1, 1))
+		T.assert_false(round_cfg.stamp_perks_unlocked(1, 9))
+		T.assert_true(round_cfg.stamp_perks_unlocked(2, 1))
+		T.assert_true(round_cfg.stamp_perks_unlocked(3, 2))
+	end)
+
 	T.it("normalizes saved word_round defaults and config labels", function()
 		local wr = { set = 2, hand_index = 1 }
 		Round.normalize_saved_word_round(wr)

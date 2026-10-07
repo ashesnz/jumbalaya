@@ -120,22 +120,26 @@ local function run_gold_transform(card, on_complete)
 	})
 end
 
-local function fly_card_to_stack(queue_event, card, fly_index, card_delay)
+local function fly_card_to_stack(queue_event, card, fly_index, fly_duration)
+	fly_duration = fly_duration or 0.45
 	local sx, sy = card.T.x, card.T.y
 	local tx, ty = layout.target_position(fly_index)
-	local started = (game().TIMERS and game().TIMERS.REAL) or 0
+	local fly_start
 	if play_sfx then
 		play_sfx("card_slide1", 0.88 + fly_index * 0.015, 0.55)
 	end
 	queue_event(Tween({
 		mode = "window",
 		timer = "REAL",
-		delay = card_delay,
+		delay = fly_duration,
 		blockable = false,
 		blocking = false,
 		func = function()
-			local now = (game().TIMERS and game().TIMERS.REAL) or (started + card_delay)
-			local u = card_delay > 0 and math.min(1, (now - started) / card_delay) or 1
+			local now = (game().TIMERS and game().TIMERS.REAL) or 0
+			if not fly_start then
+				fly_start = now
+			end
+			local u = fly_duration > 0 and math.min(1, (now - fly_start) / fly_duration) or 1
 			local e = smoothstep(u)
 			card.T.x = sx + (tx - sx) * e
 			card.T.y = sy + (ty - sy) * e

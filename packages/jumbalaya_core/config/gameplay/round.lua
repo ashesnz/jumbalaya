@@ -69,6 +69,11 @@ function M.is_boss_word_hand(set, hand_index)
 	return set == 1 and hand_index == 3
 end
 
+--- Sidebar stamp perks (roll + strike animation) unlock entering set 2.
+function M.stamp_perks_unlocked(set, _hand_index)
+	return (set or 1) >= 2
+end
+
 function M.is_bonus_stack_hand(set, hand_index)
 	set = set or 1
 	hand_index = hand_index or 1

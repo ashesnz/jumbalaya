@@ -13,6 +13,7 @@ local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
 local run_state = facade.run_state()
+local round_config = require("jumbalaya_core.config.gameplay.round")
 local perk_cfg = require("word_game.config.perks")
 local definition = require("word_game.ui.perks.stamp.definition")
 local draw = require("word_game.ui.perks.stamp.draw")
@@ -62,6 +63,26 @@ function M.queue(entry)
 	return true
 end
 
+function M.stamp_perks_unlocked(set, hand_index)
+	return round_config.stamp_perks_unlocked(set, hand_index)
+end
+
+function M.queue_after_boss_clear()
+	if M.is_active() then return false end
+	local rolled = facade.perks_registry().roll_stamp_perk()
+	if not rolled then return false end
+	return M.queue(rolled)
+end
+
+function M.try_play_pending_on_hand_start(set, hand_index)
+	if not M.stamp_perks_unlocked(set, hand_index) then return false end
+	if M.is_active() then return false end
+	if game().STATE ~= game().STATES.TABLE_BOARD then return false end
+	local pending = game_access.get() and game_access.get().pending_stamp_perk
+	if not pending then return false end
+	return M.play()
+end
+
 function M.play(perk_entry, callback)
 	if animate.is_active() then return false end
 	if game().STATE ~= game().STATES.TABLE_BOARD then return false end
@@ -80,20 +101,9 @@ function M.play(perk_entry, callback)
 	return true
 end
 
---- Opening-table demo: stamp the top-left discard-bin voucher on fresh runs.
+--- Legacy hook (run_board_ready / tutorial). Stamps unlock at 2-1 via hand_started.
 function M.try_opening_demo()
-	if M.is_active() then return false end
-	if WORD_GAME_UI.FirstPlayTutorial and WORD_GAME_UI.FirstPlayTutorial.is_active()
-		and WORD_GAME_UI.FirstPlayTutorial.is_active() then
-		return false
-	end
-	if game().STATE ~= game().STATES.TABLE_BOARD then return false end
-	if animate.imprint_count() > 0 then return false end
-	local rs = run_state.get()
-	if not rs or #(rs.perks or {}) > 0 then return false end
-	local entry = perk_cfg.by_id("discard_bin")
-	if not entry then return false end
-	return M.play(entry)
+	return false
 end
 
 function M.demo_play()

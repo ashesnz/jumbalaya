@@ -64,6 +64,9 @@ function M.register(Presentation, ctx)
 		PresentationBus.emit("stage_label_sync")
 		PresentationBus.emit("sidebar_refresh")
 		PresentationBus.emit("stage_backgrounds", set, hand_index)
+		if ui.PerkStamp and ui.PerkStamp.try_play_pending_on_hand_start then
+			ui.PerkStamp.try_play_pending_on_hand_start(set, hand_index)
+		end
 	end)
 
 	Presentation.on("bonus_stack_on_hand_start", function(set, hand_index)
@@ -99,21 +102,6 @@ function M.register(Presentation, ctx)
 	end)
 
 	Presentation.on("run_board_ready", function()
-		local Scheduler = ctx.Scheduler
-		local runtime = ctx.runtime
-		Scheduler.add{
-			mode = "delayed",
-			delay = 0.45,
-			blocking = false,
-			func = function()
-				if runtime().STATE == runtime().STATES.TABLE_BOARD and runtime().STAGE == runtime().STAGES.RUN then
-					if ui.PerkStamp and ui.PerkStamp.try_opening_demo then
-						ui.PerkStamp.try_opening_demo()
-					end
-				end
-				return true
-			end,
-		}
 		if ui.FirstPlayTutorial and ui.FirstPlayTutorial.try_schedule then
 			ui.FirstPlayTutorial.try_schedule()
 		end

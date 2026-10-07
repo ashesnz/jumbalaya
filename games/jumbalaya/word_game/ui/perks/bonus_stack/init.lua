@@ -231,6 +231,10 @@ end
 
 local function try_award_gutter_perk()
 	if M.is_active() then return end
+	local wr = facade.game_access().word_round()
+	if not wr or not round_config.stamp_perks_unlocked(wr.set, wr.hand_index) then
+		return
+	end
 	local perk_stamp = WORD_GAME_UI.PerkStamp
 	if not perk_stamp then return end
 	local rolled = facade.perks_registry().roll_stamp_perk()

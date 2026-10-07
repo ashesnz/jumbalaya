@@ -4,6 +4,7 @@ local game = require("word_game.ui.util.game_runtime").game
 
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
+local round_config = require("jumbalaya_core.config.gameplay.round")
 local definition = require("word_game.ui.perks.stamp.definition")
 local draw = require("word_game.ui.perks.stamp.draw")
 local stamp_puff = require("word_game.ui.perks.stamp.puff")
@@ -247,7 +248,9 @@ function M.update(dt)
 
 	if not anim or anim.debug then
 		local game = game_access.get()
-		if not anim and game and game.pending_stamp_perk and ctx.play_pending then
+		local wr = game_access.word_round()
+		if not anim and game and game.pending_stamp_perk and ctx.play_pending and wr
+			and round_config.stamp_perks_unlocked(wr.set, wr.hand_index) then
 			ctx.play_pending()
 		end
 	end
