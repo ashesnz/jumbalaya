@@ -10,6 +10,27 @@ T.describe("Jumble play flow integration", function()
 	local jumble = require("word_game.model.jumble")
 	local play = require("word_game.model.jumble_play")
 
+	T.it("prepare_hand_clear flags boss_next on set 1 hand 3 without resetting deck", function()
+		mock_env.patch_game({
+			word_round = {
+				set = 1,
+				hand_index = 3,
+				jumble = { total_score = 30, boss_word_active = false },
+			},
+		})
+		local deck = require("word_game.model.cards.deck")
+		local reset_called = false
+		local orig = deck.reset_table_deck
+		deck.reset_table_deck = function()
+			reset_called = true
+		end
+		local opts = {}
+		play.prepare_hand_clear(opts)
+		deck.reset_table_deck = orig
+		T.assert_true(opts.boss_next)
+		T.assert_false(reset_called, "boss transition should not shuffle deck back before intro")
+	end)
+
 	T.it("resolve_after_clear returns trade when eligible without TradeUI loaded", function()
 		mock_env.patch_game({
 			word_round = {

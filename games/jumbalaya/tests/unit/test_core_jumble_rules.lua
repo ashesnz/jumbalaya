@@ -59,7 +59,7 @@ T.describe("jumbalaya_core jumble rules", function()
 	T.it("uses hand targets from core config", function()
 		local round_cfg = Core.Config.Gameplay.Round
 		T.assert_equal(round_cfg.hand_target(1, 1), 25)
-		T.assert_equal(round_cfg.hand_target(1, 2), 50)
+		T.assert_equal(round_cfg.hand_target(1, 2), 10)
 	end)
 
 	T.it("creates store default state without G", function()

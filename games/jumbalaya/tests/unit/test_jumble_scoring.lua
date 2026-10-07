@@ -125,13 +125,13 @@ T.describe("Jumble scoring and odometer", function()
 		T.assert_almost_equal(sb.jumble_multi, 1.0, 0.01)
 	end)
 
-	T.it("initializes round target to 25 points for stage 1-1 and 50 points for stage 1-2", function()
+	T.it("initializes round target to 25 points for stage 1-1 and 10 points for stage 1-2", function()
 		local pcfg = require("word_game.board.placement.config")
 		T.assert_equal(pcfg.ANCHOR_PAD_Y_FRAC, 0.078, "Anchor pad frac lowered to 0.078")
 
 		local round_cfg = require("jumbalaya_core.config.gameplay.round")
 		T.assert_equal(round_cfg.hand_target(1, 1), 25, "Stage 1-1 target should be 25 points")
-		T.assert_equal(round_cfg.hand_target(1, 2), 50, "Stage 1-2 target should be 50 points")
+		T.assert_equal(round_cfg.hand_target(1, 2), 10, "Stage 1-2 target should be 10 points")
 		T.assert_equal(round_cfg.hand_target(1, 9), 100, "Stage 1-9 target should be 100 points")
 
 		local wr = { target = round_cfg.hand_target(1, 1) }

@@ -85,7 +85,7 @@ function M.install(play_module)
 			if opts.boss_cleared and token_reward.capture_reward then
 				token_reward.capture_reward({ refresh = true })
 			end
-			if token_reward.try_award(play_clear_sequence) then
+			if not opts.boss_next and token_reward.try_award(play_clear_sequence) then
 				return
 			end
 		end

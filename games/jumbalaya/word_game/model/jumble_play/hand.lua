@@ -33,13 +33,13 @@ function M.prepare_hand_clear(opts)
 		and Jumble.clear_blank_cards then
 		Jumble.clear_blank_cards(j.slots)
 	end
-	if not opts.boss_cleared
-		and Deck.is_jumble_deck() then
-		Deck.reset_table_deck()
-	end
 	if wr and round_config.is_boss_word_hand(wr.set, wr.hand_index) and j
 		and not j.boss_word_active and not opts.boss_cleared then
 		opts.boss_next = true
+	end
+	if not opts.boss_cleared and not opts.boss_next
+		and Deck.is_jumble_deck() then
+		Deck.reset_table_deck()
 	end
 	return wr, j, opts
 end

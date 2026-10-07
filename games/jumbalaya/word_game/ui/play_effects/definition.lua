@@ -26,6 +26,7 @@ M.BOSS_INTRO = {
 		{ text = "3", hold = 0.85 },
 		{ text = "2", hold = 0.85 },
 		{ text = "1", hold = 0.85 },
+		{ text = "GO!", hold = 0.65 },
 	},
 }
 
@@ -39,8 +40,10 @@ end
 function M.capture_token_timer_if_cleared(cleared, opts)
 	opts = opts or {}
 	if not cleared or not RunMode.ends_hand_on_target() then return end
-	if not opts.skip_focus
-		and WORD_GAME_UI.HandClearFocus and WORD_GAME_UI.HandClearFocus.begin then
+	if opts.result and M.triggers_boss_word(opts.result) then
+		return
+	end
+	if WORD_GAME_UI.HandClearFocus and WORD_GAME_UI.HandClearFocus.begin then
 		WORD_GAME_UI.HandClearFocus.begin()
 	end
 	local score = opts.cleared_score

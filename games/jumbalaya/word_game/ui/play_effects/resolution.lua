@@ -29,9 +29,7 @@ function M.resolve(play_module, opts)
 
 	Presentation.emit("PLAY_RESOLVED", result)
 	effects.roll_jumble_banners(result)
-	local boss_trigger = effects.triggers_boss_word(result)
 	effects.capture_token_timer_if_cleared(ends_hand_on_target(result.cleared), {
-		skip_focus = boss_trigger,
 		result = result,
 	})
 

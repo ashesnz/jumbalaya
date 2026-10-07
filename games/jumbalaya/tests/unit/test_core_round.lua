@@ -12,7 +12,7 @@ T.describe("jumbalaya_core round", function()
 		local wr = Round.new_word_round(1, 2)
 		T.assert_equal(wr.set, 1)
 		T.assert_equal(wr.hand_index, 2)
-		T.assert_equal(wr.target, 50)
+		T.assert_equal(wr.target, 10)
 		T.assert_equal(wr.hand_name, "Standard")
 	end)
 

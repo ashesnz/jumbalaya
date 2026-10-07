@@ -63,8 +63,8 @@ function M.present_boss_word(_wr, on_complete)
 	if WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.hide_points_to_get_display then
 		WORD_GAME_UI.ScoreBanner.hide_points_to_get_display()
 	end
-	if WORD_GAME_UI.TimelineTimer and WORD_GAME_UI.TimelineTimer.pause then
-		WORD_GAME_UI.TimelineTimer.pause()
+	if WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.set_banner_mode then
+		WORD_GAME_UI.ScoreBanner.set_banner_mode("boss_prep", "Boss Level!")
 	end
 
 	local function finish_intro()
@@ -79,13 +79,8 @@ function M.present_boss_word(_wr, on_complete)
 		if WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.set_banner_mode then
 			WORD_GAME_UI.ScoreBanner.set_banner_mode("boss_word", "BOSS WORD")
 		end
-		if WORD_GAME_UI.BossWordAnnounce then
-			if WORD_GAME_UI.BossWordAnnounce.play_boss then
-				WORD_GAME_UI.BossWordAnnounce.play_boss("BOSS WORD")
-			end
-			if WORD_GAME_UI.BossWordAnnounce.play_theme then
-				WORD_GAME_UI.BossWordAnnounce.play_theme("Garden Theme")
-			end
+		if WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.play_theme then
+			WORD_GAME_UI.BossWordAnnounce.play_theme("Garden Theme")
 		end
 		local revealed = jumble.reveal_boss_puzzle()
 		if not revealed then
@@ -149,8 +144,8 @@ function M.present_boss_word(_wr, on_complete)
 				func = function()
 					word_feedback.show_boss_countdown(step.text, step.hold)
 					if play_sfx then
-						if index == 1 then
-							play_sfx("timpani", 0.9, 0.7)
+						if index == 1 or index == #steps then
+							play_sfx("timpani", index == 1 and 0.9 or 0.95, index == 1 and 0.7 or 0.85)
 						else
 							play_sfx("card_tick", 0.9, 0.7)
 						end
