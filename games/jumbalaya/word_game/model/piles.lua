@@ -114,7 +114,7 @@ local function resolve_live_card(record)
 			return card
 		end
 	end
-	return record
+	return nil
 end
 
 --- Dispatch a core MOVE_CARD action and mirror pile_id on a live Card (presentation).
@@ -200,13 +200,13 @@ function M.hydrate_hosts_from_store(pile_ids)
 				for slot_index, record in pairs(store_pile) do
 					if type(slot_index) == "number" and record then
 						local card = resolve_live_card(record)
-						if card then host:emplace(card) end
+						if card and card.set_card_area then host:emplace(card) end
 					end
 				end
 			else
 				for _, record in ipairs(store_pile) do
 					local card = resolve_live_card(record)
-					if card then host:emplace(card) end
+					if card and card.set_card_area then host:emplace(card) end
 				end
 			end
 			if host.set_ranks then host:set_ranks() end

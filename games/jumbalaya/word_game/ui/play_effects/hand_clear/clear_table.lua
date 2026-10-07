@@ -55,6 +55,10 @@ function M.clear_now()
 	if WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
 		WORD_GAME_UI.TableInput.refresh_card_input()
 	end
+
+	if Deck.commit_pile_hosts then
+		Deck.commit_pile_hosts({ "hand", "draw", "discard", "pattern" })
+	end
 end
 
 return M

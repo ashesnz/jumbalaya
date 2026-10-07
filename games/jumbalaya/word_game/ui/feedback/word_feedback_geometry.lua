@@ -86,4 +86,29 @@ function M.hand_gap_metrics()
 	}
 end
 
+--- Tile-space bounds of the placement row backdrop (matches placement/draw.lua).
+function M.play_board_message_rect(offset_x, offset_y)
+	offset_x = offset_x or 0
+	offset_y = offset_y or 0
+	local area = M.placement_area()
+	if area and area.T then
+		return {
+			x = area.T.x + offset_x,
+			y = area.T.y + offset_y,
+			w = area.T.w,
+			h = area.T.h,
+		}
+	end
+	local felt = get_table_felt_rect()
+	if felt then
+		return {
+			x = felt.x + offset_x,
+			y = felt.y + offset_y,
+			w = felt.w,
+			h = felt.h,
+		}
+	end
+	return nil
+end
+
 return M

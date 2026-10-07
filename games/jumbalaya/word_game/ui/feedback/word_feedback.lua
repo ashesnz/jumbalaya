@@ -97,6 +97,24 @@ function M.show(text, colour, hold, offset_y)
 	push_message(text, colour, hold, board_message_rect(offset_y))
 end
 
+--- Center on the placement row backdrop (dark CardPile rect), not the hand-gap strip.
+function M.show_on_play_board(text, colour, hold, offset_x, offset_y)
+	local row = shell.pattern_row()
+	if row and row.apply_screen_position then
+		row:apply_screen_position()
+	end
+	local rect = geometry.play_board_message_rect(offset_x, offset_y)
+	if not rect then
+		M.show(text, colour, hold, offset_y)
+		return
+	end
+	push_message(text, colour, hold, rect)
+	local area = row and row.area
+	if area and area.pulse then
+		area:pulse(0.22, 0.12)
+	end
+end
+
 function M.show_screen_centered(text, colour, hold, offset_y)
 	local scale = math.min(0.82, math.max(0.48, (game().TILE_H or 11) * 0.055))
 	M.spawn_attention({
@@ -196,6 +214,11 @@ function M.active_count()
 	return #messages
 end
 
+--- Headless tests: inspect the most recently queued board message.
+function M.peek_top_message()
+	return messages[#messages]
+end
+
 function M.clear()
 	messages = {}
 end
@@ -238,10 +261,13 @@ function M.draw_pass()
 		local x = msg.x * ts
 		local y = msg.y * ts
 		local w = msg.w * ts
+		local h = (msg.h or 0.85) * ts
+		local fh = font:getHeight()
+		local draw_y = y + math.max(0, (h - fh) * 0.5)
 		love.graphics.setColor(SHADOW[1], SHADOW[2], SHADOW[3], SHADOW[4] * a)
-		love.graphics.printf(msg.text, x + 2, y + 2, w, "center")
+		love.graphics.printf(msg.text, x + 2, draw_y + 2, w, "center")
 		love.graphics.setColor(c[1], c[2], c[3], (c[4] or 1) * a)
-		love.graphics.printf(msg.text, x, y, w, "center")
+		love.graphics.printf(msg.text, x, draw_y, w, "center")
 	end
 	love.graphics.pop()
 
