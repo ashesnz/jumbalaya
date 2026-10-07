@@ -8,11 +8,9 @@
 
 local live_game = require("word_game.model.live_game")
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
-local hand_size_cfg = require("word_game.model.hand_size")
 local voucher_discard = require("word_game.model.perks.voucher_discard")
 local Presentation = require("word_game.model.presentation")
 local game_access = require("word_game.model.game_access")
-local LayoutRequest = require("word_game.model.layout.request")
 
 local M = {}
 local Shared = require("word_game.model.cards.deck.shared")
@@ -30,7 +28,12 @@ end
 
 		local function after_discard()
 			voucher_discard.stash_discarded_card(card)
-			Deck().draw_jumble_replacement()
+			Deck().commit_pile_hosts({ "hand", "draw", "discard" })
+			if Deck().hand_card_count() == 0 then
+				Deck().refill_jumble_hand_when_empty()
+			else
+				Deck().draw_jumble_replacement()
+			end
 			Deck().sync_deck_count_display()
 			if live_game().dealt_letters then
 				live_game().dealt_letters:hard_set_cards()
@@ -95,17 +98,5 @@ end
 		end
 
 		return true
-	end
-
-	function M.refill_jumble_held(target_size)
-		target_size = target_size or hand_size_cfg.get()
-		while Deck().held_count() < target_size do
-			if not Deck().draw_jumble_replacement() then break end
-		end
-		if live_game().dealt_letters then
-			live_game().dealt_letters:set_ranks()
-			live_game().dealt_letters:relayout()
-		end
-		LayoutRequest.refresh()
 	end
 return M

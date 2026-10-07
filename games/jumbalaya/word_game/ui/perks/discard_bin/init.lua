@@ -34,10 +34,8 @@ M.sync_voucher_counter = counter.sync_voucher_counter
 M.roll_discards_left = counter.roll_discards_left
 M.is_full = counter.is_full
 M.record_discard = counter.record_discard
-M.visible_counter_digit = counter.visible_counter_digit
 
 M.sync_discard_pile_area = pile.sync_discard_pile_area
-M.stash_discarded_card = pile.stash_discarded_card
 M.hide_discard_pile_cards = pile.hide_discard_pile_cards
 
 M.voucher_discard_active = input.voucher_discard_active

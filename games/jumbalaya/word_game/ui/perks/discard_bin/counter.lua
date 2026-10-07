@@ -111,13 +111,4 @@ function M.ensure_odometer()
 	ensure_overlay_odometer()
 end
 
-function M.visible_counter_digit()
-	local odometer = M.overlay_odometer()
-	if not odometer then return nil end
-	if odometer.roll then
-		return tostring(odometer.roll.from)
-	end
-	return tostring(odometer.display_count or odometer:current_value())
-end
-
 return M

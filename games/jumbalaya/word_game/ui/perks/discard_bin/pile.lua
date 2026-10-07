@@ -12,7 +12,7 @@ function M.sync_discard_pile_area()
 	stash.states.release_on.can = false
 end
 
-function M.stash_discarded_card(card)
+local function hide_recycled_card(card)
 	if not card or card.played_pool then return end
 	card.discard_stash = true
 	if card.states then
@@ -24,7 +24,7 @@ function M.hide_discard_pile_cards()
 	local stash = shell.recycle_stash()
 	if not stash or not stash.cards then return end
 	for _, card in ipairs(stash.cards) do
-		M.stash_discarded_card(card)
+		hide_recycled_card(card)
 	end
 end
 

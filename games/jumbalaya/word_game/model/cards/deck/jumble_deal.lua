@@ -110,46 +110,55 @@ end
 		return true
 	end
 
+	local function recycle_stash_count()
+		return (live_game().recycle_stash and live_game().recycle_stash.cards and #live_game().recycle_stash.cards) or 0
+	end
+
+	local function pattern_empty()
+		local placement = live_game().pattern_row and live_game().pattern_row.area and live_game().pattern_row.area.cards
+		return not placement or #placement == 0
+	end
+
+	function M.ensure_draw_pile_from_recycle()
+		if Deck().draw_pile_count() > 0 then return true end
+		return Deck().recycle_discard_into_deck()
+	end
+
+	--- Hand empty, pattern clear: merge recycle into draw if needed, then deal a full jumble hand.
+	function M.refill_jumble_hand_when_empty(on_complete)
+		if not Deck().is_jumble_deck() then
+			if on_complete then on_complete() end
+			return false
+		end
+		if Deck().hand_card_count() > 0 or not pattern_empty() then
+			if on_complete then on_complete() end
+			return false
+		end
+		local target = hand_size_cfg.get()
+		if Deck().draw_pile_count() < target and recycle_stash_count() > 0 then
+			Deck().recycle_discard_into_deck()
+		end
+		if Deck().draw_pile_count() <= 0 then
+			if on_complete then on_complete() end
+			return false
+		end
+		local dealt = Deck().deal_into_hand(target, function()
+			local j = jumble()
+			if j and j.ensure_playable_puzzle then j.ensure_playable_puzzle() end
+			LayoutRequest.refresh()
+			if on_complete then on_complete() end
+		end)
+		return (dealt or 0) > 0
+	end
+
 	function M.needs_jumble_reshuffle()
 		if not Deck().is_jumble_deck() then return false end
 		if Deck().hand_card_count() > 0 then return false end
-		if Deck().draw_pile_count() > 0 then return false end
-		local placement = live_game().pattern_row and live_game().pattern_row.area and live_game().pattern_row.area.cards
-		if placement and #placement > 0 then return false end
-		local discard_count = (live_game().recycle_stash and live_game().recycle_stash.cards and #live_game().recycle_stash.cards) or 0
-		return discard_count > 0
-	end
-
-	function M.try_jumble_reshuffle_and_deal(on_complete)
-		if not Deck().needs_jumble_reshuffle() then
-			if on_complete then on_complete() end
-			return false
-		end
-		if not Deck().recycle_discard_into_deck() then
-			if on_complete then on_complete() end
-			return false
-		end
-
-		piles.hydrate_hosts_from_store({ "draw" })
-		local to_deal = math.min(hand_size_cfg.get(), Deck().draw_pile_count())
-		for _ = 1, to_deal do
-			local card = live_game().draw_pile:remove_card()
-			if card and live_game().dealt_letters then
-				live_game().dealt_letters:emplace(card)
-			end
-		end
-		if live_game().dealt_letters then
-			live_game().dealt_letters:set_ranks()
-			live_game().dealt_letters:relayout()
-			live_game().dealt_letters:snap_VT()
-			live_game().dealt_letters:hard_set_cards()
-		end
-		Shared.commit_piles({ "hand", "draw", "discard" })
-		local j = jumble()
-		if j and j.ensure_playable_puzzle then j.ensure_playable_puzzle() end
-		LayoutRequest.refresh()
-		if on_complete then on_complete() end
-		return true
+		if not pattern_empty() then return false end
+		local target = hand_size_cfg.get()
+		local in_draw = Deck().draw_pile_count()
+		if in_draw >= target then return false end
+		return (in_draw + recycle_stash_count()) > 0
 	end
 
 	function M.deal_jumble_hand()
@@ -184,11 +193,9 @@ end
 	function M.draw_jumble_replacement()
 		if not live_game().dealt_letters then return nil end
 		if Deck().draw_pile_count() == 0 then
-			if Deck().try_jumble_reshuffle_and_deal() then
-				local hand = TableAreas.hand_cards()
-				return hand[#hand]
+			if not Deck().ensure_draw_pile_from_recycle() then
+				return nil
 			end
-			return nil
 		end
 		piles.hydrate_hosts_from_store({ "draw" })
 		local card = live_game().draw_pile:remove_card()

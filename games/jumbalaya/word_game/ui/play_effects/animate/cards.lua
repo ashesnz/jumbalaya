@@ -65,7 +65,7 @@ function M.deal_and_refresh(on_complete)
 	end
 	if deck_api().is_jumble_deck and deck_api().is_jumble_deck()
 		and deck_api().needs_jumble_reshuffle and deck_api().needs_jumble_reshuffle() then
-		deck_api().try_jumble_reshuffle_and_deal(finish)
+		deck_api().refill_jumble_hand_when_empty(finish)
 		return
 	end
 	deck_api().deal_into_hand(facade.hand_size().get(), finish)

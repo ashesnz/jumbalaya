@@ -24,7 +24,6 @@ local registry = require "devtools.registry"
 
 return {
 	DebugPanel = require "devtools.panel",
-	DebugButton = require "devtools.debug_button",
 	register_section = registry.register,
 	layout = require "devtools.layout",
 }

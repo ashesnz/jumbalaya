@@ -17,12 +17,6 @@ local function refresh_pending_layout()
 	end
 end
 
-local function update_devtools()
-	if DEVTOOLS and DEVTOOLS.DebugButton then
-		DEVTOOLS.DebugButton.sync()
-	end
-end
-
 local function sync_table_chrome()
 	if WORD_GAME_UI.TableControls then
 		WORD_GAME_UI.TableControls.sync()
@@ -69,7 +63,6 @@ end
 
 function M.run(game, dt, ensure_placement_pattern_overlay)
 	refresh_pending_layout()
-	update_devtools()
 	sync_table_chrome()
 	update_jumble_timer()
 	update_boss_announce(dt)

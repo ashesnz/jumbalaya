@@ -274,8 +274,9 @@ function M.apply(Timer, deps)
 				if play_sfx then
 					play_sfx("card_tick", 0.55, 0.32)
 				end
-				if WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.on_classic_score_tick and roll then
-					WORD_GAME_UI.TokenReward.on_classic_score_tick(roll.last_val)
+				local active_roll = Timer.score_roll
+				if WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.on_classic_score_tick and active_roll then
+					WORD_GAME_UI.TokenReward.on_classic_score_tick(active_roll.last_val)
 				end
 			end)
 			Timer.score_roll = roll
