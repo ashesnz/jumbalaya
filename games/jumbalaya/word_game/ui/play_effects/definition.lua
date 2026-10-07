@@ -186,17 +186,8 @@ end
 
 -- Warm coral-red for played-word / banked puzzle score (distinct from error red and gold clears).
 local POINTS_SCORED_COLOUR = { 0.94, 0.38, 0.34, 1 }
--- Fine-tune label vs placement backdrop (room tile units).
-local PLAY_BOARD_LABEL_NUDGE = { x = 0.28, y = 0.14 }
-
 function M.show_word_success(word)
-	word_feedback.show_on_play_board(
-		word .. "  +" .. #word,
-		POINTS_SCORED_COLOUR,
-		1.2,
-		PLAY_BOARD_LABEL_NUDGE.x,
-		PLAY_BOARD_LABEL_NUDGE.y
-	)
+	word_feedback.show_on_play_board(word .. "  +" .. #word, POINTS_SCORED_COLOUR, 1.2)
 	play_sfx("coin2", 1, 0.9)
 end
 
@@ -204,9 +195,7 @@ function M.show_puzzle_bank_feedback(puzzle_total)
 	word_feedback.show_on_play_board(
 		puzzle_total .. " Points Scored!",
 		POINTS_SCORED_COLOUR,
-		1.5,
-		PLAY_BOARD_LABEL_NUDGE.x,
-		PLAY_BOARD_LABEL_NUDGE.y
+		1.5
 	)
 	play_sfx("coin2", 1, 0.9)
 end

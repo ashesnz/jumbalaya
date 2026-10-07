@@ -15,6 +15,9 @@ local RunMode = facade.run_mode()
 
 local M = {}
 
+-- Shared nudge for labels on the placement row backdrop (room tile units).
+M.PLAY_BOARD_LABEL_NUDGE = { x = 1, y = 3.15 }
+
 local INVALID_WORD_TEXT = "Not a valid word!"
 local MUST_PLAY_TEXT = "Word must be played!"
 local GameFonts = require("word_game.ui.util.fonts")
@@ -98,7 +101,11 @@ function M.show(text, colour, hold, offset_y)
 end
 
 --- Center on the placement row backdrop (dark CardPile rect), not the hand-gap strip.
+--- Uses `PLAY_BOARD_LABEL_NUDGE` unless offset_x / offset_y are passed explicitly.
 function M.show_on_play_board(text, colour, hold, offset_x, offset_y)
+	local nudge = M.PLAY_BOARD_LABEL_NUDGE
+	if offset_x == nil then offset_x = nudge.x end
+	if offset_y == nil then offset_y = nudge.y end
 	local row = shell.pattern_row()
 	if row and row.apply_screen_position then
 		row:apply_screen_position()

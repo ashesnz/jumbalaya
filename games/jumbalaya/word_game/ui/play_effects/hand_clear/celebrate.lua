@@ -1,9 +1,7 @@
 --[[ word_game/ui/play_effects/hand_clear/celebrate.lua - Hand/boss clear celebration FX ]]
 
 local game = require("word_game.ui.util.game_runtime").game
-local facade = require("word_game.ui.facade")
-
-local feedback = facade.feedback()
+local word_feedback = require("word_game.ui.feedback.word_feedback")
 
 local M = {}
 
@@ -16,7 +14,7 @@ function M.play_hand_clear(cleared_label)
 	if WORD_GAME_UI.Confetti then
 		WORD_GAME_UI.Confetti.burst()
 	end
-	feedback.show(cleared_label or "Hand Cleared", game().C.GOLD, 1.8, 0.15)
+	word_feedback.show_on_play_board(cleared_label or "Hand Cleared", game().C.GOLD, 1.8)
 	play_sfx("applause", 1, 0.9)
 	play_sfx("timpani", 0.92, 0.9)
 	play_sfx("card_tick", 0.6, 0.5)
@@ -29,7 +27,7 @@ function M.play_boss_clear(cleared_label)
 	if WORD_GAME_UI.Confetti then
 		WORD_GAME_UI.Confetti.burst()
 	end
-	feedback.show(cleared_label or "Boss Defeated!", game().C.GOLD, 1.8, 0.15)
+	word_feedback.show_on_play_board(cleared_label or "Boss Defeated!", game().C.GOLD, 1.8)
 	play_sfx("applause", 1, 0.9)
 	play_sfx("timpani", 0.92, 0.9)
 end
