@@ -24,6 +24,9 @@ function M.draw(sb)
 	if mode_early ~= "boss_prep" and mode_early ~= "boss_word"
 		and not boss_word_announce.is_active()
 		and felt_layout.is_boss_sequence() then
+		if boss_word_announce.draw then
+			boss_word_announce.draw()
+		end
 		return
 	end
 
@@ -74,6 +77,9 @@ function M.draw(sb)
 		end
 		if prev_font and love.graphics.setFont then love.graphics.setFont(prev_font) end
 		if love.graphics.setColor then love.graphics.setColor(cr, cg, cb, ca) end
+		if boss_word_announce.draw then
+			boss_word_announce.draw()
+		end
 		return
 	end
 

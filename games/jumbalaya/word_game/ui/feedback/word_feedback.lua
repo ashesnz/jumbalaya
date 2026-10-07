@@ -115,6 +115,10 @@ function M.show_screen_centered(text, colour, hold, offset_y)
 end
 
 function M.show_boss_countdown(text, hold)
+	if WORD_GAME_UI and WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.set_center_text then
+		WORD_GAME_UI.BossWordAnnounce.set_center_text(text, hold or 0.85, "countdown")
+		return
+	end
 	M.spawn_attention({
 		text = text,
 		scale = 2.6,

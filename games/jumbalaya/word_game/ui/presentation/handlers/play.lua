@@ -27,6 +27,12 @@ function M.register(Presentation, ctx)
 	end)
 
 	Presentation.on("boss_word_begin", function(wr, on_complete)
+		if ui.ScoreBanner and ui.ScoreBanner.set_banner_mode then
+			ui.ScoreBanner.set_banner_mode("boss_prep", "Boss Level!")
+		end
+		if ui.BossWordAnnounce and ui.BossWordAnnounce.set_center_text then
+			ui.BossWordAnnounce.set_center_text("Boss Level!", 2.4, "title")
+		end
 		if ui.PlayEffects and ui.PlayEffects.present_boss_word then
 			ui.PlayEffects.present_boss_word(wr, on_complete)
 			return true

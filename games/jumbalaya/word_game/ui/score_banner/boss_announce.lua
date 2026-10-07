@@ -26,6 +26,7 @@ local RIBBON_MIN_WIDTH_SCALE = 1.3
 
 local boss_banner = nil
 local theme_banner = nil
+local center_overlay = nil
 local content_origin = nil
 local BANNER_IMAGE_PATH = "resources/assets/banner.png"
 
@@ -252,7 +253,41 @@ local function advance_banner(banner, dt)
 end
 
 function M.is_active()
-	return boss_banner ~= nil or theme_banner ~= nil
+	return boss_banner ~= nil or theme_banner ~= nil or center_overlay ~= nil
+end
+
+function M.has_center_overlay()
+	return center_overlay ~= nil
+end
+
+function M.set_center_text(text, hold, kind)
+	if not text or text == "" then
+		center_overlay = nil
+		return
+	end
+	center_overlay = {
+		text = tostring(text),
+		age = 0,
+		life = hold or 0.85,
+		alpha = 1,
+		kind = kind or "countdown",
+	}
+end
+
+local function advance_center_overlay(dt)
+	if not center_overlay then return end
+	center_overlay.age = (center_overlay.age or 0) + (dt or 0)
+	local life = center_overlay.life or 0.85
+	if center_overlay.age >= life then
+		center_overlay = nil
+		return
+	end
+	local fade_start = life * 0.72
+	if center_overlay.age <= fade_start then
+		center_overlay.alpha = 1
+	else
+		center_overlay.alpha = math.max(0, 1 - (center_overlay.age - fade_start) / math.max(0.01, life - fade_start))
+	end
 end
 
 function M.play_boss(text)
@@ -277,11 +312,13 @@ end
 function M.clear()
 	boss_banner = nil
 	theme_banner = nil
+	center_overlay = nil
 end
 
 function M.update(dt)
 	advance_banner(boss_banner, dt)
 	advance_banner(theme_banner, dt)
+	advance_center_overlay(dt)
 end
 
 local function draw_professional_text(msg, msg_tw, msg_th, alpha)
@@ -353,13 +390,36 @@ local function draw_banner(banner, stack, img_w, img_h)
 	love.graphics.pop()
 end
 
+local function draw_center_overlay()
+	if not center_overlay or not love or not love.graphics then return end
+	local felt = Layout.felt_rect and Layout.felt_rect()
+	if not felt then return end
+	local ts = (game().TILESCALE or 1) * (game().TILESIZE or 1)
+	local cx = (felt.x + felt.w * 0.5) * ts
+	local cy = (felt.y + felt.h * (center_overlay.kind == "title" and 0.42 or 0.48)) * ts
+	local px = center_overlay.kind == "title" and 44 or 96
+	local font = fonts.title_font(px)
+	love.graphics.setFont(font)
+	local msg = center_overlay.text
+	local tw = font:getWidth(msg)
+	local th = font:getHeight()
+	local alpha = center_overlay.alpha or 1
+	love.graphics.push()
+	love.graphics.translate(cx, cy)
+	draw_professional_text(msg, tw, th, alpha)
+	love.graphics.pop()
+end
+
 function M.draw()
 	if not M.is_active() or not game_access.get() or not game().ROOM then return end
 	if game().STATE ~= game().STATES.TABLE_BOARD then return end
 
 	local stack = stack_layout_pixels()
-	if not stack then return end
-	local img_w, img_h = ribbon_size(stack)
+	if not stack and not center_overlay then return end
+	local img_w, img_h = 0, 0
+	if stack then
+		img_w, img_h = ribbon_size(stack)
+	end
 
 	local prev_font = love.graphics.getFont and love.graphics.getFont()
 	local cr, cg, cb, ca = 1, 1, 1, 1
@@ -372,11 +432,15 @@ function M.draw()
 	if love.graphics.setShader then love.graphics.setShader() end
 	room_translate()
 
-	if boss_banner then
+	if boss_banner and stack then
 		draw_banner(boss_banner, stack, img_w, img_h)
 	end
-	if theme_banner then
+	if theme_banner and stack then
 		draw_banner(theme_banner, stack, img_w, img_h)
+	end
+
+	if center_overlay then
+		draw_center_overlay()
 	end
 
 	love.graphics.pop()

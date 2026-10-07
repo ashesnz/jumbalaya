@@ -15,7 +15,13 @@ function M.draw(timer, layout)
 	if game().STATE ~= game().STATES.TABLE_BOARD then return end
 	local vis = timer.intro_visible
 	if vis == nil then vis = 1 end
-	if vis <= 0.001 then return end
+	local boss_announce = WORD_GAME_UI and WORD_GAME_UI.BossWordAnnounce
+	if vis <= 0.001 then
+		if boss_announce and boss_announce.is_active and boss_announce.is_active() and boss_announce.draw then
+			boss_announce.draw()
+		end
+		return
+	end
 
 	local ts = (game().TILESCALE or 1) * (game().TILESIZE or 1)
 	local rect = Layout.timeline_rect and Layout.timeline_rect() or Layout.portrait_rect()

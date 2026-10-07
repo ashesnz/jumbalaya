@@ -141,7 +141,7 @@ function M.draw_reward_passes()
 end
 
 function M.draw_attention_passes()
-	if hand_clear_focus_active() then return end
+	if hand_clear_focus_active() and not boss_sequence_active() then return end
 	local game = runtime()
 	local live = game.LIVE and game.LIVE.UIBOX
 	if live then

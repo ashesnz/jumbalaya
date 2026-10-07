@@ -6,6 +6,7 @@
 
 local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 local game = require("word_game.ui.util.game_runtime").game
+local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 
 local facade = require("word_game.ui.facade")
 
@@ -47,6 +48,15 @@ local function has_event_manager()
 	return game().TIMELINE and game().TIMELINE.enqueue
 end
 
+local function clear_hand_clear_blockers()
+	if WORD_GAME_UI.HandClearFocus and WORD_GAME_UI.HandClearFocus.end_focus then
+		WORD_GAME_UI.HandClearFocus.end_focus()
+	end
+	if WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.reset then
+		WORD_GAME_UI.TokenReward.reset()
+	end
+end
+
 function M.present_boss_word(_wr, on_complete)
 	local jumble = facade.jumble()
 	local deck = facade.deck()
@@ -54,6 +64,8 @@ function M.present_boss_word(_wr, on_complete)
 		if on_complete then on_complete() end
 		return
 	end
+
+	clear_hand_clear_blockers()
 
 	if game().dealt_letters then
 		clear_locked_hand_layout()
@@ -66,8 +78,16 @@ function M.present_boss_word(_wr, on_complete)
 	if WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.set_banner_mode then
 		WORD_GAME_UI.ScoreBanner.set_banner_mode("boss_prep", "Boss Level!")
 	end
+	if WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.set_center_text then
+		WORD_GAME_UI.BossWordAnnounce.set_center_text("Boss Level!", 2.4, "title")
+	end
 
-	local function finish_intro()
+	local hide_done = false
+	local deal_done = false
+	local countdown_done = false
+	local countdown_started = false
+
+	local function reveal_boss_phase()
 		local tt = WORD_GAME_UI.TimelineTimer
 		if tt and tt.arm_boss_countdown then
 			tt.arm_boss_countdown(round_config.TIMELINE_SECONDS)
@@ -112,35 +132,19 @@ function M.present_boss_word(_wr, on_complete)
 		if on_complete then on_complete() end
 	end
 
-	local function run_countdown(done)
+	local function try_reveal_boss_phase()
+		if not deal_done or not countdown_done then return end
+		reveal_boss_phase()
+	end
+
+	local function run_countdown()
 		local steps = definition.BOSS_INTRO.steps
-		local fx = effects()
-		local function queue_step(index)
-			if index > #steps then
-				if fx and fx.queue_event then
-					fx.queue_event(Tween({
-						mode = "delayed",
-						delay = 0.12,
-						blocking = true,
-						func = function()
-							if done then done() end
-							return true
-						end,
-					}))
-				elseif done then
-					done()
-				end
-				return
-			end
-			local step = steps[index]
-			if not (fx and fx.queue_event) then
-				queue_step(index + 1)
-				return
-			end
-			fx.queue_event(Tween({
+		local delay = 0
+		for index, step in ipairs(steps) do
+			Scheduler.add{
 				mode = "delayed",
-				delay = 0,
-				blocking = true,
+				delay = delay,
+				blocking = false,
 				func = function()
 					word_feedback.show_boss_countdown(step.text, step.hold)
 					if play_sfx then
@@ -150,45 +154,43 @@ function M.present_boss_word(_wr, on_complete)
 							play_sfx("card_tick", 0.9, 0.7)
 						end
 					end
-					fx.queue_event(Tween({
-						mode = "delayed",
-						delay = step.hold,
-						blocking = true,
-						func = function()
-							queue_step(index + 1)
-							return true
-						end,
-					}))
 					return true
 				end,
-			}))
+			}
+			delay = delay + step.hold
 		end
-		queue_step(1)
+		Scheduler.add{
+			mode = "delayed",
+			delay = delay + 0.12,
+			blocking = false,
+			func = function()
+				countdown_done = true
+				try_reveal_boss_phase()
+				return true
+			end,
+		}
 	end
 
-	local hide_done = false
-	local deal_done = false
-	local started = false
-
-	local function start_if_ready()
-		if started or not hide_done or not deal_done then return end
-		started = true
-		run_countdown(finish_intro)
+	local function start_countdown_if_ready()
+		if countdown_started or not hide_done then return end
+		countdown_started = true
+		run_countdown()
 	end
 
 	local hide_dur = has_event_manager() and definition.BOSS_INTRO.hide_duration or 0
 	if WORD_GAME_UI.TimelineTimer and WORD_GAME_UI.TimelineTimer.hide_slider then
 		WORD_GAME_UI.TimelineTimer.hide_slider(hide_dur, function()
 			hide_done = true
-			start_if_ready()
+			start_countdown_if_ready()
 		end)
 	else
 		hide_done = true
+		start_countdown_if_ready()
 	end
 
 	local function after_boss_deal()
 		deal_done = true
-		start_if_ready()
+		try_reveal_boss_phase()
 	end
 
 	local function deal_boss_hand()

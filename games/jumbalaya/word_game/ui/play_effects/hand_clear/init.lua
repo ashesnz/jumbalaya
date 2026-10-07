@@ -40,6 +40,16 @@ function M.install(play_module)
 			set_score_animating(true)
 		end
 
+		if opts.boss_next then
+			clear_table.clear_now()
+			if WORD_GAME_UI.HandClearFocus and WORD_GAME_UI.HandClearFocus.end_focus then
+				WORD_GAME_UI.HandClearFocus.end_focus()
+			end
+			local outcome = play_module.resolve_after_clear(opts)
+			after_clear.handle_after_clear(play_module, opts, outcome, set_score_animating)
+			return
+		end
+
 		if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.roll_to_next_hand then
 			WORD_GAME_UI.Sidebar.roll_to_next_hand()
 		end
