@@ -80,10 +80,27 @@ function M.blank_slot_index_for_x(session, x)
 			if #(before.cards or {}) >= before_limit and #(after.cards or {}) >= after_limit then
 				return nil
 			end
-			local active_len = topology.span_active_len(j)
-			local centers = geo.span_centers(session, active_len)
-			local center_end_idx = center_idx + #(j.puzzle.center or "") - 1
-			local center_mid = (centers[center_idx] + (centers[center_end_idx] or centers[center_idx])) / 2
+			local extra = session.area and session.area.cards
+			local cells = topology.span_cells(j, extra)
+			local centers = geo.span_centers(session, #cells)
+			local center_start, center_end
+			for i, cell in ipairs(cells) do
+				if cell.kind == "fixed" and cell.anchor == "center" then
+					center_start = center_start or i
+					center_end = i
+				end
+			end
+			local center_mid
+			if center_start and centers[center_start] then
+				local cx_end = centers[center_end or center_start] or centers[center_start]
+				center_mid = (centers[center_start] + cx_end) / 2
+			else
+				local mid_i = math.ceil(#centers / 2)
+				center_mid = centers[mid_i]
+			end
+			if not center_mid then
+				return nil
+			end
 			if x <= center_mid then
 				if #(before.cards or {}) < before_limit then
 					return before_i, #(before.cards or {}) + 1
