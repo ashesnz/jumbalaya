@@ -1,9 +1,7 @@
 --[[ word_game/ui/perks/timeline_timer/layout.lua - geometry, fonts, and label formatting ]]
 
 local game = require("word_game.ui.util.game_runtime").game
-
-local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
-local font_cache = {}
+local GameFonts = require("word_game.ui.util.fonts")
 
 local M = {}
 
@@ -28,20 +26,7 @@ end
 
 function M.timer_font(px)
 	px = math.max(12, math.floor(px + 0.5))
-	local cached = font_cache[px]
-	if cached then return cached end
-	local font = nil
-	if love and love.graphics and love.graphics.newFont then
-		local ok, f = pcall(love.graphics.newFont, FONT_FILE, px)
-		if ok and f then
-			font = f
-		else
-			font = love.graphics.newFont(px)
-		end
-		font:setFilter("linear", "linear")
-	end
-	font_cache[px] = font
-	return font
+	return GameFonts.outfit(px)
 end
 
 function M.room_translate()

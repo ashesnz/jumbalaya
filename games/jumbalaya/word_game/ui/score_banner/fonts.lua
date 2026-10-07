@@ -3,41 +3,18 @@
 ]]
 
 local game = require("word_game.ui.util.game_runtime").game
+local GameFonts = require("word_game.ui.util.fonts")
 
 local M = {}
 
-local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
-local BUBBLE_FONT_FILE = "resources/fonts/Sniglet-ExtraBold.ttf"
-local font_cache = {}
-local bubble_font_cache = {}
-
 local function title_font(px)
 	px = math.max(12, math.floor(px + 0.5))
-	local cached = font_cache[px]
-	if cached then return cached end
-	local ok, font = pcall(love.graphics.newFont, FONT_FILE, px)
-	if not ok or not font then
-		font = love.graphics.newFont(px)
-	end
-	if font.setFilter then font:setFilter("linear", "linear") end
-	font_cache[px] = font
-	return font
+	return GameFonts.outfit(px)
 end
 
 local function bubble_font(px)
 	px = math.max(12, math.floor(px + 0.5))
-	local cached = bubble_font_cache[px]
-	if cached then return cached end
-	local ok, font = pcall(love.graphics.newFont, BUBBLE_FONT_FILE, px)
-	if not ok or not font then
-		ok, font = pcall(love.graphics.newFont, FONT_FILE, px)
-	end
-	if not ok or not font then
-		font = love.graphics.newFont(px)
-	end
-	if font.setFilter then font:setFilter("linear", "linear") end
-	bubble_font_cache[px] = font
-	return font
+	return GameFonts.sniglet(px)
 end
 
 function M.title_font(px)

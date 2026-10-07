@@ -10,8 +10,7 @@ local Layout = require("word_game.ui.layout")
 
 local FloatUpText = EaseNode:derive("FloatUpText")
 
-local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
-local font_cache = {}
+local GameFonts = require("word_game.ui.util.fonts")
 local live = {}
 
 local DEFAULT_COLOUR = { 0.0, 1.0, 0.965, 1 }
@@ -21,15 +20,7 @@ local CARD_ABOVE_GAP = 0.14
 
 local function title_font(px)
 	px = math.max(10, math.floor(px + 0.5))
-	local cached = font_cache[px]
-	if cached then return cached end
-	local ok, font = pcall(love.graphics.newFont, FONT_FILE, px)
-	if not ok or not font then
-		font = love.graphics.newFont(px)
-	end
-	font:setFilter("linear", "linear")
-	font_cache[px] = font
-	return font
+	return GameFonts.outfit(px)
 end
 
 function FloatUpText:construct(config)

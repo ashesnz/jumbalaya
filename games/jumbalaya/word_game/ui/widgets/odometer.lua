@@ -6,21 +6,11 @@ local Odometer = EaseNode:derive("Odometer")
 local Roll = require("jumbalaya-engine.util.roll")
 local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
-
-local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
-local font_cache = {}
+local GameFonts = require("word_game.ui.util.fonts")
 
 local function meter_font(px)
 	px = math.max(10, math.floor(px + 0.5))
-	local cached = font_cache[px]
-	if cached then return cached end
-	local ok, font = pcall(love.graphics.newFont, FONT_FILE, px)
-	if not ok or not font then
-		font = love.graphics.newFont(px)
-	end
-	font:setFilter("linear", "linear")
-	font_cache[px] = font
-	return font
+	return GameFonts.outfit(px)
 end
 
 local function ui_text_metrics(scale, sample)
@@ -260,6 +250,7 @@ function Odometer:draw_rolling_px(cx, cy, height_px)
 end
 
 function Odometer:draw()
+	if self.config and self.config.overlay_only then return end
 	if not self.states.visible then return end
 
 	if self.text_scale then

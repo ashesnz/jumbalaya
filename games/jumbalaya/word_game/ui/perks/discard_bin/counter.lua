@@ -3,6 +3,7 @@
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
 local Odometer = require("word_game.ui.widgets.odometer")
+local SceneRoots = require("jumbalaya-engine.scene.roots")
 local rules = require("word_game.ui.perks.discard_bin.rules")
 
 local M = {
@@ -37,15 +38,22 @@ local function ensure_overlay_odometer()
 	overlay_odometer = Odometer({
 		label = "",
 		text_shadow = true,
+		overlay_only = true,
 		value = M.discards_left(),
 		value_fn = function() return M.discards_left() end,
 		colour = M.COUNTER_COLOUR,
 	})
+	-- Roll state only; digit is painted on the voucher via draw_rolling_px.
+	overlay_odometer.states.visible = false
+	SceneRoots.sync(overlay_odometer)
 	return overlay_odometer
 end
 
 function M.reset()
 	write_discards_used(0)
+	if overlay_odometer and overlay_odometer.remove then
+		overlay_odometer:remove()
+	end
 	overlay_odometer = nil
 	M.sync_voucher_counter(true)
 end
@@ -64,7 +72,12 @@ end
 
 function M.overlay_odometer()
 	if not rules.voucher_discard_unlocked() then return nil end
-	return ensure_overlay_odometer()
+	local odometer = ensure_overlay_odometer()
+	if odometer.states.visible then
+		odometer.states.visible = false
+		SceneRoots.sync(odometer)
+	end
+	return odometer
 end
 
 function M.sync_voucher_counter(force)

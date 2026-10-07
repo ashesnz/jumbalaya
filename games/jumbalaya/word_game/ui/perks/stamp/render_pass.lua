@@ -10,6 +10,18 @@ local geometry = require("word_game.ui.perks.stamp.geometry")
 
 local M = {}
 
+--- Discard-bin voucher is redrawn in VoucherDiscard.draw_voucher_foreground (above cards).
+local function skip_discard_voucher_imprint(entry)
+	local vd = WORD_GAME_UI and WORD_GAME_UI.VoucherDiscard
+	if not vd or not vd.resolve_voucher_perk or not vd.uses_table_draw then
+		return false
+	end
+	if not vd.resolve_voucher_perk(entry) then
+		return false
+	end
+	return vd.uses_table_draw()
+end
+
 function M.draw_pass()
 	if game().STATE ~= game().STATES.TABLE_BOARD or not game().ROOM or not love.graphics then return end
 
@@ -29,11 +41,15 @@ function M.draw_pass()
 			local imprint_t = math.min(1, (anim.t - animate.STRIKE_DUR) / animate.IMPRINT_DUR)
 			alpha = math.min(1, imprint_t * 2.2)
 		end
+		if skip_discard_voucher_imprint(entry) then
+			goto continue_imprint
+		end
 		draw.draw_type_imprint(entry.perk or entry.sprite, x, y, w, h, alpha)
 		local voucher_discard = WORD_GAME_UI.VoucherDiscard
 		if voucher_discard and voucher_discard.draw_voucher_overlay then
 			voucher_discard.draw_voucher_overlay(entry, x, y, w, h)
 		end
+		::continue_imprint::
 	end
 
 	stamp_puff.draw()

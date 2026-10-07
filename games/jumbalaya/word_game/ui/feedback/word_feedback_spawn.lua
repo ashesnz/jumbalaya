@@ -7,6 +7,7 @@ local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 local Colour = require("jumbalaya-engine.util.colour")
 local Tables = require("jumbalaya-engine.util.tables")
 local UIViewHost = require("jumbalaya-engine.panels.view_host")
+local GameFonts = require("word_game.ui.util.fonts")
 
 local M = {}
 
@@ -46,7 +47,7 @@ function M.spawn_attention(args)
 				T = { args.pos.x, args.pos.y, 0, 0 },
 				definition =
 					{ n = game().UI.ROOT, config = { align = args.cover_align or 'cm', minw = (args.cover and args.cover.T.w or 0.001) + (args.cover_padding or 0), minh = (args.cover and args.cover.T.h or 0.001) + (args.cover_padding or 0), padding = 0.03, r = 0.1, emboss = args.emboss, colour = args.cover_colour }, nodes = {
-						{ n = game().UI.OBJECT, config = { draw_layer = 1, object = FlowText({ scale = args.scale, string = args.text, maxw = args.maxw, colours = { args.colour }, float = not args.bump, shadow = true, silent = not args.noisy, args.scale, pop_in = 0, pop_in_rate = 6, rotate = args.rotate or nil, bump = args.bump, bump_rate = args.bump_rate, bump_amount = args.bump_amount }) } },
+						{ n = game().UI.OBJECT, config = { draw_layer = 1, object = FlowText({ font = GameFonts.resolve_flow_text_font(), scale = args.scale, string = args.text, maxw = args.maxw, colours = { args.colour }, float = not args.bump, shadow = true, silent = not args.noisy, args.scale, pop_in = 0, pop_in_rate = 6, rotate = args.rotate or nil, bump = args.bump, bump_rate = args.bump_rate, bump_amount = args.bump_amount }) } },
 					} },
 				config = args.uibox_config
 			}

@@ -3,27 +3,18 @@
 local game = require("word_game.ui.util.game_runtime").game
 local geometry = require("word_game.ui.table.deck.geometry")
 local tokens = require("word_game.ui.table.deck.tokens")
+local GameFonts = require("word_game.ui.util.fonts")
 
-local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
 local COL_EDGE = { 0.93, 0.90, 0.84, 1 }
 local COL_EDGE_DARK = { 0.78, 0.74, 0.68, 1 }
 local COL_RIGHT = { 0.86, 0.83, 0.76, 1 }
 
-local font_cache = {}
 local M = {}
 
 
 local function deck_font(px)
 	px = math.max(10, math.floor(px + 0.5))
-	local cached = font_cache[px]
-	if cached then return cached end
-	local ok, font = pcall(love.graphics.newFont, FONT_FILE, px)
-	if not ok or not font then
-		font = love.graphics.newFont(px)
-	end
-	font:setFilter("linear", "linear")
-	font_cache[px] = font
-	return font
+	return GameFonts.outfit(px)
 end
 
 local function tokens_atlas()

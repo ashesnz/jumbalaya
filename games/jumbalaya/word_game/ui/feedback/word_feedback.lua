@@ -17,7 +17,7 @@ local M = {}
 
 local INVALID_WORD_TEXT = "Not a valid word!"
 local MUST_PLAY_TEXT = "Word must be played!"
-local FONT_FILE = "resources/fonts/Outfit-Bold.ttf"
+local GameFonts = require("word_game.ui.util.fonts")
 local SHADOW = { 0.07, 0.05, 0.08, 0.92 }
 local DEFAULT_RED = { 1, 0.18, 0.22, 1 }
 
@@ -26,13 +26,8 @@ local messages = {}
 
 local function board_font()
 	if overlay_font then return overlay_font end
-	local ok, font = pcall(love.graphics.newFont, FONT_FILE, 42)
-	if not ok or not font then
-		font = love.graphics.newFont(42)
-	end
-	font:setFilter("linear", "linear")
-	overlay_font = font
-	return font
+	overlay_font = GameFonts.outfit(42)
+	return overlay_font
 end
 
 local function fallback_rect(offset_y)

@@ -87,4 +87,34 @@ function M.load_image(rel_path, opts)
 	return love.graphics.newImage(love.filesystem.newFileData(bytes, leaf), opts)
 end
 
+--- Load a TTF/OTF through love FS when mounted, otherwise from disk via FileData.
+function M.load_font(rel_path, size)
+	if not love or not love.graphics or not love.graphics.newFont then
+		return nil
+	end
+	size = math.max(1, math.floor(size or 12))
+	M.ensure_mounted()
+	if love.filesystem and love.filesystem.getInfo(rel_path) then
+		local ok, font = pcall(love.graphics.newFont, rel_path, size)
+		if ok and font then
+			return font
+		end
+	end
+	local file = io.open(M.absolute_path(rel_path), "rb")
+	if not file then
+		return nil
+	end
+	local bytes = file:read("*a")
+	file:close()
+	if not bytes or bytes == "" then
+		return nil
+	end
+	local leaf = rel_path:match("[^/\\]+$") or "font.ttf"
+	local ok, font = pcall(love.graphics.newFont, love.filesystem.newFileData(bytes, leaf), size)
+	if ok and font then
+		return font
+	end
+	return nil
+end
+
 return M

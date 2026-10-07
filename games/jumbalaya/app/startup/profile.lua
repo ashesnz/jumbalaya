@@ -16,11 +16,8 @@ local function run_init_localization()
 end
 
 local function load_font_spec(spec)
-	local ok, font
-	if GameFiles.exists(spec.file) then
-		ok, font = pcall(love.graphics.newFont, spec.file, spec.render_scale)
-	end
-	if not ok or not font then
+	local font = GameFiles.load_font(spec.file, spec.render_scale)
+	if not font then
 		font = love.graphics.newFont(spec.render_scale)
 	end
 	spec.FONT = font
