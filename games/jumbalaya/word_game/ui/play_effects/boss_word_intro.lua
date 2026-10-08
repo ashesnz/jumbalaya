@@ -76,10 +76,7 @@ function M.present_boss_word(_wr, on_complete)
 		WORD_GAME_UI.ScoreBanner.hide_points_to_get_display()
 	end
 	if WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.set_banner_mode then
-		WORD_GAME_UI.ScoreBanner.set_banner_mode("boss_prep", "Boss Level!")
-	end
-	if WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.set_center_text then
-		WORD_GAME_UI.BossWordAnnounce.set_center_text("Boss Level!", 2.4, "title")
+		WORD_GAME_UI.ScoreBanner.set_banner_mode("boss_prep")
 	end
 
 	local hide_done = false
@@ -97,10 +94,7 @@ function M.present_boss_word(_wr, on_complete)
 			tt.reveal_countdown_timer(reveal_dur)
 		end
 		if WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.set_banner_mode then
-			WORD_GAME_UI.ScoreBanner.set_banner_mode("boss_word", "BOSS WORD")
-		end
-		if WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.play_theme then
-			WORD_GAME_UI.BossWordAnnounce.play_theme("Garden Theme")
+			WORD_GAME_UI.ScoreBanner.set_banner_mode("boss_word")
 		end
 		local revealed = jumble.reveal_boss_puzzle()
 		if not revealed then

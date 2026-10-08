@@ -22,16 +22,13 @@ function M.register(Presentation, ctx)
 		PresentationBus.emit("layout_refresh_placement")
 		PresentationBus.emit("sidebar_sync_visibility")
 		PresentationBus.emit("hand_shuffle_sync_position")
-		PresentationBus.emit("score_banner_set_mode", "boss_word", "BOSS WORD")
+		PresentationBus.emit("score_banner_set_mode", "boss_word")
 		PresentationBus.emit("score_banner_hide_points")
 	end)
 
 	Presentation.on("boss_word_begin", function(wr, on_complete)
 		if ui.ScoreBanner and ui.ScoreBanner.set_banner_mode then
-			ui.ScoreBanner.set_banner_mode("boss_prep", "Boss Level!")
-		end
-		if ui.BossWordAnnounce and ui.BossWordAnnounce.set_center_text then
-			ui.BossWordAnnounce.set_center_text("Boss Level!", 2.4, "title")
+			ui.ScoreBanner.set_banner_mode("boss_prep")
 		end
 		if ui.PlayEffects and ui.PlayEffects.present_boss_word then
 			ui.PlayEffects.present_boss_word(wr, on_complete)

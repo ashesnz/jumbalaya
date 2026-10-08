@@ -57,9 +57,8 @@ function M.set_banner_mode(mode, message)
 	end
 	hud.banner_mode = next_mode
 	hud.banner_message = message
-	if next_mode == "boss_prep" or next_mode == "boss_word" then
-		local text = message
-			or (next_mode == "boss_prep" and "Boss Level!" or "BOSS WORD")
+	if next_mode == "boss_word" then
+		local text = message or boss_word_announce.stage_message()
 		boss_word_announce.play(text)
 	end
 end

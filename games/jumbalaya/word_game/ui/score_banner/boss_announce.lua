@@ -1,8 +1,8 @@
 --[[
-	word_game/ui/boss_word_announce.lua - Boss countdown ribbons below the timer.
+	word_game/ui/score_banner/boss_announce.lua - Boss stage ribbon below the timeline timer.
 
-	Boss word: sweeps left-to-right when the 3-2-1 intro ends.
-	Theme: sweeps right-to-left at the same moment, mirrored below boss with a gap — arrowhead stack.
+	Single sliding banner (e.g. "Boss Stage — Garden Theme") sits in the HUD gap above the
+	score banner rect so it never overlaps the points/timer strip.
 ]]
 
 local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
@@ -13,19 +13,21 @@ local game = require("word_game.ui.util.game_runtime").game
 
 local Layout = require("word_game.ui.layout")
 local fonts = require("word_game.ui.score_banner.fonts")
-local word_feedback = require("word_game.ui.feedback.word_feedback")
 
 local M = {}
 
-local SWEEP_TIME = 0.55
-local SIZE_SCALE = 0.5
-local TIMER_GAP_PX = 45
+local SWEEP_TIME = 0.62
+local SIZE_SCALE = 0.46
+local TIMER_GAP_PX = 28
+local BANNER_TOP_GAP_PX = 22
 local REF_TILE_PX = 73
-local RIBBON_HEIGHT_SCALE = 1.15
-local RIBBON_MIN_WIDTH_SCALE = 1.3
+local RIBBON_HEIGHT_SCALE = 1.08
+local RIBBON_MIN_WIDTH_SCALE = 1.22
 
-local boss_banner = nil
-local theme_banner = nil
+local DEFAULT_THEME = "Garden Theme"
+local STAGE_PREFIX = "Boss Stage"
+
+local stage_banner = nil
 local center_overlay = nil
 local content_origin = nil
 local BANNER_IMAGE_PATH = "resources/assets/banner.png"
@@ -50,6 +52,15 @@ local function hsv_to_rgb(h, s, v)
 	return v, p, q
 end
 
+function M.default_theme()
+	return DEFAULT_THEME
+end
+
+function M.stage_message(theme)
+	theme = theme or DEFAULT_THEME
+	return STAGE_PREFIX .. " — " .. theme
+end
+
 local function room_translate()
 	local room = game().ROOM
 	if not room then return end
@@ -71,9 +82,9 @@ local function px_to_tiles(px)
 	return px / pixels_per_tile()
 end
 
-local function banner_gap_tiles()
+local function gap_tiles(px)
 	local scale = pixels_per_tile() / REF_TILE_PX
-	return px_to_tiles(TIMER_GAP_PX * scale)
+	return px_to_tiles(px * scale)
 end
 
 local function ribbon_half_span_tiles(banner_h)
@@ -82,23 +93,38 @@ end
 
 local function stack_layout_tiles()
 	local timer = Layout.timeline_rect()
-	local banner = Layout.banner_rect()
-	if not timer or not banner then return nil end
-	local banner_h = banner.h * SIZE_SCALE
+	local score_banner = Layout.banner_rect()
+	if not timer or not score_banner then return nil end
+	local banner_h = score_banner.h * SIZE_SCALE
 	local span = ribbon_half_span_tiles(banner_h)
 	local cx = timer.x + timer.w * 0.5
-	local w = banner.w * SIZE_SCALE
-	local boss_cy = timer.y + timer.h + banner_gap_tiles() + span
-	local gap = banner_gap_tiles()
-	local theme_cy = boss_cy + span + gap + span
+	local w = score_banner.w * SIZE_SCALE
+	local timer_bottom = timer.y + timer.h
+	local score_top = score_banner.y
+	local top_pad = gap_tiles(TIMER_GAP_PX)
+	local bottom_pad = gap_tiles(BANNER_TOP_GAP_PX)
+	local band_top = timer_bottom + top_pad
+	local band_bottom = score_top - bottom_pad
+	local band_h = band_bottom - band_top
+	if band_h <= 0.02 then
+		band_top = timer_bottom
+		band_bottom = score_top
+		band_h = band_bottom - band_top
+	end
+	local stage_cy = (band_top + band_bottom) * 0.5
+	local max_span = math.max(0.08, band_h * 0.46)
+	span = math.min(span, max_span)
+	span = math.min(span, stage_cy - band_top, band_bottom - stage_cy)
 	return {
 		cx = cx,
 		w = w,
 		h = banner_h,
 		span = span,
-		gap = gap,
-		boss_cy = boss_cy,
-		theme_cy = theme_cy,
+		stage_cy = stage_cy,
+		timer_bottom = timer_bottom,
+		score_top = score_top,
+		band_top = band_top,
+		band_bottom = band_bottom,
 	}
 end
 
@@ -110,8 +136,8 @@ local function stack_layout_pixels()
 		cx = stack.cx * ts,
 		w = stack.w * ts,
 		h = stack.h * ts,
-		boss_cy = stack.boss_cy * ts,
-		theme_cy = stack.theme_cy * ts,
+		stage_cy = stack.stage_cy * ts,
+		span = stack.span * ts,
 	}
 end
 
@@ -134,9 +160,6 @@ local function ribbon_size(rect)
 	return img_w, img_h, iw, ih
 end
 
--- Opaque ribbon art is not centered in banner.png (more padding on the left).
--- Flipping around the texture midpoint therefore shifts Garden left by ~10–20px.
--- Both ribbons pivot around the opaque content center so visual corners match.
 local function scan_opaque_bounds(iw, ih)
 	if not (love and love.image and love.image.newImageData) then
 		return nil
@@ -193,7 +216,6 @@ function M.set_content_bounds_for_test(bounds)
 	content_origin = bounds and { forced = bounds } or nil
 end
 
--- Testable layout: shared visual corners, separated ribbon bodies (arrowhead stack).
 function M.measure_stack()
 	local stack = stack_layout_tiles()
 	if not stack then return nil end
@@ -202,46 +224,31 @@ function M.measure_stack()
 	local img_w = img_w_px / ts
 	local origin = ribbon_content_origin(iw, ih)
 	local scale_x = img_w / iw
-	local boss_top = stack.boss_cy - stack.span
-	local boss_bottom = stack.boss_cy + stack.span
-	local theme_top = stack.theme_cy - stack.span
-	local theme_bottom = stack.theme_cy + stack.span
-	local boss_left = stack.cx + (origin.minx - origin.ox) * scale_x
-	local boss_right = stack.cx + (origin.maxx - origin.ox) * scale_x
-	local garden_left = stack.cx + (origin.maxx - origin.ox) * (-scale_x)
-	local garden_right = stack.cx + (origin.minx - origin.ox) * (-scale_x)
+	local top = stack.stage_cy - stack.span
+	local bottom = stack.stage_cy + stack.span
+	local left = stack.cx + (origin.minx - origin.ox) * scale_x
+	local right = stack.cx + (origin.maxx - origin.ox) * scale_x
 	return {
 		cx = stack.cx,
 		w = stack.w,
 		h = stack.h,
 		span = stack.span,
-		gap = stack.gap,
-		boss_cy = stack.boss_cy,
-		theme_cy = stack.theme_cy,
-		img_w = img_w,
-		left = boss_left,
-		right = boss_right,
-		boss_top = boss_top,
-		boss_bottom = boss_bottom,
-		theme_top = theme_top,
-		theme_bottom = theme_bottom,
-		ribbon_gap = theme_top - boss_bottom,
-		boss_bottom_left = { x = boss_left, y = boss_bottom },
-		boss_bottom_right = { x = boss_right, y = boss_bottom },
-		garden_top_left = { x = garden_left, y = theme_top },
-		garden_top_right = { x = garden_right, y = theme_top },
+		stage_cy = stack.stage_cy,
+		timer_bottom = stack.timer_bottom,
+		score_top = stack.score_top,
+		top = top,
+		bottom = bottom,
+		left = left,
+		right = right,
+		fits_above_score = top >= stack.band_top and bottom <= stack.band_bottom,
 	}
 end
 
-local function new_banner(text, opts)
-	opts = opts or {}
+local function new_banner(text)
 	return {
 		text = text,
 		t = 0,
 		sweep_time = SWEEP_TIME,
-		direction = opts.direction or "ltr",
-		mirror = opts.mirror or false,
-		slot = opts.slot or "boss",
 	}
 end
 
@@ -253,7 +260,7 @@ local function advance_banner(banner, dt)
 end
 
 function M.is_active()
-	return boss_banner ~= nil or theme_banner ~= nil or center_overlay ~= nil
+	return stage_banner ~= nil or center_overlay ~= nil
 end
 
 function M.has_center_overlay()
@@ -290,35 +297,141 @@ local function advance_center_overlay(dt)
 	end
 end
 
-function M.play_boss(text)
-	text = text or "BOSS WORD"
-	if boss_banner and boss_banner.text == text then return end
-	boss_banner = new_banner(text, { direction = "ltr", slot = "boss" })
+function M.play(text)
+	text = text or M.stage_message()
+	if stage_banner and stage_banner.text == text then return end
+	stage_banner = new_banner(text)
 	if play_sfx then
 		play_sfx("timpani", 0.95, 0.82)
 	end
 end
 
-function M.play_theme(text)
-	text = text or "Garden Theme"
-	if theme_banner and theme_banner.text == text then return end
-	theme_banner = new_banner(text, { direction = "rtl", mirror = true, slot = "theme" })
-end
-
-function M.play(text)
-	M.play_boss(text)
+function M.play_stage(theme)
+	M.play(M.stage_message(theme))
 end
 
 function M.clear()
-	boss_banner = nil
-	theme_banner = nil
+	stage_banner = nil
 	center_overlay = nil
 end
 
 function M.update(dt)
-	advance_banner(boss_banner, dt)
-	advance_banner(theme_banner, dt)
+	advance_banner(stage_banner, dt)
 	advance_center_overlay(dt)
+end
+
+local function split_stage_message(text)
+	local sep = " — "
+	local i = text:find(sep, 1, true)
+	if i then
+		return text:sub(1, i - 1), text:sub(i + #sep)
+	end
+	sep = " - "
+	i = text:find(sep, 1, true)
+	if i then
+		return text:sub(1, i - 1), text:sub(i + #sep)
+	end
+	return text, nil
+end
+
+local function draw_text_shadow(msg, tx, ty, alpha, r, g, b)
+	love.graphics.setColor(0.04, 0.07, 0.12, 0.62 * alpha)
+	love.graphics.print(msg, tx + 1.5, ty + 2.5)
+	love.graphics.setColor(r, g, b, alpha)
+	love.graphics.print(msg, tx, ty)
+	love.graphics.setColor(1, 1, 1, 0.18 * alpha)
+	love.graphics.print(msg, tx, ty - 1)
+end
+
+local function draw_stage_label(msg, stack, sweep_u)
+	local title, theme = split_stage_message(msg)
+	local base_px = math.max(13, math.floor(stack.h * 0.52))
+	local title_font = fonts.title_font(base_px)
+	local theme_font = theme and fonts.title_font(math.max(12, math.floor(base_px * 0.88))) or title_font
+
+	local text_alpha = clamp01((sweep_u - 0.42) / 0.35)
+	local settle = clamp01((sweep_u - 0.78) / 0.22)
+	local breathe = 1 + math.sin((game().TIMERS.REAL or 0) * 4.2) * 0.012 * settle
+
+	if theme then
+		local tw_t = title_font:getWidth(title)
+		local tw_th = title_font:getWidth(" — ")
+		local tw_m = theme_font:getWidth(theme)
+		local th = math.max(title_font:getHeight(), theme_font:getHeight())
+		local total_w = tw_t + tw_th + tw_m
+		local x0 = -total_w * 0.5
+		local y0 = -th * 0.5
+
+		love.graphics.push()
+		love.graphics.scale(breathe, breathe)
+		love.graphics.setFont(title_font)
+		draw_text_shadow(title, x0, y0, text_alpha, 0.98, 0.93, 0.78)
+		love.graphics.setFont(theme_font)
+		local sep_x = x0 + tw_t
+		draw_text_shadow(" — ", sep_x, y0 + (title_font:getHeight() - theme_font:getHeight()) * 0.5, text_alpha * 0.55, 0.72, 0.78, 0.86)
+		local tr, tg, tb = hsv_to_rgb(0.38, 0.42, 0.98)
+		draw_text_shadow(theme, sep_x + tw_th, y0 + (title_font:getHeight() - theme_font:getHeight()) * 0.08, text_alpha, tr, tg, tb)
+		love.graphics.pop()
+		return
+	end
+
+	love.graphics.setFont(title_font)
+	local tw = title_font:getWidth(msg)
+	local th = title_font:getHeight()
+	love.graphics.push()
+	love.graphics.scale(breathe, breathe)
+	draw_text_shadow(msg, -tw * 0.5, -th * 0.5, text_alpha, 0.96, 0.93, 0.86)
+	love.graphics.pop()
+end
+
+local function settle_glow(sweep_u)
+	return clamp01((sweep_u - 0.7) / 0.3)
+end
+
+local function draw_stage_banner(banner, stack, img_w, img_h)
+	local sweep_u = clamp01(banner.t / banner.sweep_time)
+	local eased = 1 - (1 - sweep_u) * (1 - sweep_u) * (1 - sweep_u)
+	local sweeping = sweep_u < 1
+
+	love.graphics.push()
+	love.graphics.translate(stack.cx, stack.stage_cy)
+
+	local band_l, band_r, band_cx = nil, nil, nil
+	local atlas = game().TEXTURE_ATLASES and game().TEXTURE_ATLASES.boss_banner
+	if atlas and atlas.image and love.graphics.draw then
+		local iw, ih = atlas.image:getDimensions()
+		local origin = ribbon_content_origin(iw, ih)
+		local offscreen = stack.w * 0.5 + img_w * 0.5 + 80
+		local start_x = offscreen
+		band_cx = start_x + (0 - start_x) * eased
+		band_l = band_cx - img_w * 0.5
+		band_r = band_cx + img_w * 0.5
+		local ribbon_alpha = 0.92 + settle_glow(sweep_u) * 0.08
+		love.graphics.setColor(1, 1, 1, ribbon_alpha)
+		local sx = img_w / iw
+		love.graphics.draw(atlas.image, band_cx, 0, 0, sx, img_h / ih, origin.ox, origin.oy)
+	end
+
+	draw_stage_label(banner.text, stack, sweep_u)
+
+	if sweeping and band_l and love.graphics.transformPoint
+		and love.graphics.intersectScissor and love.graphics.getScissor then
+		local font_h = math.max(14, stack.h * 0.5)
+		local x1, y1 = love.graphics.transformPoint(band_l, -font_h)
+		local x2, y2 = love.graphics.transformPoint(band_r, font_h)
+		local psx, psy, psw, psh = love.graphics.getScissor()
+		love.graphics.intersectScissor(
+			math.min(x1, x2), math.min(y1, y2),
+			math.abs(x2 - x1), math.abs(y2 - y1))
+		draw_stage_label(banner.text, stack, 1)
+		if psx then
+			love.graphics.setScissor(psx, psy, psw, psh)
+		else
+			love.graphics.setScissor()
+		end
+	end
+
+	love.graphics.pop()
 end
 
 local function draw_professional_text(msg, msg_tw, msg_th, alpha)
@@ -330,64 +443,6 @@ local function draw_professional_text(msg, msg_tw, msg_th, alpha)
 	love.graphics.print(msg, tx, ty)
 	love.graphics.setColor(1, 1, 1, 0.22 * alpha)
 	love.graphics.print(msg, tx, ty - 1)
-end
-
-local function draw_banner(banner, stack, img_w, img_h)
-	local cy = banner.slot == "theme" and stack.theme_cy or stack.boss_cy
-	local sweep_u = clamp01(banner.t / banner.sweep_time)
-	local eased = 1 - (1 - sweep_u) * (1 - sweep_u) * (1 - sweep_u)
-	local sweeping = sweep_u < 1
-	local from_right = banner.direction == "rtl"
-
-	local msg = banner.text
-	local msg_font_px = math.max(14, math.floor(stack.h * 0.58))
-	local msg_font = fonts.title_font(msg_font_px)
-	local msg_tw = msg_font:getWidth(msg)
-	local msg_th = msg_font:getHeight()
-
-	love.graphics.push()
-	love.graphics.translate(stack.cx, cy)
-
-	local band_l, band_r, band_cx = nil, nil, nil
-	local atlas = game().TEXTURE_ATLASES and game().TEXTURE_ATLASES.boss_banner
-	if atlas and atlas.image and love.graphics.draw then
-		local iw, ih = atlas.image:getDimensions()
-		local origin = ribbon_content_origin(iw, ih)
-		local offscreen = stack.w * 0.5 + img_w * 0.5 + 60
-		local start_x = from_right and offscreen or -offscreen
-		band_cx = start_x + (0 - start_x) * eased
-		band_l = band_cx - img_w * 0.5
-		band_r = band_cx + img_w * 0.5
-		love.graphics.setColor(1, 1, 1, 1)
-		local sx = img_w / iw
-		if banner.mirror then
-			sx = -sx
-		end
-		love.graphics.draw(atlas.image, band_cx, 0, 0, sx, img_h / ih, origin.ox, origin.oy)
-	end
-
-	love.graphics.setFont(msg_font)
-	draw_professional_text(msg, msg_tw, msg_th, 1)
-
-	if sweeping and band_l and love.graphics.transformPoint
-		and love.graphics.intersectScissor and love.graphics.getScissor then
-		local x1, y1 = love.graphics.transformPoint(band_l, -msg_th)
-		local x2, y2 = love.graphics.transformPoint(band_r, msg_th)
-		local psx, psy, psw, psh = love.graphics.getScissor()
-		love.graphics.intersectScissor(
-			math.min(x1, x2), math.min(y1, y2),
-			math.abs(x2 - x1), math.abs(y2 - y1))
-		local hr, hg, hb = hsv_to_rgb(((game().TIMERS.REAL or 0) * 1.2) % 1, 0.35, 1)
-		love.graphics.setColor(hr, hg, hb, 0.92)
-		love.graphics.print(msg, -msg_tw * 0.5, -msg_th * 0.5)
-		if psx then
-			love.graphics.setScissor(psx, psy, psw, psh)
-		else
-			love.graphics.setScissor()
-		end
-	end
-
-	love.graphics.pop()
 end
 
 local function draw_center_overlay()
@@ -432,11 +487,8 @@ function M.draw()
 	if love.graphics.setShader then love.graphics.setShader() end
 	room_translate()
 
-	if boss_banner and stack then
-		draw_banner(boss_banner, stack, img_w, img_h)
-	end
-	if theme_banner and stack then
-		draw_banner(theme_banner, stack, img_w, img_h)
+	if stage_banner and stack then
+		draw_stage_banner(stage_banner, stack, img_w, img_h)
 	end
 
 	if center_overlay then

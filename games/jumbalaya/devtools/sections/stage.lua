@@ -1,62 +1,32 @@
---[[ devtools/sections/stage.lua - Jump to a match stage from the debug panel. ]]
+--[[ devtools/sections/stage.lua - Jump to set boss (showdown) hands from the debug panel. ]]
 
 local layout = require "devtools.layout"
 local round_config = require "jumbalaya_core.config.gameplay.round"
-
-local function shell()
 local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
-	return require("devtools.runtime").game()
-end
 local opening_deal = require "word_game.model.jumble_play.opening_deal"
 local Funcs = require("app.callbacks.funcs")
 
--- Stage 1-3 boss word with two revealed letters → seven gutter bonus cards on 1-4.
-local DEBUG_BOSS_WORD = "VEGETABLE"
-local DEBUG_BOSS_PATTERN = "V_______E"
+local BOSS_HAND_INDEX = 3
 
-local function debug_bonus_letters()
-	local letters = {}
-	for index = 1, #DEBUG_BOSS_WORD do
-		if DEBUG_BOSS_PATTERN:sub(index, index) == "_" then
-			letters[#letters + 1] = DEBUG_BOSS_WORD:sub(index, index)
-		end
-	end
-	return letters
+local BOSS_SETS = {
+	{ set = 1, label = "1-3" },
+	{ set = 2, label = "2-3" },
+	{ set = 3, label = "3-3" },
+}
+
+local function shell()
+	return require("devtools.runtime").game()
 end
 
-local function destroy_bonus_stack_cards()
-	local bonus_stack = WORD_GAME and WORD_GAME_UI.BonusStackUI
-	local deck = WORD_GAME and WORD_GAME.Deck
-	if not bonus_stack or not deck or not deck.destroy_card then return end
-	for _, card in ipairs(bonus_stack.cards() or {}) do
-		deck.destroy_card(card)
-	end
-	bonus_stack.clear()
-end
-
-local function seed_bonus_gutter()
-	if not (WORD_GAME and WORD_GAME.Deck and WORD_GAME.Deck.create_letter_card) then return end
-	if not (WORD_GAME and WORD_GAME_UI.BonusStackUI and WORD_GAME_UI.BonusStackUI.promote_to_bonus) then
-		return
-	end
-
-	destroy_bonus_stack_cards()
-
-	local cards = {}
-	for _, letter in ipairs(debug_bonus_letters()) do
-		cards[#cards + 1] = WORD_GAME.Deck.create_letter_card(letter, "red")
-	end
-	WORD_GAME_UI.BonusStackUI.promote_to_bonus(cards)
-end
-
-local function jump_to_hand(ctx, set, hand_index)
+local function jump_to_boss(ctx, set)
 	if not ctx:is_run_stage() then return end
 	local game = shell()
 	if not game or game.STATE ~= game.STATES.TABLE_BOARD then return end
 	if not (WORD_GAME and WORD_GAME.Round) then return end
 
 	set = math.max(1, math.min(round_config.SETS_TO_WIN or 8, set))
-	hand_index = math.max(1, math.min(round_config.hands_in_set(set), hand_index or 1))
+	local hand_index = math.min(round_config.hands_in_set(set), BOSS_HAND_INDEX)
+
 	WORD_GAME.GameAccess.patch({
 		word_score_animating = false,
 		hand_redraw_animating = false,
@@ -97,9 +67,6 @@ local function jump_to_hand(ctx, set, hand_index)
 	if game.pattern_row and game.pattern_row.apply_screen_position then
 		game.pattern_row:apply_screen_position()
 	end
-	if set == 1 and hand_index == round_config.BONUS_STACK_HAND_FIRST then
-		seed_bonus_gutter()
-	end
 	if WORD_GAME_UI.TableControls then
 		WORD_GAME_UI.TableControls.sync()
 	end
@@ -115,37 +82,25 @@ local function jump_to_hand(ctx, set, hand_index)
 	play_sfx("generic1", 0.9, 0.7)
 end
 
-local HANDS = {
-	{ set = 1, hand = 1, label = "1-1" },
-	{ set = 1, hand = 3, label = "1-3 (boss)" },
-	{ set = 1, hand = 4, label = "1-4" },
-	{ set = 1, hand = 7, label = "1-7 (boss)" },
-	{ set = 1, hand = 9, label = "1-9 (boss)" },
-	{ set = 2, hand = 1, label = "2-1" },
-	{ set = 2, hand = 3, label = "2-3 (boss)" },
-}
-
 return {
 	id = "stage",
 	order = 25,
-	jump_to_hand = jump_to_hand,
-	seed_bonus_gutter = seed_bonus_gutter,
 
 	register = function(panel)
-		for _, row in ipairs(HANDS) do
-			local set, hand = row.set, row.hand
-			panel:action("goto_hand_" .. set .. "_" .. hand, function(ctx)
-				jump_to_hand(ctx, set, hand)
+		for _, row in ipairs(BOSS_SETS) do
+			local set = row.set
+			panel:action("goto_boss_" .. set, function(ctx)
+				jump_to_boss(ctx, set)
 			end)
 		end
 	end,
 
 	build = function(_panel)
 		local buttons = {}
-		for _, row in ipairs(HANDS) do
+		for _, row in ipairs(BOSS_SETS) do
 			buttons[#buttons + 1] = {
 				label = row.label,
-				action = "goto_hand_" .. row.set .. "_" .. row.hand,
+				action = "goto_boss_" .. row.set,
 			}
 		end
 		return layout.section("Stage", layout.button_columns(buttons, 3))
