@@ -19,7 +19,6 @@ local function stub_letter_card(overrides)
 		dissolve = 0,
 		greyed = false,
 		debuff = false,
-		seal = nil,
 		ambient_tilt = 0.2,
 		selected = false,
 		inspecting = false,

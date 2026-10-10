@@ -119,4 +119,4 @@ love tests
 - Reintroducing legacy AP/plays/discards loop code (open-board playability rerolls, `current_hand` stubs, `usables` piles)
 - Importing UI from `word_game/model/` or `word_game/board/`
 - Re-adding character portraits, achievements, edition badges, or vault terminology
-- Editing `AlphaCardsBackup/`, `dictionary/words_set.lua`, or binary assets by hand
+- Editing `dictionary/words_set.lua` or binary assets by hand

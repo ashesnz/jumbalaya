@@ -86,7 +86,6 @@ function M.run()
 	function HANDLERS.purge(request)
 		local profile_num = request.profile_num or 1
 		love.filesystem.remove(SavePaths.write_path_for(profile_num .. '/save'))
-		love.filesystem.remove(SavePaths.legacy_path_for(profile_num .. '/save'))
 	end
 
 	while true do

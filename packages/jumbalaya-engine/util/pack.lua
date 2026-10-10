@@ -63,7 +63,7 @@ end
 --  Plain source payloads (starting with `'return'`) pass through untouched.
 ---@param path string
 ---@return string|nil
---- Load a logical save slot (e.g. "settings", "1/save"); accepts `.jmb` or legacy `.acs`.
+--- Load a logical save slot (e.g. "settings", "1/save") as `.jmb`.
 function read_game_save(relative)
 	local SavePaths = require("jumbalaya-engine.persistence.save_paths")
 	return read_save_payload(SavePaths.read_path_for(relative))

@@ -108,11 +108,8 @@ Funcs.register("delete_profile",  function(e)
   else
     local pid = game().focused_profile
     love.filesystem.remove(SavePaths.write_path_for(pid .. '/profile'))
-    love.filesystem.remove(SavePaths.legacy_path_for(pid .. '/profile'))
     love.filesystem.remove(SavePaths.write_path_for(pid .. '/save'))
-    love.filesystem.remove(SavePaths.legacy_path_for(pid .. '/save'))
     love.filesystem.remove(SavePaths.write_path_for(pid .. '/meta'))
-    love.filesystem.remove(SavePaths.legacy_path_for(pid .. '/meta'))
     love.filesystem.remove(game().focused_profile..'')
     game().STORED_RUN = nil
     game().DISCOVER_TALLIES = nil

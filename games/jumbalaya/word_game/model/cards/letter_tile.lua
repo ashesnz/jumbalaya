@@ -217,24 +217,11 @@ local SAVED_FIELDS = {
 
 LetterTile.SAVE_VERSION = 5
 
--- Older saves stored the inventory id as `playing_card`.
-local function migrate_letter_card_id(state)
-	if state.playing_card ~= nil and state.letter_card_id == nil then
-		state.letter_card_id = state.playing_card
-	end
-	state.playing_card = nil
-	return state
-end
-
 local function migrate_v1_save(old)
 	local state = {}
 	for _, field in ipairs(SAVED_FIELDS) do
 		state[field] = old[field]
 	end
-	if old.playing_card ~= nil and state.letter_card_id == nil then
-		state.letter_card_id = old.playing_card
-	end
-	migrate_letter_card_id(state)
 	return {
 		version = LetterTile.SAVE_VERSION,
 		refs = { card = old.save_fields and old.save_fields.card },
@@ -249,7 +236,7 @@ local function migrate_v2_save(saved)
 		version = LetterTile.SAVE_VERSION,
 		refs = { card = refs.card },
 		params = saved.params,
-		state = migrate_letter_card_id(saved.state or {}),
+		state = saved.state or {},
 	}
 end
 

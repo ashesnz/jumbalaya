@@ -13,8 +13,7 @@
     ],
     "ignoreDir": [
       "dice-have-no-eyes",
-      "_tools",
-      "AlphaCardsBackup"
+      "_tools"
     ],
     "ignoreGlobs": [
       "dictionary/words_set.lua"
@@ -46,7 +45,6 @@
       "Card",
       "CardPile",
       "TitleLogo",
-      "PerkVoucherSprite",
       "localize"
     ],
     "disable": [

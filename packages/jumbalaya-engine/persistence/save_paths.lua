@@ -1,35 +1,21 @@
 --[[
 	jumbalaya-engine/persistence/save_paths.lua - Jumbalaya save filenames.
 
-	Older saves used `.acs` (compressed Lua). New saves use `.jmb`.
-	Readers accept either extension; writers always use `.jmb`.
+	Saves use `.jmb` (compressed Lua).
 ]]
 
 local M = {
 	EXT = ".jmb",
-	LEGACY_EXT = ".acs",
 }
 
 ---@param relative string e.g. "settings" or "1/profile" (no extension)
 function M.read_path_for(relative)
-	local modern = relative .. M.EXT
-	if love.filesystem.getInfo(modern) then
-		return modern
-	end
-	local legacy = relative .. M.LEGACY_EXT
-	if love.filesystem.getInfo(legacy) then
-		return legacy
-	end
-	return modern
+	return relative .. M.EXT
 end
 
 ---@param relative string path without extension
 function M.write_path_for(relative)
 	return relative .. M.EXT
-end
-
-function M.legacy_path_for(relative)
-	return relative .. M.LEGACY_EXT
 end
 
 function M.exists(relative)

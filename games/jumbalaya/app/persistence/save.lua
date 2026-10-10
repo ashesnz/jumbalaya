@@ -58,7 +58,6 @@ function delete_saved_run()
 	local profile_id = (g.SETTINGS and g.SETTINGS.profile) or 1
 	local SavePaths = require("jumbalaya-engine.persistence.save_paths")
 	love.filesystem.remove(SavePaths.write_path_for(profile_id .. '/save'))
-	love.filesystem.remove(SavePaths.legacy_path_for(profile_id .. '/save'))
 	g.STORED_RUN = nil
 	if g.WRITE_FLAGS then g.WRITE_FLAGS.run = nil end
 	if g.DISK_WORKER and g.DISK_WORKER.channel then

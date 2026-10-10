@@ -2,8 +2,8 @@
 // Drawn over the yellow dissolve face with normal alpha. The stripe's alpha
 // is the animation — gold-on-gold additive was effectively invisible.
 //
-// Clock is `time` (G.TIMERS.REAL). Cards do not need to move; Lua is not a
-// limiter — the game loop advances REAL every frame.
+// Clock is `time` (TIMERS.REAL). Cards do not need to move; the game loop
+// advances REAL every frame.
 
 uniform vec2 mouse_screen_pos;
 uniform float screen_scale;
@@ -15,9 +15,7 @@ uniform vec2 image_details;
 uniform vec4 burn_colour_1;
 uniform vec4 burn_colour_2;
 uniform bool shadow;
-uniform vec4 gold_seal;
 
-// Must stay in sync with tests/unit/test_bonus_card_gold_shader.lua
 #define SWEEP_X 0.85
 #define SWEEP_Y 0.45
 #define SWEEP_SPEED 0.233

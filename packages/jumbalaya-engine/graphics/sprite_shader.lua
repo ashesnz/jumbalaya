@@ -72,8 +72,10 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 			if _shader == 'dissolve' then
 				sh:send('dissolve_wipe', draw_major.dissolve_wipe or 0)
 			end
-			if _shader ~= 'gold_seal' then
-				local clock = (game().TIMERS and game().TIMERS.REAL) or 0
+			local clock = (game().TIMERS and game().TIMERS.REAL) or 0
+			if _shader == 'bonus_gold' then
+				sh:send('time', clock)
+			else
 				sh:send('time', clock + (tonumber(draw_major.ID) or 0) * 0.17)
 			end
 			sh:send('texture_details', self:texture_descriptor())
@@ -81,13 +83,8 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 			sh:send('burn_colour_1', draw_major.dissolve_colours and draw_major.dissolve_colours[1] or game().C.CLEAR)
 			sh:send('burn_colour_2', draw_major.dissolve_colours and draw_major.dissolve_colours[2] or game().C.CLEAR)
 			sh:send('shadow', (not not _shadow_height))
-			if _shader ~= 'gold_seal' and _send then
+			if _shader ~= 'bonus_gold' and _send then
 				sh:send(_shader, _send)
-			end
-			if _shader == 'gold_seal' then
-				local clock = (game().TIMERS and game().TIMERS.REAL) or 0
-				sh:send('time', clock)
-				sh:send('gold_seal', clock, clock, 0, 1)
 			end
 		end
 	end

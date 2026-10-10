@@ -9,7 +9,7 @@ local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local function draw_bonus_gold_shimmer(card)
 	local center = card.children and card.children.center
 	if not center then return end
-	center:apply_shader_effect("gold_seal", nil, card.ARGS and card.ARGS.send_to_shader)
+	center:apply_shader_effect("bonus_gold")
 end
 
 --- Resting table cards skip dissolve/tilt shaders until hover, drag, or FX need them.

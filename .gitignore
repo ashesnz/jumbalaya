@@ -69,8 +69,6 @@ steam_appid.txt
 # Save data & player profiles (written to project dir during dev by mistake)
 # LÖVE normally stores these in ~/Library/Application Support/LOVE/Jumbalaya/
 # ------------------------------------------------------------------------------
-*.acs
-
 # Profile subdirectories (1/, 2/, 3/ save slots)
 [0-9]/
 [0-9]/**
@@ -96,4 +94,3 @@ test_results*.txt
 .luacheckrc.local
 .luarc.json.user
 .venv-textures/
-/AlphaCardsBackup/

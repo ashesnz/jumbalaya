@@ -22,7 +22,6 @@ Roguelike **jumble** word game on Love2D/Lua. Active loop: fill **pattern puzzle
 | `app/runtime.lua`, `app/callbacks/funcs.lua`, `app/bootstrap/shell_bind.lua` | Shell facade, Panel callbacks, boot injection (was `bridge/`) |
 | `games/jumbalaya/dictionary/`, `resources/` | Offline words + assets |
 | `_tools/` | Python asset pipelines (not runtime) |
-| `AlphaCardsBackup/` | Legacy card-engine reference — do not edit |
 
 Agent docs: `AGENTS.md`, `.cursor/skills/jumbalaya/SKILL.md`
 

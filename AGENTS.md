@@ -25,7 +25,6 @@ games/jumbalaya/
   types/                 Analyzer-only type catalogs
 tests/                   Root shim — `love tests` (forwards to games/jumbalaya suite)
 _tools/                  Python asset pipelines (not runtime) — do not edit for gameplay
-AlphaCardsBackup/        Legacy card-engine reference — do not edit
 ```
 
 ## Dependency rules
@@ -60,7 +59,7 @@ Removed / renamed (do not reintroduce):
 
 - **Vault** terminology → use **sidebar** (`word_game/ui/sidebar/`)
 - Character portraits / `player_host` → removed; table input is `WORD_GAME_UI.TableInput`
-- Edition/seal/achievement UI → removed (gold seal shader kept for boss-word bonus cards)
+- Edition/seal/achievement UI → removed; bonus tiles use `bonus_gold` shimmer
 
 ## Key packages
 
