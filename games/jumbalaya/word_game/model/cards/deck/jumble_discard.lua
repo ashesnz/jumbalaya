@@ -1,5 +1,5 @@
 --[[
-	word_game/model/cards/deck/jumble_discard.lua - Voucher discard from hand with dissolve and hand refill
+	word_game/model/cards/deck/jumble_discard.lua - Discard-bin discard from hand with dissolve and hand refill
 
 	Core: none
 	Store: game_access.dispatch(RECORD_CARD_DISCARDED)
@@ -8,7 +8,7 @@
 
 local live_game = require("word_game.model.live_game")
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
-local voucher_discard = require("word_game.model.perks.voucher_discard")
+local discard_bin = require("word_game.model.perks.discard_bin")
 local Presentation = require("word_game.model.presentation")
 local game_access = require("word_game.model.game_access")
 
@@ -22,12 +22,12 @@ end
 
 	function M.discard_from_hand(card)
 		if not Deck().is_jumble_deck() then return false end
-		if not voucher_discard.can_discard_card(card) then
+		if not discard_bin.can_discard_card(card) then
 			return false
 		end
 
 		local function after_discard()
-			voucher_discard.stash_discarded_card(card)
+			discard_bin.stash_discarded_card(card)
 			Deck().commit_pile_hosts({ "hand", "draw", "discard" })
 			if Deck().hand_card_count() == 0 then
 				Deck().refill_jumble_hand_when_empty()
@@ -46,8 +46,8 @@ end
 			game_access.dispatch({ type = "RECORD_CARD_DISCARDED" })
 		end
 
-		voucher_discard.record_discard()
-		local allowance_full = voucher_discard.is_full()
+		discard_bin.record_discard()
+		local allowance_full = discard_bin.is_full()
 		if allowance_full and card and card.states then
 			card.states.visible = false
 		end
@@ -57,7 +57,7 @@ end
 			if live_game().dealt_letters then
 				live_game().dealt_letters:remove_card(card)
 			end
-			local vx, vy = voucher_discard and voucher_discard.voucher_discard_center and voucher_discard.voucher_discard_center()
+			local vx, vy = discard_bin.discard_bin_center and discard_bin.discard_bin_center()
 			if vx and vy and card.T then
 				local cx = vx - card.T.w * 0.5
 				local cy = vy - card.T.h * 0.5

@@ -13,7 +13,7 @@ local M = {
 
 function M.should_show_end_run()
 	if not rules.end_run_button_visible() then return false end
-	if not rules.voucher_discard_unlocked() then return true end
+	if not rules.discard_bin_unlocked() then return true end
 	return counter.is_full()
 end
 

@@ -1,6 +1,6 @@
 # Jumbalaya
 
-Roguelike **jumble** word game built on Love2D — pattern puzzles, multiplier scoring, timeline pressure, tokens, and vouchers.
+Roguelike **jumble** word game built on Love2D — pattern puzzles, multiplier scoring, timeline pressure, tokens, and perk stamps.
 
 ## Documentation
 

@@ -90,7 +90,7 @@ function M.section(title, child_rows)
 	return {n = game.UI.ROW, config = {align = "cm", padding = 0.07}, nodes = nodes}
 end
 
---- Panel chrome without UIBox_dyn_container's minh=30 (taller than the screen).
+--- Panel chrome without panel_dyn_container's minh=30 (taller than the screen).
 function M.panel_container(content)
 	local game = shell()
 	return {n = game.UI.ROW, config = {align = "cm", padding = 0.04, colour = game.C.UI.TRANSPARENT_DARK, r = 0.1}, nodes = {

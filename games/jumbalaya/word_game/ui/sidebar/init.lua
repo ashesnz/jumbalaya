@@ -35,14 +35,14 @@ local function sync_hand_controls()
 	end
 end
 
-local function ensure_uibox_registry(hud)
+local function ensure_panel_registry(hud)
 	local live = game().LIVE
 	if not live then return end
-	live.UIBOX = live.UIBOX or {}
-	for _, panel in pairs(live.UIBOX) do
+	live.PANELS = live.PANELS or {}
+	for _, panel in pairs(live.PANELS) do
 		if panel == hud then return end
 	end
-	table.insert(live.UIBOX, hud)
+	table.insert(live.PANELS, hud)
 end
 
 local REQUIRED_SIDEBAR_ROWS = {
@@ -104,7 +104,7 @@ function WordSidebar:ensure()
 		deck_mod().sync_deck_count_display()
 		sync_hand_controls()
 		hud_definition.sync_end_run_row()
-		table_discard.sync_voucher_counter(true)
+		table_discard.sync_discard_counter(true)
 		return game().SIDEBAR_HUD
 	end
 
@@ -129,12 +129,12 @@ function WordSidebar:ensure()
 	if game().SIDEBAR_HUD.align_to_major then
 		game().SIDEBAR_HUD:align_to_major()
 	end
-	ensure_uibox_registry(game().SIDEBAR_HUD)
+	ensure_panel_registry(game().SIDEBAR_HUD)
 	game().SIDEBAR_HUD:recalculate()
 	deck_mod().sync_deck_count_display()
 	sync_hand_controls()
 	hud_definition.sync_end_run_row()
-	table_discard.sync_voucher_counter(true)
+	table_discard.sync_discard_counter(true)
 	Layout.set_screen_positions()
 	return game().SIDEBAR_HUD
 end
@@ -171,7 +171,7 @@ function WordSidebar:draw()
 	if hud and not hud.REMOVED then
 		love.graphics.push()
 		hud:translate_container()
-		-- Sidebar is drawn through this dedicated path rather than draw_live_uibox,
+		-- Sidebar is drawn through this dedicated path rather than draw_live_panels,
 		-- so the panel's per-frame render cache must be reset to ensure it draws.
 		if hud.FRAME then hud.FRAME.RENDER = -1 end
 		hud:draw()
@@ -201,8 +201,8 @@ function WordSidebar.rebuild()
 end
 
 function WordSidebar.end_run()
-	if WORD_GAME_UI.VoucherDiscard and WORD_GAME_UI.VoucherDiscard.end_run then
-		return WORD_GAME_UI.VoucherDiscard.end_run()
+	if WORD_GAME_UI.DiscardBin and WORD_GAME_UI.DiscardBin.end_run then
+		return WORD_GAME_UI.DiscardBin.end_run()
 	end
 	local Match = facade.match()
 	if Match and Match.end_run then

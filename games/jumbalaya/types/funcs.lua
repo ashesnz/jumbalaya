@@ -1,5 +1,5 @@
 --[[
-	types/funcs.lua - UIBox string callback catalog (analyzer-only).
+	types/funcs.lua - Panel string callback catalog (analyzer-only).
 
 	Handlers register via app/callbacks/funcs.lua (Funcs.register).
 	Retained UI dispatches with Funcs.dispatch(name, ...).

@@ -40,8 +40,6 @@ function M.emplace(self, card, location, stay_flipped, type_handler)
 		end
 	elseif card.facing == 'back' and self.config.type ~= 'discard' and self.config.type ~= 'deck' and not stay_flipped then
 		card:flip()
-	elseif self == game().dealt_letters and stay_flipped then
-		card.ability.wheel_flipped = true
 	end
 
 	if self == game().draw_pile and #self.cards > self.config.card_limit then

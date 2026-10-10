@@ -21,7 +21,7 @@ end
 	local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 	local Presentation = require("word_game.model.presentation")
 	local piles = require("word_game.model.piles")
-	local voucher_discard = require("word_game.model.perks.voucher_discard")
+	local discard_bin = require("word_game.model.perks.discard_bin")
 
 	function M.front_key(letter, color)
 		return core_identity.front_key(letter, color)
@@ -95,7 +95,6 @@ end
 			card.states.click.can = true
 			card.states.drag.can = true
 		end
-		if card.ability then card.ability.wheel_flipped = nil end
 	end
 
 	function M.sanitize_hand()
@@ -128,7 +127,7 @@ end
 
 	function M.reset_table_deck()
 		Presentation.emit("table_deck_reset")
-		voucher_discard.reset()
+		discard_bin.reset()
 		piles.hydrate_hosts_from_store({ "hand", "draw", "discard", "pattern" })
 		local all = {}
 		for _, area in ipairs(Deck().all_areas()) do

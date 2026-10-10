@@ -1,4 +1,4 @@
---[[ word_game/ui/presentation/handlers/table.lua - Table controls, motion, and voucher hooks ]]
+--[[ word_game/ui/presentation/handlers/table.lua - Table controls, motion, and discard-bin hooks ]]
 
 local M = {}
 
@@ -11,14 +11,14 @@ function M.register(Presentation, ctx)
 		return true
 	end)
 
-	Presentation.on("voucher_discard_ui_reset", function()
-		if ui.VoucherDiscard and ui.VoucherDiscard.reset then
-			ui.VoucherDiscard.reset()
+	Presentation.on("discard_bin_ui_reset", function()
+		if ui.DiscardBin and ui.DiscardBin.reset then
+			ui.DiscardBin.reset()
 		end
 	end)
 
-	Presentation.on("voucher_discard_recorded", function(from_left, to_left)
-		local vd = ui.VoucherDiscard
+	Presentation.on("discard_bin_recorded", function(from_left, to_left)
+		local vd = ui.DiscardBin
 		if not vd then return end
 		if vd.roll_discards_left then
 			vd.roll_discards_left(from_left, to_left)
@@ -28,9 +28,9 @@ function M.register(Presentation, ctx)
 		end
 	end)
 
-	Presentation.on("voucher_discard_ui_sync", function()
-		if ui.VoucherDiscard and ui.VoucherDiscard.sync_sidebar_ui then
-			ui.VoucherDiscard.sync_sidebar_ui()
+	Presentation.on("discard_bin_ui_sync", function()
+		if ui.DiscardBin and ui.DiscardBin.sync_sidebar_ui then
+			ui.DiscardBin.sync_sidebar_ui()
 		end
 	end)
 end

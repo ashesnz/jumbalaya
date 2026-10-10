@@ -29,7 +29,7 @@ Start here when adding or moving HUD / table chrome:
 
 ```mermaid
 flowchart TD
-  input[Player input] --> router[InputRouter / UIBox funcs]
+  input[Player input] --> router[InputRouter / panel funcs]
   router --> store[store:dispatch]
   store --> model[word_game/model glue]
   model --> pres[Presentation.emit]
@@ -61,7 +61,7 @@ Model glue **never** imports `word_game/ui/` or calls `WORD_GAME_UI`. It notifie
 | Feature | Layer | Module |
 |---------|-------|--------|
 | Right-hand sidebar HUD | panels | `word_game/ui/sidebar/` + `views/sidebar_view.lua` |
-| Play / shuffle buttons | panels | `table/controls/definition.lua` (UIBox nodes beside hand) |
+| Play / shuffle buttons | panels | `table/controls/definition.lua` (panel nodes beside hand) |
 | Dealt hand + pattern row | cardarea | `ui/cardarea/hand.lua`, `ui/cardarea/placement.lua` |
 | Boss-word 3-2-1 countdown | play_effects + feedback | `play_effects/boss_word_intro.lua`, `feedback/word_feedback.lua` |
 | Token fly to sidebar | scene graph FX | `table/token_reward.lua` |

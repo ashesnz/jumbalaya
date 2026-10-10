@@ -39,10 +39,10 @@ Canonical game tree: `games/jumbalaya/` (`app/`, `word_game/`, …). Shared pack
 - `word_game/board/` — snap/geometry only; no UI imports at require time (fixed-letter overlay wired from `ui/table/board.lua`)
 - `app/` → `word_game/` at boot only; no jumble rules; portable loop/adapters live in `jumbalaya-engine/`, shell glue in `app/`
 - Cross-package access: `WORD_GAME` and `WORD_GAME_UI` facades. Inside `word_game/model/`, hoist sibling requires to module scope; use `jumble/bonus_return` when model code must return bonus cards to the gutter.
-- **Runtime bus:** Game shell via `jumbalaya-engine.shell` (`app/runtime.lua` delegates); run snapshot via `WORD_GAME.store()` / `WORD_GAME.GameAccess` / `runtime.game_access()`; UIBox strings via `Funcs.dispatch`. Shell injection: `app/bootstrap/shell_bind.lua`. **Every new feature:** facade method + owned run-state field in `types/store.lua`, or it does not ship (`test_store_state_catalog.lua`).
+- **Runtime bus:** Game shell via `jumbalaya-engine.shell` (`app/runtime.lua` delegates); run snapshot via `WORD_GAME.store()` / `WORD_GAME.GameAccess` / `runtime.game_access()`; panel callback strings via `Funcs.dispatch`. Shell injection: `app/bootstrap/shell_bind.lua`. **Every new feature:** facade method + owned run-state field in `types/store.lua`, or it does not ship (`test_store_state_catalog.lua`).
 - **Facade imports:** `app/` (except bootstrap wiring), `devtools/`, and new `word_game/ui/` code must not deep-require `word_game.model.*` — use `WORD_GAME`, `WORD_GAME_UI`, `word_game.ui.facade`, or `runtime.game_access()` (`test_facade_boundaries.lua`).
 - **Core purity:** `packages/jumbalaya_core/` never imports Love2D, `app/`, or `word_game/` — add rules there + `test_core_*` first (`test_core_purity.lua` static scan).
-- **UIBox callbacks:** every `func` / `button` / `Funcs.dispatch` name must appear in `types/funcs.lua` and `Funcs.register` (`test_g_funcs_registry.lua`).
+- **Panel callbacks:** every `func` / `button` / `Funcs.dispatch` name must appear in `types/funcs.lua` and `Funcs.register` (`test_g_funcs_registry.lua`).
 - **Glue headers:** `word_game/model/` modules document `Core` / `Store` / `Presentation` in the file header. Hoist `require()` to module scope — no inline requires in update/draw/deal hot paths unless breaking a documented cycle.
 - **No proxy shims:** require engine/core modules directly — no one-line `return require(...)` files under `word_game/` (`test_legacy_shims.lua` audits the tree; only `app/bootstrap/engine_boot.lua` may delegate).
 - **Rules vs glue:** pure gameplay logic in `packages/jumbalaya_core/` (+ `test_core_*`); `word_game/model/` is runtime glue only.
@@ -72,7 +72,7 @@ Removed / renamed (do not reintroduce):
 | `Run` / `Busy` / `InputLock` | Run lifecycle and table-busy flags |
 | `Board` | `PlacementTable`, `Config`, `Snap`, `JumbleGeometry`, `BonusGutter` |
 | `BonusStack` | Bonus gutter model state |
-| `VoucherDiscard` | Discard-bin allowance rules (`model/perks/voucher_discard`) |
+| `DiscardBin` | Discard-bin allowance rules (`model/perks/discard_bin`) |
 | `Match` | `end_run()` — game-over from sidebar End Run |
 
 ### `WORD_GAME_UI` presentation facade (`word_game/ui/facade/exports.lua`)
@@ -141,7 +141,7 @@ Tests that need rules only call `play_jumble_word`; tests that need full FX call
 - Package folders use `init.lua`; most modules `local M = {}` … `return M`
 - Files/dirs/locals: `snake_case`; classes/globals: `PascalCase`
 - **Devtools:** Lua modules under `games/jumbalaya/devtools/` use `snake_case` (`debug_button.lua`, `sections/stage.lua`). Locale files use BCP47 tags (`localization/en-us.lua`). Python one-off scripts belong in `_tools/`, not `devtools/`.
-- UI binds UIBox `func` strings — move implementations, not registration names when refactoring (`Funcs.register` keeps the name stable)
+- UI binds panel `func` strings — move implementations, not registration names when refactoring (`Funcs.register` keeps the name stable)
 - Class chain: `Object → Node → EaseNode/AnimNode → Sprite, Panel, Card, CardArea`
 - `Card` model class loads in `app/bootstrap/game_boot.lua`; presentation mixins install via `word_game/ui/cards/bind.lua` (tests: `mock_env.ensure_card_class()`)
 

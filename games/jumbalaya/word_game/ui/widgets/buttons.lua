@@ -136,7 +136,7 @@ function build_generic_options(args)
 end
 
 
-function UIBox_dyn_container(inner_table, horizontal, colour_override, background_override, flipped, padding)
+function panel_dyn_container(inner_table, horizontal, colour_override, background_override, flipped, padding)
 	return {n=game().UI.ROW, config = {align = "cm", padding= 0.03, colour = game().C.UI.TRANSPARENT_DARK, r=0.1}, nodes={
 		{n=game().UI.ROW, config = {align = "cm", padding= 0.05, colour = colour_override or game().C.DYN_UI.MAIN, r=0.1}, nodes={
 		{n=game().UI.ROW, config={align = horizontal and "cl" or (flipped and 'bm' or "tm"), colour = background_override or game().C.DYN_UI.BOSS_DARK, minw = horizontal and 100 or 0, minh = horizontal and 0 or 30, r=0.1, padding = padding or 0.08}, nodes=

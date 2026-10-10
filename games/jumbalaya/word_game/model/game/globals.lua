@@ -13,8 +13,7 @@ local Dimensions = require("word_game.config.layout.dimensions")
 local Colour = require("jumbalaya-engine.util.colour")
 local Tables = require("jumbalaya-engine.util.tables")
 
-VERSION = '1.0.0i'
-VERSION = VERSION..'-FULL'
+VERSION = '0.1.0'
 
 --- Populates every field on the Game shell (self). Called once at boot;
 --- some settings-menu / save-load code paths also re-invoke parts of this
@@ -117,7 +116,7 @@ function Game:define_constants()
         CARD = {},
         CARDPILE = {},
         ALERT = {},
-        UIBOX = {},
+        PANELS = {},
     }
     self.SCENE_ROOTS = {}
     self.ANIM_SHEETS = {}

@@ -2,13 +2,13 @@
 
 Jumbalaya is a roguelike word game built on Love2D. You solve **jumble puzzles** under time pressure, bank **points × multiplier** scores, and clear **24 stages** (8 sets × 3 hands) to win the match.
 
-The game pivoted from an open Scrabble-like placement loop to a **pattern jumble** mode with timeline pressure, tokens, vouchers, and run modifiers. Legacy AP/plays/discards loop code has been removed; jumble mode is the only active player experience.
+The game pivoted from an open Scrabble-like placement loop to a **pattern jumble** mode with timeline pressure, tokens, perk stamps, and run modifiers. Legacy AP/plays/discards loop code has been removed; jumble mode is the only active player experience.
 
 ## How to read these docs
 
 | Document | Contents |
 |----------|----------|
-| [Gameplay](gameplay.md) | Jumble puzzles, scoring, timeline, tokens, vouchers, controls, match structure |
+| [Gameplay](gameplay.md) | Jumble puzzles, scoring, timeline, tokens, perks, controls, match structure |
 | [Code organization](code-organization.md) | Package boundaries, jumble module map, legacy vs active code |
 | [Testing](testing.md) | Unit test suite structure, test runner, adding tests (`love tests`) |
 
@@ -19,7 +19,7 @@ The game pivoted from an open Scrabble-like placement loop to a **pattern jumble
 - **Hand:** 7 cards dealt from a jumble letter pool (**A, E, R, T, N, L, S**). **Shuffle** (left) or **hold Play 5s** (right) to redraw the whole hand.
 - **Timeline:** A **60-second fuse bar** anchors the top HUD. On **1-1 clear**, leftover time becomes **tokens**.
 - **Match:** 8 sets × 3 hands (Standard, Standard, Showdown). Clear set 8’s Showdown to win.
-- **Between hands:** **The Trade** (Card Marketplace). Early showdowns (sets 1–3) also offer a **voucher shop** paid with tokens.
+- **Between hands:** **The Trade** (Card Marketplace). Early showdowns (sets 1–3) also offer perk stamps paid with tokens.
 - **Dictionary:** Valid words must appear in the offline word list (3–7 letters unless a puzzle says otherwise).
 
 Config sources live under `word_game/config/`; rules logic under `word_game/model/`.

@@ -17,9 +17,7 @@ local overlay_odometer
 
 local function read_discards_used()
 	local game = game_access.get()
-	if game and game.voucher_discards_used ~= nil then
-		discards_used_count = game.voucher_discards_used
-	elseif game and game.discard_bin_count ~= nil then
+	if game and game.discard_bin_count ~= nil then
 		discards_used_count = game.discard_bin_count
 	end
 	return discards_used_count
@@ -28,7 +26,6 @@ end
 local function write_discards_used(count)
 	discards_used_count = math.max(0, count or 0)
 	game_access.patch({
-		voucher_discards_used = discards_used_count,
 		discard_bin_count = discards_used_count,
 	})
 end
@@ -43,7 +40,7 @@ local function ensure_overlay_odometer()
 		value_fn = function() return M.discards_left() end,
 		colour = M.COUNTER_COLOUR,
 	})
-	-- Roll state only; digit is painted on the voucher via draw_rolling_px.
+	-- Roll state only; digit is painted on the stamp via draw_rolling_px.
 	overlay_odometer.states.visible = false
 	SceneRoots.sync(overlay_odometer)
 	return overlay_odometer
@@ -55,7 +52,7 @@ function M.reset()
 		overlay_odometer:remove()
 	end
 	overlay_odometer = nil
-	M.sync_voucher_counter(true)
+	M.sync_discard_counter(true)
 end
 
 function M.discards_used()
@@ -71,7 +68,7 @@ function M.is_full()
 end
 
 function M.overlay_odometer()
-	if not rules.voucher_discard_unlocked() then return nil end
+	if not rules.discard_bin_unlocked() then return nil end
 	local odometer = ensure_overlay_odometer()
 	if odometer.states.visible then
 		odometer.states.visible = false
@@ -80,7 +77,7 @@ function M.overlay_odometer()
 	return odometer
 end
 
-function M.sync_voucher_counter(force)
+function M.sync_discard_counter(force)
 	local left = M.discards_left()
 	local odometer = M.overlay_odometer()
 	if not odometer then return end
@@ -94,7 +91,7 @@ function M.roll_discards_left(from_left, to_left)
 	if odometer and odometer.start_roll then
 		odometer:start_roll(from_left, to_left)
 	else
-		M.sync_voucher_counter(true)
+		M.sync_discard_counter(true)
 	end
 end
 

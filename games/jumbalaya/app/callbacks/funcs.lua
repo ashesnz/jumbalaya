@@ -1,5 +1,5 @@
 --[[
-	app/callbacks/funcs.lua - UIBox string callback registry.
+	app/callbacks/funcs.lua - Panel string callback registry.
 
 	Handlers are module-scoped; retained UI dispatches via Funcs.dispatch(name, ...).
 	Catalog for analyzers: types/funcs.lua

@@ -20,7 +20,7 @@ Phases 0–13 are **complete** (store, engine package, retained UI, `Funcs` regi
 **Freeze policy (ongoing):**
 
 - No new run-state keys without a declared owner in `types/store.lua` **and** a reducer/default in `jumbalaya_core` — enforced by `tests/unit/test_store_state_catalog.lua`.
-- No new UIBox callback names (`func`, `button`, `back_func`, `Funcs.dispatch`) without an entry in `types/funcs.lua` and a `Funcs.register` handler — enforced by `tests/unit/test_g_funcs_registry.lua`.
+- No new Panel callback names (`func`, `button`, `back_func`, `Funcs.dispatch`) without an entry in `types/funcs.lua` and a `Funcs.register` handler — enforced by `tests/unit/test_g_funcs_registry.lua`.
 - `jumbalaya_core/` must stay headless (no `love.*`, no `app/` / `word_game/` imports) — enforced by `tests/unit/test_core_purity.lua`.
 - No new deep `word_game.model.*` / `word_game.ui.*` requires across `app/` (bootstrap wiring exempt), `devtools/`, or `word_game/ui/` (grandfathered allowlist) — enforced by `tests/unit/test_facade_boundaries.lua`.
 - New features ship via `WORD_GAME` / `WORD_GAME_UI` facade methods; model code uses `Presentation.emit`, not `Funcs.dispatch`.
@@ -125,7 +125,7 @@ Glue modules are often labeled *"glue over jumbalaya_core"* in their file header
 
 **Direct imports (no proxies):** Engine-agnostic tuning → `jumbalaya_core.config.gameplay.*`; timeline scheduling → `jumbalaya-engine.effects.timeline_scheduler`; panel trees → `jumbalaya-engine.panels` (or `jumbalaya-engine.panels.view_host`); stateless helpers → `jumbalaya-engine.util.*` (`colour`, `number_format`, `roll`, `geometry`, `tables`, `pack`, `random`, `tween`). Game-only data (jumble puzzles, visuals, boot flags, `run_params`) stays in `word_game/config/`. `word_game/ui/util/` keeps **game-bound** helpers only (`loc_colour`, `localize`, `game_runtime`) — do not re-wrap engine util modules there. Do not add one-line `return require(...)` shim files or side-effect `require … return true` loaders under `word_game/` (`test_legacy_shims.lua` scans the tree). Allowed exception: `app/bootstrap/engine_boot.lua` delegates to `jumbalaya-engine.boot`.
 
-**Model→UI event flow (unidirectional):** UI input → `store:dispatch` (core reducer) → model glue emits `Presentation.emit` → handlers in `word_game/ui/presentation/install.lua` update HUD/FX. Store-backed **views** (`word_game/ui/views/*`) may `store:subscribe` only to bump render revision — not to fan out side effects. Do not poll model state each frame to refresh HUD; emit presentation events when domain state changes. UIBox `Funcs.dispatch` is for shell/widgets only (overlays, profile), not model notifications.
+**Model→UI event flow (unidirectional):** UI input → `store:dispatch` (core reducer) → model glue emits `Presentation.emit` → handlers in `word_game/ui/presentation/install.lua` update HUD/FX. Store-backed **views** (`word_game/ui/views/*`) may `store:subscribe` only to bump render revision — not to fan out side effects. Do not poll model state each frame to refresh HUD; emit presentation events when domain state changes. panel `Funcs.dispatch` is for shell/widgets only (overlays, profile), not model notifications.
 
 **Card / pile state (Phase 10):** Authoritative **table layout** is `store.piles` (`MOVE_CARD` / `ADD_CARD_TO_PILE` reducers in `jumbalaya_core`). **Run deck membership** is `G.letter_inventory` (live `Card` instances). **CardPile hosts** (`dealt_letters`, `draw_pile`, `pattern_row.area`) are presentation + input targets — mutate during drag/deal, then `word_game.model.piles.sync_hosts_to_store` or `piles.move_card`. `word_game/model/` must not import `ui/cardarea/`; `ui/cardarea/` must not import gameplay rules. Use `TableAreas` selectors for pile reads in model glue.
 
@@ -150,7 +150,7 @@ jumbalaya-engine/
   adapters/     love2d.lua renderer adapter
 ```
 
-**Two “input” layers (by design):** `services/input.lua` maps UIBox `func` strings → store actions; `interaction/` routes raw Love2D events to scene nodes.
+**Two “input” layers (by design):** `services/input.lua` maps panel `func` strings → store actions; `interaction/` routes raw Love2D events to scene nodes.
 
 **Boot boundary:** `boot.lua` installs engine globals including `jumbalaya-engine/adapters/love2d/display.lua`. Game draw passes register from `app/session/draw_passes.lua` in `runtime_boot.lua` after `Game()`.
 
@@ -187,7 +187,7 @@ Dependency direction: `word_game/ui/` → `jumbalaya-engine` + `app/` (shell) �
 
 ### Callback ownership
 
-UIBox buttons still bind **string names** (`func = 'shuffle_hand'`). Runtime dispatch goes through `app/callbacks/funcs.lua` (`Funcs.register`, `Funcs.dispatch`). Implementations live in `app/callbacks/` and `word_game/ui/callbacks/`.
+Panel buttons still bind **string names** (`func = 'shuffle_hand'`). Runtime dispatch goes through `app/callbacks/funcs.lua` (`Funcs.register`, `Funcs.dispatch`). Implementations live in `app/callbacks/` and `word_game/ui/callbacks/`.
 
 | Area | Module |
 |------|--------|
@@ -219,7 +219,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 |---------|--------|
 | Game shell (settings, scene nodes, timers) | `app/runtime.lua` → `jumbalaya-engine.shell` |
 | Run snapshot | `WORD_GAME.store()` / `game_access.get()` / `WORD_GAME.state()` |
-| UIBox string callbacks | `app/callbacks/funcs.lua` → `Funcs.dispatch("name", …)` |
+| Panel string callbacks | `app/callbacks/funcs.lua` → `Funcs.dispatch("name", …)` |
 | Model → UI notify | `Presentation.emit` (contract: `types/presentation.lua`) |
 
 **Stop growing ad hoc state:** every new feature ships with a **facade method + owned run-state field** (declared in `types/game.lua`) or it does not land. Callback string names are registration only; logic lives on `WORD_GAME_UI` / app modules.
@@ -242,7 +242,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `Busy` / `InputLock` | Table-busy flags on run state (FX modules push); `is_table_busy()` |
 | `Timeline` | Authoritative fuse seconds on run state; classic goal/target reads |
 | `Match` | `end_run()` — centralized discard-bin surrender / game-over transition |
-| `VoucherDiscard` | Discard-bin allowance rules (`model/perks/voucher_discard`) |
+| `DiscardBin` | Discard-bin allowance rules (`model/perks/discard_bin`) |
 | `Perks` | Perk model package (`model/perks`: registry, effects) |
 | `store()` / `engine()` | Bound `jumbalaya_core` store and `jumbalaya-engine` services |
 
@@ -257,7 +257,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `TokenReward` | 1-1 token fly animations |
 | `HandShuffleAnim` / `PlayHoldRedraw` | Shuffle animation + hold-to-redraw (under `table/controls/`) |
 | `TableControls` | Play + shuffle/remove buttons beside the dealt hand |
-| `TradeUI` / `PerkStamp` | Marketplace and perk stamp overlays |
+| `TradeUI` / `PerkStamp` / `DiscardBin` | Marketplace, perk stamps, and discard-bin overlay |
 | `Sidebar` | Right-hand HUD (stamps, deck, End Run) |
 | `SidebarStageButton` | Classic End Run / Next button in the sidebar |
 | `BonusStackUI` | Bonus gutter animation/draw |
@@ -277,7 +277,7 @@ The **active player loop** is jumble mode (`word_game/model/jumble/` + `word_gam
 | `Card` presentation | Model class in `model/cards/card.lua`; draw/tooltip mixins install from `ui/cards/bind.lua` at boot |
 | Layout refresh | `word_game/model/layout/request.lua` sets pending layout on the Game shell; model must not `require` `word_game.ui.layout` |
 | Run-state field owners | `types/game.lua` | Declared keys + owning module; no ad-hoc fields |
-| Callback string names | `types/funcs.lua` | Catalog for UIBox/button handlers |
+| Callback string names | `types/funcs.lua` | Catalog for panel/button handlers |
 | UI reactions | `Presentation` + `ui/presentation/install.lua` | Contract in `types/presentation.lua` |
 | Headless rule tests | `tests/unit/test_core_*.lua` | Call `jumbalaya_core` directly — no `mock_env` needed |
 
@@ -293,10 +293,10 @@ Perk-adjacent code is grouped under `word_game/model/perks/` and `word_game/ui/p
 |-------|----------|-------|
 | Effect hooks | `model/perks/effects.lua` | Glue over `jumbalaya_core.rules.perk_effects` |
 | Registry / rolls | `model/perks/registry.lua` | Glue over `jumbalaya_core.perks.registry` |
-| Discard voucher | `ui/perks/discard_bin/` | Unlocks with first perk; drag hand cards onto imprint |
+| Discard bin | `ui/perks/discard_bin/` | Unlocks with first perk; drag hand cards onto imprint |
 | Timeline fuse | `model/run/timeline.lua` + `ui/perks/timeline_timer/` | Authoritative fuse on run state; HUD draw/sync only |
 | Stamp animation | `ui/perks/stamp/` | Rubber-stamp acquisition UI |
-| Stamp grid / voucher | `ui/perks/stamp/grid.lua`, `ui/perks/shared/voucher.lua` | Sidebar stamp layout and marketplace sprites |
+| Stamp grid | `ui/perks/stamp/grid.lua`, `ui/perks/shared/stamp_sheet.lua` | Sidebar stamp layout and marketplace sprites |
 
 ---
 

@@ -100,9 +100,9 @@ return {
 },
   },
   ["v_dictionary"]={
-    ["a_chips"]="+#1#",
-    ["a_mult"]="+#1# Mult",
-    ["a_xmult"]="X#1# Mult",
+    ["a_points"]="+#1#",
+    ["a_multiplier"]="+#1# multiplier",
+    ["a_x_multiplier"]="×#1# multiplier",
   },
   ["tutorial"]={
     ["first_play_welcome"]={

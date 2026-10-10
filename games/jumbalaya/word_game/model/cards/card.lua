@@ -20,7 +20,6 @@ local SceneRoots = require("jumbalaya-engine.scene.roots")
 ---@field letter_card_id number|nil
 ---@field children table
 ---@field added_to_deck boolean
----@field edition table|nil
 ---@overload fun(...): Card
 ---@field draw fun(self: Card, layer: string|nil)
 ---@field set_selected fun(self: Card, is_highlighted: boolean)
@@ -71,8 +70,7 @@ local CARD_SCHEMA = {
 --- @param H number height
 --- @param card table|nil base letter-face data, see `apply_face`
 --- @param center table|nil center definition (companion/perk/etc.), see `apply_center`
---- @param params table|nil extra flags: `letter_card_id`, `viewed_back`,
----   `bypass_discovery_center`, `bypass_discovery_ui`, `bypass_lock`, etc.
+--- @param params table|nil extra flags: `letter_card_id`, `viewed_back`, etc.
 function Card:construct(X, Y, W, H, card, center, params)
     local p = (type(params) == "table") and params or {}
 
@@ -98,15 +96,10 @@ function Card:construct(X, Y, W, H, card, center, params)
     -- Flags forwarded from params.
     self.letter_card_id = p.letter_card_id or p.playing_card
     self.back = p.viewed_back and "viewed_back" or "selected_back"
-    self.bypass_discovery_center = p.bypass_discovery_center
-    self.bypass_discovery_ui = p.bypass_discovery_ui
-    self.bypass_lock = p.bypass_lock
     self.no_ui = self.config.card.no_ui
 
     -- Identity / ordering.
     self.sort_id = shell.next_sort_id()
-    self.unique_val = 1 - self.ID / 1603301
-    self.edition = nil
     self.area = nil
 
     self.states.collide.can = true
@@ -201,7 +194,7 @@ function Card:get_nominal(mod)
 		+ (self.base.color_tiebreak or 0) * weight
 		+ (self.base.color_tiebreak_original or 0) * 0.0001 * weight
 		+ (self.base.face_tiebreak or 0)
-		+ 0.000001 * self.unique_val
+		+ 1e-9 * (self.sort_id or self.ID or 0)
 end
 
 function Card:get_id()
@@ -232,13 +225,12 @@ end
 local SAVED_FIELDS = {
     "no_ui", "facing", "sprite_facing", "selected", "debuff",
     "slot", "added_to_deck", "label", "letter_card_id", "base", "sort_id",
-    "bypass_discovery_center", "bypass_discovery_ui", "bypass_lock",
-    "ability", "pinned", "edition", "seal",
+    "ability", "pinned",
 }
 
 --- Current save-format version. Bump whenever the layout produced by
 --- `Card:save()` changes; loaders migrate older payloads via `migrate_*`.
-Card.SAVE_VERSION = 3
+Card.SAVE_VERSION = 4
 
 local function migrate_letter_card_id(state)
     if state.playing_card ~= nil and state.letter_card_id == nil then

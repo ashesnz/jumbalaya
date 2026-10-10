@@ -33,15 +33,14 @@ function Card:build_card_tooltip()
 		local loc_vars = nil
 		local main_start, main_end = nil,nil
 		
-		if not self.bypass_lock and self.config.center.unlocked ~= false and
-		(self.ability.set == 'Companion' or self.ability.set == 'Finish' or self.ability.usable or self.ability.set == 'Perk') and
+		if self.config.center.unlocked ~= false and
+		(self.ability.set == 'Companion' or self.ability.set == 'Finish' or self.ability.set == 'Perk') and
 		not self.config.center.discovered then
 				card_type = 'Undiscovered'
 		end
-		if self.config.center.unlocked == false and not self.bypass_lock then
+		if self.config.center.unlocked == false then
 				card_type = "Locked"
-		elseif card_type == 'Undiscovered' and not self.bypass_discovery_ui then
-				hide_desc = true
+		elseif card_type == 'Undiscovered' then
 				hide_desc = true
 		elseif self.debuff then
 				loc_vars = { no_name = self.ability.set == 'Default' or self.ability.set == 'Enhanced', debuffed = true, has_letter_face = not not self.base.colour, value = self.base.value, color_name = (self.base.color == 'red') and 'Red' or 'Black', colour = self.base.colour }
@@ -58,7 +57,7 @@ function Card:build_card_tooltip()
 		if (card_type ~= 'Locked' and card_type ~= 'Undiscovered' and card_type ~= 'Default') or self.debuff then
 				badges.card_type = card_type
 		end
-		if self.ability.set == 'Companion' and self.bypass_discovery_ui then
+		if self.ability.set == 'Companion' then
 				badges.force_rarity = true
 		end
 
@@ -72,7 +71,7 @@ end
 -- logic worth explaining below; the rest are largely self-describing by name.
 
 --- Sort key combining letter, color, and a per-instance tiebreaker
---- (`unique_val`) so sorts are stable even between identical letters.
+--- (`sort_id`) so sorts are stable even between identical letters.
 --- Passing `mod = 'color'` weights color above letter.
 
 
@@ -99,7 +98,7 @@ end
 
 function Card:align_h_popup()
 				local focused_ui = self.children.focused_ui and true or false
-				local popup_direction = (self.children.buy_button or (self.area and self.area.config.view_deck) or (self.area and self.area.config.type == 'shop')) and 'cl' or 
+				local popup_direction = (self.children.buy_button or (self.area and self.area.config.view_deck)) and 'cl' or 
 																(self.T.y < game().CARD_H*0.8) and 'bm' or
 																'tm'
 				return {
@@ -111,7 +110,6 @@ function Card:align_h_popup()
 						offset = {
 								x = popup_direction ~= 'cl' and 0 or
 										focused_ui and -0.05 or
-										(self.ability.usable and 0.0) or
 										(self.ability.set == 'Perk' and 0.0) or
 										-0.05,
 								y = focused_ui and (
@@ -212,8 +210,8 @@ end
 function Card:stop_drag()
 		SceneNode.stop_drag(self)
 		if self.area == game().dealt_letters
-				and WORD_GAME_UI.VoucherDiscard
-				and WORD_GAME_UI.VoucherDiscard.try_discard(self) then
+				and WORD_GAME_UI.DiscardBin
+				and WORD_GAME_UI.DiscardBin.try_discard(self) then
 				return
 		end
 		if game().pattern_row then

@@ -49,9 +49,9 @@
 ---| "timeline_reset_puzzle_smoke"
 ---| "timeline_sync_from_model"
 ---| "timeline_sync_progress"
----| "voucher_discard_recorded"
----| "voucher_discard_ui_reset"
----| "voucher_discard_ui_sync"
+---| "discard_bin_recorded"
+---| "discard_bin_ui_reset"
+---| "discard_bin_ui_sync"
 
 --[[
 	Event reference (payload → handler module → primary emitter):
@@ -94,7 +94,7 @@
 	timeline_reset_puzzle_smoke () — timeline — composed from puzzle_applied
 	timeline_sync_from_model () — timeline — model/run/timeline.lua
 	timeline_sync_progress () — timeline — composed from puzzle_applied
-	voucher_discard_recorded (from_left, to_left) — table — model/perks/voucher_discard.lua
-	voucher_discard_ui_reset () — table — model/perks/voucher_discard.lua
-	voucher_discard_ui_sync () — table — handler only (no emit site)
+	discard_bin_recorded (from_left, to_left) — table — model/perks/discard_bin.lua
+	discard_bin_ui_reset () — table — model/perks/discard_bin.lua
+	discard_bin_ui_sync () — table — handler only (no emit site)
 ]]

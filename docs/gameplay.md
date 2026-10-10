@@ -83,7 +83,7 @@ When a new stage starts:
 
 - Jumble state resets (`puzzle_index`, `total_score`, current puzzle points/multiplier).
 - Timeline resets to **60 seconds** (`round_config.TIMELINE_SECONDS` in `word_game/config/gameplay/round.lua`; see `Round.reset_timeline()`).
-- Voucher discard allowance resets on each jumble hand deal (`word_game/model/perks/voucher_discard.lua` — up to `round_config.VOUCHER_DISCARDS_PER_HAND` per hand).
+- Discard-bin allowance resets on each jumble hand deal (`word_game/model/perks/discard_bin.lua` — up to `round_config.DISCARD_BIN_PER_HAND` per hand).
 - After the last hand in a set: next set, hand 1. Set 1 advances through all nine hands before set 2.
 
 ### After clearing a stage
@@ -109,7 +109,7 @@ During a stage you see:
 - **Draw pile** — jumble deck stack; shows remaining cards. Token pile stacks above it after you earn tokens.
 - **Sidebar** — perk stamps, deck pile, cards-left counter, End Run button.
 
-Drag a hand card onto the **discard_bin perk voucher** (top stamp slot) to discard it; a new card deals in from the deck pile. A counter on the voucher shows **2 → 1 → 0** discards remaining per hand (odometer roll on each discard). End Run unlocks once both voucher discards are used.
+Drag a hand card onto the **discard-bin stamp** (top stamp slot) to discard it; a new card deals in from the deck pile. A counter on the stamp shows **2 → 1 → 0** discards remaining per hand (odometer roll on each discard). End Run unlocks once both discard-bin uses are spent.
 
 ---
 

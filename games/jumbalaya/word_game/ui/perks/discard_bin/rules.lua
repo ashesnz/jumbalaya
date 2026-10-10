@@ -1,4 +1,4 @@
---[[ word_game/ui/perks/discard_bin/rules.lua - Voucher discard unlock and visibility rules ]]
+--[[ word_game/ui/perks/discard_bin/rules.lua - Discard-bin unlock and visibility rules ]]
 
 local game = require("word_game.ui.util.game_runtime").game
 
@@ -19,7 +19,7 @@ local function perk_stamp_imprint_count()
 	return 0
 end
 
-function M.voucher_discard_unlocked()
+function M.discard_bin_unlocked()
 	local rs = run_state.get()
 	if rs and #(rs.perks or {}) >= 1 then
 		return true
@@ -28,7 +28,7 @@ function M.voucher_discard_unlocked()
 end
 
 function M.max_fills()
-	return round_config.VOUCHER_DISCARDS_PER_HAND
+	return round_config.DISCARD_BIN_PER_HAND
 end
 
 function M.uses_table_draw()

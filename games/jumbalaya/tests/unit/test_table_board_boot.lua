@@ -144,22 +144,22 @@ T.describe("table board boot", function()
 		T.assert_true(board_prime.is_ready(), "presentation hook should prime HUD immediately")
 	end)
 
-	T.it("sidebar HUD registers on LIVE.UIBOX for immediate board-pass drawing", function()
+	T.it("sidebar HUD registers on LIVE.PANELS for immediate board-pass drawing", function()
 		local game = install_table_board_ui()
 		game.LIVE = game.LIVE or {}
-		game.LIVE.UIBOX = game.LIVE.UIBOX or {}
+		game.LIVE.PANELS = game.LIVE.PANELS or {}
 		board_prime.prime()
 
 		local hud = game.SIDEBAR_HUD
 		T.assert_not_nil(hud)
 		local listed = false
-		for _, panel in pairs(game.LIVE.UIBOX) do
+		for _, panel in pairs(game.LIVE.PANELS) do
 			if panel == hud then
 				listed = true
 				break
 			end
 		end
-		T.assert_true(listed, "SIDEBAR_HUD should be registered on LIVE.UIBOX")
+		T.assert_true(listed, "SIDEBAR_HUD should be registered on LIVE.PANELS")
 	end)
 
 	T.it("sidebar draw uses panel translate_container and draw_pile for deck art", function()

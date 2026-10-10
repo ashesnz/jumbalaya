@@ -102,7 +102,7 @@ love tests
 
 ## Refactor checklist
 
-1. Keep UIBox `func` string names stable unless updating all UI definitions that reference them (`Funcs.register`)
+1. Keep panel `func` string names stable unless updating all UI definitions that reference them (`Funcs.register`)
 2. Re-export geometry on `WORD_GAME.Layout` if moving sidebar layout helpers
 3. Update `word_game/init.lua` facade exports when adding cross-package APIs
 4. Run `love tests`; for structural changes also run `emmylua_check . --severity warn` locally (CI runs error severity — see `docs/testing.md`)

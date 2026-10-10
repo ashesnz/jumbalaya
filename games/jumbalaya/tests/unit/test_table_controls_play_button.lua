@@ -60,7 +60,7 @@ T.describe("table controls play button", function()
 		return game
 	end
 
-	T.it("registers play_placement_word on the UIBox callback registry", function()
+	T.it("registers play_placement_word on the Panel callback registry", function()
 		require("word_game.ui.callbacks.table_controls")
 		T.assert_not_nil(Funcs.get("play_placement_word"))
 	end)

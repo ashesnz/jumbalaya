@@ -1,7 +1,7 @@
 --[[ packages/jumbalaya_core/config/gameplay/round.lua - Set / hand targets and play limits ]]
 
 local M = {
-	VOUCHER_DISCARDS_PER_HAND = 2,
+	DISCARD_BIN_PER_HAND = 2,
 	TIMELINE_SECONDS = 60,
 	SETS_TO_WIN = 8,
 	MIN_WORD_LEN = 3,

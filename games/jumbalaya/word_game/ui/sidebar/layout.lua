@@ -6,7 +6,7 @@ local game = require("word_game.ui.util.game_runtime").game
 
 local felt = require("word_game.ui.layout.felt")
 local TableDeck = require("word_game.ui.table.deck")
-local voucher_discard = require("word_game.ui.perks.discard_bin")
+local discard_bin = require("word_game.ui.perks.discard_bin")
 
 local M = {}
 
@@ -49,7 +49,7 @@ function M.deck_slot_size()
 end
 
 function M.end_run_slot_size()
-	return voucher_discard.end_run_slot_size(game().CARD_W, game().CARD_H)
+	return discard_bin.end_run_slot_size(game().CARD_W, game().CARD_H)
 end
 
 local function layout_rows()

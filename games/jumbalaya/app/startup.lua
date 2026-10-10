@@ -17,28 +17,10 @@ function Game:launch()
 	local settings_ver = nil
 	if settings then
 		local settings_file = unpack_source(settings)
-		if self.VERSION >= '1.0.0' and (love.system.getOS() == 'Windows') and ((not settings_file.version) or (settings_file.version < '1.0.0')) then
-			for i = 1, 3 do
-				love.filesystem.remove(i .. '/profile.jmb')
-				love.filesystem.remove(i .. '/profile.acs')
-				love.filesystem.remove(i .. '/save.jmb')
-				love.filesystem.remove(i .. '/save.acs')
-				love.filesystem.remove(i .. '/meta.jmb')
-				love.filesystem.remove(i .. '/meta.acs')
-				love.filesystem.remove(i..'')
-			end
-			for k, v in pairs(settings_file) do
-				self.SETTINGS[k] = v
-			end
-			self.SETTINGS.profile = 1
-		else
-			if self.VERSION < '1.0.0' then
-				settings_ver = settings_file.version
-			end
-			for k, v in pairs(settings_file) do
-				self.SETTINGS[k] = v
-			end
+		for k, v in pairs(settings_file) do
+			self.SETTINGS[k] = v
 		end
+		settings_ver = settings_file.version
 	end
 	self.SETTINGS.version = settings_ver or self.VERSION
 	self.SETTINGS.paused = nil

@@ -65,7 +65,7 @@
 ---@field pseudorandom table|nil
 ---@field seed_streams { seed: string, hashed_seed: number }|nil
 ---@field starting_deck_size number|nil
----@field starting_params { hand_size: number, usable_slots: number|nil }|nil
+---@field starting_params { hand_size: number }|nil
 ---@field points number|nil
 ---@field round number|nil
 ---@field round_scores table<string, { amt: number }>|nil
@@ -90,8 +90,7 @@
 ---@field placement_word string|nil
 ---@field placement_word_valid boolean|nil
 ---
---- Owner: model/perks/voucher_discard.lua (+ round reset)
----@field voucher_discards_used number|nil
+--- Owner: model/perks/discard_bin.lua (+ round reset)
 ---@field discard_bin_count number|nil
 ---
 --- Owner: model/perks/registry.lua

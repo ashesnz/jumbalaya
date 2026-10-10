@@ -1,8 +1,8 @@
---[[ word_game/ui/perks/discard_bin/draw.lua - Voucher imprint overlay and counter draw ]]
+--[[ word_game/ui/perks/discard_bin/draw.lua - Discard-bin imprint overlay and counter draw ]]
 
 local game = require("word_game.ui.util.game_runtime").game
 
-local perk_voucher = require("word_game.ui.perks.shared.voucher")
+local stamp_sheet = require("word_game.ui.perks.shared.stamp_sheet")
 local rules = require("word_game.ui.perks.discard_bin.rules")
 local counter = require("word_game.ui.perks.discard_bin.counter")
 local input = require("word_game.ui.perks.discard_bin.input")
@@ -20,16 +20,16 @@ end
 
 local M = {}
 
-local function voucher_art_rect(perk_entry, slot_x, slot_y, slot_w, slot_h)
-	local _, _, pw, ph = perk_voucher.stamp_quad(perk_entry)
+local function stamp_art_rect(perk_entry, slot_x, slot_y, slot_w, slot_h)
+	local _, _, pw, ph = stamp_sheet.stamp_quad(perk_entry)
 	if not pw or not ph then
 		return slot_x, slot_y, slot_w, slot_h
 	end
-	local ox, oy, aw, ah = perk_voucher.fit_rect(pw, ph, slot_w, slot_h)
+	local ox, oy, aw, ah = stamp_sheet.fit_rect(pw, ph, slot_w, slot_h)
 	return slot_x + ox, slot_y + oy, aw, ah
 end
 
-function M.resolve_voucher_perk(imprint_entry)
+function M.resolve_discard_perk(imprint_entry)
 	if not imprint_entry then return nil end
 	if imprint_entry.id == rules.DISCARD_PERK_ID then return imprint_entry end
 	if imprint_entry.perk and imprint_entry.perk.id == rules.DISCARD_PERK_ID then
@@ -38,13 +38,13 @@ function M.resolve_voucher_perk(imprint_entry)
 	return nil
 end
 
-function M.voucher_counter_layout(imprint_entry, slot_x, slot_y, slot_w, slot_h)
-	local perk_entry = M.resolve_voucher_perk(imprint_entry)
+function M.discard_counter_layout(imprint_entry, slot_x, slot_y, slot_w, slot_h)
+	local perk_entry = M.resolve_discard_perk(imprint_entry)
 	if not perk_entry then return nil end
-	if not rules.voucher_discard_unlocked() or not rules.uses_table_draw() then return nil end
+	if not rules.discard_bin_unlocked() or not rules.uses_table_draw() then return nil end
 	local left = counter.discards_left()
 
-	local art_x, art_y, art_w, art_h = voucher_art_rect(perk_entry, slot_x, slot_y, slot_w, slot_h)
+	local art_x, art_y, art_w, art_h = stamp_art_rect(perk_entry, slot_x, slot_y, slot_w, slot_h)
 	return {
 		perk = perk_entry,
 		art_x = art_x,
@@ -58,10 +58,10 @@ function M.voucher_counter_layout(imprint_entry, slot_x, slot_y, slot_w, slot_h)
 	}
 end
 
-local function voucher_hover_highlight(art_x, art_y, art_w, art_h)
+local function stamp_hover_highlight(art_x, art_y, art_w, art_h)
 	local dragging = game().INPUT and game().INPUT.dragging and game().INPUT.dragging.target
 	if not dragging or not input.can_discard_card(dragging) then return false end
-	return input.point_in_discard_voucher(
+	return input.point_in_discard_bin(
 		dragging.T.x + dragging.T.w * 0.5,
 		dragging.T.y + dragging.T.h * 0.5
 	)
@@ -88,11 +88,11 @@ local function draw_yellow_halo(x, y, w, h)
 	love.graphics.setLineWidth(1)
 end
 
-function M.draw_voucher_overlay(imprint_entry, x, y, w, h)
-	local layout = M.voucher_counter_layout(imprint_entry, x, y, w, h)
+function M.draw_discard_overlay(imprint_entry, x, y, w, h)
+	local layout = M.discard_counter_layout(imprint_entry, x, y, w, h)
 	if not layout then return end
 
-	if voucher_hover_highlight(layout.art_x, layout.art_y, layout.art_w, layout.art_h) then
+	if stamp_hover_highlight(layout.art_x, layout.art_y, layout.art_w, layout.art_h) then
 		draw_yellow_halo(layout.art_x, layout.art_y, layout.art_w, layout.art_h)
 	end
 
@@ -104,11 +104,11 @@ function M.draw_voucher_overlay(imprint_entry, x, y, w, h)
 	love.graphics.setColor(1, 1, 1, 1)
 end
 
-function M.draw_voucher_foreground()
-	if not rules.voucher_discard_unlocked() or not rules.uses_table_draw() then return end
+function M.draw_discard_foreground()
+	if not rules.discard_bin_unlocked() or not rules.uses_table_draw() then return end
 	if game().STATE ~= game().STATES.TABLE_BOARD or not game().ROOM or not love.graphics then return end
 
-	local entry, rect = input.discard_voucher_slot_px()
+	local entry, rect = input.discard_bin_slot_px()
 	if not entry or not rect then return end
 
 	local layout_mod, draw_mod = stamp_modules()
@@ -119,7 +119,7 @@ function M.draw_voucher_foreground()
 	love.graphics.setShader()
 	layout_mod.room_translate()
 	draw_mod.draw_type_imprint(entry.perk or entry.sprite, rect.x, rect.y, rect.w, rect.h, 1)
-	M.draw_voucher_overlay(entry, rect.x, rect.y, rect.w, rect.h)
+	M.draw_discard_overlay(entry, rect.x, rect.y, rect.w, rect.h)
 	love.graphics.pop()
 
 	if prev_shader then love.graphics.setShader(prev_shader) end

@@ -1,5 +1,5 @@
 --[[ tests/helpers/g_funcs_audit.lua
-     Static audit for UIBox callback catalog compliance (engine migration).
+     Static audit for Panel callback catalog compliance (engine migration).
 ]]
 
 local M = {}
@@ -101,7 +101,7 @@ local function collect_callback_names(content, names)
 	end
 end
 
---- UIBox bindings and Funcs.dispatch targets in app/ and word_game/.
+--- Panel bindings and Funcs.dispatch targets in app/ and word_game/.
 function M.scan_ui_bindings()
 	local names = {}
 	for _, path in ipairs(list_lua_files()) do
@@ -146,7 +146,7 @@ function M.unlisted_registrations()
 	return unlisted
 end
 
---- UIBox bindings / dispatches that are not listed in types/funcs.lua.
+--- Panel bindings / dispatches that are not listed in types/funcs.lua.
 function M.unlisted_ui_bindings()
 	local catalog = M.load_catalog()
 	local bindings = M.scan_ui_bindings()

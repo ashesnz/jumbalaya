@@ -6,7 +6,7 @@ local M = {}
 
 function M.install()
 	function Card:update_alert()
-		if (self.ability.set == 'Companion' or self.ability.set == 'Perk' or self.ability.usable or self.ability.set == 'Finish') then
+		if (self.ability.set == 'Companion' or self.ability.set == 'Perk' or self.ability.set == 'Finish') then
 			if self.area and self.area.config.collection and self.config.center then
 				if self.config.center.alerted and self.children.alert then
 					self.children.alert:remove()

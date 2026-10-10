@@ -232,7 +232,7 @@ function M.relayout()
 		stamp_slot.config.minh = stamp_slot_height()
 	end
 	M.sync_end_run_row()
-	table_discard.sync_voucher_counter(true)
+	table_discard.sync_discard_counter(true)
 	game().SIDEBAR_HUD:recalculate()
 	Layout.update_sidebar_attach()
 	Layout.set_screen_positions()

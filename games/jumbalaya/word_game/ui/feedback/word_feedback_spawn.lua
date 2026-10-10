@@ -51,7 +51,7 @@ function M.spawn_attention(args)
 					} },
 				config = args.uibox_config
 			}
-			-- LIVE.UIBOX stores the inner Panel. Flag both so the early UI pass
+			-- LIVE.PANELS stores the inner Panel. Flag both so the early UI pass
 			-- skips this overlay and draw_attention_passes paints it over the board.
 			args.AT.spawn_attention = true
 			local inner = args.AT._inner or args.AT

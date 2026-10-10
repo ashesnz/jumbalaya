@@ -2,12 +2,12 @@
 	word_game/ui/cardarea/discard.lua - Invisible recycle-pile CardPile behaviour.
 
 	game().recycle_stash holds played/discarded cards for deck recycling. Voucher discard
-	uses dissolve-on-voucher; this pile is never shown as a bin sprite.
+	uses dissolve-on-stamp; this pile is never shown as a bin sprite.
 ]]
 
 local game = require("word_game.ui.util.game_runtime").game
 
-local voucher_discard = require("word_game.ui.perks.discard_bin")
+local discard_bin = require("word_game.ui.perks.discard_bin")
 
 local M = {}
 
@@ -20,7 +20,7 @@ end
 
 function M.update(self, dt)
 	if self ~= game().recycle_stash then return end
-	voucher_discard.sync_discard_pile_area()
+	discard_bin.sync_discard_pile_area()
 	for _, card in ipairs(self.cards or {}) do
 		if card.area == self then
 			card.states.drag.can = false

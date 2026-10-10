@@ -19,7 +19,7 @@ local game_access = require("word_game.model.game_access")
 local piles = require("word_game.model.piles")
 local TableAreas = require("word_game.model.table_areas")
 local core_letter_card = require("jumbalaya_core.cards.letter_card")
-local voucher_discard = require("word_game.model.perks.voucher_discard")
+local discard_bin = require("word_game.model.perks.discard_bin")
 
 local M = {}
 local Shared = require("word_game.model.cards.deck.shared")
@@ -171,7 +171,7 @@ end
 				jumble_api.clear_blank_cards(j.slots)
 			end
 		end
-		voucher_discard.reset()
+		discard_bin.reset()
 		Deck().clear_hand_and_placement()
 		piles.hydrate_hosts_from_store({ "draw" })
 		local to_deal = math.min(hand_size_cfg.get(), Deck().draw_pile_count())

@@ -14,7 +14,7 @@ local ref_sidebar_w_px = dimensions.layout.TABLE_BOARD_SIDEBAR_WIDTH * dimension
 M.STAMP_SLOT_WIDTH_FRAC = 190 / ref_sidebar_w_px
 M.STAMP_SLOT_ASPECT = 90 / 190
 
--- Perks.png: 3×2 grid of horizontal voucher tickets (measured pixel bounds).
+-- Perks.png: 3×2 grid of horizontal stamp tickets (measured pixel bounds).
 -- Regions are authored against the native 908×275 sheet. Runtime atlases may
 -- report a different logical size (1x downsample, or 2x loaded with dpiscale=2).
 M.SHEET_W = 908
@@ -51,22 +51,6 @@ for row = 1, M.STAMP_ROWS do
 	end
 end
 M.STAMP_ASPECT = stamp_aspect / (M.STAMP_COLS * M.STAMP_ROWS)
-
--- Marketplace vouchers use the same sheet regions.
-M.VOUCHER_COLS = M.STAMP_COLS
-M.VOUCHER_ROWS = M.STAMP_ROWS
-M.VOUCHER_REGIONS = M.STAMP_REGIONS
-
-local voucher_aspect = 0
-local voucher_count = 0
-for row = 1, M.VOUCHER_ROWS do
-	for col = 1, M.VOUCHER_COLS do
-		local region = M.VOUCHER_REGIONS[row][col]
-		voucher_aspect = voucher_aspect + region.w / region.h
-		voucher_count = voucher_count + 1
-	end
-end
-M.VOUCHER_ASPECT = voucher_aspect / voucher_count
 
 function M.stamp_sprite_at(col, row)
 	col = col + 1

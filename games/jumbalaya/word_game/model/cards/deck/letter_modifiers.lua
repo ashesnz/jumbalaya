@@ -44,7 +44,6 @@ end
 		if not card or not card.ability then return false end
 		if Deck().is_modified(card) then return false end
 		card.ability.modified = true
-		card.edition = nil
 		sync_modified_face(card)
 		return true
 	end

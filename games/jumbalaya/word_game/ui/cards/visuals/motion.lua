@@ -190,7 +190,6 @@ function Card:flip()
 				self.facing='back'
 				self.pinch.x = true
 		elseif self.facing == 'back' then
-				self.ability.wheel_flipped = nil
 				self.flipping = 'b2f'
 				self.facing='front'
 				self.pinch.x = true

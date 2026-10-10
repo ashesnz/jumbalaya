@@ -1,6 +1,6 @@
 --[[ word_game/ui/perks/stamp/draw.lua - 3D rubber-stamp geometry and rendering ]]
 
-local perk_voucher = require("word_game.ui.perks.shared.voucher")
+local stamp_sheet = require("word_game.ui.perks.shared.stamp_sheet")
 
 local M = {}
 
@@ -261,7 +261,7 @@ end
 
 function M.draw_type_imprint(art_entry, x, y, w, h, alpha)
 	alpha = alpha or 1
-	return perk_voucher.draw_stamp(art_entry, x, y, w, h, alpha * 0.96)
+	return stamp_sheet.draw_stamp(art_entry, x, y, w, h, alpha * 0.96)
 end
 
 -- Returns the projected outline structure for a stamp posed at the given

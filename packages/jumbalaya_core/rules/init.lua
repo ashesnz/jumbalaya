@@ -6,5 +6,5 @@ return {
 	Play = require("jumbalaya_core.rules.play"),
 	HandSize = require("jumbalaya_core.rules.hand_size"),
 	BonusStack = require("jumbalaya_core.rules.bonus_stack"),
-	VoucherDiscard = require("jumbalaya_core.rules.voucher_discard"),
+	DiscardBin = require("jumbalaya_core.rules.discard_bin"),
 }

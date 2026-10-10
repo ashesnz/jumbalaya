@@ -1,5 +1,5 @@
 --[[
-	word_game/ui/perks/discard_bin/init.lua - Voucher discard facade (sidebar stamp slot).
+	word_game/ui/perks/discard_bin/init.lua - Discard-bin facade (sidebar stamp slot).
 
 	Submodules: rules, counter, pile, input, draw, end_run.
 ]]
@@ -21,7 +21,7 @@ local M = {
 
 local hud_definition
 
-M.voucher_discard_unlocked = rules.voucher_discard_unlocked
+M.discard_bin_unlocked = rules.discard_bin_unlocked
 M.max_fills = rules.max_fills
 M.uses_table_draw = rules.uses_table_draw
 M.end_run_button_visible = rules.end_run_button_visible
@@ -30,7 +30,7 @@ M.overlay_odometer = counter.overlay_odometer
 M.reset = counter.reset
 M.discards_used = counter.discards_used
 M.discards_left = counter.discards_left
-M.sync_voucher_counter = counter.sync_voucher_counter
+M.sync_discard_counter = counter.sync_discard_counter
 M.roll_discards_left = counter.roll_discards_left
 M.is_full = counter.is_full
 M.record_discard = counter.record_discard
@@ -38,16 +38,16 @@ M.record_discard = counter.record_discard
 M.sync_discard_pile_area = pile.sync_discard_pile_area
 M.hide_discard_pile_cards = pile.hide_discard_pile_cards
 
-M.voucher_discard_active = input.voucher_discard_active
-M.point_in_discard_voucher = input.point_in_discard_voucher
-M.voucher_discard_center = input.voucher_discard_center
+M.discard_bin_active = input.discard_bin_active
+M.point_in_discard_bin = input.point_in_discard_bin
+M.discard_bin_center = input.discard_bin_center
 M.can_discard_card = input.can_discard_card
 M.try_discard = input.try_discard
 
-M.resolve_voucher_perk = draw.resolve_voucher_perk
-M.voucher_counter_layout = draw.voucher_counter_layout
-M.draw_voucher_overlay = draw.draw_voucher_overlay
-M.draw_voucher_foreground = draw.draw_voucher_foreground
+M.resolve_discard_perk = draw.resolve_discard_perk
+M.discard_counter_layout = draw.discard_counter_layout
+M.draw_discard_overlay = draw.draw_discard_overlay
+M.draw_discard_foreground = draw.draw_discard_foreground
 
 M.should_show_end_run = end_run.should_show_end_run
 M.end_run = end_run.end_run
@@ -65,7 +65,7 @@ end
 
 function M.sync_sidebar_ui()
 	M.hide_discard_pile_cards()
-	M.sync_voucher_counter()
+	M.sync_discard_counter()
 	M.sync_discard_pile_area()
 	if hud_definition and hud_definition.sync_end_run_row then
 		hud_definition.sync_end_run_row()

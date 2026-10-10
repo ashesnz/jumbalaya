@@ -1,9 +1,9 @@
---[[ tests/unit/test_g_funcs_registry.lua - UIBox callback catalog freeze ]]
+--[[ tests/unit/test_g_funcs_registry.lua - Panel callback catalog freeze ]]
 
 local T = require("tests.framework")
 local audit = require("tests.helpers.g_funcs_audit")
 
-T.describe("UIBox callback registry", function()
+T.describe("Panel callback registry", function()
 	T.it("loads the catalog from types/funcs.lua", function()
 		local catalog = audit.load_catalog()
 		local count = 0
@@ -23,12 +23,12 @@ T.describe("UIBox callback registry", function()
 		T.assert_equal(#missing, 0, "missing callback impl: " .. table.concat(missing, ", "))
 	end)
 
-	T.it("lists every UIBox func/button binding in types/funcs.lua", function()
+	T.it("lists every panel func/button binding in types/funcs.lua", function()
 		local unlisted = audit.unlisted_ui_bindings()
 		T.assert_equal(#unlisted, 0, "unlisted UI bindings: " .. table.concat(unlisted, ", "))
 	end)
 
-	T.it("registers every cataloged UIBox binding used in UI trees", function()
+	T.it("registers every cataloged panel binding used in UI trees", function()
 		local missing = audit.unregistered_ui_bindings()
 		T.assert_equal(#missing, 0, "unregistered UI bindings: " .. table.concat(missing, ", "))
 	end)

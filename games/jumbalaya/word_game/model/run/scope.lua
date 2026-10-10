@@ -87,7 +87,7 @@ function M.reset_globals()
 			live_game().LIVE.CARD[#live_game().LIVE.CARD + 1] = wipe_card
 		end
 		live_game().LIVE.CARDAREA = {}
-		live_game().LIVE.UIBOX = {}
+		live_game().LIVE.PANELS = {}
 	end
 	live_game().SIDEBAR_HUD = nil
 	if live_game().pattern_row then

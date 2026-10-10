@@ -30,7 +30,7 @@ T.describe("End Run match overlay", function()
 		T.assert_true(game.STATE_COMPLETE)
 	end)
 
-	T.it("ends the run even when voucher discards remain", function()
+	T.it("ends the run even when discard-bin uses remain", function()
 		mock_env.reset_game()
 		local opened = false
 		mock_env.install_presentation({
@@ -42,7 +42,7 @@ T.describe("End Run match overlay", function()
 		})
 		mock_env.patch_game({
 			run_state = { tokens = 0, perks = { { id = "discard_bin" } }, stats = {} },
-			voucher_discards_used = 0,
+			discard_bin_count = 0,
 		})
 		local end_run = require("word_game.ui.perks.discard_bin.end_run")
 		T.assert_true(end_run.end_run())

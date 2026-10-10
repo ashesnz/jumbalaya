@@ -7,7 +7,7 @@ return function(Target)
 function Target:remove()
 	if self == game().OVERLAY_MENU then game().REFRESH_ALERTS = true end
 	self.root_node:remove()
-	local registry_key = (self.config and self.config.instance_type) or "UIBOX"
+	local registry_key = (self.config and self.config.instance_type) or "PANELS"
 	local registry = game().LIVE and game().LIVE[registry_key] or nil
 	if registry then
 		for k, v in pairs(registry) do

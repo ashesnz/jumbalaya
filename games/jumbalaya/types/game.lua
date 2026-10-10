@@ -3,7 +3,7 @@
 
 	Runtime bus (live state on the Game shell via app/runtime.lua):
 	- **Run snapshot** — `WORD_GAME.store()` / `game_access.get()`; schema in `types/store.lua`.
-	- **UIBox callbacks** — string handlers via app/callbacks/funcs.lua (catalog: types/funcs.lua).
+	- **Panel callbacks** — string handlers via app/callbacks/funcs.lua (catalog: types/funcs.lua).
 	- **Presentation** — model→UI notify (contract: types/presentation.lua).
 
 	Cross-package API:
@@ -26,7 +26,7 @@
 	Adding fields — **do not grow the Game shell ad hoc**:
 	- **Run state** → Game.GAME only. New feature needs a facade method + owned field on
 	  `GameRunState` in types/store.lua (declare owner there) or it does not ship.
-	- **Live scene nodes** (CardPile, UIBox, overlays) may stay on the Game shell as engine/runtime
+	- **Live scene nodes** (CardPile, panels, overlays) may stay on the Game shell as engine/runtime
 	  wiring; prefer `WORD_GAME.Deck` / `Board` accessors over new top-level names.
 	- **Letter definitions** → LETTERS via `word_game/model/cards/registry.lua`, not
 	  ad-hoc globals. `app/` shell must not reference jumble, letters, or card faces.
@@ -122,7 +122,7 @@
 ---@field NODE SceneNode[]
 ---@field MOVEABLE EaseNode[]
 ---@field SPRITE Sprite[]
----@field UIBOX UIPanel[]
+---@field PANELS UIPanel[]
 ---@field POPUP any[]
 ---@field CARD Card[]
 ---@field CARDPILE CardPile[]

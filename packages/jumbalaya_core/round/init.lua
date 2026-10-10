@@ -18,7 +18,6 @@ end
 
 function M.run_reset_fields()
 	return {
-		voucher_discards_used = 0,
 		discard_bin_count = 0,
 	}
 end

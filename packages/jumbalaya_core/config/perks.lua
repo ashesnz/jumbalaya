@@ -9,7 +9,7 @@ M.POOL = {
 	{
 		id = "discard_bin",
 		name = "Discard Bin",
-		desc = "Drag up to 2 hand cards onto this voucher each hand to discard them.",
+		desc = "Drag up to 2 hand cards onto this stamp each hand to discard them.",
 		token_cost = 10,
 		pos = { x = 0, y = 0 },
 	},

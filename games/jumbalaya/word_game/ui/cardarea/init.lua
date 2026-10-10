@@ -2,7 +2,7 @@
 	word_game/ui/cardarea/init.lua - `CardPile`: a region that owns and lays out `Card` instances.
 
 	Per-type behaviour lives in TYPE_HANDLERS modules (hand, deck, discard, placement,
-	shop, title). init.lua dispatches draw/update/selection/lifecycle through the active
+	title). init.lua dispatches draw/update/selection/lifecycle through the active
 	handler only — do not add new `config.type` branches here.
 ]]
 
@@ -13,7 +13,6 @@ local hand = require("word_game.ui.cardarea.hand")
 local deck = require("word_game.ui.cardarea.deck")
 local discard = require("word_game.ui.cardarea.discard")
 local placement = require("word_game.ui.cardarea.placement")
-local shop = require("word_game.ui.cardarea.shop")
 local title = require("word_game.ui.cardarea.title")
 local selection = require("word_game.ui.cardarea.selection")
 local relayout_mod = require("word_game.ui.cardarea.relayout")
@@ -29,9 +28,6 @@ local TYPE_HANDLERS = {
 	deck = deck,
 	discard = discard,
 	placement = placement,
-	shop = shop,
-	usable = shop,
-	title_2 = shop,
 	title = title,
 	perk = title,
 }
@@ -40,7 +36,7 @@ local TYPE_HANDLERS = {
 --- @field cards Card[] list of Card instances currently in this area, in display order
 --- @field selected Card[] subset of `cards` currently selected/selected
 --- @field config table per-instance behaviour config; see `config.type` above
---- @field children { area_uibox: table|nil, view_deck: table|nil, [string]: any }
+--- @field children { area_panel: table|nil, view_deck: table|nil, [string]: any }
 ---@overload fun(...): CardPile
 --- @field emplace fun(self: CardPile, card: Card, location: string|nil, stay_flipped: boolean|nil)
 --- @field set_ranks fun(self: CardPile)
@@ -130,8 +126,7 @@ end
 -- `config.selected_limit` caps how many can be selected at once.
 
 --- Whether cards in this area are allowed to be selected at all, given the
---- current input device. InputController input restricts selecting to hand
---- cards only (no companion/usable/shop multi-select via d-pad).
+--- current input device. Gamepad input restricts selecting to hand cards.
 --- @param card table the card being considered (currently unused, kept for API shape)
 --- @return boolean can_select
 function CardPile:can_select(card)
@@ -151,9 +146,8 @@ function CardPile:clear_selection()
 end
 
 --- Assigns each card's `slot` (its 1-based index/position) and sets
---- per-card drag/collide/click ability based on this area's type - e.g. only
---- the top deck card is draggable, 'shop'/'usable' cards can't be dragged
---- once placed.
+--- per-card drag/collide/click ability based on this area's type — e.g. only
+--- the top deck card is draggable.
 function CardPile:set_ranks()
 	local handler = type_handler(self)
 	for k, card in ipairs(self.cards) do

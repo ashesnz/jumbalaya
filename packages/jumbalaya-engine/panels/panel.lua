@@ -60,7 +60,7 @@ function RetainedPanel:construct(args)
 		local live = game().LIVE
 		local skip_registry = args.config and args.config.skip_live_registry
 		if live and not skip_registry then
-			local registry_key = (args.config and args.config.instance_type) or "UIBOX"
+			local registry_key = (args.config and args.config.instance_type) or "PANELS"
 			live[registry_key] = live[registry_key] or {}
 			table.insert(live[registry_key], self)
 		end

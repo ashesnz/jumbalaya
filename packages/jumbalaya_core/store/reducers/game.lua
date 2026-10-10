@@ -31,10 +31,8 @@ function M.CLEAR_BUSY_FLAGS(state, action)
 	return state
 end
 
-function M.SET_VOUCHER_DISCARDS_USED(state, action)
-	local count = math.max(0, action.count or 0)
-	state.voucher_discards_used = count
-	state.discard_bin_count = count
+function M.SET_DISCARD_BIN_COUNT(state, action)
+	state.discard_bin_count = math.max(0, action.count or 0)
 	return state
 end
 

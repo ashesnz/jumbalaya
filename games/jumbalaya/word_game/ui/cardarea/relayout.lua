@@ -21,13 +21,6 @@ local function slot_x(area, card, k, count, max_slots, span_width)
 	return x
 end
 
-local function even_x(area, card, k, count)
-	if count > 1 then
-		return area.T.x + (area.T.w - area.card_w) * ((k - 1) / (count - 1)) + 0.5 * (area.card_w - card.T.w)
-	end
-	return area.T.x + area.T.w / 2 - area.card_w / 2 + 0.5 * (area.card_w - card.T.w)
-end
-
 local function selection_lift(card, scale)
 	if card.selected then return game().HIGHLIGHT_H * (scale or 1) end
 	return 0
@@ -104,56 +97,6 @@ function M.relayout(area, face_down_in_pile)
 			end
 		end
 		table.sort(area.cards, function(a, b) return a.ability.order < b.ability.order end)
-	end
-
-	if layout == 'shop' then
-		for k, card in ipairs(area.cards) do
-			if not card.states.drag.is then
-				local max_slots = math.max(count, area.config.temp_limit)
-				card.T.r = 0
-				card.T.x = slot_x(area, card, k, count, max_slots)
-				if area.config.card_limit == 1 then
-					card.T.x = card.T.x + 0.5 * (area.T.w - card.T.w)
-				end
-				card.T.y = area.T.y + area.T.h / 2 - card.T.h / 2 - selection_lift(card)
-				apply_parallax(card)
-			end
-		end
-		sort_by_left_edge(area.cards)
-	end
-
-	if layout == 'title_2' then
-		for k, card in ipairs(area.cards) do
-			if not card.states.drag.is then
-				card.T.r = fan_tilt(k, count, 0.1, card.T.x)
-				if count > 2 or (count > 1 and area.config.spread) then
-					card.T.x = even_x(area, card, k, count)
-				elseif count > 1 then
-					card.T.x = area.T.x + (area.T.w - area.card_w) * ((k - 0.5) / count) + 0.5 * (area.card_w - card.T.w)
-				else
-					card.T.x = even_x(area, card, k, count)
-				end
-				card.T.y = area.T.y + area.T.h / 2 - card.T.h / 2 - selection_lift(card, 0.5)
-					+ row_bob(card.T.x)
-				apply_parallax(card)
-			end
-		end
-		table.sort(area.cards, function(a, b)
-			return a.T.x + a.T.w / 2 - 100 * (a.pinned and a.sort_id or 0)
-				< b.T.x + b.T.w / 2 - 100 * (b.pinned and b.sort_id or 0)
-		end)
-	end
-
-	if layout == 'usable' then
-		for k, card in ipairs(area.cards) do
-			if not card.states.drag.is then
-				card.T.x = even_x(area, card, k, count)
-				card.T.y = area.T.y + area.T.h / 2 - card.T.h / 2 - selection_lift(card)
-					+ (not card.selected and 0.05 * math.sin(3.332 * game().TIMERS.REAL + card.T.x) or 0)
-				apply_parallax(card)
-			end
-		end
-		sort_by_left_edge(area.cards)
 	end
 
 	placement.relayout(area)

@@ -1,5 +1,5 @@
 --[[
-	app/callbacks/registry.lua - Central registry of UIBox callback modules.
+	app/callbacks/registry.lua - Central registry of Panel callback modules.
 
 	App callbacks (loaded via app.callbacks.settings before WORD_GAME):
 	  app.callbacks.ui_controls  - buttons, toggles, sliders, option cycles

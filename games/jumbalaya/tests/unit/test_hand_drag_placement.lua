@@ -23,7 +23,7 @@ local function install_ui_facade()
 	_G.WORD_GAME_UI.TableDeck = _G.WORD_GAME_UI.TableDeck or {
 		uses_table_draw = function() return false end,
 	}
-	_G.WORD_GAME_UI.VoucherDiscard = _G.WORD_GAME_UI.VoucherDiscard or {
+	_G.WORD_GAME_UI.DiscardBin = _G.WORD_GAME_UI.DiscardBin or {
 		try_discard = function() return false end,
 	}
 	return _G.WORD_GAME_UI

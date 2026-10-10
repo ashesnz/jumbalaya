@@ -23,12 +23,7 @@ local function materialize_saved_card(cdata)
 			0, 0,
 			shell.CARD_W, shell.CARD_H,
 			shell.LETTERS.faces.empty,
-			shell.LETTERS.centers.letter_base,
-			{
-				bypass_discovery_center = true,
-				bypass_discovery_ui = true,
-				bypass_lock = true,
-			}
+			shell.LETTERS.centers.letter_base
 		)
 		card:load(cdata)
 		return card

@@ -24,26 +24,26 @@ local STATUS_DEFINITIONS = {
 		points = {
 				sound = 'card_tick',
 				colour = function() return game().C.POINTS end,
-				text = function(amount) return localize{type = 'variable', key = 'a_chips', vars = {amount}} end,
+				text = function(amount) return localize{type = 'variable', key = 'a_points', vars = {amount}} end,
 				delay = 0.6,
 		},
 		mult = {
 				sound = 'multhit1',
 				colour = function() return game().C.MULTIPLIER end,
-				text = function(amount) return localize{type = 'variable', key = 'a_mult', vars = {amount}} end,
+				text = function(amount) return localize{type = 'variable', key = 'a_multiplier', vars = {amount}} end,
 				config = {type = 'fade', scale = 0.7},
 		},
 		x_mult = {
 				sound = 'multhit2',
 				volume = 0.7,
 				colour = function() return game().C.XMULT end,
-				text = function(amount) return localize{type = 'variable', key = 'a_xmult', vars = {amount}} end,
+				text = function(amount) return localize{type = 'variable', key = 'a_x_multiplier', vars = {amount}} end,
 				config = {type = 'fade', scale = 0.7},
 		},
 		h_mult = {
 				sound = 'multhit1',
 				colour = function() return game().C.MULTIPLIER end,
-				text = function(amount) return localize{type = 'variable', key = 'a_mult', vars = {amount}} end,
+				text = function(amount) return localize{type = 'variable', key = 'a_multiplier', vars = {amount}} end,
 				config = {type = 'fade', scale = 0.7},
 		},
 		dollars = {
@@ -78,13 +78,11 @@ local function position_for(card)
 end
 
 local function extra_definition(extra)
-		local sound = extra.sound or extra.edition and 'foil2'
+		local sound = extra.sound
 				or extra.mult_mod and 'multhit1' or extra.Xmult_mod and 'multhit2' or 'generic1'
 		local config = {type = 'fall', scale = 0.7}
 		local colour = extra.colour or game().C.FILTER
-		if extra.edition then
-				colour = game().C.DARK_FINISH
-		elseif extra.mult_mod or extra.Xmult_mod then
+		if extra.mult_mod or extra.Xmult_mod then
 				colour = game().C.MULTIPLIER
 		end
 		if extra.chip_mod then
@@ -97,7 +95,7 @@ local function extra_definition(extra)
 
 		return {
 				sound = sound,
-				volume = extra.edition and 0.3 or sound == 'multhit2' and 0.7 or 1,
+				volume = extra.volume or sound == 'multhit2' and 0.7 or 1,
 				delay = extra.delay or 0.75,
 				amount = 1,
 				text = extra.message or '',

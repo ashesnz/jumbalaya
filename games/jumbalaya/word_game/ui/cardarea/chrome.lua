@@ -10,11 +10,8 @@ local INVISIBLE_AREA_TYPES = {
 	discard = 1,
 	hand = 1,
 	perk = 1,
-	usable = 1,
 	title = 1,
-	title_2 = 1,
 	placement = 1,
-	shelf = 1,
 }
 
 function M.skip_chrome(area)
@@ -24,8 +21,8 @@ function M.skip_chrome(area)
 	return area.config.type == 'deck' and area ~= game().draw_pile
 end
 
-function M.ensure_area_uibox(area)
-	if area.children.area_uibox then return end
+function M.ensure_area_panel(area)
+	if area.children.area_panel then return end
 
 	local show_count = area ~= game().dealt_letters
 	local placement_area = game().pattern_row and game().pattern_row.area
@@ -37,7 +34,7 @@ function M.ensure_area_uibox(area)
 		{n=game().UI.BOX, config={w = 0.1,h=0.1}}
 	}} or nil
 
-	area.children.area_uibox = UIViewHost.create{
+	area.children.area_panel = UIViewHost.create{
 		definition =
 			{n=game().UI.ROOT, config = {align = 'cm', colour = game().C.CLEAR}, nodes={
 				{n=game().UI.ROW, config={minw = area.T.w,minh = area.T.h,align = "cm", padding = 0.1, mid = true, r = 0.1, colour = {0,0,0,0.1}, ref_table = area}, nodes={}},
@@ -48,18 +45,18 @@ function M.ensure_area_uibox(area)
 end
 
 function M.draw_chrome(area)
-	if area == game().dealt_letters and area.children.area_uibox and not area.config.hide_card_count then
-		area.children.area_uibox:remove()
-		area.children.area_uibox = nil
+	if area == game().dealt_letters and area.children.area_panel and not area.config.hide_card_count then
+		area.children.area_panel:remove()
+		area.children.area_panel = nil
 	end
 	if area == game().dealt_letters then
 		area.config.hide_card_count = true
 	end
-	M.ensure_area_uibox(area)
+	M.ensure_area_panel(area)
 	local skip_pad = area == game().draw_pile and WORD_GAME_UI.TableDeck
 		and WORD_GAME_UI.TableDeck.uses_table_draw()
 	if not skip_pad then
-		area.children.area_uibox:draw()
+		area.children.area_panel:draw()
 	end
 end
 

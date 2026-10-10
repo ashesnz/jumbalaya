@@ -119,7 +119,7 @@ function M.set_screen_positions(opts)
 			game().draw_pile.T.h = deck.h
 			if game().draw_pile.hard_set_T then game().draw_pile:hard_set_T(deck.x, deck.y, deck.w, deck.h) end
 			end
-			-- Invisible recycle pile; voucher discard dissolves on the perk imprint.
+			-- Invisible recycle pile; discard-bin cards dissolve on the perk imprint.
 			if game().recycle_stash and game().recycle_stash.T then
 				game().recycle_stash.T.x = -20
 				game().recycle_stash.T.y = -20
@@ -137,8 +137,8 @@ function M.set_screen_positions(opts)
 		dealt_hand.apply_screen_position()
 
 		if game().recycle_stash and game().recycle_stash.T
-			and not (WORD_GAME_UI.VoucherDiscard and WORD_GAME_UI.VoucherDiscard.uses_table_draw
-				and WORD_GAME_UI.VoucherDiscard.uses_table_draw()) then
+			and not (WORD_GAME_UI.DiscardBin and WORD_GAME_UI.DiscardBin.uses_table_draw
+				and WORD_GAME_UI.DiscardBin.uses_table_draw()) then
 			game().recycle_stash.T.x = rect.x + rect.w * 0.5
 			game().recycle_stash.T.y = rect.y + rect.h * 0.5
 		end

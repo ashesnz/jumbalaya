@@ -37,7 +37,7 @@ local M = {
 	FlowText = FlowText,
 }
 
---- Install legacy global aliases expected by Love2D boot, UIBox, and Kind graph checks.
+--- Install legacy global aliases expected by Love2D boot, panels, and Kind graph checks.
 function M.install()
 	_G.Kind = M.Kind
 	_G.Node = M.Node

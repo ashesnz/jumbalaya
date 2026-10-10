@@ -143,7 +143,7 @@ end
 function M.draw_attention_passes()
 	if hand_clear_focus_active() and not boss_sequence_active() then return end
 	local game = runtime()
-	local live = game.LIVE and game.LIVE.UIBOX
+	local live = game.LIVE and game.LIVE.PANELS
 	if live then
 		for _, panel in pairs(live) do
 			if panel and not panel.REMOVED and panel.spawn_attention then
@@ -190,9 +190,9 @@ function M.draw_card_interaction(game)
 	if WORD_GAME_UI.CardInspect then
 		WORD_GAME_UI.CardInspect.draw_foreground()
 	end
-	local voucher_discard = WORD_GAME_UI.VoucherDiscard
-	if voucher_discard and voucher_discard.draw_voucher_foreground then
-		voucher_discard.draw_voucher_foreground()
+	local discard_bin = WORD_GAME_UI.DiscardBin
+	if discard_bin and discard_bin.draw_discard_foreground then
+		discard_bin.draw_discard_foreground()
 	end
 end
 

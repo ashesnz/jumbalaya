@@ -22,7 +22,7 @@ T.describe("word feedback draw", function()
 		game.TILESIZE = game.TILESIZE or 20
 		game.HAND_CLEAR_OVERLAY = nil
 		game.LIVE = game.LIVE or {}
-		game.LIVE.UIBOX = game.LIVE.UIBOX or {}
+		game.LIVE.PANELS = game.LIVE.PANELS or {}
 		_G.WORD_GAME_UI = _G.WORD_GAME_UI or {}
 
 		local painted = 0

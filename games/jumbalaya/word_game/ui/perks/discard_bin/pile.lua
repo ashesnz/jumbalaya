@@ -1,4 +1,4 @@
---[[ word_game/ui/perks/discard_bin/pile.lua - Hidden recycle stash for voucher discards ]]
+--[[ word_game/ui/perks/discard_bin/pile.lua - Hidden recycle stash for discard-bin discards ]]
 
 local shell = require("word_game.ui.facade").shell()
 

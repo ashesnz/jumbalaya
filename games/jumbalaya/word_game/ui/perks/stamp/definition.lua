@@ -5,7 +5,7 @@ local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
 local perk_cfg = require("word_game.config.perks")
-require("word_game.ui.perks.shared.voucher_sprite")
+require("word_game.ui.perks.shared.stamp_sprite")
 
 local perk_model = facade.perks_registry()
 local run_state = facade.run_state()
@@ -14,8 +14,8 @@ local M = {}
 
 function M.perk_popup_definition(entry)
 	local w = (game().CARD_W or 1) * 0.9
-	local h = w / (perk_cfg.VOUCHER_ASPECT or 2.3)
-	local sprite = PerkVoucherSprite(0, 0, w, h, entry)
+	local h = w / (perk_cfg.STAMP_ASPECT or 2.3)
+	local sprite = PerkStampSprite(0, 0, w, h, entry)
 	return build_generic_options({
 		contents = {
 			{ n = game().UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {

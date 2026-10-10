@@ -25,8 +25,8 @@ local function draw_spotlight_overlay(game, overlay)
 	end
 end
 
-local function draw_live_uibox(game)
-	local live = game.LIVE and game.LIVE.UIBOX
+local function draw_live_panels(game)
+	local live = game.LIVE and game.LIVE.PANELS
 	if not live then return end
 	for _, panel in pairs(live) do
 		if panel.REMOVED then goto continue end
@@ -51,7 +51,7 @@ function M.install()
 		if not show_background then return end
 
 		perf_checkpoint('primitives', 'draw')
-		draw_live_uibox(game)
+		draw_live_panels(game)
 		perf_checkpoint('panels', 'draw')
 
 		if not trade_marketplace_open()

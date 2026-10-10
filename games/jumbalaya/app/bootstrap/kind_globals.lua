@@ -18,7 +18,7 @@ end
 
 function M.install_ui_types()
 	_G.TitleLogo = require("word_game.ui.menu.title_logo")
-	_G.PerkVoucherSprite = require("word_game.ui.perks.shared.voucher_sprite")
+	_G.PerkStampSprite = require("word_game.ui.perks.shared.stamp_sprite")
 end
 
 function M.install()

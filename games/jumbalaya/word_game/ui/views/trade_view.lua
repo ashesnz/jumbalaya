@@ -25,7 +25,7 @@ function TradeView.create_marketplace_body(ctx, config, definition)
 	config = config or {}
 	config.offset = config.offset or { x = 0, y = 0 }
 	config.align = config.align or "cm"
-	-- Embedded in OVERLAY_MENU only — must not register in LIVE.UIBOX or the
+	-- Embedded in OVERLAY_MENU only — must not register in LIVE.PANELS or the
 	-- board pass draws it first and the per-frame draw guard skips overlay paint.
 	config.skip_live_registry = true
 	return Panels.create({

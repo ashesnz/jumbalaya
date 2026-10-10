@@ -1,5 +1,5 @@
 --[[
-	word_game/ui/widgets/ - Reusable UIBox controls and chrome.
+	word_game/ui/widgets/ - Reusable panel controls and chrome.
 
 	`util/` holds stateless helpers (colour, roll math, localize). This package
 	builds `game().DEFINITIONS.*` and shared control nodes loaded from game boot.
