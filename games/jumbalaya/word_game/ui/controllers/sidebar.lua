@@ -1,4 +1,4 @@
---[[ word_game/ui/controllers/sidebar.lua - Phase 4 sidebar game().FUNCS controller ]]
+--[[ word_game/ui/controllers/sidebar.lua - Phase 4 sidebar Funcs controller ]]
 
 local game = require("word_game.ui.util.game_runtime").game
 

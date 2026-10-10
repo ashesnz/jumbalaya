@@ -193,7 +193,6 @@ end
 function CardPile:draw()
 	if not self.states.visible then return end
 	if not self.cards then return end
-	if game().VIEWING_DECK and (self==game().draw_pile or self==game().dealt_letters) then return end
 
 	if not chrome.skip_chrome(self) then
 		chrome.draw_chrome(self)

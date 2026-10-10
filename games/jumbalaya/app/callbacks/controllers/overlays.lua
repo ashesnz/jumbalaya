@@ -116,16 +116,11 @@ end
 
 function M.close_overlay()
 	if not game().OVERLAY_MENU then return end
-	local ok, components = pcall(require, "word_game.ui.widgets.components")
-	if ok and components and components.clear_dynamic_actions then
-		components.clear_dynamic_actions()
-	end
 	game().INPUT.locks.frame_set = true
 	game().INPUT.locks.frame = true
 	game().INPUT:shift_context_layer(-1000)
 	game().OVERLAY_MENU:remove()
 	game().OVERLAY_MENU = nil
-	game().VIEWING_DECK = nil
 	game().SETTINGS.paused = false
 	game():queue_settings_write()
 	sync_main_menu_title_visibility()

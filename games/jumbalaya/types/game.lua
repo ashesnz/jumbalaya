@@ -203,7 +203,6 @@
 ---@field OVERLAY_MENU UIPanel|nil
 ---@field RUN { active: boolean }|nil
 ---@field view_deck CardPile[]|nil
----@field VIEWING_DECK any
 ---@field deck_preview any
 ---@field real_dt number
 ---@field HIGHLIGHT_H number

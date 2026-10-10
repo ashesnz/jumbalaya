@@ -1,4 +1,4 @@
---[[ app/callbacks/ui_controls/sliders_cycles.lua - Slider / cycle game().FUNCS registration ]]
+--[[ app/callbacks/ui_controls/sliders_cycles.lua - Slider / cycle Funcs registration ]]
 
 local game = require("app.runtime").game
 

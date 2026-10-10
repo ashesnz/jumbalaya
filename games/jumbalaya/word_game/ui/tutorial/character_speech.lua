@@ -146,8 +146,8 @@ function M.bubble_definition(text_key, loc_vars)
 		})
 end
 
-function M.pop_bubble(uibox)
-	local target = uibox and (uibox.root_node or uibox)
+function M.pop_bubble(panel)
+	local target = panel and (panel.root_node or panel)
 	if target and target.speech_pop then
 		target:speech_pop()
 	end

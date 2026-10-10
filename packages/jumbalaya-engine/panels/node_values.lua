@@ -15,7 +15,7 @@ function Target:set_values(_T, recalculate)
 	end
 
 	-- Interaction capability from config shape.
-	if self.config.button_UIE then
+	if self.config.button_host then
 		self.states.collide.can = true; self.states.hover.can = false; self.states.click.can = true
 	end
 	if self.config.button then
@@ -83,7 +83,7 @@ function Target:set_values(_T, recalculate)
 	-- Register gamepad-focus metadata exactly once per element.
 	if self.config.focus_args and not self.config.focus_args.registered then
 		if self.config.focus_args.button then
-			game().INPUT:add_to_registry(self.config.button_UIE or self, self.config.focus_args.button)
+			game().INPUT:add_to_registry(self.config.button_host or self, self.config.focus_args.button)
 		end
 		if self.config.focus_args.snap_to then
 			game().INPUT:snap_to{node = self}
@@ -115,7 +115,7 @@ function Target:set_values(_T, recalculate)
 
 	-- Run func hooks immediately where they configure rather than animate.
 	if self.config and self.config.func
-		and (((self.config.button_UIE or self.config.button) and self.config.func ~= 'set_button_pip') or self.config.insta_func) then
+		and (((self.config.button_host or self.config.button) and self.config.func ~= 'set_button_pip') or self.config.insta_func) then
 		invoke.call(self.config.func, self)
 	end
 end

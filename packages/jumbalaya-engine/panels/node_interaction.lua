@@ -76,8 +76,8 @@ function Target:click()
 	end
 
 	-- Nested buttons chain outward (inner click activates the outer action).
-	if self.config.button_UIE then
-		self.config.button_UIE:click()
+	if self.config.button_host then
+		self.config.button_host:click()
 	end
 end
 

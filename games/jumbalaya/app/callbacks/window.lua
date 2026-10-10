@@ -1,4 +1,4 @@
---[[ app/callbacks/window.lua - Window / graphics FUNCS registration ]]
+--[[ app/callbacks/window.lua - Window / graphics Funcs registration ]]
 
 local dispatch_wrap = require("app.callbacks.controllers.dispatch_wrap")
 local Settings = require("app.callbacks.controllers.settings")

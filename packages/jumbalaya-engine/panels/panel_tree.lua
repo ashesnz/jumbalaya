@@ -50,41 +50,41 @@ end
 --- Creates a LayoutNode for `node`, wires inheritance (group/button), recurses
 --- into container children, and attaches the result to its parent's tree.
 function Target:attach_node(node, parent)
-	local ui_e = LayoutNode(parent, self, node.n, node.config)
+	local child = LayoutNode(parent, self, node.n, node.config)
 
 	-- Children inherit their parent's group tag...
 	if parent and parent.config and parent.config.group then
-		if ui_e.config then ui_e.config.group = parent.config.group
-		else ui_e.config = {group = parent.config.group} end
+		if child.config then child.config.group = parent.config.group
+		else child.config = {group = parent.config.group} end
 	end
 	-- ...and button linkage (nested buttons click their outer button too).
 	if parent and parent.config and parent.config.button then
-		if ui_e.config then ui_e.config.button_UIE = parent
-		else ui_e.config = {button_UIE = parent} end
+		if child.config then child.config.button_host = parent
+		else child.config = {button_host = parent} end
 	end
-	if parent and parent.config and parent.config.button_UIE then
-		if ui_e.config then ui_e.config.button_UIE = parent.config.button_UIE
-		else ui_e.config = {button = parent.config.button} end
+	if parent and parent.config and parent.config.button_host then
+		if child.config then child.config.button_host = parent.config.button_host
+		else child.config = {button = parent.config.button} end
 	end
 
 	-- An embedded object that itself carries the button shouldn't compete
 	-- for clicks with the element wrapping it.
-	if node.n and node.n == game().UI.OBJECT and ui_e.config.button then
-		ui_e.config.object.states.click.can = false
+	if node.n and node.n == game().UI.OBJECT and child.config.button then
+		child.config.object.states.click.can = false
 	end
 
 	if (node.n and node.n == game().UI.COLUMN or node.n == game().UI.ROW or node.n == game().UI.ROOT) and node.nodes then
 		for _, v in ipairs(node.nodes) do
-			self:attach_node(v, ui_e)
+			self:attach_node(v, child)
 		end
 	end
 
 	if not parent then
-		self.root_node = ui_e
+		self.root_node = child
 		self.root_node:set_scene_parent(self)
 	else
-		table.insert(parent.children, ui_e)
+		table.insert(parent.children, child)
 	end
-	if node.config and node.config.mid then self.Mid = ui_e end
+	if node.config and node.config.mid then self.Mid = child end
 end
 end

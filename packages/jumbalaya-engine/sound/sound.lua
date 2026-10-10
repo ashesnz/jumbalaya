@@ -115,8 +115,11 @@ function M.mix_audio(dt)
 	game().ARGS.score_intensity.earned_score = earned
 	game().ARGS.score_intensity.required_score = (wr and wr.target) or 0
 	local intensity = game().ARGS.score_intensity
-	intensity.flames = math.min(1, (game().STAGE == game().STAGES.RUN and 1 or 0) *
-		((game().ARGS.chip_flames and (game().ARGS.chip_flames.real_intensity + game().ARGS.chip_flames.change)) or 0) / 10)
+	local run_live = (game().STAGE == game().STAGES.RUN) and 1 or 0
+	local score_ratio = (intensity.required_score > 0)
+		and math.min(1, intensity.earned_score / (intensity.required_score + 1))
+		or 0
+	intensity.flames = run_live * score_ratio
 	intensity.organ = game().video_organ or (intensity.required_score > 0
 		and math.max(math.min(0.4, 0.1 * math.log(intensity.earned_score / (intensity.required_score + 1), 5)), 0))
 		or 0
@@ -128,8 +131,8 @@ function M.mix_audio(dt)
 		ambientFire2 = {gainfunc = function(prev) return prev * (1 - dt) + dt * 0.9 * ((intensity.flames > 0.3) and 1 or intensity.flames / 0.3) end},
 		-- High-intensity fire layer joins above 30%.
 		ambientFire1 = {gainfunc = function(prev) return prev * (1 - dt) + dt * 0.8 * ((intensity.flames > 0.3) and (intensity.flames - 0.3) / 0.7 or 0) end},
-		-- Crackling reacts directly to chip/mult flame changes.
-		ambientFire3 = {gainfunc = function(prev) return prev * (1 - dt) + dt * 0.4 * ((game().ARGS.chip_flames and game().ARGS.chip_flames.change or 0) + (game().ARGS.mult_flames and game().ARGS.mult_flames.change or 0)) end},
+		-- Crackling tracks score intensity.
+		ambientFire3 = {gainfunc = function(prev) return prev * (1 - dt) + dt * 0.4 * intensity.flames end},
 		-- Organ swells logarithmically with earned-vs-target score.
 		ambientOrgan1 = {gainfunc = function(prev) return prev * (1 - dt) + dt * 0.6 * (game().SETTINGS.SOUND.music_volume + 100) / 200 * intensity.organ end},
 	}

@@ -12,7 +12,7 @@ function Target:draw_self()
 		return
 	end
 
-	if self.config.force_focus or self.config.force_collision or self.config.button_UIE
+	if self.config.force_focus or self.config.force_collision or self.config.button_host
 		or self.config.button or self.states.collide.can then
 		HitOrder.track_hit_target(self)
 	end
@@ -21,7 +21,7 @@ function Target:draw_self()
 	local button_being_pressed = false
 	local sx, sy = DropShadow.pixels(game().TILESIZE)
 
-	if self.config.button or self.config.button_UIE then
+	if self.config.button or self.config.button_host then
 		self.parallax_shift.x = (self.parent and self.parent ~= self.panel and self.parent.parallax_shift.x) or 0
 		self.parallax_shift.y = (self.parent and self.parent ~= self.panel and self.parent.parallax_shift.y) or 0
 
@@ -34,7 +34,7 @@ function Target:draw_self()
 		end
 
 		-- Grey-out text nested under a disabled button wrapper.
-		if self.config.button_UIE and not self.config.button_UIE.config.button then button_active = false end
+		if self.config.button_host and not self.config.button_host.config.button then button_active = false end
 	end
 
 	if self.config.colour[4] > 0.01 then
@@ -50,11 +50,11 @@ function Target:draw_self()
 			local shadow_tx = sx / game().TILESIZE
 			local shadow_ty = sy / game().TILESIZE
 
-			if (self.config.button_UIE and button_active)
-				or (not self.config.button_UIE and self.config.shadow and game().SETTINGS.GRAPHICS.shadows == 'On') then
+			if (self.config.button_host and button_active)
+				or (not self.config.button_host and self.config.shadow and game().SETTINGS.GRAPHICS.shadows == 'On') then
 				NodeTransform.push_node_transform(self, 0.97)
 				if self.config.vert then love.graphics.translate(0, self.VT.h); love.graphics.rotate(-math.pi / 2) end
-				if (self.config.shadow or (self.config.button_UIE and button_active))
+				if (self.config.shadow or (self.config.button_host and button_active))
 					and game().SETTINGS.GRAPHICS.shadows == 'On' then
 					love.graphics.setColor(DropShadow.rgba(self.config.colour[4]))
 					love.graphics.draw(
@@ -113,7 +113,7 @@ function Target:draw_self()
 
 			-- Fill layers: base colour (greyed during button_delay), plus a
 			-- hover/click overlay tint.
-			local collided_button = self.config.button_UIE or self
+			local collided_button = self.config.button_host or self
 			self.ARGS.button_colours = self.ARGS.button_colours or {}
 			self.ARGS.button_colours[1] = self.config.button_delay
 				and Colour.blend_colours(self.config.colour, game().C.L_BLACK, 0.5) or self.config.colour

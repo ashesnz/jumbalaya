@@ -1,4 +1,4 @@
---[[ word_game/ui/controllers/gameplay.lua - Phase 4 gameplay game().FUNCS controller ]]
+--[[ word_game/ui/controllers/gameplay.lua - Phase 4 gameplay Funcs controller ]]
 
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()

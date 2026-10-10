@@ -1,7 +1,7 @@
 --[[
 	jumbalaya-engine/persistence/save_paths.lua - Jumbalaya save filenames.
 
-	Legacy AlphaCards builds used `.acs` (compressed Lua). New saves use `.jmb`.
+	Older saves used `.acs` (compressed Lua). New saves use `.jmb`.
 	Readers accept either extension; writers always use `.jmb`.
 ]]
 

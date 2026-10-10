@@ -1,4 +1,4 @@
---[[ word_game/ui/callbacks/tutorial.lua - Tutorial game().FUNCS registration ]]
+--[[ word_game/ui/callbacks/tutorial.lua - Tutorial Funcs registration ]]
 
 local game = require("word_game.ui.util.game_runtime").game
 

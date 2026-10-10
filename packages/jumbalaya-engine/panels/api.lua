@@ -192,15 +192,6 @@ function M.button(opts, children)
 	}
 end
 
---- Mount a compiled (or builder) tree on a ViewHost.
-function M.mount(definition, host_config)
-	local ViewHost = require("jumbalaya-engine.panels.view_host")
-	return ViewHost.create({
-		definition = definition,
-		config = host_config or {},
-	})
-end
-
 M.kind = ui_kind
 
 return M

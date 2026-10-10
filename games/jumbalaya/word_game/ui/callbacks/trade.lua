@@ -1,4 +1,4 @@
---[[ word_game/ui/callbacks/trade.lua - Card Marketplace game().FUNCS registration ]]
+--[[ word_game/ui/callbacks/trade.lua - Card Marketplace Funcs registration ]]
 
 local TradeController = require("word_game.ui.controllers.trade")
 local Funcs = require("app.callbacks.funcs")

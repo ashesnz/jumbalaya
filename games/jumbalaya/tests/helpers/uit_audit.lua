@@ -1,5 +1,5 @@
 --[[ tests/helpers/uit_audit.lua
-     Static freeze: new word_game/ui files must not author game().UI kind integers.
+     Static freeze: word_game/ui files must not author game().UI kind integers.
 ]]
 
 local M = {}
@@ -61,62 +61,29 @@ local function rel_path(path)
 	return path
 end
 
-local function allowlist_set()
-	local listed = require("tests.helpers.uit_allowlist")
-	local set = {}
-	for _, path in ipairs(listed) do
-		set[path] = true
-	end
-	return set
-end
-
---- Paths (relative to games/jumbalaya) that use n = game().UI.* outside the allowlist.
+--- Paths (relative to games/jumbalaya) that use n = game().UI.* trees.
 function M.violations()
-	local allowed = allowlist_set()
 	local found = {}
 	for _, path in ipairs(list_ui_lua()) do
 		local rel = rel_path(path)
-		if not allowed[rel] then
-			local file = io.open(path, "r")
-			if file then
-				local contents = file:read("*a")
-				file:close()
-				contents = contents:gsub("%-%-%[%[.-%]%]", "")
-				local lineno = 0
-				for line in (contents .. "\n"):gmatch("(.-)\n") do
-					lineno = lineno + 1
-					local code = strip_comment(line)
-					local kind = code:find("%.UI%.(ROOT|ROW|COLUMN|TEXT|BOX|OBJECT|SLIDER|INPUT)%f[%W]")
-					if kind and (code:find("n%s*=") or code:find("and .*UI%.") or code:find("or .*UI%.")) then
-						found[#found + 1] = rel .. ":" .. lineno
-					end
+		local file = io.open(path, "r")
+		if file then
+			local contents = file:read("*a")
+			file:close()
+			contents = contents:gsub("%-%-%[%[.-%]%]", "")
+			local lineno = 0
+			for line in (contents .. "\n"):gmatch("(.-)\n") do
+				lineno = lineno + 1
+				local code = strip_comment(line)
+				local kind = code:find("%.UI%.(ROOT|ROW|COLUMN|TEXT|BOX|OBJECT|SLIDER|INPUT)%f[%W]")
+				if kind and (code:find("n%s*=") or code:find("and .*UI%.") or code:find("or .*UI%.")) then
+					found[#found + 1] = rel .. ":" .. lineno
 				end
 			end
 		end
 	end
 	table.sort(found)
 	return found
-end
-
---- Allowlist entries that no longer contain UIT nodes (should be dropped).
-function M.stale_allowlist()
-	local allowed = require("tests.helpers.uit_allowlist")
-	local stale = {}
-	local paths = require("bootstrap_paths").resolve()
-	for _, rel in ipairs(allowed) do
-		local file = io.open(paths.game_root .. "/" .. rel, "r")
-		if not file then
-			stale[#stale + 1] = rel .. " (missing)"
-		else
-			local contents = file:read("*a")
-			file:close()
-			if not contents:find("%.UI%.(ROOT|ROW|COLUMN|TEXT|BOX|OBJECT|SLIDER|INPUT)") then
-				stale[#stale + 1] = rel
-			end
-		end
-	end
-	table.sort(stale)
-	return stale
 end
 
 return M

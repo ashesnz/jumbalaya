@@ -23,7 +23,7 @@ function Target:print_topology(indent)
 end
 
 --- Snap the freshly-laid-out tree onto its transforms and sync embedded
---- objects. Capability-guarded so plain Moveables work as objects too.
+--- objects. Capability-guarded so plain AnimNodes work as objects too.
 function Target:initialize_VT()
 	self:move_with_major(0)
 	self:calculate_parallax()

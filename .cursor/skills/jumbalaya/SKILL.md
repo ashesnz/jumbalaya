@@ -59,7 +59,7 @@ Cross-package: `WORD_GAME` (domain) and `WORD_GAME_UI` (presentation). Tests and
 
 New screens and new widgets **must** use `Panel.column` / `Panel.row` / `Panel.button` / `Panel.label` from `jumbalaya-engine.panels.api`. Do not author `{ n = game().UI.ROW, config = ..., nodes = ... }` trees. Layout kinds are strings at the call site; callbacks are functions (`on_press` / `on_update`). Do not add new `func` / `button` string names to `types/funcs.lua` for new UI.
 
-Existing files may keep UIT only while listed in `tests/helpers/uit_allowlist.lua` (enforced by `test_uit_freeze.lua`). Shrink that list as each overlay migrates. `Funcs.register` is only for remaining string bindings.
+`test_uit_freeze.lua` forbids `{ n = game().UI.* }` trees in `word_game/ui/`. `Funcs.register` is only for remaining string bindings.
 
 ## Sidebar (right-hand HUD)
 

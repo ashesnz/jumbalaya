@@ -87,7 +87,7 @@ function LetterTile:construct(X, Y, W, H, face, params)
 	}
 	self.children = { shadow = EaseNode(0, 0, 0, 0) }
 
-	self.letter_card_id = p.letter_card_id or p.playing_card
+	self.letter_card_id = p.letter_card_id
 	self.pile_id = p.pile_id or "draw"
 	self.back = p.viewed_back and "viewed_back" or "selected_back"
 	self.no_ui = self.config.card.no_ui
@@ -217,6 +217,7 @@ local SAVED_FIELDS = {
 
 LetterTile.SAVE_VERSION = 5
 
+-- Older saves stored the inventory id as `playing_card`.
 local function migrate_letter_card_id(state)
 	if state.playing_card ~= nil and state.letter_card_id == nil then
 		state.letter_card_id = state.playing_card

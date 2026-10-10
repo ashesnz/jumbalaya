@@ -1,4 +1,4 @@
---[[ app/callbacks/run_lifecycle.lua - Run start / menu return FUNCS registration ]]
+--[[ app/callbacks/run_lifecycle.lua - Run start / menu return Funcs registration ]]
 
 local action_dispatch = require("app.input.action_dispatch")
 local RunLifecycle = require("app.callbacks.controllers.run_lifecycle")

@@ -23,7 +23,7 @@ Funcs.register("key_button",  function(e)
 end)
 
 --Modifies the text input to show the current text value being modified. Shows the prompt text if\
---the text input area is not hooked. Also modifies the UIE colour to show the hooked/non hooked colour\
+--the text input area is not hooked. Also modifies the node colour to show the hooked/non hooked colour\
 --If using a keyboard, pops it up here or removes it if using KBM
 --
 ---@param e table
@@ -78,7 +78,7 @@ Funcs.register("paste_run_seed",  function(e)
   Funcs.dispatch("text_field_key", {key = 'return'})
 end)
 
---When clicked, hooks the text input defined by e->1->1, which should be the text input UIE
+--When clicked, hooks the text input defined by e->1->1, which should be the text input node
 --
 ---@param e table
 --
@@ -177,7 +177,7 @@ Funcs.register("text_field_key",  function(args)
   end
 end)
 
---Helper function for game().FUNCS.text_field_key
+--Helper function for Funcs.text_field_key
 function GET_TEXT_FROM_INPUT()
   local new_text = ''
   local hook = game().INPUT.text_capture
@@ -189,7 +189,7 @@ function GET_TEXT_FROM_INPUT()
   return new_text
 end
 
---Helper function for game().FUNCS.text_field_key
+--Helper function for Funcs.text_field_key
 --
 ---@param args {letter: string, text_table: table, pos: number, delete: boolean}
 --**letter** the letter being pressed\
@@ -224,7 +224,7 @@ function MODIFY_TEXT_INPUT(args)
   end
 end
 
---Helper function for game().FUNCS.text_field_key\
+--Helper function for Funcs.text_field_key\
 --Moves the cursor left or right. Typing a key, deleting or backspacing also counts\
 --as a cursor move, since empty strings are used to fill the hook
 --

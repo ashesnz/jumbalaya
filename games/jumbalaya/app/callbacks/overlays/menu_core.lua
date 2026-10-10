@@ -1,4 +1,4 @@
---[[ app/callbacks/overlays/menu_core.lua - Overlay menu FUNCS registration ]]
+--[[ app/callbacks/overlays/menu_core.lua - Overlay menu Funcs registration ]]
 
 local dispatch_wrap = require("app.callbacks.controllers.dispatch_wrap")
 local Overlays = require("app.callbacks.controllers.overlays")

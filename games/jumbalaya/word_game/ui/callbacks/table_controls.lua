@@ -1,4 +1,4 @@
---[[ word_game/ui/callbacks/table_controls.lua - Table control FUNCS registration ]]
+--[[ word_game/ui/callbacks/table_controls.lua - Table control Funcs registration ]]
 
 local Gameplay = require("word_game.ui.controllers.gameplay")
 local Funcs = require("app.callbacks.funcs")

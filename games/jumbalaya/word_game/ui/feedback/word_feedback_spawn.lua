@@ -32,7 +32,7 @@ function M.spawn_attention(args)
 		args.cover_colour = Tables.deep_clone(game().C.CLEAR)
 	end
 
-	args.uibox_config = {
+	args.panel_config = {
 		align = args.align or 'cm',
 		offset = args.offset or { x = 0, y = 0 },
 		major = args.cover or args.major or nil,
@@ -50,7 +50,7 @@ function M.spawn_attention(args)
 					Panel.root({ align = args.cover_align or 'cm', minw = (args.cover and args.cover.T.w or 0.001) + (args.cover_padding or 0), minh = (args.cover and args.cover.T.h or 0.001) + (args.cover_padding or 0), padding = 0.03, r = 0.1, emboss = args.emboss, colour = args.cover_colour }, {
 						Panel.object({ draw_layer = 1, object = FlowText({ font = GameFonts.resolve_flow_text_font(), scale = args.scale, string = args.text, maxw = args.maxw, colours = { args.colour }, float = not args.bump, shadow = true, silent = not args.noisy, args.scale, pop_in = 0, pop_in_rate = 6, rotate = args.rotate or nil, bump = args.bump, bump_rate = args.bump_rate, bump_amount = args.bump_amount }) }),
 					}),
-				config = args.uibox_config
+				config = args.panel_config
 			}
 			-- LIVE.PANELS stores the inner Panel. Flag both so the early UI pass
 			-- skips this overlay and draw_attention_passes paints it over the board.

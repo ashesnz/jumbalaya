@@ -21,7 +21,7 @@ local function item_from_event(e)
 				return items[ref.market_index], ref.market_index
 			end
 		end
-		node = node.config and node.config.button_UIE
+		node = node.config and node.config.button_host
 	end
 end
 

@@ -1,4 +1,4 @@
---[[ word_game/ui/sidebar/funcs.lua - Sidebar game().FUNCS registration (logic on Sidebar module) ]]
+--[[ word_game/ui/sidebar/funcs.lua - Sidebar Funcs registration (logic on Sidebar module) ]]
 
 local game = require("word_game.ui.util.game_runtime").game
 

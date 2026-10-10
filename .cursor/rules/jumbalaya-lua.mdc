@@ -17,27 +17,27 @@ alwaysApply: false
 
 - Files/dirs: `snake_case`
 - Locals: `snake_case`
-- Classes/globals: `PascalCase` (`Card`, `Game`, `LayoutView`)
-- Package globals: `UPPER_SNAKE` (`WORD_GAME`, `G`, `DEVTOOLS`)
-- Feature flags on `G`: `F_*` from `runtime_options.flags`
+- Classes/globals: `PascalCase` (`LetterTile`, `Game`, `Panel`)
+- Package globals: `UPPER_SNAKE` (`WORD_GAME`, `WORD_GAME_UI`)
+- Feature flags: `F_*` from `runtime_options.flags`
 
-## Classes (`app/core/object.lua`)
+## Classes (`jumbalaya-engine/scene`)
 
 ```lua
-Card = EaseNode:derive("Card")
+LetterTile = AnimNode:derive("LetterTile")
 
-function Card:construct(X, Y, W, H, ...)
+function LetterTile:construct(X, Y, W, H, ...)
     EaseNode.construct(self, X, Y, W, H)
 end
 ```
 
-Chain: `Object → Node → EaseNode/Moveable → Sprite, LayoutView, Card, CardArea`
+Chain: `Object → Node → EaseNode/AnimNode → Sprite, Panel, LetterTile, CardPile`
 
-`card.lua` mixes in behavior via requires (`card_visuals.lua`, `card_ui.lua`) — preserve this pattern.
+`letter_tile.lua` mixes in presentation via `word_game/ui/cards/bind.lua`.
 
 ## Callbacks & layout
 
-- UI binds `G.FUNCS.*` by string — move implementations, not registration names
+- Remaining string callbacks go through `Funcs.register` — move implementations, not registration names. New UI uses function `on_press`.
 - Model requests layout via `WORD_GAME.Layout.request_refresh()` / deferred `G.ARGS.pending_layout` — not direct geometry from model code
 
 ## Annotations

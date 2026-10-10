@@ -12,7 +12,6 @@
 ]]
 
 local game = require("word_game.ui.util.game_runtime").game
-local Funcs = require("app.callbacks.funcs")
 local Panel = require("jumbalaya-engine.panels.api")
 local Press = require("word_game.ui.widgets.press")
 
@@ -26,18 +25,6 @@ local CHROME = {
 }
 
 Components.CHROME = CHROME
-
-local action_seq = 0
-local registered_actions = {}
-
---- Removes generated Funcs handlers (overlay menus, cyclers with closures).
-function Components.clear_dynamic_actions()
-	for name in pairs(registered_actions) do
-		Funcs.unregister(name)
-	end
-	registered_actions = {}
-	action_seq = 0
-end
 
 --- Resolves an action spec to a function or leftover catalog string.
 ---@param action function|string|nil
@@ -62,7 +49,7 @@ Components.resolve_action = resolve_action
 --------------------------------------------------------------------
 
 --- Builds a push button.
---- Friendly keys: onClick (function or game().FUNCS name), onTick, width,
+--- Friendly keys: onClick (function or Funcs catalog name), onTick, width,
 --- height, textSize, textColour. Legacy keys still honoured.
 ---@param def table
 function Components.button(def)

@@ -1,4 +1,4 @@
---[[ word_game/ui/perks/shared/stamp_sprite.lua - Moveable perk stamp for UI/market ]]
+--[[ word_game/ui/perks/shared/stamp_sprite.lua - AnimNode perk stamp for UI/market ]]
 
 local stamp_sheet = require("word_game.ui.perks.shared.stamp_sheet")
 local AnimNode = require("jumbalaya-engine.scene.animated.init")

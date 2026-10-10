@@ -1,7 +1,7 @@
 -- Application profile and save callbacks.
 
 --Determines if there is a valid save file to load and continue from main menu
---**e** Is the UIE that called this function
+--**e** Is the panel node that called this function
 
 local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 

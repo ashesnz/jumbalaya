@@ -1,4 +1,4 @@
---[[ word_game/ui/callbacks/overlays.lua - Overlay screen FUNCS (stable names) ]]
+--[[ word_game/ui/callbacks/overlays.lua - Overlay screen Funcs (stable names) ]]
 
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()

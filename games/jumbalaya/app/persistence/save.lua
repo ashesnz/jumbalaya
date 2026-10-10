@@ -112,7 +112,6 @@ function Game:discard_run()
 		self.LIVE.CARD = {}
 		self.LIVE.CARDPILE = {}
 	end
-	self.VIEWING_DECK = nil
 	self.TIMELINE:flush()
 	self.INPUT:shift_context_layer(-1000)
 	self.INPUT.focus_cursor_stack = {}
