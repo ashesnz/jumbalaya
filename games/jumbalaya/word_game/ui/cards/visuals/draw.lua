@@ -5,6 +5,7 @@ local game = require("word_game.ui.util.game_runtime").game
 local LetterFaces = require("word_game.ui.cards.letter_faces")
 local Tables = require("jumbalaya-engine.util.tables")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
+local send_to_shader = { 0, 0 }
 
 local function draw_bonus_gold_shimmer(card)
 	local center = card.children and card.children.center
@@ -73,9 +74,8 @@ local function draw_letter_face(card)
 end
 
 function Card:sync_shadow_state()
-	self.ARGS.send_to_shader = self.ARGS.send_to_shader or {}
-	self.ARGS.send_to_shader[1] = math.min(self.VT.r*3, 1) + game().TIMERS.REAL/(28) + (self.bounce and self.bounce.r*20 or 0) + self.tilt_var.amt
-	self.ARGS.send_to_shader[2] = game().TIMERS.REAL
+	send_to_shader[1] = math.min(self.VT.r*3, 1) + game().TIMERS.REAL/(28) + (self.bounce and self.bounce.r*20 or 0) + self.tilt_var.amt
+	send_to_shader[2] = game().TIMERS.REAL
 
 	for _, child in pairs(self.children) do
 		child.VT.scale = self.VT.scale
@@ -149,15 +149,15 @@ function Card:draw_front()
 	end
 
 	if self.debuff then
-		apply_named_shader(self.children.center, "debuff", self.ARGS.send_to_shader)
+		apply_named_shader(self.children.center, "debuff", send_to_shader)
 		if self.children.front then
-			apply_named_shader(self.children.front, "debuff", self.ARGS.send_to_shader)
+			apply_named_shader(self.children.front, "debuff", send_to_shader)
 		end
 	end
 	if self.greyed then
-		apply_named_shader(self.children.center, "played", self.ARGS.send_to_shader)
+		apply_named_shader(self.children.center, "played", send_to_shader)
 		if self.children.front then
-			apply_named_shader(self.children.front, "played", self.ARGS.send_to_shader)
+			apply_named_shader(self.children.front, "played", send_to_shader)
 		end
 	end
 end

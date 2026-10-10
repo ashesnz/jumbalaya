@@ -103,10 +103,7 @@ function FlowText:construct(config)
 	self.states.drag.can = false
 	self.states.release_on.can = false
 
-	self:set_role{
-		wh_bond = 'Weak',
-		scale_bond = 'Weak',
-	}
+	self:unfollow()
 end
 
 function FlowText:update(dt)

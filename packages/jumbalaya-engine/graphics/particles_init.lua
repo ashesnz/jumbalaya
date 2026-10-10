@@ -25,13 +25,14 @@ function ParticleEmitter:construct(X, Y, W, H, config)
 			type = 'cm',
 			bond = 'Strong',
 		}
-		table.insert(self.role.major.children, self)
-		SceneRoots.set_parent(self, self.role.major)
-		self.T.x = self.role.major.T.x + self.padding
-		self.T.y = self.role.major.T.y + self.padding
+		local host = self.attach.host
+		table.insert(host.children, self)
+		SceneRoots.set_parent(self, host)
+		self.T.x = host.T.x + self.padding
+		self.T.y = host.T.y + self.padding
 		if self.fill then
-			self.T.w = self.role.major.T.w - self.padding
-			self.T.h = self.role.major.T.h - self.padding
+			self.T.w = host.T.w - self.padding
+			self.T.h = host.T.h - self.padding
 		end
 	end
 

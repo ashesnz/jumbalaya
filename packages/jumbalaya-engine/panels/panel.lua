@@ -29,12 +29,6 @@ function RetainedPanel:construct(args)
 			bond = args.config.bond or 'Strong',
 			offset = args.config.offset or {x = 0, y = 0},
 		})
-		self:set_role{
-			xy_bond = args.config.xy_bond,
-			r_bond = args.config.r_bond,
-			wh_bond = args.config.wh_bond or 'Weak',
-			scale_bond = args.config.scale_bond or 'Weak',
-		}
 		self.states.collide.can =
 			(args.config.can_collide == nil) and true or args.config.can_collide
 

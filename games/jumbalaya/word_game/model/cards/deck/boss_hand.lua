@@ -40,15 +40,15 @@ function M.deal_boss_hand(letters, on_complete, opts)
 					end
 				end
 				boss_cards[#boss_cards + 1] = card
-				live_game().draw_pile:emplace(card)
+				live_game().draw_pile:add_card(card)
 				live_game().draw_pile:remove_card(card)
-				live_game().dealt_letters:emplace(card)
+				live_game().dealt_letters:add_card(card)
 			end
 			game_access.dispatch({ type = "JUMBLE_SET_BOSS_CARDS", cards = boss_cards })
 			if live_game().pattern_row and live_game().pattern_row.apply_screen_position then
 				live_game().pattern_row:apply_screen_position()
 			end
-			live_game().dealt_letters:set_ranks()
+			live_game().dealt_letters:refresh_order()
 			live_game().dealt_letters:relayout()
 			live_game().dealt_letters:snap_VT()
 			live_game().dealt_letters:hard_set_cards()
@@ -71,7 +71,7 @@ function M.deal_boss_hand(letters, on_complete, opts)
 				end
 			end
 			boss_cards[#boss_cards + 1] = card
-			live_game().draw_pile:emplace(card)
+			live_game().draw_pile:add_card(card)
 			if live_game().TIMELINE and live_game().TIMELINE.enqueue then
 				Scheduler.add{
 					mode = "window",
@@ -86,7 +86,7 @@ function M.deal_boss_hand(letters, on_complete, opts)
 				Shared.fly_from_deck_to_hand(card)
 			else
 				live_game().draw_pile:remove_card(card)
-				live_game().dealt_letters:emplace(card)
+				live_game().dealt_letters:add_card(card)
 			end
 		end
 		game_access.dispatch({ type = "JUMBLE_SET_BOSS_CARDS", cards = boss_cards })
@@ -98,7 +98,7 @@ function M.deal_boss_hand(letters, on_complete, opts)
 				live_game().pattern_row:apply_screen_position()
 			end
 			if live_game().dealt_letters then
-				live_game().dealt_letters:set_ranks()
+				live_game().dealt_letters:refresh_order()
 				live_game().dealt_letters:relayout()
 				live_game().dealt_letters:snap_VT()
 				live_game().dealt_letters:hard_set_cards()

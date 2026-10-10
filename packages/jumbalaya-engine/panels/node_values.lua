@@ -25,8 +25,7 @@ function Target:set_values(_T, recalculate)
 		self.states.collide.can = true
 	end
 
-	-- Every element hangs off its RetainedPanel as a Minor at its layout position.
-	self:set_role{role_type = 'Minor', major = self.panel, offset = {x = _T.x, y = _T.y}, wh_bond = 'Weak', scale_bond = 'Weak'}
+	self:follow(self.panel, { x = _T.x, y = _T.y }, { lock_drawn = false })
 
 	if self.config.draw_layer then
 		self.panel.draw_layers[self.config.draw_layer] = self
@@ -41,8 +40,10 @@ function Target:set_values(_T, recalculate)
 	end
 
 	if self.ui_kind == game().UI.OBJECT and not self.config.no_role then
-		self.config.object:set_role(self.config.role
-			or {role_type = 'Minor', major = self, xy_bond = 'Strong', wh_bond = 'Weak', scale_bond = 'Weak'})
+		local object = self.config.object
+		if object.follow then
+			object:follow(self, { x = 0, y = 0 }, { lock_drawn = true })
+		end
 	end
 
 	if self.config and self.config.ref_value and self.config.ref_table then

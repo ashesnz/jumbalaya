@@ -5,6 +5,7 @@ local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 
 local sprite_util = require("jumbalaya-engine.graphics.sprite_util")
+local cursor_pos = { 0, 0 }
 
 --- Replaces the render pipeline with an ordered list of shader passes.
 --- Each step: `{shader=, shadow_height=, send={{name=, val=|func=|ref_table=+ref_value=}}, no_tilt=, other_obj=, ms, mr, mx, my}`
@@ -36,7 +37,7 @@ end
 function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt, other_obj, ms, mr, mx, my, custom_shader, tilt_shadow, overlay)
 	if not self.states.visible then return end
 
-	local draw_major = self.role.draw_major or self
+	local draw_major = (self.draw_host and self:draw_host()) or self
 
 	-- Shadow pre-transform: one down-right offset, no scale shrink.
 	if _shadow_height then
@@ -55,16 +56,14 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 	else
 		local sh = sprite_util.shader_for(_shader)
 		if sh then
-			self.ARGS.prep_shader = self.ARGS.prep_shader or {}
-			self.ARGS.prep_shader.cursor_pos = self.ARGS.prep_shader.cursor_pos or {}
-			self.ARGS.prep_shader.cursor_pos[1] =
+			cursor_pos[1] =
 				draw_major.tilt_var and draw_major.tilt_var.mx * game().CANVAS_SCALE
 				or (game().INPUT and game().INPUT.cursor_position and game().INPUT.cursor_position.x * game().CANVAS_SCALE or 0)
-			self.ARGS.prep_shader.cursor_pos[2] =
+			cursor_pos[2] =
 				draw_major.tilt_var and draw_major.tilt_var.my * game().CANVAS_SCALE
 				or (game().INPUT and game().INPUT.cursor_position and game().INPUT.cursor_position.y * game().CANVAS_SCALE or 0)
 
-			sh:send('mouse_screen_pos', self.ARGS.prep_shader.cursor_pos)
+			sh:send('mouse_screen_pos', cursor_pos)
 			sh:send('screen_scale', game().TILESCALE * game().TILESIZE * (draw_major.mouse_damping or 1) * game().CANVAS_SCALE)
 			sh:send('hovering', ((_shadow_height and not tilt_shadow) or _no_tilt) and 0
 				or (draw_major.hover_tilt or 0) * (tilt_shadow or 1))

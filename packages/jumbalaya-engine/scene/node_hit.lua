@@ -2,19 +2,21 @@
 local Geometry = require("jumbalaya-engine.util.geometry")
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
+
+local scratch_point = {}
+local scratch_trans = {}
+local scratch_rot = {}
+local offset_point = {}
+local offset_trans = {}
+
 return function(Node)
 	function Node:collides_with_point(point)
 		if not self.container then return end
 
-		local T = self.CT or self.T
-		self.ARGS.collides_with_point_point = self.ARGS.collides_with_point_point or {}
-		self.ARGS.collides_with_point_translation = self.ARGS.collides_with_point_translation or {}
-		self.ARGS.collides_with_point_rotation = self.ARGS.collides_with_point_rotation or {}
-		local p = self.ARGS.collides_with_point_point
-		local t = self.ARGS.collides_with_point_translation
-		local rot = self.ARGS.collides_with_point_rotation
+		local T = self.CT or self.drawn or self.VT or self.T
+		local p, t, rot = scratch_point, scratch_trans, scratch_rot
 
-		local buffer = self.states.hover.is and game().COLLISION_BUFFER or 0
+		local buffer = self.states.hovering and game().COLLISION_BUFFER or 0
 		p.x, p.y = point.x, point.y
 
 		if self.container ~= self then
@@ -45,10 +47,7 @@ return function(Node)
 	end
 
 	function Node:set_offset(point, kind)
-		self.ARGS.set_offset_point = self.ARGS.set_offset_point or {}
-		self.ARGS.set_offset_translation = self.ARGS.set_offset_translation or {}
-		local p = self.ARGS.set_offset_point
-		local t = self.ARGS.set_offset_translation
+		local p, t = offset_point, offset_trans
 
 		p.x, p.y = point.x, point.y
 		t.x, t.y = -self.container.T.w / 2, -self.container.T.h / 2

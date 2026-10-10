@@ -51,7 +51,7 @@ local function clear_pattern_row_cards(j)
 			if card.bonus_card then
 				bonus_return.return_card(card)
 			elseif card.area ~= live_game().dealt_letters and live_game().dealt_letters then
-				live_game().dealt_letters:emplace(card)
+				live_game().dealt_letters:add_card(card)
 			end
 		end
 		if area.config then

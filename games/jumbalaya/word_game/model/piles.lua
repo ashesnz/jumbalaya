@@ -195,21 +195,21 @@ function M.hydrate_hosts_from_store(pile_ids)
 	for _, pile_id in ipairs(pile_ids) do
 		local host = host_for_pile(pile_id)
 		local store_pile = state.piles[pile_id]
-		if host and host.emplace and store_pile and pile_record.count(store_pile) > 0 and #(host.cards or {}) == 0 then
+		if host and host.add_card and store_pile and pile_record.count(store_pile) > 0 and #(host.cards or {}) == 0 then
 			if pile_id == "pattern" then
 				for slot_index, record in pairs(store_pile) do
 					if type(slot_index) == "number" and record then
 						local card = resolve_live_card(record)
-						if card and card.set_card_area then host:emplace(card) end
+						if card and card.set_card_area then host:add_card(card) end
 					end
 				end
 			else
 				for _, record in ipairs(store_pile) do
 					local card = resolve_live_card(record)
-					if card and card.set_card_area then host:emplace(card) end
+					if card and card.set_card_area then host:add_card(card) end
 				end
 			end
-			if host.set_ranks then host:set_ranks() end
+			if host.refresh_order then host:refresh_order() end
 		end
 	end
 end
@@ -238,7 +238,7 @@ function M.release_static_chrome(store, pile_ids)
 				end
 			end
 			host.cards = retained
-			if host.set_ranks then host:set_ranks() end
+			if host.refresh_order then host:refresh_order() end
 		end
 	end
 end

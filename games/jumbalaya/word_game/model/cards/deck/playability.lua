@@ -69,7 +69,7 @@ end
 	local function fly_from_deck_to_hand(card)
 		if not card or not live_game().dealt_letters then return false end
 		start_from_pile(card)
-		live_game().dealt_letters:emplace(card)
+		live_game().dealt_letters:add_card(card)
 		if card.pulse then
 			card:pulse(0.18, 0.08)
 		end

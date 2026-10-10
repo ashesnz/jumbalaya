@@ -5,6 +5,7 @@ local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local DropShadow = require("jumbalaya-engine.graphics.drop_shadow")
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
+local button_colours = {}
 return function(Target)
 function Target:draw_self()
 	if not self.states.visible then
@@ -114,15 +115,14 @@ function Target:draw_self()
 			-- Fill layers: base colour (greyed during button_delay), plus a
 			-- hover/click overlay tint.
 			local collided_button = self.config.button_host or self
-			self.ARGS.button_colours = self.ARGS.button_colours or {}
-			self.ARGS.button_colours[1] = self.config.button_delay
+			button_colours[1] = self.config.button_delay
 				and Colour.blend_colours(self.config.colour, game().C.L_BLACK, 0.5) or self.config.colour
-			self.ARGS.button_colours[2] =
+			button_colours[2] =
 				(((collided_button.config.hover and collided_button.states.hover.is)
 					or (collided_button.last_clicked and collided_button.last_clicked > game().TIMERS.REAL - 0.1))
 				and game().C.UI.HOVER or nil)
 
-			for layer, colour in ipairs(self.ARGS.button_colours) do
+			for layer, colour in ipairs(button_colours) do
 				love.graphics.setColor(colour)
 				if self.config.glossy and layer == 1 then
 					-- Glossy normally needs stencils, which canvas rendering may

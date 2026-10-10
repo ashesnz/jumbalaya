@@ -93,8 +93,8 @@ function M.stash_played_card(card)
 		if card.states.hover then card.states.hover.can = false end
 		if card.states.click then card.states.click.can = false end
 	end
-	if game().recycle_stash and game().recycle_stash.emplace then
-		game().recycle_stash:emplace(card)
+	if game().recycle_stash and game().recycle_stash.add_card then
+		game().recycle_stash:add_card(card)
 	end
 end
 

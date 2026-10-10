@@ -135,10 +135,10 @@ local function setup_hand_and_draw(hand_letters, draw_letters)
 	run_scheduled_tweens(game)
 
 	for index, letter in ipairs(hand_letters) do
-		game.dealt_letters:emplace(make_letter_card(game, index, letter))
+		game.dealt_letters:add_card(make_letter_card(game, index, letter))
 	end
 	for index, letter in ipairs(draw_letters) do
-		game.draw_pile:emplace(make_letter_card(game, 100 + index, letter))
+		game.draw_pile:add_card(make_letter_card(game, 100 + index, letter))
 	end
 
 	local store = store_ops.store()

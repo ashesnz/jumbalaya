@@ -127,8 +127,8 @@ function M.animate(hand, on_complete)
 
 	local before = capture_layout(hand)
 	hand:shuffle("hand_shuffle")
-	if hand.set_ranks then
-		hand:set_ranks()
+	if hand.refresh_order then
+		hand:refresh_order()
 	end
 	hand:relayout()
 

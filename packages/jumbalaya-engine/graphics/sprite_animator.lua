@@ -54,12 +54,12 @@ function GfxAnimator:configure_frames(column, row)
 end
 
 function GfxAnimator:texture_descriptor()
-	local descriptor = self.RETS.texture_descriptor or {}
+	local descriptor = self._texture_descriptor or {}
 	descriptor[1] = self.current_animation.current
 	descriptor[2] = self.animation.y
 	descriptor[3] = self.animation.w
 	descriptor[4] = self.animation.h
-	self.RETS.texture_descriptor = descriptor
+	self._texture_descriptor = descriptor
 	return descriptor
 end
 

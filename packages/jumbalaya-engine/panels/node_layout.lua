@@ -30,11 +30,11 @@ function Target:set_wh()
 	return self.T.w, self.T.h
 end
 
---- Shifts this subtree's role offsets by (x, y) — the mechanism behind
+--- Shifts this subtree's follow offsets by (x, y) — the mechanism behind
 --- alignment chars.
 function Target:align(x, y)
-	self.role.offset.y = self.role.offset.y + y
-	self.role.offset.x = self.role.offset.x + x
+	self.attach.offset.y = self.attach.offset.y + y
+	self.attach.offset.x = self.attach.offset.x + x
 	for _, v in pairs(self.children) do
 		if v.align then v:align(x, y) end
 	end
@@ -116,8 +116,12 @@ function Target:update_object()
 	if self.config.object and self.config.object.ui_object_updated then
 		self.config.object.ui_object_updated = nil
 		self.config.object:set_scene_parent(self)
-		self.config.object:set_role(self.config.role or {role_type = 'Minor', major = self})
-		self.config.object:move_with_major(0)
+		if self.config.object.follow then
+			self.config.object:follow(self, { x = 0, y = 0 }, { lock_drawn = true })
+		end
+		if self.config.object.snap_to_attach then
+			self.config.object:snap_to_attach()
+		end
 		if self.config.object.non_recalc then
 			-- Manual placement: adjust the parent's content box instead of a
 			-- full relayout (used by high-frequency readouts).

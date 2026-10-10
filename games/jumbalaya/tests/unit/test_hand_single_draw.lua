@@ -134,7 +134,7 @@ local function setup_table_board(hand_cards)
 
 	for index, letter in ipairs(hand_cards) do
 		local card = make_hand_card(game, index, letter)
-		game.dealt_letters:emplace(card)
+		game.dealt_letters:add_card(card)
 	end
 
 	local store = store_ops.store()

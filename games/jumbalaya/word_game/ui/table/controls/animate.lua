@@ -63,7 +63,7 @@ function M.recall_placement_cards(opts)
 			if stack and stack.is_bonus_card(card) then
 				stack.return_card(card)
 			elseif game().dealt_letters then
-				game().dealt_letters:emplace(card)
+				game().dealt_letters:add_card(card)
 			end
 		end
 		if p_area.hard_set_cards then
@@ -83,7 +83,7 @@ function M.recall_placement_cards(opts)
 	facade.placement_word().clear()
 	if game().dealt_letters then
 		if game().dealt_letters.clear_selection then game().dealt_letters:clear_selection() end
-		if game().dealt_letters.set_ranks then game().dealt_letters:set_ranks() end
+		if game().dealt_letters.refresh_order then game().dealt_letters:refresh_order() end
 		if game().dealt_letters.relayout then game().dealt_letters:relayout() end
 		if not opts.skip_hand_snap then
 			if game().dealt_letters.hard_set_cards then game().dealt_letters:hard_set_cards() end

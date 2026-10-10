@@ -7,7 +7,7 @@ alwaysApply: true
 
 Roguelike **jumble** word game on Love2D/Lua. Active loop: fill **pattern puzzles** from a 7-card hand, bank score × multiplier, clear 24 stages (8 sets × 3 hands). Timeline fuse → tokens; between hands → The Trade marketplace.
 
-**Authoritative docs:** `docs/code-organization.md`, `docs/gameplay.md`, `docs/testing.md`
+**Authoritative docs:** `docs/code-organization.md`, `docs/gameplay.md`, `docs/testing.md`, `docs/engine.md`
 
 ## Layout
 

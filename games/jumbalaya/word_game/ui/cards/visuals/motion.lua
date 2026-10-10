@@ -76,7 +76,9 @@ function Card:explode(dissolve_colours, explode_time_fac)
 								attach = self,
 								colours = self.dissolve_colours,
 						})
-						childParts2:set_role({r_bond = 'Weak'})
+						if childParts2.follow then
+							childParts2:follow(self, { x = 0, y = 0 }, { lock_drawn = false })
+						end
 						Scheduler.add{
 								mode = 'tween',
 								blockable = false,

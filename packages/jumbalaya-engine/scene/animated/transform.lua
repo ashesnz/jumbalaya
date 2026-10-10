@@ -5,7 +5,10 @@ local game = shell.game
 
 local Node = require("jumbalaya-engine.scene.node")
 
---- Teleports both transforms to (X, Y, W, H) and kills all velocity.
+local drag_cursor = {}
+local drag_trans = {}
+
+--- Teleports both target and drawn to (X, Y, W, H) and kills velocity.
 function AnimNode:hard_set_T(X, Y, W, H)
 	self.T.x, self.T.y, self.T.w, self.T.h = X, Y, W, H
 	self.velocity.x, self.velocity.y, self.velocity.r, self.velocity.scale = 0, 0, 0, 0
@@ -15,7 +18,7 @@ function AnimNode:hard_set_T(X, Y, W, H)
 	self:calculate_parallax()
 end
 
---- Snaps only the visible transform onto the logical one (no velocity reset).
+--- Snaps only the drawn rect onto the layout target (no velocity reset).
 function AnimNode:snap_VT()
 	self.VT.x = self.T.x
 	self.VT.y = self.T.y
@@ -24,13 +27,10 @@ function AnimNode:snap_VT()
 end
 
 --- Follows the cursor: converts cursor pixels into container space, then pins
---- `T` to the grab point recorded by `set_offset(.., 'Click')`.
+--- target to the grab point recorded by `set_offset(.., 'Click')`.
 function AnimNode:drag(offset)
 	if self.states.drag.can or offset then
-		self.ARGS.drag_cursor_trans = self.ARGS.drag_cursor_trans or {}
-		self.ARGS.drag_translation = self.ARGS.drag_translation or {}
-		local p = self.ARGS.drag_cursor_trans
-		local t = self.ARGS.drag_translation
+		local p, t = drag_cursor, drag_trans
 		p.x = game().INPUT.cursor_position.x / (game().TILESCALE * game().TILESIZE)
 		p.y = game().INPUT.cursor_position.y / (game().TILESCALE * game().TILESIZE)
 
@@ -44,7 +44,7 @@ function AnimNode:drag(offset)
 
 		self.T.x = p.x - offset.x
 		self.T.y = p.y - offset.y
-		self.NEW_ALIGNMENT = true
+		if self.attach then self.attach.dirty = true end
 		for _, v in pairs(self.children) do v:drag(offset) end
 	end
 	if self.states.drag.can then Node.drag(self) end

@@ -81,9 +81,7 @@ function Card:align_h_popup()
 				return {
 						major = self.children.focused_ui or self,
 						parent = self,
-						xy_bond = 'Strong',
-						r_bond = 'Weak',
-						wh_bond = 'Weak',
+						bond = 'Strong',
 						offset = {
 								x = popup_direction ~= 'cl' and 0 or
 										focused_ui and -0.05 or

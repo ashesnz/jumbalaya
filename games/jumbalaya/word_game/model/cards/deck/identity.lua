@@ -145,7 +145,7 @@ end
 		end
 
 		for _, card in ipairs(all) do
-			live_game().draw_pile:emplace(card)
+			live_game().draw_pile:add_card(card)
 		end
 		live_game().draw_pile:shuffle("letter_deck_reset")
 		live_game().draw_pile:hard_set_T()

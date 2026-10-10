@@ -66,7 +66,7 @@ end
 		if not M.is_jumble_deck() then return end
 		local g = live_game()
 		local draw = g.draw_pile
-		if not draw or not draw.emplace then return end
+		if not draw or not draw.add_card then return end
 
 		piles.hydrate_hosts_from_store({ "draw" })
 
@@ -91,7 +91,7 @@ end
 				if card.remove_from_area then
 					card:remove_from_area()
 				end
-				draw:emplace(card)
+				draw:add_card(card)
 			end
 			::continue::
 		end
@@ -122,8 +122,8 @@ end
 				if card.states then
 					card.states.visible = true
 				end
-				if live_game().draw_pile.emplace then
-					live_game().draw_pile:emplace(card)
+				if live_game().draw_pile.add_card then
+					live_game().draw_pile:add_card(card)
 				end
 			end
 		end

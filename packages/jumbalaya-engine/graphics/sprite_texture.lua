@@ -39,14 +39,14 @@ end
 
 --- Cell position + size fed to the `texture_details` shader uniform.
 function GfxSprite:texture_descriptor()
-	local descriptor = self.RETS.texture_descriptor or {}
+	local descriptor = self._texture_descriptor or {}
 	local position = self.sprite_pos or {x = 0, y = 0}
 	local atlas = self.atlas or {}
 	descriptor[1] = position.x
 	descriptor[2] = position.y
 	descriptor[3] = atlas.px or 1
 	descriptor[4] = atlas.py or 1
-	self.RETS.texture_descriptor = descriptor
+	self._texture_descriptor = descriptor
 	return descriptor
 end
 

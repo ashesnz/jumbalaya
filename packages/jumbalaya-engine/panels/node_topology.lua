@@ -25,7 +25,7 @@ end
 --- Snap the freshly-laid-out tree onto its transforms and sync embedded
 --- objects. Capability-guarded so plain AnimNodes work as objects too.
 function Target:initialize_VT()
-	self:move_with_major(0)
+	if self.snap_to_attach then self:snap_to_attach() end
 	self:calculate_parallax()
 
 	for _, v in pairs(self.children) do
@@ -40,8 +40,8 @@ function Target:initialize_VT()
 			if self.config.object.hard_set_T then
 				self.config.object:hard_set_T(self.T.x, self.T.y, self.T.w, self.T.h)
 			end
-			if self.config.object.move_with_major then
-				self.config.object:move_with_major(0)
+			if self.config.object.snap_to_attach then
+				self.config.object:snap_to_attach()
 			end
 			if self.config.object.alignment and self.config.object.align_to_major then
 				self.config.object.alignment.prev_type = ''

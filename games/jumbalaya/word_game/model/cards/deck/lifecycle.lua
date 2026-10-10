@@ -39,7 +39,7 @@ end
 		shell.reset_letter_registry()
 		live_game().draw_pile.cards = {}
 		for _, letter in ipairs(Deck().STARTING_LETTERS) do
-			live_game().draw_pile:emplace(Deck().create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR))
+			live_game().draw_pile:add_card(Deck().create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR))
 		end
 		game_access.patch({ starting_deck_size = #Deck().STARTING_LETTERS })
 		live_game().draw_pile.config.card_limit = #Deck().STARTING_LETTERS
@@ -53,7 +53,7 @@ end
 	 function M.draft_letter(letter, color)
 	 	live_game().draw_pile.config = live_game().draw_pile.config or {}
 		local card = Deck().create_letter_card(letter, color)
-		live_game().draw_pile:emplace(card)
+		live_game().draw_pile:add_card(card)
 		live_game().draw_pile.config.card_limit = (live_game().draw_pile.config.card_limit or #Deck().STARTING_LETTERS) + 1
 		if Deck().reconcile_draw_pile_from_inventory then
 			Deck().reconcile_draw_pile_from_inventory()

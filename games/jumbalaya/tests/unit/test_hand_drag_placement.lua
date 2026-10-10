@@ -179,7 +179,7 @@ local function deal_hand(game, letters)
 	local cards = {}
 	for index, letter in ipairs(letters) do
 		local card = make_letter_card(game, index, letter)
-		game.dealt_letters:emplace(card)
+		game.dealt_letters:add_card(card)
 		cards[#cards + 1] = card
 	end
 	local store = store_ops.store()

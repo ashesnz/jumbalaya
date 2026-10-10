@@ -21,6 +21,7 @@ local M = {
 	Node = Node,
 	AnimNode = AnimNode,
 	EaseNode = AnimNode,
+	Spatial = AnimNode,
 	SceneNode = Node,
 	GfxSprite = GfxSprite,
 	Sprite = GfxSprite,
@@ -43,6 +44,7 @@ function M.install()
 	_G.Node = M.Node
 	_G.AnimNode = M.AnimNode
 	_G.EaseNode = M.EaseNode
+	_G.Spatial = M.Spatial
 	_G.SceneNode = M.SceneNode
 	_G.GfxSprite = M.GfxSprite
 	_G.Sprite = M.Sprite

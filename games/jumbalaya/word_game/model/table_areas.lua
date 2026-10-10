@@ -118,7 +118,7 @@ function M.dealt_letters()
 	return {
 		cards = M.hand_cards(),
 		config = { card_limit = 7, selected_limit = 7 },
-		emplace = function(self, card) table.insert(self.cards, card) end,
+		add_card = function(self, card) table.insert(self.cards, card) end,
 		remove_card = function(self, card)
 			for i, c in ipairs(self.cards) do
 				if c == card or c.id == card.id then
@@ -127,7 +127,7 @@ function M.dealt_letters()
 				end
 			end
 		end,
-		set_ranks = function() end,
+		refresh_order = function() end,
 		relayout = function() end,
 	}
 end

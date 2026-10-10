@@ -31,7 +31,9 @@ function LetterTile:construct(X, Y, W, H, ...)
 end
 ```
 
-Chain: `Object → Node → EaseNode/AnimNode → Sprite, Panel, LetterTile, CardPile`
+Chain: `Kind → SceneNode (Node) → Spatial (AnimNode / EaseNode) → Sprite, Panel, LetterTile, CardPile`
+
+Spatial motion: `set_rect`, `follow(parent, offset)`, `bind_to(host)`. Do not add `set_role` / `role_type` / `xy_bond`. See `docs/engine.md`.
 
 `letter_tile.lua` mixes in presentation via `word_game/ui/cards/bind.lua`.
 

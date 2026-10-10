@@ -47,7 +47,7 @@ end
 		if opts.instant then
 			for _, card in ipairs(cards) do
 				live_game().dealt_letters:remove_card(card)
-				live_game().draw_pile:emplace(card)
+				live_game().draw_pile:add_card(card)
 			end
 			Deck().shuffle_deck()
 			Shared.commit_piles({ "hand", "draw" })
@@ -67,7 +67,7 @@ end
 				}
 			elseif live_game().dealt_letters and live_game().draw_pile then
 				live_game().dealt_letters:remove_card(card)
-				live_game().draw_pile:emplace(card)
+				live_game().draw_pile:add_card(card)
 			end
 		end
 		if live_game().TIMELINE and live_game().TIMELINE.enqueue then
@@ -100,7 +100,7 @@ end
 			if card.states then
 				card.states.visible = true
 			end
-			live_game().draw_pile:emplace(card)
+			live_game().draw_pile:add_card(card)
 		end
 		if live_game().recycle_stash.hard_set_cards then
 			live_game().recycle_stash:hard_set_cards()
@@ -178,10 +178,10 @@ end
 		for _ = 1, to_deal do
 			local card = live_game().draw_pile:remove_card()
 			if card then
-				live_game().dealt_letters:emplace(card)
+				live_game().dealt_letters:add_card(card)
 			end
 		end
-		live_game().dealt_letters:set_ranks()
+		live_game().dealt_letters:refresh_order()
 		live_game().dealt_letters:relayout()
 		live_game().dealt_letters:snap_VT()
 		live_game().dealt_letters:hard_set_cards()
@@ -202,7 +202,7 @@ end
 		if not card then return nil end
 		local function finish()
 			if live_game().dealt_letters then
-				live_game().dealt_letters:set_ranks()
+				live_game().dealt_letters:refresh_order()
 				live_game().dealt_letters:relayout()
 			end
 			Shared.commit_piles({ "hand", "draw" })
@@ -230,7 +230,7 @@ end
 			Shared.fly_from_deck_to_hand(card)
 			finish()
 		else
-			live_game().dealt_letters:emplace(card)
+			live_game().dealt_letters:add_card(card)
 			finish()
 		end
 		return card

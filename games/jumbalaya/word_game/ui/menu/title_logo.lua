@@ -9,6 +9,7 @@ local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 
 local BASE_W = 933
 local BASE_H = 267
+local cursor_pos = { 0, 0 }
 
 -- Pixel placement on the 1x title canvas (from Jumbalaya.png alignment).
 local LETTER_ANCHORS = {
@@ -140,16 +141,14 @@ function TitleLogo:apply_shader_effect()
 	local sh = game().SHADERS and game().SHADERS.dissolve
 	if not sh then return end
 
-	local _draw_major = self.role.draw_major or self
-	self.ARGS.prep_shader = self.ARGS.prep_shader or {}
-	self.ARGS.prep_shader.cursor_pos = self.ARGS.prep_shader.cursor_pos or {}
-	self.ARGS.prep_shader.cursor_pos[1] = _draw_major.tilt_var and _draw_major.tilt_var.mx * game().CANVAS_SCALE
+	local _draw_major = (self.draw_host and self:draw_host()) or self
+	cursor_pos[1] = _draw_major.tilt_var and _draw_major.tilt_var.mx * game().CANVAS_SCALE
 		or (game().INPUT and game().INPUT.cursor_position and game().INPUT.cursor_position.x * game().CANVAS_SCALE or 0)
-	self.ARGS.prep_shader.cursor_pos[2] = _draw_major.tilt_var and _draw_major.tilt_var.my * game().CANVAS_SCALE
+	cursor_pos[2] = _draw_major.tilt_var and _draw_major.tilt_var.my * game().CANVAS_SCALE
 		or (game().INPUT and game().INPUT.cursor_position and game().INPUT.cursor_position.y * game().CANVAS_SCALE or 0)
 
 	pcall(function()
-		sh:send("mouse_screen_pos", self.ARGS.prep_shader.cursor_pos)
+		sh:send("mouse_screen_pos", cursor_pos)
 		sh:send("screen_scale", game().TILESCALE * game().TILESIZE * (_draw_major.mouse_damping or 1) * game().CANVAS_SCALE)
 		sh:send("hovering", (_draw_major.hover_tilt or 0))
 		sh:send("dissolve", math.abs(_draw_major.dissolve or 0))

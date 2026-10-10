@@ -1,6 +1,7 @@
---[[ jumbalaya-engine/scene/node.lua - transform tree node with interaction state ]]
+--[[ jumbalaya-engine/scene/node.lua - SceneNode: identity, children, input flags ]]
 
 local Kind = require("jumbalaya-engine.object")
+local InputFlags = require("jumbalaya-engine.scene.input_flags")
 
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
@@ -11,24 +12,24 @@ local Node = Kind:derive("Node")
 
 function Node:construct(args)
 	args = args or {}
-	args.T = args.T or {}
+	local rect = args.T or args.rect or args
+	if type(rect) ~= "table" then rect = {} end
 
-	self.ARGS = self.ARGS or {}
-	self.RETS = {}
 	self.config = self.config or {}
 
-	self.T = {
-		x = args.T.x or args.T[1] or 0,
-		y = args.T.y or args.T[2] or 0,
-		w = args.T.w or args.T[3] or 1,
-		h = args.T.h or args.T[4] or 1,
-		r = args.T.r or args.T[5] or 0,
-		scale = args.T.scale or args.T[6] or 1,
+	self.target = {
+		x = rect.x or rect[1] or 0,
+		y = rect.y or rect[2] or 0,
+		w = rect.w or rect[3] or 1,
+		h = rect.h or rect[4] or 1,
+		r = rect.r or rect[5] or 0,
+		scale = rect.scale or rect[6] or 1,
 	}
-	self.CT = self.T
+	self.T = self.target
 	self.click_offset = { x = 0, y = 0 }
 	self.hover_offset = { x = 0, y = 0 }
-	self.created_on_pause = game().SETTINGS.paused
+	self.moves_while_paused = game().SETTINGS.paused
+	self.created_on_pause = self.moves_while_paused
 	self.REMOVED = false
 
 	game().ID = game().ID or 1
@@ -36,15 +37,7 @@ function Node:construct(args)
 	game().ID = game().ID + 1
 
 	self.FRAME = { RENDER = -1, TRANSFORM = -1 }
-	self.states = {
-		visible = true,
-		collide = { can = false, is = false },
-		focus = { can = false, is = false },
-		hover = { can = true, is = false },
-		click = { can = true, is = false },
-		drag = { can = true, is = false },
-		release_on = { can = true, is = false },
-	}
+	self.states = InputFlags.new()
 
 	self.container = args.container or game().ROOM
 	self.children = self.children or {}
@@ -61,7 +54,5 @@ end
 require("jumbalaya-engine.scene.node_debug")(Node)
 require("jumbalaya-engine.scene.node_hit")(Node)
 require("jumbalaya-engine.scene.node_lifecycle")(Node)
-
-local SceneNode = Node
 
 return Node

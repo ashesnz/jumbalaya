@@ -56,11 +56,11 @@ function M.reset()
 	if WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
 		WORD_GAME_UI.TableInput.refresh_card_input()
 	else
-		if game().dealt_letters and game().dealt_letters.set_ranks then
-			game().dealt_letters:set_ranks()
+		if game().dealt_letters and game().dealt_letters.refresh_order then
+			game().dealt_letters:refresh_order()
 		end
-		if game().pattern_row and game().pattern_row.area and game().pattern_row.area.set_ranks then
-			game().pattern_row.area:set_ranks()
+		if game().pattern_row and game().pattern_row.area and game().pattern_row.area.refresh_order then
+			game().pattern_row.area:refresh_order()
 		end
 	end
 end

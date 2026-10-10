@@ -36,6 +36,10 @@ Parallel accessors (same function reference, no per-file wrapper):
 When a function parameter is already named `game`, name the accessor `runtime`
 instead to avoid shadowing (see `word_game/ui/table/board.lua`).
 
+## Scene motion
+
+Spatial (`AnimNode`) ticks each frame: **bind** (copy host drawn rect), **follow** (parent + offset), or **independent** (spring `drawn` toward `target`). Public API: `set_rect`, `follow`, `bind_to`. See `docs/engine.md`. Do not reintroduce `set_role` / Major-Minor-Glued.
+
 ## Kind graph globals
 
 Engine and gameplay `:derive` classes are **local module exports**. Boot assigns

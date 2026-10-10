@@ -24,13 +24,13 @@ end
 
 function M.node_world_xywh(node)
 	if not node then return nil end
-	local role = node.role
-	local major = role and role.major
+	local attach = node.attach
+	local host = attach and attach.host
 	local t = node.T or node.VT
 	if not t then return nil end
-	if major and major.T and role.offset then
-		return (major.T.x or 0) + (role.offset.x or 0),
-			(major.T.y or 0) + (role.offset.y or 0),
+	if host and host.T and attach.offset then
+		return (host.T.x or 0) + (attach.offset.x or 0),
+			(host.T.y or 0) + (attach.offset.y or 0),
 			t.w or 0,
 			t.h or 0
 	end

@@ -38,8 +38,8 @@ local TYPE_HANDLERS = {
 --- @field config table per-instance behaviour config; see `config.type` above
 --- @field children { area_panel: table|nil, view_deck: table|nil, [string]: any }
 ---@overload fun(...): CardPile
---- @field emplace fun(self: CardPile, card: Card, location: string|nil, stay_flipped: boolean|nil)
---- @field set_ranks fun(self: CardPile)
+--- @field add_card fun(self: CardPile, card: Card, location: string|nil, stay_flipped: boolean|nil)
+--- @field refresh_order fun(self: CardPile)
 --- @field relayout fun(self: CardPile)
 --- @field remove_card fun(self: CardPile, card: Card|nil, discarded_only: boolean|nil): Card|nil
 --- @field remove_selection fun(self: CardPile, card: Card, force: boolean|nil)
@@ -112,8 +112,8 @@ function CardPile:construct(X, Y, W, H, config)
 	end
 end
 
-function CardPile:emplace(card, location, stay_flipped)
-	lifecycle.emplace(self, card, location, stay_flipped, type_handler)
+function CardPile:add_card(card, location, stay_flipped)
+	lifecycle.add_card(self, card, location, stay_flipped, type_handler)
 end
 
 function CardPile:remove_card(card, discarded_only)
@@ -148,7 +148,7 @@ end
 --- Assigns each card's `slot` (its 1-based index/position) and sets
 --- per-card drag/collide/click ability based on this area's type — e.g. only
 --- the top deck card is draggable.
-function CardPile:set_ranks()
+function CardPile:refresh_order()
 	local handler = type_handler(self)
 	for k, card in ipairs(self.cards) do
 		card.slot = k
@@ -206,8 +206,8 @@ function CardPile:draw()
 	self:draw_boundingrect()
 	HitOrder.track_hit_target(self)
 
-	self.ARGS.draw_layers = self.ARGS.draw_layers or self.config.draw_layers or {'shadow', 'card'}
-	for _, v in ipairs(self.ARGS.draw_layers) do
+	local draw_layers = self.config.draw_layers or { "shadow", "card" }
+	for _, v in ipairs(draw_layers) do
 		if handler and handler.draw_layer then
 			handler.draw_layer(self, v, draw_card_layer)
 		end

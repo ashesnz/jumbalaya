@@ -13,18 +13,12 @@ local function sync_screen_wipe_card()
 	if not card or not game().screenwipe then return end
 	local host = game().screenwipe.find_node_by_id and game().screenwipe:find_node_by_id('screenwipe_card')
 	if host then
-		card:set_role({
-			role_type = 'Minor',
-			major = host,
-			xy_bond = 'Strong',
-			wh_bond = 'Weak',
-			scale_bond = 'Weak',
-		})
+		card:follow(host, { x = 0, y = 0 }, { lock_drawn = true })
 	end
 	card.states.visible = true
 	card:hard_set_T(card.T.x, card.T.y, game().CARD_W, game().CARD_H)
-	if card.move_with_major then
-		card:move_with_major(0)
+	if card.snap_to_attach then
+		card:snap_to_attach()
 	end
 end
 

@@ -278,7 +278,7 @@ function M.assign_card_to_blank(slot_index, card, insert_pos)
 			if displaced.bonus_card then
 				bonus_return.return_card(displaced)
 			elseif live_game().dealt_letters and displaced.area ~= live_game().dealt_letters then
-				live_game().dealt_letters:emplace(displaced)
+				live_game().dealt_letters:add_card(displaced)
 			end
 		end
 		detach_card_from_slots(j.slots, card)

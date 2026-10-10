@@ -37,8 +37,8 @@ function ComicBurst:construct(X, Y, W, H, config)
 			type = "cm",
 			bond = "Strong",
 		})
-		table.insert(self.role.major.children, self)
-		SceneRoots.set_parent(self, self.role.major)
+		table.insert(self.attach.host.children, self)
+		SceneRoots.set_parent(self, self.attach.host)
 	end
 
 	self.states.hover.can = false
@@ -74,10 +74,10 @@ function ComicBurst:draw()
 end
 
 function ComicBurst:remove()
-	if self.role.major then
-		for k, v in pairs(self.role.major.children) do
+	if self.attach and self.attach.host then
+		for k, v in pairs(self.attach.host.children) do
 			if v == self and type(k) == "number" then
-				table.remove(self.role.major.children, k)
+				table.remove(self.attach.host.children, k)
 			end
 		end
 	end

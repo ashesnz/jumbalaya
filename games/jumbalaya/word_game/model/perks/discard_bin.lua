@@ -74,8 +74,8 @@ function M.stash_discarded_card(card)
 		if card.states.click then card.states.click.can = false end
 	end
 	local stash = live_game().recycle_stash
-	if stash and stash.emplace and card.area ~= stash then
-		stash:emplace(card)
+	if stash and stash.add_card and card.area ~= stash then
+		stash:add_card(card)
 	end
 end
 

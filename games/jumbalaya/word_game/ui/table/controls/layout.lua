@@ -143,7 +143,7 @@ end
 
 local function refresh_bar_tree(bar)
 	if not bar or not bar.root_node then return end
-	bar.root_node:move_with_major(0)
+	if bar.root_node.snap_to_attach then bar.root_node:snap_to_attach() end
 	bar.root_node:initialize_VT()
 end
 

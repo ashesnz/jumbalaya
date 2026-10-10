@@ -28,7 +28,7 @@ return function(Node)
 			love.graphics.setColor(game().C.GOLD)
 			love.graphics.setLineWidth(1)
 		end
-		if self.CALCING then
+		if self.attach and self.attach.dirty then
 			love.graphics.setColor({ 0, 0, 1, 1 })
 			love.graphics.setLineWidth(3)
 		end

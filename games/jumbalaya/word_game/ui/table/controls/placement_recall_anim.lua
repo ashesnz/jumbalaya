@@ -170,7 +170,7 @@ local function slide_card_to_hand(card, p_area, delay)
 			end
 
 			card.placement_recall_slide = true
-			game().dealt_letters:emplace(card)
+			game().dealt_letters:add_card(card)
 
 			local tx, ty, tr = card.T.x, card.T.y, card.T.r or 0
 			local arc = (game().CARD_H or 1.4) * ARC_FRAC
@@ -236,7 +236,7 @@ local function finish_recall()
 
 	if game().dealt_letters then
 		if game().dealt_letters.clear_selection then game().dealt_letters:clear_selection() end
-		if game().dealt_letters.set_ranks then game().dealt_letters:set_ranks() end
+		if game().dealt_letters.refresh_order then game().dealt_letters:refresh_order() end
 		if game().dealt_letters.relayout then game().dealt_letters:relayout() end
 		if game().dealt_letters.hard_set_cards then game().dealt_letters:hard_set_cards() end
 		if game().dealt_letters.snap_VT then game().dealt_letters:snap_VT() end

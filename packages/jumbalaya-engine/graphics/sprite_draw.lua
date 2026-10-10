@@ -5,6 +5,7 @@ local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 
 local sprite_util = require("jumbalaya-engine.graphics.sprite_util")
+local draw_from_offset = { x = 0, y = 0 }
 
 --- Draws just this quad into the current (possibly shader-bound) pass.
 function GfxSprite:draw_self(overlay)
@@ -69,11 +70,10 @@ end
 
 --- Draws this texture using another object's transform (holographic overlays).
 function GfxSprite:project_onto(other_obj, ms, mr, mx, my)
-	self.ARGS.draw_from_offset = self.ARGS.draw_from_offset or {}
-	self.ARGS.draw_from_offset.x = mx or 0
-	self.ARGS.draw_from_offset.y = my or 0
+	draw_from_offset.x = mx or 0
+	draw_from_offset.y = my or 0
 
-	NodeTransform.push_node_transform(other_obj, 1 + (ms or 0), mr or 0, self.ARGS.draw_from_offset, true)
+	NodeTransform.push_node_transform(other_obj, 1 + (ms or 0), mr or 0, draw_from_offset, true)
 	self:draw_projected_texture(other_obj)
 	love.graphics.pop()
 end

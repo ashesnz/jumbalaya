@@ -1,4 +1,4 @@
---[[ jumbalaya-engine/scene/animated/init.lua - visible transform (VT springs toward T) ]]
+--[[ jumbalaya-engine/scene/animated/init.lua - Spatial: drawn springs toward target ]]
 
 local Node = require("jumbalaya-engine.scene.node")
 local SceneRoots = require("jumbalaya-engine.scene.roots")
@@ -14,29 +14,29 @@ local AnimNode = Node:derive("AnimNode")
 require("jumbalaya-engine.scene.animated.alignment")(AnimNode)
 require("jumbalaya-engine.scene.animated.transform")(AnimNode)
 require("jumbalaya-engine.scene.animated.bounce")(AnimNode)
-require("jumbalaya-engine.scene.animated.motion")(AnimNode)
 require("jumbalaya-engine.scene.animated.integrate")(AnimNode)
-require("jumbalaya-engine.scene.animated.role")(AnimNode)
+require("jumbalaya-engine.scene.animated.attach")(AnimNode)
+require("jumbalaya-engine.scene.animated.motion")(AnimNode)
 
 function AnimNode:construct(X, Y, W, H)
 	local args = (type(X) == "table") and X or { T = { X or 0, Y or 0, W or 0, H or 0 } }
 	Node.construct(self, args)
 
-	self.VT = {
+	self.target = self.T
+	self.drawn = {
 		x = self.T.x, y = self.T.y,
 		w = self.T.w, h = self.T.h,
 		r = self.T.r, scale = self.T.scale,
 	}
+	self.VT = self.drawn
 	self.velocity = { x = 0, y = 0, r = 0, scale = 0, mag = 0 }
-	self.role = {
-		role_type = "Major",
+	self.attach = {
+		mode = "independent",
+		host = nil,
 		offset = { x = 0, y = 0 },
-		major = nil,
-		draw_major = self,
-		xy_bond = "Strong",
-		wh_bond = "Strong",
-		r_bond = "Strong",
-		scale_bond = "Strong",
+		draw_host = self,
+		lock_drawn = false,
+		dirty = false,
 	}
 	self.alignment = {
 		type = "a",
@@ -53,6 +53,8 @@ function AnimNode:construct(X, Y, W, H)
 	self.shadow_parallax = { x = DropShadow.X, y = DropShadow.Y }
 	self.parallax_shift = { x = 0, y = 0 }
 	self.shadow_height = 0.2
+	self.settled = true
+	self.STATIONARY = true
 
 	table.insert(game().TRANSFORMS, self)
 	table.insert(game().LIVE.TRANSFORM, self)

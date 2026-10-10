@@ -85,6 +85,9 @@ error.log
 *.bak
 *.orig
 
+# Third-party source used only for local regression checks — never ship
+BalatroSource/
+
 # ------------------------------------------------------------------------------
 # Lua tooling caches
 # ------------------------------------------------------------------------------

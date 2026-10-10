@@ -26,7 +26,7 @@ function CardMotion.move(options)
 								if options.from then card = options.from:remove_card(card) end
 								if card then drawn = true end
 								local stay_flipped = options.stay_flipped or false
-								options.to:emplace(card, nil, stay_flipped)
+								options.to:add_card(card, nil, stay_flipped)
 						elseif options.to:draw_card_from(options.from, options.stay_flipped, options.discarded_only) then
 								drawn = true
 						end

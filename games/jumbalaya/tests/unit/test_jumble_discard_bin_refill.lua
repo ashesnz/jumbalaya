@@ -60,13 +60,13 @@ local function setup_jumble_deck(hand_letters, draw_letters, recycle_letters)
 	end
 
 	for i, letter in ipairs(hand_letters) do
-		game.dealt_letters:emplace(track(make_letter_card(game, i, letter)))
+		game.dealt_letters:add_card(track(make_letter_card(game, i, letter)))
 	end
 	for i, letter in ipairs(draw_letters) do
-		game.draw_pile:emplace(track(make_letter_card(game, 100 + i, letter)))
+		game.draw_pile:add_card(track(make_letter_card(game, 100 + i, letter)))
 	end
 	for i, letter in ipairs(recycle_letters) do
-		game.recycle_stash:emplace(track(make_letter_card(game, 200 + i, letter)))
+		game.recycle_stash:add_card(track(make_letter_card(game, 200 + i, letter)))
 	end
 
 	local store = store_ops.store()

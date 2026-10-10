@@ -50,10 +50,10 @@ end
 
 function ParticleEmitter:remove()
 	-- Detach from the numeric child list of whatever we were attached to.
-	if self.role.major then
-		for k, v in pairs(self.role.major.children) do
+	if self.attach and self.attach.host then
+		for k, v in pairs(self.attach.host.children) do
 			if v == self and type(k) == 'number' then
-				table.remove(self.role.major.children, k)
+				table.remove(self.attach.host.children, k)
 			end
 		end
 	end

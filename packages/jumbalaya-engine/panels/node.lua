@@ -16,7 +16,6 @@ function LayoutNode:construct(parent, new_panel, new_ui_kind, config)
 	self.config = config or {}
 	if self.config and self.config.object then self.config.object:set_scene_parent(self) end
 	self.children = {}
-	self.ARGS = self.ARGS or {}
 	self.content_dimensions = {w = 0, h = 0}
 end
 

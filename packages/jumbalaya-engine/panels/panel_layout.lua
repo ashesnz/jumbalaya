@@ -4,8 +4,8 @@ local invoke = require("jumbalaya-engine.panels.invoke")
 local game = shell.game
 return function(Target)
 function Target:calculate_xywh(node, _T, recalculate, _scale)
-	node.ARGS.xywh_node_trans = node.ARGS.xywh_node_trans or {}
-	local node_t = node.ARGS.xywh_node_trans
+	node._xywh = node._xywh or {}
+	local node_t = node._xywh
 	local content = {x = 0, y = 0, w = 0, h = 0}
 
 	local padding = node.config.padding or game().UI.padding

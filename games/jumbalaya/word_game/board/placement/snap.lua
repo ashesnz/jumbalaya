@@ -172,7 +172,7 @@ function M.place_in_row(session, card)
 			M.restore_bonus_card(session, card, origin_slot, origin_insert)
 		elseif from_area == area or (from_area and dealt and from_area == dealt) then
 			if dealt then
-				if dealt.emplace then dealt:emplace(card) end
+				if dealt.add_card then dealt:add_card(card) end
 				if dealt.relayout then dealt:relayout() end
 			end
 		elseif from_bonus then
@@ -224,7 +224,7 @@ function M.return_to_hand(session, card)
 	end
 	if not dealt or not M.card_on_placement(session, card) then return false end
 	jumble.remove_card_from_blanks(card)
-	if dealt.emplace then dealt:emplace(card) end
+	if dealt.add_card then dealt:add_card(card) end
 	if dealt.relayout then dealt:relayout() end
 	if dealt.snap_VT then dealt:snap_VT() end
 	if dealt.hard_set_cards then dealt:hard_set_cards() end

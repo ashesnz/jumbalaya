@@ -26,6 +26,7 @@ Phases 0–13 are **complete** (store, engine package, retained UI, `Funcs` regi
 - No new deep `word_game.model.*` / `word_game.ui.*` requires across `app/` (bootstrap wiring exempt), `devtools/`, or `word_game/ui/` (grandfathered allowlist) — enforced by `tests/unit/test_facade_boundaries.lua`.
 - New features ship via `WORD_GAME` / `WORD_GAME_UI` facade methods; model code uses `Presentation.emit`, not `Funcs.dispatch`.
 - Store authority lives on `WORD_GAME.store()` / `game_access` via `word_game/model/store_ops.lua`.
+- **Engine originality:** do not copy structure, names, or control flow from `BalatroSource/` into `jumbalaya-engine`. Scene motion is Spatial (`set_rect`, `follow`, `bind_to`) — see [engine.md](engine.md). `BalatroSource/` is gitignored; use it only to check accidental regression.
 
 ### Store immutability (POC)
 
@@ -171,7 +172,7 @@ These layers are **not** duplicates — they sit at different levels:
 
 | Layer | Path | Role |
 |-------|------|------|
-| Scene graph | `jumbalaya-engine/scene/` | `Node`, `AnimNode` — transforms, parenting, motion |
+| Scene graph | `jumbalaya-engine/scene/` | `SceneNode`, `Spatial` (`AnimNode` alias) — rects, `follow` / `bind_to`, springs |
 | Panel tree | `jumbalaya-engine/panels/` | Declarative HUD trees (`Panel`, `LayoutNode`, `ViewHost`) — layout, hit testing, buttons from definition tables |
 | Store views | `jumbalaya-engine/views/` | Headless render helpers (`PileView`, `LetterCardView`) |
 | Game presentation | `word_game/ui/` | Jumbalaya screens: sidebar, table board, trade, play FX, card chrome |

@@ -39,17 +39,49 @@ T.describe("engine loop", function()
 			T.assert_equal(#game.SCENE_ROOTS, 0)
 		end)
 
-		T.it("never draws glued card-layer sprites as scene roots", function()
+		T.it("never draws bound card-layer sprites as scene roots", function()
 			local game = shell.game() or {}
 			shell.bind_game(game)
 			game.SCENE_ROOTS = {}
 
-			local glued = {
+			local bound = {
 				states = { visible = true },
-				role = { role_type = "Glued" },
+				attach = { mode = "bind" },
 			}
-			SceneRoots.register(glued, "transform")
+			SceneRoots.register(bound, "transform")
 			T.assert_equal(#game.SCENE_ROOTS, 0, "raw letter_frame sprites must not paint themselves")
+		end)
+	end)
+
+	T.describe("spatial attach", function()
+		T.it("set_rect writes the layout target", function()
+			mock_env.reset_game()
+			mock_env.ensure_engine_globals()
+			local Spatial = require("jumbalaya-engine.scene.animated.init")
+			local node = Spatial(0, 0, 1, 1)
+			node:set_rect(2, 3, 4, 5)
+			T.assert_equal(node:get_rect().x, 2)
+			T.assert_equal(node.T.x, 2)
+			T.assert_equal(node.target.x, 2)
+			T.assert_equal(node:get_rect().w, 4)
+		end)
+
+		T.it("bind_to copies the host drawn rect on tick", function()
+			mock_env.reset_game()
+			mock_env.ensure_engine_globals()
+			local Spatial = require("jumbalaya-engine.scene.animated.init")
+			local host = Spatial(1, 2, 3, 4)
+			host:hard_set_T(1, 2, 3, 4)
+			local face = Spatial(0, 0, 3, 4)
+			face:bind_to(host)
+			host.FRAME.TRANSFORM = -1
+			face.FRAME.TRANSFORM = -1
+			local game = shell.game()
+			game.FRAMES.TRANSFORM = (game.FRAMES.TRANSFORM or 0) + 1
+			face:tick(0.016)
+			T.assert_equal(face.VT.x, host.VT.x)
+			T.assert_equal(face.VT.y, host.VT.y)
+			T.assert_equal(face.attach.mode, "bind")
 		end)
 	end)
 end)

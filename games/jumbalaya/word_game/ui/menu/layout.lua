@@ -79,9 +79,9 @@ function M.main_menu_button_abs_rect(ui, id_or_action)
 	local ox, oy = 0, 0
 	local parent = node.parent
 	while parent do
-		if parent.role and parent.role.offset then
-			ox = ox + parent.role.offset.x
-			oy = oy + parent.role.offset.y
+		if parent.attach and parent.attach.offset then
+			ox = ox + parent.attach.offset.x
+			oy = oy + parent.attach.offset.y
 		end
 		parent = parent.parent
 	end
@@ -115,18 +115,18 @@ end
 function M.layout_main_menu_mode_column()
 	if not game().MAIN_MENU_UI then return end
 	local row = game().MAIN_MENU_UI:find_node_by_id("main_menu_mode_align_row")
-	if row and row.role then
-		row.role.offset.x = 0
+	if row and row.attach and row.attach.offset then
+		row.attach.offset.x = 0
 	end
 	game().MAIN_MENU_UI:recalculate()
 	local settings_rect = M.main_menu_button_abs_rect(game().MAIN_MENU_UI, "open_settings")
 	local classic_rect = M.main_menu_button_abs_rect(game().MAIN_MENU_UI, "main_menu_classic")
-	if not settings_rect or not classic_rect or not row or not row.role then return end
+	if not settings_rect or not classic_rect or not row or not row.attach then return end
 	local delta = settings_rect.x - classic_rect.x
 	if math.abs(delta) < 0.01 then return end
-	row.role.offset.x = delta
-	if game().MAIN_MENU_UI.root_node and game().MAIN_MENU_UI.root_node.move_with_major then
-		game().MAIN_MENU_UI.root_node:move_with_major(0)
+	row.attach.offset.x = delta
+	if game().MAIN_MENU_UI.root_node and game().MAIN_MENU_UI.root_node.snap_to_attach then
+		game().MAIN_MENU_UI.root_node:snap_to_attach()
 	end
 end
 

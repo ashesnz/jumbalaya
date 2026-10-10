@@ -32,7 +32,7 @@ function M.relayout(area, face_down_in_pile)
 		card.slot = k
 	end
 	if area.children.view_deck then
-		area.children.view_deck:set_role{major = area.cards[1] or area}
+		area.children.view_deck:follow(area.cards[1] or area, { x = 0, y = 0 }, { lock_drawn = false })
 	end
 end
 

@@ -18,7 +18,7 @@ local function face_down_in_pile(card)
 	end
 end
 
-function M.emplace_at_front(self, location)
+function M.insert_at_front(self, location)
 	local t = self.config.type
 	return location == "front" or t == "draw" or t == "deck"
 end

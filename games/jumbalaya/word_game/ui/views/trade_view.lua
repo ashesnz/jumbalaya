@@ -18,7 +18,7 @@ local function trade_signature(state)
 end
 
 --- Marketplace body host: a real retained panel (same as LayoutView on
---- working-version). A thin proxy here makes set_role/hard_set_T write the
+--- working-version). A thin proxy here makes follow/hard_set_T write the
 --- wrapper instead of the inner tree, which misaligns cards and buttons.
 function TradeView.create_marketplace_body(ctx, config, definition)
 	local trade_definition = require("word_game.ui.trade.definition")

@@ -24,7 +24,7 @@ local function glue_sprite(self, sprite)
 	sprite.states.click = self.states.click
 	sprite.states.drag = self.states.drag
 	sprite.states.collide.can = false
-	sprite:set_role({ major = self, role_type = "Glued", draw_major = self })
+	sprite:bind_to(self)
 end
 
 function Card:set_sprites(front)

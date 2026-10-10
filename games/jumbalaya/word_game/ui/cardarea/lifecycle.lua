@@ -15,7 +15,7 @@ local function table_board()
 	return game().STATE == game().STATES.TABLE_BOARD
 end
 
-function M.emplace(self, card, location, stay_flipped, type_handler)
+function M.add_card(self, card, location, stay_flipped, type_handler)
 	if table_board() and card and card.bonus_card and (self == game().dealt_letters or self == game().draw_pile) then
 		local origin_slot, origin_insert
 		if Jumble.slot_for_card then
@@ -26,8 +26,8 @@ function M.emplace(self, card, location, stay_flipped, type_handler)
 	end
 	local at_front = location == "front"
 	local handler = type_handler and type_handler(self)
-	if handler and handler.emplace_at_front then
-		at_front = handler.emplace_at_front(self, location)
+	if handler and handler.insert_at_front then
+		at_front = handler.insert_at_front(self, location)
 	end
 	if at_front then
 		table.insert(self.cards, 1, card)
@@ -47,7 +47,7 @@ function M.emplace(self, card, location, stay_flipped, type_handler)
 	end
 
 	card:set_card_area(self)
-	self:set_ranks()
+	self:refresh_order()
 	self:relayout()
 end
 
@@ -74,7 +74,7 @@ function M.remove_card(self, card, discarded_only, type_handler)
 	end
 
 	if not card then
-		self:set_ranks()
+		self:refresh_order()
 		return
 	end
 	for i = #self.cards,1,-1 do
@@ -89,13 +89,13 @@ function M.remove_card(self, card, discarded_only, type_handler)
 			break
 		end
 	end
-	self:set_ranks()
+	self:refresh_order()
 	return card
 end
 
 function M.shuffle(self, _seed)
 	Random.shuffle_seeded(self.cards, Random.advance_seed(_seed or 'shuffle'))
-	self:set_ranks()
+	self:refresh_order()
 end
 
 function M.sort(self, method)
@@ -121,7 +121,7 @@ function M.draw_card_from(self, area, stay_flipped, discarded_only)
 				if area == game().recycle_stash then
 					card.T.r = 0
 				end
-				self:emplace(card)
+				self:add_card(card)
 				return true
 			end
 		end
@@ -159,7 +159,7 @@ function M.load(self, cardAreaTable)
 		end
 		card:set_card_area(self)
 	end
-	self:set_ranks()
+	self:refresh_order()
 	self:relayout()
 	self:hard_set_cards()
 end

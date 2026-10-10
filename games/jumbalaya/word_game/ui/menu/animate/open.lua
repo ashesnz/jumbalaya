@@ -29,7 +29,7 @@ local function settle_main_menu_layout()
 	end
 	if game().title_top then
 		game().title_top:sort("order")
-		game().title_top:set_ranks()
+		game().title_top:refresh_order()
 		game().title_top:relayout()
 		game().title_top:hard_set_cards()
 	end
@@ -101,7 +101,7 @@ function M.open_main_menu(self, change_context)
 	Layout.set_screen_positions()
 	if not cold_boot then
 		self.title_top:sort("order")
-		self.title_top:set_ranks()
+		self.title_top:refresh_order()
 		self.title_top:relayout()
 		self.title_top:hard_set_cards()
 	end

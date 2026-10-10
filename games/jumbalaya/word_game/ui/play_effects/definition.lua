@@ -142,7 +142,7 @@ end
 
 function M.set_word_score_animating(active)
 	game_access.patch({ word_score_animating = active })
-	-- deal_boss_hand and other sequences call set_ranks while this flag is still
+	-- deal_boss_hand and other sequences call refresh_order while this flag is still
 	-- true, which leaves drag.can false until ranks are refreshed.
 	if not active
 		and WORD_GAME_UI.TableInput

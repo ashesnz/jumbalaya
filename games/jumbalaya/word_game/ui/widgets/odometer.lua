@@ -61,10 +61,7 @@ function Odometer:construct(config)
 	self.states.click.can = false
 	self.states.collide.can = false
 	self.states.drag.can = false
-	self:set_role{
-		wh_bond = "Weak",
-		scale_bond = "Weak",
-	}
+	self:unfollow()
 end
 
 function Odometer:current_value()
