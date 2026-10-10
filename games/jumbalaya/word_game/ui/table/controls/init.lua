@@ -7,6 +7,7 @@ local Play = facade.jumble_play()
 local Jumble = facade.jumble()
 local RunMode = facade.run_mode()
 local definition = require("word_game.ui.table.controls.definition")
+local Press = require("word_game.ui.widgets.press")
 local layout = require("word_game.ui.table.controls.layout")
 local animate = require("word_game.ui.table.controls.animate")
 local placement = require("word_game.ui.table.controls.placement")
@@ -103,10 +104,10 @@ local function sync_shuffle_button(shuffle_btn, show)
 	shuffle_btn.states.collide.can = true
 
 	if M.placement_has_cards() then
-		shuffle_btn.config.button = "return_placement_cards"
+		shuffle_btn.config.button = Press.named("return_placement_cards")
 		definition.set_shuffle_display(shuffle_btn, "remove")
 	else
-		shuffle_btn.config.button = "shuffle_hand"
+		shuffle_btn.config.button = Press.named("shuffle_hand")
 		definition.set_shuffle_display(shuffle_btn, "shuffle")
 	end
 end
@@ -121,7 +122,7 @@ local function sync_play_button(play_btn, show)
 
 	play_btn.states.visible = true
 
-	play_btn.config.button = "play_placement_word"
+	play_btn.config.button = Press.named("play_placement_word")
 	play_btn.config.colour = definition.play_button_colour()
 	play_btn.config.force_collision = true
 	play_btn.states.collide.can = true

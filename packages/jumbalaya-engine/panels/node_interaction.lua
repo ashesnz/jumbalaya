@@ -1,6 +1,7 @@
 
 local Tables = require("jumbalaya-engine.util.tables")
 local shell = require("jumbalaya-engine.shell")
+local invoke = require("jumbalaya-engine.panels.invoke")
 local game = shell.game
 local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 return function(Target)
@@ -21,10 +22,10 @@ function Target:update(dt)
 	if self.button_clicked then self.button_clicked = nil end
 
 	if self.config and self.config.func then
-		game().ARGS.FUNC_TRACKER[self.config.func] = (game().ARGS.FUNC_TRACKER[self.config.func] or 0) + 1
-		if shell.get_func(self.config.func) then
-			shell.dispatch_func(self.config.func, self)
+		if type(self.config.func) == "string" then
+			game().ARGS.FUNC_TRACKER[self.config.func] = (game().ARGS.FUNC_TRACKER[self.config.func] or 0) + 1
 		end
+		invoke.call(self.config.func, self)
 	end
 
 	if self.ui_kind == game().UI.TEXT then self:update_text() end
@@ -54,9 +55,7 @@ function Target:click()
 			game().NO_MOD_CURSOR_STACK = true
 		end
 
-		if shell.get_func(self.config.button) then
-			shell.dispatch_func(self.config.button, self)
-		end
+		invoke.call(self.config.button, self)
 
 		game().NO_MOD_CURSOR_STACK = nil
 

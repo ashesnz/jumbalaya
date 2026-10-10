@@ -17,6 +17,7 @@ local UIViewHost = require("jumbalaya-engine.panels.view_host")
 
 local active = false
 local overlay_colour = { 0.06, 0.08, 0.12, 0 }
+local Panel = require("jumbalaya-engine.panels.api")
 
 function M.is_eligible()
 	local token = WORD_GAME_UI.TokenReward
@@ -63,19 +64,15 @@ function M.begin()
 	Easing.value{ref_table = overlay_colour, ref_value = 4, mod = 0.72, timer = "REAL", not_blockable = true, delay = 0.4}
 
 	game().HAND_CLEAR_OVERLAY = UIViewHost.create{
-		definition = {
-			n = game().UI.ROOT,
-			config = {
+		definition = Panel.root({
 				align = "cm",
 				padding = 32.05,
 				r = 0.1,
 				colour = overlay_colour,
 				emboss = 0.05,
-			},
-			nodes = {
-				{ n = game().UI.ROW, config = { align = "cm", minh = game().ROOM.T.h, minw = game().ROOM.T.w }, nodes = {} },
-			},
-		},
+			}, {
+				Panel.row({ align = "cm", minh = game().ROOM.T.h, minw = game().ROOM.T.w }, {}),
+			}),
 		config = {
 			align = "cm",
 			offset = { x = 0, y = 3.2 },

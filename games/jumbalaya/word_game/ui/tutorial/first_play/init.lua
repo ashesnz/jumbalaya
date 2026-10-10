@@ -9,6 +9,7 @@ local session = require("word_game.ui.tutorial.first_play.session")
 local steps = require("word_game.ui.tutorial.first_play.steps")
 
 local M = {}
+local Panel = require("jumbalaya-engine.panels.api")
 
 
 function M.is_active()
@@ -75,19 +76,15 @@ function M.begin()
 	}
 
 	game().FIRST_PLAY_TUTORIAL_OVERLAY = UIViewHost.create{
-		definition = {
-			n = game().UI.ROOT,
-			config = {
+		definition = Panel.root({
 				align = "cm",
 				padding = 32.05,
 				r = 0.1,
 				colour = overlay_colour,
 				emboss = 0.05,
-			},
-			nodes = {
-				{ n = game().UI.ROW, config = { align = "cm", minh = game().ROOM.T.h, minw = game().ROOM.T.w }, nodes = {} },
-			},
-		},
+			}, {
+				Panel.row({ align = "cm", minh = game().ROOM.T.h, minw = game().ROOM.T.w }, {}),
+			}),
 		config = {
 			align = "cm",
 			offset = { x = 0, y = 3.2 },

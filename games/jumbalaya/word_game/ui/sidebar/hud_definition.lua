@@ -16,6 +16,9 @@ local SIDEBAR_BOTTOM_PAD = 0.22
 local SIDEBAR_COUNTER_SCALE = 0.38
 local SIDEBAR_COUNTER_ROW_H = 0.35
 
+local Panel = require("jumbalaya-engine.panels.api")
+local Press = require("word_game.ui.widgets.press")
+
 local function deck_mod()
 	return facade.deck()
 end
@@ -34,15 +37,15 @@ local function counter_text_config(opts)
 end
 
 local function counter_row(box_w, row_id, label, value_node)
-	return { n = game().UI.ROW, config = {
+	return Panel.row({
 		align = "cm",
 		id = row_id,
 		minw = box_w,
 		padding = 0,
-	}, nodes = {
-		{ n = game().UI.TEXT, config = counter_text_config({ text = label }) },
+	}, {
+		Panel.label(counter_text_config({ text = label })),
 		value_node,
-	}}
+	})
 end
 
 local function stamp_slot_height()
@@ -77,14 +80,11 @@ end
 local function deck_count_node(box_w)
 	game().ARGS = game().ARGS or {}
 	deck_mod().sync_deck_count_display()
-	return counter_row(box_w, "row_deck_count", "Cards left: ", {
-		n = game().UI.TEXT,
-		config = counter_text_config({
+	return counter_row(box_w, "row_deck_count", "Cards left: ", Panel.label(counter_text_config({
 			id = "text_deck_count",
 			ref_table = game().ARGS,
 			ref_value = "deck_left_count",
-		}),
-	})
+		})))
 end
 
 local function set_node_visible(node, visible)
@@ -124,49 +124,49 @@ function M.hud_definition()
 	local sidebar_grey = game().C.DYN_UI.MAIN
 
 	local fill_nodes = {
-		{ n = game().UI.ROW, config = {
+		Panel.row({
 			id = "row_stamp_slot",
 			minh = stamp_h,
 			minw = box_w,
 			align = "cm",
 			padding = 0,
-		}, nodes = {} },
-		{ n = game().UI.ROW, config = {
+		}, {}),
+		Panel.row({
 			id = "row_sidebar_spacer",
 			minh = sidebar_spacer_height(),
-		}, nodes = {} },
+		}, {}),
 		(function()
 			local dw, dh = Layout.deck_slot_size()
-			return { n = game().UI.ROW, config = {
+			return Panel.row({
 				align = "cm",
 				id = "row_deck",
 				minw = box_w,
 				minh = dh,
 				maxh = dh,
-			}, nodes = {
-				{ n = game().UI.BOX, config = { w = dw, h = dh } },
-			}}
+			}, {
+				Panel.box({ w = dw, h = dh }),
+			})
 		end)(),
 		deck_count_node(box_w),
 		(function()
 			local dw, dh = Layout.end_run_slot_size()
 			local btn_side = math.min(dw, dh)
 			local stage_btn = WORD_GAME_UI.SidebarStageButton
-			return { n = game().UI.ROW, config = {
+			return Panel.row({
 				align = "cm",
 				id = "row_end_run",
 				minw = box_w,
 				minh = btn_side,
 				maxh = btn_side,
-			}, nodes = {
-				{ n = game().UI.COLUMN, config = {
+			}, {
+				Panel.column({
 					align = "cm",
 					padding = 0,
 					r = Components.CHROME.radius,
 					hover = true,
 					colour = game().C.RED,
 					hover_colour = game().C.UI.BUTTON_HOVER,
-					button = "end_run_from_sidebar",
+					on_press = Press.named("end_run_from_sidebar"),
 					id = "end_run_button",
 					minw = btn_side,
 					minh = btn_side,
@@ -174,31 +174,31 @@ function M.hud_definition()
 					maxh = btn_side,
 					visible = true,
 					focus_args = { nav = "wide", snap_to = true },
-				}, nodes = {
-					{ n = game().UI.TEXT, config = {
+				}, {
+					Panel.label({
 						id = "end_run_label",
 						text = "End Run",
 						scale = stage_btn.label_scale_for("End Run"),
 						colour = game().C.UI.TEXT_LIGHT,
 						shadow = true,
-					}},
-				}},
-			}}
+					}),
+				}),
+			})
 		end)(),
 	}
-	fill_nodes[#fill_nodes + 1] = { n = game().UI.ROW, config = {
+	fill_nodes[#fill_nodes + 1] = Panel.row({
 		id = "row_sidebar_bottom_pad",
 		minh = SIDEBAR_BOTTOM_PAD,
-	}, nodes = {} }
+	}, {})
 
-	return { n = game().UI.ROOT, config = {
+	return Panel.root({
 		align = "tm",
 		padding = SIDEBAR_ROOT_PAD,
 		colour = sidebar_grey,
 		minh = sidebar_h,
 		minw = box_w,
-	}, nodes = {
-		{ n = game().UI.ROW, config = {
+	}, {
+		Panel.row({
 			align = "tm",
 			padding = SIDEBAR_FILL_PAD,
 			colour = sidebar_grey,
@@ -206,8 +206,8 @@ function M.hud_definition()
 			id = "row_sidebar_fill",
 			minh = inner_h,
 			minw = box_w,
-		}, nodes = fill_nodes },
-	}}
+		}, fill_nodes),
+	})
 end
 
 function M.relayout()

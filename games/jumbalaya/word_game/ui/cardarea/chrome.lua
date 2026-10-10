@@ -3,6 +3,7 @@
 local game = require("word_game.ui.util.game_runtime").game
 
 local UIViewHost = require("jumbalaya-engine.panels.view_host")
+local Panel = require("jumbalaya-engine.panels.api")
 
 local M = {}
 
@@ -27,20 +28,20 @@ function M.ensure_area_panel(area)
 
 	local show_count = area ~= game().dealt_letters
 	local placement_area = game().pattern_row and game().pattern_row.area
-	local card_count = show_count and {n=game().UI.ROW, config={align = area == placement_area and 'cl' or 'cr', padding = 0.03, no_fill = true}, nodes={
-		{n=game().UI.BOX, config={w = 0.1,h=0.1}},
-		{n=game().UI.TEXT, config={ref_table = area.config, ref_value = 'card_count', scale = 0.3, colour = game().C.WHITE}},
-		{n=game().UI.TEXT, config={text = '/', scale = 0.3, colour = game().C.WHITE}},
-		{n=game().UI.TEXT, config={ref_table = area.config, ref_value = 'card_limit', scale = 0.3, colour = game().C.WHITE}},
-		{n=game().UI.BOX, config={w = 0.1,h=0.1}}
-	}} or nil
+	local card_count = show_count and Panel.row({align = area == placement_area and 'cl' or 'cr', padding = 0.03, no_fill = true}, {
+		Panel.box({w = 0.1,h=0.1}),
+		Panel.label({ref_table = area.config, ref_value = 'card_count', scale = 0.3, colour = game().C.WHITE}),
+		Panel.label({text = '/', scale = 0.3, colour = game().C.WHITE}),
+		Panel.label({ref_table = area.config, ref_value = 'card_limit', scale = 0.3, colour = game().C.WHITE}),
+		Panel.box({w = 0.1,h=0.1})
+	}) or nil
 
 	area.children.area_panel = UIViewHost.create{
 		definition =
-			{n=game().UI.ROOT, config = {align = 'cm', colour = game().C.CLEAR}, nodes={
-				{n=game().UI.ROW, config={minw = area.T.w,minh = area.T.h,align = "cm", padding = 0.1, mid = true, r = 0.1, colour = {0,0,0,0.1}, ref_table = area}, nodes={}},
+			Panel.root({align = 'cm', colour = game().C.CLEAR}, {
+				Panel.row({minw = area.T.w,minh = area.T.h,align = "cm", padding = 0.1, mid = true, r = 0.1, colour = {0,0,0,0.1}, ref_table = area}, {}),
 				card_count
-			}},
+			}),
 		config = { align = 'cm', offset = {x=0,y=0}, major = area, parent = area}
 	}
 end

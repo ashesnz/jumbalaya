@@ -14,6 +14,7 @@ local garden = require("word_game.ui.menu.animate.garden")
 local sound = require("jumbalaya-engine.sound.sound")
 local play_sfx = sound.play_sfx
 local retag_audio = sound.retag_audio
+local Panel = require("jumbalaya-engine.panels.api")
 
 require("word_game.ui.menu.title_logo")
 
@@ -116,9 +117,9 @@ function M.open_main_menu(self, change_context)
 		return true
 	end}
 	game().MAIN_MENU_VERSION_UI = UIViewHost.create{
-		definition = {n = game().UI.ROOT, config = {align = "cm", colour = game().C.UI.TRANSPARENT_DARK}, nodes = {
-			{n = game().UI.TEXT, config = {text = game().VERSION, scale = 0.3, colour = game().C.UI.TEXT_LIGHT}},
-		}},
+		definition = Panel.root({align = "cm", colour = game().C.UI.TRANSPARENT_DARK}, {
+			Panel.label({text = game().VERSION, scale = 0.3, colour = game().C.UI.TEXT_LIGHT}),
+		}),
 		config = {align = "tri", offset = {x = 0, y = 0}, major = game().ROOM_ATTACH, bond = "Weak"},
 	}
 end

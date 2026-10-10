@@ -22,6 +22,9 @@ local BUTTON_STACK_GAP_PX = 20
 local MODAL_BOTTOM_PADDING_PX = 36
 local MODAL_CONTENT_LIFT_PX = 24
 
+local Panel = require("jumbalaya-engine.panels.api")
+local Press = require("word_game.ui.widgets.press")
+
 local function marketplace_px_to_tiles(px)
 	local g = game()
 	local ts = (g.TILESIZE or 20) * (g.TILESCALE or 1)
@@ -116,30 +119,30 @@ end
 
 local function token_row(cost)
 	local nodes = {
-		{ n = game().UI.TEXT, config = {
+		Panel.label({
 			text = tostring(cost),
 			scale = 0.26,
 			font = alpha_button_font(),
 			colour = game().C.GOLD,
 			shadow = false,
-		}},
+		}),
 	}
 	local coin = coin_sprite(0.26)
 	if coin then
-		nodes[#nodes + 1] = { n = game().UI.OBJECT, config = {
+		nodes[#nodes + 1] = Panel.object({
 			object = coin,
 			w = 0.26,
 			h = 0.26,
 			colour = game().C.WHITE,
 			shadow = false,
-		}}
+		})
 	end
-	return { n = game().UI.ROW, config = {
+	return Panel.row({
 		align = "cm",
 		padding = 0.02,
 		colour = game().C.CLEAR,
 		shadow = false,
-	}, nodes = nodes }
+	}, nodes)
 end
 
 function M.can_click_add(item)
@@ -174,7 +177,7 @@ function M.set_action_button_enabled(btn_col, enabled, func_name)
 	cfg.colour = enabled and g.C.UI.BUTTON or g.C.UI.BACKGROUND_INACTIVE
 	cfg.hover = enabled or nil
 	cfg.hover_colour = enabled and g.C.UI.BUTTON_HOVER or nil
-	cfg.button = enabled and func_name or nil
+	cfg.button = enabled and Press.named(func_name) or nil
 	local kids = btn_col.children or btn_col.nodes
 	local text_node = kids and kids[1]
 	if text_node and text_node.config then
@@ -248,22 +251,22 @@ local function action_button(label, cost, func_name, enabled, col_index, col_w)
 	if enabled then
 		cfg.hover = true
 		cfg.hover_colour = g.C.UI.BUTTON_HOVER
-		cfg.button = func_name
+		cfg.button = Press.named(func_name)
 	end
-	return { n = g.UI.COLUMN, config = cfg, nodes = {
-		{ n = g.UI.TEXT, config = {
+	return Panel.column(cfg, {
+		Panel.label({
 			text = label,
 			scale = 0.24,
 			font = alpha_button_font(),
 			colour = text_colour,
 			shadow = false,
-		}},
+		}),
 		token_row(cost),
-	}}
+	})
 end
 
 local function grid_cell(nodes, col_w, min_h, id, align)
-	return { n = game().UI.COLUMN, config = {
+	return Panel.column({
 		id = id,
 		align = align or "cm",
 		minw = col_w,
@@ -272,7 +275,7 @@ local function grid_cell(nodes, col_w, min_h, id, align)
 		padding = 0.01,
 		colour = game().C.CLEAR,
 		shadow = false,
-	}, nodes = nodes }
+	}, nodes)
 end
 
 local function modifier_label(letter)
@@ -286,21 +289,21 @@ local function card_cell(item, index, col_w, row_h)
 	local card = preview.ensure(item, card_w, card_h)
 	local nodes = {}
 	if card then
-		nodes[#nodes + 1] = { n = game().UI.OBJECT, config = {
+		nodes[#nodes + 1] = Panel.object({
 			id = "trade_market_card_" .. index,
 			object = card,
 			w = card_w,
 			h = card_h,
 			colour = game().C.WHITE,
 			shadow = false,
-		}}
+		})
 	else
-		nodes[#nodes + 1] = { n = game().UI.TEXT, config = {
+		nodes[#nodes + 1] = Panel.label({
 			text = item.letter or "?",
 			scale = 0.7,
 			colour = game().C.GOLD,
 			shadow = true,
-		}}
+		})
 	end
 	return grid_cell(nodes, col_w, row_h, "trade_market_cell_card_" .. index, "bm")
 end
@@ -308,14 +311,14 @@ end
 local function modifier_cell(item, index, col_w, row_h)
 	local mod_text = modifier_label(item.letter)
 	return grid_cell({
-		{ n = game().UI.TEXT, config = {
+		Panel.label({
 			id = "trade_market_modifier_" .. index,
 			text = mod_text,
 			scale = 0.2,
 			maxw = col_w * 0.95,
 			colour = modifier_text_colour(),
 			shadow = false,
-		}},
+		}),
 	}, col_w, row_h, "trade_market_cell_modifier_" .. index, "bm")
 end
 
@@ -325,7 +328,7 @@ local function column_row(row_id, col_w, row_h, items, cell_builder, ...)
 		local item = items[index]
 		cells[#cells + 1] = cell_builder(item, index, col_w, row_h, ...)
 	end
-	return { n = game().UI.ROW, config = {
+	return Panel.row({
 		id = row_id,
 		align = "cm",
 		minw = col_w * GRID_COLS,
@@ -334,7 +337,7 @@ local function column_row(row_id, col_w, row_h, items, cell_builder, ...)
 		padding = 0.01,
 		colour = game().C.CLEAR,
 		shadow = false,
-	}, nodes = cells }
+	}, cells)
 end
 
 local function action_row(row_id, label, cost, func_name, items, col_w, row_h, afford_fn)
@@ -344,7 +347,7 @@ local function action_row(row_id, label, cost, func_name, items, col_w, row_h, a
 			action_button(label, cost, func_name, afford_fn(item), index, col_w),
 		}, col_w, row_h, row_id .. "_col_" .. index)
 	end
-	return { n = game().UI.ROW, config = {
+	return Panel.row({
 		id = row_id,
 		align = "cm",
 		minw = col_w * GRID_COLS,
@@ -353,12 +356,12 @@ local function action_row(row_id, label, cost, func_name, items, col_w, row_h, a
 		padding = 0,
 		colour = game().C.CLEAR,
 		shadow = false,
-	}, nodes = cells }
+	}, cells)
 end
 
 --- Empty ROW spacer — grid COLUMN only stacks ROW children vertically.
 local function spacer_row(frame_w, gap_h, id)
-	return { n = game().UI.ROW, config = {
+	return Panel.row({
 		id = id,
 		align = "cm",
 		minw = frame_w,
@@ -366,7 +369,7 @@ local function spacer_row(frame_w, gap_h, id)
 		minh = gap_h,
 		colour = game().C.CLEAR,
 		shadow = false,
-	}, nodes = {} }
+	}, {})
 end
 
 function M.build_grid(frame)
@@ -425,9 +428,7 @@ function M.build_grid(frame)
 	rows[#rows + 1] = modify_row
 	rows[#rows + 1] = spacer_row(frame.w, metrics.bottom_pad, "trade_marketplace_bottom_spacer")
 
-	return {
-		n = game().UI.COLUMN,
-		config = {
+	return Panel.column({
 			id = "trade_marketplace_grid",
 			draw_layer = GRID_LAYER,
 			align = "cm",
@@ -438,9 +439,7 @@ function M.build_grid(frame)
 			padding = GRID_PADDING,
 			colour = game().C.CLEAR,
 			shadow = false,
-		},
-		nodes = rows,
-	}
+		}, rows)
 end
 
 function M.sum_row_min_heights(grid_def)

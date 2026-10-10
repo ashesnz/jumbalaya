@@ -129,7 +129,7 @@ function M.setup()
 	S.C.UI.TEXT_LIGHT = S.C.UI.TEXT_LIGHT or { 1, 1, 1, 1 }
 	S.C.UI.OUTLINE_LIGHT = S.C.UI.OUTLINE_LIGHT or { 1, 1, 1, 0.35 }
 	S.C.UI.BACKGROUND_DARK = S.C.UI.BACKGROUND_DARK or { 0.1, 0.1, 0.12, 1 }
-	S.UI = S.UI or { ROOT = 1, ROW = 2, COL = 3, TEXT = 4, OBJECT = 5, BOX = 6 }
+	S.UI = S.UI or { TEXT = 1, BOX = 2, COLUMN = 3, COL = 3, ROW = 4, OBJECT = 5, ROOT = 7, SLIDER = 8, INPUT = 9 }
 	S.UI.padding = S.UI.padding or 0.05
 	S.TILE_W = S.TILE_W or 20
 	S.TILE_H = S.TILE_H or 11

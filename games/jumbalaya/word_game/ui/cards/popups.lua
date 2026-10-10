@@ -13,6 +13,8 @@ local Tables = require("jumbalaya-engine.util.tables")
 local localize = require("word_game.ui.util.localize").localize
 
 local DEFINITIONS = game().DEFINITIONS
+local Panel = require("jumbalaya-engine.panels.api")
+local Press = require("word_game.ui.widgets.press")
 
 function DEFINITIONS.card_focus_ui(card)
 	-- Hand letter tiles never wear the white gamepad focus plate (working-version G.hand).
@@ -27,9 +29,9 @@ function DEFINITIONS.card_focus_ui(card)
 	local base_background = UIViewHost.create{
 		T = {card.VT.x,card.VT.y,0,0},
 		definition = 
-			{n=game().UI.ROOT, config = {align = 'cm', minw = card_width + 0.3, minh = card.T.h + 0.3, r = 0.1, colour = Colour.with_alpha(game().C.BLACK, 0.7), outline_colour = Colour.tint(game().C.MUTED_GREY, 0.5), outline = 1.5, line_emboss = 0.8}, nodes={
-				{n=game().UI.ROW, config={id = 'ATTACH_TO_ME'}, nodes={}}
-			}},
+			Panel.root({align = 'cm', minw = card_width + 0.3, minh = card.T.h + 0.3, r = 0.1, colour = Colour.with_alpha(game().C.BLACK, 0.7), outline_colour = Colour.tint(game().C.MUTED_GREY, 0.5), outline = 1.5, line_emboss = 0.8}, {
+				Panel.row({id = 'ATTACH_TO_ME'}, {})
+			}),
 		config = {
 				align = 'cm',
 				offset = {x= 0.007*t_card_norm.x*card.T.w, y = 0.007*t_card_norm.y*card.T.h}, 
@@ -52,32 +54,32 @@ end
 function desc_from_rows(desc_nodes, empty, maxw)
 	local t = {}
 	for k, v in ipairs(desc_nodes) do
-		t[#t+1] = {n=game().UI.ROW, config={align = "cm", maxw = maxw}, nodes=v}
+		t[#t+1] = Panel.row({align = "cm", maxw = maxw}, v)
 	end
-	return {n=game().UI.ROW, config={align = "cm", colour = empty and game().C.CLEAR or game().C.UI.BACKGROUND_WHITE, r = 0.1, padding = 0.04, minw = 2, minh = 0.8, emboss = not empty and 0.05 or nil, filler = true}, nodes={
-		{n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes=t}
-	}}
+	return Panel.row({align = "cm", colour = empty and game().C.CLEAR or game().C.UI.BACKGROUND_WHITE, r = 0.1, padding = 0.04, minw = 2, minh = 0.8, emboss = not empty and 0.05 or nil, filler = true}, {
+		Panel.row({align = "cm", padding = 0.03}, t)
+	})
 end
 
 
 function transparent_multiline_text(desc_nodes)
 	local t = {}
 	for k, v in ipairs(desc_nodes) do
-		t[#t+1] = {n=game().UI.ROW, config={align = "cm"}, nodes=v}
+		t[#t+1] = Panel.row({align = "cm"}, v)
 	end
-	return {n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes=t}
+	return Panel.row({align = "cm", padding = 0.03}, t)
 end
 
 
 function rows_to_infotip(desc_nodes, name)
 	local t = {}
 	for k, v in ipairs(desc_nodes) do
-		t[#t+1] = {n=game().UI.ROW, config={align = "cm"}, nodes=v}
+		t[#t+1] = Panel.row({align = "cm"}, v)
 	end
-	return {n=game().UI.ROW, config={align = "cm", colour = Colour.tint(game().C.GREY, 0.15), r = 0.1}, nodes={
-		{n=game().UI.ROW, config={align = "tm", minh = 0.36, padding = 0.03}, nodes={{n=game().UI.TEXT, config={text = name, scale = 0.32, colour = game().C.UI.TEXT_LIGHT}}}},
-		{n=game().UI.ROW, config={align = "cm", minw = 1.5, minh = 0.4, r = 0.1, padding = 0.05, colour = game().C.WHITE}, nodes={{n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes=t}}}
-	}}
+	return Panel.row({align = "cm", colour = Colour.tint(game().C.GREY, 0.15), r = 0.1}, {
+		Panel.row({align = "tm", minh = 0.36, padding = 0.03}, {Panel.label({text = name, scale = 0.32, colour = game().C.UI.TEXT_LIGHT})}),
+		Panel.row({align = "cm", minw = 1.5, minh = 0.4, r = 0.1, padding = 0.05, colour = game().C.WHITE}, {Panel.row({align = "cm", padding = 0.03}, t)})
+	})
 end
 
 
@@ -94,17 +96,17 @@ function overlay_infotip(text_rows)
 	local t = {}
 	if type(text_rows) ~= 'table' then text_rows = {"ERROR"} end
 	for k, v in ipairs(text_rows) do
-		t[#t+1] = {n=game().UI.ROW, config={align = "cm"}, nodes={
-			{n=game().UI.TEXT, config={text = v,colour = game().C.UI.TEXT_LIGHT, scale = 0.45, bounce = true, shadow = true, lang = text_rows.lang}}
-		}}
+		t[#t+1] = Panel.row({align = "cm"}, {
+			Panel.label({text = v,colour = game().C.UI.TEXT_LIGHT, scale = 0.45, bounce = true, shadow = true, lang = text_rows.lang})
+		})
 	end
-	return {n=game().UI.ROOT, config={align = "cm", colour = game().C.CLEAR, padding = 0.1}, nodes=t}
+	return Panel.root({align = "cm", colour = game().C.CLEAR, padding = 0.1}, t)
 end
 
 
 function name_from_rows(name_nodes, background_colour)
 	if not name_nodes or (type(name_nodes) ~= 'table') or not next(name_nodes) then return end
-	return {n=game().UI.ROW, config={align = "cm", padding = 0.05, r = 0.1, colour = background_colour, emboss = background_colour and 0.05 or nil}, nodes=name_nodes}
+	return Panel.row({align = "cm", padding = 0.05, r = 0.1, colour = background_colour, emboss = background_colour and 0.05 or nil}, name_nodes)
 end
 
 
@@ -143,38 +145,38 @@ function DEFINITIONS.card_h_popup(card)
 		if tip.info then
 			for k, v in ipairs(tip.info) do
 				info_boxes[#info_boxes+1] =
-				{n=game().UI.ROW, config={align = "cm"}, nodes={
-				{n=game().UI.ROW, config={align = "cm", colour = Colour.tint(game().C.MUTED_GREY, 0.5), r = 0.1, padding = 0.05, emboss = 0.05}, nodes={
+				Panel.row({align = "cm"}, {
+				Panel.row({align = "cm", colour = Colour.tint(game().C.MUTED_GREY, 0.5), r = 0.1, padding = 0.05, emboss = 0.05}, {
 					rows_to_infotip(v, v.name),
-				}}
-			}}
+				})
+			})
 			end
 		end
 
-		return {n=game().UI.ROOT, config = {align = 'cm', colour = game().C.CLEAR}, nodes={
-			{n=game().UI.COLUMN, config={align = "cm", func = 'show_infotip',object = EaseNode(),ref_table = next(info_boxes) and info_boxes or nil}, nodes={
-				{n=game().UI.ROW, config={padding = outer_padding, r = 0.12, colour = Colour.tint(game().C.MUTED_GREY, 0.5), emboss = 0.07}, nodes={
-					{n=game().UI.ROW, config={align = "cm", padding = 0.07, r = 0.1, colour = Colour.with_alpha(card_type_background, 0.8)}, nodes={
+		return Panel.root({align = 'cm', colour = game().C.CLEAR}, {
+			Panel.column({align = "cm", on_update = Press.named('show_infotip'),object = EaseNode(),ref_table = next(info_boxes) and info_boxes or nil}, {
+				Panel.row({padding = outer_padding, r = 0.12, colour = Colour.tint(game().C.MUTED_GREY, 0.5), emboss = 0.07}, {
+					Panel.row({align = "cm", padding = 0.07, r = 0.1, colour = Colour.with_alpha(card_type_background, 0.8)}, {
 						name_from_rows(tip.name, is_letter_face and game().C.WHITE or nil),
 						desc_from_rows(tip.main),
-						badges[1] and {n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes=badges} or nil,
-					}}
-				}}
-			}},
-		}}
+						badges[1] and Panel.row({align = "cm", padding = 0.03}, badges) or nil,
+					})
+				})
+			}),
+		})
 	end
 end
 
 
 function make_badge(_string, _badge_col, _text_col, scaling)
 	scaling = scaling or 1
-	return {n=game().UI.ROW, config={align = "cm"}, nodes={
-		{n=game().UI.ROW, config={align = "cm", colour = _badge_col or game().C.GREEN, r = 0.1, minw = 2, minh = 0.4*scaling, emboss = 0.05, padding = 0.03*scaling}, nodes={
-			{n=game().UI.BOX, config={h=0.1,w=0.03}},
-			{n=game().UI.OBJECT, config={object = FlowText({string = _string or 'ERROR', colours = {_text_col or game().C.WHITE},float = true, shadow = true, offset_y = -0.05, silent = true, spacing = 1, scale = 0.33*scaling})}},
-			{n=game().UI.BOX, config={h=0.1,w=0.03}},
-		}}
-	}}
+	return Panel.row({align = "cm"}, {
+		Panel.row({align = "cm", colour = _badge_col or game().C.GREEN, r = 0.1, minw = 2, minh = 0.4*scaling, emboss = 0.05, padding = 0.03*scaling}, {
+			Panel.box({h=0.1,w=0.03}),
+			Panel.object({object = FlowText({string = _string or 'ERROR', colours = {_text_col or game().C.WHITE},float = true, shadow = true, offset_y = -0.05, silent = true, spacing = 1, scale = 0.33*scaling})}),
+			Panel.box({h=0.1,w=0.03}),
+		})
+	})
 end
 
 
@@ -187,11 +189,11 @@ function build_detailed_tooltip(_center)
 			badges = {}
 	}
 	local desc = generate_card_ui(_center, full_UI_table, nil, _center.set, nil)
-	return {n=game().UI.ROOT, config={align = "cm", colour = game().C.CLEAR}, nodes={
-		{n=game().UI.ROW, config={align = "cm", colour = Colour.tint(game().C.MUTED_GREY, 0.5), r = 0.1, padding = 0.05, emboss = 0.05}, nodes={
+	return Panel.root({align = "cm", colour = game().C.CLEAR}, {
+		Panel.row({align = "cm", colour = Colour.tint(game().C.MUTED_GREY, 0.5), r = 0.1, padding = 0.05, emboss = 0.05}, {
 			rows_to_infotip(desc.info[1], desc.info[1].name),
-		}}
-	}}
+		})
+	})
 end
 
 
@@ -200,28 +202,26 @@ function make_tooltip(tooltip)
 	local text = tooltip.text or {}
 	local rows = {}
 	if title then
-			local r = {n=game().UI.ROW, config={align = "cm"}, nodes={
-					{n=game().UI.COLUMN, config={align = "cm"}, nodes={
-							{n=game().UI.TEXT, config={text = title,colour = game().C.UI.TEXT_DARK, scale = 0.4}}}}}}
+			local r = Panel.row({align = "cm"}, {
+					Panel.column({align = "cm"}, {
+							Panel.label({text = title,colour = game().C.UI.TEXT_DARK, scale = 0.4})})})
 			table.insert(rows, r)
 	end
 	for i = 1, #text do
 		if type(text[i]) == 'table' then
-			local r = {n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes={
-				{n=game().UI.TEXT, config={ref_table = text[i].ref_table, ref_value = text[i].ref_value,colour = game().C.UI.TEXT_DARK, scale = 0.4}}}}
+			local r = Panel.row({align = "cm", padding = 0.03}, {
+				Panel.label({ref_table = text[i].ref_table, ref_value = text[i].ref_value,colour = game().C.UI.TEXT_DARK, scale = 0.4})})
 			table.insert(rows, r)
 		else
-			local r = {n=game().UI.ROW, config={align = "cm", padding = 0.03}, nodes={
-							{n=game().UI.TEXT, config={text = text[i],colour = game().C.UI.TEXT_DARK, scale = 0.4}}}}
+			local r = Panel.row({align = "cm", padding = 0.03}, {
+							Panel.label({text = text[i],colour = game().C.UI.TEXT_DARK, scale = 0.4})})
 			table.insert(rows, r)
 		end
 	end
 	if tooltip.filler then 
 		table.insert(rows, tooltip.filler.func(tooltip.filler.args))
 	end
-	local t = {
-			n=game().UI.ROOT, config = {align = "cm", padding = 0.05, r=0.1, colour = game().C.RED, emboss = 0.05}, nodes=
-			{{n=game().UI.COLUMN, config={align = "cm", padding = 0.05, r = 0.1, colour = game().C.WHITE, emboss = 0.05}, nodes=rows}}}
+	local t = Panel.root({align = "cm", padding = 0.05, r=0.1, colour = game().C.RED, emboss = 0.05}, {Panel.column({align = "cm", padding = 0.05, r = 0.1, colour = game().C.WHITE, emboss = 0.05}, rows)})
 	return t
 end
 

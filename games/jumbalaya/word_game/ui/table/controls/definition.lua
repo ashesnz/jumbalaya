@@ -1,6 +1,8 @@
 --[[ word_game/ui/table/controls/definition.lua - Shuffle/play button chrome and definitions ]]
 
 local game = require("word_game.ui.util.game_runtime").game
+local Press = require("word_game.ui.widgets.press")
+local Panel = require("jumbalaya-engine.panels.api")
 
 local M = {}
 
@@ -92,14 +94,9 @@ function M.shuffle_button_def(size)
 	local shuffle_sprite = shuffle_icon_sprite(size)
 	local nodes = {}
 	if shuffle_sprite then
-		nodes[#nodes + 1] = {
-			n = game().UI.OBJECT,
-			config = { id = "hand_shuffle_icon", object = shuffle_sprite },
-		}
+		nodes[#nodes + 1] = Panel.object({ id = "hand_shuffle_icon", object = shuffle_sprite })
 	end
-	return {
-		n = game().UI.COLUMN,
-		config = {
+	return Panel.column({
 			align = "cm",
 			padding = 0,
 			r = 0.5,
@@ -109,7 +106,7 @@ function M.shuffle_button_def(size)
 			maxh = size,
 			hover = true,
 			colour = M.play_button_colour(),
-			button = "shuffle_hand",
+			on_press = Press.named("shuffle_hand"),
 			id = "hand_shuffle_button",
 			no_jiggle = true,
 			shadow = false,
@@ -117,33 +114,23 @@ function M.shuffle_button_def(size)
 			can_collide = true,
 			force_collision = true,
 			focus_args = { snap_to = true },
-		},
-		nodes = nodes,
-	}
+		}, nodes)
 end
 
 function M.play_button_def(size)
 	local nodes = {}
 	local sprite = play_icon_sprite(size)
 	if sprite then
-		nodes[#nodes + 1] = {
-			n = game().UI.OBJECT,
-			config = { id = "play_hand_icon", object = sprite },
-		}
+		nodes[#nodes + 1] = Panel.object({ id = "play_hand_icon", object = sprite })
 	end
-	nodes[#nodes + 1] = {
-		n = game().UI.TEXT,
-		config = {
+	nodes[#nodes + 1] = Panel.label({
 			id = "play_hand_icon_text",
 			text = M.ICON_PLAY,
 			scale = 0.48,
 			colour = game().C.WHITE,
 			shadow = true,
-		},
-	}
-	return {
-		n = game().UI.COLUMN,
-		config = {
+		})
+	return Panel.column({
 			align = "cm",
 			padding = 0,
 			r = 0.5,
@@ -153,7 +140,7 @@ function M.play_button_def(size)
 			maxh = size,
 			hover = true,
 			colour = M.play_button_colour(),
-			button = "play_placement_word",
+			on_press = Press.named("play_placement_word"),
 			id = "hand_play_button",
 			no_jiggle = true,
 			shadow = false,
@@ -161,9 +148,7 @@ function M.play_button_def(size)
 			can_collide = true,
 			force_collision = true,
 			focus_args = { snap_to = true },
-		},
-		nodes = nodes,
-	}
+		}, nodes)
 end
 
 return M

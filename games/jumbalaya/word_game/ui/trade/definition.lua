@@ -8,6 +8,9 @@ local M = {}
 
 local CLOSE_LAYER = 2
 
+local Panel = require("jumbalaya-engine.panels.api")
+local Press = require("word_game.ui.widgets.press")
+
 local function marketplace_sprite(w, h)
 	if not Sprite then
 		return nil
@@ -25,7 +28,7 @@ local function marketplace_sprite(w, h)
 end
 
 local function close_button_node()
-	return { n = game().UI.COLUMN, config = {
+	return Panel.column({
 		id = "trade_marketplace_close",
 		align = "cm",
 		minw = 0.42,
@@ -35,19 +38,19 @@ local function close_button_node()
 		hover = true,
 		colour = game().C.RED,
 		hover_colour = game().C.UI.BUTTON_HOVER,
-		button = "trade_close",
+		on_press = Press.named("trade_close"),
 		shadow = false,
 		emboss = false,
 		no_jiggle = true,
-	}, nodes = {
-		{ n = game().UI.TEXT, config = {
+	}, {
+		Panel.label({
 			text = "X",
 			scale = 0.32,
 			font = alpha_button_font(),
 			colour = game().C.WHITE,
 			shadow = false,
-		}},
-	}}
+		}),
+	})
 end
 
 function M.build_overlay_definition()
@@ -60,7 +63,7 @@ function M.build_overlay_definition()
 
 	local stage_nodes = {}
 	if sprite then
-		stage_nodes[#stage_nodes + 1] = { n = g.UI.OBJECT, config = {
+		stage_nodes[#stage_nodes + 1] = Panel.object({
 			id = "trade_marketplace_art",
 			object = sprite,
 			w = frame.w,
@@ -68,10 +71,10 @@ function M.build_overlay_definition()
 			colour = g.C.WHITE,
 			outline_colour = g.C.CLEAR,
 			shadow = false,
-		}}
+		})
 	end
 	stage_nodes[#stage_nodes + 1] = grid_mod.build_grid(frame)
-	stage_nodes[#stage_nodes + 1] = { n = g.UI.ROW, config = {
+	stage_nodes[#stage_nodes + 1] = Panel.row({
 		id = "trade_marketplace_close_row",
 		draw_layer = CLOSE_LAYER,
 		align = "tr",
@@ -80,9 +83,9 @@ function M.build_overlay_definition()
 		padding = 0.08,
 		colour = g.C.CLEAR,
 		shadow = false,
-	}, nodes = { close_button_node() } }
+	}, { close_button_node() })
 
-	local marketplace_stage = { n = g.UI.COLUMN, config = {
+	local marketplace_stage = Panel.column({
 		id = "trade_marketplace_stage",
 		align = "cm",
 		minw = frame.w,
@@ -90,11 +93,9 @@ function M.build_overlay_definition()
 		padding = 0,
 		colour = g.C.CLEAR,
 		shadow = false,
-	}, nodes = stage_nodes }
+	}, stage_nodes)
 
-	return {
-		n = g.UI.ROOT,
-		config = {
+	return Panel.root({
 			id = "trade_marketplace_frame",
 			align = "cm",
 			minw = dim_w,
@@ -103,16 +104,14 @@ function M.build_overlay_definition()
 			r = 0.1,
 			colour = { 0, 0, 0, 0.55 },
 			shadow = false,
-		},
-		nodes = {
-			{ n = g.UI.COLUMN, config = {
+		}, {
+			Panel.column({
 				align = "cm",
 				padding = 0,
 				colour = g.C.CLEAR,
 				shadow = false,
-			}, nodes = { marketplace_stage } },
-		},
-	}
+			}, { marketplace_stage }),
+		})
 end
 
 M.CLOSE_DRAW_LAYER = CLOSE_LAYER

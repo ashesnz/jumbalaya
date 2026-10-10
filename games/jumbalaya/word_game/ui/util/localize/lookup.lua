@@ -4,6 +4,7 @@ local game = require("word_game.ui.util.game_runtime").game
 local GameFiles = require("app.platform.game_files")
 
 local M = {}
+local Panel = require("jumbalaya-engine.panels.api")
 
 local function ensure_localization()
 	local shell = game()
@@ -121,9 +122,7 @@ function M.localize(args, misc_cat)
 				end
 				local desc_scale = game().LANG.font.DESCSCALE
 				if args.type == "name" then
-					final_line[#final_line + 1] = {
-						n = game().UI.OBJECT,
-						config = {
+					final_line[#final_line + 1] = Panel.object({
 							object = FlowText({
 								string = { assembled_string },
 								colours = { (part.control.V and args.vars.colours[tonumber(part.control.V)]) or (part.control.C and loc_colour(part.control.C)) or game().C.UI.TEXT_LIGHT },
@@ -137,8 +136,7 @@ function M.localize(args, misc_cat)
 								spacing = math.max(0, 0.32 * (17 - #assembled_string)),
 								scale = (0.55 - 0.004 * #assembled_string) * (part.control.s and tonumber(part.control.s) or 1) * desc_scale,
 							}),
-						},
-					}
+						})
 				elseif part.control.E then
 					local _float, _silent, _pop_in, _bump, _spacing = nil, true, nil, nil, nil
 					if part.control.E == "1" then
@@ -149,9 +147,7 @@ function M.localize(args, misc_cat)
 						_bump = true
 						_spacing = 1
 					end
-					final_line[#final_line + 1] = {
-						n = game().UI.OBJECT,
-						config = {
+					final_line[#final_line + 1] = Panel.object({
 							object = FlowText({
 								string = { assembled_string },
 								colours = { part.control.V and args.vars.colours[tonumber(part.control.V)] or loc_colour(part.control.C or nil) },
@@ -162,34 +158,23 @@ function M.localize(args, misc_cat)
 								spacing = _spacing,
 								scale = 0.32 * (part.control.s and tonumber(part.control.s) or 1) * desc_scale,
 							}),
-						},
-					}
+						})
 				elseif part.control.X then
-					final_line[#final_line + 1] = {
-						n = game().UI.COLUMN,
-						config = { align = "m", colour = loc_colour(part.control.X), r = 0.05, padding = 0.03, res = 0.15 },
-						nodes = {
-							{
-								n = game().UI.TEXT,
-								config = {
+					final_line[#final_line + 1] = Panel.column({ align = "m", colour = loc_colour(part.control.X), r = 0.05, padding = 0.03, res = 0.15 }, {
+							Panel.label({
 									text = assembled_string,
 									colour = loc_colour(part.control.C or nil),
 									scale = 0.32 * (part.control.s and tonumber(part.control.s) or 1) * desc_scale,
-								},
-							},
-						},
-					}
+								}),
+						})
 				else
-					final_line[#final_line + 1] = {
-						n = game().UI.TEXT,
-						config = {
+					final_line[#final_line + 1] = Panel.label({
 							detailed_tooltip = part.control.T and game().LETTERS.centers[part.control.T] or nil,
 							text = assembled_string,
 							shadow = args.shadow,
 							colour = part.control.V and args.vars.colours[tonumber(part.control.V)] or loc_colour(part.control.C or nil, args.default_col),
 							scale = 0.32 * (part.control.s and tonumber(part.control.s) or 1) * desc_scale,
-						},
-					}
+						})
 				end
 			end
 			if args.type == "name" or args.type == "text" then

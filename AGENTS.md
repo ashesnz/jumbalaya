@@ -42,7 +42,8 @@ Canonical game tree: `games/jumbalaya/` (`app/`, `word_game/`, …). Shared pack
 - **Runtime bus:** Game shell via `jumbalaya-engine.shell` (`app/runtime.lua` delegates); run snapshot via `WORD_GAME.store()` / `WORD_GAME.GameAccess` / `runtime.game_access()`; panel callback strings via `Funcs.dispatch`. Shell injection: `app/bootstrap/shell_bind.lua`. **Every new feature:** facade method + owned run-state field in `types/store.lua`, or it does not ship (`test_store_state_catalog.lua`).
 - **Facade imports:** `app/` (except bootstrap wiring), `devtools/`, and new `word_game/ui/` code must not deep-require `word_game.model.*` — use `WORD_GAME`, `WORD_GAME_UI`, `word_game.ui.facade`, or `runtime.game_access()` (`test_facade_boundaries.lua`).
 - **Core purity:** `packages/jumbalaya_core/` never imports Love2D, `app/`, or `word_game/` — add rules there + `test_core_*` first (`test_core_purity.lua` static scan).
-- **Panel callbacks:** every `func` / `button` / `Funcs.dispatch` name must appear in `types/funcs.lua` and `Funcs.register` (`test_g_funcs_registry.lua`).
+- **Panel trees:** new screens/widgets use `Panel.column` / `Panel.button` (`jumbalaya-engine.panels.api`) — no new `{ n = game().UI.* }` trees (`test_uit_freeze.lua`, `tests/helpers/uit_allowlist.lua`).
+- **Panel callbacks:** remaining `func` / `button` / `Funcs.dispatch` **string** names must appear in `types/funcs.lua` and `Funcs.register` (`test_g_funcs_registry.lua`). New UI uses function `on_press` / `on_update` — do not add new catalog names.
 - **Glue headers:** `word_game/model/` modules document `Core` / `Store` / `Presentation` in the file header. Hoist `require()` to module scope — no inline requires in update/draw/deal hot paths unless breaking a documented cycle.
 - **No proxy shims:** require engine/core modules directly — no one-line `return require(...)` files under `word_game/` (`test_legacy_shims.lua` audits the tree; only `app/bootstrap/engine_boot.lua` may delegate).
 - **Rules vs glue:** pure gameplay logic in `packages/jumbalaya_core/` (+ `test_core_*`); `word_game/model/` is runtime glue only.
@@ -141,7 +142,7 @@ Tests that need rules only call `play_jumble_word`; tests that need full FX call
 - Package folders use `init.lua`; most modules `local M = {}` … `return M`
 - Files/dirs/locals: `snake_case`; classes/globals: `PascalCase`
 - **Devtools:** Lua modules under `games/jumbalaya/devtools/` use `snake_case` (`debug_button.lua`, `sections/stage.lua`). Locale files use BCP47 tags (`localization/en-us.lua`). Python one-off scripts belong in `_tools/`, not `devtools/`.
-- UI binds panel `func` strings — move implementations, not registration names when refactoring (`Funcs.register` keeps the name stable)
+- New UI binds function callbacks on `Panel.button`. Remaining string `func` names stay stable until that screen migrates (`Funcs.register`); then drop the catalog entry in the same slice.
 - Class chain: `Object → Node → EaseNode/AnimNode → Sprite, Panel, LetterTile, CardPile` (`Card` is a LetterTile alias)
 - `Card` model class loads in `app/bootstrap/game_boot.lua`; presentation mixins install via `word_game/ui/cards/bind.lua` (tests: `mock_env.ensure_card_class()`)
 

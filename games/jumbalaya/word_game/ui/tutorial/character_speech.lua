@@ -12,6 +12,7 @@ local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 
 
 local M = {}
+local Panel = require("jumbalaya-engine.panels.api")
 
 M.CHARS_PER_SEC = 18
 M.LINE_GAP = 0.28
@@ -119,21 +120,16 @@ function M.bubble_definition(text_key, loc_vars)
 				})
 				hide_letters(dyna)
 				delay = type_letters(dyna, delay, cps)
-				line_nodes[#line_nodes + 1] = {
-					n = game().UI.OBJECT,
-					config = { object = dyna },
-				}
+				line_nodes[#line_nodes + 1] = Panel.object({ object = dyna })
 			end
 		end
 		if #line_nodes > 0 then
-			row[#row + 1] = { n = game().UI.ROW, config = { align = "cl" }, nodes = line_nodes }
+			row[#row + 1] = Panel.row({ align = "cl" }, line_nodes)
 			delay = delay + M.LINE_GAP
 		end
 	end
 
-	return {
-		n = game().UI.ROOT,
-		config = {
+	return Panel.root({
 			align = "cm",
 			minw = 1.8,
 			minh = 0.5,
@@ -144,12 +140,10 @@ function M.bubble_definition(text_key, loc_vars)
 			outline = 1,
 			outline_colour = game().C.BLACK,
 			speech_tail = "mouth",
-		},
-		nodes = {
-			{ n = game().UI.COLUMN, config = { align = "cl", colour = game().C.CLEAR }, nodes = row },
-			{ n = game().UI.BOX, config = { h = 0.1, w = 0.01 } },
-		},
-	}
+		}, {
+			Panel.column({ align = "cl", colour = game().C.CLEAR }, row),
+			Panel.box({ h = 0.1, w = 0.01 }),
+		})
 end
 
 function M.pop_bubble(uibox)

@@ -9,6 +9,8 @@ local Colour = require("jumbalaya-engine.util.colour")
 
 local button_font
 local localize = require("word_game.ui.util.localize").localize
+local Panel = require("jumbalaya-engine.panels.api")
+local Press = require("word_game.ui.widgets.press")
 function alpha_button_font()
 	if not button_font then
 		local ok, font = pcall(love.graphics.newFont, "resources/fonts/Outfit-Bold.ttf", game().TILESIZE * 7)
@@ -29,24 +31,24 @@ function build_character_button(args)
 	local colour = args.colour or game().C.UI.BUTTON
 	local update_func = args.update_func or nil
 
-	local t = {n=game().UI.ROOT, config = {align = "cm", padding = 0.1, colour = game().C.CLEAR}, nodes={
-		{n=game().UI.COLUMN, config={align = "tm", minw = 1.9, padding = 0.34, minh = 1.2, r = Components.CHROME.radius, hover = true, colour = colour, hover_colour = game().C.UI.BUTTON_HOVER, button = func, func = update_func, shadow = true, maxw = args.maxw}, nodes={
-			{n=game().UI.ROW, config={align = "cm", padding = 0}, nodes={
-				{n=game().UI.TEXT, config={text = button, scale = 0.55, font = alpha_button_font(), colour = game().C.UI.BUTTON_TEXT, focus_args = {button = 'x', orientation = 'bm'}, func = 'set_button_pip'}}
-			}}
-		}},
-		}}
+	local t = Panel.root({align = "cm", padding = 0.1, colour = game().C.CLEAR}, {
+		Panel.column({align = "tm", minw = 1.9, padding = 0.34, minh = 1.2, r = Components.CHROME.radius, hover = true, colour = colour, hover_colour = game().C.UI.BUTTON_HOVER, button = func, func = update_func, shadow = true, maxw = args.maxw}, {
+			Panel.row({align = "cm", padding = 0}, {
+				Panel.label({text = button, scale = 0.55, font = alpha_button_font(), colour = game().C.UI.BUTTON_TEXT, focus_args = {button = 'x', orientation = 'bm'}, func = 'set_button_pip'})
+			})
+		}),
+		})
 	return t
 end
 
 
 function build_card_alert(args)
 	args = args or {}
-	return {n=game().UI.ROOT, config = {align = 'cm', colour = game().C.CLEAR, refresh_movement = true}, nodes={
-			{n=game().UI.ROW, config={align = "cm", r = 0.15, minw = 0.42, minh = 0.42, colour = args.no_bg and game().C.CLEAR or args.bg_col or (args.red_bad and Colour.shade(game().C.RED, 0.1) or game().C.RED), draw_layer = 1, emboss = 0.05, refresh_movement = true}, nodes={
-				{n=game().UI.OBJECT, config={object = FlowText({string = args.text or '!', colours = {game().C.WHITE},shadow = true, rotate = true,H_offset = args.y_offset or 0,bump_rate = args.text and 3 or 7, bump_amount = args.bump_amount or 3, bump = true,maxw = args.maxw, text_rot = args.text_rot or  0.2, spacing = 3*(args.scale or 1), scale = args.scale or 0.48})}}
-			}},
-	}}
+	return Panel.root({align = 'cm', colour = game().C.CLEAR, refresh_movement = true}, {
+			Panel.row({align = "cm", r = 0.15, minw = 0.42, minh = 0.42, colour = args.no_bg and game().C.CLEAR or args.bg_col or (args.red_bad and Colour.shade(game().C.RED, 0.1) or game().C.RED), draw_layer = 1, emboss = 0.05, refresh_movement = true}, {
+				Panel.object({object = FlowText({string = args.text or '!', colours = {game().C.WHITE},shadow = true, rotate = true,H_offset = args.y_offset or 0,bump_rate = args.text and 3 or 7, bump_amount = args.bump_amount or 3, bump = true,maxw = args.maxw, text_rot = args.text_rot or  0.2, spacing = 3*(args.scale or 1), scale = args.scale or 0.48})})
+			}),
+	})
 end
 
 function make_keyboard_key(key, binding)
@@ -85,16 +87,19 @@ function make_bind_pip(args)
 		{x=button_sprite_map[args.button],
 		 y=game().INPUT.GAMEPAD_CONSOLE == 'Nintendo' and 2 or game().INPUT.GAMEPAD_CONSOLE == 'Playstation' and (game().F_PS4_PLAYSTATION_GLYPHS and 3 or 1) or 0})
 
-	return {n=game().UI.ROOT, config = {align = 'cm', colour = game().C.CLEAR}, nodes={
-				{n=game().UI.OBJECT, config={object = BUTTON_SPRITE}},
-		}}
+	return Panel.root({align = 'cm', colour = game().C.CLEAR}, {
+				Panel.object({object = BUTTON_SPRITE}),
+		})
 end
 
 
 function build_generic_options(args)
 	args = args or {}
-	local back_func = args.back_func or "close_overlay"
-	local contents = args.contents or ({n=game().UI.TEXT, config={text = "EMPTY",colour = game().C.UI.RED, scale = 0.4}})
+	local back_func = args.back_func or Press.named("close_overlay")
+	if type(back_func) == "string" then
+		back_func = Press.named(back_func)
+	end
+	local contents = args.contents or (Panel.label({text = "EMPTY",colour = game().C.UI.RED, scale = 0.4}))
 	if args.infotip then
 		Scheduler.add{
 			blocking = false,
@@ -116,32 +121,28 @@ function build_generic_options(args)
 		}
 	end
 
-	return {n=game().UI.ROOT, config = {align = "cm", minw = args.root_minw or game().ROOM.T.w*5, minh = args.root_minh or game().ROOM.T.h*5,padding = 0.1, r = 0.1, colour = args.bg_colour or {game().C.GREY[1], game().C.GREY[2], game().C.GREY[3],0.7}}, nodes={
-		{n=game().UI.ROW, config={align = "cm", minh = args.minh or 1,r = 0.3, padding = 0.07, minw = 1, colour = args.outline_colour or game().C.MUTED_GREY, emboss = 0.1}, nodes={
-			{n=game().UI.COLUMN, config={align = "cm", minh = args.minh or 1,r = 0.2, padding = 0.2, minw = 1, colour = args.colour or game().C.L_BLACK}, nodes={
-				{n=game().UI.ROW, config={align = "cm",padding = args.padding or 0.2, minw = args.minw or 7}, nodes=
-					contents
-				},
-				not args.no_back and {n=game().UI.ROW, config={id = args.back_id or 'overlay_menu_back_button', align = "cm", minw = 2.5, button_delay = args.back_delay, padding =0.24, r = Components.CHROME.radius, hover = true, colour = args.back_colour or game().C.UI.BUTTON, hover_colour = game().C.UI.BUTTON_HOVER, button = back_func, shadow = true, focus_args = {nav = 'wide', button = 'b', snap_to = args.snap_back}}, nodes={
-					{n=game().UI.ROW, config={align = "cm", padding = 0, no_fill = true}, nodes={
-						{n=game().UI.TEXT, config={id = args.back_id or nil, text = args.back_label or localize('ui_back'), scale = 0.5, font = alpha_button_font(), colour = game().C.UI.BUTTON_TEXT, shadow = true, func = not args.no_pip and 'set_button_pip' or nil, focus_args =  not args.no_pip and {button = args.back_button or 'b'} or nil}}
-					}}
-				}} or nil
-			}},
-		}},
-		{n=game().UI.ROW, config={align = "cm"}, nodes={
-			{n=game().UI.OBJECT, config={id = 'overlay_menu_infotip', object = EaseNode()}},
-		}},
-	}}
+	return Panel.root({align = "cm", minw = args.root_minw or game().ROOM.T.w*5, minh = args.root_minh or game().ROOM.T.h*5,padding = 0.1, r = 0.1, colour = args.bg_colour or {game().C.GREY[1], game().C.GREY[2], game().C.GREY[3],0.7}}, {
+		Panel.row({align = "cm", minh = args.minh or 1,r = 0.3, padding = 0.07, minw = 1, colour = args.outline_colour or game().C.MUTED_GREY, emboss = 0.1}, {
+			Panel.column({align = "cm", minh = args.minh or 1,r = 0.2, padding = 0.2, minw = 1, colour = args.colour or game().C.L_BLACK}, {
+				Panel.row({align = "cm",padding = args.padding or 0.2, minw = args.minw or 7}, contents),
+				not args.no_back and Panel.row({id = args.back_id or 'overlay_menu_back_button', align = "cm", minw = 2.5, button_delay = args.back_delay, padding =0.24, r = Components.CHROME.radius, hover = true, colour = args.back_colour or game().C.UI.BUTTON, hover_colour = game().C.UI.BUTTON_HOVER, button = back_func, shadow = true, focus_args = {nav = 'wide', button = 'b', snap_to = args.snap_back}}, {
+					Panel.row({align = "cm", padding = 0, no_fill = true}, {
+						Panel.label({id = args.back_id or nil, text = args.back_label or localize('ui_back'), scale = 0.5, font = alpha_button_font(), colour = game().C.UI.BUTTON_TEXT, shadow = true, func = not args.no_pip and 'set_button_pip' or nil, focus_args =  not args.no_pip and {button = args.back_button or 'b'} or nil})
+					})
+				}) or nil
+			}),
+		}),
+		Panel.row({align = "cm"}, {
+			Panel.object({id = 'overlay_menu_infotip', object = EaseNode()}),
+		}),
+	})
 end
 
 
 function panel_dyn_container(inner_table, horizontal, colour_override, background_override, flipped, padding)
-	return {n=game().UI.ROW, config = {align = "cm", padding= 0.03, colour = game().C.UI.TRANSPARENT_DARK, r=0.1}, nodes={
-		{n=game().UI.ROW, config = {align = "cm", padding= 0.05, colour = colour_override or game().C.DYN_UI.MAIN, r=0.1}, nodes={
-		{n=game().UI.ROW, config={align = horizontal and "cl" or (flipped and 'bm' or "tm"), colour = background_override or game().C.DYN_UI.BOSS_DARK, minw = horizontal and 100 or 0, minh = horizontal and 0 or 30, r=0.1, padding = padding or 0.08}, nodes=
-			inner_table
-	}}}}}
+	return Panel.row({align = "cm", padding= 0.03, colour = game().C.UI.TRANSPARENT_DARK, r=0.1}, {
+		Panel.row({align = "cm", padding= 0.05, colour = colour_override or game().C.DYN_UI.MAIN, r=0.1}, {
+		Panel.row({align = horizontal and "cl" or (flipped and 'bm' or "tm"), colour = background_override or game().C.DYN_UI.BOSS_DARK, minw = horizontal and 100 or 0, minh = horizontal and 0 or 30, r=0.1, padding = padding or 0.08}, inner_table)})})
 end
 
 
@@ -153,11 +154,12 @@ function simple_text_container(_loc, args)
 	if loc_result and type(loc_result) == 'table' then
 		for k, v in ipairs(loc_result) do
 			container[#container+1] =
-				{n=game().UI.ROW, config = {align = "cm", padding= 0}, nodes={
-					{n=game().UI.TEXT, config={text = v, scale = args.scale or 0.35, colour = args.colour or game().C.UI.TEXT_DARK, shadow = args.shadow}}
-				}}
+				Panel.row({align = "cm", padding= 0}, {
+					Panel.label({text = v, scale = args.scale or 0.35, colour = args.colour or game().C.UI.TEXT_DARK, shadow = args.shadow})
+				})
 		end
-		return {n=args.col and game().UI.COLUMN or game().UI.ROW, config = {align = "cm", padding= args.padding or 0.03}, nodes=container}
+		local wrap = args.col and Panel.column or Panel.row
+		return wrap({align = "cm", padding= args.padding or 0.03}, container)
 	end
 end
 

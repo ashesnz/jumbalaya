@@ -11,6 +11,8 @@ local Tables = require("jumbalaya-engine.util.tables")
 local M = {}
 
 local localize = require("word_game.ui.util.localize").localize
+local Panel = require("jumbalaya-engine.panels.api")
+local Press = require("word_game.ui.widgets.press")
 function M.best_jumble_value(stats)
 	stats = stats or {}
 	local pattern = stats.best_puzzle
@@ -41,24 +43,24 @@ function M.definition(won)
 	local colour = won and game().C.GOLD or game().C.RED
 	local lines = M.summary_lines(stats)
 	local contents = {
-		{ n = game().UI.ROW, config = { align = "cm", padding = 0.12 }, nodes = {
-			{ n = game().UI.TEXT, config = { text = title, scale = 0.7, colour = colour, shadow = true } },
-		}},
+		Panel.row({ align = "cm", padding = 0.12 }, {
+			Panel.label({ text = title, scale = 0.7, colour = colour, shadow = true }),
+		}),
 	}
 	for i, line in ipairs(lines) do
 		local padding = i == 1 and 0.06 or 0.04
-		contents[#contents + 1] = { n = game().UI.ROW, config = { align = "cm", padding = padding }, nodes = {
-			{ n = game().UI.TEXT, config = {
+		contents[#contents + 1] = Panel.row({ align = "cm", padding = padding }, {
+			Panel.label({
 				text = line.label .. ": " .. tostring(line.value),
 				scale = 0.36,
 				colour = game().C.UI.TEXT_LIGHT,
 				shadow = true,
-			}},
-		}}
+			}),
+		})
 	end
-	contents[#contents + 1] = { n = game().UI.ROW, config = { align = "cm", padding = 0.1 }, nodes = {
+	contents[#contents + 1] = Panel.row({ align = "cm", padding = 0.1 }, {
 		widgets.button("Back to Menu", "return_to_menu", game().C.RED, 3.4, 0.75),
-	}}
+	})
 
 	return build_generic_options({
 		contents = contents,
@@ -67,9 +69,9 @@ function M.definition(won)
 end
 
 function M.stat_line(label, value)
-	return { n = game().UI.ROW, config = { align = "cm", padding = 0.04 }, nodes = {
-		{ n = game().UI.TEXT, config = { text = label .. "  " .. tostring(value), scale = 0.38, colour = game().C.UI.TEXT_LIGHT, shadow = true } },
-	}}
+	return Panel.row({ align = "cm", padding = 0.04 }, {
+		Panel.label({ text = label .. "  " .. tostring(value), scale = 0.38, colour = game().C.UI.TEXT_LIGHT, shadow = true }),
+	})
 end
 
 function M.overlay_definition(won)
@@ -93,8 +95,8 @@ function M.overlay_definition(won)
 		no_back = true,
 		padding = 0.08,
 		contents = {
-			{ n = game().UI.ROW, config = { align = "cm", padding = 0.12 }, nodes = {
-				{ n = game().UI.OBJECT, config = { object = FlowText({
+			Panel.row({ align = "cm", padding = 0.12 }, {
+				Panel.object({ object = FlowText({
 					string = { title },
 					colours = { title_col },
 					shadow = true,
@@ -102,11 +104,11 @@ function M.overlay_definition(won)
 					scale = 1.35,
 					pop_in = 0.4,
 					maxw = 6.5,
-				})}},
-			}},
-			{ n = game().UI.ROW, config = { align = "cm", padding = 0.12, colour = game().C.BLACK, r = 0.1, emboss = 0.05 }, nodes = stat_nodes },
-			{ n = game().UI.ROW, config = { align = "cm", padding = 0.12 }, nodes = {
-				{ n = game().UI.ROW, config = {
+				})}),
+			}),
+			Panel.row({ align = "cm", padding = 0.12, colour = game().C.BLACK, r = 0.1, emboss = 0.05 }, stat_nodes),
+			Panel.row({ align = "cm", padding = 0.12 }, {
+				Panel.row({
 					id = "from_game_over",
 					align = "cm",
 					minw = 5,
@@ -114,27 +116,27 @@ function M.overlay_definition(won)
 					r = 0.1,
 					hover = true,
 					colour = game().C.RED,
-					button = "notify_then_start_run",
+					on_press = Press.named("notify_then_start_run"),
 					shadow = true,
 					focus_args = { nav = "wide", snap_to = true },
-				}, nodes = {
-					{ n = game().UI.TEXT, config = { text = localize("ui_start_new_run"), scale = 0.5, colour = game().C.UI.TEXT_LIGHT } },
-				}},
-				{ n = game().UI.ROW, config = { minh = 0.08 }, nodes = {} },
-				{ n = game().UI.ROW, config = {
+				}, {
+					Panel.label({ text = localize("ui_start_new_run"), scale = 0.5, colour = game().C.UI.TEXT_LIGHT }),
+				}),
+				Panel.row({ minh = 0.08 }, {}),
+				Panel.row({
 					align = "cm",
 					minw = 5,
 					padding = 0.1,
 					r = 0.1,
 					hover = true,
 					colour = game().C.RED,
-					button = "return_to_menu",
+					on_press = Press.named("return_to_menu"),
 					shadow = true,
 					focus_args = { nav = "wide" },
-				}, nodes = {
-					{ n = game().UI.TEXT, config = { text = localize("ui_main_menu"), scale = 0.5, colour = game().C.UI.TEXT_LIGHT } },
-				}},
-			}},
+				}, {
+					Panel.label({ text = localize("ui_main_menu"), scale = 0.5, colour = game().C.UI.TEXT_LIGHT }),
+				}),
+			}),
 		},
 	})
 end

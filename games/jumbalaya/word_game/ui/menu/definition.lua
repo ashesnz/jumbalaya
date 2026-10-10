@@ -14,6 +14,9 @@ local M = {}
 
 local STACK_GAP_PX = 20
 
+local Panel = require("jumbalaya-engine.panels.api")
+local Press = require("word_game.ui.widgets.press")
+
 local function menu_px_to_tiles(px)
 	local ts = (game().TILESIZE or 1) * (game().TILESCALE or 1)
 	return px / ts
@@ -41,7 +44,7 @@ function DEFINITIONS.profile_select()
 
 	local focused = shell.focused_profile()
 	local t = build_generic_options({padding = 0, contents = {
-			{n=game().UI.ROW, config={align = "cm", padding = 0, draw_layer = 1, minw = 4}, nodes={
+			Panel.row({align = "cm", padding = 0, draw_layer = 1, minw = 4}, {
 				make_tab_strip(
 				{tabs = {
 						{
@@ -64,7 +67,7 @@ function DEFINITIONS.profile_select()
 						}
 				},
 				snap_to_nav = true}),
-			}},
+			}),
 	}})
 	return t
 end
@@ -81,9 +84,9 @@ function DEFINITIONS.profile_option(_profile)
 
 	local lwidth, rwidth, scale = 1, 1, 1
 	game().CHECK_PROFILE_DATA = nil
-	local t = {n=game().UI.ROOT, config={align = 'cm', colour = game().C.CLEAR}, nodes={
-		{n=game().UI.ROW, config={align = 'cm',padding = 0.1, minh = 0.8}, nodes={
-				((_profile == game().SETTINGS.profile) or not profile_data) and {n=game().UI.ROW, config={align = "cm"}, nodes={
+	local t = Panel.root({align = 'cm', colour = game().C.CLEAR}, {
+		Panel.row({align = 'cm',padding = 0.1, minh = 0.8}, {
+				((_profile == game().SETTINGS.profile) or not profile_data) and Panel.row({align = "cm"}, {
 				make_text_field({
 					w = 4, max_length = 16, prompt_text = localize('term_enter_name'),
 					ref_table = game().PROFILES[_profile], ref_value = 'name',extended_corpus = true, keyboard_offset = 1,
@@ -92,42 +95,42 @@ function DEFINITIONS.profile_option(_profile)
 						game().WRITE_FLAGS.force = true
 					end
 				}),
-			}} or {n=game().UI.ROW, config={align = 'cm',padding = 0.1, minw = 4, r = 0.1, colour = game().C.BLACK, minh = 0.6}, nodes={
-				{n=game().UI.TEXT, config={text = game().PROFILES[_profile].name, scale = 0.45, colour = game().C.WHITE}},
-			}},
-		}},
-		{n=game().UI.ROW, config={align = "cm", padding = 0.1}, nodes={
-			{n=game().UI.COLUMN, config={align = "cm", minw = 6}, nodes={
-				{n=game().UI.COLUMN, config={align = "cm", minh = 4, minw = 5.2, colour = game().C.BLACK, r = 0.1}, nodes={
-					{n=game().UI.TEXT, config={text = localize('term_empty_caps'), scale = 0.5, colour = game().C.UI.TRANSPARENT_LIGHT}}
-				}},
-			}},
-			{n=game().UI.COLUMN, config={align = "cm", minh = 4}, nodes={
-				{n=game().UI.ROW, config={align = "cm", minh = 1}, nodes={
-					profile_data and {n=game().UI.ROW, config={align = "cm"}, nodes={
-						{n=game().UI.COLUMN, config={align = "cm", minw = lwidth}, nodes={{n=game().UI.TEXT, config={text = localize('term_wins'),colour = game().C.UI.TEXT_LIGHT, scale = scale*0.7}}}},
-						{n=game().UI.COLUMN, config={align = "cm"}, nodes={{n=game().UI.TEXT, config={text = ': ',colour = game().C.UI.TEXT_LIGHT, scale = scale*0.7}}}},
-						{n=game().UI.COLUMN, config={align = "cl", minw = rwidth}, nodes={{n=game().UI.TEXT, config={text = tostring(profile_data.career_stats.c_wins),colour = game().C.RED, shadow = true, scale = 1*scale}}}}
-					}} or nil,
-				}},
-				{n=game().UI.ROW, config={align = "cm", padding = 0.2}, nodes={
-					{n=game().UI.ROW, config={align = "cm", padding = 0}, nodes={
-						{n=game().UI.ROW, config={align = "cm", minw = 4, maxw = 4, minh = 0.8, padding = 0.2, r = 0.1, hover = true, colour = game().C.BLUE,func = 'can_load_profile', button = "load_profile", shadow = true, focus_args = {nav = 'wide'}}, nodes={
-							{n=game().UI.TEXT, config={text = _profile == game().SETTINGS.profile and localize('ui_current_profile') or profile_data and localize('ui_load_profile') or localize('ui_create_profile'), ref_value = 'load_button_text', scale = 0.5, colour = game().C.UI.TEXT_LIGHT}}
-						}}
-					}},
-					{n=game().UI.ROW, config={align = "cm", padding = 0, minh = 0.7}, nodes={
-						{n=game().UI.ROW, config={align = "cm", minw = 3, maxw = 4, minh = 0.6, padding = 0.2, r = 0.1, hover = true, colour = game().C.RED,func = 'can_delete_profile', button = "delete_profile", shadow = true, focus_args = {nav = 'wide'}}, nodes={
-							{n=game().UI.TEXT, config={text = _profile == game().SETTINGS.profile and localize('ui_reset_profile') or localize('ui_delete_profile'), scale = 0.3, colour = game().C.UI.TEXT_LIGHT}}
-						}}
-					}},
-				}},
-		}},
-		}},
-		{n=game().UI.ROW, config={align = "cm", padding = 0}, nodes={
-			{n=game().UI.TEXT, config={id = 'warning_text', text = localize('hdr_click_confirm'), scale = 0.4, colour = game().C.CLEAR}}
-		}}
-	}} 
+			}) or Panel.row({align = 'cm',padding = 0.1, minw = 4, r = 0.1, colour = game().C.BLACK, minh = 0.6}, {
+				Panel.label({text = game().PROFILES[_profile].name, scale = 0.45, colour = game().C.WHITE}),
+			}),
+		}),
+		Panel.row({align = "cm", padding = 0.1}, {
+			Panel.column({align = "cm", minw = 6}, {
+				Panel.column({align = "cm", minh = 4, minw = 5.2, colour = game().C.BLACK, r = 0.1}, {
+					Panel.label({text = localize('term_empty_caps'), scale = 0.5, colour = game().C.UI.TRANSPARENT_LIGHT})
+				}),
+			}),
+			Panel.column({align = "cm", minh = 4}, {
+				Panel.row({align = "cm", minh = 1}, {
+					profile_data and Panel.row({align = "cm"}, {
+						Panel.column({align = "cm", minw = lwidth}, {Panel.label({text = localize('term_wins'),colour = game().C.UI.TEXT_LIGHT, scale = scale*0.7})}),
+						Panel.column({align = "cm"}, {Panel.label({text = ': ',colour = game().C.UI.TEXT_LIGHT, scale = scale*0.7})}),
+						Panel.column({align = "cl", minw = rwidth}, {Panel.label({text = tostring(profile_data.career_stats.c_wins),colour = game().C.RED, shadow = true, scale = 1*scale})})
+					}) or nil,
+				}),
+				Panel.row({align = "cm", padding = 0.2}, {
+					Panel.row({align = "cm", padding = 0}, {
+						Panel.row({align = "cm", minw = 4, maxw = 4, minh = 0.8, padding = 0.2, r = 0.1, hover = true, colour = game().C.BLUE,on_update = Press.named('can_load_profile'), on_press = Press.named("load_profile"), shadow = true, focus_args = {nav = 'wide'}}, {
+							Panel.label({text = _profile == game().SETTINGS.profile and localize('ui_current_profile') or profile_data and localize('ui_load_profile') or localize('ui_create_profile'), ref_value = 'load_button_text', scale = 0.5, colour = game().C.UI.TEXT_LIGHT})
+						})
+					}),
+					Panel.row({align = "cm", padding = 0, minh = 0.7}, {
+						Panel.row({align = "cm", minw = 3, maxw = 4, minh = 0.6, padding = 0.2, r = 0.1, hover = true, colour = game().C.RED,on_update = Press.named('can_delete_profile'), on_press = Press.named("delete_profile"), shadow = true, focus_args = {nav = 'wide'}}, {
+							Panel.label({text = _profile == game().SETTINGS.profile and localize('ui_reset_profile') or localize('ui_delete_profile'), scale = 0.3, colour = game().C.UI.TEXT_LIGHT})
+						})
+					}),
+				}),
+		}),
+		}),
+		Panel.row({align = "cm", padding = 0}, {
+			Panel.label({id = 'warning_text', text = localize('hdr_click_confirm'), scale = 0.4, colour = game().C.CLEAR})
+		})
+	}) 
 	return t
 end
 
@@ -138,7 +141,7 @@ function M.build_profile_button()
 	if game().F_DISP_USERNAME then
 		for c in each_utf8_char(game().F_DISP_USERNAME) do
 			local leng = game().LANGUAGES['all1'].font.FONT:hasGlyphs(c)
-			letters[#letters+1] = {n=game().UI.TEXT, config={lang = game().LANGUAGES[leng and 'all1' or 'all2'],text = c, scale = 0.3, colour = Colour.blend_colours(game().C.GREEN, game().C.WHITE, 0.7), shadow = true}}
+			letters[#letters+1] = Panel.label({lang = game().LANGUAGES[leng and 'all1' or 'all2'],text = c, scale = 0.3, colour = Colour.blend_colours(game().C.GREEN, game().C.WHITE, 0.7), shadow = true})
 		end
 	end
 
@@ -146,25 +149,25 @@ function M.build_profile_button()
 		game().PROFILES[game().SETTINGS.profile].name = "P"..game().SETTINGS.profile
 	end
 
-	return {n=game().UI.ROOT, config = {align = "cm", colour = game().C.CLEAR}, nodes={
-		{n=game().UI.ROW, config={align = "cm", padding = 0.2, r = 0.1, emboss = 0.1, colour = game().C.L_BLACK}, nodes={
-			{n=game().UI.ROW, config={align = "cm"}, nodes={
-				{n=game().UI.TEXT, config={text = localize('term_profile'), scale = 0.4, colour = game().C.UI.TEXT_LIGHT, shadow = true}}
-			}},
-			{n=game().UI.ROW, config={align = "cm"}, nodes={
-				{n=game().UI.COLUMN, config={align = "cm", padding = 0.15, minw = 2, minh = 0.8, maxw = 2, r = 0.1, hover = true, colour = Colour.blend_colours(game().C.WHITE, game().C.GREY, 0.2), button = 'profile_select', shadow = true}, nodes={
-					{n=game().UI.TEXT, config={ref_table = game().PROFILES[game().SETTINGS.profile], ref_value = 'name', scale = 0.4, colour = game().C.UI.TEXT_LIGHT, shadow = true}}
-				}},
-			}}
-		}},
-		game().F_DISP_USERNAME and {n=game().UI.ROW, config={align = "cm"}, nodes={
-			{n=game().UI.ROW, config={align = "cm"}, nodes={
-				{n=game().UI.TEXT, config={text = localize('term_playing_as'), scale = 0.3, colour = game().C.UI.TEXT_LIGHT, shadow = true}}
-			}},
-			{n=game().UI.ROW, config={align = "cm", minh = 0.12}, nodes={}},
-			{n=game().UI.ROW, config={align = "cm", maxw = 2}, nodes=letters}
-		}} or nil,
-	}}
+	return Panel.root({align = "cm", colour = game().C.CLEAR}, {
+		Panel.row({align = "cm", padding = 0.2, r = 0.1, emboss = 0.1, colour = game().C.L_BLACK}, {
+			Panel.row({align = "cm"}, {
+				Panel.label({text = localize('term_profile'), scale = 0.4, colour = game().C.UI.TEXT_LIGHT, shadow = true})
+			}),
+			Panel.row({align = "cm"}, {
+				Panel.column({align = "cm", padding = 0.15, minw = 2, minh = 0.8, maxw = 2, r = 0.1, hover = true, colour = Colour.blend_colours(game().C.WHITE, game().C.GREY, 0.2), on_press = Press.named('profile_select'), shadow = true}, {
+					Panel.label({ref_table = game().PROFILES[game().SETTINGS.profile], ref_value = 'name', scale = 0.4, colour = game().C.UI.TEXT_LIGHT, shadow = true})
+				}),
+			})
+		}),
+		game().F_DISP_USERNAME and Panel.row({align = "cm"}, {
+			Panel.row({align = "cm"}, {
+				Panel.label({text = localize('term_playing_as'), scale = 0.3, colour = game().C.UI.TEXT_LIGHT, shadow = true})
+			}),
+			Panel.row({align = "cm", minh = 0.12}, {}),
+			Panel.row({align = "cm", maxw = 2}, letters)
+		}) or nil,
+	})
 end
 
 function M.build_main_menu_mode_buttons()
@@ -192,42 +195,41 @@ function M.build_main_menu_buttons()
 	end
 
 	local function mode_button(id, label, action, colour)
-		return { n = game().UI.ROW, config = { align = "cm" }, nodes = {
+		return Panel.row({ align = "cm" }, {
 			menu_button(id, label, action, colour),
-		}}
+		})
 	end
 
 	local function gap_node()
-		return {n=game().UI.COLUMN, config={minw = gap}, nodes={}}
+		return Panel.column({minw = gap}, {})
 	end
 
 	local function mode_stack()
-		return {n=game().UI.ROW, config=menu_mode_chrome(), nodes={
+		return Panel.row(menu_mode_chrome(), {
 			mode_button('main_menu_classic', localize('ui_classic'), 'begin_classic_run', game().C.BLUE),
-			{n=game().UI.ROW, config={minh = gap, minw = button_w}, nodes={}},
+			Panel.row({minh = gap, minw = button_w}, {}),
 			mode_button('main_menu_time_run', localize('ui_time_run'), 'begin_time_run', game().C.GREEN),
-		}}
+		})
 	end
 
-	return {
-		n=game().UI.ROOT, config = {align = "cm", colour = game().C.CLEAR}, nodes={
-			{n=game().UI.COLUMN, config={align = "cm", padding = 0}, nodes={
-				{n=game().UI.ROW, config={
+	return Panel.root({align = "cm", colour = game().C.CLEAR}, {
+			Panel.column({align = "cm", padding = 0}, {
+				Panel.row({
 					id = "main_menu_mode_align_row",
 					align = "cm",
 					padding = 0,
 					colour = game().C.CLEAR,
-				}, nodes={
+				}, {
 					mode_stack(),
-				}},
-				{n=game().UI.ROW, config={minh = stack_gap}, nodes={}},
-				{n=game().UI.ROW, config=chrome, nodes={
+				}),
+				Panel.row({minh = stack_gap}, {}),
+				Panel.row(chrome, {
 					menu_button(nil, localize('ui_settings'), 'open_settings', game().C.ORANGE),
 					gap_node(),
 					menu_button(nil, localize('ui_quit_cap'), 'quit', game().C.RED),
-				}},
-			}},
-		}}
+				}),
+			}),
+		})
 end
 
 
@@ -242,13 +244,13 @@ function DEFINITIONS.language_selector()
 	table.sort(langs, (function(a, b) return a.label < b.label end))
 	local _row = {}
 	for k, v in ipairs(langs) do
-		_row[#_row+1] = {n=game().UI.COLUMN, config={align = "cm", padding = 0.05, r = 0.1, minh = 0.7, minw = 4.5, button = 'change_lang', ref_table = v, colour = game().C.BLUE, hover = true, shadow = true, focus_args = {snap_to = (k == 1)}}, nodes={
-			{n=game().UI.ROW, config={align = "cm"}, nodes={
-				{n=game().UI.TEXT, config={text = v.label, lang = v, scale = 0.45, colour = game().C.UI.TEXT_LIGHT, shadow = true}}
-			}}
-		}}
+		_row[#_row+1] = Panel.column({align = "cm", padding = 0.05, r = 0.1, minh = 0.7, minw = 4.5, on_press = Press.named('change_lang'), ref_table = v, colour = game().C.BLUE, hover = true, shadow = true, focus_args = {snap_to = (k == 1)}}, {
+			Panel.row({align = "cm"}, {
+				Panel.label({text = v.label, lang = v, scale = 0.45, colour = game().C.UI.TEXT_LIGHT, shadow = true})
+			})
+		})
 		if _row[3] or (k == #langs) then 
-			rows[#rows+1] = {n=game().UI.ROW, config={align = "cm", padding = 0.1}, nodes=_row}
+			rows[#rows+1] = Panel.row({align = "cm", padding = 0.1}, _row)
 			_row = {}
 		end
 	end
@@ -257,13 +259,13 @@ function DEFINITIONS.language_selector()
 	discord.states.drag.can = false
 
 	local t = build_generic_options({contents ={
-		{n=game().UI.ROW, config={align = "cm", padding = 0.05}, nodes=rows},
-		{n=game().UI.ROW, config={align = "cm", padding = 0.05}, nodes={
-			{n=game().UI.COLUMN, config={align = "cm", padding = 0.1, minw = 4, maxw = 4, r = 0.1, minh = 0.8, colour = Colour.blend_colours(game().C.GREEN, game().C.GREY, 0.4)}, nodes={
-				{n=game().UI.OBJECT, config={object = discord}},
-				{n=game().UI.TEXT, config={text = game().LANG.button, scale = 0.45, colour = game().C.UI.TEXT_LIGHT, shadow = true}}
-			}},
-		}}
+		Panel.row({align = "cm", padding = 0.05}, rows),
+		Panel.row({align = "cm", padding = 0.05}, {
+			Panel.column({align = "cm", padding = 0.1, minw = 4, maxw = 4, r = 0.1, minh = 0.8, colour = Colour.blend_colours(game().C.GREEN, game().C.GREY, 0.4)}, {
+				Panel.object({object = discord}),
+				Panel.label({text = game().LANG.button, scale = 0.45, colour = game().C.UI.TEXT_LIGHT, shadow = true})
+			}),
+		})
 	}})
 	return t
 end

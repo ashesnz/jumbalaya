@@ -55,6 +55,12 @@ word_game/ui/      Presentation — may import model/config
 
 Cross-package: `WORD_GAME` (domain) and `WORD_GAME_UI` (presentation). Tests and `app/` should use those facades, not deep `word_game.model.*` requires unless testing internals. Model code emits via `Presentation`; it must not call `WORD_GAME_UI` or `Funcs.dispatch`.
 
+## Panel trees (no new UIT)
+
+New screens and new widgets **must** use `Panel.column` / `Panel.row` / `Panel.button` / `Panel.label` from `jumbalaya-engine.panels.api`. Do not author `{ n = game().UI.ROW, config = ..., nodes = ... }` trees. Layout kinds are strings at the call site; callbacks are functions (`on_press` / `on_update`). Do not add new `func` / `button` string names to `types/funcs.lua` for new UI.
+
+Existing files may keep UIT only while listed in `tests/helpers/uit_allowlist.lua` (enforced by `test_uit_freeze.lua`). Shrink that list as each overlay migrates. `Funcs.register` is only for remaining string bindings.
+
 ## Sidebar (right-hand HUD)
 
 All right-column HUD code lives in `word_game/ui/sidebar/`. Use **sidebar** naming everywhere:
@@ -102,7 +108,7 @@ love tests
 
 ## Refactor checklist
 
-1. Keep panel `func` string names stable unless updating all UI definitions that reference them (`Funcs.register`)
+1. New HUD uses `Panel.*` + function callbacks. Keep remaining `func` string names stable unless updating all UI definitions that reference them (`Funcs.register`); do not add new catalog names.
 2. Re-export geometry on `WORD_GAME.Layout` if moving sidebar layout helpers
 3. Update `word_game/init.lua` facade exports when adding cross-package APIs
 4. Run `love tests`; for structural changes also run `emmylua_check . --severity warn` locally (CI runs error severity — see `docs/testing.md`)

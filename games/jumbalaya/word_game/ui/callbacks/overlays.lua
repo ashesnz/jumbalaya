@@ -11,6 +11,7 @@ local Funcs = require("app.callbacks.funcs")
 local M = {}
 
 local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
+local Panel = require("jumbalaya-engine.panels.api")
 function M.install()
 	Funcs.register("open_options", function(e)
 		game().SETTINGS.paused = true
@@ -69,7 +70,7 @@ function M.install()
 
 			Scheduler.add{mode = 'delayed', delay = 0.35, blockable = false, blocking = false, func = function()
 				e.config.disable_button = nil;return true end}
-			e.config.button = 'change_lang'
+			e.config.button = require("word_game.ui.widgets.press").named('change_lang')
 			play_sfx('generic1', 1, 0.4)
 		end
 	end)
@@ -106,7 +107,7 @@ function M.install()
 	Funcs.register("show_infotip", function(e)
 		if e.config.ref_table then
 			e.children.info = UIViewHost.create{
-				definition = {n=game().UI.ROOT, config = {align = 'cm', colour = game().C.CLEAR, padding = 0.02}, nodes=e.config.ref_table},
+				definition = Panel.root({align = 'cm', colour = game().C.CLEAR, padding = 0.02}, e.config.ref_table),
 				config = {offset = {x=-0.03,y=0}, align = 'cl', parent = e}
 			}
 			e.children.info:align_to_major()

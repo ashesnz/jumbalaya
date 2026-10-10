@@ -7,6 +7,7 @@ local game = require("word_game.ui.util.game_runtime").game
 local Panels = require("jumbalaya-engine.panels")
 
 local TableControlsView = {}
+local Panel = require("jumbalaya-engine.panels.api")
 TableControlsView.__index = TableControlsView
 
 local function delegate_index(view, key)
@@ -41,11 +42,7 @@ function TableControlsView.create_bar(button_def, size, config)
 	}
 	config.instance_type = config.instance_type or "table_control_bar"
 	local inner = Panels.create({
-		definition = {
-			n = game().UI.ROOT,
-			config = { align = "cm", colour = game().C.CLEAR, minw = size, minh = size },
-			nodes = { button_def },
-		},
+		definition = Panel.root({ align = "cm", colour = game().C.CLEAR, minw = size, minh = size }, { button_def }),
 		config = config,
 	})
 	if inner.states then

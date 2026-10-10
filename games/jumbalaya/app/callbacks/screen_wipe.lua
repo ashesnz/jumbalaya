@@ -6,6 +6,8 @@ local BridgeRuntime = require("app.runtime")
 local Funcs = require("app.callbacks.funcs")
 local function game() return BridgeRuntime.game() end
 
+local Panel = require("jumbalaya-engine.panels.api")
+
 local function sync_screen_wipe_card()
 	local card = game().screenwipecard
 	if not card or not game().screenwipe then return end
@@ -55,29 +57,29 @@ Funcs.register("wipe_in",  function(message, no_card, timefac, alt_colour)
   if message then
     message_t = {}
     for k, v in ipairs(message) do
-      table.insert(message_t, {n=game().UI.ROW, config={align = "cm"}, nodes={{n=game().UI.OBJECT, config={object = FlowText({string = v or '', colours = {math.min(game().C.BACKGROUND.C[1], game().C.BACKGROUND.C[2]) > 0.5 and game().C.BLACK or game().C.WHITE},shadow = true, silent = k ~= 1, float = true, scale = 1.3, pop_in = 0, pop_in_rate = 2, rotate = 1})}}}})
+      table.insert(message_t, Panel.row({align = "cm"}, {Panel.object({object = FlowText({string = v or '', colours = {math.min(game().C.BACKGROUND.C[1], game().C.BACKGROUND.C[2]) > 0.5 and game().C.BLACK or game().C.WHITE},shadow = true, silent = k ~= 1, float = true, scale = 1.3, pop_in = 0, pop_in_rate = 2, rotate = 1})})}))
     end
   end
 
   local row_nodes = {}
   if message then
-    row_nodes[#row_nodes + 1] = {n=game().UI.ROW, config={id = 'text', align = "cm", padding = 0.7}, nodes=message_t}
+    row_nodes[#row_nodes + 1] = Panel.row({id = 'text', align = "cm", padding = 0.7}, message_t)
   end
   if not no_card then
-    row_nodes[#row_nodes + 1] = {n=game().UI.OBJECT, config={
+    row_nodes[#row_nodes + 1] = Panel.object({
       id = 'screenwipe_card',
       object = game().screenwipecard,
       w = game().CARD_W,
       h = game().CARD_H,
-    }}
+    })
   end
 
   local ViewHost = require("jumbalaya-engine.panels.view_host")
   game().screenwipe = ViewHost.create{
     definition =
-      {n=game().UI.ROOT, config = {align = "cm", minw =0, minh =0 ,padding = 0.15, r = 0.1, colour = game().C.CLEAR}, nodes={
-        {n=game().UI.ROW, config={align = "cm"}, nodes=row_nodes},
-      }},
+      Panel.root({align = "cm", minw =0, minh =0 ,padding = 0.15, r = 0.1, colour = game().C.CLEAR}, {
+        Panel.row({align = "cm"}, row_nodes),
+      }),
     config = {align="cm", offset = {x=0,y=0}, major = game().ROOM_ATTACH}
   }
   game().screenwipe.colours = colours

@@ -5,6 +5,7 @@ local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
 local perk_cfg = require("word_game.config.perks")
+local Panel = require("jumbalaya-engine.panels.api")
 require("word_game.ui.perks.shared.stamp_sprite")
 
 local perk_model = facade.perks_registry()
@@ -18,25 +19,25 @@ function M.perk_popup_definition(entry)
 	local sprite = PerkStampSprite(0, 0, w, h, entry)
 	return build_generic_options({
 		contents = {
-			{ n = game().UI.ROW, config = { align = "cm", padding = 0.06 }, nodes = {
-				{ n = game().UI.OBJECT, config = { object = sprite, w = w, h = h } },
-			}},
-			{ n = game().UI.ROW, config = { align = "cm", padding = 0.04 }, nodes = {
-				{ n = game().UI.TEXT, config = {
+			Panel.row({ align = "cm", padding = 0.06 }, {
+				Panel.object({ object = sprite, w = w, h = h }),
+			}),
+			Panel.row({ align = "cm", padding = 0.04 }, {
+				Panel.label({
 					text = entry.name or "Perk",
 					scale = 0.42,
 					colour = game().C.GOLD,
 					shadow = true,
-				}},
-			}},
-			{ n = game().UI.ROW, config = { align = "cm", padding = 0.06, maxw = 4.8 }, nodes = {
-				{ n = game().UI.TEXT, config = {
+				}),
+			}),
+			Panel.row({ align = "cm", padding = 0.06, maxw = 4.8 }, {
+				Panel.label({
 					text = entry.desc or "",
 					scale = 0.28,
 					colour = game().C.UI.TEXT_LIGHT,
 					shadow = true,
-				}},
-			}},
+				}),
+			}),
 		},
 	})
 end

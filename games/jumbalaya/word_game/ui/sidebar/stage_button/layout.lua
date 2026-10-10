@@ -3,6 +3,7 @@
 local game = require("word_game.ui.util.game_runtime").game
 local Layout = require("word_game.ui.layout")
 local state = require("word_game.ui.sidebar.stage_button.state")
+local Press = require("word_game.ui.widgets.press")
 
 local M = {}
 
@@ -136,7 +137,7 @@ function M.set_display_mode(col, mode, opts)
 	end
 	if col and col.config then
 		col.config.colour = w.panel_colour
-		col.config.button = w.button_action
+		col.config.button = Press.named(w.button_action)
 	end
 end
 
@@ -144,7 +145,7 @@ function M.apply_widget_to_proxy()
 	local w = widget()
 	local col = M.button_column()
 	if not col or not col.config then return end
-	col.config.button = w.button_action
+	col.config.button = Press.named(w.button_action)
 	col.config.colour = w.panel_colour or M.red_colour()
 	col.config.visible = w.visible
 	if col.states then col.states.visible = w.visible end

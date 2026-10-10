@@ -30,9 +30,15 @@ local function setup_marketplace_game()
 		px = 1408,
 		py = 768,
 	}
-		game.UI = game.UI or {
-		TEXT = 1, BOX = 2, COLUMN = 3, ROW = 4, OBJECT = 5, ROOT = 7, padding = 0,
-	}
+	game.UI = game.UI or {}
+	game.UI.TEXT = game.UI.TEXT or 1
+	game.UI.BOX = game.UI.BOX or 2
+	game.UI.COLUMN = game.UI.COLUMN or game.UI.COL or 3
+	game.UI.COL = game.UI.COL or game.UI.COLUMN
+	game.UI.ROW = game.UI.ROW or 4
+	game.UI.OBJECT = game.UI.OBJECT or 5
+	game.UI.ROOT = game.UI.ROOT or 7
+	game.UI.padding = game.UI.padding or 0
 	game.TILESIZE = 20
 	game.TILESCALE = 1
 	game.C = game.C or {}
@@ -66,7 +72,7 @@ T.describe("marketplace", function()
 		T.assert_not_nil(art)
 		T.assert_not_nil(close)
 		T.assert_not_nil(grid)
-		T.assert_equal(close.config.button, "trade_close")
+		T.assert_equal(type(close.config.button), "function")
 		T.assert_nil(art.config.draw_layer)
 		T.assert_equal(grid.config.draw_layer, 1)
 
@@ -133,7 +139,7 @@ T.describe("marketplace", function()
 		local first_col = add_row.nodes and add_row.nodes[1]
 		local btn_col = first_col and first_col.nodes and first_col.nodes[1]
 		T.assert_equal(btn_col.config.ref_table.market_index, 1)
-		T.assert_equal(btn_col.config.button, "trade_market_add")
+		T.assert_equal(type(btn_col.config.button), "function")
 		T.assert_equal(btn_col.config.minw, metrics.button_minw)
 		T.assert_true(btn_col.config.maxw <= metrics.col_w + 0.001)
 
@@ -717,7 +723,7 @@ T.describe("marketplace", function()
 
 		game_access.dispatch({ type = "RUN_STATE_ADD_TOKENS", amount = 100 })
 		columns.sync_action_affordance(root)
-		T.assert_equal(btn_col.config.button, "trade_market_add")
+		T.assert_equal(type(btn_col.config.button), "function")
 		T.assert_true(columns.any_action_affordable())
 
 		session_state.teardown()

@@ -12,6 +12,7 @@ local table_discard = require("word_game.ui.perks.discard_bin")
 local stage_button = require("word_game.ui.sidebar.stage_button")
 local facade = require("word_game.ui.facade")
 local TableDeck = require("word_game.ui.table.deck")
+local Press = require("word_game.ui.widgets.press")
 
 local SidebarView = {}
 SidebarView.__index = SidebarView
@@ -92,7 +93,13 @@ local function make_button_proxy(layout)
 	local button = {
 		config = {
 			id = "end_run_button",
-			button = stage_button.current_action and stage_button.current_action() or "end_run_from_sidebar",
+			button = (function()
+				local action = stage_button.current_action and stage_button.current_action()
+				if type(action) == "function" then
+					return action
+				end
+				return Press.named(action or "end_run_from_sidebar")
+			end)(),
 			colour = stage_button.current_colour and stage_button.current_colour() or ((game() and game().C and game().C.RED) or { 1, 0, 0.4, 1 }),
 			minw = rect.w,
 			minh = rect.h,

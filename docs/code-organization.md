@@ -20,7 +20,8 @@ Phases 0–13 are **complete** (store, engine package, retained UI, `Funcs` regi
 **Freeze policy (ongoing):**
 
 - No new run-state keys without a declared owner in `types/store.lua` **and** a reducer/default in `jumbalaya_core` — enforced by `tests/unit/test_store_state_catalog.lua`.
-- No new Panel callback names (`func`, `button`, `back_func`, `Funcs.dispatch`) without an entry in `types/funcs.lua` and a `Funcs.register` handler — enforced by `tests/unit/test_g_funcs_registry.lua`.
+- No new `{ n = game().UI.* }` panel trees — use `Panel.column` / `Panel.button` (`jumbalaya-engine.panels.api`). Enforced by `tests/unit/test_uit_freeze.lua`.
+- No new Panel **string** callback names (`func`, `button`, `back_func`, `Funcs.dispatch`) without an entry in `types/funcs.lua` and a `Funcs.register` handler — enforced by `tests/unit/test_g_funcs_registry.lua`. New UI uses function `on_press`.
 - `jumbalaya_core/` must stay headless (no `love.*`, no `app/` / `word_game/` imports) — enforced by `tests/unit/test_core_purity.lua`.
 - No new deep `word_game.model.*` / `word_game.ui.*` requires across `app/` (bootstrap wiring exempt), `devtools/`, or `word_game/ui/` (grandfathered allowlist) — enforced by `tests/unit/test_facade_boundaries.lua`.
 - New features ship via `WORD_GAME` / `WORD_GAME_UI` facade methods; model code uses `Presentation.emit`, not `Funcs.dispatch`.

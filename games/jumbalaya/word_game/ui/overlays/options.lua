@@ -11,6 +11,8 @@ local DEFINITIONS = game().DEFINITIONS
 local localize = require("word_game.ui.util.localize").localize
 local enumerate_display_modes = require("jumbalaya-engine.adapters.love2d.display").enumerate_display_modes
 
+local Panel = require("jumbalaya-engine.panels.api")
+
 local function cycler_option_index(options, value)
 	for index, option in ipairs(options) do
 		if option == value
@@ -37,21 +39,21 @@ function build_options()
 	if game().STAGE == game().STAGES.RUN then
 		restart = Components.button{id = 'restart_button', label = {localize('ui_start_new_run')}, onClick = "begin_run", width = 5}
 		main_menu = Components.button{ label = {localize('ui_main_menu')}, onClick = "return_to_menu", width = 5}
-		current_seed = {n=game().UI.ROW, config={align = "cm", padding = 0.05}, nodes={
-				{n=game().UI.COLUMN, config={align = "cm", padding = 0}, nodes={
-				{n=game().UI.TEXT, config={text = localize('ui_seed')..": ", scale = 0.4, colour = game().C.WHITE}}
-			}},
-			{n=game().UI.COLUMN, config={align = "cm", padding = 0, minh = 0.8}, nodes={
-				{n=game().UI.COLUMN, config={align = "cm", padding = 0, minh = 0.8}, nodes={
-					{n=game().UI.ROW, config={align = "cm", r = 0.1, colour = shell and shell.seeded and game().C.RED or game().C.BLACK, minw = 1.8, minh = 0.5, padding = 0.1, emboss = 0.05}, nodes={
-						{n=game().UI.COLUMN, config={align = "cm"}, nodes={
-							{n=game().UI.TEXT, config={ text = tostring(shell and shell.seed_streams and shell.seed_streams.seed or ""), scale = 0.43, colour = game().C.UI.TEXT_LIGHT, shadow = true}}
-						}}
-					}}
-				}}
-			}},
+		current_seed = Panel.row({align = "cm", padding = 0.05}, {
+				Panel.column({align = "cm", padding = 0}, {
+				Panel.label({text = localize('ui_seed')..": ", scale = 0.4, colour = game().C.WHITE})
+			}),
+			Panel.column({align = "cm", padding = 0, minh = 0.8}, {
+				Panel.column({align = "cm", padding = 0, minh = 0.8}, {
+					Panel.row({align = "cm", r = 0.1, colour = shell and shell.seeded and game().C.RED or game().C.BLACK, minw = 1.8, minh = 0.5, padding = 0.1, emboss = 0.05}, {
+						Panel.column({align = "cm"}, {
+							Panel.label({ text = tostring(shell and shell.seed_streams and shell.seed_streams.seed or ""), scale = 0.43, colour = game().C.UI.TEXT_LIGHT, shadow = true})
+						})
+					})
+				})
+			}),
 			Components.button({col = true, onClick = 'copy_run_seed', label = {localize('ui_copy')}, colour = game().C.BLUE, textSize = 0.3, width = 1.3, height = 0.5,}),
-		}}
+		})
 	end
 
 	local settings = Components.button({onClick = 'open_settings', label = {localize('ui_settings')}, width = 5, focus_args = {snap_to = true}})
@@ -116,7 +118,7 @@ function DEFINITIONS.settings_tab(tab)
 		if type(game().SETTINGS.screenshake) ~= 'number' then
 			game().SETTINGS.screenshake = 50
 		end
-		return {n=game().UI.ROOT, config={align = "cm", padding = 0.05, colour = game().C.CLEAR}, nodes={
+		return Panel.root({align = "cm", padding = 0.05, colour = game().C.CLEAR}, {
 			Components.cycler({
 				label = localize('ui_set_gamespeed'),
 				scale = 0.8,
@@ -128,7 +130,7 @@ function DEFINITIONS.settings_tab(tab)
 			game().F_RUMBLE and Components.toggle({label = localize('ui_set_rumble'), ref_table = game().SETTINGS, ref_value = 'rumble'}) or nil,
 			Components.slider({label = localize('ui_set_screenshake'),width = 4, height = 0.4, ref_table = game().SETTINGS, ref_value = 'screenshake', min = 0, max = 100}),
 			game().F_CRASH_REPORTS and Components.toggle({label = localize('ui_set_crash_reports'), ref_table = game().SETTINGS, ref_value = 'crashreports', info = localize('opt_crash_report_info')}) or nil,
-		}}
+		})
 	elseif tab == 'Video' then
 		--Reset the queue so there are no pending changes
 		game().SETTINGS.QUEUED_CHANGE = {}
@@ -137,25 +139,25 @@ function DEFINITIONS.settings_tab(tab)
 		local res_option = enumerate_display_modes(game().SETTINGS.WINDOW.screenmode, game().SETTINGS.WINDOW.selected_display)
 	
 		return
-		{n=game().UI.ROOT, config={align = "cm", padding = 0.05, colour = game().C.CLEAR}, nodes={
+		Panel.root({align = "cm", padding = 0.05, colour = game().C.CLEAR}, {
 				Components.cycler({width = 4,scale = 0.8, label = localize('ui_set_monitor'), options = game().SETTINGS.WINDOW.display_names, onChange = 'change_display', current_option = (game().SETTINGS.WINDOW.selected_display)}),
 				Components.cycler({width = 4,scale = 0.8, label = localize('ui_set_windowmode'), options = localize('opt_windowmode_opt'), onChange = 'change_screenmode', current_option = (({Windowed = 1, Fullscreen = 2, Borderless = 3})[game().SETTINGS.WINDOW.screenmode] or 1)}),
-				{n=game().UI.ROW, config={align = "cm", id = 'resolution_cycle'}, nodes={Components.cycler({width = 4,scale = 0.8, options = game().SETTINGS.WINDOW.DISPLAYS[game().SETTINGS.WINDOW.selected_display].screen_resolutions.strings, onChange = 'change_screen_resolution',current_option = res_option or 1})}},
-				{n=game().UI.ROW, config={align = "cm"}, nodes={Components.cycler({width = 4,scale = 0.8, options = localize('opt_vsync_opt'), onChange = 'change_vsync',current_option = game().SETTINGS.WINDOW.vsync == 0 and 2 or 1})}},
+				Panel.row({align = "cm", id = 'resolution_cycle'}, {Components.cycler({width = 4,scale = 0.8, options = game().SETTINGS.WINDOW.DISPLAYS[game().SETTINGS.WINDOW.selected_display].screen_resolutions.strings, onChange = 'change_screen_resolution',current_option = res_option or 1})}),
+				Panel.row({align = "cm"}, {Components.cycler({width = 4,scale = 0.8, options = localize('opt_vsync_opt'), onChange = 'change_vsync',current_option = game().SETTINGS.WINDOW.vsync == 0 and 2 or 1})}),
 				Components.button({onClick = 'apply_window_changes', label = {localize('ui_set_apply')}, width = 3, onTick = 'can_apply_window_changes'}),
-		}}
+		})
 	elseif tab == 'Audio' then
-		return {n=game().UI.ROOT, config={align = "cm", padding = 0.05, colour = game().C.CLEAR}, nodes={
+		return Panel.root({align = "cm", padding = 0.05, colour = game().C.CLEAR}, {
 			Components.slider({label = localize('ui_set_master_vol'), width = 5, height = 0.4, ref_table = game().SETTINGS.SOUND, ref_value = 'volume', min = 0, max = 100}),
 			Components.slider({label = localize('ui_set_music_vol'), width = 5, height = 0.4, ref_table = game().SETTINGS.SOUND, ref_value = 'music_volume', min = 0, max = 100}),
 			Components.slider({label = localize('ui_set_game_vol'), width = 5, height = 0.4, ref_table = game().SETTINGS.SOUND, ref_value = 'game_sounds_volume', min = 0, max = 100}),
-		}}
+		})
 	elseif tab == 'Graphics' then
-		return {n=game().UI.ROOT, config={align = "cm", padding = 0.05, colour = game().C.CLEAR}, nodes={
+		return Panel.root({align = "cm", padding = 0.05, colour = game().C.CLEAR}, {
 			Components.cycler({width = 4,scale = 0.8, label = localize("ui_set_shadows"),options = localize('opt_shadow_opt'), onChange = 'change_shadows', current_option = (game().SETTINGS.GRAPHICS.shadows == 'On' and 1 or 2)}),
 			Components.cycler({width = 4,scale = 0.8, label = localize("ui_set_pixel_smoothing"),options = localize('opt_smoothing_opt'), onChange = 'change_pixel_smoothing', current_option = game().SETTINGS.GRAPHICS.texture_scaling}),
-		}}
+		})
 	end
 
-	return {n=game().UI.ROOT, config={align = "cm", padding = 0.05, colour = game().C.CLEAR, minh = 5, minw = 5}, nodes={}}
+	return Panel.root({align = "cm", padding = 0.05, colour = game().C.CLEAR, minh = 5, minw = 5}, {})
 end
