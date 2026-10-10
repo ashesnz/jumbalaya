@@ -50,7 +50,7 @@ end
 
 function M.layout_ready(g)
 	g = g or game()
-	return not (g.ARGS and g.ARGS.pending_layout)
+	return not g.pending_layout
 end
 
 function M.is_ready(g)
@@ -98,7 +98,7 @@ function M.prime()
 		end
 	end
 	if g.ARGS then
-		g.ARGS.pending_layout = false
+		g.pending_layout = false
 	end
 	return M.is_ready(g)
 end

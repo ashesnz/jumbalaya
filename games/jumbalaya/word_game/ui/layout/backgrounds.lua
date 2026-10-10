@@ -45,26 +45,26 @@ end
 
 --- One long-lived event easing the swirl spin amount each tick.
 local function ensure_spin_event()
-	game().ARGS.spin = game().ARGS.spin or {amount = 0, real = 0, eased = 0}
-	game().ARGS.run_bg = game().ARGS.run_bg or {mode = "swirl"}
-	if game().ARGS.run_bg.spin_event then return end
-	game().ARGS.run_bg.spin_event = true
+	game().spin = game().spin or {amount = 0, real = 0, eased = 0}
+	game().run_bg = game().run_bg or {mode = "swirl"}
+	if game().run_bg.spin_event then return end
+	game().run_bg.spin_event = true
 	Scheduler.add{
 		mode = "instant",
 		blocking = false,
 		blockable = false,
 		func = function()
-			if not game().ARGS.run_bg or game().ARGS.run_bg.mode ~= "swirl" then
+			if not game().run_bg or game().run_bg.mode ~= "swirl" then
 				return false -- done once another look takes over
 			end
 			local r_dt = game().real_dt or 0.016
-			local step = game().ARGS.spin.amount > game().ARGS.spin.eased and r_dt * 2 or 0.3 * r_dt
-			local delta = game().ARGS.spin.real - game().ARGS.spin.eased
+			local step = game().spin.amount > game().spin.eased and r_dt * 2 or 0.3 * r_dt
+			local delta = game().spin.real - game().spin.eased
 			if math.abs(delta) > step then delta = delta * step / math.abs(delta) end
-			game().ARGS.spin.eased = game().ARGS.spin.eased + delta
-			game().ARGS.spin.amount = step * game().ARGS.spin.eased + (1 - step) * game().ARGS.spin.amount
+			game().spin.eased = game().spin.eased + delta
+			game().spin.amount = step * game().spin.eased + (1 - step) * game().spin.amount
 			if game().TIMERS and game().TIMERS.BACKGROUND then
-				game().TIMERS.BACKGROUND = game().TIMERS.BACKGROUND - 60 * (game().ARGS.spin.eased - game().ARGS.spin.amount) * step
+				game().TIMERS.BACKGROUND = game().TIMERS.BACKGROUND - 60 * (game().spin.eased - game().spin.amount) * step
 			end
 			return false
 		end,
@@ -73,10 +73,10 @@ end
 
 function M.garden()
 	remove_current()
-	game().ARGS.run_bg = game().ARGS.run_bg or {}
-	game().ARGS.run_bg.mode = "garden"
-	if game().ARGS.spin then
-		game().ARGS.spin.amount, game().ARGS.spin.real, game().ARGS.spin.eased = 0, 0, 0
+	game().run_bg = game().run_bg or {}
+	game().run_bg.mode = "garden"
+	if game().spin then
+		game().spin.amount, game().spin.real, game().spin.eased = 0, 0, 0
 	end
 
 	local atlas = game().TEXTURE_ATLASES and game().TEXTURE_ATLASES["ui_1"]
@@ -104,8 +104,8 @@ end
 
 function M.swirl()
 	remove_current()
-	game().ARGS.run_bg = game().ARGS.run_bg or {}
-	game().ARGS.run_bg.mode = "swirl"
+	game().run_bg = game().run_bg or {}
+	game().run_bg.mode = "swirl"
 	ensure_spin_event()
 
 	local atlas = game().TEXTURE_ATLASES and game().TEXTURE_ATLASES["ui_1"]
@@ -130,7 +130,7 @@ function M.swirl()
 			{name = "colour_2", ref_table = game().C.BACKGROUND, ref_value = "L"},
 			{name = "colour_3", ref_table = game().C.BACKGROUND, ref_value = "D"},
 			{name = "contrast", ref_table = game().C.BACKGROUND, ref_value = "contrast"},
-			{name = "spin_amount", ref_table = game().ARGS.spin, ref_value = "amount"},
+			{name = "spin_amount", ref_table = game().spin, ref_value = "amount"},
 		},
 	}})
 end

@@ -169,8 +169,8 @@ function SidebarView:state()
 end
 
 function SidebarView:deck_left_count()
-	if game() and game().ARGS and game().ARGS.deck_left_count ~= nil then
-		return game().ARGS.deck_left_count
+	if game() and game().deck_left_count ~= nil then
+		return game().deck_left_count
 	end
 	local state = self:state()
 	return state and state.deck_left_count or 0

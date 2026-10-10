@@ -107,6 +107,13 @@ function Game:define_constants()
     self.STATE_COMPLETE = false
 
     self.ARGS = {}
+    self.pending_layout = false
+    self.deck_left_count = nil
+    self.timeline_rect = nil
+    self.spin = { amount = 0, real = 0, eased = 0 }
+    self.run_bg = { mode = "garden" }
+    self.eased_cursor_pos = nil
+    self.word_feedback_queue = nil
     self.LIVE = {
         NODE = {},
         TRANSFORM = {},

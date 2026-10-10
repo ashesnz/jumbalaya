@@ -97,10 +97,10 @@ function FlowText:construct(config)
 
 	self.T.r = config.text_rot or 0
 
-	self.states.hover.can = false
-	self.states.click.can = false
-	self.states.collide.can = false
-	self.states.drag.can = false
+	self.states.hoverable = false
+	self.states.clickable = false
+	self.states.collideable = false
+	self.states.draggable = false
 	self.states.release_on.can = false
 
 	self:unfollow()

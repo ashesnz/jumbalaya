@@ -11,8 +11,8 @@ local Play = facade.jumble_play()
 local M = {}
 
 local function refresh_pending_layout()
-	if runtime().ARGS and runtime().ARGS.pending_layout then
-		runtime().ARGS.pending_layout = false
+	if runtime().pending_layout then
+		runtime().pending_layout = false
 		Layout.refresh_placement_layout()
 	end
 end

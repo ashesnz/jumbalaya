@@ -91,8 +91,27 @@ return function(Spatial)
 		VT.w, VT.h = T.w, T.h
 	end
 
+	function Spatial.bump_generation()
+		local g = game()
+		g.FRAMES = g.FRAMES or { RENDER = 0, TRANSFORM = 0 }
+		g.FRAMES.TRANSFORM = (g.FRAMES.TRANSFORM or 0) + 1
+	end
+
+	function Spatial:needs_tick()
+		local g = game()
+		local gen = g.FRAMES and g.FRAMES.TRANSFORM
+		if not gen or not self.FRAME then return false end
+		return (self.FRAME.TRANSFORM or 0) < gen
+	end
+
+	function Spatial:ticked_this_generation()
+		local g = game()
+		local gen = g.FRAMES and g.FRAMES.TRANSFORM
+		return not not (self.FRAME and gen and (self.FRAME.TRANSFORM or 0) >= gen)
+	end
+
 	function Spatial:tick(dt)
-		if self.FRAME.TRANSFORM >= game().FRAMES.TRANSFORM then return end
+		if not self:needs_tick() then return end
 		self.FRAME.TRANSFORM = game().FRAMES.TRANSFORM
 		if not self.moves_while_paused and game().SETTINGS.paused then return end
 

@@ -51,7 +51,7 @@ Model glue **never** imports `word_game/ui/` or calls `WORD_GAME_UI`. It notifie
 | Mechanism | When |
 |-----------|------|
 | `Presentation.emit(event, …)` | HUD refresh, boss intro, timeline sync, play resolved — catalog in `types/presentation_events.lua` |
-| `LayoutRequest.refresh()` | Deferred TABLE_BOARD relayout (`ARGS.pending_layout`; consumed in `table/board.lua`) |
+| `LayoutRequest.refresh()` | Deferred TABLE_BOARD relayout (`pending_layout`; consumed in `table/board.lua`) |
 | `model/feedback.lua` queue | Ephemeral sentences drained by `word_feedback` each frame |
 
 `Funcs.dispatch` is for **shell/widgets** (overlays, profile, settings) — not model notifications.

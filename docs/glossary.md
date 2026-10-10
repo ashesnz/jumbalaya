@@ -74,4 +74,4 @@ See [ui/effects/README.md](../games/jumbalaya/word_game/ui/effects/README.md) an
 | Term | Meaning | Code |
 |------|---------|------|
 | **Presentation.emit** | Model → UI notification (one-way) | `word_game/model/presentation.lua`; catalog `types/presentation_events.lua` |
-| **Layout refresh** | Deferred TABLE_BOARD relayout | `LayoutRequest.refresh()` → `ARGS.pending_layout` |
+| **Layout refresh** | Deferred TABLE_BOARD relayout | `LayoutRequest.refresh()` → `pending_layout` |

@@ -26,7 +26,7 @@ T.describe("run backgrounds", function()
 		backgrounds.garden()
 
 		T.assert_not_nil(game.SPLASH_BACK)
-		T.assert_equal(game.ARGS.run_bg.mode, "garden")
+		T.assert_equal(game.run_bg.mode, "garden")
 		T.assert_equal(game.SPLASH_BACK.draw_steps[1].shader, "garden_leaves")
 	end)
 
@@ -35,7 +35,7 @@ T.describe("run backgrounds", function()
 		game.SPLASH_BACK = nil
 		require("word_game.model.presentation").emit("run_backgrounds")
 		T.assert_not_nil(game.SPLASH_BACK)
-		T.assert_equal(game.ARGS.run_bg.mode, "garden")
+		T.assert_equal(game.run_bg.mode, "garden")
 	end)
 
 	if love and love.graphics and love.graphics.newShader then

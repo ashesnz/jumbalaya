@@ -470,7 +470,7 @@ T.describe("marketplace", function()
 		local shell = require("jumbalaya-engine.shell")
 		local game = shell.game()
 		game.ARGS = game.ARGS or {}
-		game.ARGS.deck_left_count = 42
+		game.deck_left_count = 42
 
 		local recalculated = false
 		game.SIDEBAR_HUD = {

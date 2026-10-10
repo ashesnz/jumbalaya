@@ -15,8 +15,8 @@ end
 
 --- Timeline HUD anchor; uses the last rect published by layout, else placement geometry.
 local function timeline_rect()
-	if game().ARGS and game().ARGS.timeline_rect then
-		return game().ARGS.timeline_rect
+	if game().ARGS and game().timeline_rect then
+		return game().timeline_rect
 	end
 	local pt = game().pattern_row
 	if pt and pt.area and pt.area.T then

@@ -52,7 +52,7 @@ Incremental cleanup after the engine migration. Not a blocking phase gate — la
 | Item | Rule | Enforcement |
 |------|------|-------------|
 | Hoist `require()` | Module scope in hot paths (deal/draw, play controls, frame updaters). Inline requires only in bootstrap, tests, or documented cycles. | Review + `test_glue_hygiene.lua` (layout path) |
-| Model → UI | `Presentation.emit` or `LayoutRequest.refresh()` — never `WORD_GAME_UI`, `Funcs.dispatch`, or ad-hoc `ARGS.pending_layout` in model glue | `test_glue_hygiene.lua`, `test_presentation_catalog.lua` |
+| Model → UI | `Presentation.emit` or `LayoutRequest.refresh()` — never `WORD_GAME_UI`, `Funcs.dispatch`, or ad-hoc `pending_layout` in model glue | `test_glue_hygiene.lua`, `test_presentation_catalog.lua` |
 | Glue headers | `word_game/model/*` files document **Core** / **Store** / **Presentation** in the file header | Review |
 | UI layer choice | Panels vs cardarea vs play_effects — see [`docs/ui-stack.md`](ui-stack.md) | Docs |
 

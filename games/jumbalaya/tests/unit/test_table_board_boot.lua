@@ -123,7 +123,7 @@ local function install_table_board_ui()
 		},
 		deck_left_count = 5,
 	})
-	game.ARGS.deck_left_count = 5
+	game.deck_left_count = 5
 
 	return game
 end
@@ -131,12 +131,12 @@ end
 T.describe("table board boot", function()
 	T.it("table_board_prime leaves HUD ready without waiting for update frames", function()
 		local game = install_table_board_ui()
-		game.ARGS.pending_layout = true
+		game.pending_layout = true
 
 		local ok = board_prime.prime()
 		T.assert_true(ok, "prime should report ready HUD")
 		T.assert_true(board_prime.is_ready(game), "stage 1-1 HUD should be ready synchronously")
-		T.assert_false(game.ARGS.pending_layout, "layout must not stay deferred after prime")
+		T.assert_false(game.pending_layout, "layout must not stay deferred after prime")
 	end)
 
 	T.it("presentation table_board_prime event matches direct prime", function()

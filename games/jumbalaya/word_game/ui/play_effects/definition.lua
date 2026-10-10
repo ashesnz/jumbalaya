@@ -222,7 +222,7 @@ function M.restore_boss_layout(opts)
 		WORD_GAME_UI.Sidebar.sync_visibility()
 	end
 	game().ARGS = game().ARGS or {}
-	game().ARGS.pending_layout = true
+	game().pending_layout = true
 	M.align_placement_table()
 	if game().dealt_letters then
 		game().dealt_letters:relayout()

@@ -48,8 +48,7 @@ end
 
 	function M.sync_deck_count_display()
 		local count = Deck().cards_left()
-		live_game().ARGS = live_game().ARGS or {}
-		live_game().ARGS.deck_left_count = count
+		live_game().deck_left_count = count
 		game_access.patch({ deck_left_count = count })
 	end
 

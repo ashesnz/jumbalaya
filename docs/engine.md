@@ -48,6 +48,10 @@ Public API:
 
 `settled` is the skip flag for the frame loop. Pause uses `moves_while_paused`.
 
+The frame loop calls `Spatial.bump_generation()` then `needs_tick()` / `ticked_this_generation()` so generation gating stays inside Spatial.
+
+Ephemeral shell fields (`pending_layout`, `spin`, `run_bg`, `deck_left_count`, `timeline_rect`, `word_feedback_queue`, `eased_cursor_pos`) live on the Game object, not `ARGS`. Persistence payloads and focus scratch may still use `ARGS` until those slices move.
+
 ## Node construction
 
 `SceneNode` owns identity, children, input flags, and hit testing. Construction uses `InputFlags` (nested `can`/`is` plus flat aliases such as `hoverable` / `draggable`). Engine interaction code uses the flat names.

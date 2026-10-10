@@ -12,7 +12,7 @@ function Target:pulse(amount, rot_amt)
 end
 
 function Target:can_drag()
-	if self.states.drag.can then return self end
+	if self.states.draggable then return self end
 	return self.panel:can_drag()
 end
 

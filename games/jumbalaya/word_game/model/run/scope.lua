@@ -20,9 +20,6 @@ local M = {}
 
 local teardown_hooks = {}
 
-local RUN_ARG_DEFAULTS = {
-	deck_left_count = 0,
-}
 
 local function ensure_run_table()
 	live_game().RUN = live_game().RUN or { generation = 0, active = false }
@@ -62,20 +59,21 @@ function M.with_generation(gen, fn)
 end
 
 function M.reset_args()
-	live_game().ARGS = live_game().ARGS or {}
-	live_game().ARGS.run_generation = (live_game().ARGS.run_generation or 0) + 1
-	for key, value in pairs(RUN_ARG_DEFAULTS) do
-		live_game().ARGS[key] = value
-	end
-	live_game().ARGS.pending_layout = nil
-	live_game().ARGS.run_snapshot = nil
-	live_game().ARGS.spin = { amount = 0, real = 0, eased = 0 }
-	if live_game().ARGS.score_intensity then
-		live_game().ARGS.score_intensity.earned_score = 0
-		live_game().ARGS.score_intensity.required_score = 0
+	local g = live_game()
+	g.ARGS = g.ARGS or {}
+	g.ARGS.run_generation = (g.ARGS.run_generation or 0) + 1
+	g.deck_left_count = 0
+	g.pending_layout = nil
+	g.ARGS.run_snapshot = nil
+	g.spin = { amount = 0, real = 0, eased = 0 }
+	g.word_feedback_queue = nil
+	g.eased_cursor_pos = nil
+	if g.ARGS.score_intensity then
+		g.ARGS.score_intensity.earned_score = 0
+		g.ARGS.score_intensity.required_score = 0
 	end
 	local run = ensure_run_table()
-	run.generation = live_game().ARGS.run_generation
+	run.generation = g.ARGS.run_generation
 end
 
 function M.reset_globals()

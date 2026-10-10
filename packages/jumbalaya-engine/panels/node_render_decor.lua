@@ -12,7 +12,7 @@ function Target:draw_self_decor()
 		love.graphics.scale(1 / game().TILESIZE)
 		love.graphics.setLineWidth(self.config.outline)
 		if self.config.line_emboss then
-			love.graphics.setColor(Colour.shade(self.config.outline_colour, self.states.hover.is and 0.5 or 0.3, true))
+			love.graphics.setColor(Colour.shade(self.config.outline_colour, self.states.hovering and 0.5 or 0.3, true))
 			self:draw_pixellated_rect('line_emboss', nil, self.config.line_emboss)
 		end
 		love.graphics.setColor(self.config.outline_colour)

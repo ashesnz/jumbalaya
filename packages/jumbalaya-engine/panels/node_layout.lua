@@ -114,13 +114,13 @@ function Target:update_object()
 
 	if self.config.object then
 		self.config.object.config.refresh_movement = true
-		if self.config.object.states.hover.is and not self.states.hover.is then
+		if self.config.object.states.hovering and not self.states.hovering then
 			self:hover()
-			self.states.hover.is = true
+			self.states.hovering = true
 		end
-		if not self.config.object.states.hover.is and self.states.hover.is then
+		if not self.config.object.states.hovering and self.states.hovering then
 			self:stop_hover()
-			self.states.hover.is = false
+			self.states.hovering = false
 		end
 	end
 

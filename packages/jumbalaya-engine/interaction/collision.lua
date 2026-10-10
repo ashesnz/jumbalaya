@@ -11,7 +11,7 @@ function InputRouter:get_cursor_collision(cursor_trans)
 	if self.COYOTE_FOCUS then return end
 
 	if self.dragging.target then
-		self.dragging.target.states.collide.is = true
+		self.dragging.target.states.colliding = true
 		self.nodes_at_cursor[#self.nodes_at_cursor + 1] = self.dragging.target
 		self.collision_list[#self.collision_list + 1] = self.dragging.target
 	end
@@ -27,8 +27,8 @@ function InputRouter:get_cursor_collision(cursor_trans)
 		local v = game().HIT_ORDER[i]
 		if v and v.collides_with_point and v:collides_with_point(cursor_trans) and not v.REMOVED then
 			self.nodes_at_cursor[#self.nodes_at_cursor + 1] = v
-			if v.states and v.states.collide and v.states.collide.can then
-				v.states.collide.is = true
+			if v.states and v.states.collide and v.states.collideable then
+				v.states.colliding = true
 				self.collision_list[#self.collision_list + 1] = v
 			end
 		end

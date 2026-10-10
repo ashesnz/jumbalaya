@@ -14,7 +14,7 @@ function Target:draw_self()
 	end
 
 	if self.config.force_focus or self.config.force_collision or self.config.button_host
-		or self.config.button or self.states.collide.can then
+		or self.config.button or self.states.collideable then
 		HitOrder.track_hit_target(self)
 	end
 
@@ -28,7 +28,7 @@ function Target:draw_self()
 
 		-- Pressed-in look: recent click, or hovered/dragged while held.
 		if self.config.button and ((self.last_clicked and self.last_clicked > game().TIMERS.REAL - 0.1)
-			or ((self.config.button and (self.states.hover.is or self.states.drag.is))
+			or ((self.config.button and (self.states.hovering or self.states.dragging))
 				and game().INPUT.pointer_held)) then
 			self.parallax_shift.y = self.parallax_shift.y + 0.05 * (self.config.button_dist or 1)
 			button_being_pressed = true
@@ -108,7 +108,7 @@ function Target:draw_self()
 
 			-- Embossed lip above the fill surface.
 			if self.config.emboss then
-				love.graphics.setColor(Colour.shade(self.config.colour, self.states.hover.is and 0.5 or 0.3, true))
+				love.graphics.setColor(Colour.shade(self.config.colour, self.states.hovering and 0.5 or 0.3, true))
 				self:draw_pixellated_rect('emboss', nil, self.config.emboss)
 			end
 
@@ -118,7 +118,7 @@ function Target:draw_self()
 			button_colours[1] = self.config.button_delay
 				and Colour.blend_colours(self.config.colour, game().C.L_BLACK, 0.5) or self.config.colour
 			button_colours[2] =
-				(((collided_button.config.hover and collided_button.states.hover.is)
+				(((collided_button.config.hover and collided_button.states.hovering)
 					or (collided_button.last_clicked and collided_button.last_clicked > game().TIMERS.REAL - 0.1))
 				and game().C.UI.HOVER or nil)
 

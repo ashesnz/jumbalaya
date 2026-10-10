@@ -70,7 +70,7 @@ function Target:attach_node(node, parent)
 	-- An embedded object that itself carries the button shouldn't compete
 	-- for clicks with the element wrapping it.
 	if node.n and node.n == game().UI.OBJECT and child.config.button then
-		child.config.object.states.click.can = false
+		child.config.object.states.clickable = false
 	end
 
 	if (node.n and node.n == game().UI.COLUMN or node.n == game().UI.ROW or node.n == game().UI.ROOT) and node.nodes then

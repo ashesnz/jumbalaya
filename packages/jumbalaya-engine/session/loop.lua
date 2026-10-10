@@ -5,6 +5,7 @@ local Updaters = require("jumbalaya-engine.session.updaters")
 local DrawPasses = require("jumbalaya-engine.session.draw_passes")
 local Tables = require("jumbalaya-engine.util.tables")
 local Node = require("jumbalaya-engine.scene.node")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 local perf_checkpoint = require("jumbalaya-engine.adapters.love2d.display").perf_checkpoint
 
 require("jumbalaya-engine.session.frame_updaters")
@@ -19,7 +20,7 @@ local function draw_with_container(node)
 end
 
 function Game:update(dt)
-	self.FRAMES.TRANSFORM = self.FRAMES.TRANSFORM + 1
+	Spatial.bump_generation()
 	perf_checkpoint("start->discovery", "update")
 	Updaters.run("early_frame", self, dt)
 	perf_checkpoint("sounds", "update")
@@ -58,7 +59,7 @@ function Game:update(dt)
 		self.TRANSFORMS = Tables.compact_array(self.TRANSFORMS)
 
 		for _, v in ipairs(self.TRANSFORMS) do
-			if v and v.FRAME and v.FRAME.TRANSFORM and v.FRAME.TRANSFORM < self.FRAMES.TRANSFORM then
+			if v and v.needs_tick and v:needs_tick() then
 				if v.move then
 					v:move(move_dt)
 				elseif v.tick then
@@ -73,15 +74,13 @@ function Game:update(dt)
 		for _, v in ipairs(self.TRANSFORMS) do
 			if not v or not v.update then goto continue_update end
 			if v.settled
-				and v.FRAME
-				and v.FRAME.TRANSFORM
-				and v.FRAME.TRANSFORM >= self.FRAMES.TRANSFORM
+				and v.ticked_this_generation and v:ticked_this_generation()
 				and v.update == default_node_update then
 				goto continue_update
 			end
 			v:update(dt * self.TIME_SCALE)
-			if v.states and v.states.collide then
-				v.states.collide.is = false
+			if v.states then
+				v.states.colliding = false
 			end
 			::continue_update::
 		end

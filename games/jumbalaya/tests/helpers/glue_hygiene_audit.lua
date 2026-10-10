@@ -5,6 +5,7 @@ local M = {}
 local PENDING_LAYOUT_ALLOWLIST = {
 	["word_game/model/layout/request.lua"] = true,
 	["word_game/model/run/scope.lua"] = true,
+	["word_game/model/game/globals.lua"] = true,
 }
 
 local function read_file(path)

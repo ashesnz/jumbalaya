@@ -66,8 +66,8 @@ end
 local Updaters = require "jumbalaya-engine.session.updaters"
 local Runtime = require "word_game.ui.effects.runtime"
 
-Updaters.register('early_frame', 'canvas_juice', function(_, dt)
-	Runtime.update_canvas_juice(dt)
+Updaters.register('early_frame', 'canvas_shake', function(_, dt)
+	Runtime.update_canvas_shake(dt)
 end)
 Updaters.register('early_board', 'timeline_fuse', function(game, dt)
 	if game.STATE == game.STATES.TABLE_BOARD then
@@ -101,7 +101,7 @@ Updaters.register('post_input', 'card_inspect', function(game, dt)
 	WORD_GAME_UI.CardInspect.update(dt)
 end)
 Updaters.register('post_input', 'word_feedback_queue', function()
-	if game().ARGS and game().ARGS.word_feedback_queue then
+	if game().word_feedback_queue then
 		word_feedback.flush_pending()
 	end
 end)

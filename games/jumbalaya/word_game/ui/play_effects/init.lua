@@ -28,7 +28,7 @@ end
 
 function M.request_layout_refresh()
 	game().ARGS = game().ARGS or {}
-	game().ARGS.pending_layout = true
+	game().pending_layout = true
 end
 
 for k, v in pairs(definition) do

@@ -40,7 +40,7 @@ Spatial motion: `set_rect`, `follow(parent, offset)`, `bind_to(host)`. See `docs
 ## Callbacks & layout
 
 - Remaining string callbacks go through `Funcs.register` — move implementations, not registration names. New UI uses function `on_press`.
-- Model requests layout via `WORD_GAME.Layout.request_refresh()` / deferred `G.ARGS.pending_layout` — not direct geometry from model code
+- Model requests layout via `WORD_GAME.Layout.request_refresh()` / deferred `G.pending_layout` — not direct geometry from model code
 
 ## Annotations
 

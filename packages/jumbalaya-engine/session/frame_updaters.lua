@@ -17,7 +17,7 @@ Updaters.register("early_frame", "wall_clock", function(game, dt)
 	game.TIMERS.REAL = game.TIMERS.REAL + dt
 	game.TIMERS.UPTIME = game.TIMERS.UPTIME + dt
 	game.SETTINGS.DEMO.total_uptime = (game.SETTINGS.DEMO.total_uptime or 0) + dt
-	game.TIMERS.BACKGROUND = game.TIMERS.BACKGROUND + dt * (game.ARGS.spin and game.ARGS.spin.amount or 0)
+	game.TIMERS.BACKGROUND = game.TIMERS.BACKGROUND + dt * (game.spin and game.spin.amount or 0)
 	game.real_dt = dt
 end)
 
