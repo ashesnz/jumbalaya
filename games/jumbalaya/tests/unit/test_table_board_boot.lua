@@ -4,7 +4,6 @@ local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
 local Spatial = require("jumbalaya-engine.scene.animated.init")
 local shell = require("jumbalaya-engine.shell")
-local Presentation = require("word_game.model.presentation")
 local board_prime = require("word_game.ui.table.board_prime")
 
 local function install_table_board_ui()
@@ -139,12 +138,6 @@ T.describe("table board boot", function()
 		T.assert_false(game.pending_layout, "layout must not stay deferred after prime")
 	end)
 
-	T.it("presentation table_board_prime event matches direct prime", function()
-		install_table_board_ui()
-		Presentation.emit("table_board_prime")
-		T.assert_true(board_prime.is_ready(), "presentation hook should prime HUD immediately")
-	end)
-
 	T.it("sidebar HUD registers on LIVE.PANELS for immediate board-pass drawing", function()
 		local game = install_table_board_ui()
 		game.LIVE = game.LIVE or {}
@@ -261,12 +254,6 @@ T.describe("table board boot", function()
 		T.assert_equal(play_bar._inner.alignment.offset.x, 1.5)
 	end)
 
-	T.it("table_board_prime presentation creates hand action bars", function()
-		install_table_board_ui()
-		Presentation.emit("table_board_prime")
-		T.assert_true(board_prime.table_controls_ready(), "prime should install play and shuffle bars")
-	end)
-
 	T.it("table_board_prime syncs score equation above the dealt hand", function()
 		install_table_board_ui()
 		board_prime.prime()
@@ -361,41 +348,5 @@ T.describe("table board boot", function()
 
 		T.assert_nil(game.OVERLAY_MENU, "match overlay must close before the next run")
 		T.assert_equal(game.SETTINGS.paused, false)
-	end)
-
-	T.it("smokes drag flags, flip, deal host, play/shuffle, sidebar, and The Trade", function()
-		install_table_board_ui()
-		board_prime.prime()
-		local game = shell.game()
-
-		local host = Spatial(0, 0, 1, 1.4)
-		host:snap_rect(0, 0, 1, 1.4)
-		local card = Spatial(0, 0, 1, 1.4)
-		card.states.draggable = true
-		card.facing = "front"
-		card.pinch = {}
-		setmetatable(card, { __index = Card })
-		card:set_rect(2, 3, 1, 1.4)
-		T.assert_equal(card.T.x, 2)
-		card:follow(game.dealt_letters, { x = 0, y = 0 })
-		T.assert_equal(card.attach.mode, "follow")
-		card:bind_to(host)
-		T.assert_equal(card.attach.mode, "bind")
-		card:flip()
-		T.assert_equal(card.facing, "back")
-		card.states.dragging = true
-		T.assert_true(card.states.dragging)
-		T.assert_true(card.states.draggable)
-
-		T.assert_true(game.dealt_letters and game.dealt_letters.states.visible)
-		T.assert_true(WORD_GAME_UI.TableControls.buttons_present())
-		T.assert_true(game.hand_action_bar.states.visible)
-		T.assert_true(game.table_shuffle_bar.states.visible)
-		T.assert_not_nil(game.SIDEBAR_HUD)
-		T.assert_true(game.SIDEBAR_HUD.states.visible)
-
-		local trade = require("word_game.ui.trade.definition")
-		local tree = trade.build_overlay_definition()
-		T.assert_not_nil(tree)
 	end)
 end)

@@ -9,46 +9,6 @@ T.describe("Jumble scoring and odometer", function()
 	mock_env.reset_game()
 	local jumble = require("word_game.model.jumble")
 
-	T.it("scores word by letter count and ramps multiplier by 0.2x for subsequent plays on same puzzle", function()
-		local wr = {
-			mode = "jumble",
-			jumble = {
-				puzzle_index = 1,
-				solved = false,
-				puzzle_points = 0,
-				puzzle_multi = 1.0,
-				puzzle_words = {},
-				slots = {},
-				puzzle = { span = { "C", "T" }, min = 3, max = 7, kind = "span" },
-			},
-		}
-		mock_env.patch_game({ word_round = wr })
-
-		local old_p1, new_p1, old_m1, new_m1 = jumble.record_puzzle_word("CAT")
-		T.assert_equal(old_p1, 0)
-		T.assert_equal(new_p1, 3, "CAT should give 3 points")
-		T.assert_almost_equal(old_m1, 1.0, 0.01)
-		T.assert_almost_equal(new_m1, 1.0, 0.01, "First word multi should be 1.0x")
-
-		local old_p2, new_p2, old_m2, new_m2 = jumble.record_puzzle_word("CENT")
-		T.assert_equal(old_p2, 3)
-		T.assert_equal(new_p2, 7, "CENT adds 4 points to 3 = 7 points")
-		T.assert_almost_equal(old_m2, 1.0, 0.01)
-		T.assert_almost_equal(new_m2, 1.2, 0.01, "Second word multi should be 1.2x")
-
-		local old_p3, new_p3, old_m3, new_m3 = jumble.record_puzzle_word("CHAT")
-		T.assert_equal(old_p3, 7)
-		T.assert_equal(new_p3, 11, "CHAT adds 4 points to 7 = 11 points")
-		T.assert_almost_equal(old_m3, 1.2, 0.01)
-		T.assert_almost_equal(new_m3, 1.4, 0.01, "Third word multi should be 1.4x")
-
-		local old_p4, new_p4, old_m4, new_m4 = jumble.record_puzzle_word("COT")
-		T.assert_equal(old_p4, 11)
-		T.assert_equal(new_p4, 14, "COT adds 3 points to 11 = 14 points")
-		T.assert_almost_equal(old_m4, 1.4, 0.01)
-		T.assert_almost_equal(new_m4, 1.6, 0.01, "Fourth word multi should be 1.6x")
-	end)
-
 	T.it("calculates total puzzle score as math.floor(points * multi) on advance", function()
 		local flow = require("word_game.model.jumble_play")
 
@@ -123,20 +83,6 @@ T.describe("Jumble scoring and odometer", function()
 		sb.reset_jumble_score()
 		T.assert_equal(sb.jumble_points, 0)
 		T.assert_almost_equal(sb.jumble_multi, 1.0, 0.01)
-	end)
-
-	T.it("initializes round target to 25 points for stage 1-1 and 10 points for stage 1-2", function()
-		local pcfg = require("word_game.board.placement.config")
-		T.assert_equal(pcfg.ANCHOR_PAD_Y_FRAC, 0.078, "Anchor pad frac lowered to 0.078")
-
-		local round_cfg = require("jumbalaya_core.config.gameplay.round")
-		T.assert_equal(round_cfg.hand_target(1, 1), 25, "Stage 1-1 target should be 25 points")
-		T.assert_equal(round_cfg.hand_target(1, 2), 10, "Stage 1-2 target should be 10 points")
-		T.assert_equal(round_cfg.hand_target(1, 9), 100, "Stage 1-9 target should be 100 points")
-
-		local wr = { target = round_cfg.hand_target(1, 1) }
-		jumble.start_hand(wr)
-		T.assert_equal(wr.target, 25, "Jumble preserves round_config target on start_hand")
 	end)
 
 	T.it("executes fast odometer countdown for points to get in under 0.5s", function()

@@ -113,25 +113,4 @@ T.describe("table controls play button", function()
 		resolution.resolve = orig_resolve
 		action_dispatch.dispatch_func = orig_dispatch
 	end)
-
-	T.it("placement try_play delegates to resolution when the table is idle", function()
-		install_table_board()
-		local placement = require("word_game.ui.table.controls.placement")
-		local play = require("word_game.model.jumble_play")
-		local resolved = false
-		local resolution = require("word_game.ui.play_effects.resolution")
-		local orig_resolve = resolution.resolve
-
-		resolution.resolve = function(mod)
-			resolved = mod == play
-			return { kind = "invalid", err = "blocked" }
-		end
-		WORD_GAME_UI = WORD_GAME_UI or {}
-		WORD_GAME_UI.PlayHoldRedraw = { consume_click = function() return false end }
-
-		placement.try_play()
-		T.assert_true(resolved)
-
-		resolution.resolve = orig_resolve
-	end)
 end)

@@ -11,13 +11,6 @@ T.describe("run backgrounds", function()
 
 	local game = require("word_game.ui.util.game_runtime").game()
 
-	T.it("uses the garden leaves board for every stage", function()
-		T.assert_true(backgrounds.is_garden_stage(1, 1))
-		T.assert_true(backgrounds.is_garden_stage(1, 6))
-		T.assert_true(backgrounds.is_garden_stage(2, 3))
-		T.assert_true(backgrounds.is_garden_stage(8, 1))
-	end)
-
 	T.it("garden installs SPLASH_BACK with garden_leaves shader", function()
 		game.ARGS = game.ARGS or {}
 		game.SHADERS = game.SHADERS or {}

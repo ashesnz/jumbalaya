@@ -95,7 +95,7 @@ WORD_GAME_UI.TradeUI = { is_open = function() return false end }
 WORD_GAME_UI.Sidebar = { sync_visibility = function() end, draw = function() end }
 ```
 
-See `test_play_hold_redraw.lua`, `test_classic_run_mode.lua`.
+See `test_table_controls_play_button.lua`, `test_play_resolution.lua`.
 
 ### Simulate play (model only vs full FX)
 
@@ -185,16 +185,12 @@ mock_env.ensure_engine_globals() -- Sprite, Node, Spatial, colour helpers
 | File | Covers |
 |------|--------|
 | `test_core_jumble_patterns.lua` | Pattern validation, slots (headless) |
-| `test_jumble_scoring.lua` | Scoring, odometer, targets |
-| `test_jumble_play_flow.lua` | Play flow, marketplace, stage files |
-| `test_classic_run_mode.lua` | Classic run loop and stage progression |
-| `test_classic_stage_advance_deal.lua` | Next → marketplace → deal on stage advance |
-| `test_table_discard.lua` | Sidebar discard bin, `max_fills()`, game-over |
-| `test_sidebar_stage_button.lua` | Sidebar End Run / Next button |
-| `test_timeline_timer.lua` | Fuse bar |
-| `test_save_roundtrip.lua` | Save/load round-trip, jumble hand restore |
-| `test_play_hold_redraw.lua` | Hold-to-redraw |
+| `test_core_jumble_rules.lua` | Scoring, combo ramp, hand targets |
+| `test_jumble_scoring.lua` | Score banner odometer / points-to-get |
+| `test_jumble_play_flow.lua` | Hand-clear, trade handoff, stage files |
 | `test_play_resolution.lua` | Play cinematics and score resolution |
+| `test_timeline_timer.lua` | Fuse bar |
+| `test_end_run.lua` | Sidebar End Run overlay |
 
 ## CI gate (representative)
 
@@ -203,11 +199,11 @@ These tests must pass on every PR. See [code-organization.md](code-organization.
 | Tier | Files | Role |
 |------|-------|------|
 | **Core rules** | `test_core_*.lua` | `jumbalaya_core` headless — no Love2D boot |
-| **Gameplay** | `test_jumble_*.lua`, `test_play_resolution.lua`, `test_classic_run_mode.lua`, … | Jumble loop, scoring, marketplace |
-| **Store / access** | `test_store_ops.lua`, `test_store_stale_ref.lua`, `test_game_access.lua`, `test_piles.lua` | Store binding, `game_access`, pile hosts, stale-ref guards |
-| **UI / table** | `test_table_board.lua`, `test_sidebar_stage_button.lua`, `test_timeline_timer.lua`, … | HUD, fuse, table rendering |
-| **Persistence** | `test_save_roundtrip.lua` | Save/load contract |
-| **Boot / policy** | `test_boot_simulation.lua`, `test_g_funcs_registry.lua`, `test_store_state_catalog.lua`, `test_facade_boundaries.lua`, `test_core_purity.lua`, `test_legacy_shims.lua` | Startup smoke, Funcs/UI bindings, run-state catalog, facade imports, core isolation, proxy-file scan |
+| **Gameplay** | `test_jumble_*.lua`, `test_play_resolution.lua`, `test_marketplace.lua` | Jumble loop, scoring, marketplace |
+| **Store / access** | `test_store_ops.lua`, `test_store_stale_ref.lua`, `test_pile_boundaries.lua` | Store binding, pile hosts, stale-ref guards |
+| **UI / table** | `test_table_board_boot.lua`, `test_timeline_timer.lua`, `test_end_run.lua` | HUD, fuse, table rendering |
+| **Persistence** | `test_save_schema.lua` | Save/load contract |
+| **Boot / policy** | `test_g_funcs_registry.lua`, `test_store_state_catalog.lua`, `test_facade_boundaries.lua`, `test_core_purity.lua`, `test_legacy_shims.lua` | Funcs/UI bindings, run-state catalog, facade imports, core isolation, proxy-file scan |
 
 ## CI
 

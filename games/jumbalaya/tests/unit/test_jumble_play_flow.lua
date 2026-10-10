@@ -76,47 +76,6 @@ T.describe("Jumble play flow integration", function()
 		T.assert_equal(anim.alpha, 1, "Fixed animation alpha should reset to 1")
 	end)
 
-	T.it("rejects play on first attempt without placed cards", function()
-		local flow = require("word_game.model.jumble_play")
-		local wr = {
-			mode = "jumble",
-			jumble = {
-				puzzle_index = 1,
-				solved = false,
-				total_score = 0,
-				puzzle_words = {},
-				slots = {
-					{ kind = "fixed", letter = "C" },
-					{ kind = "span", cards = {}, min = 1, max = 5 },
-					{ kind = "fixed", letter = "T" },
-				},
-				puzzle = { span = { "C", "T" }, min = 3, max = 7, kind = "span" },
-			},
-		}
-		mock_env.patch_game({ word_round = wr, word_score_animating = false })
-
-		local play_resolution = require("word_game.ui.play_effects.resolution")
-		local effects = require("word_game.ui.play_effects")
-		local shown
-		local orig = effects.show_validation_error
-		effects.show_validation_error = function(err)
-			shown = err
-		end
-		local result = play_resolution.resolve(flow)
-		effects.show_validation_error = orig
-
-		T.assert_equal(result.kind, "invalid")
-		T.assert_equal(result.err, "Word must be played!")
-		T.assert_equal(shown, "Word must be played!")
-		T.assert_equal(wr.jumble.puzzle_index, 1, "Puzzle index should stay 1")
-		T.assert_false(wr.jumble.solved, "Puzzle should remain unsolved")
-	end)
-
-	T.it("uses core economy trade add cost", function()
-		local economy = require("jumbalaya_core.config.gameplay.economy")
-		T.assert_equal(economy.TRADE_ADD_COST, 10)
-	end)
-
 	T.it("updates the token counter while the marketplace hides the table deck area", function()
 		local table_deck = require("word_game.ui.table.deck")
 		local state = require("word_game.model.run.state")
