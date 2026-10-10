@@ -29,7 +29,6 @@ function M.relayout(self)
 				card.T.r = 0.2 * (-fan_n / 2 - 0.5 + slot) / fan_n + 0.02 * math.sin(2 * game().TIMERS.REAL + card.T.x)
 				card.T.x = start_x + (k - 1) * card_w * spacing + 0.5 * (card_w - card.T.w)
 				card.T.y = self.T.y + self.T.h / 2 - card.T.h / 2 + 0.03 * math.sin(0.666 * game().TIMERS.REAL + card.T.x) + math.abs(0.5 * (-fan_n / 2 + slot - 0.5) / fan_n) - 0.2
-				card.T.x = card.T.x + card.shadow_parallax.x / 30
 			end
 		end
 		table.sort(self.cards, function(a, b) return a.T.x + a.T.w / 2 < b.T.x + b.T.w / 2 end)

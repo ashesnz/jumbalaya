@@ -53,13 +53,7 @@ function Game:update(dt)
 		end
 		perf_checkpoint("animate", "update")
 
-		self.smoothing.xy = math.exp(-38 * self.real_dt)
-		self.smoothing.scale = math.exp(-52 * self.real_dt)
-		self.smoothing.r = math.exp(-150 * self.real_dt)
-
 		local move_dt = math.min(1 / 20, self.real_dt)
-
-		self.smoothing.max_vel = 58 * move_dt
 
 		self.TRANSFORMS = Tables.compact_array(self.TRANSFORMS)
 

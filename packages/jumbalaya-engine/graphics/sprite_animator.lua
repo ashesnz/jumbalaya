@@ -93,10 +93,9 @@ end
 
 function GfxAnimator:update_float_motion(now)
 	if not self.float then return end
-	local parallax = self.shadow_parallax or {x = 0, y = 0}
-	self.T.r = 0.018 * math.sin(now * 1.7 + self.T.x)
-	self.offset.x = -(0.8 + 0.15 * math.sin(now * 0.55 + self.T.x)) * parallax.x
-	self.offset.y = -(1 + 0.25 * math.sin(now * 0.55 + self.T.y)) * parallax.y
+	self.T.r = 0.014 * math.sin(now * 1.15 + self.T.x * 0.4)
+	self.offset.x = 0.04 * math.sin(now * 0.7 + self.T.x)
+	self.offset.y = 0.06 * math.sin(now * 0.9 + self.T.y)
 end
 
 function GfxAnimator:animate()

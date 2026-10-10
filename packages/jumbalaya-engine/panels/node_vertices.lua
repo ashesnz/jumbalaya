@@ -1,4 +1,5 @@
 
+local DropShadow = require("jumbalaya-engine.graphics.drop_shadow")
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 return function(Target)
@@ -24,23 +25,20 @@ local function rounded_rect_vertices(w, h, radius, ext_up, segs)
 end
 
 --- Cached rounded-rect vertex sets (fill/shadow/line/emboss variants),
---- invalidated whenever size, parallax, progress, or speech-ness changes.
-function Target:draw_pixellated_rect(_type, _parallax, _emboss, _progress)
+--- invalidated whenever size, progress, or speech-ness changes.
+function Target:draw_pixellated_rect(_type, _unused, _emboss, _progress)
 	if not self.pixellated_rect
+		or not self.pixellated_rect[_type]
 		or #self.pixellated_rect[_type].vertices < 1
-		or _parallax ~= self.pixellated_rect.parallax
 		or self.pixellated_rect.w ~= self.VT.w
 		or self.pixellated_rect.h ~= self.VT.h
-		or self.pixellated_rect.sw ~= self.shadow_parallax.x
-		or self.pixellated_rect.sh ~= self.shadow_parallax.y
 		or self.pixellated_rect.progress ~= (_progress or 1)
 		or self.pixellated_rect.speech ~= (not not self.config.speech_tail) then
 
+		local sx, sy = DropShadow.pixels(game().TILESIZE)
 		self.pixellated_rect = {
 			w = self.VT.w,
 			h = self.VT.h,
-			sw = self.shadow_parallax.x,
-			sh = self.shadow_parallax.y,
 			progress = (_progress or 1),
 			speech = not not self.config.speech_tail,
 			fill = {vertices = {}},
@@ -48,7 +46,6 @@ function Target:draw_pixellated_rect(_type, _parallax, _emboss, _progress)
 			line = {vertices = {}},
 			emboss = {vertices = {}},
 			line_emboss = {vertices = {}},
-			parallax = _parallax,
 		}
 
 		local ext_up = self.config.ext_up and self.config.ext_up * game().TILESIZE or 0
@@ -78,14 +75,14 @@ function Target:draw_pixellated_rect(_type, _parallax, _emboss, _progress)
 				self.pixellated_rect.line.vertices[k - 4] = v
 				if _emboss then
 					self.pixellated_rect.line_emboss.vertices[k - 4] =
-						v + (k % 2 == 0 and -_emboss * self.shadow_parallax.y or -0.7 * _emboss * self.shadow_parallax.x)
+						v + (k % 2 == 0 and -_emboss * game().TILESIZE or 0)
 				end
 			end
 			if k % 2 == 0 then
-				self.pixellated_rect.shadow.vertices[k] = v - self.shadow_parallax.y * _parallax
+				self.pixellated_rect.shadow.vertices[k] = v + sy
 				if _emboss then self.pixellated_rect.emboss.vertices[k] = v + _emboss * game().TILESIZE end
 			else
-				self.pixellated_rect.shadow.vertices[k] = v - self.shadow_parallax.x * _parallax
+				self.pixellated_rect.shadow.vertices[k] = v + sx
 				if _emboss then self.pixellated_rect.emboss.vertices[k] = v end
 			end
 		end

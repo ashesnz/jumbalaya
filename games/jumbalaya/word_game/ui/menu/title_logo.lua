@@ -154,7 +154,7 @@ function TitleLogo:apply_shader_effect()
 		sh:send("hovering", (_draw_major.hover_tilt or 0))
 		sh:send("dissolve", math.abs(_draw_major.dissolve or 0))
 		sh:send("dissolve_wipe", _draw_major.dissolve_wipe or 0)
-		sh:send("time", 123.33412 * ((_draw_major.ID or 1) / 1.14212) % 3000)
+		sh:send("time", ((game().TIMERS and game().TIMERS.REAL) or 0) + (_draw_major.ID or 0) * 0.17)
 		local title_image = (self.dissolve or 0) > 0 and self.full_image or self.base_image
 		local title_w, title_h = title_image:getDimensions()
 		sh:send("texture_details", {0, 0, title_w, title_h})

@@ -2,6 +2,7 @@
 local Colour = require("jumbalaya-engine.util.colour")
 local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
+local DropShadow = require("jumbalaya-engine.graphics.drop_shadow")
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 return function(Target)
@@ -17,25 +18,18 @@ function Target:draw_self()
 	end
 
 	local button_active = true
-	local parallax_dist = 1.5
 	local button_being_pressed = false
+	local sx, sy = DropShadow.pixels(game().TILESIZE)
 
 	if self.config.button or self.config.button_UIE then
-		-- Accumulate layered parallax down the tree (+ shadow contribution).
-		self.parallax_shift.x = ((self.parent and self.parent ~= self.panel and self.parent.parallax_shift.x) or 0)
-			+ ((self.config.shadow and 0.4 * self.shadow_parallax.x or 0) / game().TILESIZE)
-		self.parallax_shift.y = ((self.parent and self.parent ~= self.panel and self.parent.parallax_shift.y) or 0)
-			+ ((self.config.shadow and 0.4 * self.shadow_parallax.y or 0) / game().TILESIZE)
+		self.parallax_shift.x = (self.parent and self.parent ~= self.panel and self.parent.parallax_shift.x) or 0
+		self.parallax_shift.y = (self.parent and self.parent ~= self.panel and self.parent.parallax_shift.y) or 0
 
 		-- Pressed-in look: recent click, or hovered/dragged while held.
 		if self.config.button and ((self.last_clicked and self.last_clicked > game().TIMERS.REAL - 0.1)
 			or ((self.config.button and (self.states.hover.is or self.states.drag.is))
 				and game().INPUT.pointer_held)) then
-			self.parallax_shift.x = self.parallax_shift.x
-				- parallax_dist * self.shadow_parallax.x / game().TILESIZE * (self.config.button_dist or 1)
-			self.parallax_shift.y = self.parallax_shift.y
-				- parallax_dist * self.shadow_parallax.y / game().TILESIZE * (self.config.button_dist or 1)
-			parallax_dist = 0
+			self.parallax_shift.y = self.parallax_shift.y + 0.05 * (self.config.button_dist or 1)
 			button_being_pressed = true
 		end
 
@@ -52,10 +46,9 @@ function Target:draw_self()
 				return
 			end
 			-- Text: optional drop shadow pass at depth 0.97, then the glyph.
-			self.ARGS.text_parallax = self.ARGS.text_parallax or {}
 			local font_obj = self.config.font or self.config.lang.font
-			self.ARGS.text_parallax.sx = -self.shadow_parallax.x * 0.5 / (self.config.scale * font_obj.FONTSCALE)
-			self.ARGS.text_parallax.sy = -self.shadow_parallax.y * 0.5 / (self.config.scale * font_obj.FONTSCALE)
+			local shadow_tx = sx / game().TILESIZE
+			local shadow_ty = sy / game().TILESIZE
 
 			if (self.config.button_UIE and button_active)
 				or (not self.config.button_UIE and self.config.shadow and game().SETTINGS.GRAPHICS.shadows == 'On') then
@@ -63,11 +56,11 @@ function Target:draw_self()
 				if self.config.vert then love.graphics.translate(0, self.VT.h); love.graphics.rotate(-math.pi / 2) end
 				if (self.config.shadow or (self.config.button_UIE and button_active))
 					and game().SETTINGS.GRAPHICS.shadows == 'On' then
-					love.graphics.setColor(0, 0, 0, 0.25 * self.config.colour[4])
+					love.graphics.setColor(DropShadow.rgba(self.config.colour[4]))
 					love.graphics.draw(
 						self.config.text_drawable,
-						(font_obj.TEXT_OFFSET.x + (self.config.vert and -self.ARGS.text_parallax.sy or self.ARGS.text_parallax.sx)) * (self.config.scale or 1) * font_obj.FONTSCALE / game().TILESIZE,
-						(font_obj.TEXT_OFFSET.y + (self.config.vert and self.ARGS.text_parallax.sx or self.ARGS.text_parallax.sy)) * (self.config.scale or 1) * font_obj.FONTSCALE / game().TILESIZE,
+						font_obj.TEXT_OFFSET.x * (self.config.scale or 1) * font_obj.FONTSCALE / game().TILESIZE + (self.config.vert and -shadow_ty or shadow_tx),
+						font_obj.TEXT_OFFSET.y * (self.config.scale or 1) * font_obj.FONTSCALE / game().TILESIZE + (self.config.vert and shadow_tx or shadow_ty),
 						0,
 						self.config.scale * font_obj.squish * font_obj.FONTSCALE / game().TILESIZE,
 						self.config.scale * font_obj.FONTSCALE / game().TILESIZE)
@@ -95,21 +88,18 @@ function Target:draw_self()
 			NodeTransform.push_node_transform(self, 1)
 			love.graphics.scale(1 / game().TILESIZE)
 
-			-- Drop shadow (slightly smaller, offset by parallax direction).
+			-- Drop shadow: one offset + alpha.
 			if self.config.shadow and game().SETTINGS.GRAPHICS.shadows == 'On' then
-				love.graphics.scale(0.986)
 				if self.config.shadow_colour then
 					love.graphics.setColor(self.config.shadow_colour)
 				else
-					love.graphics.setColor(0, 0, 0, 0.25 * self.config.colour[4])
+					love.graphics.setColor(DropShadow.rgba(self.config.colour[4]))
 				end
 				if self.config.r and self.VT.w > 0.01 then
-					self:draw_pixellated_rect('shadow', parallax_dist)
+					self:draw_pixellated_rect('shadow')
 				else
-					love.graphics.rectangle('fill', -self.shadow_parallax.x * parallax_dist,
-						-self.shadow_parallax.y * parallax_dist, self.VT.w * game().TILESIZE, self.VT.h * game().TILESIZE)
+					love.graphics.rectangle('fill', sx, sy, self.VT.w * game().TILESIZE, self.VT.h * game().TILESIZE)
 				end
-				love.graphics.scale(1 / 0.986)
 			end
 
 			-- Press-in squash.
@@ -118,7 +108,7 @@ function Target:draw_self()
 			-- Embossed lip above the fill surface.
 			if self.config.emboss then
 				love.graphics.setColor(Colour.shade(self.config.colour, self.states.hover.is and 0.5 or 0.3, true))
-				self:draw_pixellated_rect('emboss', parallax_dist, self.config.emboss)
+				self:draw_pixellated_rect('emboss', nil, self.config.emboss)
 			end
 
 			-- Fill layers: base colour (greyed during button_delay), plus a
@@ -138,7 +128,7 @@ function Target:draw_self()
 					-- Glossy normally needs stencils, which canvas rendering may
 					-- not provide; fall back to the standard rounded fill.
 					if self.config.r and self.VT.w > 0.01 then
-						self:draw_pixellated_rect('fill', parallax_dist)
+						self:draw_pixellated_rect('fill')
 					else
 						love.graphics.rectangle('fill', 0, 0, self.VT.w * game().TILESIZE, self.VT.h * game().TILESIZE)
 					end
@@ -146,18 +136,18 @@ function Target:draw_self()
 					if self.config.button_delay then
 						-- Delay bar: grey track filling left-to-right.
 						love.graphics.setColor(game().C.GREY)
-						self:draw_pixellated_rect('fill', parallax_dist)
+						self:draw_pixellated_rect('fill')
 						love.graphics.setColor(colour)
-						self:draw_pixellated_rect('fill', parallax_dist, nil, self.config.button_delay_progress)
+						self:draw_pixellated_rect('fill', nil, nil, self.config.button_delay_progress)
 					elseif self.config.progress_bar then
 						local progress = self.config.progress_bar
 						love.graphics.setColor(progress.empty_col or game().C.GREY)
-						self:draw_pixellated_rect('fill', parallax_dist)
+						self:draw_pixellated_rect('fill')
 						love.graphics.setColor(progress.filled_col or game().C.BLUE)
-						self:draw_pixellated_rect('fill', parallax_dist, nil,
+						self:draw_pixellated_rect('fill', nil, nil,
 							progress.ref_table[progress.ref_value] / progress.max)
 					else
-						self:draw_pixellated_rect('fill', parallax_dist)
+						self:draw_pixellated_rect('fill')
 					end
 				else
 					love.graphics.rectangle('fill', 0, 0, self.VT.w * game().TILESIZE, self.VT.h * game().TILESIZE)
@@ -174,10 +164,10 @@ function Target:draw_self()
 				love.graphics.scale(1 / game().TILESIZE)
 				love.graphics.setLineWidth(lw + 1.5)
 				love.graphics.setColor(Colour.with_alpha(game().C.WHITE, 0.2 * lw, true))
-				self:draw_pixellated_rect('fill', parallax_dist)
+				self:draw_pixellated_rect('fill')
 				love.graphics.setColor(self.config.colour[4] > 0
 					and Colour.blend_colours(game().C.WHITE, self.config.colour, 0.8) or game().C.WHITE)
-				self:draw_pixellated_rect('line', parallax_dist)
+				self:draw_pixellated_rect('line')
 				love.graphics.pop()
 			else
 				self.object_focus_timer = nil
@@ -186,7 +176,7 @@ function Target:draw_self()
 		end
 	end
 
-	self:draw_self_decor(parallax_dist)
+	self:draw_self_decor()
 	self:draw_boundingrect()
 end
 end

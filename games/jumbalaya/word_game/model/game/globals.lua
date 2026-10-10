@@ -43,7 +43,6 @@ function Game:define_constants()
         RENDER = 0,
         TRANSFORM = 0
     }
-    self.smoothing = {xy = 0, scale = 0, r = 0}
     self.SETTINGS = RuntimeOptions.settings()
 
     local os_name = love.system.getOS()

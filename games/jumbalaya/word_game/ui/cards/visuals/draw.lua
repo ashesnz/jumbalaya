@@ -83,24 +83,34 @@ function Card:sync_shadow_state()
 end
 
 function Card:update_tilt()
-	self.tilt_var = self.overwrite_tilt_var or self.tilt_var
-		or {mx = 0, my = 0, dx = self.tilt_var.dx or 0, dy = self.tilt_var.dy or 0, amt = 0}
+	local prev = self.tilt_var
+	self.tilt_var = self.overwrite_tilt_var or prev
+		or { mx = 0, my = 0, dx = 0, dy = 0, amt = 0 }
 	if self.overwrite_tilt_var then return end
 
-	local tilt_factor = 0.3
-	if self.states.focus.is then
-		self.tilt_var.mx, self.tilt_var.my =
-			game().INPUT.cursor_position.x + self.tilt_var.dx*self.T.w*game().TILESCALE*game().TILESIZE,
-			game().INPUT.cursor_position.y + self.tilt_var.dy*self.T.h*game().TILESCALE*game().TILESIZE
-		self.tilt_var.amt = math.abs(self.hover_offset.y + self.hover_offset.x - 1 + self.tilt_var.dx + self.tilt_var.dy - 1)*tilt_factor
-	elseif self.states.hover.is then
-		self.tilt_var.mx, self.tilt_var.my = game().INPUT.cursor_position.x, game().INPUT.cursor_position.y
-		self.tilt_var.amt = math.abs(self.hover_offset.y + self.hover_offset.x - 1)*tilt_factor
+	local tiles = game().TILESCALE * game().TILESIZE
+	local room = game().ROOM and game().ROOM.T or { x = 0, y = 0 }
+	local cx = (self.VT.x + self.VT.w * 0.5 + room.x) * tiles
+	local cy = (self.VT.y + self.VT.h * 0.5 + room.y) * tiles
+	local cursor = game().INPUT and game().INPUT.cursor_position
+
+	if (self.states.focus.is or self.states.hover.is) and cursor then
+		local mx, my = cursor.x, cursor.y
+		if self.states.focus.is then
+			mx = mx + (self.tilt_var.dx or 0) * self.T.w * tiles
+			my = my + (self.tilt_var.dy or 0) * self.T.h * tiles
+		end
+		self.tilt_var.mx, self.tilt_var.my = mx, my
+		local nx = (mx - cx) / math.max(self.VT.w * tiles, 1)
+		local ny = (my - cy) / math.max(self.VT.h * tiles, 1)
+		self.tilt_var.amt = math.min(0.55, math.sqrt(nx * nx + ny * ny) * 0.42)
 	elseif self.ambient_tilt then
-		local tilt_angle = game().TIMERS.REAL*(1.56 + (self.ID/1.14212)%1) + self.ID/1.35122
-		self.tilt_var.mx = ((0.5 + 0.5*self.ambient_tilt*math.cos(tilt_angle))*self.VT.w+self.VT.x+game().ROOM.T.x)*game().TILESIZE*game().TILESCALE
-		self.tilt_var.my = ((0.5 + 0.5*self.ambient_tilt*math.sin(tilt_angle))*self.VT.h+self.VT.y+game().ROOM.T.y)*game().TILESIZE*game().TILESCALE
-		self.tilt_var.amt = self.ambient_tilt*(0.5+math.cos(tilt_angle))*tilt_factor
+		local t = game().TIMERS.REAL
+		local sway = t * 0.62 + (self.ID or 0) * 0.41
+		local amp = 0.22 * self.ambient_tilt
+		self.tilt_var.mx = cx + amp * self.VT.w * tiles * math.sin(sway)
+		self.tilt_var.my = cy + amp * self.VT.h * tiles * math.cos(sway * 0.73)
+		self.tilt_var.amt = self.ambient_tilt * (0.22 + 0.08 * math.sin(sway * 0.5))
 	end
 end
 

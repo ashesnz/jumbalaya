@@ -1,13 +1,15 @@
 
 local Tables = require("jumbalaya-engine.util.tables")
 local SceneRoots = require("jumbalaya-engine.scene.roots")
+local DropShadow = require("jumbalaya-engine.graphics.drop_shadow")
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 return function(AnimNode)
---- Horizontal shadow parallax based on room-relative position.
+--- Keeps the drop-shadow offset at the engine-wide constant (no room parallax).
 function AnimNode:calculate_parallax()
-	if not game().ROOM then return end
-	self.shadow_parallax.x = (self.T.x + self.T.w / 2 - game().ROOM.T.w / 2) / (game().ROOM.T.w / 2) * 1.2
+	self.shadow_parallax = self.shadow_parallax or { x = DropShadow.X, y = DropShadow.Y }
+	self.shadow_parallax.x = DropShadow.X
+	self.shadow_parallax.y = DropShadow.Y
 end
 
 --- Merges `args` over the current role. Offsets are accepted only as tables
@@ -33,7 +35,7 @@ function AnimNode:set_role(args)
 end
 
 --- Walks up the weld chain returning the top Major plus the accumulated
---- offset (including layered parallax). Cached per frame; invalidated by
+--- offset. Cached per frame; invalidated by
 --- setting `game().REFRESH_FRAME_MAJOR_CACHE` (e.g. retained panel recalculation).
 function AnimNode:get_major()
 	if (self.role.role_type ~= 'Major' and self.role.major ~= self)

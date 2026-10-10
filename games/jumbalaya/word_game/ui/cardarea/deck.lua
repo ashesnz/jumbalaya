@@ -42,10 +42,10 @@ function M.relayout(self)
 		face_down_in_pile(card)
 
 		if not card.states.drag.is then
-			card.T.x = self.T.x + 0.5*(self.T.w - card.T.w) + self.shadow_parallax.x*deck_height*(#self.cards/(self == game().draw_pile and 1 or 2) - k) + 0.9*self.shuffle_amt*(1 - k*0.01)*(k%2 == 1 and 1 or -0)
-			card.T.y = self.T.y + 0.5*(self.T.h - card.T.h) + self.shadow_parallax.y*deck_height*(#self.cards/(self == game().draw_pile and 1 or 2) - k)
+			local stack = (#self.cards / (self == game().draw_pile and 1 or 2) - k) * deck_height
+			card.T.x = self.T.x + 0.5*(self.T.w - card.T.w) + 0.012 * stack + 0.9*self.shuffle_amt*(1 - k*0.01)*(k%2 == 1 and 1 or -0)
+			card.T.y = self.T.y + 0.5*(self.T.h - card.T.h) + 0.018 * stack
 			card.T.r = 0 + 0.3*self.shuffle_amt*(1 + k*0.05)*(k%2 == 1 and 1 or -0)
-			card.T.x = card.T.x + card.shadow_parallax.x/30
 		end
 	end
 end

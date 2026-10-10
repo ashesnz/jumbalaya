@@ -44,7 +44,8 @@ function Card:explode(dissolve_colours, explode_time_fac)
 				func = (function()
 								if self.bounce then 
 										percent = (game().TIMERS.TOTAL - start_time)/explode_time
-										self.bounce.r = 0.05*(math.sin(5*game().TIMERS.TOTAL) + math.cos(0.33 + 41.15332*game().TIMERS.TOTAL) + math.cos(67.12*game().TIMERS.TOTAL))*percent
+										local t = game().TIMERS.TOTAL
+										self.bounce.r = 0.05 * (math.sin(7.2 * t) + 0.45 * math.sin(3.1 * t + 0.8)) * percent
 										self.bounce.scale = percent*0.15
 								end
 								if game().TIMERS.TOTAL - start_time > 1.5*explode_time then return true end

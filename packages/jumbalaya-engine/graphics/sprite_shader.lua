@@ -1,5 +1,6 @@
 return function(GfxSprite)
 local Tables = require("jumbalaya-engine.util.tables")
+local DropShadow = require("jumbalaya-engine.graphics.drop_shadow")
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 
@@ -37,11 +38,10 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 
 	local draw_major = self.role.draw_major or self
 
-	-- Shadow pre-transform: offset along parallax direction, shrink slightly.
+	-- Shadow pre-transform: one down-right offset, no scale shrink.
 	if _shadow_height then
-		self.VT.y = self.VT.y - draw_major.shadow_parallax.y * _shadow_height
-		self.VT.x = self.VT.x - draw_major.shadow_parallax.x * _shadow_height
-		self.VT.scale = self.VT.scale * (1 - 0.2 * _shadow_height)
+		self.VT.x = self.VT.x + DropShadow.X
+		self.VT.y = self.VT.y + DropShadow.Y
 	end
 
 	if custom_shader then
@@ -73,8 +73,8 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 				sh:send('dissolve_wipe', draw_major.dissolve_wipe or 0)
 			end
 			if _shader ~= 'gold_seal' then
-				local id_phase = 123.33412 * ((tonumber(draw_major.ID) or 0) / 1.14212) % 3000
-				sh:send('time', id_phase + (game().TIMERS and game().TIMERS.REAL or 0))
+				local clock = (game().TIMERS and game().TIMERS.REAL) or 0
+				sh:send('time', clock + (tonumber(draw_major.ID) or 0) * 0.17)
 			end
 			sh:send('texture_details', self:texture_descriptor())
 			sh:send('image_details', self:image_dimensions())
@@ -108,10 +108,9 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 
 	love.graphics.setShader()
 
-	if _shadow_height then -- undo the shadow pre-transform exactly
-		self.VT.y = self.VT.y + draw_major.shadow_parallax.y * _shadow_height
-		self.VT.x = self.VT.x + draw_major.shadow_parallax.x * _shadow_height
-		self.VT.scale = self.VT.scale / (1 - 0.2 * _shadow_height)
+	if _shadow_height then
+		self.VT.x = self.VT.x - DropShadow.X
+		self.VT.y = self.VT.y - DropShadow.Y
 	end
 end
 end

@@ -1,8 +1,9 @@
---[[ jumbalaya-engine/scene/animated/init.lua - eased visible transform (VT follows T) ]]
+--[[ jumbalaya-engine/scene/animated/init.lua - visible transform (VT springs toward T) ]]
 
 local Node = require("jumbalaya-engine.scene.node")
 local SceneRoots = require("jumbalaya-engine.scene.roots")
 local Tables = require("jumbalaya-engine.util.tables")
+local DropShadow = require("jumbalaya-engine.graphics.drop_shadow")
 
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
@@ -49,10 +50,9 @@ function AnimNode:construct(X, Y, W, H)
 	self.static_rotation = false
 	self.offset = { x = 0, y = 0 }
 	self.Mid = self
-	self.shadow_parallax = { x = 0, y = -1.8 }
+	self.shadow_parallax = { x = DropShadow.X, y = DropShadow.Y }
 	self.parallax_shift = { x = 0, y = 0 }
 	self.shadow_height = 0.2
-	self:calculate_parallax()
 
 	table.insert(game().TRANSFORMS, self)
 	table.insert(game().LIVE.TRANSFORM, self)

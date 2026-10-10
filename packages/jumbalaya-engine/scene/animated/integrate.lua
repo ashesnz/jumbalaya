@@ -1,42 +1,55 @@
 
-local shell = require("jumbalaya-engine.shell")
-local game = shell.game
+-- Semi-implicit Euler springs: VT tracks T. Stiffness/damping live here,
+-- not as per-frame exp rates on the game shell.
+local XY_OMEGA, XY_ZETA = 14.5, 0.82
+local SCALE_OMEGA, SCALE_ZETA = 18, 0.76
+local R_OMEGA, R_ZETA = 16.5, 0.88
+local POS_SNAP, VEL_SNAP = 0.01, 0.012
+local SCALE_SNAP, R_SNAP = 0.002, 0.001
+local LEAN = 0.07
+local LEAN_MAX = 0.11
+
+local function spring_to(pos, vel, target, dt, omega, zeta)
+	local acc = omega * omega * (target - pos) - 2 * zeta * omega * vel
+	vel = vel + acc * dt
+	pos = pos + vel * dt
+	return pos, vel
+end
+
 return function(AnimNode)
---- Critically-damped XY integration of VT toward T with a speed clamp.
+--- Spring-integrates VT.xy toward T.xy.
 function AnimNode:move_xy(dt)
-	if (self.T.x ~= self.VT.x or math.abs(self.velocity.x) > 0.01) or
-		(self.T.y ~= self.VT.y or math.abs(self.velocity.y) > 0.01) then
-		self.velocity.x = game().smoothing.xy * self.velocity.x + (1 - game().smoothing.xy) * (self.T.x - self.VT.x) * 30 * dt
-		self.velocity.y = game().smoothing.xy * self.velocity.y + (1 - game().smoothing.xy) * (self.T.y - self.VT.y) * 30 * dt
-		local vel_sq = self.velocity.x^2 + self.velocity.y^2
-		if vel_sq > game().smoothing.max_vel^2 then
-			local actual_vel = math.sqrt(vel_sq)
-			self.velocity.x = game().smoothing.max_vel * self.velocity.x / actual_vel
-			self.velocity.y = game().smoothing.max_vel * self.velocity.y / actual_vel
-		end
+	if dt <= 0 then return end
+	if (self.T.x ~= self.VT.x or math.abs(self.velocity.x) > VEL_SNAP)
+		or (self.T.y ~= self.VT.y or math.abs(self.velocity.y) > VEL_SNAP) then
+		self.VT.x, self.velocity.x = spring_to(self.VT.x, self.velocity.x, self.T.x, dt, XY_OMEGA, XY_ZETA)
+		self.VT.y, self.velocity.y = spring_to(self.VT.y, self.velocity.y, self.T.y, dt, XY_OMEGA, XY_ZETA)
 		self.STATIONARY = false
-		self.VT.x = self.VT.x + self.velocity.x
-		self.VT.y = self.VT.y + self.velocity.y
-		if math.abs(self.VT.x - self.T.x) < 0.01 and math.abs(self.velocity.x) < 0.01 then
-			self.VT.x = self.T.x; self.velocity.x = 0
+		if math.abs(self.VT.x - self.T.x) < POS_SNAP and math.abs(self.velocity.x) < VEL_SNAP then
+			self.VT.x = self.T.x
+			self.velocity.x = 0
 		end
-		if math.abs(self.VT.y - self.T.y) < 0.01 and math.abs(self.velocity.y) < 0.01 then
-			self.VT.y = self.T.y; self.velocity.y = 0
+		if math.abs(self.VT.y - self.T.y) < POS_SNAP and math.abs(self.velocity.y) < VEL_SNAP then
+			self.VT.y = self.T.y
+			self.velocity.y = 0
 		end
 	end
 end
 
---- Eases VT.scale toward T.scale plus zoom (drag/hover) and bounce offsets.
+--- Springs VT.scale toward T.scale plus zoom (drag/hover) and bounce offsets.
 function AnimNode:move_scale(dt)
+	if dt <= 0 then return end
 	local desired_scale = self.T.scale
 		+ (self.zoom and ((self.states.drag.is and 0.08 or 0) + (self.states.hover.is and 0.04 or 0)) or 0)
 		+ (self.bounce and self.bounce.scale or 0)
 
-	if desired_scale ~= self.VT.scale or math.abs(self.velocity.scale) > 0.001 then
+	if desired_scale ~= self.VT.scale or math.abs(self.velocity.scale) > SCALE_SNAP then
 		self.STATIONARY = false
-		self.velocity.scale = game().smoothing.scale * self.velocity.scale
-			+ (1 - game().smoothing.scale) * (desired_scale - self.VT.scale)
-		self.VT.scale = self.VT.scale + self.velocity.scale
+		self.VT.scale, self.velocity.scale = spring_to(self.VT.scale, self.velocity.scale, desired_scale, dt, SCALE_OMEGA, SCALE_ZETA)
+		if math.abs(self.VT.scale - desired_scale) < SCALE_SNAP and math.abs(self.velocity.scale) < SCALE_SNAP then
+			self.VT.scale = desired_scale
+			self.velocity.scale = 0
+		end
 	end
 end
 
@@ -54,17 +67,20 @@ function AnimNode:move_wh(dt)
 	end
 end
 
---- Eases rotation; horizontal velocity feeds a subtle lean proportional to speed.
+--- Springs rotation; horizontal velocity adds a clamped lean.
 function AnimNode:move_r(dt, vel)
-	local desired_r = self.T.r + 0.015 * vel.x / dt + (self.bounce and self.bounce.r * 2 or 0)
+	if dt <= 0 then return end
+	local lean = vel.x * LEAN
+	if lean > LEAN_MAX then lean = LEAN_MAX elseif lean < -LEAN_MAX then lean = -LEAN_MAX end
+	local desired_r = self.T.r + lean + (self.bounce and self.bounce.r * 2 or 0)
 
-	if desired_r ~= self.VT.r or math.abs(self.velocity.r) > 0.001 then
+	if desired_r ~= self.VT.r or math.abs(self.velocity.r) > R_SNAP then
 		self.STATIONARY = false
-		self.velocity.r = game().smoothing.r * self.velocity.r + (1 - game().smoothing.r) * (desired_r - self.VT.r)
-		self.VT.r = self.VT.r + self.velocity.r
+		self.VT.r, self.velocity.r = spring_to(self.VT.r, self.velocity.r, desired_r, dt, R_OMEGA, R_ZETA)
 	end
-	if math.abs(self.VT.r - self.T.r) < 0.001 and math.abs(self.velocity.r) < 0.001 then
-		self.VT.r = self.T.r; self.velocity.r = 0
+	if math.abs(self.VT.r - self.T.r) < R_SNAP and math.abs(self.velocity.r) < R_SNAP then
+		self.VT.r = self.T.r
+		self.velocity.r = 0
 	end
 end
 end

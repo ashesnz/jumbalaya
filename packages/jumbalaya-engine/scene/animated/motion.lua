@@ -36,7 +36,6 @@ function AnimNode:move(dt)
 		self:move_r(dt, self.velocity)
 		self:move_scale(dt)
 		self:move_wh(dt)
-		self:calculate_parallax()
 	end
 	self.NEW_ALIGNMENT = false
 end
@@ -115,7 +114,5 @@ function AnimNode:move_with_major(dt)
 	elseif self.role.wh_bond == 'Weak' then
 		self:move_wh(dt)
 	end
-
-	self:calculate_parallax()
 end
 end

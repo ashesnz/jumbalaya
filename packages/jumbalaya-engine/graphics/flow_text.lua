@@ -1,6 +1,7 @@
 
 local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
+local DropShadow = require("jumbalaya-engine.graphics.drop_shadow")
 local AnimNode = require("jumbalaya-engine.scene.animated.init")
 local Envelopes = require("jumbalaya-engine.graphics.flow_text_envelopes")
 local Utf8 = require("jumbalaya-engine.util.utf8")
@@ -370,6 +371,9 @@ function FlowText:draw()
 	local focused = self.strings[self.active_string]
 
 	if self.shadow then
+		local sx, sy = DropShadow.pixels(1)
+		sx = sx * self.scale / game().TILESIZE
+		sy = sy * self.scale / game().TILESIZE
 		NodeTransform.push_node_transform(self, 1)
 		love.graphics.translate(
 			focused.W_offset + self.text_offset.x * self.font.FONTSCALE / game().TILESIZE,
@@ -378,14 +382,14 @@ function FlowText:draw()
 		if self.config.shadow_colour then
 			love.graphics.setColor(self.config.shadow_colour)
 		else
-			love.graphics.setColor(0, 0, 0, 0.25 * self.colours[1][4])
+			love.graphics.setColor(DropShadow.rgba(self.colours[1][4]))
 		end
 		for _, letter in ipairs(focused.letters) do
 			local real_pop_in = self.config.min_cycle_time == 0 and 1 or letter.pop_in
 			love.graphics.draw(
 				letter.letter,
-				0.5 * (letter.dims.x - letter.offset.x) * self.font.FONTSCALE / game().TILESIZE - self.shadow_parallax.x * self.scale / game().TILESIZE,
-				0.5 * letter.dims.y * self.font.FONTSCALE / game().TILESIZE - self.shadow_parallax.y * self.scale / game().TILESIZE,
+				0.5 * (letter.dims.x - letter.offset.x) * self.font.FONTSCALE / game().TILESIZE + sx,
+				0.5 * letter.dims.y * self.font.FONTSCALE / game().TILESIZE + sy,
 				letter.r or 0,
 				real_pop_in * self.scale * self.font.FONTSCALE / game().TILESIZE,
 				real_pop_in * self.scale * self.font.FONTSCALE / game().TILESIZE,
@@ -402,20 +406,13 @@ function FlowText:draw()
 		focused.H_offset + self.text_offset.y * self.font.FONTSCALE / game().TILESIZE)
 	if self.config.spacing then love.graphics.translate(self.config.spacing * self.font.FONTSCALE / game().TILESIZE, 0) end
 
-	-- Normalized shadow direction shared by all letters this frame.
-	self.ARGS.draw_shadow_norm = self.ARGS.draw_shadow_norm or {}
-	local shadow_norm = self.ARGS.draw_shadow_norm
-	local parallax_len = math.sqrt(self.shadow_parallax.y^2 + self.shadow_parallax.x^2)
-	shadow_norm.x = self.shadow_parallax.x / parallax_len * self.font.FONTSCALE / game().TILESIZE
-	shadow_norm.y = self.shadow_parallax.y / parallax_len * self.font.FONTSCALE / game().TILESIZE
-
 	for k, letter in ipairs(focused.letters) do
 		local real_pop_in = self.config.min_cycle_time == 0 and 1 or letter.pop_in
 		love.graphics.setColor(letter.prefix or letter.suffix or letter.colour or self.colours[k % #self.colours + 1])
 		love.graphics.draw(
 			letter.letter,
-			0.5 * (letter.dims.x - letter.offset.x) * self.font.FONTSCALE / game().TILESIZE + shadow_norm.x,
-			0.5 * (letter.dims.y - letter.offset.y) * self.font.FONTSCALE / game().TILESIZE + shadow_norm.y,
+			0.5 * (letter.dims.x - letter.offset.x) * self.font.FONTSCALE / game().TILESIZE,
+			0.5 * (letter.dims.y - letter.offset.y) * self.font.FONTSCALE / game().TILESIZE,
 			letter.r or 0,
 			real_pop_in * letter.scale * self.scale * self.font.FONTSCALE / game().TILESIZE,
 			real_pop_in * letter.scale * self.scale * self.font.FONTSCALE / game().TILESIZE,

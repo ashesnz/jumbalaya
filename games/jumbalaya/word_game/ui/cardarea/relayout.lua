@@ -36,10 +36,6 @@ local function row_bob(x)
 	return 0.03 * math.sin(0.666 * game().TIMERS.REAL + x)
 end
 
-local function apply_parallax(card)
-	card.T.x = card.T.x + card.shadow_parallax.x / 30
-end
-
 local function sort_by_left_edge(cards)
 	table.sort(cards, function(a, b) return a.T.x + a.T.w / 2 < b.T.x + b.T.w / 2 end)
 end
@@ -75,7 +71,6 @@ function M.relayout(area, face_down_in_pile)
 					+ row_bob(card.T.x)
 					+ math.abs(0.5 * (-count / 2 + k - 0.5) / count)
 					- (count > 1 and 0.2 or 0)
-				apply_parallax(card)
 			end
 		end
 		sort_by_left_edge(area.cards)
@@ -93,7 +88,6 @@ function M.relayout(area, face_down_in_pile)
 					+ row_bob(card.T.x)
 					+ math.abs(0.5 * (-count / 2 + k - 0.5) / count)
 					- (count > 1 and 0.2 or 0)
-				apply_parallax(card)
 			end
 		end
 		table.sort(area.cards, function(a, b) return a.ability.order < b.ability.order end)

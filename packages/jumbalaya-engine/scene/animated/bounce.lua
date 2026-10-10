@@ -1,61 +1,68 @@
 
 local Random = require("jumbalaya-engine.util.random")
-local shell = require("jumbalaya-engine.shell")
-local game = shell.game
+
+local PULSE_OMEGA = 21
+local PULSE_ZETA = 0.28
+local PULSE_R_OMEGA = 16
+local PULSE_R_ZETA = 0.36
+local SPEECH_OMEGA = 13
+local SPEECH_ZETA = 0.33
+local SETTLE = 0.003
+
+local function spring_step(pos, vel, dt, omega, zeta)
+	local acc = -omega * omega * pos - 2 * zeta * omega * vel
+	vel = vel + acc * dt
+	pos = pos + vel * dt
+	return pos, vel
+end
+
 return function(AnimNode)
---- Quick squash-and-stretch pulse (the classic "card bounce").
+--- One-shot squash: compress, then an underdamped spring overshoots and settles.
 function AnimNode:pulse(amount, rot_amt)
 	amount = amount or 0.4
-	local start_time = game().TIMERS.REAL
+	local twist = rot_amt or Random.pick_random({ 0.55 * amount, -0.55 * amount }) or 0
 	self.bounce = {
-		scale = 0,
-		scale_amt = amount,
+		scale = -0.62 * amount,
+		scale_vel = 11 * amount,
 		r = 0,
-		r_amt = ((rot_amt or Random.pick_random({0.6 * amount, -0.6 * amount})) or 0),
-		start_time = start_time,
-		end_time = start_time + 0.4,
+		r_vel = 12 * twist,
+		omega = PULSE_OMEGA,
+		zeta = PULSE_ZETA,
+		r_omega = PULSE_R_OMEGA,
+		r_zeta = PULSE_R_ZETA,
 	}
-	self.VT.scale = 1 - 0.5 * amount
+	self.VT.scale = (self.T.scale or 1) + self.bounce.scale
 end
 
---- Softer elastic settle used for speech bubbles (distinct from pulse).
+--- Softer spring used for speech bubbles (distinct stiffness from pulse).
 function AnimNode:speech_pop()
 	self.bounce = {
-		kind = "speech",
-		scale = -0.22,
-		scale_amt = 0.22,
+		scale = -0.2,
+		scale_vel = 5.5,
 		r = 0,
-		r_amt = 0.055,
-		start_time = game().TIMERS.REAL,
-		end_time = game().TIMERS.REAL + 0.52,
+		r_vel = 1.1,
+		omega = SPEECH_OMEGA,
+		zeta = SPEECH_ZETA,
+		r_omega = 10,
+		r_zeta = 0.4,
 	}
 end
 
---- Advances the active bounce envelope; clears it once past `end_time`.
+--- Integrates the bounce spring toward rest; clears it when settled.
 function AnimNode:advance_bounce(dt)
 	local bounce = self.bounce
 	if not bounce or bounce.handled_elsewhere then return end
+	if not dt or dt <= 0 then return end
 
-	if bounce.end_time < game().TIMERS.REAL then
+	local omega = bounce.omega or PULSE_OMEGA
+	local zeta = bounce.zeta or PULSE_ZETA
+	bounce.scale, bounce.scale_vel = spring_step(bounce.scale, bounce.scale_vel or 0, dt, omega, zeta)
+	bounce.r, bounce.r_vel = spring_step(bounce.r, bounce.r_vel or 0, dt, bounce.r_omega or PULSE_R_OMEGA, bounce.r_zeta or PULSE_R_ZETA)
+
+	local energy = math.abs(bounce.scale) + math.abs(bounce.r)
+		+ math.abs(bounce.scale_vel) + math.abs(bounce.r_vel)
+	if energy < SETTLE then
 		self.bounce = nil
-		return
-	end
-
-	if bounce.kind == "speech" then
-		local u = (game().TIMERS.REAL - bounce.start_time) / (bounce.end_time - bounce.start_time)
-		if u >= 1 then
-			self.bounce = nil
-		else
-			-- Elastic-out ring: single overshoot plus a soft second bump.
-			local elastic = (2 ^ (-9.2 * u)) * math.sin((u * 9.4 - 0.75) * (2 * math.pi) / 3.1)
-			bounce.scale = -0.04 + bounce.scale_amt * elastic
-			bounce.r = bounce.r_amt * (2 ^ (-7.4 * u)) * math.sin(u * 6.4)
-		end
-	else
-		local elapsed = game().TIMERS.REAL - bounce.start_time
-		local remaining_frac = (bounce.end_time - game().TIMERS.REAL) / (bounce.end_time - bounce.start_time)
-		bounce.scale = bounce.scale_amt * math.sin(44 * elapsed) * math.max(0, remaining_frac^2.5)
-		bounce.r = bounce.r_amt * math.sin(36 * elapsed) * math.max(0, remaining_frac^1.5)
 	end
 end
 end
