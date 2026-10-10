@@ -19,6 +19,15 @@ T.describe("boss intro display", function()
 		T.assert_equal(hud.banner_mode, "boss_prep")
 	end)
 
+	T.it("shows the stage ribbon as soon as boss_word mode is set", function()
+		mock_env.reset_game()
+		local announce = require("word_game.ui.score_banner.boss_announce")
+		announce.clear()
+		local sb = require("word_game.ui.score_banner")
+		sb.set_banner_mode("boss_word")
+		T.assert_true(announce.is_active())
+	end)
+
 	T.it("plays a single combined banner when boss_word mode begins", function()
 		mock_env.reset_game()
 		mock_env.patch_game({

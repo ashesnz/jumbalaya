@@ -28,6 +28,38 @@ function M.deal_boss_hand(letters, on_complete, opts)
 			return
 		end
 		Deck().clear_hand_and_placement()
+		if opts.instant_deal then
+			local boss_cards = {}
+			for _, letter in ipairs(letters) do
+				local card = Deck().create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR)
+				card.boss_temp = true
+				for pi = #(live_game().letter_inventory or {}), 1, -1 do
+					if live_game().letter_inventory[pi] == card then
+						table.remove(live_game().letter_inventory, pi)
+						break
+					end
+				end
+				boss_cards[#boss_cards + 1] = card
+				live_game().draw_pile:emplace(card)
+				live_game().draw_pile:remove_card(card)
+				live_game().dealt_letters:emplace(card)
+			end
+			game_access.dispatch({ type = "JUMBLE_SET_BOSS_CARDS", cards = boss_cards })
+			if live_game().pattern_row and live_game().pattern_row.apply_screen_position then
+				live_game().pattern_row:apply_screen_position()
+			end
+			live_game().dealt_letters:set_ranks()
+			live_game().dealt_letters:relayout()
+			live_game().dealt_letters:snap_VT()
+			live_game().dealt_letters:hard_set_cards()
+			if Deck().commit_pile_hosts then
+				Deck().commit_pile_hosts({ "hand", "draw", "pattern" })
+			else
+				Deck().sync_deck_count_display()
+			end
+			if on_complete then on_complete() end
+			return
+		end
 		local boss_cards = {}
 		for i, letter in ipairs(letters) do
 			local card = Deck().create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR)

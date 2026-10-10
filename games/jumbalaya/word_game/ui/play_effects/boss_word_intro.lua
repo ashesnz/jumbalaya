@@ -1,5 +1,5 @@
 --[[
-	word_game/ui/play_effects/boss_word_intro.lua — Boss-word 3-2-1 intro and hand staging.
+	word_game/ui/play_effects/boss_word_intro.lua — Boss-word intro: stage banner + 3-2-1, then reveal.
 	Inputs: word_round, facade jumble/deck, TimelineTimer, ScoreBanner, effects host.
 	Outputs: present_boss_word(wr, on_complete); countdown via word_feedback.show_boss_countdown.
 ]]
@@ -44,10 +44,6 @@ local function clear_locked_hand_layout()
 	game_access().dispatch({ type = "JUMBLE_SET_LOCKED_HAND_LAYOUT" })
 end
 
-local function has_event_manager()
-	return game().TIMELINE and game().TIMELINE.enqueue
-end
-
 local function clear_hand_clear_blockers()
 	if WORD_GAME_UI.HandClearFocus and WORD_GAME_UI.HandClearFocus.end_focus then
 		WORD_GAME_UI.HandClearFocus.end_focus()
@@ -55,6 +51,52 @@ local function clear_hand_clear_blockers()
 	if WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.reset then
 		WORD_GAME_UI.TokenReward.reset()
 	end
+end
+
+local function run_countdown(on_complete)
+	local intro = definition.BOSS_INTRO
+	local steps = intro.steps
+	if not steps or #steps == 0 then
+		if on_complete then on_complete() end
+		return
+	end
+
+	local first = steps[1]
+	word_feedback.show_boss_countdown(first.text, first.hold)
+	if play_sfx then
+		play_sfx("timpani", 0.9, 0.7)
+	end
+
+	local delay = first.hold
+	for index = 2, #steps do
+		local step = steps[index]
+		Scheduler.add{
+			mode = "delayed",
+			delay = delay,
+			blocking = false,
+			func = function()
+				word_feedback.show_boss_countdown(step.text, step.hold)
+				if play_sfx then
+					if index == #steps then
+						play_sfx("timpani", 0.95, 0.85)
+					else
+						play_sfx("card_tick", 0.9, 0.7)
+					end
+				end
+				return true
+			end,
+		}
+		delay = delay + step.hold
+	end
+	Scheduler.add{
+		mode = "delayed",
+		delay = delay + (intro.countdown_tail or 0.12),
+		blocking = false,
+		func = function()
+			if on_complete then on_complete() end
+			return true
+		end,
+	}
 end
 
 function M.present_boss_word(_wr, on_complete)
@@ -76,25 +118,23 @@ function M.present_boss_word(_wr, on_complete)
 		WORD_GAME_UI.ScoreBanner.hide_points_to_get_display()
 	end
 	if WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.set_banner_mode then
-		WORD_GAME_UI.ScoreBanner.set_banner_mode("boss_prep")
+		WORD_GAME_UI.ScoreBanner.set_banner_mode("boss_word")
 	end
 
-	local hide_done = false
+	local tt = WORD_GAME_UI.TimelineTimer
+	if tt and tt.hide_slider then
+		tt.hide_slider(0)
+	end
+
 	local deal_done = false
 	local countdown_done = false
-	local countdown_started = false
 
 	local function reveal_boss_phase()
-		local tt = WORD_GAME_UI.TimelineTimer
 		if tt and tt.arm_boss_countdown then
 			tt.arm_boss_countdown(round_config.TIMELINE_SECONDS)
 		end
 		if tt and tt.reveal_countdown_timer then
-			local reveal_dur = has_event_manager() and definition.BOSS_INTRO.timer_reveal_duration or 0
-			tt.reveal_countdown_timer(reveal_dur)
-		end
-		if WORD_GAME_UI.ScoreBanner and WORD_GAME_UI.ScoreBanner.set_banner_mode then
-			WORD_GAME_UI.ScoreBanner.set_banner_mode("boss_word")
+			tt.reveal_countdown_timer(0)
 		end
 		local revealed = jumble.reveal_boss_puzzle()
 		if not revealed then
@@ -131,61 +171,10 @@ function M.present_boss_word(_wr, on_complete)
 		reveal_boss_phase()
 	end
 
-	local function run_countdown()
-		local steps = definition.BOSS_INTRO.steps
-		local delay = 0
-		for index, step in ipairs(steps) do
-			Scheduler.add{
-				mode = "delayed",
-				delay = delay,
-				blocking = false,
-				func = function()
-					word_feedback.show_boss_countdown(step.text, step.hold)
-					if play_sfx then
-						if index == 1 or index == #steps then
-							play_sfx("timpani", index == 1 and 0.9 or 0.95, index == 1 and 0.7 or 0.85)
-						else
-							play_sfx("card_tick", 0.9, 0.7)
-						end
-					end
-					return true
-				end,
-			}
-			delay = delay + step.hold
-		end
-		Scheduler.add{
-			mode = "delayed",
-			delay = delay + 0.12,
-			blocking = false,
-			func = function()
-				countdown_done = true
-				try_reveal_boss_phase()
-				return true
-			end,
-		}
-	end
-
-	local function start_countdown_if_ready()
-		if countdown_started or not hide_done then return end
-		countdown_started = true
-		run_countdown()
-	end
-
-	local hide_dur = has_event_manager() and definition.BOSS_INTRO.hide_duration or 0
-	if WORD_GAME_UI.TimelineTimer and WORD_GAME_UI.TimelineTimer.hide_slider then
-		WORD_GAME_UI.TimelineTimer.hide_slider(hide_dur, function()
-			hide_done = true
-			start_countdown_if_ready()
-		end)
-	else
-		hide_done = true
-		start_countdown_if_ready()
-	end
-
-	local function after_boss_deal()
-		deal_done = true
+	run_countdown(function()
+		countdown_done = true
 		try_reveal_boss_phase()
-	end
+	end)
 
 	local function deal_boss_hand()
 		local wr = live_word_round()
@@ -201,8 +190,9 @@ function M.present_boss_word(_wr, on_complete)
 		deck.deal_boss_hand(letters, function()
 			definition.sync_hand_after_deal()
 			word_feedback.lock_hand_layout()
-			after_boss_deal()
-		end, { fast = true })
+			deal_done = true
+			try_reveal_boss_phase()
+		end, { fast = true, instant_deal = true })
 	end
 
 	if not jumble.prepare_boss_word() then
