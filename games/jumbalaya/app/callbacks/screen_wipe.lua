@@ -36,13 +36,13 @@ Funcs.register("wipe_in",  function(message, no_card, timefac, alt_colour)
     white = {1, 1, 1, 1}
   }
   if not no_card then
-    local face, center = nil, nil
+    local face = nil
     local deck = rawget(_G, "WORD_GAME") and WORD_GAME.Deck
     if deck and deck.random_wipe_card then
-      face, center = deck.random_wipe_card()
+      face = deck.random_wipe_card()
     end
-    if face and center then
-      game().screenwipecard = Card(0, 0, game().CARD_W, game().CARD_H, face, center)
+    if face then
+      game().screenwipecard = LetterTile(0, 0, game().CARD_W, game().CARD_H, face, nil)
       game().screenwipecard.sprite_facing = 'back'
       game().screenwipecard.facing = 'back'
       game().screenwipecard.states.hover.can = false

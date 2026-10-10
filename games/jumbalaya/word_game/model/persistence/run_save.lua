@@ -17,13 +17,13 @@ local M = {}
 
 local function materialize_saved_card(cdata)
 	if not cdata then return nil end
-	if Card and cdata.state and getmetatable(cdata) ~= Card then
+	if LetterTile and cdata.state and getmetatable(cdata) ~= LetterTile then
 		local shell = live_game()
-		local card = Card(
+		local card = LetterTile(
 			0, 0,
 			shell.CARD_W, shell.CARD_H,
 			shell.LETTERS.faces.empty,
-			shell.LETTERS.centers.letter_base
+			nil
 		)
 		card:load(cdata)
 		return card

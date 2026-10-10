@@ -7,6 +7,7 @@ local perk = facade.perks_registry()
 
 local localize = require("word_game.ui.util.localize").localize
 function get_type_colour(_c, card)
+	_c = _c or { set = "Default" }
 	if _c.unlocked == false then
 		return game().C.BLACK
 	end
@@ -17,6 +18,7 @@ function get_type_colour(_c, card)
 end
 
 function generate_card_ui(_c, full_UI_table, specific_vars, card_type, badges, hide_desc, main_start, main_end)
+	_c = _c or { set = "Default" }
 	local first_pass = nil
 	if not full_UI_table then
 		first_pass = true

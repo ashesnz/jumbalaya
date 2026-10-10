@@ -1,14 +1,16 @@
 --[[
-	word_game/model/cards/init.lua - Cards domain package facade (Card class, Deck module)
+	word_game/model/cards/init.lua - Cards domain package facade (LetterTile class, Deck module)
 
 	Core: none
 	Store: none
 	Presentation: none
 ]]
--- Jumbalaya card-domain package: definitions and deck behavior.
+
+local LetterTile = require("word_game.model.cards.letter_tile")
 
 local M = {
-	Card = require("word_game.model.cards.card"),
+	LetterTile = LetterTile,
+	Card = LetterTile,
 	Deck = require("word_game.model.cards.deck"),
 }
 

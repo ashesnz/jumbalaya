@@ -24,10 +24,44 @@ function M.new(id, letter, color_key, pile_id, slot_index, overrides)
 	return card
 end
 
+function M.letter_index(letter)
+	if type(letter) ~= "string" or #letter < 1 then return 0 end
+	local ch = letter:sub(1, 1):upper()
+	return string.byte(ch) - string.byte("A") + 1
+end
+
+function M.color_tiebreak(color)
+	if color == "red" then return 0.01 end
+	if color == "black" then return 0.02 end
+	if color == "modified" then return 0.03 end
+	if color == "gold" then return 0.04 end
+	return 0
+end
+
+--- Ability table for a jumble letter tile (no companion/perk/center fields).
+function M.ability_from_face(face, previous)
+	face = face or {}
+	previous = previous or {}
+	local letter = face.letter or previous.letter or "A"
+	local color = face.color or previous.letter_color or "black"
+	return {
+		letter = letter,
+		letter_color = color,
+		set = "Default",
+		bonus = previous.bonus or 0,
+		perma_bonus = previous.perma_bonus or 0,
+		modified = previous.modified,
+		extra = previous.extra,
+	}
+end
+
 function M.tag_ability(card, letter, color)
 	card.ability = card.ability or {}
 	card.ability.letter = letter
 	card.ability.letter_color = color
+	if not card.ability.set then
+		card.ability.set = "Default"
+	end
 end
 
 function M.color_from_card(card, opts)

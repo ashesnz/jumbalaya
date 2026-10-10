@@ -17,13 +17,14 @@ T.describe("tier 4 refactor", function()
 		T.assert_equal(#violations, 0, table.concat(violations, ", "))
 	end)
 
-	T.it("Card model keeps presentation mixins out of card.lua", function()
+	T.it("LetterTile keeps presentation mixins out of letter_tile.lua", function()
 		local paths = require("bootstrap_paths").resolve()
-		local card_path = paths.game_root .. "/word_game/model/cards/card.lua"
-		local content = read_file(card_path)
+		local tile_path = paths.game_root .. "/word_game/model/cards/letter_tile.lua"
+		local content = read_file(tile_path)
+		T.assert_nil(content:find("function%s+LetterTile:update_alert"), "update_alert belongs in ui/cards/alerts.lua")
 		T.assert_nil(content:find("function%s+Card:update_alert"), "update_alert belongs in ui/cards/alerts.lua")
 		T.assert_nil(content:find("function%s+Card:align"), "align belongs in ui/cards/align.lua")
-		T.assert_nil(content:find("UIViewHost"), "card model must not import UIViewHost")
+		T.assert_nil(content:find("UIViewHost"), "tile model must not import UIViewHost")
 	end)
 
 	T.it("discard_bin init is a thin facade", function()

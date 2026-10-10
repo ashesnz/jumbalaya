@@ -25,21 +25,16 @@ function M.ensure(item, card_w, card_h)
 	end
 	-- Never embed the live deck card: it keeps draw-pile/world transforms and
 	-- renders outside the marketplace cell (often the right-hand offer column).
-	if not Card then return nil end
+	if not LetterTile then return nil end
 	local g = game()
 	local letter = item.letter
 	local color = item.color
-	local center = deck.letter_center()
-	if not center or not center.config then
-		return nil
-	end
 	local front = deck.front(letter, color)
-	local card = Card(
+	local card = LetterTile(
 		0, 0,
 		card_w or g.CARD_W or 1,
 		card_h or g.CARD_H or 1.4,
 		front,
-		center,
 		{}
 	)
 	deck.tag_card(card, letter, color)

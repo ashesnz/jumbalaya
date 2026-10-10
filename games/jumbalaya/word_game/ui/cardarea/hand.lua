@@ -16,6 +16,17 @@ end
 function M.relayout(self)
 	if self.config.type ~= 'hand' then return end
 
+	if not table_board() then
+		for _, card in ipairs(self.cards) do
+			if not card.states.drag.is then
+				card.T.x = self.T.x + 0.5 * (self.T.w - card.T.w)
+				card.T.y = self.T.y + 0.5 * (self.T.h - card.T.h)
+				card.T.r = 0
+			end
+		end
+		return
+	end
+
 	if table_board() then
 		local n = #self.cards
 		local spacing = game().HAND_CARD_SPACING or 0.78

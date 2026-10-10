@@ -27,7 +27,6 @@ function M.discover_card(card)
 	}
 end
 
--- Card model loads before WORD_GAME; keep global for card_ability.lua.
 discover_card = M.discover_card
 
 function M.queue_progress_write()

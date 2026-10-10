@@ -59,7 +59,7 @@ function PlacementTable:create_area(w, h)
 		0, 0, w, h,
 		{
 			card_limit = self.ctx:card_limit(),
-			type = 'placement',
+			type = 'pattern',
 			selection_limit = 1,
 		}
 	)

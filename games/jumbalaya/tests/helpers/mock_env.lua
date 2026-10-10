@@ -272,18 +272,19 @@ function M.setup()
 	_G.play_sfx = _G.play_sfx or function() end
 	_G.spawn_attention = _G.spawn_attention or function() end
 	_G.attention = _G.attention or function() end
-	_G.Card = _G.Card or function(x, y, w, h, front, center, _params)
+	_G.LetterTile = _G.LetterTile or function(x, y, w, h, front, _params)
 		return {
 			T = { x = x or 0, y = y or 0, w = w or 1, h = h or 1.4 },
 			VT = { x = x or 0, y = y or 0, w = w or 1, h = h or 1.4 },
 			ability = {},
-			config = { center = center, card = front },
+			config = { card = front },
 			states = { hover = {}, click = {}, collide = {}, drag = {} },
 			set_sprites = function() end,
 			pulse = function() end,
 			remove = function() end,
 		}
 	end
+	_G.Card = _G.Card or _G.LetterTile
 
 	package.preload["dictionary.words_set"] = package.preload["dictionary.words_set"] or function()
 		return {

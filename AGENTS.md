@@ -49,7 +49,7 @@ Canonical game tree: `games/jumbalaya/` (`app/`, `word_game/`, …). Shared pack
 - Config = data; model glue = wiring; ui = presentation — keep separated
 - Bootstrap load order in `app/bootstrap.lua` only; `Game()` in `runtime_boot.lua` (no global `G` singleton)
 - Model requests layout via `Layout.request_refresh()` / `Presentation.emit` — not UI modules or `Funcs.dispatch`. Presentation contract: `types/presentation.lua`. Handlers live in `word_game/ui/presentation/install.lua`; store-backed views subscribe for render revision only.
-- **Pile ownership:** `store.piles` is authoritative for hand/draw/pattern/bonus/discard layout (`word_game/model/piles.lua`, `MOVE_CARD` reducer). `G.letter_inventory` tracks run deck Card instances. CardPile hosts are presentation-only — sync via `piles.sync_hosts_to_store` / `piles.move_card` after host mutations (`test_pile_boundaries.lua`).
+- **Pile ownership:** `store.piles` is authoritative for hand/draw/pattern/bonus/discard layout (`word_game/model/piles.lua`, `MOVE_CARD` reducer). `G.letter_inventory` tracks run deck LetterTile instances. CardPile hosts are presentation-only — sync via `piles.sync_hosts_to_store` / `piles.move_card` after host mutations (`test_pile_boundaries.lua`).
 
 ## Active vs legacy
 
@@ -142,7 +142,7 @@ Tests that need rules only call `play_jumble_word`; tests that need full FX call
 - Files/dirs/locals: `snake_case`; classes/globals: `PascalCase`
 - **Devtools:** Lua modules under `games/jumbalaya/devtools/` use `snake_case` (`debug_button.lua`, `sections/stage.lua`). Locale files use BCP47 tags (`localization/en-us.lua`). Python one-off scripts belong in `_tools/`, not `devtools/`.
 - UI binds panel `func` strings — move implementations, not registration names when refactoring (`Funcs.register` keeps the name stable)
-- Class chain: `Object → Node → EaseNode/AnimNode → Sprite, Panel, Card, CardArea`
+- Class chain: `Object → Node → EaseNode/AnimNode → Sprite, Panel, LetterTile, CardPile` (`Card` is a LetterTile alias)
 - `Card` model class loads in `app/bootstrap/game_boot.lua`; presentation mixins install via `word_game/ui/cards/bind.lua` (tests: `mock_env.ensure_card_class()`)
 
 ## Dev flags

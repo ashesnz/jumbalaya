@@ -486,7 +486,7 @@ engine_boot → runtime_boot (Game(), store, facade) → store_boot → presenta
 The inheritance order is contractual:
 
 ```text
-Object → Node → EaseNode/AnimNode → Sprite, Card, CardArea, Panel
+Object → Node → EaseNode/AnimNode → Sprite, LetterTile, CardPile, Panel
 ```
 
 Additional rules:

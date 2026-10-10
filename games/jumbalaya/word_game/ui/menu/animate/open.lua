@@ -62,7 +62,7 @@ function M.open_main_menu(self, change_context)
 	end}
 
 	local scale = 1.1 * (game().debug_splash_size_toggle and 0.8 or 1)
-	self.title_top = CardPile(0, 0, game().CARD_W, game().CARD_H, {card_limit = 1, type = "title"})
+	self.title_top = CardPile(0, 0, game().CARD_W, game().CARD_H, {card_limit = 1, type = "hand"})
 	local logo_atlas = game().TEXTURE_ATLASES and game().TEXTURE_ATLASES.jumbalaya_base
 	local logo_ratio = logo_atlas and logo_atlas.py and logo_atlas.px
 		and logo_atlas.py / logo_atlas.px or (267 / 933)

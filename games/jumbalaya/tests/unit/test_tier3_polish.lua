@@ -28,12 +28,14 @@ T.describe("tier 3 polish", function()
 		T.assert_equal(#violations, 0, table.concat(violations, ", "))
 	end)
 
-	T.it("Card model keeps draw in ui/cards mixins", function()
+	T.it("LetterTile keeps draw in ui/cards mixins", function()
 		local paths = require("bootstrap_paths").resolve()
-		local card_path = paths.game_root .. "/word_game/model/cards/card.lua"
-		local content = read_file(card_path)
+		local tile_path = paths.game_root .. "/word_game/model/cards/letter_tile.lua"
+		local content = read_file(tile_path)
+		T.assert_nil(content:find("function%s+LetterTile:draw"), "LetterTile:draw belongs in word_game/ui/cards/")
 		T.assert_nil(content:find("function%s+Card:draw"), "Card:draw belongs in word_game/ui/cards/")
-		T.assert_nil(content:find("require%([\"']word_game%.ui"), "card model must not import UI")
+		T.assert_nil(content:find("function%s+%w+:apply_center"), "LetterTile must not define apply_center")
+		T.assert_nil(content:find("require%([\"']word_game%.ui"), "tile model must not import UI")
 	end)
 
 	T.it("flow_text envelope math lives in flow_text_envelopes module", function()

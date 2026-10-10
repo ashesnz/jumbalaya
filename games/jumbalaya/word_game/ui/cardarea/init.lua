@@ -1,8 +1,8 @@
 --[[
 	word_game/ui/cardarea/init.lua - `CardPile`: a region that owns and lays out `Card` instances.
 
-	Per-type behaviour lives in TYPE_HANDLERS modules (hand, deck, discard, placement,
-	title). init.lua dispatches draw/update/selection/lifecycle through the active
+	Per-type behaviour lives in TYPE_HANDLERS (hand, draw, pattern, bonus, discard).
+	`deck`/`placement` are load aliases. init.lua dispatches through the active
 	handler only — do not add new `config.type` branches here.
 ]]
 
@@ -13,7 +13,6 @@ local hand = require("word_game.ui.cardarea.hand")
 local deck = require("word_game.ui.cardarea.deck")
 local discard = require("word_game.ui.cardarea.discard")
 local placement = require("word_game.ui.cardarea.placement")
-local title = require("word_game.ui.cardarea.title")
 local selection = require("word_game.ui.cardarea.selection")
 local relayout_mod = require("word_game.ui.cardarea.relayout")
 local chrome = require("word_game.ui.cardarea.chrome")
@@ -25,11 +24,12 @@ local AnimNode = require("jumbalaya-engine.scene.animated.init")
 
 local TYPE_HANDLERS = {
 	hand = hand,
+	draw = deck,
 	deck = deck,
 	discard = discard,
+	pattern = placement,
 	placement = placement,
-	title = title,
-	perk = title,
+	bonus = discard,
 }
 
 --- @class (partial) CardPile : EaseNode
@@ -79,8 +79,8 @@ end
 --Kind methods
 
 --- @param config table|nil see field comments below; notable keys:
----   `type` (string, default 'deck') - behaviour selector, see file header;
----   `selection_limit` (number, default 5) - max cards selectable at once;
+---   `type` (string, default 'draw') - hand / draw / pattern / bonus / discard;
+---   `selection_limit` (number, default 1) - max tiles selectable at once;
 ---   `card_limit` (number, default 52) - max cards this area can hold;
 ---   `card_w` (number, default `game().CARD_W`) - card width override;
 ---   `sort` (string, default 'desc') - default `CardPile:sort` method.
@@ -98,11 +98,11 @@ function CardPile:construct(X, Y, W, H, config)
 	self.cards = {}
 	self.children = {}
 	self.selected = {}
-	self.config.selected_limit = config.selection_limit or 5
+	self.config.selected_limit = config.selection_limit or 1
 	self.config.card_limit = config.card_limit or 52
 	self.config.temp_limit = self.config.card_limit
 	self.config.card_count = 0
-	self.config.type = config.type or 'deck'
+	self.config.type = config.type or 'draw'
 	self.config.sort = config.sort or 'desc'
 	self.config.lr_padding = config.lr_padding or 0.1
 	self.shuffle_amt = 0

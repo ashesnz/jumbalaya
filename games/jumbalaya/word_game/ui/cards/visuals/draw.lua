@@ -164,7 +164,7 @@ end
 
 function Card:draw_back()
 	local overlay = game().C.WHITE
-	if self.area and self.area.config.type == "deck" then
+	if self.area and (self.area.config.type == "draw" or self.area.config.type == "deck") then
 		overlay = {0.5 + ((#self.area.cards - self.slot)%7)/50,
 			0.5 + ((#self.area.cards - self.slot)%7)/50,
 			0.5 + ((#self.area.cards - self.slot)%7)/50, 1}

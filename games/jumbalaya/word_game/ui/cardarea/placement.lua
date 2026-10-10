@@ -34,21 +34,21 @@ function M.on_remove(self)
 end
 
 function M.relayout(self)
-	if self.config.type ~= 'placement' then return end
+	if self.config.type ~= "pattern" and self.config.type ~= "placement" then return end
 	if game().pattern_row and game().pattern_row.area == self then
 		game().pattern_row:relayout()
 	end
 end
 
 function M.draw_shadows(self)
-	if self.config.type ~= 'placement' then return end
+	if self.config.type ~= "pattern" and self.config.type ~= "placement" then return end
 	if game().pattern_row and game().pattern_row.area == self then
 		game().pattern_row:draw_shadows()
 	end
 end
 
 function M.draw_layer(self, v, draw_card_layer)
-	if self.config.type ~= 'placement' then return end
+	if self.config.type ~= "pattern" and self.config.type ~= "placement" then return end
 	for i = 1, #self.cards do
 		if self.cards[i] ~= game().INPUT.focused.target then
 			if not self.cards[i].selected then

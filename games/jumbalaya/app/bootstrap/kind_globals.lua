@@ -11,7 +11,8 @@ function M.install_game()
 end
 
 function M.install_card_types()
-	_G.Card = require("word_game.model.cards.card")
+	_G.LetterTile = require("word_game.model.cards.letter_tile")
+	_G.Card = _G.LetterTile
 	require("word_game.ui.cards.bind").install()
 	_G.CardPile = require("word_game.ui.cardarea.init")
 end

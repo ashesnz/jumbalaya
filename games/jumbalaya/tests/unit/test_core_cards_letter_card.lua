@@ -7,6 +7,22 @@ local T = require("tests.framework")
 local LetterCard = require("jumbalaya_core.cards.letter_card")
 
 T.describe("jumbalaya_core cards letter card", function()
+	T.it("builds letter ability without center/companion fields", function()
+		local ability = LetterCard.ability_from_face({ letter = "C", color = "red" }, { bonus = 2 })
+		T.assert_equal(ability.letter, "C")
+		T.assert_equal(ability.letter_color, "red")
+		T.assert_equal(ability.set, "Default")
+		T.assert_equal(ability.bonus, 2)
+		T.assert_nil(ability.effect)
+		T.assert_nil(ability.order)
+	end)
+
+	T.it("maps letters to A=1 sort indexes", function()
+		T.assert_equal(LetterCard.letter_index("A"), 1)
+		T.assert_equal(LetterCard.letter_index("Z"), 26)
+		T.assert_equal(LetterCard.color_tiebreak("gold"), 0.04)
+	end)
+
 	T.it("tags ability tables on plain card data", function()
 		local card = {}
 		LetterCard.tag_ability(card, "E", "red")

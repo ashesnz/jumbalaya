@@ -19,7 +19,8 @@ local function face_down_in_pile(card)
 end
 
 function M.emplace_at_front(self, location)
-	return location == "front" or self.config.type == "deck"
+	local t = self.config.type
+	return location == "front" or t == "draw" or t == "deck"
 end
 
 function M.set_card_ranks(self, k, card)
@@ -30,7 +31,7 @@ function M.set_card_ranks(self, k, card)
 end
 
 function M.relayout(self)
-	if self.config.type ~= 'deck' then return end
+	if self.config.type ~= "draw" and self.config.type ~= "deck" then return end
 	for i = #self.cards, 1, -1 do
 		local owned = self.cards[i]
 		if owned.area and owned.area ~= self then
@@ -68,7 +69,7 @@ local function store_renders_draw()
 end
 
 function M.draw_layer(self, v, draw_card_layer)
-	if self.config.type ~= 'deck' then return end
+	if self.config.type ~= "draw" and self.config.type ~= "deck" then return end
 	if self == game().draw_pile and store_renders_draw() then return end
 	if self == game().draw_pile and WORD_GAME_UI.TableDeck
 		and WORD_GAME_UI.TableDeck.uses_table_draw() then

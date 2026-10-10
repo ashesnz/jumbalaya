@@ -204,8 +204,8 @@ function Card:hard_set_T(X, Y, W, H)
 		local h = (H or self.T.h)
 		EaseNode.hard_set_T(self,x, y, w, h)
 		if self.children.front then self.children.front:hard_set_T(x, y, w, h) end
-		self.children.back:hard_set_T(x, y, w, h)
-		self.children.center:hard_set_T(x, y, w, h)
+		if self.children.back then self.children.back:hard_set_T(x, y, w, h) end
+		if self.children.center then self.children.center:hard_set_T(x, y, w, h) end
 end
 
 function Card:move(dt)

@@ -70,7 +70,7 @@ end
 local function position_for(card)
 		local position = {align = 'bm', y = 0.15 * game().CARD_H}
 		if card.area == game().dealt_letters
-				or (card.area and card.area.config.type == 'placement') or card.is_mascot then
+				or (card.area and (card.area.config.type == "pattern" or card.area.config.type == "placement")) or card.is_mascot then
 				position.y = -0.05 * game().CARD_H
 				position.align = 'tm'
 		end

@@ -38,7 +38,7 @@ function M.emplace(self, card, location, stay_flipped, type_handler)
 		if self == game().dealt_letters and Deck.reveal_in_hand then
 			Deck.reveal_in_hand(card)
 		end
-	elseif card.facing == 'back' and self.config.type ~= 'discard' and self.config.type ~= 'deck' and not stay_flipped then
+	elseif card.facing == 'back' and self.config.type ~= 'discard' and self.config.type ~= 'draw' and self.config.type ~= 'deck' and not stay_flipped then
 		card:flip()
 	end
 
@@ -151,7 +151,7 @@ function M.load(self, cardAreaTable)
 	self.config = cardAreaTable.config
 
 	for i = 1, #cardAreaTable.cards do
-		local card = Card(0, 0, game().CARD_W, game().CARD_H, game().LETTERS.faces.empty, game().LETTERS.centers.letter_base, nil)
+		local card = LetterTile(0, 0, game().CARD_W, game().CARD_H, game().LETTERS.faces.empty, nil)
 		card:load(cardAreaTable.cards[i])
 		self.cards[#self.cards + 1] = card
 		if card.selected then

@@ -192,7 +192,7 @@ function Game:start_run(args)
     self.draw_pile = CardPile(
         0, 0,
         CAI.deck_W,CAI.deck_H, 
-        {card_limit = 12, type = 'deck'})
+        {card_limit = 12, type = 'draw'})
     self.dealt_letters = CardPile(
         0, 0,
         CAI.hand_W,CAI.hand_H,

@@ -32,7 +32,7 @@ local function is_letter_card(card)
 	if set ~= "Default" and set ~= "Enhanced" then return false end
 	local area = card.area
 	if not area then return false end
-	return area == game().dealt_letters or (area.config and area.config.type == "placement")
+	return area == game().dealt_letters or (area.config and (area.config.type == "pattern" or area.config.type == "placement"))
 end
 
 local function ease_inout(t)

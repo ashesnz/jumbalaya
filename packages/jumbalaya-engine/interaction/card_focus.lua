@@ -18,7 +18,7 @@ function M.is_table_card(node)
 	local area = node.area
 	if not area or not area.config then return false end
 	local t = area.config.type
-	return t == 'hand' or t == 'deck' or t == 'placement'
+	return t == 'hand' or t == 'draw' or t == 'deck' or t == 'pattern' or t == 'placement' or t == 'bonus'
 end
 
 function M.bonus_stack_contains(node)

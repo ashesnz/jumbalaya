@@ -21,47 +21,24 @@ end
 function Card:build_unlock_table(hidden)
 		local loc_vars = {no_name = true, not_hidden = not hidden}
 
-		return generate_card_ui(self.config.center, nil, loc_vars, 'Locked')
+		return generate_card_ui(nil, nil, loc_vars, 'Locked')
 end
 
---- Builds the full ability-description tooltip content for this card,
---- choosing the right "card_type" (Locked/Undiscovered/Default/Enhanced/
---- debuffed/etc.) and localization variables based on current state.
+--- Letter tooltip: points and modifier bonus only (no discovery/lock/companion).
 --- @return table ui_definition passed to `generate_card_ui`
 function Card:build_card_tooltip()
-		local card_type, hide_desc = self.ability.set or "None", nil
 		local loc_vars = nil
-		local main_start, main_end = nil,nil
-		
-		if self.config.center.unlocked ~= false and
-		(self.ability.set == 'Companion' or self.ability.set == 'Finish' or self.ability.set == 'Perk') and
-		not self.config.center.discovered then
-				card_type = 'Undiscovered'
-		end
-		if self.config.center.unlocked == false then
-				card_type = "Locked"
-		elseif card_type == 'Undiscovered' then
-				hide_desc = true
-		elseif self.debuff then
-				loc_vars = { no_name = self.ability.set == 'Default' or self.ability.set == 'Enhanced', debuffed = true, has_letter_face = not not self.base.colour, value = self.base.value, color_name = (self.base.color == 'red') and 'Red' or 'Black', colour = self.base.colour }
-		elseif card_type == 'Default' or card_type == 'Enhanced' then
+		if self.debuff then
+				loc_vars = { no_name = true, debuffed = true, has_letter_face = not not self.base.colour, value = self.base.value, color_name = (self.base.color == 'red') and 'Red' or 'Black', colour = self.base.colour }
+		else
 				local points = self.base.letter_index
 				loc_vars = { no_name = true, has_letter_face = not not self.base.colour, value = self.base.value, color_name = (self.base.color == 'red') and 'Red' or 'Black', colour = self.base.colour,
 										letter_points = points and points > 0 and points or nil,
 										letter_bonus = (self.ability.bonus + (self.ability.perma_bonus or 0)) > 0 and (self.ability.bonus + (self.ability.perma_bonus or 0)) or nil,
 								}
-		elseif self.ability.set == 'Companion' then
-				-- Shop/collection companions were removed from game().LETTERS.centers.
-		end
-		local badges = {}
-		if (card_type ~= 'Locked' and card_type ~= 'Undiscovered' and card_type ~= 'Default') or self.debuff then
-				badges.card_type = card_type
-		end
-		if self.ability.set == 'Companion' then
-				badges.force_rarity = true
 		end
 
-		return generate_card_ui(self.config.center, nil, loc_vars, card_type, badges, hide_desc, main_start, main_end)
+		return generate_card_ui({ set = "Default" }, nil, loc_vars, "Default", {}, nil, nil, nil)
 end
 
 -- ============ Stat getters ============
@@ -129,9 +106,9 @@ end
 --- First hover on an undiscovered card clears its "new item" badge and
 --- queues a progress write so the dismissal persists.
 function Card:mark_alert_seen()
-		if self.children.alert and not self.config.center.alerted then
-				self.config.center.alerted = true
-				game():queue_progress_write()
+		if self.children.alert then
+			self.children.alert:remove()
+			self.children.alert = nil
 		end
 end
 

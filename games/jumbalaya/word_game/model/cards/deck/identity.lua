@@ -70,7 +70,7 @@ end
 			end
 		end
 		if front and front.pos and card.set_sprites then
-			card:set_sprites(card.config and card.config.center, front)
+			card:set_sprites(front)
 		end
 	end
 
@@ -172,11 +172,10 @@ end
 		local id = shell.next_letter_card_id()
 		local deck_x = (live_game().draw_pile and live_game().draw_pile.T and live_game().draw_pile.T.x) or 0
 		local deck_y = (live_game().draw_pile and live_game().draw_pile.T and live_game().draw_pile.T.y) or 0
-		local card = Card(
+		local card = LetterTile(
 			deck_x, deck_y, live_game().CARD_W or 1, live_game().CARD_H or 1.4,
 			front,
-			Deck().letter_center(),
-			{ letter_card_id = id }
+			{ letter_card_id = id, pile_id = "draw" }
 		)
 		Deck().tag_card(card, letter, color)
 		card.id = id

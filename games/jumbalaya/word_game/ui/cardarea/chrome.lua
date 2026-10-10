@@ -9,16 +9,17 @@ local M = {}
 local INVISIBLE_AREA_TYPES = {
 	discard = 1,
 	hand = 1,
-	perk = 1,
-	title = 1,
+	pattern = 1,
 	placement = 1,
+	bonus = 1,
 }
 
 function M.skip_chrome(area)
 	if INVISIBLE_AREA_TYPES[area.config.type] then
 		return true
 	end
-	return area.config.type == 'deck' and area ~= game().draw_pile
+	local t = area.config.type
+	return (t == "draw" or t == "deck") and area ~= game().draw_pile
 end
 
 function M.ensure_area_panel(area)
