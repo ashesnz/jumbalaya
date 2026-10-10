@@ -26,7 +26,7 @@ Phases 0–13 are **complete** (store, engine package, retained UI, `Funcs` regi
 - No new deep `word_game.model.*` / `word_game.ui.*` requires across `app/` (bootstrap wiring exempt), `devtools/`, or `word_game/ui/` (grandfathered allowlist) — enforced by `tests/unit/test_facade_boundaries.lua`.
 - New features ship via `WORD_GAME` / `WORD_GAME_UI` facade methods; model code uses `Presentation.emit`, not `Funcs.dispatch`.
 - Store authority lives on `WORD_GAME.store()` / `game_access` via `word_game/model/store_ops.lua`.
-- **Engine originality:** do not copy structure, names, or control flow from `BalatroSource/` into `jumbalaya-engine`. Scene motion is Spatial (`set_rect`, `follow`, `bind_to`) — see [engine.md](engine.md). `BalatroSource/` is gitignored; use it only to check accidental regression.
+- **Engine scene API:** Spatial only (`set_rect`, `follow`, `bind_to`) — see [engine.md](engine.md) and remaining work in [engine-lineage.md](engine-lineage.md).
 
 ### Store immutability (POC)
 

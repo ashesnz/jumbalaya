@@ -248,6 +248,16 @@ T.describe("table board boot", function()
 		local game = shell.game()
 		T.assert_true(game.hand_action_bar and game.hand_action_bar.states.visible)
 		T.assert_true(game.table_shuffle_bar and game.table_shuffle_bar.states.visible)
+		local play_bar = game.hand_action_bar
+		T.assert_not_nil(play_bar._inner)
+		T.assert_nil(rawget(play_bar, "attach"), "follow state must not live on the wrapper")
+		play_bar:set_alignment({
+			major = game.ROOM_ATTACH,
+			type = "cm",
+			offset = { x = 1.5, y = -0.25 },
+		})
+		T.assert_equal(play_bar._inner.attach.host, game.ROOM_ATTACH)
+		T.assert_equal(play_bar._inner.alignment.offset.x, 1.5)
 	end)
 
 	T.it("table_board_prime presentation creates hand action bars", function()

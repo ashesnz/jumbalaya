@@ -157,6 +157,7 @@ function M.place_bar(bar, x, y, size)
 		bar:set_alignment({
 			major = game().ROOM_ATTACH,
 			type = "cm",
+			bond = "Strong",
 			offset = offset,
 		})
 	end

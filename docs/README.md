@@ -10,7 +10,8 @@ The game pivoted from an open Scrabble-like placement loop to a **pattern jumble
 |----------|----------|
 | [Gameplay](gameplay.md) | Jumble puzzles, scoring, timeline, tokens, perks, controls, match structure |
 | [Code organization](code-organization.md) | Package boundaries, jumble module map, legacy vs active code |
-| [Engine](engine.md) | Scene graph, Spatial motion (`follow` / `bind_to`), originality freeze |
+| [Engine](engine.md) | Scene graph, Spatial motion (`follow` / `bind_to`) |
+| [Engine lineage](engine-lineage.md) | Remaining scene/API rewrite order |
 | [Testing](testing.md) | Unit test suite structure, test runner, adding tests (`love tests`) |
 
 ## Quick summary

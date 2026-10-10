@@ -2,8 +2,17 @@ return function(AnimNode)
 	function AnimNode:set_alignment(args)
 		args = args or {}
 		if args.major then
-			local lock = args.bond == "Strong"
-			self:follow(args.major, args.offset, { lock_drawn = lock })
+			local lock
+			if args.bond ~= nil then
+				lock = args.bond == "Strong"
+			elseif self.attach and self.attach.lock_drawn ~= nil then
+				lock = self.attach.lock_drawn and true or false
+			else
+				lock = true
+			end
+			-- Alignment offset is applied in apply_alignment, not as the follow
+			-- weld offset (that would fight type "cm" every tick).
+			self:follow(args.major, nil, { lock_drawn = lock })
 		end
 		self.alignment.type = args.type or self.alignment.type
 		if args.offset and (type(args.offset) == "table" and not (args.offset.y and args.offset.x)) or type(args.offset) ~= "table" then

@@ -10,27 +10,38 @@ local TableControlsView = {}
 local Panel = require("jumbalaya-engine.panels.api")
 TableControlsView.__index = TableControlsView
 
-local function delegate_index(view, key)
-	local own = TableControlsView[key]
-	if own ~= nil then return own end
-	local inner = view._inner
-	if inner then return inner[key] end
-	return nil
-end
-
 local function wrap_bar(inner)
-	local view = setmetatable({
-		_inner = inner,
-	}, TableControlsView)
-	setmetatable(view, { __index = function(t, k) return delegate_index(t, k) end })
-	view.T = inner.T
-	view.VT = inner.VT
-	view.root_node = inner.root_node
-	view.config = inner.config
-	view.states = inner.states
-	view.REMOVED = inner.REMOVED
-	view.FRAME = inner.FRAME
-	return view
+	-- Colon calls on the wrapper must run Spatial methods with the inner
+	-- panel as `self`. Otherwise follow/alignment land on the proxy while
+	-- the panel in TRANSFORMS still ticks toward ROOM_ATTACH center.
+	local view = { _inner = inner }
+	return setmetatable(view, {
+		__index = function(t, k)
+			local own = TableControlsView[k]
+			if own ~= nil then return own end
+			local host = rawget(t, "_inner")
+			if not host then return nil end
+			local value = host[k]
+			if type(value) == "function" then
+				return function(_, ...)
+					return value(host, ...)
+				end
+			end
+			return value
+		end,
+		__newindex = function(t, k, value)
+			if k == "_inner" then
+				rawset(t, k, value)
+				return
+			end
+			local host = rawget(t, "_inner")
+			if host then
+				host[k] = value
+			else
+				rawset(t, k, value)
+			end
+		end,
+	})
 end
 
 function TableControlsView.create_bar(button_def, size, config)

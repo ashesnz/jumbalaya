@@ -38,7 +38,7 @@ instead to avoid shadowing (see `word_game/ui/table/board.lua`).
 
 ## Scene motion
 
-Spatial (`AnimNode`) ticks each frame: **bind** (copy host drawn rect), **follow** (parent + offset), or **independent** (spring `drawn` toward `target`). Public API: `set_rect`, `follow`, `bind_to`. See `docs/engine.md`. Do not reintroduce `set_role` / Major-Minor-Glued.
+Spatial (`AnimNode`) ticks each frame: **bind** (copy host drawn rect), **follow** (parent + offset), or **independent** (spring `drawn` toward `target`). Public API: `set_rect`, `follow`, `bind_to`. See `docs/engine.md`. Remaining follow-ups: `docs/engine-lineage.md`.
 
 ## Kind graph globals
 

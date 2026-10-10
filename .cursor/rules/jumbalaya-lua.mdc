@@ -33,7 +33,7 @@ end
 
 Chain: `Kind → SceneNode (Node) → Spatial (AnimNode / EaseNode) → Sprite, Panel, LetterTile, CardPile`
 
-Spatial motion: `set_rect`, `follow(parent, offset)`, `bind_to(host)`. Do not add `set_role` / `role_type` / `xy_bond`. See `docs/engine.md`.
+Spatial motion: `set_rect`, `follow(parent, offset)`, `bind_to(host)`. See `docs/engine.md` and remaining work in `docs/engine-lineage.md`.
 
 `letter_tile.lua` mixes in presentation via `word_game/ui/cards/bind.lua`.
 

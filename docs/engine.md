@@ -1,13 +1,14 @@
 # Jumbalaya engine — scene and motion
 
-`packages/jumbalaya-engine/` is Jumbalaya’s Love2D engine. It is **not** a Balatro port. Scene motion uses two attachments and a spring integrator we own.
+`packages/jumbalaya-engine/` is Jumbalaya’s Love2D engine. Scene motion uses two attachments and a spring integrator owned by this package.
 
-**Authoritative freeze** (also listed in [code-organization.md](code-organization.md)):
+**Freeze** (also listed in [code-organization.md](code-organization.md)):
 
-- `BalatroSource/` is local reference for accidental-regression checks only. Never copy structure, names, or control flow from it into this package.
 - New scene APIs go through Spatial: `set_rect`, `follow`, `bind_to`. Do not add `set_role`, `role_type`, or `xy_bond`.
 - Gameplay rules stay in `jumbalaya_core`. The engine does not grow jumble logic.
 - `util/tween.lua` is a **timeline scheduler**, not a spatial interpolator. Card and HUD motion use springs in `scene/animated/integrate.lua`.
+
+Remaining follow-ups: [engine-lineage.md](engine-lineage.md).
 
 ## Kind chain
 
@@ -46,10 +47,10 @@ Public API:
 
 ## Node construction
 
-`SceneNode` owns identity, children, input flags, and hit testing. Construction uses `InputFlags` (nested `can`/`is` plus flat aliases such as `hoverable`). Scratch geometry for hit tests lives in module locals, not per-node `ARGS`/`RETS`.
+`SceneNode` owns identity, children, input flags, and hit testing. Construction uses `InputFlags` (nested `can`/`is` plus flat aliases such as `hoverable`). Scratch geometry for hit tests lives in module locals.
 
 `moves_while_paused` is the pause flag (`created_on_pause` is the same field). Engine serial `ID` is assigned from the bound game shell.
 
 ## Piles
 
-Presentation hosts are `CardPile`. Membership is `store.piles` (`MOVE_CARD`). Hosts expose `add_card` / `refresh_order`, not Balatro `emplace` / `set_ranks`.
+Presentation hosts are `CardPile`. Membership is `store.piles` (`MOVE_CARD`). Hosts expose `add_card` / `refresh_order`.
