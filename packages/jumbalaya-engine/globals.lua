@@ -20,8 +20,6 @@ local M = {
 	Kind = Kind,
 	Node = Node,
 	Spatial = Spatial,
-	AnimNode = Spatial,
-	EaseNode = Spatial,
 	SceneNode = Node,
 	GfxSprite = GfxSprite,
 	Sprite = GfxSprite,
@@ -42,8 +40,6 @@ local M = {
 function M.install()
 	_G.Kind = M.Kind
 	_G.Node = M.Node
-	_G.AnimNode = M.AnimNode
-	_G.EaseNode = M.EaseNode
 	_G.Spatial = M.Spatial
 	_G.SceneNode = M.SceneNode
 	_G.GfxSprite = M.GfxSprite

@@ -30,9 +30,6 @@ function Spatial:snap_drawn()
 	VT.h = T.h
 end
 
-Spatial.hard_set_T = Spatial.snap_rect
-Spatial.snap_VT = Spatial.snap_drawn
-
 --- Follows the cursor: converts cursor pixels into room space, then pins
 --- target to the grab point recorded by `set_offset(.., 'Click')`.
 function Spatial:drag(offset)

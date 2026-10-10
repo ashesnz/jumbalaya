@@ -23,7 +23,7 @@ local function stub_atlas()
 	}
 end
 
---- Load real engine classes (AnimNode, Sprite, etc.) so tests never use stub moveables.
+--- Load real engine classes (Spatial, Sprite, etc.) so tests never use stub moveables.
 function M.ensure_engine_globals()
 	if not package.loaded["bootstrap_paths"] then
 		require("bootstrap_paths").install()

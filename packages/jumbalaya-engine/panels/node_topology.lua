@@ -23,7 +23,7 @@ function Target:print_topology(indent)
 end
 
 --- Snap the freshly-laid-out tree onto its transforms and sync embedded
---- objects. Capability-guarded so plain AnimNodes work as objects too.
+--- objects. Capability-guarded so plain Spatials work as objects too.
 function Target:initialize_drawn()
 	if self.snap_to_attach then self:snap_to_attach() end
 	self:calculate_parallax()
@@ -36,7 +36,7 @@ function Target:initialize_drawn()
 
 	if self.ui_kind == game().UI.TEXT then self:update_text() end
 	if self.config.object then
-		if not self.config.no_role then
+		if not self.config.skip_follow then
 			if self.config.object.snap_rect then
 				self.config.object:snap_rect(self.T.x, self.T.y, self.T.w, self.T.h)
 			end

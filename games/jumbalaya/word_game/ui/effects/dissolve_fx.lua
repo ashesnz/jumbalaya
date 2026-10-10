@@ -1,6 +1,6 @@
 --[[
 	word_game/ui/effects/dissolve_fx.lua — Shader dissolve/materialize on any node with dissolve uniform.
-	Inputs: AnimNode, TIMELINE, optional particle attach.
+	Inputs: Spatial, TIMELINE, optional particle attach.
 	Outputs: dissolve_fx.play(node, opts) with completion callback; no Card dependency.
 ]]
 

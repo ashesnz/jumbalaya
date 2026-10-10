@@ -55,7 +55,6 @@ function Spatial:construct(X, Y, W, H)
 	self.parallax_shift = { x = 0, y = 0 }
 	self.shadow_height = 0.2
 	self.settled = true
-	self.STATIONARY = true
 
 	table.insert(game().TRANSFORMS, self)
 	table.insert(game().LIVE.TRANSFORM, self)

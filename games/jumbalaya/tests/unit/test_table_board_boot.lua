@@ -2,6 +2,7 @@
 
 local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 local shell = require("jumbalaya-engine.shell")
 local Presentation = require("word_game.model.presentation")
 local board_prime = require("word_game.ui.table.board_prime")
@@ -39,7 +40,7 @@ local function install_table_board_ui()
 	game.TABLE_BOARD_SIDEBAR_WIDTH = game.TABLE_BOARD_SIDEBAR_WIDTH or 3.0
 	game.ARGS = game.ARGS or {}
 
-	game.SIDEBAR_ATTACH = game.SIDEBAR_ATTACH or EaseNode({
+	game.SIDEBAR_ATTACH = game.SIDEBAR_ATTACH or Spatial({
 		T = { x = game.TILE_W - 3, y = 0, w = 3, h = game.TILE_H },
 	})
 	game.SIDEBAR_ATTACH.states = game.SIDEBAR_ATTACH.states or { drag = { can = false } }
@@ -47,13 +48,13 @@ local function install_table_board_ui()
 	game.SIDEBAR_ATTACH.translate_container = game.SIDEBAR_ATTACH.translate_container or function() end
 	game.SIDEBAR_ATTACH.snap_rect = game.SIDEBAR_ATTACH.snap_rect or function() end
 
-	game.PANEL_ATTACH = game.PANEL_ATTACH or EaseNode({
+	game.PANEL_ATTACH = game.PANEL_ATTACH or Spatial({
 		T = { x = game.TILE_W - 3, y = 0, w = 3, h = game.TILE_H },
 	})
 	game.PANEL_ATTACH.states = game.PANEL_ATTACH.states or { drag = { can = false } }
 	game.PANEL_ATTACH.snap_rect = game.PANEL_ATTACH.snap_rect or function() end
 
-	game.PLAY_ATTACH = game.PLAY_ATTACH or EaseNode({
+	game.PLAY_ATTACH = game.PLAY_ATTACH or Spatial({
 		T = { x = 0, y = 2, w = game.TILE_W - 3, h = game.TILE_H - 3.5 },
 	})
 	game.PLAY_ATTACH.snap_rect = game.PLAY_ATTACH.snap_rect or function() end

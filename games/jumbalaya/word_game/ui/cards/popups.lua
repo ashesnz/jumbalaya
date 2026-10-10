@@ -14,10 +14,11 @@ local localize = require("word_game.ui.util.localize").localize
 
 local DEFINITIONS = game().DEFINITIONS
 local Panel = require("jumbalaya-engine.panels.api")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 local Press = require("word_game.ui.widgets.press")
 
 function DEFINITIONS.card_focus_ui(card)
-	-- Hand letter tiles never wear the white gamepad focus plate (working-version G.hand).
+	-- Hand letter tiles never wear the white gamepad focus plate.
 	if game().dealt_letters and card.area == game().dealt_letters then
 		return nil
 	end
@@ -88,7 +89,7 @@ function clear_overlay_infotip()
 	local infotip = game().OVERLAY_MENU:find_node_by_id('overlay_menu_infotip')
 	if infotip and infotip.config.object then
 		infotip.config.object:remove()
-		infotip.config.object = EaseNode()
+		infotip.config.object = Spatial()
 	end
 end
 
@@ -154,7 +155,7 @@ function DEFINITIONS.card_h_popup(card)
 		end
 
 		return Panel.root({align = 'cm', colour = game().C.CLEAR}, {
-			Panel.column({align = "cm", on_update = Press.named('show_infotip'),object = EaseNode(),ref_table = next(info_boxes) and info_boxes or nil}, {
+			Panel.column({align = "cm", on_update = Press.named('show_infotip'),object = Spatial(),ref_table = next(info_boxes) and info_boxes or nil}, {
 				Panel.row({padding = outer_padding, r = 0.12, colour = Colour.tint(game().C.MUTED_GREY, 0.5), emboss = 0.07}, {
 					Panel.row({align = "cm", padding = 0.07, r = 0.1, colour = Colour.with_alpha(card_type_background, 0.8)}, {
 						name_from_rows(tip.name, is_letter_face and game().C.WHITE or nil),

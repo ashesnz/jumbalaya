@@ -12,14 +12,14 @@ local facade = require("word_game.ui.facade")
 
 local M = {}
 
-local function snap_moveable(moveable)
-	if not moveable then return end
-	if moveable.snap_drawn then moveable:snap_drawn() end
-	if moveable.velocity then
-		moveable.velocity.x = 0
-		moveable.velocity.y = 0
-		moveable.velocity.r = 0
-		moveable.velocity.scale = 0
+local function snap_spatial(node)
+	if not node then return end
+	if node.snap_drawn then node:snap_drawn() end
+	if node.velocity then
+		node.velocity.x = 0
+		node.velocity.y = 0
+		node.velocity.r = 0
+		node.velocity.scale = 0
 	end
 end
 
@@ -144,9 +144,9 @@ function M.set_screen_positions(opts)
 		end
 
 		if game().dealt_letters.snap_drawn then game().dealt_letters:snap_drawn() end
-		snap_moveable(game().dealt_letters)
-		snap_moveable(game().draw_pile)
-		snap_moveable(game().recycle_stash)
+		snap_spatial(game().dealt_letters)
+		snap_spatial(game().draw_pile)
+		snap_spatial(game().recycle_stash)
 		if game().draw_pile and game().draw_pile.cards and game().draw_pile.cards[1] then
 			if game().draw_pile.relayout then game().draw_pile:relayout() end
 			if game().draw_pile.hard_set_cards then game().draw_pile:hard_set_cards() end

@@ -10,6 +10,7 @@ local Colour = require("jumbalaya-engine.util.colour")
 local button_font
 local localize = require("word_game.ui.util.localize").localize
 local Panel = require("jumbalaya-engine.panels.api")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 local Press = require("word_game.ui.widgets.press")
 function alpha_button_font()
 	if not button_font then
@@ -133,7 +134,7 @@ function build_generic_options(args)
 			}),
 		}),
 		Panel.row({align = "cm"}, {
-			Panel.object({id = 'overlay_menu_infotip', object = EaseNode()}),
+			Panel.object({id = 'overlay_menu_infotip', object = Spatial()}),
 		}),
 	})
 end

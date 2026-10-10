@@ -10,7 +10,7 @@ return {
 	Kind = require("jumbalaya-engine.object"),
 	Scene = {
 		Node = require("jumbalaya-engine.scene.node"),
-		AnimNode = require("jumbalaya-engine.scene.animated.init"),
+		Spatial = require("jumbalaya-engine.scene.animated.init"),
 	},
 	Context = require("jumbalaya-engine.services.context"),
 	Renderer = require("jumbalaya-engine.services.renderer"),

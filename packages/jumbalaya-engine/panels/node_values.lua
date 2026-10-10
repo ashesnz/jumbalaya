@@ -39,7 +39,7 @@ function Target:set_values(_T, recalculate)
 		if self.config.object then self.config.object.states.collideable = self.states.collideable end
 	end
 
-	if self.ui_kind == game().UI.OBJECT and not self.config.no_role then
+	if self.ui_kind == game().UI.OBJECT and not self.config.skip_follow then
 		local object = self.config.object
 		if object.follow then
 			object:follow(self, { x = 0, y = 0 }, { lock_drawn = true })

@@ -1,6 +1,6 @@
 --[[ word_game/ui/cards/visuals/motion.lua - Card motion, flip, and timed FX ]]
 
----@class (partial) Card : EaseNode
+---@class (partial) Card : Spatial
 local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")
 local shell = facade.shell()
@@ -204,7 +204,7 @@ function Card:snap_rect(X, Y, W, H)
 		local y = (Y or self.T.y)
 		local w = (W or self.T.w)
 		local h = (H or self.T.h)
-		EaseNode.snap_rect(self,x, y, w, h)
+		Spatial.snap_rect(self,x, y, w, h)
 		if self.children.front then self.children.front:snap_rect(x, y, w, h) end
 		if self.children.back then self.children.back:snap_rect(x, y, w, h) end
 		if self.children.center then self.children.center:snap_rect(x, y, w, h) end

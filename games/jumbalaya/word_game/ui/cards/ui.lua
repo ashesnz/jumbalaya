@@ -1,6 +1,6 @@
 --[[ word_game/ui/card_ui.lua - hover UI, click, set_selected, per-frame update ]]
 
----@class (partial) Card : EaseNode
+---@class (partial) Card : Spatial
 --- Clears cached ability tooltip UI so it gets rebuilt next time it's shown.
 local game = require("word_game.ui.util.game_runtime").game
 local facade = require("word_game.ui.facade")

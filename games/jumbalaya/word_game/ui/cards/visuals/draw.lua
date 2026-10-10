@@ -1,6 +1,6 @@
 --[[ word_game/ui/cards/visuals/draw.lua - Card tilt and draw passes ]]
 
----@class (partial) Card : EaseNode
+---@class (partial) Card : Spatial
 local game = require("word_game.ui.util.game_runtime").game
 local LetterFaces = require("word_game.ui.cards.letter_faces")
 local Tables = require("jumbalaya-engine.util.tables")

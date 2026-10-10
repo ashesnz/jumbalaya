@@ -5,15 +5,15 @@
 local SceneRoots = require("jumbalaya-engine.scene.roots")
 local DropShadow = require("jumbalaya-engine.graphics.drop_shadow")
 
-return function(AnimNode)
+return function(Spatial)
 	--- Drop-shadow offset is a global constant (no room parallax).
-	function AnimNode:calculate_parallax()
+	function Spatial:calculate_parallax()
 		self.shadow_parallax = self.shadow_parallax or { x = DropShadow.X, y = DropShadow.Y }
 		self.shadow_parallax.x = DropShadow.X
 		self.shadow_parallax.y = DropShadow.Y
 	end
 
-	function AnimNode:set_rect(x, y, w, h)
+	function Spatial:set_rect(x, y, w, h)
 		local rect = self.target or self.T
 		if type(x) == "table" then
 			rect.x = x.x or x[1] or rect.x
@@ -30,11 +30,11 @@ return function(AnimNode)
 		if h ~= nil then rect.h = h end
 	end
 
-	function AnimNode:get_rect()
+	function Spatial:get_rect()
 		return self.target or self.T
 	end
 
-	function AnimNode:drawn_rect()
+	function Spatial:drawn_rect()
 		return self.drawn or self.VT
 	end
 
@@ -42,7 +42,7 @@ return function(AnimNode)
 	---@param host table|nil Spatial to follow
 	---@param offset {x:number, y:number}|nil
 	---@param opts {lock_drawn:boolean}|nil
-	function AnimNode:follow(host, offset, opts)
+	function Spatial:follow(host, offset, opts)
 		opts = opts or {}
 		self.attach = self.attach or {}
 		self.attach.mode = host and "follow" or "independent"
@@ -61,7 +61,7 @@ return function(AnimNode)
 	end
 
 	--- Letter faces: copy the host's drawn rect each tick (drawn by the host).
-	function AnimNode:bind_to(host)
+	function Spatial:bind_to(host)
 		self.attach = self.attach or {}
 		self.attach.mode = host and "bind" or "independent"
 		self.attach.host = host
@@ -71,7 +71,7 @@ return function(AnimNode)
 		SceneRoots.sync(self)
 	end
 
-	function AnimNode:unfollow()
+	function Spatial:unfollow()
 		self.attach = self.attach or {}
 		self.attach.mode = "independent"
 		self.attach.host = nil
@@ -81,7 +81,7 @@ return function(AnimNode)
 	end
 
 	--- Shader / tilt source: bound host, else self.
-	function AnimNode:draw_host()
+	function Spatial:draw_host()
 		local attach = self.attach
 		if attach and attach.draw_host then return attach.draw_host end
 		if attach and attach.host then return attach.host end

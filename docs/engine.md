@@ -14,7 +14,7 @@
 Kind → SceneNode (Node) → Spatial → Sprite, Panel, LetterTile, CardPile
 ```
 
-`AnimNode` and `EaseNode` are boot aliases of Spatial (`globals.install`) so existing constructors keep working. New derives use `Spatial:derive`.
+Derives use `Spatial:derive`. Boot installs `_G.Spatial`.
 
 ## Spatial model
 
@@ -46,7 +46,7 @@ Public API:
 
 `T` and `VT` are the **same tables** as `target` and `drawn`. Engine motion writes `target` / `drawn`; game draw code may still read `.T` / `.VT`.
 
-`settled` is the skip flag for the frame loop (`STATIONARY` is kept in sync). Pause uses `moves_while_paused`.
+`settled` is the skip flag for the frame loop. Pause uses `moves_while_paused`.
 
 ## Node construction
 

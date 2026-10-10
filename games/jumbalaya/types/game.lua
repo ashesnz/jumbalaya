@@ -120,7 +120,7 @@
 
 ---@class GameInstanceTables
 ---@field NODE SceneNode[]
----@field MOVEABLE EaseNode[]
+---@field TRANSFORM Spatial[]
 ---@field SPRITE Sprite[]
 ---@field PANELS UIPanel[]
 ---@field POPUP any[]
@@ -181,14 +181,13 @@
 ---@field focused_profile number
 ---@field save_settings fun(self: Game)
 ---@field C table
----@field UIT table
 ---@field ARGS table
 ---@field I GameInstanceTables
 ---@field TIMERS GameTimers
 ---@field FRAMES { DRAW: number, MOVE: number }
 ---@field GAME GameRunState Live run snapshot — field owners in types/store.lua
 ---@field ROOM SceneNode
----@field ROOM_ATTACH EaseNode
+---@field ROOM_ATTACH Spatial
 ---@field dealt_letters CardPile|nil Player's dealt letter row
 ---@field draw_pile CardPile|nil Draw pile (sidebar stack)
 ---@field recycle_stash CardPile|nil Played / fly-off recycle stash (off-screen)
@@ -206,11 +205,8 @@
 ---@field deck_preview any
 ---@field real_dt number
 ---@field HIGHLIGHT_H number
----@field E_MANAGER Scheduler
 ---@field CONTROLLER InputController
 ---@field CURSOR Sprite
----@field MOVEABLES EaseNode[]
----@field DRAW_HASH SceneNode[]
 ---@field debug_panel DebugPanel|nil
 ---@field VIBRATION number
 ---@class LettersRegistry

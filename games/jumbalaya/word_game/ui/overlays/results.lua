@@ -12,6 +12,7 @@ local Tables = require("jumbalaya-engine.util.tables")
 
 local localize = require("word_game.ui.util.localize").localize
 local Panel = require("jumbalaya-engine.panels.api")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 local Press = require("word_game.ui.widgets.press")
 function build_win()
 	local show_win_cta = false
@@ -47,7 +48,7 @@ function build_win()
 	}}) 
 	t.nodes[1] = Panel.row({align = "cm", padding = 0.1}, {
 			Panel.column({align = "cm", padding = 2}, {
-				Panel.object({padding = 0, id = 'mascot_spot', object = EaseNode(0,0,game().CARD_W*1.1, game().CARD_H*1.1)}),
+				Panel.object({padding = 0, id = 'mascot_spot', object = Spatial(0,0,game().CARD_W*1.1, game().CARD_H*1.1)}),
 			}),
 			Panel.column({align = "cm", padding = 0.1}, {t.nodes[1]})})
 	--t.nodes[1].config.mid = true
@@ -75,7 +76,7 @@ function build_exit_CTA()
 	}})
 	t.nodes[2] = t.nodes[1]
 	t.nodes[1] = Panel.column({align = "cm", padding = 2}, {
-		Panel.object({padding = 0, id = 'mascot_spot', object = EaseNode(0,0,game().CARD_W*1.1, game().CARD_H*1.1)}),
+		Panel.object({padding = 0, id = 'mascot_spot', object = Spatial(0,0,game().CARD_W*1.1, game().CARD_H*1.1)}),
 	})   
 	--t.nodes[1].config.mid = true
 	return t
@@ -128,7 +129,7 @@ function build_game_over()
 	t.nodes[1] = Panel.row({align = "cm", padding = 0.1}, {
 		Panel.column({align = "cm", padding = 2}, {
 			Panel.row({align = "cm"}, {
-				Panel.object({padding = 0, id = 'mascot_spot', object = EaseNode(0,0,game().CARD_W*1.1, game().CARD_H*1.1)}),
+				Panel.object({padding = 0, id = 'mascot_spot', object = Spatial(0,0,game().CARD_W*1.1, game().CARD_H*1.1)}),
 			}),
 		}),
 		Panel.column({align = "cm", padding = 0.1}, {t.nodes[1]})})

@@ -7,6 +7,7 @@
 ]]
 
 local Kind = require("jumbalaya-engine.object")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 
 local Game = Kind:derive("Game")
 
@@ -26,22 +27,22 @@ function Game:prep_stage(new_stage, new_state, new_game_obj)
 	self.SETTINGS.paused = false
 	self.ROOM = SceneNode{T={x = self.ROOM_PADDING_W, y = self.ROOM_PADDING_H, w = self.TILE_W, h = self.TILE_H}}
 	self.ROOM.jiggle = 0
-	self.ROOM.states.drag.can = false
+	self.ROOM.states.draggable = false
 	self.ROOM:set_container(self.ROOM)
-	self.ROOM_ATTACH = EaseNode{T={x = 0, y = 0, w = self.TILE_W, h = self.TILE_H}}
-	self.ROOM_ATTACH.states.drag.can = false
+	self.ROOM_ATTACH = Spatial{T={x = 0, y = 0, w = self.TILE_W, h = self.TILE_H}}
+	self.ROOM_ATTACH.states.draggable = false
 	self.ROOM_ATTACH:set_container(self.ROOM)
 	local sidebar_w = self.TABLE_BOARD_SIDEBAR_WIDTH
 		or (self.TABLE_BOARD_SIDEBAR_FRAC and self.TILE_W * self.TABLE_BOARD_SIDEBAR_FRAC)
 		or 3.0
-	self.PANEL_ATTACH = EaseNode{T={x = self.TILE_W - sidebar_w, y = 0, w = sidebar_w, h = self.TILE_H}}
-	self.PANEL_ATTACH.states.drag.can = false
+	self.PANEL_ATTACH = Spatial{T={x = self.TILE_W - sidebar_w, y = 0, w = sidebar_w, h = self.TILE_H}}
+	self.PANEL_ATTACH.states.draggable = false
 	self.PANEL_ATTACH:set_container(self.ROOM)
-	self.SIDEBAR_ATTACH = EaseNode{T={x = self.TILE_W - sidebar_w, y = 0, w = sidebar_w, h = self.TILE_H}}
-	self.SIDEBAR_ATTACH.states.drag.can = false
+	self.SIDEBAR_ATTACH = Spatial{T={x = self.TILE_W - sidebar_w, y = 0, w = sidebar_w, h = self.TILE_H}}
+	self.SIDEBAR_ATTACH.states.draggable = false
 	self.SIDEBAR_ATTACH:set_container(self.ROOM)
-	self.PLAY_ATTACH = EaseNode{T={x = 0, y = 2.0, w = self.TILE_W - sidebar_w, h = self.TILE_H - 3.5}}
-	self.PLAY_ATTACH.states.drag.can = false
+	self.PLAY_ATTACH = Spatial{T={x = 0, y = 2.0, w = self.TILE_W - sidebar_w, h = self.TILE_H - 3.5}}
+	self.PLAY_ATTACH.states.draggable = false
 	self.PLAY_ATTACH:set_container(self.ROOM)
 	if love.graphics and love.graphics.getWidth and love.graphics.getHeight then require("jumbalaya-engine.adapters.love2d.window").sync_resize() end
 end

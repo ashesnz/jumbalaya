@@ -16,9 +16,9 @@ local function spring_step(pos, vel, dt, omega, zeta)
 	return pos, vel
 end
 
-return function(AnimNode)
+return function(Spatial)
 --- One-shot squash: compress, then an underdamped spring overshoots and settles.
-function AnimNode:pulse(amount, rot_amt)
+function Spatial:pulse(amount, rot_amt)
 	amount = amount or 0.4
 	local twist = rot_amt or Random.pick_random({ 0.55 * amount, -0.55 * amount }) or 0
 	self.bounce = {
@@ -35,7 +35,7 @@ function AnimNode:pulse(amount, rot_amt)
 end
 
 --- Softer spring used for speech bubbles (distinct stiffness from pulse).
-function AnimNode:speech_pop()
+function Spatial:speech_pop()
 	self.bounce = {
 		scale = -0.2,
 		scale_vel = 5.5,
@@ -49,7 +49,7 @@ function AnimNode:speech_pop()
 end
 
 --- Integrates the bounce spring toward rest; clears it when settled.
-function AnimNode:advance_bounce(dt)
+function Spatial:advance_bounce(dt)
 	local bounce = self.bounce
 	if not bounce or bounce.handled_elsewhere then return end
 	if not dt or dt <= 0 then return end

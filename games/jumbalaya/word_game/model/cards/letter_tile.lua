@@ -15,7 +15,7 @@ local Tables = require("jumbalaya-engine.util.tables")
 local SceneRoots = require("jumbalaya-engine.scene.roots")
 local CoreLetter = require("jumbalaya_core.cards.letter_card")
 
----@class (partial) LetterTile : EaseNode
+---@class (partial) LetterTile : Spatial
 ---@field ability CardAbility
 ---@field base table
 ---@field config table
@@ -85,7 +85,7 @@ function LetterTile:construct(X, Y, W, H, face, params)
 		x = math.random(),
 		y = math.random(),
 	}
-	self.children = { shadow = EaseNode(0, 0, 0, 0) }
+	self.children = { shadow = Spatial(0, 0, 0, 0) }
 
 	self.letter_card_id = p.letter_card_id
 	self.pile_id = p.pile_id or "draw"
@@ -276,7 +276,7 @@ function LetterTile:load(saved)
 	end
 
 	Tables.teardown_tree(self.children)
-	self.children = { shadow = EaseNode(0, 0, 0, 0) }
+	self.children = { shadow = Spatial(0, 0, 0, 0) }
 
 	self:set_sprites(self.config.card)
 

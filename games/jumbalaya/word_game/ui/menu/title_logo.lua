@@ -26,7 +26,7 @@ local CYCLE_RETURN = 1.6
 local JUGGLE_HEIGHT = 0.42
 local FLIPS_PER_SWAP = 2
 
----@class TitleLogo : EaseNode
+---@class TitleLogo : Spatial
 ---@field base_image love.Image
 ---@field full_image love.Image
 ---@field a_images table<string, love.Image>

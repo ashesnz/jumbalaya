@@ -2,7 +2,7 @@
 
 local facade = require("word_game.ui.facade")
 local game_access = facade.game_access()
----@class (partial) LetterTile : EaseNode
+---@class (partial) LetterTile : Spatial
 local game = require("word_game.ui.util.game_runtime").game
 local LetterFaces = require("word_game.ui.cards.letter_faces")
 

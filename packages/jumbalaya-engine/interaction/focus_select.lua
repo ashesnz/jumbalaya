@@ -46,7 +46,7 @@ function InputRouter:update_focus(dir)
 				end
 			end
 		else
-			-- Directional search considers every moveable.
+			-- Directional search considers every Spatial.
 			for _, v in ipairs(game().TRANSFORMS) do
 				v.states.focus.can = false
 				v.states.focus.is = false

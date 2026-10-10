@@ -73,9 +73,9 @@ Game-specific updaters belong in `app/bootstrap/runtime_boot.lua`, not in `loop.
 
 - `game().TRANSFORMS` is a dense array compacted each frame (`Tables.compact_array`).
 - Both move and update iterate with `ipairs` only (never `pairs` on arrays).
-- `AnimNode:remove` and `Node:remove` use `Tables.remove_swap_last` (O(1)).
-- Move skips nodes already transformed this frame (`FRAME.TRANSFORM` gate).
-- Update skips stationary majors still using the default empty `Node:update`.
+- `Spatial:remove` and `Node:remove` use `Tables.remove_swap_last` (O(1)).
+- Tick skips nodes already transformed this frame (`FRAME.TRANSFORM` gate).
+- Update skips settled nodes still using the default empty `Node:update`.
 
 ### Scene draw roots
 

@@ -112,7 +112,6 @@ function M.snap_bar(bar)
 		bar.root_node:snap_drawn()
 	end
 	bar.settled = true
-	bar.STATIONARY = true
 end
 
 function M.snap_hand_container()

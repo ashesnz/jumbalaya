@@ -6,8 +6,6 @@ local game = shell.game
 local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 return function(Target)
 function Target:update(dt)
-	game().ARGS.FUNC_TRACKER = game().ARGS.FUNC_TRACKER or {}
-
 	-- button_delay parks the real handler aside for a cooldown window while
 	-- drawing a progress fill.
 	if self.config.button_delay then
@@ -22,9 +20,6 @@ function Target:update(dt)
 	if self.button_clicked then self.button_clicked = nil end
 
 	if self.config and self.config.func then
-		if type(self.config.func) == "string" then
-			game().ARGS.FUNC_TRACKER[self.config.func] = (game().ARGS.FUNC_TRACKER[self.config.func] or 0) + 1
-		end
 		invoke.call(self.config.func, self)
 	end
 

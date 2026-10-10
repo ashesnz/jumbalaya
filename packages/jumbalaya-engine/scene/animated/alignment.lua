@@ -126,5 +126,4 @@ return function(Spatial)
 		}
 	end
 
-	Spatial.align_to_major = Spatial.apply_alignment
 end

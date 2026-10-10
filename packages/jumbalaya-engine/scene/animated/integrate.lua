@@ -18,7 +18,6 @@ end
 
 local function unsettle(self)
 	self.settled = false
-	self.STATIONARY = false
 end
 
 return function(Spatial)

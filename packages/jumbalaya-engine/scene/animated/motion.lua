@@ -14,7 +14,6 @@ local follow_offset = { x = 0, y = 0 }
 return function(Spatial)
 	local function mark_settled(self, settled)
 		self.settled = settled
-		self.STATIONARY = settled
 	end
 
 	local function tick_host(node, host, dt)

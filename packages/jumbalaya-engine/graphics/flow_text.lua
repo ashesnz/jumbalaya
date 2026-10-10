@@ -11,7 +11,7 @@ local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 --[[
 	jumbalaya-engine/graphics/flow_text.lua - animated per-letter text (FlowText).
 
-	Animation model (deliberately unlike the original engine's):
+	Animation model:
 	  - Reveal uses an ease-out-back "spring" envelope; letters overshoot
 	    slightly before settling instead of ramping quadratically.
 	  - Idle motion phases are de-synced with the golden angle rather than
