@@ -7,8 +7,9 @@
 local game = require("word_game.ui.util.game_runtime").game
 
 local Layout = require("word_game.ui.layout")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 
-local FloatUpText = EaseNode:derive("FloatUpText")
+local FloatUpText = Spatial:derive("FloatUpText")
 
 local GameFonts = require("word_game.ui.util.fonts")
 local live = {}
@@ -27,7 +28,7 @@ function FloatUpText:construct(config)
 	config = config or {}
 	local w = config.w or 1.4
 	local h = config.h or 0.55
-	EaseNode.construct(self, config.x or 0, config.y or 0, w, h)
+	Spatial.construct(self, config.x or 0, config.y or 0, w, h)
 	self:set_container(game().ROOM)
 	self.states.hover.can = false
 	self.states.click.can = false
@@ -46,8 +47,8 @@ function FloatUpText:construct(config)
 	self.font_px = config.font_px or 28
 	self.alpha = 1
 
-	self:hard_set_T(self.T.x, self.T.y, self.T.w, self.T.h)
-	self:snap_VT()
+	self:snap_rect(self.T.x, self.T.y, self.T.w, self.T.h)
+	self:snap_drawn()
 	live[#live + 1] = self
 end
 
@@ -115,7 +116,7 @@ function FloatUpText:remove()
 			break
 		end
 	end
-	EaseNode.remove(self)
+	Spatial.remove(self)
 end
 
 function FloatUpText.spawn(config)

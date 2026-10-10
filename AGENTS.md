@@ -142,7 +142,7 @@ Tests that need rules only call `play_jumble_word`; tests that need full FX call
 - Files/dirs/locals: `snake_case`; classes/globals: `PascalCase`
 - **Devtools:** Lua modules under `games/jumbalaya/devtools/` use `snake_case` (`debug_button.lua`, `sections/stage.lua`). Locale files use BCP47 tags (`localization/en-us.lua`). Python one-off scripts belong in `_tools/`, not `devtools/`.
 - New UI binds function callbacks on `Panel.button`. Remaining string `func` names stay stable until that screen migrates (`Funcs.register`); then drop the catalog entry in the same slice.
-- Class chain: `Kind → SceneNode (Node) → Spatial (AnimNode / EaseNode) → Sprite, Panel, LetterTile, CardPile` (`Card` is a LetterTile alias). Motion: `set_rect` / `follow` / `bind_to` — see `docs/engine.md`.
+- Class chain: `Kind → SceneNode (Node) → Spatial → Sprite, Panel, LetterTile, CardPile` (`Card` is a LetterTile alias). Motion: `set_rect` / `follow` / `bind_to` — see `docs/engine.md`.
 - `Card` model class loads in `app/bootstrap/game_boot.lua`; presentation mixins install via `word_game/ui/cards/bind.lua` (tests: `mock_env.ensure_card_class()`)
 
 ## Dev flags

@@ -22,6 +22,7 @@ local perk_effects = require("word_game.model.perks.effects")
 local bonus_return = require("word_game.model.jumble.bonus_return")
 local jumble_rules = require("word_game.model.jumble_play.jumble_rules")
 local Presentation = require("word_game.model.presentation")
+local piles = require("word_game.model.piles")
 local core_hand = require("jumbalaya_core.jumble.hand")
 local immutable = require("jumbalaya_core.store.immutable")
 local game_access = require("word_game.model.game_access")
@@ -51,7 +52,7 @@ local function clear_pattern_row_cards(j)
 			if card.bonus_card then
 				bonus_return.return_card(card)
 			elseif card.area ~= live_game().dealt_letters and live_game().dealt_letters then
-				live_game().dealt_letters:add_card(card)
+				piles.present_card(card, "hand", { from_pile = "pattern" })
 			end
 		end
 		if area.config then

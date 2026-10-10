@@ -117,18 +117,18 @@ end
 		local vowel_card = take_letter_from_deck(true)
 		if not vowel_card or not Dictionary.is_vowel_letter(card_letter(vowel_card)) then
 			if vowel_card then
-				live_game().draw_pile:add_card(vowel_card)
+				piles.present_card(vowel_card, "draw")
 			end
 			return false
 		end
 		if not swap_card then
-			live_game().draw_pile:add_card(vowel_card)
+			piles.present_card(vowel_card, "draw")
 			return false
 		end
 		if swap_card.area then
 			swap_card.area:remove_card(swap_card)
 		end
-		live_game().draw_pile:add_card(swap_card)
+		piles.present_card(swap_card, "draw", { from_pile = "hand" })
 		return give_vowel_to_hand(vowel_card)
 	end
 
@@ -172,7 +172,7 @@ end
 					live_game().dealt_letters:remove_card(swap_card)
 					live_game().draw_pile:remove_card(from_deck)
 					fly_from_deck_to_hand(from_deck)
-					live_game().draw_pile:add_card(swap_card)
+					piles.present_card(swap_card, "draw", { from_pile = "hand" })
 				end
 			end
 		end

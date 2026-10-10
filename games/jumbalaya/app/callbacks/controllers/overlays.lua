@@ -93,7 +93,7 @@ function M.show_overlay(args)
 
 	game().OVERLAY_MENU.alignment.offset.y = stable_overlay and (args.config.offset.y or 0) or 0
 	if game().ROOM and not stable_overlay then game().ROOM.jiggle = (game().ROOM.jiggle or 0) + 1 end
-	game().OVERLAY_MENU:align_to_major()
+	game().OVERLAY_MENU:apply_alignment()
 	if stable_overlay then
 		game().OVERLAY_MENU.NEW_ALIGNMENT = false
 		game().OVERLAY_MENU.VT.x = game().OVERLAY_MENU.T.x
@@ -104,7 +104,7 @@ function M.show_overlay(args)
 	local tab_contents = game().OVERLAY_MENU:find_node_by_id('tab_contents')
 	if tab_contents and tab_contents.config.object and tab_contents.config.object.recalculate then
 		tab_contents.config.object:set_scene_parent(tab_contents)
-		tab_contents.config.object:align_to_major()
+		tab_contents.config.object:apply_alignment()
 		tab_contents.panel:recalculate()
 	end
 	sync_trade_marketplace(game().OVERLAY_MENU)

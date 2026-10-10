@@ -263,8 +263,8 @@ local function draw_sidebar_deck(deck_rect)
 	pile.T.y = deck_rect.y
 	pile.T.w = deck_rect.w
 	pile.T.h = deck_rect.h
-	if pile.hard_set_T then
-		pile:hard_set_T(deck_rect.x, deck_rect.y, deck_rect.w, deck_rect.h)
+	if pile.snap_rect then
+		pile:snap_rect(deck_rect.x, deck_rect.y, deck_rect.w, deck_rect.h)
 	end
 	TableDeck.draw(pile)
 end

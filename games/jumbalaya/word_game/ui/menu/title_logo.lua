@@ -3,7 +3,7 @@
 ]]
 
 local game = require("word_game.ui.util.game_runtime").game
-local AnimNode = require("jumbalaya-engine.scene.animated.init")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 
@@ -34,7 +34,7 @@ local FLIPS_PER_SWAP = 2
 ---@field anim_time number
 ---@field dissolve number|nil
 ---@field dissolve_colours table|nil
-local TitleLogo = AnimNode:derive("TitleLogo")
+local TitleLogo = Spatial:derive("TitleLogo")
 
 TitleLogo.LETTER_ANCHORS = LETTER_ANCHORS
 TitleLogo.CYCLE_TIMINGS = {
@@ -45,7 +45,7 @@ TitleLogo.CYCLE_TIMINGS = {
 }
 
 function TitleLogo:construct(X, Y, W, H)
-	EaseNode.construct(self, X, Y, W, H)
+	Spatial.construct(self, X, Y, W, H)
 	self.anim_time = 0
 	self.dissolve = 1
 	self.dissolve_colours = {game().C.WHITE, game().C.WHITE}
@@ -73,7 +73,7 @@ function TitleLogo:construct(X, Y, W, H)
 end
 
 function TitleLogo:remove()
-	EaseNode.remove(self)
+	Spatial.remove(self)
 end
 
 function TitleLogo:update(dt)
@@ -217,7 +217,7 @@ function TitleLogo.create(major, width, height)
 	local logo = TitleLogo(0, 0, width, height)
 	logo:set_alignment({
 		major = major,
-		type = "cm",
+		anchor = { x = "center", y = "center" },
 		bond = "Strong",
 		offset = {x = 0, y = 0},
 	})

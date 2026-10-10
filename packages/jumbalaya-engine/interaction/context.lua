@@ -66,12 +66,12 @@ function InputRouter:recall_cardarea_focus(_cardarea)
 	if ca_string then self.cardarea_context[ca_string] = nil end
 end
 
---- Places the cursor: hard-set to `hard_set_T`, or centered on the focus target.
-function InputRouter:update_cursor(hard_set_T)
+--- Places the cursor: hard-set to `snap_rect`, or centered on the focus target.
+function InputRouter:update_cursor(snap_rect)
 	local units = game().TILESCALE * game().TILESIZE
-	if hard_set_T then
-		game().POINTER.T.x = hard_set_T.x
-		game().POINTER.T.y = hard_set_T.y
+	if snap_rect then
+		game().POINTER.T.x = snap_rect.x
+		game().POINTER.T.y = snap_rect.y
 		self.cursor_position.x = game().POINTER.T.x * units
 		self.cursor_position.y = game().POINTER.T.y * units
 		game().POINTER.VT.x = game().POINTER.T.x

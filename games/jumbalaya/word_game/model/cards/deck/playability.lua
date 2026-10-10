@@ -18,6 +18,7 @@ end
 
 
 	local core_playability = require("jumbalaya_core.cards.playability")
+	local piles = require("word_game.model.piles")
 
 	local function deck_owns(card)
 		return core_playability.deck_owns(card, live_game().draw_pile)
@@ -69,7 +70,7 @@ end
 	local function fly_from_deck_to_hand(card)
 		if not card or not live_game().dealt_letters then return false end
 		start_from_pile(card)
-		live_game().dealt_letters:add_card(card)
+		piles.present_card(card, "hand", { from_pile = "draw" })
 		if card.pulse then
 			card:pulse(0.18, 0.08)
 		end

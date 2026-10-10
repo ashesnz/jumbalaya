@@ -18,7 +18,7 @@ function M.relayout(self)
 
 	if not table_board() then
 		for _, card in ipairs(self.cards) do
-			if not card.states.drag.is then
+			if not card.states.dragging then
 				card.T.x = self.T.x + 0.5 * (self.T.w - card.T.w)
 				card.T.y = self.T.y + 0.5 * (self.T.h - card.T.h)
 				card.T.r = 0
@@ -35,7 +35,7 @@ function M.relayout(self)
 		local start_x = self.T.x + (self.T.w - group_w) / 2
 		local fan_n = facade.hand_size().get()
 		for k, card in ipairs(self.cards) do
-			if not card.states.drag.is and not card.shuffle_hop and not card.placement_recall_slide then
+			if not card.states.dragging and not card.shuffle_hop and not card.placement_recall_slide then
 				local slot = k + (fan_n - n) * 0.5
 				card.T.r = 0.2 * (-fan_n / 2 - 0.5 + slot) / fan_n + 0.02 * math.sin(2 * game().TIMERS.REAL + card.T.x)
 				card.T.x = start_x + (k - 1) * card_w * spacing + 0.5 * (card_w - card.T.w)
@@ -47,7 +47,7 @@ function M.relayout(self)
 end
 
 function M.set_card_ranks(_self, _k, card)
-	card.states.drag.can = true
+	card.states.draggable = true
 end
 
 function M.can_select(_self, _card)

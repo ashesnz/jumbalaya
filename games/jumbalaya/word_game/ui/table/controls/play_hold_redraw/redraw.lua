@@ -110,7 +110,7 @@ function M.discard_hand_down(on_complete, constants)
 			end
 			if game().draw_pile then
 				game().draw_pile:shuffle("play_hold_redraw")
-				game().draw_pile:hard_set_T()
+				game().draw_pile:snap_rect()
 			end
 			if game().dealt_letters then
 				game().dealt_letters:relayout()

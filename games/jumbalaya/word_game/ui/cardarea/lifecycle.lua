@@ -178,7 +178,7 @@ function M.remove(self, type_handler)
 			table.remove(game().LIVE.CARDPILE, k)
 		end
 	end
-	EaseNode.remove(self)
+	Spatial.remove(self)
 end
 
 return M

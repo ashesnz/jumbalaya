@@ -8,17 +8,17 @@ local DropShadow = require("jumbalaya-engine.graphics.drop_shadow")
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 
----@class AnimNode : Node
-local AnimNode = Node:derive("AnimNode")
+---@class Spatial : Node
+local Spatial = Node:derive("Spatial")
 
-require("jumbalaya-engine.scene.animated.alignment")(AnimNode)
-require("jumbalaya-engine.scene.animated.transform")(AnimNode)
-require("jumbalaya-engine.scene.animated.bounce")(AnimNode)
-require("jumbalaya-engine.scene.animated.integrate")(AnimNode)
-require("jumbalaya-engine.scene.animated.attach")(AnimNode)
-require("jumbalaya-engine.scene.animated.motion")(AnimNode)
+require("jumbalaya-engine.scene.animated.alignment")(Spatial)
+require("jumbalaya-engine.scene.animated.transform")(Spatial)
+require("jumbalaya-engine.scene.animated.bounce")(Spatial)
+require("jumbalaya-engine.scene.animated.integrate")(Spatial)
+require("jumbalaya-engine.scene.animated.attach")(Spatial)
+require("jumbalaya-engine.scene.animated.motion")(Spatial)
 
-function AnimNode:construct(X, Y, W, H)
+function Spatial:construct(X, Y, W, H)
 	local args = (type(X) == "table") and X or { T = { X or 0, Y or 0, W or 0, H or 0 } }
 	Node.construct(self, args)
 
@@ -40,6 +40,7 @@ function AnimNode:construct(X, Y, W, H)
 	}
 	self.alignment = {
 		type = "a",
+		anchor = { x = "none", y = "none", inset = false, absolute = true },
 		offset = { x = 0, y = 0 },
 		prev_type = "",
 		prev_offset = { x = 0, y = 0 },
@@ -61,16 +62,16 @@ function AnimNode:construct(X, Y, W, H)
 	SceneRoots.register(self, "transform")
 end
 
-function AnimNode:draw()
+function Spatial:draw()
 	Node.draw(self)
 	self:draw_boundingrect()
 end
 
-function AnimNode:remove()
+function Spatial:remove()
 	SceneRoots.unregister(self)
 	Tables.remove_swap_last(game().TRANSFORMS, self)
 	Tables.remove_swap_last(game().LIVE.TRANSFORM, self)
 	Node.remove(self)
 end
 
-return AnimNode
+return Spatial

@@ -11,7 +11,7 @@ local game = shell.game
 
 local follow_offset = { x = 0, y = 0 }
 
-return function(AnimNode)
+return function(Spatial)
 	local function mark_settled(self, settled)
 		self.settled = settled
 		self.STATIONARY = settled
@@ -26,9 +26,13 @@ return function(AnimNode)
 		end
 	end
 
+	local function rects(node)
+		return node.target or node.T, node.drawn or node.VT
+	end
+
 	local function apply_bind(self, host)
-		local T, VT = self.T, self.VT
-		local host_T, host_VT = host.T, host.VT
+		local T, VT = rects(self)
+		local host_T, host_VT = rects(host)
 		T.x, T.y, T.w, T.h = host_T.x, host_T.y, host_T.w, host_T.h
 		T.r, T.scale = host_T.r, host_T.scale
 		local host_w = host_T.w ~= 0 and host_T.w or 1
@@ -38,20 +42,24 @@ return function(AnimNode)
 		VT.r, VT.scale = host_VT.r, host_VT.scale
 		self.pinch = host.pinch
 		self.shadow_parallax = host.shadow_parallax
-		mark_settled(self, host.settled or host.STATIONARY)
+		mark_settled(self, host.settled)
 	end
 
 	local function apply_follow(self, host, dt)
 		tick_host(self, host, dt)
 		local off = self.attach.offset or follow_offset
-		self.T.x = host.T.x + (off.x or 0)
-		self.T.y = host.T.y + (off.y or 0)
+		local T = self.target or self.T
+		local host_T = host.target or host.T
+		T.x = host_T.x + (off.x or 0)
+		T.y = host_T.y + (off.y or 0)
 
 		self:advance_bounce(dt)
 
 		if self.attach.lock_drawn then
-			self.VT.x = host.VT.x + (off.x or 0)
-			self.VT.y = host.VT.y + (off.y or 0)
+			local VT = self.drawn or self.VT
+			local host_VT = host.drawn or host.VT
+			VT.x = host_VT.x + (off.x or 0)
+			VT.y = host_VT.y + (off.y or 0)
 		else
 			self:move_xy(dt)
 		end
@@ -61,10 +69,10 @@ return function(AnimNode)
 	end
 
 	--- Layout snap for panel trees (dt = 0): copy follow target without springs.
-	function AnimNode:snap_to_attach()
+	function Spatial:snap_to_attach()
 		local attach = self.attach
 		if not attach or attach.mode == "independent" or not attach.host then
-			self:snap_VT()
+			self:snap_drawn()
 			return
 		end
 		if attach.mode == "bind" then
@@ -73,21 +81,23 @@ return function(AnimNode)
 		end
 		local host = attach.host
 		local off = attach.offset or follow_offset
-		self.T.x = host.T.x + (off.x or 0)
-		self.T.y = host.T.y + (off.y or 0)
+		local T, VT = rects(self)
+		local host_T, host_VT = rects(host)
+		T.x = host_T.x + (off.x or 0)
+		T.y = host_T.y + (off.y or 0)
 		if attach.lock_drawn then
-			self.VT.x = host.VT.x + (off.x or 0)
-			self.VT.y = host.VT.y + (off.y or 0)
+			VT.x = host_VT.x + (off.x or 0)
+			VT.y = host_VT.y + (off.y or 0)
 		end
-		self.VT.w, self.VT.h = self.T.w, self.T.h
+		VT.w, VT.h = T.w, T.h
 	end
 
-	function AnimNode:tick(dt)
+	function Spatial:tick(dt)
 		if self.FRAME.TRANSFORM >= game().FRAMES.TRANSFORM then return end
 		self.FRAME.TRANSFORM = game().FRAMES.TRANSFORM
-		if not (self.moves_while_paused or self.created_on_pause) and game().SETTINGS.paused then return end
+		if not self.moves_while_paused and game().SETTINGS.paused then return end
 
-		self:align_to_major()
+		self:apply_alignment()
 
 		local attach = self.attach or { mode = "independent" }
 		if attach.mode == "bind" and attach.host then
@@ -106,5 +116,5 @@ return function(AnimNode)
 		if attach then attach.dirty = false end
 	end
 
-	AnimNode.move = AnimNode.tick
+	Spatial.move = Spatial.tick
 end

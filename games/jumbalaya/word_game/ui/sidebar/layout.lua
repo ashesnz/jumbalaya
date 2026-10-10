@@ -124,8 +124,8 @@ function M.update_sidebar_attach()
 	game().SIDEBAR_ATTACH.T.y = sidebar.y
 	game().SIDEBAR_ATTACH.T.w = sidebar.w
 	game().SIDEBAR_ATTACH.T.h = sidebar.h
-	if game().SIDEBAR_ATTACH.hard_set_T then
-		game().SIDEBAR_ATTACH:hard_set_T(sidebar.x, sidebar.y, sidebar.w, sidebar.h)
+	if game().SIDEBAR_ATTACH.snap_rect then
+		game().SIDEBAR_ATTACH:snap_rect(sidebar.x, sidebar.y, sidebar.w, sidebar.h)
 	end
 end
 
@@ -136,7 +136,7 @@ function M.update_panel_attach()
 	game().PANEL_ATTACH.T.y = panel.y
 	game().PANEL_ATTACH.T.w = panel.w
 	game().PANEL_ATTACH.T.h = panel.h
-	game().PANEL_ATTACH:hard_set_T(panel.x, panel.y, panel.w, panel.h)
+	game().PANEL_ATTACH:snap_rect(panel.x, panel.y, panel.w, panel.h)
 end
 
 return M

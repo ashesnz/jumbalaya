@@ -63,10 +63,10 @@ end
 				local cy = vy - card.T.h * 0.5
 				card.T.x = cx
 				card.T.y = cy
-				if card.hard_set_T then
-					card:hard_set_T(cx, cy, card.T.w, card.T.h)
+				if card.snap_rect then
+					card:snap_rect(cx, cy, card.T.w, card.T.h)
 				end
-				if card.snap_VT then card:snap_VT() end
+				if card.snap_drawn then card:snap_drawn() end
 			end
 			if card.states then
 				card.states.visible = true

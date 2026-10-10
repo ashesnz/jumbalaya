@@ -1,14 +1,14 @@
 --[[ word_game/ui/perks/shared/stamp_sprite.lua - AnimNode perk stamp for UI/market ]]
 
 local stamp_sheet = require("word_game.ui.perks.shared.stamp_sheet")
-local AnimNode = require("jumbalaya-engine.scene.animated.init")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 
-local PerkStampSprite = AnimNode:derive("PerkStampSprite")
+local PerkStampSprite = Spatial:derive("PerkStampSprite")
 
 function PerkStampSprite:construct(X, Y, W, H, entry)
-	AnimNode.construct(self, X, Y, W, H)
+	Spatial.construct(self, X, Y, W, H)
 	self.CT = self.VT
 	self.entry = entry
 	self.states.drag.can = false

@@ -12,6 +12,7 @@ local Scheduler = require "jumbalaya-engine.effects.timeline_scheduler"
 local card_motion_request = require("word_game.model.card_motion_request")
 local LetterPalette = require "word_game.config.visuals.letter_card_palette"
 local game_access = require("word_game.model.game_access")
+local piles = require("word_game.model.piles")
 
 local M = {}
 local Shared = require("word_game.model.cards.deck.shared")
@@ -40,9 +41,7 @@ function M.deal_boss_hand(letters, on_complete, opts)
 					end
 				end
 				boss_cards[#boss_cards + 1] = card
-				live_game().draw_pile:add_card(card)
-				live_game().draw_pile:remove_card(card)
-				live_game().dealt_letters:add_card(card)
+				piles.present_card(card, "hand")
 			end
 			game_access.dispatch({ type = "JUMBLE_SET_BOSS_CARDS", cards = boss_cards })
 			if live_game().pattern_row and live_game().pattern_row.apply_screen_position then
@@ -50,7 +49,7 @@ function M.deal_boss_hand(letters, on_complete, opts)
 			end
 			live_game().dealt_letters:refresh_order()
 			live_game().dealt_letters:relayout()
-			live_game().dealt_letters:snap_VT()
+			live_game().dealt_letters:snap_drawn()
 			live_game().dealt_letters:hard_set_cards()
 			if Deck().commit_pile_hosts then
 				Deck().commit_pile_hosts({ "hand", "draw", "pattern" })
@@ -71,7 +70,7 @@ function M.deal_boss_hand(letters, on_complete, opts)
 				end
 			end
 			boss_cards[#boss_cards + 1] = card
-			live_game().draw_pile:add_card(card)
+			piles.present_card(card, "draw")
 			if live_game().TIMELINE and live_game().TIMELINE.enqueue then
 				Scheduler.add{
 					mode = "window",
@@ -86,7 +85,7 @@ function M.deal_boss_hand(letters, on_complete, opts)
 				Shared.fly_from_deck_to_hand(card)
 			else
 				live_game().draw_pile:remove_card(card)
-				live_game().dealt_letters:add_card(card)
+				piles.present_card(card, "hand", { from_pile = "draw" })
 			end
 		end
 		game_access.dispatch({ type = "JUMBLE_SET_BOSS_CARDS", cards = boss_cards })
@@ -100,7 +99,7 @@ function M.deal_boss_hand(letters, on_complete, opts)
 			if live_game().dealt_letters then
 				live_game().dealt_letters:refresh_order()
 				live_game().dealt_letters:relayout()
-				live_game().dealt_letters:snap_VT()
+				live_game().dealt_letters:snap_drawn()
 				live_game().dealt_letters:hard_set_cards()
 			end
 			if Deck().commit_pile_hosts then

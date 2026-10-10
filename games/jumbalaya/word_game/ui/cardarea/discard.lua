@@ -23,10 +23,10 @@ function M.update(self, dt)
 	discard_bin.sync_discard_pile_area()
 	for _, card in ipairs(self.cards or {}) do
 		if card.area == self then
-			card.states.drag.can = false
-			card.states.collide.can = false
-			card.states.hover.can = false
-			card.states.click.can = false
+			card.states.draggable = false
+			card.states.collideable = false
+			card.states.hoverable = false
+			card.states.clickable = false
 		end
 	end
 end

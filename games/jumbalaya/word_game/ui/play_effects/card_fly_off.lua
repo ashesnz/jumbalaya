@@ -43,11 +43,11 @@ local function smoothstep(u)
 end
 
 local function sync_card_transform(card)
-	if card.hard_set_T then
-		card:hard_set_T(card.T.x, card.T.y, card.T.w, card.T.h)
+	if card.snap_rect then
+		card:snap_rect(card.T.x, card.T.y, card.T.w, card.T.h)
 	end
-	if card.snap_VT then
-		card:snap_VT()
+	if card.snap_drawn then
+		card:snap_drawn()
 	end
 end
 

@@ -8,9 +8,10 @@ local Tables = require("jumbalaya-engine.util.tables")
 local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local SceneRoots = require("jumbalaya-engine.scene.roots")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 local burst = require("word_game.ui.feedback.comic_burst.burst")
 
-local ComicBurst = EaseNode:derive("ComicBurst")
+local ComicBurst = Spatial:derive("ComicBurst")
 
 ComicBurst.make = burst.make
 ComicBurst.advance = burst.advance
@@ -18,7 +19,7 @@ ComicBurst.paint = burst.paint
 
 function ComicBurst:construct(X, Y, W, H, config)
 	config = config or {}
-	EaseNode.construct(self, X, Y, W, H)
+	Spatial.construct(self, X, Y, W, H)
 
 	local data = ComicBurst.make(config.radius or 0.62)
 	self.alpha = data.alpha
@@ -34,7 +35,7 @@ function ComicBurst:construct(X, Y, W, H, config)
 	if config.attach then
 		self:set_alignment({
 			major = config.attach,
-			type = "cm",
+			anchor = { x = "center", y = "center" },
 			bond = "Strong",
 		})
 		table.insert(self.attach.host.children, self)
@@ -82,7 +83,7 @@ function ComicBurst:remove()
 		end
 	end
 	Tables.teardown_tree(self.children)
-	EaseNode.remove(self)
+	Spatial.remove(self)
 end
 
 return ComicBurst

@@ -22,10 +22,10 @@ function InputRouter:update_interact(dt)
 	if not self.press_state.handled then
 		local down_target = self.press_state.target
 		local inspect = WORD_GAME_UI.CardInspect
-		if down_target and down_target.states.drag.can and inspect and inspect.can_inspect and inspect.can_inspect(down_target) then
+		if down_target and down_target.states.draggable and inspect and inspect.can_inspect and inspect.can_inspect(down_target) then
 			inspect.begin_hold(down_target)
-		elseif down_target and down_target.states.drag.can then
-			down_target.states.drag.is = true
+		elseif down_target and down_target.states.draggable then
+			down_target.states.dragging = true
 			down_target:set_offset(self.press_state.T, 'Click')
 			self.dragging.target = down_target
 			self.dragging.handled = false
@@ -37,7 +37,7 @@ function InputRouter:update_interact(dt)
 	if not self.release_state.handled then
 		if self.dragging.target then
 			self.dragging.target:stop_drag()
-			self.dragging.target.states.drag.is = false
+			self.dragging.target.states.dragging = false
 			self.dragging.target = nil
 		end
 
@@ -46,12 +46,12 @@ function InputRouter:update_interact(dt)
 			local down = self.press_state.target
 			if not down.click_timeout or down.click_timeout * game().TIME_SCALE > self.release_state.time - self.press_state.time then
 				if Geometry.point_distance(self.press_state.T, self.release_state.T) < game().MIN_CLICK_DIST then
-					if down.states.click.can then
+					if down.states.clickable then
 						self.clicked.target = down
 						self.clicked.handled = false
 					end
 				elseif self.dragging.prev_target and self.release_state.target
-					and self.release_state.target.states.release_on.can then
+					and self.release_state.target.states.releasable then
 					self.released_on.target = self.release_state.target
 					self.released_on.handled = false
 				end

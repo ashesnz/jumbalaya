@@ -105,18 +105,19 @@ function M.snap_bar(bar)
 	if bar.root_node then
 		animate().clear_bounce(bar.root_node)
 	end
-	if bar.snap_VT then
-		bar:snap_VT()
+	if bar.snap_drawn then
+		bar:snap_drawn()
 	end
-	if bar.root_node and bar.root_node.snap_VT then
-		bar.root_node:snap_VT()
+	if bar.root_node and bar.root_node.snap_drawn then
+		bar.root_node:snap_drawn()
 	end
+	bar.settled = true
 	bar.STATIONARY = true
 end
 
 function M.snap_hand_container()
 	if not game().dealt_letters or dragging_hand_card() then return end
-	game().dealt_letters:snap_VT()
+	game().dealt_letters:snap_drawn()
 	if game().dealt_letters.velocity then
 		game().dealt_letters.velocity.x = 0
 		game().dealt_letters.velocity.y = 0
@@ -134,8 +135,8 @@ function M.snap_hand_cards()
 		if card.bounce or card.shuffle_hop or card.placement_recall_slide then
 			goto continue
 		end
-		if card.hard_set_T then
-			card:hard_set_T()
+		if card.snap_rect then
+			card:snap_rect()
 		end
 		::continue::
 	end
@@ -144,7 +145,7 @@ end
 local function refresh_bar_tree(bar)
 	if not bar or not bar.root_node then return end
 	if bar.root_node.snap_to_attach then bar.root_node:snap_to_attach() end
-	bar.root_node:initialize_VT()
+	bar.root_node:initialize_drawn()
 end
 
 function M.place_bar(bar, x, y, size)
@@ -156,18 +157,18 @@ function M.place_bar(bar, x, y, size)
 	if bar.set_alignment then
 		bar:set_alignment({
 			major = game().ROOM_ATTACH,
-			type = "cm",
+			anchor = { x = "center", y = "center" },
 			bond = "Strong",
 			offset = offset,
 		})
 	end
 	bar.T.w = size
 	bar.T.h = size
-	if bar.align_to_major then
-		bar:align_to_major()
+	if bar.apply_alignment then
+		bar:apply_alignment()
 	end
-	if bar.hard_set_T then
-		bar:hard_set_T(bar.T.x, bar.T.y, size, size)
+	if bar.snap_rect then
+		bar:snap_rect(bar.T.x, bar.T.y, size, size)
 	end
 	refresh_bar_tree(bar)
 	M.snap_bar(bar)

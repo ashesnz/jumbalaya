@@ -51,16 +51,16 @@ function M.setup_title_garden_background()
 	game().SPLASH_BACK = Sprite(-30, -13, w, h, atlas, {x = 0, y = 0})
 	game().SPLASH_BACK:set_alignment({
 		major = game().ROOM_ATTACH,
-		type = "cm",
+		anchor = { x = "center", y = "center" },
 		bond = "Strong",
 		offset = {x = 0, y = 0},
 	})
 	game().SPLASH_BACK.title_garden_pan = { t = 0 }
-	if game().SPLASH_BACK.align_to_major then
-		game().SPLASH_BACK:align_to_major()
+	if game().SPLASH_BACK.apply_alignment then
+		game().SPLASH_BACK:apply_alignment()
 	end
-	if game().SPLASH_BACK.snap_VT then
-		game().SPLASH_BACK:snap_VT()
+	if game().SPLASH_BACK.snap_drawn then
+		game().SPLASH_BACK:snap_drawn()
 	end
 end
 

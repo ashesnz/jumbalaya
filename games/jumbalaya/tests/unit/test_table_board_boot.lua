@@ -45,18 +45,18 @@ local function install_table_board_ui()
 	game.SIDEBAR_ATTACH.states = game.SIDEBAR_ATTACH.states or { drag = { can = false } }
 	game.SIDEBAR_ATTACH.set_container = game.SIDEBAR_ATTACH.set_container or function() end
 	game.SIDEBAR_ATTACH.translate_container = game.SIDEBAR_ATTACH.translate_container or function() end
-	game.SIDEBAR_ATTACH.hard_set_T = game.SIDEBAR_ATTACH.hard_set_T or function() end
+	game.SIDEBAR_ATTACH.snap_rect = game.SIDEBAR_ATTACH.snap_rect or function() end
 
 	game.PANEL_ATTACH = game.PANEL_ATTACH or EaseNode({
 		T = { x = game.TILE_W - 3, y = 0, w = 3, h = game.TILE_H },
 	})
 	game.PANEL_ATTACH.states = game.PANEL_ATTACH.states or { drag = { can = false } }
-	game.PANEL_ATTACH.hard_set_T = game.PANEL_ATTACH.hard_set_T or function() end
+	game.PANEL_ATTACH.snap_rect = game.PANEL_ATTACH.snap_rect or function() end
 
 	game.PLAY_ATTACH = game.PLAY_ATTACH or EaseNode({
 		T = { x = 0, y = 2, w = game.TILE_W - 3, h = game.TILE_H - 3.5 },
 	})
-	game.PLAY_ATTACH.hard_set_T = game.PLAY_ATTACH.hard_set_T or function() end
+	game.PLAY_ATTACH.snap_rect = game.PLAY_ATTACH.snap_rect or function() end
 
 	game.LANG = game.LANG or {
 		font = {
@@ -74,7 +74,7 @@ local function install_table_board_ui()
 		selection_limit = 1,
 	})
 	game.dealt_letters.states = game.dealt_letters.states or { visible = true }
-	game.dealt_letters.snap_VT = game.dealt_letters.snap_VT or function() end
+	game.dealt_letters.snap_drawn = game.dealt_letters.snap_drawn or function() end
 	game.dealt_letters.hard_set_cards = game.dealt_letters.hard_set_cards or function() end
 
 	game.draw_pile = CardPile(0, 0, game.CARD_W, game.CARD_H, {
@@ -82,8 +82,8 @@ local function install_table_board_ui()
 		card_limit = 12,
 	})
 	game.draw_pile.states = game.draw_pile.states or { visible = true }
-	game.draw_pile.snap_VT = game.draw_pile.snap_VT or function() end
-	game.draw_pile.hard_set_T = game.draw_pile.hard_set_T or function() end
+	game.draw_pile.snap_drawn = game.draw_pile.snap_drawn or function() end
+	game.draw_pile.snap_rect = game.draw_pile.snap_rect or function() end
 	game.draw_pile.hard_set_cards = game.draw_pile.hard_set_cards or function() end
 	game.draw_pile.cards = game.draw_pile.cards or {}
 
@@ -93,7 +93,7 @@ local function install_table_board_ui()
 			VT = { x = 1, y = 3, w = 8, h = 1 },
 			cards = {},
 			config = { type = "placement" },
-			snap_VT = function() end,
+			snap_drawn = function() end,
 			hard_set_cards = function() end,
 		},
 		apply_screen_position = function() end,
@@ -253,7 +253,7 @@ T.describe("table board boot", function()
 		T.assert_nil(rawget(play_bar, "attach"), "follow state must not live on the wrapper")
 		play_bar:set_alignment({
 			major = game.ROOM_ATTACH,
-			type = "cm",
+			anchor = { x = "center", y = "center" },
 			offset = { x = 1.5, y = -0.25 },
 		})
 		T.assert_equal(play_bar._inner.attach.host, game.ROOM_ATTACH)

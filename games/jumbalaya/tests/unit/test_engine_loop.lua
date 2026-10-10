@@ -71,7 +71,7 @@ T.describe("engine loop", function()
 			mock_env.ensure_engine_globals()
 			local Spatial = require("jumbalaya-engine.scene.animated.init")
 			local host = Spatial(1, 2, 3, 4)
-			host:hard_set_T(1, 2, 3, 4)
+			host:snap_rect(1, 2, 3, 4)
 			local face = Spatial(0, 0, 3, 4)
 			face:bind_to(host)
 			host.FRAME.TRANSFORM = -1

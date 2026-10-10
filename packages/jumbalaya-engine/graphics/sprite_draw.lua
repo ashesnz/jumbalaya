@@ -82,6 +82,6 @@ function GfxSprite:remove()
 	if self.video then self.video:release() end
 	sprite_util.unregister_instance(game().ANIMATIONS, self)
 	sprite_util.unregister_instance(game().LIVE and game().LIVE.SPRITE, self)
-	AnimNode.remove(self)
+	Spatial.remove(self)
 end
 end

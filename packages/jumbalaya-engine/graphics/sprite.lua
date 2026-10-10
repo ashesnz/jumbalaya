@@ -3,12 +3,12 @@
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 
-local AnimNode = require("jumbalaya-engine.scene.animated.init")
-local GfxSprite = AnimNode:derive("GfxSprite")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
+local GfxSprite = Spatial:derive("GfxSprite")
 
 function GfxSprite:construct(X, Y, W, H, new_sprite_atlas, sprite_pos)
-	AnimNode.construct(self, X, Y, W, H)
-	self.CT = self.VT -- collision follows the visible quad
+	Spatial.construct(self, X, Y, W, H)
+	self.CT = self.drawn -- collision follows the visible quad
 	self.atlas = new_sprite_atlas
 
 	-- Placeholder atlas: nothing to sample yet; stay invisible until reset().

@@ -39,12 +39,12 @@ end
 		shell.reset_letter_registry()
 		live_game().draw_pile.cards = {}
 		for _, letter in ipairs(Deck().STARTING_LETTERS) do
-			live_game().draw_pile:add_card(Deck().create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR))
+			piles.present_card(Deck().create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR), "draw")
 		end
 		game_access.patch({ starting_deck_size = #Deck().STARTING_LETTERS })
 		live_game().draw_pile.config.card_limit = #Deck().STARTING_LETTERS
 		Deck().shuffle_deck()
- 	if live_game().draw_pile.hard_set_T then live_game().draw_pile:hard_set_T() end
+ 	if live_game().draw_pile.snap_rect then live_game().draw_pile:snap_rect() end
 		piles.sync_hosts_to_store(nil, { "draw" })
 		piles.release_static_chrome(nil, { "draw" })
 		Deck().sync_deck_count_display()
@@ -53,7 +53,7 @@ end
 	 function M.draft_letter(letter, color)
 	 	live_game().draw_pile.config = live_game().draw_pile.config or {}
 		local card = Deck().create_letter_card(letter, color)
-		live_game().draw_pile:add_card(card)
+		piles.present_card(card, "draw")
 		live_game().draw_pile.config.card_limit = (live_game().draw_pile.config.card_limit or #Deck().STARTING_LETTERS) + 1
 		if Deck().reconcile_draw_pile_from_inventory then
 			Deck().reconcile_draw_pile_from_inventory()

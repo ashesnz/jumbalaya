@@ -1,20 +1,20 @@
 --[[ jumbalaya-engine/panels/panel.lua - Declarative panel tree container (Panel) ]]
 
-local AnimNode = require("jumbalaya-engine.scene.animated.init")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 
 local shell = require("jumbalaya-engine.shell")
 local game = shell.game
 
----@class RetainedPanel : AnimNode
+---@class RetainedPanel : Spatial
 ---@field definition table
 ---@field root_node LayoutNode
 ---@field parent RetainedPanel|LayoutNode|nil
-local RetainedPanel = AnimNode:derive("RetainedPanel")
+local RetainedPanel = Spatial:derive("RetainedPanel")
 
 function RetainedPanel:construct(args)
-	AnimNode.construct(self, {args.T})
+	Spatial.construct(self, {args.T})
 
-	self.states.drag.can = false
+	self.states.draggable = false
 	self.draw_layers = {} -- explicit draw-order overrides (config.draw_layer)
 
 	self.definition = args.definition
@@ -26,10 +26,11 @@ function RetainedPanel:construct(args)
 		self:set_alignment({
 			major = args.config.major,
 			type = args.config.align or args.config.type or '',
+			anchor = type(args.config.align) == "table" and args.config.align or nil,
 			bond = args.config.bond or 'Strong',
 			offset = args.config.offset or {x = 0, y = 0},
 		})
-		self.states.collide.can =
+		self.states.collideable =
 			(args.config.can_collide == nil) and true or args.config.can_collide
 
 		self:set_scene_parent(self.config.parent)
@@ -45,11 +46,11 @@ function RetainedPanel:construct(args)
 	self.root_node:set_wh()
 	self.root_node:set_alignments()
 
-	self:align_to_major()
+	self:apply_alignment()
 	self.VT.x, self.VT.y = self.T.x, self.T.y
 	self.VT.w, self.VT.h = self.T.w, self.T.h
 
-	self.root_node:initialize_VT(true)
+	self.root_node:initialize_drawn(true)
 	if getmetatable(self) == RetainedPanel then
 		local live = game().LIVE
 		local skip_registry = args.config and args.config.skip_live_registry

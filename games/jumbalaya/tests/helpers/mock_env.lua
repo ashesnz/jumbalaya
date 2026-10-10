@@ -66,7 +66,7 @@ function M.ensure_engine_globals()
 	S.ROOM_ATTACH = S.ROOM_ATTACH or {
 		T = { x = 0, y = 0, w = 20, h = 11 },
 		alignment = { offset = { x = 0, y = 0 } },
-		align_to_major = function() end,
+		apply_alignment = function() end,
 	}
 	S.TEXTURE_ATLASES = S.TEXTURE_ATLASES or {}
 	S.TEXTURE_ATLASES["ui_1"] = S.TEXTURE_ATLASES["ui_1"] or stub_atlas()
@@ -153,7 +153,7 @@ function M.setup()
 	S.ROOM_ATTACH = S.ROOM_ATTACH or {
 		T = { x = 0, y = 0, w = 20, h = 11 },
 		alignment = { offset = { x = 0, y = 0 } },
-		align_to_major = function() end,
+		apply_alignment = function() end,
 	}
 	S.POINTER = S.POINTER or {
 		T = { x = 0, y = 0, w = 1, h = 1 },

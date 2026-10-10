@@ -178,7 +178,7 @@ function Card:drag()
 						hand:add_selection(self, true)
 				end
 		end
-		AnimNode.drag(self)
+		Spatial.drag(self)
 end
 
 

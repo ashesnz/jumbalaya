@@ -1,12 +1,12 @@
 --[[ app/core/ui/node.lua - one node in a RetainedPanel tree (LayoutNode) ]]
 
-local AnimNode = require("jumbalaya-engine.scene.animated.init")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 
----@class LayoutNode : AnimNode
+---@class LayoutNode : Spatial
 ---@field parent RetainedPanel|LayoutNode|nil
 ---@field ui_kind integer
 ---@field panel RetainedPanel
-local LayoutNode = AnimNode:derive("LayoutNode")
+local LayoutNode = Spatial:derive("LayoutNode")
 
 -- NOTE: constructed function-style (no colon) from RetainedPanel:attach_node.
 function LayoutNode:construct(parent, new_panel, new_ui_kind, config)

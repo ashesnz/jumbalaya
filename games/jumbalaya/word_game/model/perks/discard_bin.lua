@@ -12,6 +12,7 @@ local Presentation = require("word_game.model.presentation")
 local run_state = require("word_game.model.run.state")
 local core = require("jumbalaya_core.rules.discard_bin")
 local game_access = require("word_game.model.game_access")
+local piles = require("word_game.model.piles")
 
 local M = {}
 
@@ -74,8 +75,8 @@ function M.stash_discarded_card(card)
 		if card.states.click then card.states.click.can = false end
 	end
 	local stash = live_game().recycle_stash
-	if stash and stash.add_card and card.area ~= stash then
-		stash:add_card(card)
+	if stash and card.area ~= stash then
+		piles.present_card(card, "discard")
 	end
 end
 

@@ -36,7 +36,7 @@ games/jumbalaya/tests/
 
 `tests/helpers/mock_env.lua` provides:
 
-- `ensure_engine_globals()` — loads real `Card`, `Sprite`, `AnimNode`, etc.
+- `ensure_engine_globals()` — loads real `Card`, `Sprite`, `Spatial`, etc.
 - `reset_game()` — preferred per-suite reset: binds `BridgeRuntime.game()`, seeds run state, layout stubs, bonus-stack/fly-off state
 - `setup()` — low-level globals only; called by `reset_game()`, avoid at describe level unless booting a custom shell (e.g. screen-wipe tests)
 - `install_hand_clear(play_module)` — mirrors `game_boot` wiring for `Play.on_hand_cleared` / `continue_after_dealer`
@@ -140,7 +140,7 @@ mock_env.ensure_card_class()
 ### Engine globals without full game reset
 
 ```lua
-mock_env.ensure_engine_globals() -- Sprite, Node, AnimNode, colour helpers
+mock_env.ensure_engine_globals() -- Sprite, Node, Spatial, colour helpers
 ```
 
 ### API quick reference

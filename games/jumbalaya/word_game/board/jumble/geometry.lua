@@ -194,8 +194,8 @@ function M.relayout(session)
 	end
 
 	local function snap_card(card)
-		if card and card.hard_set_T then
-			card:hard_set_T(card.T.x, card.T.y, card.T.w, card.T.h)
+		if card and card.snap_rect then
+			card:snap_rect(card.T.x, card.T.y, card.T.w, card.T.h)
 		end
 	end
 

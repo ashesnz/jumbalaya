@@ -15,6 +15,7 @@ local function J()
 end
 
 local bonus_return = require("word_game.model.jumble.bonus_return")
+local piles = require("word_game.model.piles")
 local core = require("jumbalaya_core.jumble.slots")
 local topology = require("jumbalaya_core.jumble.slot_topology")
 
@@ -278,7 +279,7 @@ function M.assign_card_to_blank(slot_index, card, insert_pos)
 			if displaced.bonus_card then
 				bonus_return.return_card(displaced)
 			elseif live_game().dealt_letters and displaced.area ~= live_game().dealt_letters then
-				live_game().dealt_letters:add_card(displaced)
+				piles.present_card(displaced, "hand", { from_pile = "pattern" })
 			end
 		end
 		detach_card_from_slots(j.slots, card)

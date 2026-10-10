@@ -29,7 +29,7 @@ local CoreLetter = require("jumbalaya_core.cards.letter_card")
 ---@field draw fun(self: LetterTile, layer: string|nil)
 ---@field set_selected fun(self: LetterTile, is_highlighted: boolean)
 ---@field flip fun(self: LetterTile)
----@field hard_set_T fun(self: LetterTile, X: number|nil, Y: number|nil, W: number|nil, H: number|nil)
+---@field snap_rect fun(self: LetterTile, X: number|nil, Y: number|nil, W: number|nil, H: number|nil)
 ---@field apply_face fun(self: LetterTile, card: table|nil, initial: boolean|nil)
 ---@field update_alert fun(self: LetterTile)
 ---@field set_sprites fun(self: LetterTile, front: table|nil)
@@ -47,9 +47,9 @@ local live_game = require("word_game.model.live_game")
 local shell = require("word_game.model.shell_access")
 local CardRegistry = require("word_game.model.cards.registry")
 local Deck = require("word_game.model.cards.deck")
-local AnimNode = require("jumbalaya-engine.scene.animated.init")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 
-local LetterTile = AnimNode:derive("LetterTile")
+local LetterTile = Spatial:derive("LetterTile")
 
 local TILE_SCHEMA = {
 	click_timeout = 0.3,
@@ -70,8 +70,8 @@ local TILE_SCHEMA = {
 function LetterTile:construct(X, Y, W, H, face, params)
 	local p = (type(params) == "table") and params or {}
 
-	EaseNode.construct(self, X, Y, W, H)
-	self.CT = self.VT
+	Spatial.construct(self, X, Y, W, H)
+	self.CT = self.drawn
 
 	for field, default in pairs(TILE_SCHEMA) do
 		self[field] = default
@@ -312,7 +312,7 @@ function LetterTile:remove()
 			break
 		end
 	end
-	EaseNode.remove(self)
+	Spatial.remove(self)
 end
 
 return LetterTile

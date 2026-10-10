@@ -10,15 +10,15 @@ function InputRouter:is_node_focusable(node)
 	if node.T.y > game().ROOM.T.h + 3 then return false end
 
 	if not node.REMOVED and not node.under_overlay
-		and (node.states.hover.can and not self.dragging.target or self.dragging.target == node)
-		and ((not not node.created_on_pause) == (not not game().SETTINGS.paused))
+		and (node.states.hoverable and not self.dragging.target or self.dragging.target == node)
+		and ((not not node.moves_while_paused) == (not not game().SETTINGS.paused))
 		and node.states.visible
 		and (not node.panel or node.panel.states.visible) then
 		if self.screen_keyboard then
 			focusable = node.panel == self.screen_keyboard and not not node.config.button
 		else
 			if CardFocus.is_table_card(node) or CardFocus.bonus_stack_contains(node) then
-				if node.states.hover.can and not node.is_mascot then
+				if node.states.hoverable and not node.is_mascot then
 					focusable = true
 				end
 			end

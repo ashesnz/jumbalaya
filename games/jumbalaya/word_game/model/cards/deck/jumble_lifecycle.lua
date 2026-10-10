@@ -91,15 +91,15 @@ end
 				if card.remove_from_area then
 					card:remove_from_area()
 				end
-				draw:add_card(card)
+				piles.present_card(card, "draw")
 			end
 			::continue::
 		end
 
 		draw.config = draw.config or {}
 		draw.config.card_limit = math.max(draw.config.card_limit or 0, draw_limit)
-		if draw.hard_set_T then
-			draw:hard_set_T()
+		if draw.snap_rect then
+			draw:snap_rect()
 		end
 		Shared.commit_piles({ "draw" })
 		Deck().sync_deck_count_display()
@@ -122,17 +122,15 @@ end
 				if card.states then
 					card.states.visible = true
 				end
-				if live_game().draw_pile.add_card then
-					live_game().draw_pile:add_card(card)
-				end
+				piles.present_card(card, "draw")
 			end
 		end
 		if live_game().draw_pile.config then
 			live_game().draw_pile.config.card_limit = #live_game().draw_pile.cards
 		end
 		Deck().shuffle_deck()
-		if live_game().draw_pile.hard_set_T then
-			live_game().draw_pile:hard_set_T()
+		if live_game().draw_pile.snap_rect then
+			live_game().draw_pile:snap_rect()
 		end
 		Shared.commit_piles({ "hand", "draw", "discard", "pattern" })
 	end

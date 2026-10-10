@@ -40,26 +40,37 @@ function Target:align(x, y)
 	end
 end
 
---- Applies our config.align to each child (c/m/b/r chars), then recurses.
+local function align_axes(align)
+	if type(align) == "table" then
+		return align.x, align.y
+	end
+	align = align or ""
+	local x = string.find(align, "m") and "center" or string.find(align, "r") and "right" or string.find(align, "l") and "left"
+	local y = string.find(align, "c") and "center" or string.find(align, "b") and "bottom" or string.find(align, "t") and "top"
+	return x, y
+end
+
+--- Applies config.align (named anchor or legacy c/m/b/r chars), then recurses.
 function Target:set_alignments()
 	for _, v in pairs(self.children) do
 		if self.config and self.config.align and v.align then
 			local padding = self.config.padding or game().UI.padding
+			local ax, ay = align_axes(self.config.align)
 			-- Leaves center within our full box; containers within our content box.
-			if string.find(self.config.align, 'c') then
+			if ay == "center" then
 				if v.ui_kind == game().UI.TEXT or v.ui_kind == game().UI.BOX or v.ui_kind == game().UI.OBJECT then
 					v:align(0, 0.5 * (self.T.h - 2 * padding - v.T.h))
 				else
 					v:align(0, 0.5 * (self.T.h - self.content_dimensions.h))
 				end
 			end
-			if string.find(self.config.align, 'm') then
+			if ax == "center" then
 				v:align(0.5 * (self.T.w - self.content_dimensions.w), 0)
 			end
-			if string.find(self.config.align, 'b') then
+			if ay == "bottom" then
 				v:align(0, self.T.h - self.content_dimensions.h)
 			end
-			if string.find(self.config.align, 'r') then
+			if ax == "right" then
 				v:align(self.T.w - self.content_dimensions.w, 0)
 			end
 		end

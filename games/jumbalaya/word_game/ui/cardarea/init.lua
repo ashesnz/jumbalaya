@@ -20,7 +20,7 @@ local lifecycle = require("word_game.ui.cardarea.lifecycle")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local facade = require("word_game.ui.facade")
 
-local AnimNode = require("jumbalaya-engine.scene.animated.init")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 
 local TYPE_HANDLERS = {
 	hand = hand,
@@ -32,7 +32,7 @@ local TYPE_HANDLERS = {
 	bonus = discard,
 }
 
---- @class (partial) CardPile : EaseNode
+--- @class (partial) CardPile : Spatial
 --- @field cards Card[] list of Card instances currently in this area, in display order
 --- @field selected Card[] subset of `cards` currently selected/selected
 --- @field config table per-instance behaviour config; see `config.type` above
@@ -52,7 +52,7 @@ local TYPE_HANDLERS = {
 --- @field draw_card_from fun(self: CardPile, area: CardPile, stay_flipped: boolean|nil, discarded_only: boolean|nil): boolean|nil
 --- @field save fun(self: CardPile): table|nil
 --- @field load fun(self: CardPile, cardAreaTable: table)
-local CardPile = AnimNode:derive("CardPile")
+local CardPile = Spatial:derive("CardPile")
 
 local function table_board()
 	return game().STATE == game().STATES.TABLE_BOARD
@@ -85,11 +85,11 @@ end
 ---   `card_w` (number, default `game().CARD_W`) - card width override;
 ---   `sort` (string, default 'desc') - default `CardPile:sort` method.
 function CardPile:construct(X, Y, W, H, config)
-	EaseNode.construct(self, X, Y, W, H)
+	Spatial.construct(self, X, Y, W, H)
 
-	self.states.drag.can = false
-	self.states.hover.can = false
-	self.states.click.can = false
+	self.states.draggable = false
+	self.states.hoverable = false
+	self.states.clickable = false
 
 
 	config = config or {}
@@ -152,18 +152,18 @@ function CardPile:refresh_order()
 	local handler = type_handler(self)
 	for k, card in ipairs(self.cards) do
 		card.slot = k
-		card.states.collide.can = true
+		card.states.collideable = true
 		if handler and handler.set_card_ranks then
 			handler.set_card_ranks(self, k, card)
 		else
-			card.states.drag.can = true
+			card.states.draggable = true
 		end
 		if WORD_GAME_UI.FirstPlayTutorial and WORD_GAME_UI.FirstPlayTutorial.is_active()
 			and WORD_GAME_UI.FirstPlayTutorial.is_active() then
-			card.states.drag.can = false
-		elseif card.states.drag.can then
-			card.states.hover.can = true
-			card.states.collide.can = true
+			card.states.draggable = false
+		elseif card.states.draggable then
+			card.states.hoverable = true
+			card.states.collideable = true
 			card.under_overlay = false
 		end
 	end
@@ -171,7 +171,7 @@ end
 
 --- @param dt number seconds since last frame
 function CardPile:move(dt)
-	EaseNode.move(self, dt)
+	Spatial.tick(self, dt)
 	self:relayout()
 end
 
@@ -220,23 +220,23 @@ end
 
 --- Immediately (no tween) sets this area's transform and repositions/snaps
 --- its cards to match, bypassing the normal smoothed movement.
-function CardPile:hard_set_T(X, Y, W, H)
+function CardPile:snap_rect(X, Y, W, H)
 	local x = (X or self.T.x)
 	local y = (Y or self.T.y)
 	local w = (W or self.T.w)
 	local h = (H or self.T.h)
-	EaseNode.hard_set_T(self,x, y, w, h)
+	EaseNode.snap_rect(self,x, y, w, h)
 	self:calculate_parallax()
 	self:relayout()
 	self:hard_set_cards()
 end
 
 --- Immediately snaps every card's transform to its current target position
---- (no animation), used after `hard_set_T` or on load.
+--- (no animation), used after `snap_rect` or on load.
 function CardPile:hard_set_cards()
 	if not self.cards then return end
 	for _, card in ipairs(self.cards) do
-		card:hard_set_T()
+		card:snap_rect()
 		card:calculate_parallax()
 	end
 end

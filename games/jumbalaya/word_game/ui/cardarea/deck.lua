@@ -25,8 +25,8 @@ end
 
 function M.set_card_ranks(self, k, card)
 	if k > 1 then
-		card.states.drag.can = false
-		card.states.collide.can = false
+		card.states.draggable = false
+		card.states.collideable = false
 	end
 end
 
@@ -42,7 +42,7 @@ function M.relayout(self)
 	for k, card in ipairs(self.cards) do
 		face_down_in_pile(card)
 
-		if not card.states.drag.is then
+		if not card.states.dragging then
 			local stack = (#self.cards / (self == game().draw_pile and 1 or 2) - k) * deck_height
 			card.T.x = self.T.x + 0.5*(self.T.w - card.T.w) + 0.012 * stack + 0.9*self.shuffle_amt*(1 - k*0.01)*(k%2 == 1 and 1 or -0)
 			card.T.y = self.T.y + 0.5*(self.T.h - card.T.h) + 0.018 * stack
@@ -98,18 +98,18 @@ function M.update(self, dt)
 	if self ~= game().draw_pile then return end
 	local table_deck = self == game().draw_pile and WORD_GAME_UI.TableDeck
 		and WORD_GAME_UI.TableDeck.uses_table_draw()
-	self.states.collide.can = not table_deck
-	self.states.hover.can = not table_deck
-	self.states.click.can = not table_deck
+	self.states.collideable = not table_deck
+	self.states.hoverable = not table_deck
+	self.states.clickable = not table_deck
 	if table_deck then
-		self.states.collide.can = true
-		self.states.hover.can = true
-		self.states.click.can = true
+		self.states.collideable = true
+		self.states.hoverable = true
+		self.states.clickable = true
 		for _, card in ipairs(self.cards) do
 			if card.area == self then
-				card.states.collide.can = false
-				card.states.hover.can = false
-				card.states.click.can = false
+				card.states.collideable = false
+				card.states.hoverable = false
+				card.states.clickable = false
 			end
 		end
 		if WORD_GAME_UI.TableDeck and WORD_GAME_UI.TableDeck.update then

@@ -118,8 +118,8 @@ function M.return_card(card)
 	end
 	local index = BonusStack.stack_index(card) or 1
 	local tx, ty = M.target_position(index)
-	if card.hard_set_T then
-		card:hard_set_T(tx, ty, card.T.w, card.T.h)
+	if card.snap_rect then
+		card:snap_rect(tx, ty, card.T.w, card.T.h)
 	end
 	card.T.r = 0
 	return true

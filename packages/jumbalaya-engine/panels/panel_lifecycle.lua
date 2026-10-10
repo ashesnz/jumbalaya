@@ -15,7 +15,7 @@ function Target:remove()
 		end
 	end
 	Tables.teardown_tree(self.children)
-	AnimNode.remove(self)
+	Spatial.remove(self)
 end
 
 function Target:draw()
@@ -54,18 +54,18 @@ function Target:recalculate()
 	self.T.w = self.root_node.T.w
 	self.T.h = self.root_node.T.h
 	game().REFRESH_FRAME_MAJOR_CACHE = (game().REFRESH_FRAME_MAJOR_CACHE or 0) + 1
-	self.root_node:initialize_VT()
+	self.root_node:initialize_drawn()
 	game().REFRESH_FRAME_MAJOR_CACHE = (game().REFRESH_FRAME_MAJOR_CACHE > 1 and game().REFRESH_FRAME_MAJOR_CACHE - 1 or nil)
 end
 
 function Target:move(dt)
-	AnimNode.move(self, dt)
-	AnimNode.move(self.root_node, dt)
+	Spatial.tick(self, dt)
+	Spatial.tick(self.root_node, dt)
 end
 
 function Target:drag(offset)
-	AnimNode.drag(self, offset)
-	AnimNode.move(self.root_node, game().real_dt)
+	Spatial.drag(self, offset)
+	Spatial.tick(self.root_node, game().real_dt)
 end
 
 function Target:add_child(node, parent)

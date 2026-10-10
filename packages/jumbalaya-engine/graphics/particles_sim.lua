@@ -50,7 +50,7 @@ function ParticleEmitter:update(dt)
 	local elapsed = now - (self.last_tick or now)
 	self.last_tick = now
 
-	if game().SETTINGS.paused and not self.created_on_pause then return end
+	if game().SETTINGS.paused and not self.moves_while_paused then return end
 
 	self.emit_credit = math.min(self.emit_credit + elapsed * self.rate, self.max_debt)
 
@@ -70,9 +70,9 @@ end
 --- A particle dies of old age (past its own `life`) instead of relying on a
 --- scale sign flip.
 function ParticleEmitter:move(dt)
-	if game().SETTINGS.paused and not self.created_on_pause then return end
+	if game().SETTINGS.paused and not self.moves_while_paused then return end
 
-	AnimNode.move(self, dt)
+	Spatial.tick(self, dt)
 
 	if self.timer_type ~= 'REAL' then dt = dt * game().TIME_SCALE end
 	local damp = math.max(0, 1 - 1.4 * dt)

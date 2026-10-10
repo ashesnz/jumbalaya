@@ -1,9 +1,8 @@
 --[[
 	jumbalaya-engine/scene/input_flags.lua - hover/click/drag capability + live bits.
 
-	Nested `can` / `is` tables stay because the input router and panels already
-	read them. Flat aliases (`hoverable`, `hovering`, …) are the names new code
-	should use.
+	Nested `can` / `is` tables are the backing store. Engine interaction and
+	new call sites use flat aliases (`hoverable`, `dragging`, …).
 ]]
 
 local function pair(can, is)

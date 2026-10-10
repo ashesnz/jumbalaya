@@ -34,7 +34,7 @@ function Menu.set_main_ui()
 												config = {align = "bli", offset = {x = -10, y = 0}, major = game().ROOM_ATTACH, bond = 'Weak'},
 										}
 										game().PROFILE_BUTTON.alignment.offset.x = 0
-										game().PROFILE_BUTTON:align_to_major()
+										game().PROFILE_BUTTON:apply_alignment()
 										return true
 								end
 						end,

@@ -18,7 +18,7 @@ function M.relayout(area, face_down_in_pile)
 	if area.config.type == "discard" or area.config.type == "bonus" then
 		for k, card in ipairs(area.cards) do
 			face_down_in_pile(card)
-			if not card.states.drag.is then
+			if not card.states.dragging then
 				card.T.x = area.T.x + (area.T.w - card.T.w) * card.discard_pos.x
 				card.T.y = area.T.y + (area.T.h - card.T.h) * card.discard_pos.y
 				card.T.r = card.discard_pos.r

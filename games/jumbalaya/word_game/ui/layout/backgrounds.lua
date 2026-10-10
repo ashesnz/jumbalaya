@@ -89,7 +89,7 @@ function M.garden()
 	game().SPLASH_BACK = Sprite(-30, -6, game().ROOM.T.w + 60, game().ROOM.T.h + 12, atlas, {x = 2, y = 0})
 	game().SPLASH_BACK:set_alignment({
 		major = game().ROOM_ATTACH,
-		type = "cm",
+		anchor = { x = "center", y = "center" },
 		offset = {x = 0, y = 0},
 	})
 	game().SPLASH_BACK:define_draw_steps({{
@@ -116,7 +116,7 @@ function M.swirl()
 	game().SPLASH_BACK = Sprite(-30, -6, game().ROOM.T.w + 60, game().ROOM.T.h + 12, atlas, {x = 2, y = 0})
 	game().SPLASH_BACK:set_alignment({
 		major = game().ROOM_ATTACH,
-		type = "cm",
+		anchor = { x = "center", y = "center" },
 		bond = "Strong",
 		offset = {x = 0, y = 0},
 	})

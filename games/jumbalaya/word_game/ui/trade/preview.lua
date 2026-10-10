@@ -41,8 +41,8 @@ function M.ensure(item, card_w, card_h)
 	if item.card and not item.card.REMOVED and deck.is_modified and deck.is_modified(item.card) then
 		deck.apply_to_card(card)
 	end
-	if card.hard_set_T then
-		card:hard_set_T(0, 0, card_w, card_h)
+	if card.snap_rect then
+		card:snap_rect(0, 0, card_w, card_h)
 	end
 	if card.set_scene_parent then
 		card:set_scene_parent(nil)

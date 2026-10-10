@@ -53,8 +53,8 @@ local function sync_card_transform(card)
 end
 
 local function snap_card_to(card, tx, ty)
-	if card.hard_set_T then
-		card:hard_set_T(tx, ty, card.T.w, card.T.h)
+	if card.snap_rect then
+		card:snap_rect(tx, ty, card.T.w, card.T.h)
 	else
 		card.T.x, card.T.y = tx, ty
 		sync_card_transform(card)
@@ -207,8 +207,8 @@ function M.animate_cards_to_stack(queue_event, _easing_mod, opts)
 					blocking = false,
 					func = function()
 						S.detach(fly_card)
-						if fly_card.hard_set_T then
-							fly_card:hard_set_T(fly_card.T.x, fly_card.T.y, fly_card.T.w, fly_card.T.h)
+						if fly_card.snap_rect then
+							fly_card:snap_rect(fly_card.T.x, fly_card.T.y, fly_card.T.w, fly_card.T.h)
 						else
 							sync_card_transform(fly_card)
 						end

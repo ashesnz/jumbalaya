@@ -33,8 +33,8 @@ local function settle_main_menu_layout()
 		game().title_top:relayout()
 		game().title_top:hard_set_cards()
 	end
-	if game().SPLASH_LOGO and game().SPLASH_LOGO.snap_VT then
-		game().SPLASH_LOGO:snap_VT()
+	if game().SPLASH_LOGO and game().SPLASH_LOGO.snap_drawn then
+		game().SPLASH_LOGO:snap_drawn()
 	end
 end
 
@@ -72,7 +72,7 @@ function M.open_main_menu(self, change_context)
 		game().SPLASH_LOGO = TitleLogo.create(self.title_top, logo_w, logo_h)
 	else
 		game().SPLASH_LOGO = Sprite(0, 0, logo_w, logo_h, logo_atlas, {x = 0, y = 0})
-		game().SPLASH_LOGO:set_alignment({major = self.title_top, type = "cm", bond = "Strong", offset = {x = 0, y = 0}})
+		game().SPLASH_LOGO:set_alignment({major = self.title_top, anchor = { x = "center", y = "center" }, bond = "Strong", offset = {x = 0, y = 0}})
 		game().SPLASH_LOGO:define_draw_steps({{shader = "dissolve"}})
 	end
 	game().SPLASH_LOGO.dissolve_colours = {game().C.WHITE, game().C.WHITE}

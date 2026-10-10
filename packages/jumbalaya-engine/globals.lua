@@ -6,7 +6,7 @@
 
 local Kind = require("jumbalaya-engine.object")
 local Node = require("jumbalaya-engine.scene.node")
-local AnimNode = require("jumbalaya-engine.scene.animated.init")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 local GfxSprite = require("jumbalaya-engine.graphics.sprite")
 local GfxAnimator = require("jumbalaya-engine.graphics.sprite_animator")
 local TweenMod = require("jumbalaya-engine.util.tween")
@@ -19,9 +19,9 @@ local FlowText = require("jumbalaya-engine.graphics.flow_text")
 local M = {
 	Kind = Kind,
 	Node = Node,
-	AnimNode = AnimNode,
-	EaseNode = AnimNode,
-	Spatial = AnimNode,
+	Spatial = Spatial,
+	AnimNode = Spatial,
+	EaseNode = Spatial,
 	SceneNode = Node,
 	GfxSprite = GfxSprite,
 	Sprite = GfxSprite,

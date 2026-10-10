@@ -21,7 +21,7 @@ Start here when adding or moving HUD / table chrome:
 |----------|--------|-------|
 | Need declarative buttons, labels, or a fixed HUD column? | Yes | **`jumbalaya-engine/panels`** — `Panel.column` / `Panel.button` (`panels.api`). Do not author `{ n = game().UI.* }` trees. Example: sidebar stamp grid, options overlay. |
 | Need draggable letter tiles, piles, or snap-to-slot input? | Yes | **`word_game/ui/cardarea`** — `Card` + `CardArea` hosts (`dealt_letters`, `draw_pile`, `pattern_row.area`). Layout authority is still `store.piles`; sync hosts after mutations. |
-| Need a one-off cinematic sprite, tween, or burst FX? | Yes | **Scene graph + `word_game/ui/play_effects`** — `Sprite` / `AnimNode` under the Game shell, or timed sequences in `play_effects/` and `feedback/`. |
+| Need a one-off cinematic sprite, tween, or burst FX? | Yes | **Scene graph + `word_game/ui/play_effects`** — `Sprite` / `Spatial` under the Game shell, or timed sequences in `play_effects/` and `feedback/`. |
 
 **Not sure?** If it has **hit targets and layout from a definition table** → panels. If it **moves between piles and snaps to puzzle slots** → cardarea. If it **plays once and disappears** → scene graph / play effects.
 

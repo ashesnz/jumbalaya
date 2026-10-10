@@ -24,12 +24,12 @@ end
 
 --- Snap the freshly-laid-out tree onto its transforms and sync embedded
 --- objects. Capability-guarded so plain AnimNodes work as objects too.
-function Target:initialize_VT()
+function Target:initialize_drawn()
 	if self.snap_to_attach then self:snap_to_attach() end
 	self:calculate_parallax()
 
 	for _, v in pairs(self.children) do
-		if v.initialize_VT then v:initialize_VT() end
+		if v.initialize_drawn then v:initialize_drawn() end
 	end
 
 	self.VT.w, self.VT.h = self.T.w, self.T.h
@@ -37,15 +37,15 @@ function Target:initialize_VT()
 	if self.ui_kind == game().UI.TEXT then self:update_text() end
 	if self.config.object then
 		if not self.config.no_role then
-			if self.config.object.hard_set_T then
-				self.config.object:hard_set_T(self.T.x, self.T.y, self.T.w, self.T.h)
+			if self.config.object.snap_rect then
+				self.config.object:snap_rect(self.T.x, self.T.y, self.T.w, self.T.h)
 			end
 			if self.config.object.snap_to_attach then
 				self.config.object:snap_to_attach()
 			end
-			if self.config.object.alignment and self.config.object.align_to_major then
+			if self.config.object.alignment and self.config.object.apply_alignment then
 				self.config.object.alignment.prev_type = ''
-				self.config.object:align_to_major()
+				self.config.object:apply_alignment()
 			end
 		end
 		if self.config.object.recalculate then

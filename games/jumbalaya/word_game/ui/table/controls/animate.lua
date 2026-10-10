@@ -87,7 +87,7 @@ function M.recall_placement_cards(opts)
 		if game().dealt_letters.relayout then game().dealt_letters:relayout() end
 		if not opts.skip_hand_snap then
 			if game().dealt_letters.hard_set_cards then game().dealt_letters:hard_set_cards() end
-			if game().dealt_letters.snap_VT then game().dealt_letters:snap_VT() end
+			if game().dealt_letters.snap_drawn then game().dealt_letters:snap_drawn() end
 		end
 	end
 end

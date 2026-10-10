@@ -27,8 +27,7 @@ end
 local function topmost_draggable(self)
 	for i = #self.nodes_at_cursor, 1, -1 do
 		local node = self.nodes_at_cursor[i]
-		if node and node ~= game().ROOM and node.states and node.states.drag
-			and node.states.drag.can and node:can_drag() then
+		if node and node ~= game().ROOM and node.states and node.states.draggable and node:can_drag() then
 			return node
 		end
 	end
@@ -44,7 +43,7 @@ local function resolve_press_target(self, press_node)
 	if not press_node or press_node == game().ROOM then
 		return press_node
 	end
-	if press_node.states.click.can then
+	if press_node.states.clickable then
 		return press_node
 	end
 	return press_node:can_drag() or nil

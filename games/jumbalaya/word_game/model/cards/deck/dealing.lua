@@ -138,7 +138,7 @@ end
 		while live_game().dealt_letters and Deck().held_count() < target_size do
 			local card = take_letter_from_deck(needs_vowel())
 			if not card then break end
-			live_game().dealt_letters:add_card(card)
+			piles.present_card(card, "hand", { from_pile = "draw" })
 		end
 		Deck().ensure_vowel_in_hand()
 		if live_game().dealt_letters then
@@ -146,7 +146,7 @@ end
 			while Deck().held_count() < target_size do
 				local card = take_letter_from_deck(needs_vowel())
 				if not card then break end
-				live_game().dealt_letters:add_card(card)
+				piles.present_card(card, "hand", { from_pile = "draw" })
 			end
 			Deck().ensure_vowel_in_hand()
 			live_game().dealt_letters:refresh_order()

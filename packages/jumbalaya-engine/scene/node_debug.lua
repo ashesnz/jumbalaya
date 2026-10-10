@@ -7,7 +7,7 @@ return function(Node)
 		self.under_overlay = game().under_overlay
 		if not game().DEBUG then return end
 
-		local transform = self.VT or self.T
+		local transform = self.drawn or self.VT or self.target or self.T
 		local px_w, px_h = transform.w * game().TILESIZE, transform.h * game().TILESIZE
 		love.graphics.push()
 		love.graphics.scale(game().TILESCALE, game().TILESCALE)
@@ -18,13 +18,13 @@ return function(Node)
 			love.graphics.setColor(1, 1, 0, 1)
 			love.graphics.print(self.DEBUG_VALUE, px_w, px_h, nil, 1 / game().TILESCALE)
 		end
-		love.graphics.setLineWidth(1 + (self.states.focus.is and 1 or 0))
-		if self.states.collide.is then
+		love.graphics.setLineWidth(1 + (self.states.focused and 1 or 0))
+		if self.states.colliding then
 			love.graphics.setColor(0, 1, 0, 0.3)
 		else
 			love.graphics.setColor(1, 0, 0, 0.3)
 		end
-		if self.states.focus.can then
+		if self.states.focusable then
 			love.graphics.setColor(game().C.GOLD)
 			love.graphics.setLineWidth(1)
 		end
@@ -45,12 +45,14 @@ return function(Node)
 	end
 
 	function Node:translate_container()
-		if not (self.container and self.container ~= self) then return end
-		local container, units = self.container, game().TILESCALE * game().TILESIZE
-		love.graphics.translate(container.T.w * units * 0.5, container.T.h * units * 0.5)
-		love.graphics.rotate(container.T.r)
+		local root = (self.coord_root and self:coord_root()) or self.container
+		if not (root and root ~= self) then return end
+		local root_T = root.target or root.T
+		local units = game().TILESCALE * game().TILESIZE
+		love.graphics.translate(root_T.w * units * 0.5, root_T.h * units * 0.5)
+		love.graphics.rotate(root_T.r or 0)
 		love.graphics.translate(
-			-container.T.w * units * 0.5 + container.T.x * units,
-			-container.T.h * units * 0.5 + container.T.y * units)
+			-root_T.w * units * 0.5 + root_T.x * units,
+			-root_T.h * units * 0.5 + root_T.y * units)
 	end
 end

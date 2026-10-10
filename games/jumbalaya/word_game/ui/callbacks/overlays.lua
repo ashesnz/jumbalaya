@@ -110,7 +110,7 @@ function M.install()
 				definition = Panel.root({align = 'cm', colour = game().C.CLEAR, padding = 0.02}, e.config.ref_table),
 				config = {offset = {x=-0.03,y=0}, align = 'cl', parent = e}
 			}
-			e.children.info:align_to_major()
+			e.children.info:apply_alignment()
 			e.config.ref_table = nil
 		end
 	end)

@@ -5,9 +5,9 @@ local game = shell.game
 return function(Target)
 function Target:set_values(_T, recalculate)
 	if not recalculate or not self.T then
-		AnimNode.construct(self, {T = _T})
-		self.states.click.can = false
-		self.states.drag.can = false
+		Spatial.construct(self, {T = _T})
+		self.states.clickable = false
+		self.states.draggable = false
 		self.static_rotation = true
 	else
 		self.T.x, self.T.y = _T.x, _T.y
@@ -16,13 +16,13 @@ function Target:set_values(_T, recalculate)
 
 	-- Interaction capability from config shape.
 	if self.config.button_host then
-		self.states.collide.can = true; self.states.hover.can = false; self.states.click.can = true
+		self.states.collideable = true; self.states.hoverable = false; self.states.clickable = true
 	end
 	if self.config.button then
-		self.states.collide.can = true; self.states.click.can = true
+		self.states.collideable = true; self.states.clickable = true
 	end
 	if self.config.on_demand_tooltip or self.config.tooltip or self.config.detailed_tooltip then
-		self.states.collide.can = true
+		self.states.collideable = true
 	end
 
 	self:follow(self.panel, { x = _T.x, y = _T.y }, { lock_drawn = false })
@@ -31,12 +31,12 @@ function Target:set_values(_T, recalculate)
 		self.panel.draw_layers[self.config.draw_layer] = self
 	end
 
-	if self.config.collideable then self.states.collide.can = true end
+	if self.config.collideable then self.states.collideable = true end
 
 	-- Explicit tri-state override; propagates to embedded objects.
 	if self.config.can_collide ~= nil then
-		self.states.collide.can = self.config.can_collide
-		if self.config.object then self.config.object.states.collide.can = self.states.collide.can end
+		self.states.collideable = self.config.can_collide
+		if self.config.object then self.config.object.states.collideable = self.states.collideable end
 	end
 
 	if self.ui_kind == game().UI.OBJECT and not self.config.no_role then
@@ -104,7 +104,7 @@ function Target:set_values(_T, recalculate)
 		self.config.focus_args.registered = true
 	end
 
-	if self.config.force_focus then self.states.collide.can = true end
+	if self.config.force_focus then self.states.collideable = true end
 
 	if self.config.button_delay and not self.config.button_delay_start then
 		self.config.button_delay_start = game().TIMERS.REAL

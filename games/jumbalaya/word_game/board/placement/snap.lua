@@ -226,7 +226,7 @@ function M.return_to_hand(session, card)
 	jumble.remove_card_from_blanks(card)
 	if dealt.add_card then dealt:add_card(card) end
 	if dealt.relayout then dealt:relayout() end
-	if dealt.snap_VT then dealt:snap_VT() end
+	if dealt.snap_drawn then dealt:snap_drawn() end
 	if dealt.hard_set_cards then dealt:hard_set_cards() end
 
 	piles.move_card({

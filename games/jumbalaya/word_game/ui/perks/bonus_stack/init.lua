@@ -166,8 +166,8 @@ function M.sync_positions()
 					M.detach(card)
 				end
 				local tx, ty = M.target_position(i)
-				if card.hard_set_T then
-					card:hard_set_T(tx, ty, card.T.w, card.T.h)
+				if card.snap_rect then
+					card:snap_rect(tx, ty, card.T.w, card.T.h)
 				else
 					card.T.x, card.T.y = tx, ty
 				end

@@ -24,16 +24,16 @@ alwaysApply: false
 ## Classes (`jumbalaya-engine/scene`)
 
 ```lua
-LetterTile = AnimNode:derive("LetterTile")
+LetterTile = Spatial:derive("LetterTile")
 
 function LetterTile:construct(X, Y, W, H, ...)
-    EaseNode.construct(self, X, Y, W, H)
+    Spatial.construct(self, X, Y, W, H)
 end
 ```
 
-Chain: `Kind → SceneNode (Node) → Spatial (AnimNode / EaseNode) → Sprite, Panel, LetterTile, CardPile`
+Chain: `Kind → SceneNode (Node) → Spatial → Sprite, Panel, LetterTile, CardPile`
 
-Spatial motion: `set_rect`, `follow(parent, offset)`, `bind_to(host)`. See `docs/engine.md` and remaining work in `docs/engine-lineage.md`.
+Spatial motion: `set_rect`, `follow(parent, offset)`, `bind_to(host)`. See `docs/engine.md`.
 
 `letter_tile.lua` mixes in presentation via `word_game/ui/cards/bind.lua`.
 

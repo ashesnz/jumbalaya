@@ -74,8 +74,8 @@ local function draw_sidebar_deck()
 	pile.T.y = deck_rect.y
 	pile.T.w = deck_rect.w
 	pile.T.h = deck_rect.h
-	if pile.hard_set_T then
-		pile:hard_set_T(deck_rect.x, deck_rect.y, deck_rect.w, deck_rect.h)
+	if pile.snap_rect then
+		pile:snap_rect(deck_rect.x, deck_rect.y, deck_rect.w, deck_rect.h)
 	end
 	TableDeck.draw(pile)
 end
@@ -126,8 +126,8 @@ function WordSidebar:ensure()
 	if room and game().SIDEBAR_HUD.set_container then
 		game().SIDEBAR_HUD:set_container(room)
 	end
-	if game().SIDEBAR_HUD.align_to_major then
-		game().SIDEBAR_HUD:align_to_major()
+	if game().SIDEBAR_HUD.apply_alignment then
+		game().SIDEBAR_HUD:apply_alignment()
 	end
 	ensure_panel_registry(game().SIDEBAR_HUD)
 	game().SIDEBAR_HUD:recalculate()

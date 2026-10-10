@@ -7,15 +7,15 @@ return function(InputRouter)
 function InputRouter:update_dispatch(dt)
 	-- Hover application: touch only hovers while the finger is down.
 	local hover_node = self.hover_state.target
-	if hover_node and hover_node.states.hover.can and (not self.HID.touch or self.pointer_held) then
+	if hover_node and hover_node.states.hoverable and (not self.HID.touch or self.pointer_held) then
 		self.hovering.target = hover_node
 		if self.hovering.prev_target and self.hovering.prev_target ~= hover_node then
-			self.hovering.prev_target.states.hover.is = false
+			self.hovering.prev_target.states.hovering = false
 		end
-		hover_node.states.hover.is = true
+		hover_node.states.hovering = true
 		hover_node:set_offset(self.hover_state.T, 'Hover')
 	elseif (hover_node == nil or (self.HID.touch and not self.pointer_held)) and self.hovering.target then
-		self.hovering.target.states.hover.is = false
+		self.hovering.target.states.hovering = false
 		self.hovering.target = nil
 	end
 

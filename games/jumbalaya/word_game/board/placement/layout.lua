@@ -39,7 +39,7 @@ function M.apply_screen_position(session)
 	end
 
 	M.relayout(session)
-	area:snap_VT()
+	area:snap_drawn()
 	area:hard_set_cards()
 end
 

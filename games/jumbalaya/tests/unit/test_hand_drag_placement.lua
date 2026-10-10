@@ -84,7 +84,7 @@ local function make_letter_card(game, id, letter)
 		translate_container = function() end,
 		draw = function() end,
 		flip = function() end,
-		hard_set_T = function() end,
+		snap_rect = function() end,
 		calculate_parallax = function() end,
 		set_card_area = function(self, area)
 			self.area = area

@@ -59,6 +59,6 @@ function ParticleEmitter:remove()
 	end
 
 	Tables.teardown_tree(self.children)
-	AnimNode.remove(self)
+	Spatial.remove(self)
 end
 end

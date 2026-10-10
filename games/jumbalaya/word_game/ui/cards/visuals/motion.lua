@@ -199,19 +199,19 @@ function Card:flip()
 		end
 end
 
-function Card:hard_set_T(X, Y, W, H)
+function Card:snap_rect(X, Y, W, H)
 		local x = (X or self.T.x)
 		local y = (Y or self.T.y)
 		local w = (W or self.T.w)
 		local h = (H or self.T.h)
-		EaseNode.hard_set_T(self,x, y, w, h)
-		if self.children.front then self.children.front:hard_set_T(x, y, w, h) end
-		if self.children.back then self.children.back:hard_set_T(x, y, w, h) end
-		if self.children.center then self.children.center:hard_set_T(x, y, w, h) end
+		EaseNode.snap_rect(self,x, y, w, h)
+		if self.children.front then self.children.front:snap_rect(x, y, w, h) end
+		if self.children.back then self.children.back:snap_rect(x, y, w, h) end
+		if self.children.center then self.children.center:snap_rect(x, y, w, h) end
 end
 
 function Card:move(dt)
-		EaseNode.move(self, dt)
+		Spatial.tick(self, dt)
 		if self.children.h_popup then
 				self.children.h_popup:set_alignment(self:align_h_popup())
 		end
@@ -220,5 +220,5 @@ end
 function Card:pulse(scale, rot_amount)
 		local rot_amt = rot_amount and 0.4*Random.pick_random({rot_amount, -rot_amount}) or Random.pick_random({0.16, -0.16})
 		scale = scale and scale*0.4 or 0.11
-		EaseNode.pulse(self, scale, rot_amt)
+		Spatial.pulse(self, scale, rot_amt)
 end

@@ -160,7 +160,7 @@ function M.sync_hand_after_deal()
 		game().dealt_letters:relayout()
 		for _, card in ipairs(game().dealt_letters.cards) do
 			if not card.bounce and card.states and not card.states.drag.is then
-				card:hard_set_T()
+				card:snap_rect()
 			end
 		end
 		if game().dealt_letters.velocity then
@@ -169,7 +169,7 @@ function M.sync_hand_after_deal()
 			game().dealt_letters.velocity.r = 0
 			game().dealt_letters.velocity.scale = 0
 		end
-		game().dealt_letters:snap_VT()
+		game().dealt_letters:snap_drawn()
 	end
 	if WORD_GAME_UI.TableControls then
 		WORD_GAME_UI.TableControls.sync_position()
@@ -226,7 +226,7 @@ function M.restore_boss_layout(opts)
 	M.align_placement_table()
 	if game().dealt_letters then
 		game().dealt_letters:relayout()
-		game().dealt_letters:snap_VT()
+		game().dealt_letters:snap_drawn()
 		game().dealt_letters:hard_set_cards()
 	end
 	if WORD_GAME_UI.TableControls then

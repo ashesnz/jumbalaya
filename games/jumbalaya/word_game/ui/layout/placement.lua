@@ -14,7 +14,7 @@ local M = {}
 
 local function snap_moveable(moveable)
 	if not moveable then return end
-	if moveable.snap_VT then moveable:snap_VT() end
+	if moveable.snap_drawn then moveable:snap_drawn() end
 	if moveable.velocity then
 		moveable.velocity.x = 0
 		moveable.velocity.y = 0
@@ -91,7 +91,7 @@ function M.update_play_attach()
 	game().PLAY_ATTACH.T.y = rect.y
 	game().PLAY_ATTACH.T.w = rect.w
 	game().PLAY_ATTACH.T.h = rect.h
-	game().PLAY_ATTACH:hard_set_T(rect.x, rect.y, rect.w, rect.h)
+	game().PLAY_ATTACH:snap_rect(rect.x, rect.y, rect.w, rect.h)
 end
 
 function M.update_all()
@@ -117,14 +117,14 @@ function M.set_screen_positions(opts)
 			game().draw_pile.T.y = deck.y
 			game().draw_pile.T.w = deck.w
 			game().draw_pile.T.h = deck.h
-			if game().draw_pile.hard_set_T then game().draw_pile:hard_set_T(deck.x, deck.y, deck.w, deck.h) end
+			if game().draw_pile.snap_rect then game().draw_pile:snap_rect(deck.x, deck.y, deck.w, deck.h) end
 			end
 			-- Invisible recycle pile; discard-bin cards dissolve on the perk imprint.
 			if game().recycle_stash and game().recycle_stash.T then
 				game().recycle_stash.T.x = -20
 				game().recycle_stash.T.y = -20
-				if game().recycle_stash.hard_set_T then
-					game().recycle_stash:hard_set_T(-20, -20, game().recycle_stash.T.w, game().recycle_stash.T.h)
+				if game().recycle_stash.snap_rect then
+					game().recycle_stash:snap_rect(-20, -20, game().recycle_stash.T.w, game().recycle_stash.T.h)
 				end
 			end
 		else
@@ -143,7 +143,7 @@ function M.set_screen_positions(opts)
 			game().recycle_stash.T.y = rect.y + rect.h * 0.5
 		end
 
-		if game().dealt_letters.snap_VT then game().dealt_letters:snap_VT() end
+		if game().dealt_letters.snap_drawn then game().dealt_letters:snap_drawn() end
 		snap_moveable(game().dealt_letters)
 		snap_moveable(game().draw_pile)
 		snap_moveable(game().recycle_stash)
@@ -162,7 +162,7 @@ function M.set_screen_positions(opts)
 		end
 
 		if placement then
-			placement:snap_VT()
+			placement:snap_drawn()
 			placement:hard_set_cards()
 		end
 
@@ -185,7 +185,7 @@ function M.refresh_placement_layout()
 	end
 	local placement = game().pattern_row.area
 	if placement then
-		placement:snap_VT()
+		placement:snap_drawn()
 		if placement.velocity then
 			placement.velocity.x = 0
 			placement.velocity.y = 0

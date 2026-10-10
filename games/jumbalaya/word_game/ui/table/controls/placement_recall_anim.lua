@@ -239,7 +239,7 @@ local function finish_recall()
 		if game().dealt_letters.refresh_order then game().dealt_letters:refresh_order() end
 		if game().dealt_letters.relayout then game().dealt_letters:relayout() end
 		if game().dealt_letters.hard_set_cards then game().dealt_letters:hard_set_cards() end
-		if game().dealt_letters.snap_VT then game().dealt_letters:snap_VT() end
+		if game().dealt_letters.snap_drawn then game().dealt_letters:snap_drawn() end
 	end
 end
 

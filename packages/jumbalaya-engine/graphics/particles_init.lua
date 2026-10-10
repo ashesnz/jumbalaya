@@ -14,7 +14,7 @@ ParticleEmitter.SHAPE_SETS = {
 function ParticleEmitter:construct(X, Y, W, H, config)
 	config = config or {}
 
-	AnimNode.construct(self, X, Y, W, H)
+	Spatial.construct(self, X, Y, W, H)
 
 	self.fill = config.fill -- spread spawn points across our rect instead of the center
 	self.padding = config.padding or 0
@@ -22,7 +22,7 @@ function ParticleEmitter:construct(X, Y, W, H, config)
 	if config.attach then
 		self:set_alignment{
 			major = config.attach,
-			type = 'cm',
+			anchor = { x = "center", y = "center" },
 			bond = 'Strong',
 		}
 		local host = self.attach.host
@@ -37,11 +37,11 @@ function ParticleEmitter:construct(X, Y, W, H, config)
 	end
 
 	-- Emitters are purely visual; never interact with the cursor.
-	self.states.hover.can = false
-	self.states.click.can = false
-	self.states.collide.can = false
-	self.states.drag.can = false
-	self.states.release_on.can = false
+	self.states.hoverable = false
+	self.states.clickable = false
+	self.states.collideable = false
+	self.states.draggable = false
+	self.states.releasable = false
 
 	-- Emission model: a credit budget refilled at `rate` credits/second.
 	-- One credit buys one particle. Debt after hitches is capped so the
@@ -53,7 +53,7 @@ function ParticleEmitter:construct(X, Y, W, H, config)
 	self.burst_allowance = math.min(20, config.pulse_max or 0)
 	self.spawned_this_frame_cap = 24
 
-	self.timer_type = (self.created_on_pause and 'REAL') or config.timer_type or 'REAL'
+	self.timer_type = (self.moves_while_paused and 'REAL') or config.timer_type or 'REAL'
 	self.last_tick = game().TIMERS[self.timer_type]
 	self.lifespan = config.lifespan or 1
 	self.fade_alpha = 0

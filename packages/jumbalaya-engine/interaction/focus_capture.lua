@@ -23,7 +23,7 @@ function InputRouter:capture_focused_input(button, input_type, dt)
 
 	-- While actively dragging the focused card, dpad reorders it in its area.
 	elseif input_type == 'press' and focused and focused.area and focused == self.dragging.target then
-		focused.states.drag.is = false
+		focused.states.dragging = false
 		local slot_index = focused.slot
 		local area = focused.area
 		if button == 'dpleft' and slot_index and slot_index > 1 and area then
@@ -41,7 +41,7 @@ function InputRouter:capture_focused_input(button, input_type, dt)
 			area:relayout()
 			self:update_cursor()
 		end
-		focused.states.drag.is = true
+		focused.states.dragging = true
 		captured = true
 	end
 

@@ -2,7 +2,7 @@
 local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
 local DropShadow = require("jumbalaya-engine.graphics.drop_shadow")
-local AnimNode = require("jumbalaya-engine.scene.animated.init")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 local Envelopes = require("jumbalaya-engine.graphics.flow_text_envelopes")
 local Utf8 = require("jumbalaya-engine.util.utf8")
 local shell = require("jumbalaya-engine.shell")
@@ -21,7 +21,7 @@ local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 	    quiver is layered low-frequency sine noise.
 ]]
 
-local FlowText = AnimNode:derive("FlowText")
+local FlowText = Spatial:derive("FlowText")
 
 local function default_font_spec(render_scale)
 	render_scale = render_scale or (game().TILESIZE or 20) * 7
@@ -93,7 +93,7 @@ function FlowText:construct(config)
 		self:pop_out(4)
 	end
 
-	EaseNode.construct(self, config.X or 0, config.Y or 0, config.W, config.H)
+	Spatial.construct(self, config.X or 0, config.Y or 0, config.W, config.H)
 
 	self.T.r = config.text_rot or 0
 

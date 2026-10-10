@@ -12,7 +12,7 @@ local HAND_BOTTOM_MARGIN = 0.25
 
 local function snap_moveable(moveable)
 	if not moveable then return end
-	if moveable.snap_VT then moveable:snap_VT() end
+	if moveable.snap_drawn then moveable:snap_drawn() end
 	if moveable.velocity then
 		moveable.velocity.x = 0
 		moveable.velocity.y = 0
@@ -30,7 +30,7 @@ function M.apply_screen_position()
 		game().dealt_letters.T.y = locked.y
 		game().dealt_letters.T.w = locked.w
 		game().dealt_letters.T.h = locked.h
-		if game().dealt_letters.hard_set_T then game().dealt_letters:hard_set_T(locked.x, locked.y, locked.w, locked.h) end
+		if game().dealt_letters.snap_rect then game().dealt_letters:snap_rect(locked.x, locked.y, locked.w, locked.h) end
 		if game().dealt_letters.cards and game().dealt_letters.cards[1] then
 			if game().dealt_letters.relayout then game().dealt_letters:relayout() end
 			if game().dealt_letters.hard_set_cards then game().dealt_letters:hard_set_cards() end
@@ -48,7 +48,7 @@ function M.apply_screen_position()
 	game().dealt_letters.T.h = hand_h
 	game().dealt_letters.T.x = felt.x + math.max(0, (felt.w - hand_w) / 2)
 	game().dealt_letters.T.y = game().TILE_H - hand_h - HAND_BOTTOM_MARGIN
-	if game().dealt_letters.hard_set_T then game().dealt_letters:hard_set_T(game().dealt_letters.T.x, game().dealt_letters.T.y, hand_w, hand_h) end
+	if game().dealt_letters.snap_rect then game().dealt_letters:snap_rect(game().dealt_letters.T.x, game().dealt_letters.T.y, hand_w, hand_h) end
 
 	if game().dealt_letters.cards and game().dealt_letters.cards[1] then
 		if game().dealt_letters.relayout then game().dealt_letters:relayout() end

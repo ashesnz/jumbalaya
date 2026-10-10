@@ -53,13 +53,13 @@ function InputRouter:set_cursor_hover()
 		return
 	end
 
-	if self.HID.controller and self.focused.target and self.focused.target.states.hover.can then
+	if self.HID.controller and self.focused.target and self.focused.target.states.hoverable then
 		-- Dpad/axis focus must still actually collide to count as hovered.
-		if (self.HID.dpad or self.HID.axis_cursor) and self.focused.target.states.collide.is then
+		if (self.HID.dpad or self.HID.axis_cursor) and self.focused.target.states.colliding then
 			self.hover_state.target = self.focused.target
 		else
 			for _, v in ipairs(self.collision_list) do
-				if v.states.hover.can then
+				if v.states.hoverable then
 					self.hover_state.target = v
 					break
 				end
@@ -67,7 +67,7 @@ function InputRouter:set_cursor_hover()
 		end
 	else
 		for _, v in ipairs(self.collision_list) do
-			if v.states.hover.can and (not v.states.drag.is or self.HID.touch) then
+			if v.states.hoverable and (not v.states.dragging or self.HID.touch) then
 				self.hover_state.target = v
 				break
 			end

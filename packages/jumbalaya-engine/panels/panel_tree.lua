@@ -44,7 +44,7 @@ function Target:remove_group(node, group)
 	self:calculate_xywh(self.root_node, self.T, true)
 	self.root_node:set_wh()
 	self.root_node:set_alignments()
-	self.root_node:initialize_VT()
+	self.root_node:initialize_drawn()
 end
 
 --- Creates a LayoutNode for `node`, wires inheritance (group/button), recurses

@@ -184,7 +184,7 @@ function M.animate(hand, on_complete)
 				card.shuffle_hop = nil
 			end
 			hand:relayout()
-			hand:snap_VT()
+			hand:snap_drawn()
 			hand:hard_set_cards()
 			set_animating(false)
 			local store = bridge.store()

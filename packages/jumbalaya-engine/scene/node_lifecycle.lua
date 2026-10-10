@@ -13,13 +13,13 @@ return function(Node)
 			definition = self.config.d_popup,
 			config = self.config.d_popup_config,
 		}
-		self.children.d_popup.states.collide.can = false
+		self.children.d_popup.states.collideable = false
 		table.insert(game().LIVE.POPUP, self.children.d_popup)
-		self.children.d_popup.states.drag.can = true
+		self.children.d_popup.states.draggable = true
 	end
 
 	function Node:can_drag()
-		return self.states.drag.can and self or nil
+		return self.states.draggable and self or nil
 	end
 
 	function Node:stop_drag()
@@ -39,8 +39,8 @@ return function(Node)
 			definition = self.config.h_popup,
 			config = self.config.h_popup_config,
 		}
-		self.children.h_popup.states.collide.can = false
-		self.children.h_popup.states.drag.can = true
+		self.children.h_popup.states.collideable = false
+		self.children.h_popup.states.draggable = true
 	end
 
 	function Node:stop_hover()

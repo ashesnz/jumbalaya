@@ -117,6 +117,22 @@ local function resolve_live_card(record)
 	return nil
 end
 
+--- Presentation add onto a host, then MOVE_CARD so store.piles is the write path.
+function M.present_card(card, pile_id, opts)
+	opts = opts or {}
+	if not card or not pile_id then return end
+	local host = opts.host or host_for_pile(pile_id)
+	if host and host.add_card then
+		host:add_card(card, opts.location, opts.stay_flipped)
+	end
+	M.move_card({
+		card = card,
+		from_pile = opts.from_pile,
+		to_pile = pile_id,
+		slot_index = opts.slot_index,
+	})
+end
+
 --- Dispatch a core MOVE_CARD action and mirror pile_id on a live Card (presentation).
 --- Gameplay ownership changes must go through the store reducer, not card.area alone.
 function M.move_card(opts)

@@ -208,7 +208,7 @@ function Game:start_run(args)
 
     if not saveTable then
         self.draw_pile:shuffle()
-        self.draw_pile:hard_set_T()
+        self.draw_pile:snap_rect()
     end
 
     self.draw_pile:relayout()

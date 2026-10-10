@@ -26,7 +26,7 @@ Phases 0–13 are **complete** (store, engine package, retained UI, `Funcs` regi
 - No new deep `word_game.model.*` / `word_game.ui.*` requires across `app/` (bootstrap wiring exempt), `devtools/`, or `word_game/ui/` (grandfathered allowlist) — enforced by `tests/unit/test_facade_boundaries.lua`.
 - New features ship via `WORD_GAME` / `WORD_GAME_UI` facade methods; model code uses `Presentation.emit`, not `Funcs.dispatch`.
 - Store authority lives on `WORD_GAME.store()` / `game_access` via `word_game/model/store_ops.lua`.
-- **Engine scene API:** Spatial only (`set_rect`, `follow`, `bind_to`) — see [engine.md](engine.md) and remaining work in [engine-lineage.md](engine-lineage.md).
+- **Engine scene API:** Spatial only (`set_rect`, `follow`, `bind_to`) — see [engine.md](engine.md).
 
 ### Store immutability (POC)
 
@@ -141,7 +141,7 @@ jumbalaya-engine/
   persistence/  save_queue.lua, worker.lua (disk flush + thread logic)
   debug/        overlay.lua (FPS / perf overlay)
   services/     Testable service interfaces (Context, Renderer, InputService, Audio, Clock, EventBus)
-  scene/        Node + AnimNode scene graph
+  scene/        Node + Spatial scene graph
   interaction/  InputRouter — pointer, gamepad, focus, collision (low-level HID)
   graphics/     Sprite, particles, draw stack, FlowText
   panels/       Declarative HUD trees (Panel, LayoutNode, ViewHost)
@@ -172,7 +172,7 @@ These layers are **not** duplicates — they sit at different levels:
 
 | Layer | Path | Role |
 |-------|------|------|
-| Scene graph | `jumbalaya-engine/scene/` | `SceneNode`, `Spatial` (`AnimNode` alias) — rects, `follow` / `bind_to`, springs |
+| Scene graph | `jumbalaya-engine/scene/` | `SceneNode`, `Spatial` — rects, `follow` / `bind_to`, springs |
 | Panel tree | `jumbalaya-engine/panels/` | Declarative HUD trees (`Panel`, `LayoutNode`, `ViewHost`) — layout, hit testing, buttons from definition tables |
 | Store views | `jumbalaya-engine/views/` | Headless render helpers (`PileView`, `LetterCardView`) |
 | Game presentation | `word_game/ui/` | Jumbalaya screens: sidebar, table board, trade, play FX, card chrome |
@@ -488,7 +488,7 @@ engine_boot → runtime_boot (Game(), store, facade) → store_boot → presenta
 The inheritance order is contractual:
 
 ```text
-Object → Node → EaseNode/AnimNode → Sprite, LetterTile, CardPile, Panel
+Object → Node → Spatial → Sprite, LetterTile, CardPile, Panel
 ```
 
 Additional rules:

@@ -35,7 +35,7 @@ end
 
 --- Elements are hit-testable only while their owning box allows collisions.
 function Target:collides_with_point(cursor_trans)
-	if self.panel.states.collide.can then
+	if self.panel.states.collideable then
 		return Node.collides_with_point(self, cursor_trans)
 	end
 	return false
@@ -106,7 +106,7 @@ function Target:remove()
 	end
 
 	Tables.teardown_tree(self.children)
-	AnimNode.remove(self)
+	Spatial.remove(self)
 end
 
 --- Builds the configured tooltip popup definition before Node creates it.

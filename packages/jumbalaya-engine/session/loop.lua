@@ -58,8 +58,12 @@ function Game:update(dt)
 		self.TRANSFORMS = Tables.compact_array(self.TRANSFORMS)
 
 		for _, v in ipairs(self.TRANSFORMS) do
-			if v and v.move and v.FRAME and v.FRAME.TRANSFORM and v.FRAME.TRANSFORM < self.FRAMES.TRANSFORM then
-				v:move(move_dt)
+			if v and v.FRAME and v.FRAME.TRANSFORM and v.FRAME.TRANSFORM < self.FRAMES.TRANSFORM then
+				if v.move then
+					v:move(move_dt)
+				elseif v.tick then
+					v:tick(move_dt)
+				end
 			end
 		end
 		perf_checkpoint("move", "update")
@@ -68,7 +72,7 @@ function Game:update(dt)
 
 		for _, v in ipairs(self.TRANSFORMS) do
 			if not v or not v.update then goto continue_update end
-			if v.STATIONARY
+			if v.settled
 				and v.FRAME
 				and v.FRAME.TRANSFORM
 				and v.FRAME.TRANSFORM >= self.FRAMES.TRANSFORM

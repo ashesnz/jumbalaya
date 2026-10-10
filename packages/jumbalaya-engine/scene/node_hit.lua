@@ -11,23 +11,26 @@ local offset_trans = {}
 
 return function(Node)
 	function Node:collides_with_point(point)
-		if not self.container then return end
+		local root = (self.coord_root and self:coord_root()) or self.container
+		if not root then return end
 
 		local T = self.CT or self.drawn or self.VT or self.T
 		local p, t, rot = scratch_point, scratch_trans, scratch_rot
+		local root_T = root.target or root.T
 
 		local buffer = self.states.hovering and game().COLLISION_BUFFER or 0
 		p.x, p.y = point.x, point.y
 
-		if self.container ~= self then
-			if math.abs(self.container.T.r) < 0.1 then
-				t.x, t.y = -self.container.T.w / 2, -self.container.T.h / 2
+		if root ~= self then
+			local root_r = root_T.r or 0
+			if math.abs(root_r) < 0.1 then
+				t.x, t.y = -root_T.w / 2, -root_T.h / 2
 				Geometry.shift_point(p, t)
-				Geometry.rotate_point(p, self.container.T.r)
-				t.x, t.y = self.container.T.w / 2 - self.container.T.x, self.container.T.h / 2 - self.container.T.y
+				Geometry.rotate_point(p, root_r)
+				t.x, t.y = root_T.w / 2 - root_T.x, root_T.h / 2 - root_T.y
 				Geometry.shift_point(p, t)
 			else
-				t.x, t.y = -self.container.T.x, -self.container.T.y
+				t.x, t.y = -root_T.x, -root_T.y
 				Geometry.shift_point(p, t)
 			end
 		end
@@ -49,26 +52,32 @@ return function(Node)
 	function Node:set_offset(point, kind)
 		local p, t = offset_point, offset_trans
 
+		local root = (self.coord_root and self:coord_root()) or self.container
+		local root_T = root.target or root.T
 		p.x, p.y = point.x, point.y
-		t.x, t.y = -self.container.T.w / 2, -self.container.T.h / 2
+		t.x, t.y = -root_T.w / 2, -root_T.h / 2
 		Geometry.shift_point(p, t)
-		Geometry.rotate_point(p, self.container.T.r)
-		t.x, t.y = self.container.T.w / 2 - self.container.T.x, self.container.T.h / 2 - self.container.T.y
+		Geometry.rotate_point(p, root_T.r or 0)
+		t.x, t.y = root_T.w / 2 - root_T.x, root_T.h / 2 - root_T.y
 		Geometry.shift_point(p, t)
 
+		local T = self.target or self.T
 		if kind == "Click" then
-			self.click_offset.x = p.x - self.T.x
-			self.click_offset.y = p.y - self.T.y
+			self.click_offset.x = p.x - T.x
+			self.click_offset.y = p.y - T.y
 		elseif kind == "Hover" then
-			self.hover_offset.x = p.x - self.T.x
-			self.hover_offset.y = p.y - self.T.y
+			self.hover_offset.x = p.x - T.x
+			self.hover_offset.y = p.y - T.y
 		end
 	end
 
 	function Node:put_focused_cursor()
 		local units = game().TILESCALE * game().TILESIZE
-		return (self.T.x + self.T.w / 2 + self.container.T.x) * units,
-			(self.T.y + self.T.h / 2 + self.container.T.y) * units
+		local T = self.target or self.T
+		local root = (self.coord_root and self:coord_root()) or self.container
+		local root_T = root.target or root.T
+		return (T.x + T.w / 2 + root_T.x) * units,
+			(T.y + T.h / 2 + root_T.y) * units
 	end
 
 	function Node:fast_mid_dist(other_node)

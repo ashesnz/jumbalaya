@@ -1,13 +1,13 @@
 
 local shell = require("jumbalaya-engine.shell")
-local AnimNode = require("jumbalaya-engine.scene.animated.init")
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 local game = shell.game
 return function(Target)
 function Target:pulse(amount, rot_amt)
 	if self.ui_kind == game().UI.OBJECT then
 		if self.config.object then self.config.object:pulse(amount, rot_amt) end
 	else
-		AnimNode.pulse(self, amount, rot_amt)
+		Spatial.pulse(self, amount, rot_amt)
 	end
 end
 

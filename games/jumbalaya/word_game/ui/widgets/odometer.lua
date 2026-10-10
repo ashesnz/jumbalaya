@@ -1,8 +1,9 @@
 --[[ word_game/ui/widgets/odometer.lua - Rolling digit + label (sidebar counters, discard-bin, etc.) ]]
 
 local game = require("word_game.ui.util.game_runtime").game
+local Spatial = require("jumbalaya-engine.scene.animated.init")
 
-local Odometer = EaseNode:derive("Odometer")
+local Odometer = Spatial:derive("Odometer")
 local Roll = require("jumbalaya-engine.util.roll")
 local NodeTransform = require("jumbalaya-engine.graphics.node_transform")
 local HitOrder = require("jumbalaya-engine.graphics.hit_order")
@@ -56,7 +57,7 @@ function Odometer:construct(config)
 	if self.text_scale then
 		w, h = ui_text_metrics(self.text_scale, "8")
 	end
-	EaseNode.construct(self, 0, 0, w, h)
+	Spatial.construct(self, 0, 0, w, h)
 	self.states.hover.can = false
 	self.states.click.can = false
 	self.states.collide.can = false

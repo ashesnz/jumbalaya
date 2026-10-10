@@ -283,25 +283,25 @@ function M.layout_main_menu_title()
 	game().title_top.T.y = layout.y
 	game().title_top.T.w = layout.w
 	game().title_top.T.h = layout.h
-	if game().title_top.hard_set_T then
-		game().title_top:hard_set_T(layout.x, layout.y, layout.w, layout.h)
+	if game().title_top.snap_rect then
+		game().title_top:snap_rect(layout.x, layout.y, layout.w, layout.h)
 	end
-	game().title_top:snap_VT()
+	game().title_top:snap_drawn()
 
 	if game().SPLASH_LOGO and game().SPLASH_LOGO.T then
 		local cx = game().title_top.T.x + game().title_top.T.w * 0.5
 		local cy = game().title_top.T.y + game().title_top.T.h * 0.5
 		game().SPLASH_LOGO.T.w = layout.w
 		game().SPLASH_LOGO.T.h = layout.h
-		if game().SPLASH_LOGO.hard_set_T then
-			game().SPLASH_LOGO:hard_set_T(cx - layout.w * 0.5, cy - layout.h * 0.5, layout.w, layout.h)
+		if game().SPLASH_LOGO.snap_rect then
+			game().SPLASH_LOGO:snap_rect(cx - layout.w * 0.5, cy - layout.h * 0.5, layout.w, layout.h)
 		end
 		if game().SPLASH_LOGO.VT then
 			game().SPLASH_LOGO.VT.w = layout.w
 			game().SPLASH_LOGO.VT.h = layout.h
 		end
-		if game().SPLASH_LOGO.align_to_major then
-			game().SPLASH_LOGO:align_to_major()
+		if game().SPLASH_LOGO.apply_alignment then
+			game().SPLASH_LOGO:apply_alignment()
 		end
 	end
 	shell.set_main_menu_logo_applied_scale(layout.scale)
@@ -312,7 +312,7 @@ function M.layout_main_menu()
 	game().MAIN_MENU_UI.alignment.offset.y = M.main_menu_bottom_offset()
 	game().MAIN_MENU_UI:recalculate()
 	M.layout_main_menu_mode_column()
-	game().MAIN_MENU_UI:align_to_major()
+	game().MAIN_MENU_UI:apply_alignment()
 	M.layout_main_menu_title()
 end
 

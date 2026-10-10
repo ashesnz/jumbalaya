@@ -16,7 +16,7 @@ local function sync_screen_wipe_card()
 		card:follow(host, { x = 0, y = 0 }, { lock_drawn = true })
 	end
 	card.states.visible = true
-	card:hard_set_T(card.T.x, card.T.y, game().CARD_W, game().CARD_H)
+	card:snap_rect(card.T.x, card.T.y, game().CARD_W, game().CARD_H)
 	if card.snap_to_attach then
 		card:snap_to_attach()
 	end
@@ -44,7 +44,7 @@ Funcs.register("wipe_in",  function(message, no_card, timefac, alt_colour)
       game().screenwipecard.states.hover.can = false
       game().screenwipecard.states.visible = true
       game().screenwipecard:pulse(0.5, 1)
-      game().screenwipecard:hard_set_T(0, 0, game().CARD_W, game().CARD_H)
+      game().screenwipecard:snap_rect(0, 0, game().CARD_W, game().CARD_H)
     end
   end
   local message_t = nil

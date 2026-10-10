@@ -42,7 +42,7 @@ function DEFINITIONS.card_focus_ui(card)
 
 	base_background.set_alignment = function()
 		local card_norm = {x = card.T.x + card.T.w/2 - game().ROOM.T.w/2, y = card.T.y + card.T.h/2 - game().ROOM.T.h/2}
-		EaseNode.set_alignment(card.children.focused_ui, {
+		Spatial.set_alignment(card.children.focused_ui, {
 			offset = {x = 0.007 * card_norm.x * card.T.w, y = 0.007 * card_norm.y * card.T.h},
 		})
 	end

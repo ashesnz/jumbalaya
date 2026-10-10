@@ -29,7 +29,6 @@ function Node:construct(args)
 	self.click_offset = { x = 0, y = 0 }
 	self.hover_offset = { x = 0, y = 0 }
 	self.moves_while_paused = game().SETTINGS.paused
-	self.created_on_pause = self.moves_while_paused
 	self.REMOVED = false
 
 	game().ID = game().ID or 1
@@ -39,6 +38,8 @@ function Node:construct(args)
 	self.FRAME = { RENDER = -1, TRANSFORM = -1 }
 	self.states = InputFlags.new()
 
+	-- `container` is the room coordinate root (screen-shake space). Scene
+	-- parent is a separate graph (`set_scene_parent`); hit/drag walk to ROOM.
 	self.container = args.container or game().ROOM
 	self.children = self.children or {}
 
@@ -49,6 +50,12 @@ function Node:construct(args)
 	if not game().STAGE_OBJECT_INTERRUPT then
 		table.insert(game().STAGE_OBJECTS[game().STAGE], self)
 	end
+end
+
+--- Room is the coordinate-space root (screen-shake). Scene `parent` is not
+--- a local transform parent — node `target` is already in room space.
+function Node:coord_root()
+	return game().ROOM or self.container or self
 end
 
 require("jumbalaya-engine.scene.node_debug")(Node)
