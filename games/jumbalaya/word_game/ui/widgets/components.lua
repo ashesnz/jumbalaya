@@ -163,7 +163,7 @@ function Components.toggle(def)
 	def.ref_value = def.ref_value or 'test'
 
 	local check = Sprite(0, 0, 0.5 * def.scale, 0.5 * def.scale, game().TEXTURE_ATLASES["icons"], {x = 1, y = 0})
-	check.states.drag.can = false
+	check.states.draggable = false
 	check.states.visible = false
 
 	local info = nil

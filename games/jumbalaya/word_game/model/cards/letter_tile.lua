@@ -95,10 +95,10 @@ function LetterTile:construct(X, Y, W, H, face, params)
 	self.sort_id = shell.next_sort_id()
 	self.area = nil
 
-	self.states.collide.can = true
-	self.states.hover.can = true
-	self.states.drag.can = true
-	self.states.click.can = true
+	self.states.collideable = true
+	self.states.hoverable = true
+	self.states.draggable = true
+	self.states.clickable = true
 
 	self:apply_face(face, true)
 

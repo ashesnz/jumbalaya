@@ -32,7 +32,7 @@ function queue_run_snapshot()
 	local store_state = store and store:get()
 	if not store_state then return end
 
-	g.ARGS.run_snapshot = save_safe_clone{
+	g.run_snapshot = save_safe_clone{
 		store = store_state,
 		STATE = g.STATE,
 		ACTION = g.action,
@@ -41,10 +41,10 @@ function queue_run_snapshot()
 	}
 	local persist = persistence()
 	if persist and persist.SaveSchema then
-		persist.SaveSchema.stamp_write(g.ARGS.run_snapshot)
+		persist.SaveSchema.stamp_write(g.run_snapshot)
 	end
 	if persist and persist.RunSave and persist.RunSave.append_pattern_row_snapshot then
-		persist.RunSave.append_pattern_row_snapshot(g.ARGS.run_snapshot)
+		persist.RunSave.append_pattern_row_snapshot(g.run_snapshot)
 	end
 
 	g.WRITE_FLAGS = g.WRITE_FLAGS or {}
@@ -127,7 +127,7 @@ function Game:queue_progress_write()
 end
 
 function Game:queue_settings_write()
-	self.ARGS.settings_payload = self.SETTINGS
+	self.settings_payload = self.SETTINGS
 	self.WRITE_FLAGS = self.WRITE_FLAGS or {}
 	self.WRITE_FLAGS.settings = true
 	self.WRITE_FLAGS.update_queued = true
@@ -141,7 +141,7 @@ function Game:flush_settings_to_disk()
 end
 
 function Game:queue_metrics_write()
-	self.ARGS.metrics_payload = self.METRICS
+	self.metrics_payload = self.METRICS
 	self.WRITE_FLAGS = self.WRITE_FLAGS or {}
 	self.WRITE_FLAGS.metrics = true
 	self.WRITE_FLAGS.update_queued = true

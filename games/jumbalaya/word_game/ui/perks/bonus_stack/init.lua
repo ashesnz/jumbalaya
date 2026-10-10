@@ -77,11 +77,11 @@ function M.detach(card)
 		card:set_scene_parent(nil)
 	end
 	if card.states and card.states.drag then
-		card.states.drag.can = true
-		card.states.drag.is = false
+		card.states.draggable = true
+		card.states.dragging = false
 	end
 	if card.states and card.states.collide then
-		card.states.collide.can = true
+		card.states.collideable = true
 	end
 	if card.states then
 		card.states.visible = true
@@ -172,10 +172,10 @@ function M.sync_positions()
 					card.T.x, card.T.y = tx, ty
 				end
 				if card.states and card.states.drag then
-					card.states.drag.can = true
+					card.states.draggable = true
 				end
 				if card.states and card.states.collide then
-					card.states.collide.can = true
+					card.states.collideable = true
 				end
 				if card.states then
 					card.states.visible = true

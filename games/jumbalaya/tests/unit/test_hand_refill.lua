@@ -47,12 +47,7 @@ local function make_letter_card(game, id, letter)
 		id = id,
 		letter_card_id = id,
 		ability = { letter = letter },
-		states = {
-			hover = { is = false, can = true },
-			click = { is = false, can = true },
-			collide = { is = false, can = true },
-			drag = { is = false, can = false },
-		},
+		states = mock_env.input_states(),
 		facing = "front",
 		REMOVED = false,
 		parent = nil,
@@ -73,6 +68,7 @@ local function make_letter_card(game, id, letter)
 		end,
 	}
 	setmetatable(card, Card)
+	card.states.draggable = false
 	card._live_registry = "transform"
 	SceneRoots.register(card, "transform")
 	game.letter_inventory = game.letter_inventory or {}

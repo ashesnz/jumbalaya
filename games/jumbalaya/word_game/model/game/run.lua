@@ -25,7 +25,7 @@ function Game:teardown_run_ui()
 	RunScope.teardown()
 end
 
---- Reset self.ARGS fields that mirror per-run gameplay state for HUD/runtime glue.
+--- Reset named Game shell fields that mirror per-run HUD/runtime glue.
 function Game:reset_run_args()
 	RunScope.reset_args()
 end

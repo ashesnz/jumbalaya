@@ -114,6 +114,22 @@ function Game:define_constants()
     self.run_bg = { mode = "garden" }
     self.eased_cursor_pos = nil
     self.word_feedback_queue = nil
+    self.run_generation = 0
+    self.run_snapshot = nil
+    self.score_intensity = nil
+    self.ambient_sounds = nil
+    self.progress_payload = nil
+    self.settings_payload = nil
+    self.metrics_payload = nil
+    self.screenmode_vals = nil
+    self.timeline_tick = nil
+    self.gamepad_patterns = nil
+    self.bt = 0
+    self.LOC_COLOURS = nil
+    self.focus_list = nil
+    self.focusables = nil
+    self.focus_cursor_pos = nil
+    self.focus_vec = nil
     self.LIVE = {
         NODE = {},
         TRANSFORM = {},

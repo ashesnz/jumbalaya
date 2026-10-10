@@ -78,8 +78,8 @@ function Scheduler:advance(dt, forced)
 		local blocked = false
 		local i = 1
 		while i <= #lane do
-			game().ARGS.timeline_tick = game().ARGS.timeline_tick or {}
-			local results = game().ARGS.timeline_tick
+			game().timeline_tick = game().timeline_tick or {}
+			local results = game().timeline_tick
 			results.blocking, results.completed, results.time_done, results.pause_skip = false, false, false, false
 
 			if not blocked or not lane[i].blockable then lane[i]:tick(results) end

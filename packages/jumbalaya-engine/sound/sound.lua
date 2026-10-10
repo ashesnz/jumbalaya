@@ -105,16 +105,16 @@ function M.mix_audio(dt)
 
 	-- Score intensity feeds the ambient fire/organ beds.
 	game().SETTINGS.ambient_control = game().SETTINGS.ambient_control or {}
-	game().ARGS.score_intensity = game().ARGS.score_intensity or {}
+	game().score_intensity = game().score_intensity or {}
 	local wr = shell.word_round()
 	local earned = 0
 	if wr and wr.jumble then
 		local j = wr.jumble
 		earned = (j.total_score or 0) + math.floor((j.puzzle_points or 0) * (j.puzzle_multi or 1.0))
 	end
-	game().ARGS.score_intensity.earned_score = earned
-	game().ARGS.score_intensity.required_score = (wr and wr.target) or 0
-	local intensity = game().ARGS.score_intensity
+	game().score_intensity.earned_score = earned
+	game().score_intensity.required_score = (wr and wr.target) or 0
+	local intensity = game().score_intensity
 	local run_live = (game().STAGE == game().STAGES.RUN) and 1 or 0
 	local score_ratio = (intensity.required_score > 0)
 		and math.min(1, intensity.earned_score / (intensity.required_score + 1))
@@ -126,7 +126,7 @@ function M.mix_audio(dt)
 
 	-- Bed layer targets ease toward their intensity-derived levels.
 	local beds = game().SETTINGS.ambient_control
-	game().ARGS.ambient_sounds = game().ARGS.ambient_sounds or {
+	game().ambient_sounds = game().ambient_sounds or {
 		-- Base fire bed once flames pass 30%.
 		ambientFire2 = {gainfunc = function(prev) return prev * (1 - dt) + dt * 0.9 * ((intensity.flames > 0.3) and 1 or intensity.flames / 0.3) end},
 		-- High-intensity fire layer joins above 30%.
@@ -137,7 +137,7 @@ function M.mix_audio(dt)
 		ambientOrgan1 = {gainfunc = function(prev) return prev * (1 - dt) + dt * 0.6 * (game().SETTINGS.SOUND.music_volume + 100) / 200 * intensity.organ end},
 	}
 
-	for name, layer in pairs(game().ARGS.ambient_sounds) do
+	for name, layer in pairs(game().ambient_sounds) do
 		beds[name] = beds[name] or {}
 		beds[name].rate =
 			(name == 'ambientOrgan1' and 0.7) or

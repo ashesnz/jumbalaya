@@ -43,7 +43,7 @@ local function install_table_board_ui()
 	game.SIDEBAR_ATTACH = game.SIDEBAR_ATTACH or Spatial({
 		T = { x = game.TILE_W - 3, y = 0, w = 3, h = game.TILE_H },
 	})
-	game.SIDEBAR_ATTACH.states = game.SIDEBAR_ATTACH.states or { drag = { can = false } }
+	game.SIDEBAR_ATTACH.states.draggable = false
 	game.SIDEBAR_ATTACH.set_container = game.SIDEBAR_ATTACH.set_container or function() end
 	game.SIDEBAR_ATTACH.translate_container = game.SIDEBAR_ATTACH.translate_container or function() end
 	game.SIDEBAR_ATTACH.snap_rect = game.SIDEBAR_ATTACH.snap_rect or function() end
@@ -51,7 +51,7 @@ local function install_table_board_ui()
 	game.PANEL_ATTACH = game.PANEL_ATTACH or Spatial({
 		T = { x = game.TILE_W - 3, y = 0, w = 3, h = game.TILE_H },
 	})
-	game.PANEL_ATTACH.states = game.PANEL_ATTACH.states or { drag = { can = false } }
+	game.PANEL_ATTACH.states.draggable = false
 	game.PANEL_ATTACH.snap_rect = game.PANEL_ATTACH.snap_rect or function() end
 
 	game.PLAY_ATTACH = game.PLAY_ATTACH or Spatial({
@@ -361,5 +361,41 @@ T.describe("table board boot", function()
 
 		T.assert_nil(game.OVERLAY_MENU, "match overlay must close before the next run")
 		T.assert_equal(game.SETTINGS.paused, false)
+	end)
+
+	T.it("smokes drag flags, flip, deal host, play/shuffle, sidebar, and The Trade", function()
+		install_table_board_ui()
+		board_prime.prime()
+		local game = shell.game()
+
+		local host = Spatial(0, 0, 1, 1.4)
+		host:snap_rect(0, 0, 1, 1.4)
+		local card = Spatial(0, 0, 1, 1.4)
+		card.states.draggable = true
+		card.facing = "front"
+		card.pinch = {}
+		setmetatable(card, { __index = Card })
+		card:set_rect(2, 3, 1, 1.4)
+		T.assert_equal(card.T.x, 2)
+		card:follow(game.dealt_letters, { x = 0, y = 0 })
+		T.assert_equal(card.attach.mode, "follow")
+		card:bind_to(host)
+		T.assert_equal(card.attach.mode, "bind")
+		card:flip()
+		T.assert_equal(card.facing, "back")
+		card.states.dragging = true
+		T.assert_true(card.states.dragging)
+		T.assert_true(card.states.draggable)
+
+		T.assert_true(game.dealt_letters and game.dealt_letters.states.visible)
+		T.assert_true(WORD_GAME_UI.TableControls.buttons_present())
+		T.assert_true(game.hand_action_bar.states.visible)
+		T.assert_true(game.table_shuffle_bar.states.visible)
+		T.assert_not_nil(game.SIDEBAR_HUD)
+		T.assert_true(game.SIDEBAR_HUD.states.visible)
+
+		local trade = require("word_game.ui.trade.definition")
+		local tree = trade.build_overlay_definition()
+		T.assert_not_nil(tree)
 	end)
 end)

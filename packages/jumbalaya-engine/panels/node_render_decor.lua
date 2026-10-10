@@ -37,7 +37,7 @@ function Target:draw_self_decor()
 	end
 
 	-- Gamepad-focus set_selected ring (animated fade-in).
-	if self.states.focus.is then
+	if self.states.focused then
 		self.focus_timer = self.focus_timer or game().TIMERS.REAL
 		local lw = 50 * math.max(0, self.focus_timer - game().TIMERS.REAL + 0.3)^2
 		NodeTransform.push_node_transform(self, 1)

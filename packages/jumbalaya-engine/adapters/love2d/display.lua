@@ -108,8 +108,7 @@ function boot_stage(label, next_label, progress)
 	game().LOADING.next = next_label
 	game().LOADING.progress = progress or 0
 
-	game().ARGS = game().ARGS or {}
-	game().ARGS.bt = love.timer and love.timer.getTime and love.timer.getTime() or 0
+	game().bt = love.timer and love.timer.getTime and love.timer.getTime() or 0
 end
 
 function refit_viewport(w, h)

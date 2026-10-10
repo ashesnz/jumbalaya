@@ -7,9 +7,9 @@ local M = {}
 function M.sync_discard_pile_area()
 	local stash = shell.recycle_stash()
 	if not stash or not stash.states then return end
-	stash.states.collide.can = false
-	stash.states.hover.can = false
-	stash.states.release_on.can = false
+	stash.states.collideable = false
+	stash.states.hoverable = false
+	stash.states.releasable = false
 end
 
 local function hide_recycled_card(card)

@@ -37,8 +37,8 @@ function M.is_pressing_play()
 	local press_state = (c and c.pointer_held) or (love.mouse and love.mouse.isDown and love.mouse.isDown(1))
 	if not press_state then return false end
 
-	if btn.states.collide and btn.states.collide.is then return true end
-	if btn.states.hover and btn.states.hover.is then return true end
+	if btn.states.colliding then return true end
+	if btn.states.hovering then return true end
 
 	for _, node in ipairs((c and c.collision_list) or {}) do
 		if belongs_to_play_button(node) then return true end

@@ -159,7 +159,7 @@ function M.sync_hand_after_deal()
 	if game().dealt_letters and game().dealt_letters.cards[1] then
 		game().dealt_letters:relayout()
 		for _, card in ipairs(game().dealt_letters.cards) do
-			if not card.bounce and card.states and not card.states.drag.is then
+			if not card.bounce and card.states and not card.states.dragging then
 				card:snap_rect()
 			end
 		end
@@ -221,7 +221,6 @@ function M.restore_boss_layout(opts)
 	if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
 		WORD_GAME_UI.Sidebar.sync_visibility()
 	end
-	game().ARGS = game().ARGS or {}
 	game().pending_layout = true
 	M.align_placement_table()
 	if game().dealt_letters then

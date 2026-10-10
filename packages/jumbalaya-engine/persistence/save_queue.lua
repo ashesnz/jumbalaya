@@ -28,18 +28,18 @@ function M.update()
 	if flags.metrics then
 		if game.F_VERBOSE then print('SAVING METRICS') end
 		if channel then
-			channel:push({ op = 'metrics', metrics = game.ARGS.metrics_payload })
+			channel:push({ op = 'metrics', metrics = game.metrics_payload })
 		end
 	end
 
 	if flags.progress then
 		if game.F_VERBOSE then print('SAVING PROGRESS') end
 		if channel then
-			channel:push({ op = 'progress', progress = game.ARGS.progress_payload })
+			channel:push({ op = 'progress', progress = game.progress_payload })
 		end
 	elseif flags.settings then
 		if game.F_VERBOSE then print('SAVING SETTINGS') end
-		local payload = game.ARGS.settings_payload or game.SETTINGS
+		local payload = game.settings_payload or game.SETTINGS
 		local profile_num = game.SETTINGS.profile or 1
 		local snapshot = Tables.save_safe_clone(payload)
 		local profile_snapshot = Tables.save_safe_clone(game.PROFILES[profile_num] or {})
@@ -62,7 +62,7 @@ function M.update()
 		if channel then
 			channel:push({
 				op = 'run',
-				snapshot = game.ARGS.run_snapshot,
+				snapshot = game.run_snapshot,
 				profile_num = game.SETTINGS.profile,
 			})
 		end

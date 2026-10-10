@@ -11,10 +11,10 @@ function PerkStampSprite:construct(X, Y, W, H, entry)
 	Spatial.construct(self, X, Y, W, H)
 	self.CT = self.VT
 	self.entry = entry
-	self.states.drag.can = false
-	self.states.hover.can = false
-	self.states.collide.can = false
-	self.states.click.can = false
+	self.states.draggable = false
+	self.states.hoverable = false
+	self.states.collideable = false
+	self.states.clickable = false
 end
 
 function PerkStampSprite:draw_self()

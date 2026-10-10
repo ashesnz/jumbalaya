@@ -12,17 +12,17 @@ function InputRouter:update_focus(dir)
 	-- Mouse/touch never keeps gamepad focus.
 	if not self.HID.controller or self.interrupt.focus
 		or (self.locked and (not game().SETTINGS.paused or game().screenwipe)) then
-		if self.focused.target then self.focused.target.states.focus.is = false end
+		if self.focused.target then self.focused.target.states.focused = false end
 		self.focused.target = nil
 		return
 	end
 
-	game().ARGS.focus_list = Tables.clear_table(game().ARGS.focus_list)
-	game().ARGS.focusables = Tables.clear_table(game().ARGS.focusables)
+	game().focus_list = Tables.clear_table(game().focus_list)
+	game().focusables = Tables.clear_table(game().focusables)
 
 	-- Drop the current target once it stops being valid.
 	if self.focused.target then
-		self.focused.target.states.focus.is = false
+		self.focused.target.states.focused = false
 		if not self:is_node_focusable(self.focused.target)
 			or not self.focused.target:collides_with_point(game().POINTER.T)
 			or self.HID.axis_cursor then
@@ -32,33 +32,33 @@ function InputRouter:update_focus(dir)
 
 	if not dir and self.focused.target then
 		-- Keep the current target.
-		self.focused.target.states.focus.can = true
-		game().ARGS.focusables[#game().ARGS.focusables + 1] = self.focused.target
+		self.focused.target.states.focusable = true
+		game().focusables[#game().focusables + 1] = self.focused.target
 	else
 		if not dir then
 			-- Take the first focusable under the cursor.
 			for _, v in ipairs(self.nodes_at_cursor) do
-				v.states.focus.can = false
-				v.states.focus.is = false
-				if #game().ARGS.focusables == 0 and self:is_node_focusable(v) then
-					v.states.focus.can = true
-					game().ARGS.focusables[#game().ARGS.focusables + 1] = v
+				v.states.focusable = false
+				v.states.focused = false
+				if #game().focusables == 0 and self:is_node_focusable(v) then
+					v.states.focusable = true
+					game().focusables[#game().focusables + 1] = v
 				end
 			end
 		else
 			-- Directional search considers every Spatial.
 			for _, v in ipairs(game().TRANSFORMS) do
-				v.states.focus.can = false
-				v.states.focus.is = false
+				v.states.focusable = false
+				v.states.focused = false
 				if self:is_node_focusable(v) then
-					v.states.focus.can = true
-					game().ARGS.focusables[#game().ARGS.focusables + 1] = v
+					v.states.focusable = true
+					game().focusables[#game().focusables + 1] = v
 				end
 			end
 		end
 	end
 
-	if #game().ARGS.focusables > 0 then
+	if #game().focusables > 0 then
 		if dir then
 			local hand = CardFocus.hand_area()
 			if (dir == 'L' or dir == '') and self.focused.target and self.focused.target:is_kind(Card)
@@ -67,39 +67,39 @@ function InputRouter:update_focus(dir)
 				local next_slot = slot + (dir == 'L' and -1 or 1)
 				if next_slot > #hand.cards then next_slot = 1 end
 				if next_slot == 0 then next_slot = #hand.cards end
-				if next_slot ~= slot then game().ARGS.focus_list[1] = {node = hand.cards[next_slot]} end
+				if next_slot ~= slot then game().focus_list[1] = {node = hand.cards[next_slot]} end
 			else
 				-- Origin: focused node midpoint (funneled), else hover/cursor pos.
-				game().ARGS.focus_cursor_pos = game().ARGS.focus_cursor_pos or {}
-				game().ARGS.focus_cursor_pos.x = game().POINTER.T.x - game().ROOM.T.x
-				game().ARGS.focus_cursor_pos.y = game().POINTER.T.y - game().ROOM.T.y
+				game().focus_cursor_pos = game().focus_cursor_pos or {}
+				game().focus_cursor_pos.x = game().POINTER.T.x - game().ROOM.T.x
+				game().focus_cursor_pos.y = game().POINTER.T.y - game().ROOM.T.y
 
 				if self.focused.target then
 					local origin = self.focused.target
 					if origin.config.focus_args and origin.config.focus_args.funnel_to then
 						origin = origin.config.focus_args.funnel_to
 					end
-					game().ARGS.focus_cursor_pos.x = origin.T.x + 0.5 * origin.T.w
-					game().ARGS.focus_cursor_pos.y = origin.T.y + 0.5 * origin.T.h
-				elseif self.hovering.target and self.hovering.target.states.focus.can then
-					game().ARGS.focus_cursor_pos.x, game().ARGS.focus_cursor_pos.y = self.hovering.target:put_focused_cursor()
-					game().ARGS.focus_cursor_pos.x = game().ARGS.focus_cursor_pos.x / (game().TILESCALE * game().TILESIZE) - game().ROOM.T.x
-					game().ARGS.focus_cursor_pos.y = game().ARGS.focus_cursor_pos.y / (game().TILESCALE * game().TILESIZE) - game().ROOM.T.y
+					game().focus_cursor_pos.x = origin.T.x + 0.5 * origin.T.w
+					game().focus_cursor_pos.y = origin.T.y + 0.5 * origin.T.h
+				elseif self.hovering.target and self.hovering.target.states.focusable then
+					game().focus_cursor_pos.x, game().focus_cursor_pos.y = self.hovering.target:put_focused_cursor()
+					game().focus_cursor_pos.x = game().focus_cursor_pos.x / (game().TILESCALE * game().TILESIZE) - game().ROOM.T.x
+					game().focus_cursor_pos.y = game().focus_cursor_pos.y / (game().TILESCALE * game().TILESIZE) - game().ROOM.T.y
 				end
 
 				-- Score every focusable in the requested direction.
-				for _, v in pairs(game().ARGS.focusables) do
+				for _, v in pairs(game().focusables) do
 					if v ~= self.hovering.target and v ~= self.focused.target then
 						local eligible = false
 						if v.config.focus_args and v.config.focus_args.funnel_to then
 							v = v.config.focus_args.funnel_to
 						end
 
-						game().ARGS.focus_vec = game().ARGS.focus_vec or {}
-						local vx = v.T.x + 0.5 * v.T.w - game().ARGS.focus_cursor_pos.x
-						local vy = v.T.y + 0.5 * v.T.h - game().ARGS.focus_cursor_pos.y
-						game().ARGS.focus_vec.x = vx
-						game().ARGS.focus_vec.y = vy
+						game().focus_vec = game().focus_vec or {}
+						local vx = v.T.x + 0.5 * v.T.w - game().focus_cursor_pos.x
+						local vy = v.T.y + 0.5 * v.T.h - game().focus_cursor_pos.y
+						game().focus_vec.x = vx
+						game().focus_vec.y = vy
 
 						if v.config.focus_args and v.config.focus_args.nav then
 							-- Layout hints: rows accept vertical steps or horizontal
@@ -122,30 +122,30 @@ function InputRouter:update_focus(dir)
 						end
 
 						if eligible then
-							game().ARGS.focus_list[#game().ARGS.focus_list + 1] = {node = v, dist = math.abs(vx) + math.abs(vy)}
+							game().focus_list[#game().focus_list + 1] = {node = v, dist = math.abs(vx) + math.abs(vy)}
 						end
 					end
 				end
 
-				if #game().ARGS.focus_list < 1 then
+				if #game().focus_list < 1 then
 					-- Nowhere to go: keep the current focus selected.
-					if self.focused.target then self.focused.target.states.focus.is = true end
+					if self.focused.target then self.focused.target.states.focused = true end
 					return
 				end
-				table.sort(game().ARGS.focus_list, function(a, b) return a.dist < b.dist end)
+				table.sort(game().focus_list, function(a, b) return a.dist < b.dist end)
 			end
 		else
 			if self.focused.target then
-				game().ARGS.focus_list[#game().ARGS.focus_list + 1] = {node = self.focused.target, dist = 0}
+				game().focus_list[#game().focus_list + 1] = {node = self.focused.target, dist = 0}
 			else
-				game().ARGS.focus_list[#game().ARGS.focus_list + 1] = {node = game().ARGS.focusables[1], dist = 0}
+				game().focus_list[#game().focus_list + 1] = {node = game().focusables[1], dist = 0}
 			end
 		end
 	end
 
 	-- Commit the winner (funnel sources redirect to their funnel target).
-	if game().ARGS.focus_list[1] then
-		local winner = game().ARGS.focus_list[1].node
+	if game().focus_list[1] then
+		local winner = game().focus_list[1].node
 		if winner.config and winner.config.focus_args and winner.config.focus_args.funnel_from then
 			self.focused.target = winner.config.focus_args.funnel_from
 		else
@@ -158,6 +158,6 @@ function InputRouter:update_focus(dir)
 		self.focused.target = nil
 	end
 
-	if self.focused.target then self.focused.target.states.focus.is = true end
+	if self.focused.target then self.focused.target.states.focused = true end
 end
 end

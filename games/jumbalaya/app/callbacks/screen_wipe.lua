@@ -41,7 +41,7 @@ Funcs.register("wipe_in",  function(message, no_card, timefac, alt_colour)
       game().screenwipecard = LetterTile(0, 0, game().CARD_W, game().CARD_H, face, nil)
       game().screenwipecard.sprite_facing = 'back'
       game().screenwipecard.facing = 'back'
-      game().screenwipecard.states.hover.can = false
+      game().screenwipecard.states.hoverable = false
       game().screenwipecard.states.visible = true
       game().screenwipecard:pulse(0.5, 1)
       game().screenwipecard:snap_rect(0, 0, game().CARD_W, game().CARD_H)

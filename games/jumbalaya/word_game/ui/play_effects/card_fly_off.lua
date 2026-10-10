@@ -69,8 +69,8 @@ local function detach_card(card)
 		card:set_scene_parent(nil)
 	end
 	if card.states and card.states.drag then
-		card.states.drag.can = false
-		card.states.drag.is = false
+		card.states.draggable = false
+		card.states.dragging = false
 	end
 	if card.states then
 		card.states.visible = true
@@ -88,10 +88,10 @@ function M.stash_played_card(card)
 	card.played_pool = true
 	if card.states then
 		card.states.visible = false
-		if card.states.drag then card.states.drag.can = false end
-		if card.states.collide then card.states.collide.can = false end
-		if card.states.hover then card.states.hover.can = false end
-		if card.states.click then card.states.click.can = false end
+		if card.states.drag then card.states.draggable = false end
+		if card.states.collide then card.states.collideable = false end
+		if card.states.hover then card.states.hoverable = false end
+		if card.states.click then card.states.clickable = false end
 	end
 	if game().recycle_stash and game().recycle_stash.add_card then
 		game().recycle_stash:add_card(card)

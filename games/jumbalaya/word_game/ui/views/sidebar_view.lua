@@ -184,7 +184,7 @@ function SidebarView:relayout()
 	self._label_proxy = label
 	local count_rect = self._layout.deck_count
 	self._deck_count_proxy = make_text_proxy("text_deck_count", count_rect, tostring(self:deck_left_count()))
-	self._deck_count_proxy.config.ref_table = game() and game().ARGS
+	self._deck_count_proxy.config.ref_table = game()
 	self._deck_count_proxy.config.ref_value = "deck_left_count"
 	stage_button.bind_button_proxy(button, label)
 	return self._layout

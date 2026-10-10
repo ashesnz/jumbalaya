@@ -15,7 +15,7 @@ end
 
 --- Timeline HUD anchor; uses the last rect published by layout, else placement geometry.
 local function timeline_rect()
-	if game().ARGS and game().timeline_rect then
+	if game().timeline_rect then
 		return game().timeline_rect
 	end
 	local pt = game().pattern_row
@@ -111,7 +111,7 @@ function M.return_card(card)
 		end
 	end
 	if card.states and card.states.drag then
-		card.states.drag.is = false
+		card.states.dragging = false
 	end
 	if card.set_selected then
 		card:set_selected(false)

@@ -97,9 +97,7 @@ function M.prime()
 			facade_ui.ScoreBanner.sync_points_to_get_preview(false)
 		end
 	end
-	if g.ARGS then
-		g.pending_layout = false
-	end
+	g.pending_layout = false
 	return M.is_ready(g)
 end
 

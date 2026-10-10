@@ -6,7 +6,7 @@
 	Presentation: none (teardown hooks notify UI via install.lua subscribers)
 
 	Every new run must pass through this module so stale UI bindings, module
-	caches, and live_game().ARGS mirrors cannot leak across runs.
+	caches, and named Game shell fields cannot leak across runs.
 ]]
 
 local live_game = require("word_game.model.live_game")
@@ -37,7 +37,7 @@ function M.on_teardown(name, fn)
 end
 
 function M.generation()
-	return (live_game().ARGS and live_game().ARGS.run_generation) or (live_game().RUN and live_game().RUN.generation) or 0
+	return live_game().run_generation or (live_game().RUN and live_game().RUN.generation) or 0
 end
 
 function M.is_current(gen)
@@ -60,20 +60,19 @@ end
 
 function M.reset_args()
 	local g = live_game()
-	g.ARGS = g.ARGS or {}
-	g.ARGS.run_generation = (g.ARGS.run_generation or 0) + 1
+	g.run_generation = (g.run_generation or 0) + 1
 	g.deck_left_count = 0
 	g.pending_layout = nil
-	g.ARGS.run_snapshot = nil
+	g.run_snapshot = nil
 	g.spin = { amount = 0, real = 0, eased = 0 }
 	g.word_feedback_queue = nil
 	g.eased_cursor_pos = nil
-	if g.ARGS.score_intensity then
-		g.ARGS.score_intensity.earned_score = 0
-		g.ARGS.score_intensity.required_score = 0
+	if g.score_intensity then
+		g.score_intensity.earned_score = 0
+		g.score_intensity.required_score = 0
 	end
 	local run = ensure_run_table()
-	run.generation = g.ARGS.run_generation
+	run.generation = g.run_generation
 end
 
 function M.reset_globals()

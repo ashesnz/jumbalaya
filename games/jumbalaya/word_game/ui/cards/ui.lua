@@ -64,7 +64,7 @@ function Card:update(dt)
 				self.pinch.x = false
 		end
 
-		if not self.states.focus.is and self.children.focused_ui then
+		if not self.states.focused and self.children.focused_ui then
 				self.children.focused_ui:remove()
 				self.children.focused_ui = nil
 		end
@@ -119,7 +119,7 @@ function Card:hover()
 		end
 
 		-- Hand letter cards skip the focus chrome; placement uses drag, not focus rings.
-		if self.states.focus.is and not self.children.focused_ui
+		if self.states.focused and not self.children.focused_ui
 				and not (is_letter and self.area == game().dealt_letters) then
 				self.children.focused_ui = game().DEFINITIONS.card_focus_ui(self)
 		end
@@ -130,7 +130,7 @@ function Card:hover()
 		-- Letter cards are placed by dragging; no hover popup for them.
 		if is_letter then return end
 
-		if not self.states.drag.is or game().INPUT.HID.touch then
+		if not self.states.dragging or game().INPUT.HID.touch then
 				if not self.children.h_popup then
 						self.tooltip_info = self:build_card_tooltip()
 						self.config.h_popup = game().DEFINITIONS.card_h_popup(self)

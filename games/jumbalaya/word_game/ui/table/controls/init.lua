@@ -101,7 +101,7 @@ local function sync_shuffle_button(shuffle_btn, show)
 	shuffle_btn.states.visible = true
 	shuffle_btn.config.colour = definition.play_button_colour()
 	shuffle_btn.config.force_collision = true
-	shuffle_btn.states.collide.can = true
+	shuffle_btn.states.collideable = true
 
 	if M.placement_has_cards() then
 		shuffle_btn.config.button = Press.named("return_placement_cards")
@@ -125,7 +125,7 @@ local function sync_play_button(play_btn, show)
 	play_btn.config.button = Press.named("play_placement_word")
 	play_btn.config.colour = definition.play_button_colour()
 	play_btn.config.force_collision = true
-	play_btn.states.collide.can = true
+	play_btn.states.collideable = true
 	definition.set_play_display(play_btn, "sprite")
 end
 

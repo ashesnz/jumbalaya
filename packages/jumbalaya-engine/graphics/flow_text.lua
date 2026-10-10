@@ -101,7 +101,7 @@ function FlowText:construct(config)
 	self.states.clickable = false
 	self.states.collideable = false
 	self.states.draggable = false
-	self.states.release_on.can = false
+	self.states.releasable = false
 
 	self:unfollow()
 end

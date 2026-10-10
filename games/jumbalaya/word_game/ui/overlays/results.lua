@@ -176,7 +176,7 @@ function build_round_scores_row(score, text_colour)
 	if score == 'hand' then
 		check_high_score = true
 		local chip_sprite = Sprite(0,0,0.3,0.3,game().TEXTURE_ATLASES.ui_1, {x=0, y=0})
-		chip_sprite.states.drag.can = false
+		chip_sprite.states.draggable = false
 		score_tab = {
 			Panel.column({align = "cm"}, {
 				Panel.object({w=0.3,h=0.3 , object = chip_sprite})

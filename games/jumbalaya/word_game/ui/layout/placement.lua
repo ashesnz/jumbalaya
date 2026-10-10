@@ -52,7 +52,6 @@ function M.timeline_rect()
 		h = h,
 		slant = h * 0.88,
 	}
-	game().ARGS = game().ARGS or {}
 	game().timeline_rect = rect
 	return rect
 end

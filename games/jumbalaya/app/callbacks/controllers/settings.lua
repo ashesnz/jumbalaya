@@ -19,8 +19,8 @@ function M.change_screen_resolution(args)
 end
 
 function M.change_screenmode(args)
-	game().ARGS.screenmode_vals = game().ARGS.screenmode_vals or { "Windowed", "Fullscreen", "Borderless" }
-	game().SETTINGS.QUEUED_CHANGE.screenmode = game().ARGS.screenmode_vals[args.to_key]
+	game().screenmode_vals = game().screenmode_vals or { "Windowed", "Fullscreen", "Borderless" }
+	game().SETTINGS.QUEUED_CHANGE.screenmode = game().screenmode_vals[args.to_key]
 	M.change_window_cycle_UI()
 end
 

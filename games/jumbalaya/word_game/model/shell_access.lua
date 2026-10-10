@@ -143,33 +143,23 @@ function M.destroy_table_control_bars()
 	M.clear_table_control_bars()
 end
 
-function M.set_args_field(key, value)
-	local g = live_game()
-	g.ARGS = g.ARGS or {}
-	g.ARGS[key] = value
-end
-
-function M.clear_args_field(key)
-	local g = live_game()
-	if g.ARGS then
-		g.ARGS[key] = nil
-	end
-end
-
--- ============ ARGS queues ============
-
 function M.word_feedback_queue()
 	local g = live_game()
-	local args = g and g.ARGS
-	return args and args.word_feedback_queue
+	return g and g.word_feedback_queue
 end
 
 function M.set_word_feedback_queue(queue)
-	M.set_args_field("word_feedback_queue", queue)
+	local g = live_game()
+	if g then
+		g.word_feedback_queue = queue
+	end
 end
 
 function M.clear_word_feedback_queue()
-	M.clear_args_field("word_feedback_queue")
+	local g = live_game()
+	if g then
+		g.word_feedback_queue = nil
+	end
 end
 
 return M

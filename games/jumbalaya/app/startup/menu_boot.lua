@@ -3,7 +3,7 @@
 function Game:boot_initial_screen()
 	self.STAGE_OBJECT_INTERRUPT = true
 	self.POINTER = Sprite(0, 0, 0.3, 0.3, self.TEXTURE_ATLASES['gamepad_ui'], { x = 18, y = 0 })
-	self.POINTER.states.collide.can = false
+	self.POINTER.states.collideable = false
 	self.STAGE_OBJECT_INTERRUPT = false
 
 	self.TIMELINE = Scheduler()

@@ -110,10 +110,10 @@ local function coin_sprite(size)
 	if not atlas or not atlas.image then return nil end
 	local s = size or 0.32
 	local sprite = Sprite(0, 0, s, s, atlas, { x = 0, y = 0 })
-	sprite.states.drag.can = false
-	sprite.states.hover.can = false
-	sprite.states.collide.can = false
-	sprite.states.click.can = false
+	sprite.states.draggable = false
+	sprite.states.hoverable = false
+	sprite.states.collideable = false
+	sprite.states.clickable = false
 	return sprite
 end
 

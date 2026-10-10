@@ -58,10 +58,10 @@ function Odometer:construct(config)
 		w, h = ui_text_metrics(self.text_scale, "8")
 	end
 	Spatial.construct(self, 0, 0, w, h)
-	self.states.hover.can = false
-	self.states.click.can = false
-	self.states.collide.can = false
-	self.states.drag.can = false
+	self.states.hoverable = false
+	self.states.clickable = false
+	self.states.collideable = false
+	self.states.draggable = false
 	self:unfollow()
 end
 

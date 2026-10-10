@@ -30,11 +30,11 @@ function FloatUpText:construct(config)
 	local h = config.h or 0.55
 	Spatial.construct(self, config.x or 0, config.y or 0, w, h)
 	self:set_container(game().ROOM)
-	self.states.hover.can = false
-	self.states.click.can = false
-	self.states.collide.can = false
-	self.states.drag.can = false
-	self.states.release_on.can = false
+	self.states.hoverable = false
+	self.states.clickable = false
+	self.states.collideable = false
+	self.states.draggable = false
+	self.states.releasable = false
 
 	self.text = config.text or "+2"
 	self.colour = config.colour or DEFAULT_COLOUR

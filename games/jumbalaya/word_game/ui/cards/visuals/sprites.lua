@@ -23,7 +23,7 @@ local function glue_sprite(self, sprite)
 	sprite.states.hover = self.states.hover
 	sprite.states.click = self.states.click
 	sprite.states.drag = self.states.drag
-	sprite.states.collide.can = false
+	sprite.states.collideable = false
 	sprite:bind_to(self)
 end
 

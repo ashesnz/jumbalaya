@@ -47,10 +47,10 @@ function M.ensure(item, card_w, card_h)
 	if card.set_scene_parent then
 		card:set_scene_parent(nil)
 	end
-	card.states.drag.can = false
-	card.states.hover.can = false
-	card.states.click.can = false
-	card.states.collide.can = false
+	card.states.draggable = false
+	card.states.hoverable = false
+	card.states.clickable = false
+	card.states.collideable = false
 	item.preview = card
 	item.preview_is_standalone = true
 	return card

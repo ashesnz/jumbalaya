@@ -157,7 +157,7 @@ end
 function Card:begin_materialize(dissolve_colours, silent, timefac)
 	local dt = 0.6*(timefac or 1)
 	self.states.visible = true
-	self.states.hover.can = false
+	self.states.hoverable = false
 	self.children.particles = DissolveFX.run(self, {
 		mode = 'in',
 		duration = dt,
@@ -166,7 +166,7 @@ function Card:begin_materialize(dissolve_colours, silent, timefac)
 		particle = {timer = 0.025, scale = 0.25, speed = 3, lifespan = 0.7},
 		fade = {delay = 0.5 * dt, cap = true},
 		on_finish = function(card)
-			card.states.hover.can = true
+			card.states.hoverable = true
 			if card.children.particles then
 				card.children.particles:remove()
 				card.children.particles = nil

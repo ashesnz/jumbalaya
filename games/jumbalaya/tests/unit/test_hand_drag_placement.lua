@@ -56,9 +56,8 @@ local function prep_drag_card(card)
 	card.click_offset = card.click_offset or { x = 0, y = 0 }
 	card.container = card.container or { T = { x = 0, y = 0, w = 1, h = 1, r = 0 } }
 	card.ARGS = card.ARGS or {}
-	card.states = card.states or {}
-	card.states.drag = card.states.drag or { can = true, is = false }
-	card.states.drag.can = true
+	card.states = card.states or mock_env.input_states()
+	card.states.draggable = true
 end
 
 local function make_letter_card(game, id, letter)
@@ -69,12 +68,7 @@ local function make_letter_card(game, id, letter)
 		letter_card_id = id,
 		ability = { letter = letter, set = "Default" },
 		selected = false,
-		states = {
-			hover = { is = false, can = true },
-			click = { is = false, can = true },
-			collide = { is = false, can = true },
-			drag = { is = false, can = true },
-		},
+		states = mock_env.input_states(),
 		facing = "front",
 		REMOVED = false,
 		parent = nil,

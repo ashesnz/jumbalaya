@@ -90,10 +90,10 @@ end
 		card.flipping = nil
 		if card.pinch then card.pinch.x = false end
 		if card.states then
-			card.states.collide.can = true
-			card.states.hover.can = true
-			card.states.click.can = true
-			card.states.drag.can = true
+			card.states.collideable = true
+			card.states.hoverable = true
+			card.states.clickable = true
+			card.states.draggable = true
 		end
 	end
 

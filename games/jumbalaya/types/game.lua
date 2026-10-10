@@ -181,7 +181,25 @@
 ---@field focused_profile number
 ---@field save_settings fun(self: Game)
 ---@field C table
----@field ARGS table
+---@field ARGS table leftover scratch; named shell fields below
+---@field pending_layout boolean|nil
+---@field deck_left_count number|nil
+---@field timeline_rect table|nil
+---@field spin table
+---@field run_bg table
+---@field eased_cursor_pos table|nil
+---@field word_feedback_queue table|nil
+---@field run_generation number
+---@field run_snapshot table|nil
+---@field score_intensity table|nil
+---@field ambient_sounds table|nil
+---@field progress_payload table|nil
+---@field settings_payload table|nil
+---@field metrics_payload table|nil
+---@field focus_list table|nil
+---@field focusables table|nil
+---@field focus_cursor_pos table|nil
+---@field focus_vec table|nil
 ---@field I GameInstanceTables
 ---@field TIMERS GameTimers
 ---@field FRAMES { DRAW: number, MOVE: number }

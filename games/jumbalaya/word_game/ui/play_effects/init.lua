@@ -27,7 +27,6 @@ function M.queue_event(ev)
 end
 
 function M.request_layout_refresh()
-	game().ARGS = game().ARGS or {}
 	game().pending_layout = true
 end
 

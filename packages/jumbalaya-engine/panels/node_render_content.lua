@@ -157,7 +157,7 @@ function Target:draw_self()
 
 		elseif self.ui_kind == game().UI.OBJECT and self.config.object then
 			-- Flash a ring while the embedded object has focus.
-			if self.config.focus_with_object and self.config.object.states.focus.is then
+			if self.config.focus_with_object and self.config.object.states.focused then
 				self.object_focus_timer = self.object_focus_timer or game().TIMERS.REAL
 				local lw = 50 * math.max(0, self.object_focus_timer - game().TIMERS.REAL + 0.3)^2
 				NodeTransform.push_node_transform(self, 1)

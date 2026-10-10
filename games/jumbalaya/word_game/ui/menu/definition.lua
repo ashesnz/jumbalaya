@@ -256,7 +256,7 @@ function DEFINITIONS.language_selector()
 	end
 	
 	local discord = Sprite(0,0,0.6,0.6,game().TEXTURE_ATLASES["icons"], {x=2, y=0})
-	discord.states.drag.can = false
+	discord.states.draggable = false
 
 	local t = build_generic_options({contents ={
 		Panel.row({align = "cm", padding = 0.05}, rows),

@@ -2,7 +2,7 @@
 	word_game/model/persistence/progress.lua - Card discovery unlock and queue_progress_write profile UDA payload
 
 	Core: none
-	Store: live_game().ARGS.progress_payload, WRITE_FLAGS
+	Store: live_game().progress_payload, WRITE_FLAGS
 	Presentation: none
 ]]
 
@@ -30,15 +30,15 @@ end
 discover_card = M.discover_card
 
 function M.queue_progress_write()
-	live_game().ARGS.progress_payload = live_game().ARGS.progress_payload or {}
-	live_game().ARGS.progress_payload.UDA = Tables.clear_table(live_game().ARGS.progress_payload.UDA)
-	live_game().ARGS.progress_payload.SETTINGS = live_game().SETTINGS
-	live_game().ARGS.progress_payload.PROFILE = live_game().PROFILES[live_game().SETTINGS.profile]
+	live_game().progress_payload = live_game().progress_payload or {}
+	live_game().progress_payload.UDA = Tables.clear_table(live_game().progress_payload.UDA)
+	live_game().progress_payload.SETTINGS = live_game().SETTINGS
+	live_game().progress_payload.PROFILE = live_game().PROFILES[live_game().SETTINGS.profile]
 
 	local centers = live_game().LETTERS and live_game().LETTERS.centers
 	if not centers then return end
 	for key, definition in pairs(centers) do
-		live_game().ARGS.progress_payload.UDA[key] =
+		live_game().progress_payload.UDA[key] =
 			(definition.unlocked and 'u' or '')..
 			(definition.discovered and 'd' or '')..
 			(definition.alerted and 'a' or '')

@@ -20,10 +20,10 @@ local function marketplace_sprite(w, h)
 		return nil
 	end
 	local sprite = Sprite(0, 0, w, h, atlas, { x = 0, y = 0 })
-	sprite.states.drag.can = false
-	sprite.states.hover.can = false
-	sprite.states.collide.can = false
-	sprite.states.click.can = false
+	sprite.states.draggable = false
+	sprite.states.hoverable = false
+	sprite.states.collideable = false
+	sprite.states.clickable = false
 	return sprite
 end
 

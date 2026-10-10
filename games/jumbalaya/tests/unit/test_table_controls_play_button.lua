@@ -77,7 +77,7 @@ T.describe("table controls play button", function()
 		local play_btn = WORD_GAME_UI.TableControls.play_button_uie()
 		T.assert_not_nil(play_btn)
 		T.assert_equal(type(play_btn.config.button), "function")
-		T.assert_true(play_btn.states.collide.can)
+		T.assert_true(play_btn.states.collideable)
 		T.assert_true(play_btn.config.force_collision)
 	end)
 

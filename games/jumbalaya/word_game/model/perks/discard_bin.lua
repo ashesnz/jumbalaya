@@ -69,10 +69,10 @@ function M.stash_discarded_card(card)
 	card.discard_stash = true
 	if card.states then
 		card.states.visible = false
-		if card.states.drag then card.states.drag.can = false end
-		if card.states.collide then card.states.collide.can = false end
-		if card.states.hover then card.states.hover.can = false end
-		if card.states.click then card.states.click.can = false end
+		if card.states.drag then card.states.draggable = false end
+		if card.states.collide then card.states.collideable = false end
+		if card.states.hover then card.states.hoverable = false end
+		if card.states.click then card.states.clickable = false end
 	end
 	local stash = live_game().recycle_stash
 	if stash and card.area ~= stash then

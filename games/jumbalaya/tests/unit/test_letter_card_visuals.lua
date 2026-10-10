@@ -4,6 +4,7 @@ local T = require("tests.framework")
 local mock_env = require("tests.helpers.mock_env")
 local shell = require("jumbalaya-engine.shell")
 
+local InputFlags = require("jumbalaya-engine.scene.input_flags")
 local LetterFaces = require("word_game.ui.cards.letter_faces")
 local LetterPalette = require("word_game.config.visuals.letter_card_palette")
 local chrome = require("word_game.ui.cardarea.chrome")
@@ -22,13 +23,7 @@ local function stub_letter_card(overrides)
 		ambient_tilt = 0.2,
 		selected = false,
 		inspecting = false,
-		states = {
-			hover = { is = false },
-			focus = { is = overrides.focused or false },
-			drag = { is = false },
-			visible = true,
-			collide = { can = true },
-		},
+		states = InputFlags.new(),
 		ability = { set = "Default", letter_color = overrides.letter_color or "red" },
 		config = {
 			center = { set = "Default", discovered = true },
@@ -73,6 +68,8 @@ local function stub_letter_card(overrides)
 		draw_boundingrect = function() end,
 	}
 	setmetatable(card, { __index = Card })
+	card.states.focused = overrides.focused or false
+	card.states.collideable = true
 	return card, center_calls, front_calls, function() return focused_draws end
 end
 
@@ -265,11 +262,7 @@ T.describe("letter card visuals", function()
 
 		local card = {
 			T = { x = 0, y = 0, w = 1, h = 1.4 },
-			states = {
-				hover = { is = false },
-				click = { is = false },
-				drag = { is = false },
-			},
+			states = InputFlags.new(),
 			config = {
 				center = { set = "Default", atlas = "letter_frame", pos = { x = 0, y = 0 } },
 				card = { letter = "Z", color = "red" },

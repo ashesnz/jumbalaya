@@ -78,11 +78,10 @@ local function box_width()
 end
 
 local function deck_count_node(box_w)
-	game().ARGS = game().ARGS or {}
 	deck_mod().sync_deck_count_display()
 	return counter_row(box_w, "row_deck_count", "Cards left: ", Panel.label(counter_text_config({
 			id = "text_deck_count",
-			ref_table = game().ARGS,
+			ref_table = game(),
 			ref_value = "deck_left_count",
 		})))
 end

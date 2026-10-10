@@ -118,7 +118,7 @@ function InputRouter:update_frame(dt)
 				self:update_cursor(self.snap_cursor_to.T)
 			end
 			if self.focused.prev_target ~= self.focused.target and self.focused.prev_target then
-				self.focused.prev_target.states.focus.is = false
+				self.focused.prev_target.states.focused = false
 			end
 			self.snap_cursor_to = nil
 		end

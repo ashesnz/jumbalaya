@@ -4,7 +4,7 @@
 
 **Freeze** (also listed in [code-organization.md](code-organization.md)):
 
-- New scene APIs go through Spatial: `set_rect`, `follow`, `bind_to`, `snap_rect`, `snap_drawn`, `apply_alignment`.
+- New scene motion goes through Spatial only: `set_rect`, `follow`, `bind_to` (plus `snap_rect` / `snap_drawn` / `apply_alignment`). Do not add tweened `T` writes or extra attach modes.
 - Gameplay rules stay in `jumbalaya_core`. The engine does not grow jumble logic.
 - `util/tween.lua` is a **timeline scheduler**, not a spatial interpolator. Card and HUD motion use springs in `scene/animated/integrate.lua`.
 
@@ -50,7 +50,7 @@ Public API:
 
 The frame loop calls `Spatial.bump_generation()` then `needs_tick()` / `ticked_this_generation()` so generation gating stays inside Spatial.
 
-Ephemeral shell fields (`pending_layout`, `spin`, `run_bg`, `deck_left_count`, `timeline_rect`, `word_feedback_queue`, `eased_cursor_pos`) live on the Game object, not `ARGS`. Persistence payloads and focus scratch may still use `ARGS` until those slices move.
+Ephemeral shell fields live on the Game object, not `ARGS`: `pending_layout`, `spin`, `run_bg`, `deck_left_count`, `timeline_rect`, `word_feedback_queue`, `eased_cursor_pos`, `run_generation`, `run_snapshot`, `score_intensity`, `ambient_sounds`, `progress_payload`, `settings_payload`, `metrics_payload`, `focus_list` / `focusables` / `focus_cursor_pos` / `focus_vec`. Per-card shader scratch may still use `card.ARGS`.
 
 ## Node construction
 

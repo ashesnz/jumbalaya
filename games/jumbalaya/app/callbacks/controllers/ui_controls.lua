@@ -10,8 +10,8 @@ local M = {}
 
 local function drag_slider_impl(e)
 	local c = e.children[1]
-	e.states.drag.can = true
-	c.states.drag.can = true
+	e.states.draggable = true
+	c.states.draggable = true
 	if game().INPUT and game().INPUT.dragging.target
 		and (game().INPUT.dragging.target == e or game().INPUT.dragging.target == c) then
 		local rt = c.config.ref_table
@@ -28,8 +28,8 @@ end
 
 function M.slider_step(e, per)
 	local c = e.children[1]
-	e.states.drag.can = true
-	c.states.drag.can = true
+	e.states.draggable = true
+	c.states.draggable = true
 	if per then
 		local rt = c.config.ref_table
 		rt.ref_table[rt.ref_value] = math.min(rt.max, math.max(rt.min, rt.ref_table[rt.ref_value] + per * (rt.max - rt.min)))

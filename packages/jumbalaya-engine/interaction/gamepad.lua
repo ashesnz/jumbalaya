@@ -27,12 +27,12 @@ end
 
 --- Brand detection from the device name (Xbox as the default).
 function InputRouter:get_console_from_gamepad(_gamepad_name)
-	game().ARGS.gamepad_patterns = game().ARGS.gamepad_patterns or {
+	game().gamepad_patterns = game().gamepad_patterns or {
 		Playstation = {"%f[%w]PS%d%f[%D]", "Sony%f[%W]", "Play[Ss]tation"},
 		Nintendo = {"Wii%f[%L]", "%f[%u]S?NES%f[%U]", "%f[%l]s?nes%f[%L]", "%f[%u]Switch%f[%L]", "Joy[- ]Cons?%f[%L]"},
 	}
 
-	for brand, patterns in pairs(game().ARGS.gamepad_patterns) do
+	for brand, patterns in pairs(game().gamepad_patterns) do
 		for _, pattern in ipairs(patterns) do
 			if _gamepad_name:match(pattern) then return brand end
 		end

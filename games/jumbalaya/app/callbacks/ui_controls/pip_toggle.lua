@@ -17,7 +17,7 @@ Funcs.register("set_button_pip", function(e)
 				offset = e.config.focus_args.offset or e.config.focus_args.orientation == 'bm' and {x = 0, y = 0.02} or {x = 0.1, y = 0.02},
 				major = e, parent = e}
 		}
-		e.children.button_pip.states.collide.can = false
+		e.children.button_pip.states.collideable = false
 	end
 	if not game().INPUT.HID.controller and e.children.button_pip then
 		e.children.button_pip:remove()

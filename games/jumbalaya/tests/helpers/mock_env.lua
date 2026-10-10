@@ -5,6 +5,7 @@
 local M = {}
 
 local shell = require("jumbalaya-engine.shell")
+local InputFlags = require("jumbalaya-engine.scene.input_flags")
 
 local function shell_game()
 	local game = shell.game()
@@ -13,6 +14,10 @@ local function shell_game()
 		game = shell.game()
 	end
 	return game
+end
+
+function M.input_states()
+	return InputFlags.new()
 end
 
 local function stub_atlas()
@@ -158,7 +163,7 @@ function M.setup()
 	S.POINTER = S.POINTER or {
 		T = { x = 0, y = 0, w = 1, h = 1 },
 		VT = { x = 0, y = 0, w = 1, h = 1 },
-		states = { hover = {}, click = {}, collide = {}, drag = {} },
+		states = M.input_states(),
 	}
 	S.INPUT = S.INPUT or {
 		locks = {},
@@ -278,7 +283,7 @@ function M.setup()
 			VT = { x = x or 0, y = y or 0, w = w or 1, h = h or 1.4 },
 			ability = {},
 			config = { card = front },
-			states = { hover = {}, click = {}, collide = {}, drag = {} },
+			states = M.input_states(),
 			set_sprites = function() end,
 			pulse = function() end,
 			remove = function() end,

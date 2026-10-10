@@ -82,9 +82,9 @@ end
 local function start_drag(card)
 	local c = game().INPUT
 	if not c or not card or card.REMOVED then return end
-	if not card.states.drag.can then return end
+	if not card.states.draggable then return end
 	restore_scale(card)
-	card.states.drag.is = true
+	card.states.dragging = true
 	card:set_offset(c.press_state.T, "Click")
 	c.dragging.target = card
 	c.dragging.handled = false
@@ -112,7 +112,7 @@ local function wanted_card()
 	end
 
 	local hover = c.hovering and c.hovering.target
-	if is_letter_card(hover) and not (hover.states and hover.states.drag.is) then
+	if is_letter_card(hover) and not (hover.states and hover.states.dragging) then
 		return hover
 	end
 	return nil

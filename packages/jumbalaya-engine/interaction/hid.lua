@@ -33,7 +33,7 @@ function InputRouter:set_cursor_position()
 
 	self.interrupt.focus = false
 	if self.focused.target then
-		self.focused.target.states.focus.is = false
+		self.focused.target.states.focused = false
 		self.focused.target = nil
 	end
 

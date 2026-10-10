@@ -75,7 +75,7 @@ end
 
 local function dragging_hand_card()
 	local target = game().INPUT and game().INPUT.dragging and game().INPUT.dragging.target
-	return target and target.states and target.states.drag and target.states.drag.is
+	return target and target.states and target.states.dragging
 		and target.area == game().dealt_letters
 end
 
@@ -84,7 +84,7 @@ function M.hand_position_drift()
 	if math.abs((game().dealt_letters.VT.x or 0) - (game().dealt_letters.T.x or 0)) > SNAP_EPS then return true end
 	if math.abs((game().dealt_letters.VT.y or 0) - (game().dealt_letters.T.y or 0)) > SNAP_EPS then return true end
 	for _, card in ipairs(game().dealt_letters.cards or {}) do
-		if card.states and card.states.drag and card.states.drag.is then
+		if card.states and card.states.dragging then
 			goto continue
 		end
 		local vt, t = card.VT, card.T
@@ -128,7 +128,7 @@ end
 function M.snap_hand_cards()
 	if not game().dealt_letters or dragging_hand_card() then return end
 	for _, card in ipairs(game().dealt_letters.cards or {}) do
-		if card.states and card.states.drag and card.states.drag.is then
+		if card.states and card.states.dragging then
 			goto continue
 		end
 		if card.bounce or card.shuffle_hop or card.placement_recall_slide then

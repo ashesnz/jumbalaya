@@ -193,8 +193,14 @@ function M.relayout(session)
 		return
 	end
 
-	local function snap_card(card)
-		if card and card.snap_rect then
+	local function place_card(card, x, y)
+		card.T.r = 0
+		if card.set_rect then
+			card:set_rect(x, y)
+		else
+			card.T.x, card.T.y = x, y
+		end
+		if card.snap_rect then
 			card:snap_rect(card.T.x, card.T.y, card.T.w, card.T.h)
 		end
 	end
@@ -204,13 +210,10 @@ function M.relayout(session)
 		local cells = topology.span_cells(j, area.cards)
 		local centers = M.span_centers(session, #cells)
 		for i, cell in ipairs(cells) do
-			if cell.kind == "card" and cell.card and not (cell.card.states and cell.card.states.drag and cell.card.states.drag.is) then
+			if cell.kind == "card" and cell.card and not (cell.card.states and cell.card.states.dragging) then
 				local cx = centers[i]
 				if cx then
-					cell.card.T.r = 0
-					cell.card.T.x = cx - card_w * 0.5
-					cell.card.T.y = M.card_row_y(area, cell.card.T.h)
-					snap_card(cell.card)
+					place_card(cell.card, cx - card_w * 0.5, M.card_row_y(area, cell.card.T.h))
 				end
 			end
 		end
@@ -219,13 +222,10 @@ function M.relayout(session)
 		for _, slot in ipairs(j.slots) do
 			if slot.kind == "blank" and slot.card then
 				local card = slot.card
-				if not card.states.drag.is then
+				if not card.states.dragging then
 					local cx = centers[slot.index]
 					if cx then
-						card.T.r = 0
-						card.T.x = cx - card.T.w / 2
-						card.T.y = M.card_row_y(area, card.T.h)
-						snap_card(card)
+						place_card(card, cx - card.T.w / 2, M.card_row_y(area, card.T.h))
 					end
 				end
 			end

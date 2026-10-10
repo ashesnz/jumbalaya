@@ -15,7 +15,7 @@ end
 
 --- Resting table cards skip dissolve/tilt shaders until hover, drag, or FX need them.
 function Card:is_shader_idle()
-	if self.states.hover.is or self.states.focus.is or self.states.drag.is then
+	if self.states.hovering or self.states.focused or self.states.dragging then
 		return false
 	end
 	if self.selected or self.inspecting then return false end
@@ -94,9 +94,9 @@ function Card:update_tilt()
 	local cy = (self.VT.y + self.VT.h * 0.5 + room.y) * tiles
 	local cursor = game().INPUT and game().INPUT.cursor_position
 
-	if (self.states.focus.is or self.states.hover.is) and cursor then
+	if (self.states.focused or self.states.hovering) and cursor then
 		local mx, my = cursor.x, cursor.y
-		if self.states.focus.is then
+		if self.states.focused then
 			mx = mx + (self.tilt_var.dx or 0) * self.T.w * tiles
 			my = my + (self.tilt_var.dy or 0) * self.T.h * tiles
 		end
