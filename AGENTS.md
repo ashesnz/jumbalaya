@@ -174,3 +174,13 @@ Minimize diff scope; match existing naming and patterns. Startup success alone d
 ## Commits and PRs
 
 Only create git commits or PRs when explicitly asked. Do not force-push to main.
+
+## Ticket workflow
+
+The ticket lifecycle and invocation guide is in [`docs/ticket-lifecycle.md`](docs/ticket-lifecycle.md). Cursor specialists live in `.cursor/agents/`; individually callable skill entry points are mirrored in `.cursor/skills/` and `.agents/skills/`:
+
+- `/scrum-master` checks ticket readiness against the current product and glossary; it does not implement.
+- `/code-developer`, `/test-writer`, and `/code-reviewer` can each be invoked individually.
+- `/run-ticket` gates the ticket, delegates the specialists in order, runs `love tests`, and coordinates at most two remediation cycles.
+
+Pass the ticket and acceptance criteria directly; no tracker, branch name, branch creation, commit, or PR is assumed. The orchestrator must stop if specialist delegation is unavailable rather than silently doing every role itself. For UI work, report any required interactive Love2D checks separately from the headless test result.
