@@ -59,6 +59,53 @@ For a Ready result, the scrum master returns a self-contained approved brief: th
 
 Each specialist receives a self-contained delegation brief: the approved ticket and exact acceptance criteria, that the work is a pipeline run, baseline/pre-existing paths, files changed so far, prior findings or test output, and its specific role. A specialist that cannot proceed returns a blocker; the orchestrator does not fill gaps by guessing.
 
+## Creating issues in Linear from Cursor
+
+The project provides a `/create-ticket` skill in `.cursor/skills/create-ticket/` (mirrored under `.agents/skills/`). It asks focused questions before creating anything when an idea is materially vague, drafts the issue in the format below, and asks the `scrum-master` agent to check readiness. It is separate from `/run-ticket`: creating an issue never implements it or starts the implementation pipeline.
+
+### Connect Linear
+
+The project-level `.cursor/mcp.json` configures Linear's hosted MCP server at `https://mcp.linear.app/mcp`. Open the project in Cursor, enable the Linear MCP server if prompted, and complete Linear's OAuth authorization in Cursor. Do not add a personal API token to the repository. Issue creation requires the read-write Linear MCP connection; a read-only connection cannot create issues. See [Linear's Cursor MCP setup](https://linear.app/docs/mcp#cursor) and [Cursor MCP integration](https://linear.app/integrations/cursor-mcp).
+
+### Create a ticket
+
+Invoke `/create-ticket` with an idea, for example `/create-ticket make the buttons rounded with a 5px radius`. The skill asks about missing information that could materially affect scope, behavior, or testing before presenting a create approval. If you want to capture an unresolved idea anyway, it leaves the gaps under **Open questions**, does not call it Ready, and uses Backlog. No branch is created: an unknown branch is shown as `Not assigned`.
+
+The description template keeps the supplied rationale and test details, without inventing missing facts:
+
+```text
+Branch: <branch name or Not assigned>
+#<Linear number> <Title>
+
+## Goal
+<Outcome and reason>
+
+## Requirements
+- <Requirement>
+  Why: <Rationale, when supplied>
+
+## Words used on this card:
+- <Term>: <Meaning>
+
+## Acceptance criteria
+- <Observable result>
+
+## How to test
+- <Setup, action, and expected result>
+
+## Out of scope
+- <Explicit exclusions>
+
+## Open questions
+- <Unresolved decision>
+```
+
+The final Linear issue title is `#<Linear number> - <Title>`; its identifier's numeric part is used (for example, `ASH-275` becomes `#275`). Since Linear only assigns the number on creation, numbering needs two approvals: first, the skill displays and asks approval for an unnumbered provisional issue in Backlog (including a `#Pending <Title>` line in its description); after creation, it shows the confirmed numbered title and full description and asks approval to update that same issue. The provisional issue is visible on the board between those approvals. If the second approval is declined, it remains in Backlog unnumbered. This avoids guessing the next issue number.
+
+The skill discovers the team, project, and Backlog state through Linear; it asks rather than guessing if the destination is ambiguous. If readiness is Not ready or could not be checked, the issue must stay in Backlog (or another explicitly confirmed non-ready state), never Ready. It shows the exact content and destination before each write and requires explicit approval for each operation. If MCP authorization, permissions, or a create/update result is uncertain, it reports the blocker and verifies the existing issue rather than blindly retrying or claiming success. No account identifiers need to be written in project configuration.
+
+This integration creates issues only. It does not configure status-change automations or webhooks; see [Cursor Automations](https://cursor.com/docs/cloud-agent/automations#linear-triggers) separately if you later want a Linear status change to start a cloud agent.
+
 ## Jumbalaya-specific constraints
 
 - Keep `packages/jumbalaya_core/` engine-agnostic and headless; keep `word_game/model/` as runtime glue and `word_game/ui/` as presentation. Respect the dependency and facade rules in `AGENTS.md` and `docs/code-organization.md`.

@@ -2,6 +2,22 @@
 
 Roguelike **jumble** word game built on Love2D — pattern puzzles, multiplier scoring, timeline pressure, tokens, and perk stamps.
 
+## Run the game and tests
+
+Install [Love2D](https://love2d.org/) first, then run these commands from the repository root:
+
+```bash
+love games/jumbalaya
+```
+
+To run the test suite:
+
+```bash
+love tests
+```
+
+See [docs/testing.md](docs/testing.md) for more about the test suite.
+
 ## Documentation
 
 Player and design docs: **[docs/](docs/README.md)** — jumble gameplay, scoring, progression, systems, code map.
