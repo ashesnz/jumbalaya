@@ -99,6 +99,10 @@ function M.update_all()
 	M.update_play_attach()
 end
 
+--- Recomputes table geometry. `opts.skip_hand_shuffle` skips the nested
+--- TableControls.sync() (caller already synced). `opts.skip_layout_settle`
+--- skips marking hand_layout_settle — used by bootstrap prime so the
+--- opening-deal easing window doesn't start before the hand is dealt.
 function M.set_screen_positions(opts)
 	opts = opts or {}
 	if game().STAGE == game().STAGES.RUN and game().dealt_letters then
@@ -165,7 +169,8 @@ function M.set_screen_positions(opts)
 			placement:hard_set_cards()
 		end
 
-		if WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.mark_layout_settle then
+		if WORD_GAME_UI.TableControls and WORD_GAME_UI.TableControls.mark_layout_settle
+			and not opts.skip_layout_settle then
 			WORD_GAME_UI.TableControls.mark_layout_settle(4)
 		end
 		if WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then

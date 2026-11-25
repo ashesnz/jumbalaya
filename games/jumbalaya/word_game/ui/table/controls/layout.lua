@@ -99,6 +99,23 @@ function M.hand_position_drift()
 	return false
 end
 
+-- Layout nodes `follow` their panel with `lock_drawn = false` (see
+-- jumbalaya-engine/panels/node_values.lua), so `snap_to_attach` / `recalculate`
+-- update the target rect but leave `drawn` stale on descendants. Recurse so a
+-- freshly placed bar is fully snapped instead of spring-easing its button and
+-- label into position over the next few frames.
+local function snap_drawn_tree(node)
+	if not node then return end
+	if node.snap_drawn then
+		node:snap_drawn()
+	end
+	if node.children then
+		for _, child in pairs(node.children) do
+			snap_drawn_tree(child)
+		end
+	end
+end
+
 function M.snap_bar(bar)
 	if not bar then return end
 	animate().clear_bounce(bar)
@@ -108,9 +125,7 @@ function M.snap_bar(bar)
 	if bar.snap_drawn then
 		bar:snap_drawn()
 	end
-	if bar.root_node and bar.root_node.snap_drawn then
-		bar.root_node:snap_drawn()
-	end
+	snap_drawn_tree(bar.root_node)
 	bar.settled = true
 end
 

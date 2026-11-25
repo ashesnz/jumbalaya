@@ -52,8 +52,8 @@ Match progress lives on the **store snapshot** — read it via `game_access.get(
 
 | Term | Meaning | Code / state |
 |------|---------|--------------|
-| **Play** (button) | Submit word or bank puzzle | `play_placement_word` → `table/controls/placement.try_play` |
-| **Shuffle** | Reorder cards in hand only | `shuffle_hand` |
+| **Play** (button) | Submit word or bank puzzle | `play_placement_word` → `table/controls/placement.try_play`; bar node `G.hand_action_bar` |
+| **Shuffle** | Reorder cards in hand only | `shuffle_hand`; bar node `G.table_shuffle_bar` |
 | **Hold redraw** | Hold Play 5s to discard hand and deal 7 new cards | `WORD_GAME_UI.PlayHoldRedraw` |
 | **The Trade** / **marketplace** | Between-hand shop: 3 random letters (1 vowel + 2 consonants); **Add** (10 tokens), **Remove** (20), **Modify** (30) | `WORD_GAME_UI.TradeUI`; `word_game/model/trade` |
 | **Hand clear** | Target reached — celebration then shop or win | `play_effects/hand_clear`; `Play.on_hand_cleared` |

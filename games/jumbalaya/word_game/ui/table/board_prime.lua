@@ -21,6 +21,26 @@ local function ui()
 	return WORD_GAME_UI
 end
 
+-- Layout nodes `follow` their panel with `lock_drawn = false` (see
+-- jumbalaya-engine/panels/node_values.lua), so panel construction/recalculate
+-- updates the target rect but leaves `drawn` stale on descendants — they'd
+-- otherwise spring-ease into place over the first visible frames. Recurse so
+-- the sidebar HUD is fully snapped before the first draw.
+local function snap_drawn_tree(node)
+	if not node then return end
+	if node.snap_drawn then
+		node:snap_drawn()
+	end
+	if node.children then
+		for _, child in pairs(node.children) do
+			snap_drawn_tree(child)
+		end
+	end
+	if node.root_node and node.root_node ~= node then
+		snap_drawn_tree(node.root_node)
+	end
+end
+
 function M.sidebar_ready(g)
 	g = g or game()
 	local hud = g.SIDEBAR_HUD
@@ -73,7 +93,9 @@ function M.prime()
 		facade_ui.TableControls.sync()
 	end
 	if facade_ui.Layout and facade_ui.Layout.set_screen_positions then
-		facade_ui.Layout.set_screen_positions()
+		-- Bootstrap prime is not the opening hand deal: don't arm the
+		-- hand-card settle window here (that belongs to the real deal-in).
+		facade_ui.Layout.set_screen_positions({ skip_layout_settle = true })
 	end
 
 	local g = game()
@@ -97,6 +119,14 @@ function M.prime()
 			facade_ui.ScoreBanner.sync_points_to_get_preview(false)
 		end
 	end
+
+	-- Final deterministic snap: force drawn == target through the sidebar
+	-- and control-bar trees so nothing eases in on the first visible frames.
+	snap_drawn_tree(g.SIDEBAR_HUD)
+	if facade_ui.TableControls and facade_ui.TableControls.snap then
+		facade_ui.TableControls.snap()
+	end
+
 	g.pending_layout = false
 	return M.is_ready(g)
 end

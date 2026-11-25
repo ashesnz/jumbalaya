@@ -6,6 +6,34 @@ local Spatial = require("jumbalaya-engine.scene.animated.init")
 local shell = require("jumbalaya-engine.shell")
 local board_prime = require("word_game.ui.table.board_prime")
 
+-- Same tolerance as controls/layout.lua's hand_position_drift() SNAP_EPS
+-- precedent: anything within this band is considered "snapped", not easing.
+local SNAP_EPS = 0.004
+
+--- Recursively asserts every node in `node`'s subtree has drawn (VT) rect
+--- equal to its target (T) rect within SNAP_EPS. A node that fails this
+--- would spring-ease into place over the next few visible frames instead of
+--- being ready in the primed frame.
+local function assert_tree_snapped(node, label, path)
+	if not node then return end
+	path = path or label
+	if node.T and node.VT then
+		T.assert_true(math.abs((node.VT.x or 0) - (node.T.x or 0)) <= SNAP_EPS,
+			path .. ": VT.x should match T.x (snapped, not easing)")
+		T.assert_true(math.abs((node.VT.y or 0) - (node.T.y or 0)) <= SNAP_EPS,
+			path .. ": VT.y should match T.y (snapped, not easing)")
+		T.assert_true(math.abs((node.VT.w or 0) - (node.T.w or 0)) <= SNAP_EPS,
+			path .. ": VT.w should match T.w (snapped, not easing)")
+		T.assert_true(math.abs((node.VT.h or 0) - (node.T.h or 0)) <= SNAP_EPS,
+			path .. ": VT.h should match T.h (snapped, not easing)")
+	end
+	if node.children then
+		for id, child in pairs(node.children) do
+			assert_tree_snapped(child, label, path .. "." .. tostring(id))
+		end
+	end
+end
+
 local function install_table_board_ui()
 	mock_env.setup()
 	mock_env.ensure_card_class()
@@ -348,5 +376,56 @@ T.describe("table board boot", function()
 
 		T.assert_nil(game.OVERLAY_MENU, "match overlay must close before the next run")
 		T.assert_equal(game.SETTINGS.paused, false)
+	end)
+
+	T.it("board_prime fully snaps the sidebar HUD tree, including nested rows", function()
+		local game = install_table_board_ui()
+		board_prime.prime()
+
+		local hud = game.SIDEBAR_HUD
+		T.assert_not_nil(hud)
+		assert_tree_snapped(hud.root_node, "sidebar_hud")
+
+		-- A grandchild-level node (button nested inside a row nested inside
+		-- the fill row) must also be snapped, not just the HUD root/children.
+		local end_run_button = hud:find_node_by_id("end_run_button")
+		T.assert_not_nil(end_run_button, "end_run_button should exist in the sidebar tree")
+		T.assert_true(math.abs(end_run_button.VT.x - end_run_button.T.x) <= SNAP_EPS,
+			"end_run_button should be snapped, not easing in from a stale drawn rect")
+		T.assert_true(math.abs(end_run_button.VT.y - end_run_button.T.y) <= SNAP_EPS,
+			"end_run_button should be snapped, not easing in from a stale drawn rect")
+
+		local end_run_label = hud:find_node_by_id("end_run_label")
+		T.assert_not_nil(end_run_label, "end_run_label should exist in the sidebar tree")
+		T.assert_true(math.abs(end_run_label.VT.x - end_run_label.T.x) <= SNAP_EPS,
+			"end_run_label (grandchild of root) should be snapped after prime")
+		T.assert_true(math.abs(end_run_label.VT.y - end_run_label.T.y) <= SNAP_EPS,
+			"end_run_label (grandchild of root) should be snapped after prime")
+	end)
+
+	T.it("board_prime fully snaps the play and shuffle control bar trees", function()
+		local game = install_table_board_ui()
+		board_prime.prime()
+
+		T.assert_not_nil(game.hand_action_bar)
+		T.assert_not_nil(game.table_shuffle_bar)
+		T.assert_not_nil(game.hand_action_bar.root_node)
+		T.assert_not_nil(game.table_shuffle_bar.root_node)
+
+		assert_tree_snapped(game.hand_action_bar.root_node, "hand_action_bar")
+		assert_tree_snapped(game.table_shuffle_bar.root_node, "table_shuffle_bar")
+	end)
+
+	T.it("board_prime does not arm hand_layout_settle during bootstrap prime", function()
+		local game = install_table_board_ui()
+		-- Sentinel left over from a previous frame: prime must not inherit or
+		-- re-arm an easing window that belongs to the real opening hand deal.
+		game.hand_layout_settle = 4
+
+		board_prime.prime()
+
+		local settle = WORD_GAME.GameAccess and WORD_GAME.GameAccess.get().hand_layout_settle
+		T.assert_true(settle == nil or settle == 0,
+			"bootstrap prime must not arm hand_layout_settle (no control-bar easing after boot)")
 	end)
 end)
