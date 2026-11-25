@@ -42,6 +42,13 @@ The Cursor subagents are defined in `.cursor/agents/`. Matching skill entry poin
 
 Run an individual skill when you need only that specialist. Include the ticket and relevant acceptance criteria in the request; do not assume one specialist knows the context from another conversation. If a tool cannot actually delegate to the requested Cursor subagent, `/run-ticket` must report that limitation and stop rather than impersonating all four specialists.
 
+### Model selection
+
+- **Default:** Composer 2.5 **slow** (standard `composer-2.5`, not `composer-2.5-fast`). Select it in the chat model picker before `/run-ticket ASH-<n>`.
+- **Orchestrator and specialists** should run on that picker choice. Project subagents use `model: inherit` in `.cursor/agents/`.
+- When delegating stages, the orchestrator uses the Task tool with `subagent_type` (`scrum-master`, `code-developer`, `test-writer`, `code-reviewer`) and **does not** pass `model`, so each specialist inherits the parent chat model.
+- Do not route pipeline work through `generalPurpose` / `explore` or impersonate specialists in the main thread when Task delegation is available.
+
 ## Readiness gate
 
 `/scrum-master` starts from the ticket text provided by the user. It reads `AGENTS.md`, `docs/glossary.md`, and the applicable parts of `docs/code-organization.md`, `docs/gameplay.md`, and `docs/testing.md`; it inspects current code when a ticket uses an informal term or names an existing behavior. The glossary is code truth, while `docs/gameplay.md` is player-facing truth.

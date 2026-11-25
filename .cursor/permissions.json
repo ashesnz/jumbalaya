@@ -1,0 +1,31 @@
+{
+  // Workspace-only: Cursor loads this file only when this repo (Jumbalaya) is the open workspace.
+  // It does not apply to other projects. There is no ~/.cursor/permissions.json for this setup.
+  "terminalAllowlist": [
+    "git merge",
+    "git push",
+    "git checkout",
+    "git commit",
+    "git add",
+    "git status",
+    "git pull",
+    "git log",
+    "git branch",
+    "git diff",
+    "git rev-parse",
+    "love",
+    "emmylua_check",
+    "_tools/run_emmylua_check.sh"
+  ],
+  "mcpAllowlist": [
+    "linear:get_issue",
+    "linear:save_issue",
+    "linear:save_comment",
+    "linear:list_comments"
+  ],
+  "autoRun": {
+    "allow_instructions": [
+      "Only in the Jumbalaya workspace (/Users/ashwin/Source/home/Jumbalaya): /complete-ticket and explicit requests to land a ticket authorize git merge into main, git push origin main, and Linear save_issue/save_comment for Done and landing comments."
+    ]
+  }
+}
