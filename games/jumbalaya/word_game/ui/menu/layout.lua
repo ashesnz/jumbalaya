@@ -308,11 +308,12 @@ function M.layout_main_menu_title()
 end
 
 function M.layout_main_menu()
-	if not game().MAIN_MENU_UI or not game().MAIN_MENU_UI.T then return end
-	game().MAIN_MENU_UI.alignment.offset.y = M.main_menu_bottom_offset()
-	game().MAIN_MENU_UI:recalculate()
-	M.layout_main_menu_mode_column()
-	game().MAIN_MENU_UI:apply_alignment()
+	if game().MAIN_MENU_UI and game().MAIN_MENU_UI.T then
+		game().MAIN_MENU_UI.alignment.offset.y = M.main_menu_bottom_offset()
+		game().MAIN_MENU_UI:recalculate()
+		M.layout_main_menu_mode_column()
+		game().MAIN_MENU_UI:apply_alignment()
+	end
 	M.layout_main_menu_title()
 end
 

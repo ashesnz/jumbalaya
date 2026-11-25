@@ -26,6 +26,8 @@ local TITLE_GARDEN_MOSS = {0.12, 0.24, 0.14, 1}
 local function settle_main_menu_layout()
 	if layout_main_menu then
 		layout_main_menu()
+	elseif layout_main_menu_title then
+		layout_main_menu_title()
 	end
 	if game().title_top then
 		game().title_top:sort("order")
@@ -81,8 +83,8 @@ function M.open_main_menu(self, change_context)
 	local cold_boot = change_context == nil
 	if cold_boot then
 		MenuEffects.set_main_ui()
-		settle_main_menu_layout()
 	end
+	settle_main_menu_layout()
 
 	Scheduler.add{mode = "delayed",
 		delay = change_context == "splash" and 1.8 or change_context == "game" and 2 or 0.15,
@@ -100,15 +102,10 @@ function M.open_main_menu(self, change_context)
 	Scheduler.add{func = function() if game().INPUT then game().INPUT.lock_input = false end; return true end}
 	Layout.set_screen_positions()
 	if not cold_boot then
-		self.title_top:sort("order")
-		self.title_top:refresh_order()
-		self.title_top:relayout()
-		self.title_top:hard_set_cards()
-	end
-	if not cold_boot then
 		Scheduler.add{mode = "delayed", delay = change_context == "splash" and 4.05 or change_context == "game" and 3 or 0.4,
 			blockable = false, blocking = false, func = function()
 				MenuEffects.set_main_ui()
+				settle_main_menu_layout()
 				return true
 			end}
 	end

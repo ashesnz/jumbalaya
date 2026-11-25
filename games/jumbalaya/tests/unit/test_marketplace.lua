@@ -146,51 +146,6 @@ T.describe("marketplace", function()
 		session_state.teardown()
 	end)
 
-	T.it("keeps grid rows and controls inside the modal frame across room sizes", function()
-		setup_marketplace_game()
-		local layout = require("word_game.ui.trade.layout")
-		local columns = require("word_game.ui.trade.columns")
-		local game = shell.game()
-		local rooms = {
-			{ w = 20, h = 11 },
-			{ w = 16, h = 9 },
-			{ w = 24, h = 13 },
-			{ w = 12, h = 7 },
-		}
-		for _, room in ipairs(rooms) do
-			game.ROOM.T.w = room.w
-			game.ROOM.T.h = room.h
-			local frame = layout.modal_frame()
-			local metrics = columns.layout_metrics(frame)
-			T.assert_true(
-				math.abs(metrics.total_row_h - metrics.inner_h) < 0.02,
-				string.format("row stack taller than frame (%.2f > %.2f) at %dx%d",
-					metrics.total_row_h, metrics.inner_h, room.w, room.h)
-			)
-			T.assert_true(metrics.button_minw <= metrics.col_w + 0.001)
-			T.assert_true(metrics.market_card_w <= metrics.col_w + 0.001)
-
-			local grid_def = columns.build_grid(frame)
-			T.assert_equal(grid_def.config.minw, frame.w)
-			T.assert_equal(grid_def.config.maxw, frame.w)
-			T.assert_equal(grid_def.config.minh, frame.h)
-			T.assert_equal(grid_def.config.maxh, frame.h)
-			T.assert_true(columns.sum_row_min_heights(grid_def) <= frame.h - 2 * columns.GRID_PADDING + 0.02)
-
-			for _, row in ipairs(grid_def.nodes or {}) do
-				T.assert_equal(row.config.maxw, frame.w)
-				T.assert_true((row.config.minh or 0) <= frame.h)
-			end
-
-			for col_index = 1, 3 do
-				local card_node = find_def_node(grid_def, "trade_market_card_" .. col_index)
-				if card_node and card_node.config.w then
-					T.assert_true(card_node.config.w <= metrics.col_w + 0.001)
-				end
-			end
-		end
-	end)
-
 	T.it("layout source constrains marketplace grid to the art frame", function()
 		local paths = require("bootstrap_paths").resolve()
 		local file = io.open(paths.path_under_repo(

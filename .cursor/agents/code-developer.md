@@ -29,3 +29,4 @@ Implement only the approved user task or ticket. Do not expand scope, commit, pu
 - For standalone logic changes, run the required suite with `love tests` and report its actual result. In a pipeline, report any focused checks run; `/run-ticket` owns the full-suite gate after test-writing.
 - For structural refactors, run `emmylua_check . --severity warn` when available and applicable. Do not claim manual Love2D visual/input verification unless it was actually performed.
 - Return changed paths, a concise description, validation commands/results, and any unresolved blocker or manual smoke check. For a pipeline, include any relevant findings for `test-writer`; do not ask the user to invoke another agent.
+- When remediating a code-reviewer report, attempt every in-scope recommended finding. List each skipped or out-of-scope item with a reason so `/run-ticket` can comment them on Linear.

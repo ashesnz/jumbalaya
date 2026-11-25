@@ -24,7 +24,7 @@ Player and design docs: **[docs/](docs/README.md)** — jumble gameplay, scoring
 
 AI / agent context: **[AGENTS.md](AGENTS.md)** and **[.cursor/skills/jumbalaya/SKILL.md](.cursor/skills/jumbalaya/SKILL.md)**.
 
-Ticket workflow: **[docs/ticket-lifecycle.md](docs/ticket-lifecycle.md)** — readiness gate, individually callable specialists, and the end-to-end `/run-ticket` process.
+Ticket workflow: **[docs/ticket-lifecycle.md](docs/ticket-lifecycle.md)** — `/create-ticket`, `/run-ticket`, `/complete-ticket`, and the specialist skills.
 
 ## Skip tutorial
 
