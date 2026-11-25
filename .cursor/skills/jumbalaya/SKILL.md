@@ -19,7 +19,8 @@ description: >-
 ## Read first
 
 1. `docs/code-organization.md` — package map and dependency rules
-1b. `docs/engine.md` — Spatial motion (`set_rect`, `follow`, `bind_to`)
+1b. `docs/dry-practices.md` — readability, dead code, duplication (code-developer / implementation work)
+1c. `docs/engine.md` — Spatial motion (`set_rect`, `follow`, `bind_to`)
 2. `docs/gameplay.md` — player-facing systems
 3. `AGENTS.md` — agent-specific constraints and current structure
 4. `.cursor/rules/jumbalaya-*.mdc` — always-on and glob-scoped rules

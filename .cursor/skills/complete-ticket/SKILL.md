@@ -17,7 +17,7 @@ Linear does **not** allow manual archive. Closed issues auto-archive only after 
 
 **This skill:** merge is the durable record (git on `main`). Then set Linear to **Done**, then **delete** the issue so the slot is free immediately. Deleted issues sit in Recently deleted for 30 days, then are gone. Git history and the merge commit remain.
 
-Linear MCP can set **Done**; it cannot delete or archive. After Done, tell the user to delete the issue in Linear (`Cmd/Ctrl+Delete` or command palette → Delete issue). One-time: Ashwin team **Settings → Automations → auto-archive** at the shortest period as a safety net for any leftover Done cards.
+Linear MCP can set **Done**; it cannot delete or archive. **Done is not removed from the board** — the card stays in the Done column until someone deletes it in Linear. After Done, tell the user to delete the issue in Linear (`Cmd/Ctrl+Delete` or command palette → Delete issue). One-time: Ashwin team **Settings → Automations → auto-archive** at the shortest period as a safety net for any leftover Done cards.
 
 Do not keep finished cards on the board to “save history.”
 
@@ -44,7 +44,8 @@ Do not force-push `main`. Do not skip hooks. Do not amend unless the user asked 
 6. Checkout `main` (or the default branch from `origin/HEAD`).
 7. Merge the ticket branch (`git merge <branch>`). If conflicts, stop and report; do not invent resolutions beyond an obvious one-file fix the user would expect.
 8. Push `main` to `origin` only if `origin` exists and tracks this repo. Never `--force` on `main`.
-9. Stay on `main` after a successful merge.
+9. On `main`, run `git pull origin main` (or the default branch from `origin/HEAD`) so the local tracking branch matches `origin` after the push (remote hooks or another machine may have moved the tip).
+10. Stay on `main` after a successful merge and pull.
 
 Do not open a PR unless the user asks. This path is a local merge to `main`.
 
@@ -54,14 +55,14 @@ After a successful merge:
 
 1. `save_issue` `id: ASH-<n>` `state: Done`.
 2. `save_comment` on the issue: merge landed on `main` (short SHA if known), branch name, `love tests` passed, leftover review items already on the issue if any.
-3. Instruct the user to **delete** the issue in Linear now (Free 250). Confirm they should not rely on archive.
+3. Instruct the user to **delete** the issue in Linear now (Free 250). Confirm they should not rely on archive. MCP cannot perform the delete.
 
 If Done fails, report the merge SHA and the Linear blocker; do not retry blindly.
 
 ## Output
 
-- Issue id, branch, merge commit SHA, whether `main` was pushed.
+- Issue id, branch, merge commit SHA, whether `main` was pushed, and `git pull` result (up to date or fast-forward).
 - `love tests` result and `emmylua_check . --severity error` result.
 - Linear **Done** (or blocker).
-- Explicit: **delete the Linear issue** to free a Free-plan slot; archive is automatic-only and too slow for the 250 cap.
+- Explicit: **delete the Linear issue** in the Linear app to remove it from the Done column; the agent cannot delete it via MCP.
 - Confirmation that specialists were not re-run.

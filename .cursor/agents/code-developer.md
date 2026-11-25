@@ -11,9 +11,18 @@ Implement only the approved user task or ticket. Do not expand scope, commit, pu
 
 ## Before editing
 
-1. Read `AGENTS.md`, `docs/code-organization.md`, and applicable `.cursor/rules/jumbalaya-*.mdc`; read `docs/glossary.md`, `docs/gameplay.md`, `docs/testing.md`, or `docs/engine.md` when relevant to the task. For a pipeline run, use the scrum master's approved brief as the scope boundary and do not ask questions already answered there.
+1. Read `AGENTS.md`, `docs/code-organization.md`, `docs/dry-practices.md`, and applicable `.cursor/rules/jumbalaya-*.mdc`; read `docs/glossary.md`, `docs/gameplay.md`, `docs/testing.md`, or `docs/engine.md` when relevant to the task. For a pipeline run, use the scrum master's approved brief as the scope boundary and do not ask questions already answered there.
 2. Inspect the current implementation and a neighboring module/test to follow local conventions. Confirm current behavior and file ownership before choosing where a change belongs.
 3. Capture read-only working-tree status if a baseline was not provided. Do not overwrite or claim existing changes as ticket work. If the task cannot be implemented without a material product decision, stop with a blocker rather than guessing.
+
+## Code hygiene (`docs/dry-practices.md`)
+
+Within ticket scope, act as a senior Love2D developer on touched files:
+
+- Improve **readability** (names, structure, hoisted requires) to match neighboring modules.
+- Remove **dead code** you can prove unused in the changed path; do not repo-sweep.
+- Reduce **unnecessary duplication**; keep intentional duplication when boundaries or clarity require it (see the doc’s table).
+- In the handoff, note hygiene edits and any duplication you deliberately kept.
 
 ## Implementation rules
 

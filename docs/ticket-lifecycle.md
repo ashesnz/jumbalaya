@@ -66,7 +66,7 @@ For a Ready result, the scrum master returns a self-contained approved brief: th
 1. **Linear + branch (when id present).** `get_issue`, baseline `git status` on the current branch, create or checkout the work branch from the default branch, set Linear to **In Progress**, patch the issue description `Branch:` line.
 2. **Establish the baseline.** Record which paths predated this ticket (captured before the branch switch). Preserve staged, unstaged, and untracked work; tell specialists which paths predate this ticket. Do not overwrite or review pre-existing changes as ticket output.
 3. **Gate.** Delegate the full ticket to `scrum-master`. On Not ready, return its report and stop without implementation (branch and Linear status may already be updated).
-4. **Implement.** Pass the approved brief and baseline paths to `code-developer`. The developer follows `AGENTS.md`, relevant `.cursor/rules/jumbalaya-*.mdc`, and the authoritative docs. It must not change branches or commit.
+4. **Implement.** Pass the approved brief and baseline paths to `code-developer`. The developer follows `AGENTS.md`, `docs/dry-practices.md` (readability, dead code, duplication within scope), relevant `.cursor/rules/jumbalaya-*.mdc`, and the authoritative docs. It must not change branches or commit.
 5. **Test.** Pass the same brief, developer's changed paths, and findings to `test-writer`. Logic tests belong in `games/jumbalaya/tests/unit/test_<feature>.lua`; the runner discovers these automatically, so do not manually register them. Use the existing test helpers and do not test constants or trivial wrappers.
 6. **Verify.** Run the required full suite from the repository root with `love tests`. **Success requires a passing run.** Do not claim success if it fails. Treat failures as change-related unless evidence shows otherwise; make a genuine attempt to resolve relevant failures without weakening assertions. Report proven pre-existing or unrelated failures as blockers and do not modify unrelated behavior to hide them.
 7. **Review.** Delegate a read-only review to `code-reviewer`, providing the approved brief, baseline paths, all ticket changes, test output, and earlier findings. The review covers changed files only, including tests and workflow/configuration files when they are part of the ticket.
@@ -81,9 +81,9 @@ Each specialist receives a self-contained delegation brief: the approved ticket 
 Invoke **`/complete-ticket ASH-5`** after `/run-ticket` has finished (green `love tests`, review leftovers commented on Linear if any). This is approval to land the work. See `.cursor/skills/complete-ticket/SKILL.md` (mirrored under `.agents/skills/`).
 
 1. Checkout the issue’s work branch, commit remaining ticket changes, run `love tests` (must pass) and `emmylua_check . --severity error` (must pass; same as CI).
-2. Merge that branch into **`main`**. Push `origin/main` when a remote exists. Never force-push `main`. No PR unless asked.
+2. Merge that branch into **`main`**. Push `origin/main` when a remote exists, then `git pull origin main` so local `main` matches the remote tip. Never force-push `main`. No PR unless asked.
 3. Set the Linear issue to **Done** and comment with the merge SHA.
-4. **Delete** the Linear issue (Free plan). Linear cannot be archived by hand; auto-archive is delayed and **Done** cards still count toward **250 issues** until archived or deleted. Git on `main` is the record. Linear MCP cannot delete: after Done, delete in the Linear UI (`Cmd/Ctrl+Delete`). Optional one-time: team **Settings → Automations** → shortest auto-archive for any leftover Done issues.
+4. **Delete** the Linear issue (Free plan). Linear MCP cannot delete: after Done the card **stays in the Done column** until it is deleted in the Linear UI (`Cmd/Ctrl+Delete` or command palette → Delete issue). Auto-archive is delayed and **Done** cards still count toward **250 issues** until archived or deleted. Git on `main` is the record. Optional one-time: team **Settings → Automations** → shortest auto-archive for leftover Done issues.
 
 Do not re-run scrum-master, code-developer, test-writer, or code-reviewer during complete.
 
