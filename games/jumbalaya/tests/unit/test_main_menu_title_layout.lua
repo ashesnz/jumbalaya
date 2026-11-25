@@ -6,7 +6,6 @@ local mock_env = require("tests.helpers.mock_env")
 local shell = require("jumbalaya-engine.shell")
 local layout = require("word_game.ui.menu.layout")
 local open = require("word_game.ui.menu.animate.open")
-local MenuEffects = require("word_game.ui.effects.menu")
 
 local function copy_rect(node)
 	if not node or not node.T then
@@ -146,21 +145,18 @@ T.describe("main menu title layout", function()
 		assert_rects_equal(returned_logo, first_logo, "SPLASH_LOGO after Classic return")
 	end)
 
-	T.it("open_main_menu('game') centres the title before MAIN_MENU_UI exists", function()
+	T.it("open_main_menu('game') builds MAIN_MENU_UI before layout settles", function()
 		local game = prepare_menu_open()
-		local orig_set_main_ui = MenuEffects.set_main_ui
-		MenuEffects.set_main_ui = function() end
 		open.open_main_menu(game, "game")
-		MenuEffects.set_main_ui = orig_set_main_ui
 
-		T.assert_nil(game.MAIN_MENU_UI)
+		T.assert_not_nil(game.MAIN_MENU_UI, "MAIN_MENU_UI exists synchronously after game open")
 		T.assert_not_nil(game.title_top)
-		local expected = layout.main_menu_resolve_logo_layout(0)
-		T.assert_almost_equal(game.title_top.T.x, expected.x, 0.0001)
-		T.assert_almost_equal(expected.x, game.TILE_W / 2 - expected.w / 2, 0.0001)
-		T.assert_not_equal(game.title_top.T.x, 0)
+		local expected = expected_logo_layout(game)
+		T.assert_almost_equal(game.title_top.T.x, expected.x, 0.0001, "title x with menu chrome")
+		T.assert_almost_equal(expected.x, game.TILE_W / 2 - expected.w / 2, 0.0001, "centred formula")
+		T.assert_not_equal(game.title_top.T.x, 0, "title must leave origin")
 		if game.SPLASH_LOGO and game.SPLASH_LOGO.T then
-			T.assert_almost_equal(game.SPLASH_LOGO.T.x, expected.x, 0.0001)
+			T.assert_almost_equal(game.SPLASH_LOGO.T.x, expected.x, 0.0001, "logo x matches title")
 		end
 	end)
 end)

@@ -80,8 +80,8 @@ function M.open_main_menu(self, change_context)
 	game().SPLASH_LOGO.dissolve_colours = {game().C.WHITE, game().C.WHITE}
 	game().SPLASH_LOGO.dissolve = 1
 
-	local cold_boot = change_context == nil
-	if cold_boot then
+	-- change_context: "splash" defers set_main_ui until after intro; "game" / nil show menu chrome immediately.
+	if change_context ~= "splash" then
 		MenuEffects.set_main_ui()
 	end
 	settle_main_menu_layout()
@@ -98,11 +98,11 @@ function M.open_main_menu(self, change_context)
 			if game().VIBRATION then game().VIBRATION = game().VIBRATION + 1.5 end
 			return true
 		end}
-	Scheduler.delayed{delay = 0.1 + (change_context == "splash" and 2 or change_context == "game" and 1.5 or 0)}
+	Scheduler.delayed{delay = 0.1 + (change_context == "splash" and 2 or 0)}
 	Scheduler.add{func = function() if game().INPUT then game().INPUT.lock_input = false end; return true end}
 	Layout.set_screen_positions()
-	if not cold_boot then
-		Scheduler.add{mode = "delayed", delay = change_context == "splash" and 4.05 or change_context == "game" and 3 or 0.4,
+	if change_context == "splash" then
+		Scheduler.add{mode = "delayed", delay = 4.05,
 			blockable = false, blocking = false, func = function()
 				MenuEffects.set_main_ui()
 				settle_main_menu_layout()
