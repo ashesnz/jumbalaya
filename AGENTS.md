@@ -144,6 +144,7 @@ Tests that need rules only call `play_jumble_word`; tests that need full FX call
 - New UI binds function callbacks on `Panel.button`. Remaining string `func` names stay stable until that screen migrates (`Funcs.register`); then drop the catalog entry in the same slice.
 - Class chain: `Kind → SceneNode (Node) → Spatial → Sprite, Panel, LetterTile, CardPile` (`Card` is a LetterTile alias). Motion: `set_rect` / `follow` / `bind_to` — see `docs/engine.md`.
 - `Card` model class loads in `app/bootstrap/game_boot.lua`; presentation mixins install via `word_game/ui/cards/bind.lua` (tests: `mock_env.ensure_card_class()`)
+- Boot `_G` Kind aliases (`Spatial`, `Sprite`, `Node`, `Card`, …) must be listed in `.emmyrc.json` → `diagnostics.globals` if any file uses them without `require`. Add a new alias in `jumbalaya-engine.globals` / `kind_globals` **and** `.emmyrc.json` in the same change. CI and `/complete-ticket` run `emmylua_check . --severity error`.
 
 ## Dev flags
 
@@ -157,10 +158,10 @@ After logic changes:
 love tests
 ```
 
-After structural refactors (local; CI runs errors-only — see `docs/testing.md`):
+After structural refactors or boot-global / `.emmyrc.json` changes (same as CI / `/complete-ticket`):
 
 ```sh
-emmylua_check . --severity warn
+emmylua_check . --severity error
 ```
 
 Minimize diff scope; match existing naming and patterns. Startup success alone does not verify jumble transitions, hold-to-redraw, token fly, or marketplace purchase — smoke-test those when touching UI flow.

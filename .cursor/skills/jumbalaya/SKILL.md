@@ -112,7 +112,7 @@ love tests
 1. New HUD uses `Panel.*` + function callbacks. Keep remaining `func` string names stable unless updating all UI definitions that reference them (`Funcs.register`); do not add new catalog names.
 2. Re-export geometry on `WORD_GAME.Layout` if moving sidebar layout helpers
 3. Update `word_game/init.lua` facade exports when adding cross-package APIs
-4. Run `love tests`; for structural changes also run `emmylua_check . --severity warn` locally (CI runs error severity — see `docs/testing.md`)
+4. Run `love tests`; for structural changes or boot-global edits also run `emmylua_check . --severity error` (CI / `/complete-ticket`). If you add a `_G` Kind alias (`Spatial`, `Panel`, …) used without `require`, add it to `.emmyrc.json` → `diagnostics.globals` in the same change.
 5. Update `docs/code-organization.md` when package layout changes materially
 
 ## Avoid

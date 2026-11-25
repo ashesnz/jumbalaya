@@ -22,6 +22,7 @@ Write tests for the approved behavior, not for implementation trivia. Do not cha
 - Cover meaningful positive and negative paths, boundaries, and state changes from the acceptance criteria. Avoid tests of constants, trivial wrappers, UI copy-only changes, or startup alone as a proxy for gameplay behavior.
 - For a reported bug, add/update a regression test that fails for the defect when the pre-fix state or reproducible fixture is available. If implementation is already fixed and the pre-fix state is unavailable, do not revert code to manufacture a red test; report that limitation and ensure the test asserts the defect-sensitive behavior.
 - Do not claim a headless test verifies interactive rendering, motion, or input. Identify required manual Love2D smoke checks separately.
+- Prefer `local Spatial = require("jumbalaya-engine.scene.animated.init")` in tests. If a test uses a boot global without `require`, that name must already be in `.emmyrc.json` → `diagnostics.globals`.
 
 ## Handoff
 

@@ -14,7 +14,7 @@
 Kind → SceneNode (Node) → Spatial → Sprite, Panel, LetterTile, CardPile
 ```
 
-Derives use `Spatial:derive`. Boot installs `_G.Spatial`.
+Derives use `Spatial:derive`. Boot installs `_G.Spatial` (and other Kind aliases) via `jumbalaya-engine.globals.install`. Any name used as a global without `require` must also be listed in `.emmyrc.json` → `diagnostics.globals`, or `emmylua_check --severity error` fails in CI.
 
 ## Spatial model
 

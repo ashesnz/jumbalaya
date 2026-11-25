@@ -55,7 +55,7 @@ Specialists must not create, rename, or switch branches; the orchestrator owns b
 7. **Linear leftovers:** After the last review cycle, if any recommended finding is still open, unfixed, or out of scope, post one comment on the Linear issue (`save_comment`) listing each leftover: severity, file/line when known, and why it was not done (out of scope, cycle cap, or developer deferred). Skip the comment if every finding was fixed. If Linear is unavailable, report the leftovers in the completion summary instead.
 8. **Completion:** Report changed paths, acceptance-criteria status, `love tests` result, review findings, leftovers posted to Linear (or that none remained), blockers, and manual checks still needed. Headless tests do not verify interactive rendering, motion, or input. Do not claim a visual/UI AC passed unless the relevant Love2D smoke check was actually performed.
 
-If a ticket changes Lua structure materially, include `emmylua_check . --severity warn` when applicable. Do not replace the required `love tests` run with a static check.
+If a ticket changes Lua structure or boot globals, run `emmylua_check . --severity error` (CI). New `_G` Kind aliases need `.emmyrc.json` `diagnostics.globals`. Do not replace the required `love tests` run with a static check. `/complete-ticket` repeats the error-severity check before merge.
 
 ## Output
 

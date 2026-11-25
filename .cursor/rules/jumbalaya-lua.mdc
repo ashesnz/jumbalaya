@@ -37,6 +37,18 @@ Spatial motion: `set_rect`, `follow(parent, offset)`, `bind_to(host)`. See `docs
 
 `letter_tile.lua` mixes in presentation via `word_game/ui/cards/bind.lua`.
 
+## Boot globals and EmmyLua
+
+Boot installs scene classes on `_G` (`jumbalaya-engine.globals.install`, `app/bootstrap/kind_globals.lua`). CI runs `emmylua_check . --severity error`; those names are **not** inferred from `_G`.
+
+Whenever you **add or use** a boot global without a local `require` (for example `Spatial`, `Sprite`, `Panel`/`RetainedPanel`, `LetterTile`, a new Kind alias):
+
+1. Install it in the existing boot module (`globals.install` or `kind_globals`).
+2. Add the **same PascalCase name** to `.emmyrc.json` → `diagnostics.globals`.
+3. Run `emmylua_check . --severity error` (or `_tools/run_emmylua_check.sh error`) before merge. `/complete-ticket` must not land if this fails.
+
+Do not rely on `love tests` to catch undefined analyzer globals.
+
 ## Callbacks & layout
 
 - Remaining string callbacks go through `Funcs.register` — move implementations, not registration names. New UI uses function `on_press`.

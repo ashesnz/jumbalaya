@@ -43,4 +43,4 @@ Jumble mode is the player experience (`word_game/model/jumble/`, `word_game/mode
 
 ## Verification
 
-After logic changes: `love games/jumbalaya tests`. For structural refactors: `emmylua_check . --severity warn` (CI and `/complete-ticket` pin `emmylua_check` at **error** severity — see `docs/testing.md`). Boot globals such as `Spatial` belong in `.emmyrc.json` `diagnostics.globals`. Minimize diff scope; match existing naming and patterns.
+After logic changes: `love games/jumbalaya tests`. For structural refactors or boot-global edits: `emmylua_check . --severity error` (CI and `/complete-ticket`). If you add or use a boot `_G` Kind alias without `require` (`Spatial`, `Sprite`, `Panel`, …), add the same name to `.emmyrc.json` → `diagnostics.globals` in the same change. Minimize diff scope; match existing naming and patterns.

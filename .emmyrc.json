@@ -44,6 +44,8 @@
       "FlowText",
       "Game",
       "Card",
+      "LetterTile",
+      "PerkStampSprite",
       "CardPile",
       "TitleLogo",
       "localize"

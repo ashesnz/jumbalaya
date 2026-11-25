@@ -40,7 +40,7 @@ Do not force-push `main`. Do not skip hooks. Do not amend unless the user asked 
 2. Checkout the ticket branch.
 3. If there are uncommitted ticket changes, stage them (not secrets) and commit with a 1–2 sentence message: why the ticket landed (issue id + title). Use a HEREDOC for the message.
 4. Run `love tests`. If it fails, stop; do not merge.
-5. Run `emmylua_check . --severity error` (or `_tools/run_emmylua_check.sh error`). If it fails, stop; do not merge. Boot-installed engine globals (`Spatial`, `Sprite`, `Node`, …) must be listed in `.emmyrc.json` → `diagnostics.globals` when code uses them as globals.
+5. Run `emmylua_check . --severity error` (or `_tools/run_emmylua_check.sh error`). If it fails, stop; do not merge. If the branch adds a boot `_G` Kind alias (`Spatial`, `Panel`/`RetainedPanel`, `LetterTile`, …) used without `require`, that name must be in `.emmyrc.json` → `diagnostics.globals` in the same commit.
 6. Checkout `main` (or the default branch from `origin/HEAD`).
 7. Merge the ticket branch (`git merge <branch>`). If conflicts, stop and report; do not invent resolutions beyond an obvious one-file fix the user would expect.
 8. Push `main` to `origin` only if `origin` exists and tracks this repo. Never `--force` on `main`.

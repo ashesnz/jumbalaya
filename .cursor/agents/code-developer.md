@@ -23,10 +23,11 @@ Implement only the approved user task or ticket. Do not expand scope, commit, pu
 - Do not reintroduce removed legacy gameplay, `G.GAME`, old Vault terminology, proxy shims, or UI dependencies in model/core code.
 - Do not add broad refactors, unrelated cleanup, dependencies, or comments that merely restate code.
 - Do not weaken or delete tests to force a pass. Coordinate additional behavioral coverage with `test-writer` in a pipeline; make a meaningful regression test yourself when the user explicitly asks for implementation and tests in one role.
+- If you install a new boot global (`_G.Spatial`, `_G.Panel`, a Kind alias) or call one without `require`, add that name to `.emmyrc.json` → `diagnostics.globals` in the same change. Run `emmylua_check . --severity error` when you touch globals or scene classes; `love tests` will not catch this.
 
 ## Validation and handoff
 
 - For standalone logic changes, run the required suite with `love tests` and report its actual result. In a pipeline, report any focused checks run; `/run-ticket` owns the full-suite gate after test-writing.
-- For structural refactors, run `emmylua_check . --severity warn` when available and applicable. Do not claim manual Love2D visual/input verification unless it was actually performed.
+- For structural refactors or boot-global / `.emmyrc.json` changes, run `emmylua_check . --severity error` (CI). Local warn-level is extra, not a substitute. Do not claim manual Love2D visual/input verification unless it was actually performed.
 - Return changed paths, a concise description, validation commands/results, and any unresolved blocker or manual smoke check. For a pipeline, include any relevant findings for `test-writer`; do not ask the user to invoke another agent.
 - When remediating a code-reviewer report, attempt every in-scope recommended finding. List each skipped or out-of-scope item with a reason so `/run-ticket` can comment them on Linear.

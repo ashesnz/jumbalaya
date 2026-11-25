@@ -13,11 +13,12 @@
 	(no ad-hoc Game.GAME keys). Then tighten live-node fields on the Game shell or
 	move them behind facade-only accessors.
 
-	CI runs `emmylua_check . --severity error`; local refactors use `--severity warn`.
+	CI and `/complete-ticket` run `emmylua_check . --severity error`.
 
 	Boot Kind aliases installed by `jumbalaya-engine.globals.install` and
-	`app/bootstrap/kind_globals.lua` are listed in `.emmyrc.json` → `diagnostics.globals`
-	(include `Spatial`, `Sprite`, `Node`, and other `_G` scene classes).
+	`app/bootstrap/kind_globals.lua` must be listed in `.emmyrc.json` → `diagnostics.globals`
+	if any file uses them without `require` (`Spatial`, `Sprite`, `Node`, `LetterTile`,
+	`PerkStampSprite`, …). Add `_G` install and the `diagnostics.globals` entry in the same change.
 ]]
 
 ---@meta

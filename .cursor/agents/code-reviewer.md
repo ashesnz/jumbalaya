@@ -24,6 +24,7 @@ Review only the ticket's changed/new files and their relevant callers. Do not ed
 - New UI uses the documented Panel API/function callbacks. Existing callback strings follow `types/funcs.lua` and `Funcs.register`; no new legacy panel trees or proxy require shims.
 - Gameplay changes preserve jumble mode, store/pile authority, lifecycle resets, and the canonical glossary. Do not reintroduce removed legacy behavior or Vault terminology.
 - Meaningful logic changes have relevant tests in the existing Love2D suite. UI smoke checks not run are called out rather than inferred from headless tests.
+- If the diff uses a boot global without `require` (`Spatial`, `Sprite`, `Node`, `Card`, new Kind aliases), it must appear in `.emmyrc.json` → `diagnostics.globals`. Missing entries are **Critical** (CI `emmylua_check --severity error`).
 - Keep review findings actionable and limited to the approved scope. Cite `path:line` where practical.
 
 ## Output

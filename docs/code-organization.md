@@ -506,7 +506,8 @@ Additional rules:
 
 ```sh
 love tests
-emmylua_check . --severity warn   # CI blocks on errors only — see testing.md
+emmylua_check . --severity error  # same as CI / /complete-ticket; see testing.md
+# Boot _G aliases used without require must be in .emmyrc.json diagnostics.globals
 ```
 
 Key test tiers:
