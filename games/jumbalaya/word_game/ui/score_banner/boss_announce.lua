@@ -388,49 +388,12 @@ local function settle_glow(sweep_u)
 	return clamp01((sweep_u - 0.7) / 0.3)
 end
 
-local function draw_stage_banner(banner, stack, img_w, img_h)
+local function draw_stage_banner(banner, stack, _img_w, _img_h)
 	local sweep_u = clamp01(banner.t / banner.sweep_time)
-	local eased = 1 - (1 - sweep_u) * (1 - sweep_u) * (1 - sweep_u)
-	local sweeping = sweep_u < 1
 
 	love.graphics.push()
 	love.graphics.translate(stack.cx, stack.stage_cy)
-
-	local band_l, band_r, band_cx = nil, nil, nil
-	local atlas = game().TEXTURE_ATLASES and game().TEXTURE_ATLASES.boss_banner
-	if atlas and atlas.image and love.graphics.draw then
-		local iw, ih = atlas.image:getDimensions()
-		local origin = ribbon_content_origin(iw, ih)
-		local offscreen = stack.w * 0.5 + img_w * 0.5 + 80
-		local start_x = offscreen
-		band_cx = start_x + (0 - start_x) * eased
-		band_l = band_cx - img_w * 0.5
-		band_r = band_cx + img_w * 0.5
-		local ribbon_alpha = 0.92 + settle_glow(sweep_u) * 0.08
-		love.graphics.setColor(1, 1, 1, ribbon_alpha)
-		local sx = img_w / iw
-		love.graphics.draw(atlas.image, band_cx, 0, 0, sx, img_h / ih, origin.ox, origin.oy)
-	end
-
 	draw_stage_label(banner.text, stack, sweep_u)
-
-	if sweeping and band_l and love.graphics.transformPoint
-		and love.graphics.intersectScissor and love.graphics.getScissor then
-		local font_h = math.max(14, stack.h * 0.5)
-		local x1, y1 = love.graphics.transformPoint(band_l, -font_h)
-		local x2, y2 = love.graphics.transformPoint(band_r, font_h)
-		local psx, psy, psw, psh = love.graphics.getScissor()
-		love.graphics.intersectScissor(
-			math.min(x1, x2), math.min(y1, y2),
-			math.abs(x2 - x1), math.abs(y2 - y1))
-		draw_stage_label(banner.text, stack, 1)
-		if psx then
-			love.graphics.setScissor(psx, psy, psw, psh)
-		else
-			love.graphics.setScissor()
-		end
-	end
-
 	love.graphics.pop()
 end
 

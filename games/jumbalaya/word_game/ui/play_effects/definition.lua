@@ -36,10 +36,25 @@ local function cleared_stage_score(result)
 	return nil
 end
 
+local function clear_hand_clear_focus()
+	if WORD_GAME_UI.HandClearFocus and WORD_GAME_UI.HandClearFocus.end_focus then
+		WORD_GAME_UI.HandClearFocus.end_focus()
+	end
+end
+
+function M.triggers_boss_word(result)
+	if not result or not result.cleared then return false end
+	local wr = game_access.word_round()
+	local j = wr and wr.jumble
+	return wr and round_config.is_boss_word_hand(wr.set, wr.hand_index)
+		and j and not j.boss_word_active
+end
+
 function M.capture_token_timer_if_cleared(cleared, opts)
 	opts = opts or {}
 	if not cleared or not RunMode.ends_hand_on_target() then return end
 	if opts.result and M.triggers_boss_word(opts.result) then
+		clear_hand_clear_focus()
 		return
 	end
 	if WORD_GAME_UI.HandClearFocus and WORD_GAME_UI.HandClearFocus.begin then
@@ -57,14 +72,6 @@ function M.capture_token_timer_if_cleared(cleared, opts)
 	elseif WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.capture_timer then
 		WORD_GAME_UI.TokenReward.capture_timer()
 	end
-end
-
-function M.triggers_boss_word(result)
-	if not result or not result.cleared then return false end
-	local wr = game_access.word_round()
-	local j = wr and wr.jumble
-	return wr and round_config.is_boss_word_hand(wr.set, wr.hand_index)
-		and j and not j.boss_word_active and not j.boss_word_staging
 end
 
 function M.show_post_target_multiplier_fx(result)
@@ -173,6 +180,9 @@ function M.sync_hand_after_deal()
 	end
 	if WORD_GAME_UI.TableControls then
 		WORD_GAME_UI.TableControls.sync_position()
+	end
+	if WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
+		WORD_GAME_UI.TableInput.refresh_card_input()
 	end
 end
 

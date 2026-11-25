@@ -24,6 +24,16 @@ Within ticket scope, act as a senior Love2D developer on touched files:
 - Reduce **unnecessary duplication**; keep intentional duplication when boundaries or clarity require it (see the doc’s table).
 - In the handoff, note hygiene edits and any duplication you deliberately kept.
 
+## Deal / pile bugs
+
+When the ticket reports missing hand cards, empty pile, or deal choreography:
+
+1. Trace the full path: host `add_card` → `piles.present_card` / `move_card` → **`Deck.commit_pile_hosts`** → `release_static_chrome` → (next frame/draw) **`hydrate_hosts_from_store`** → **`resolve_live_card`** via **`letter_inventory`**.
+2. Do not treat `jumble.boss_cards` or `store.piles.hand` alone as “dealt”; confirm **`dealt_letters.cards`** after commit.
+3. Never drop boss/deal cards from `letter_inventory` without `destroy_card`.
+
+For vague “blue square / panel / overlay” reports, confirm **screen region** (full table vs HUD band vs score chips vs boss title ribbon in `word_game/ui/score_banner/boss_announce.lua` vs `HandClearFocus`). One symptom often maps to multiple unrelated modules.
+
 ## Implementation rules
 
 - Keep the change minimal and focused. Follow package boundaries: `packages/jumbalaya_core/` for pure portable rules, `games/jumbalaya/word_game/model/` for runtime glue, `word_game/ui/` for presentation, and `games/jumbalaya/app/` for shell integration.

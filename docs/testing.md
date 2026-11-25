@@ -44,6 +44,16 @@ games/jumbalaya/tests/
 
 Prefer `mock_env.reset_game()` at the top of a `describe` block. Tests that call `Game()` should use `BridgeRuntime.game()` (or the returned instance), not a stale global `G` stub. When mocking draw piles, keep `letter_inventory` and `draw_pile.cards` as **separate tables** (production does not alias them).
 
+### Pile deal invariants (regression-prone)
+
+Many deal paths (`boss_hand`, normal jumble deal) end with **`Deck.commit_pile_hosts`**, which snapshots hosts to `store.piles` then **`piles.release_static_chrome`** removes resting cards from `CardPile` hosts. The table then re-shows cards via **`piles.hydrate_hosts_from_store`** and **`resolve_live_card`**, which looks up each pile record’s id in **`letter_inventory`**.
+
+For any ticket where “cards don’t appear in the hand” or deal choreography changes:
+
+- After `deal_*` with `instant_deal` (or the deal finish callback), assert **`#game.dealt_letters.cards`** matches the expected count, not only `store.piles.hand` or `jumble.boss_cards`.
+- Do not remove deal-created cards from **`letter_inventory`** unless the card is destroyed (`destroy_card`).
+- Boss hand: assert letter multiset via `boss_hand_letters` **and** live host count (see `test_boss_hand.lua`).
+
 **Core rule tests** (`test_core_*.lua`) call `jumbalaya_core` directly via `tests/helpers/core_env.lua` — no `mock_env.ensure_engine_globals()` needed.
 
 ## `mock_env` recipes

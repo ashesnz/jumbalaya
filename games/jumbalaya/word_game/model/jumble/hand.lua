@@ -158,10 +158,9 @@ function M.begin_boss_word(_wr, on_complete)
 
 	if M.prepare_boss_word(wr) then
 		wr = game_access.word_round()
-		local letters = J().boss_hand_letters(
-			wr.jumble.pending_boss.boss_word,
-			wr.jumble.pending_boss.pattern
-		)
+		local pending = wr.jumble.pending_boss
+		local pattern = pending.pattern or pending.display
+		local letters = J().boss_hand_letters(pending.boss_word, pattern)
 		Deck.deal_boss_hand(letters, on_complete)
 		return true
 	end

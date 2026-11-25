@@ -9,7 +9,7 @@ Turn the user's idea into a reviewable Linear issue. This workflow creates ticke
 
 ## Workflow
 
-1. Clarify the idea before asking to create anything. Ask focused questions when missing details could materially change scope, behavior, or verification. If the user cannot answer or wants to capture an incomplete idea, preserve the gaps under **Open questions**, mark readiness accordingly, and keep the issue in Backlog; do not fill gaps by guessing.
+1. Clarify the idea before asking to create anything. Ask focused questions when missing details could materially change scope, behavior, or verification. For **visual glitches** (color, square, panel), ask **where on screen** (full table, hand row, score banner chips, boss title band, sidebar). For **missing cards in hand**, ask whether the **pile is empty or cards are off-screen / undraggable** — that steers deal-vs-layout vs overlay debugging. If the user cannot answer or wants to capture an incomplete idea, preserve the gaps under **Open questions**, mark readiness accordingly, and keep the issue in Backlog; do not fill gaps by guessing.
 2. Draft one issue using this description template, retaining every relevant detail the user supplied:
 
    ```text

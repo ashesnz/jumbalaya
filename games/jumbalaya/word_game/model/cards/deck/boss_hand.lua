@@ -34,16 +34,13 @@ function M.deal_boss_hand(letters, on_complete, opts)
 			for _, letter in ipairs(letters) do
 				local card = Deck().create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR)
 				card.boss_temp = true
-				for pi = #(live_game().letter_inventory or {}), 1, -1 do
-					if live_game().letter_inventory[pi] == card then
-						table.remove(live_game().letter_inventory, pi)
-						break
-					end
-				end
 				boss_cards[#boss_cards + 1] = card
 				piles.present_card(card, "hand")
 			end
 			game_access.dispatch({ type = "JUMBLE_SET_BOSS_CARDS", cards = boss_cards })
+			if live_game().dealt_letters and live_game().dealt_letters.states then
+				live_game().dealt_letters.states.visible = true
+			end
 			if live_game().pattern_row and live_game().pattern_row.apply_screen_position then
 				live_game().pattern_row:apply_screen_position()
 			end
@@ -56,6 +53,18 @@ function M.deal_boss_hand(letters, on_complete, opts)
 			else
 				Deck().sync_deck_count_display()
 			end
+			if live_game().dealt_letters and #(live_game().dealt_letters.cards or {}) == 0 then
+				piles.hydrate_hosts_from_store({ "hand" })
+				if live_game().dealt_letters.refresh_order then
+					live_game().dealt_letters:refresh_order()
+				end
+				if live_game().dealt_letters.relayout then
+					live_game().dealt_letters:relayout()
+				end
+				if live_game().dealt_letters.hard_set_cards then
+					live_game().dealt_letters:hard_set_cards()
+				end
+			end
 			if on_complete then on_complete() end
 			return
 		end
@@ -63,12 +72,6 @@ function M.deal_boss_hand(letters, on_complete, opts)
 		for i, letter in ipairs(letters) do
 			local card = Deck().create_letter_card(letter, LetterPalette.DEFAULT_FACE_COLOR)
 			card.boss_temp = true
-			for pi = #(live_game().letter_inventory or {}), 1, -1 do
-				if live_game().letter_inventory[pi] == card then
-					table.remove(live_game().letter_inventory, pi)
-					break
-				end
-			end
 			boss_cards[#boss_cards + 1] = card
 			piles.present_card(card, "draw")
 			if live_game().TIMELINE and live_game().TIMELINE.enqueue then
@@ -106,6 +109,18 @@ function M.deal_boss_hand(letters, on_complete, opts)
 				Deck().commit_pile_hosts({ "hand", "draw", "pattern" })
 			else
 				Deck().sync_deck_count_display()
+			end
+			if live_game().dealt_letters and #(live_game().dealt_letters.cards or {}) == 0 then
+				piles.hydrate_hosts_from_store({ "hand" })
+				if live_game().dealt_letters.refresh_order then
+					live_game().dealt_letters:refresh_order()
+				end
+				if live_game().dealt_letters.relayout then
+					live_game().dealt_letters:relayout()
+				end
+				if live_game().dealt_letters.hard_set_cards then
+					live_game().dealt_letters:hard_set_cards()
+				end
 			end
 			if on_complete then on_complete() end
 		end

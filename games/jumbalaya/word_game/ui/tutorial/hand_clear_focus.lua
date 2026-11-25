@@ -16,8 +16,16 @@ local Easing = require "word_game.ui.effects.easing"
 local UIViewHost = require("jumbalaya-engine.panels.view_host")
 
 local active = false
+local owned_score_anim = false
 local overlay_colour = { 0.06, 0.08, 0.12, 0 }
 local Panel = require("jumbalaya-engine.panels.api")
+
+local function boss_sequence_active()
+	local wr = game_access.word_round()
+	local j = wr and wr.jumble
+	if not j then return false end
+	return j.boss_word_staging or j.boss_word_active or j.boss_puzzle_hidden
+end
 
 function M.is_eligible()
 	local token = WORD_GAME_UI.TokenReward
@@ -50,12 +58,14 @@ local function stop_drag()
 end
 
 function M.begin()
-	if not M.is_eligible() or active then return end
+	if not M.is_eligible() or active or boss_sequence_active() then return end
 	if not game().ROOM_ATTACH then return end
 
 	active = true
+	owned_score_anim = false
 	if game_access.get() then
 		game_access.patch({ word_score_animating = true })
+		owned_score_anim = true
 	end
 	shell.set_under_overlay(true)
 	stop_drag()
@@ -94,10 +104,15 @@ end
 function M.end_focus()
 	if not active and not game().HAND_CLEAR_OVERLAY then return end
 	active = false
+	shell.set_under_overlay(false)
 	if game().HAND_CLEAR_OVERLAY then
 		game().HAND_CLEAR_OVERLAY:remove()
 		game().HAND_CLEAR_OVERLAY = nil
 	end
+	if owned_score_anim and game_access.get() then
+		game_access.patch({ word_score_animating = false })
+	end
+	owned_score_anim = false
 	refresh_input()
 end
 

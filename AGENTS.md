@@ -49,7 +49,7 @@ Canonical game tree: `games/jumbalaya/` (`app/`, `word_game/`, …). Shared pack
 - Config = data; model glue = wiring; ui = presentation — keep separated
 - Bootstrap load order in `app/bootstrap.lua` only; `Game()` in `runtime_boot.lua` (no global `G` singleton)
 - Model requests layout via `Layout.request_refresh()` / `Presentation.emit` — not UI modules or `Funcs.dispatch`. Presentation contract: `types/presentation.lua`. Handlers live in `word_game/ui/presentation/install.lua`; store-backed views subscribe for render revision only.
-- **Pile ownership:** `store.piles` is authoritative for hand/draw/pattern/bonus/discard layout (`word_game/model/piles.lua`, `MOVE_CARD` reducer). `G.letter_inventory` tracks run deck LetterTile instances. CardPile hosts are presentation-only — sync via `piles.sync_hosts_to_store` / `piles.move_card` after host mutations (`test_pile_boundaries.lua`).
+- **Pile ownership:** `store.piles` is authoritative for hand/draw/pattern/bonus/discard layout (`word_game/model/piles.lua`, `MOVE_CARD` reducer). `G.letter_inventory` tracks run deck LetterTile instances. CardPile hosts are presentation-only — sync via `piles.sync_hosts_to_store` / `piles.move_card` after host mutations (`test_pile_boundaries.lua`). **`Deck.commit_pile_hosts` → `piles.commit_hosts` → `release_static_chrome`** clears resting cards from hosts after syncing; **`piles.hydrate_hosts_from_store`** (and `resolve_live_card`) must find each card by id in `letter_inventory`. Boss deal (`word_game/model/cards/deck/boss_hand.lua`) must not remove boss cards from `letter_inventory`; headless deal tests must assert **`#dealt_letters.cards`** after commit, not only `jumble.boss_cards` in the store (`docs/testing.md` → pile deal invariants).
 
 ## Active vs legacy
 
@@ -186,3 +186,5 @@ The ticket lifecycle and invocation guide is in [`docs/ticket-lifecycle.md`](doc
 - `/complete-ticket ASH-<n>` commits the work branch, requires passing `love tests` and `emmylua_check . --severity error` (CI), merges into `main`, sets Linear **Done**, then the issue is deleted (Linear Free 250). Linear MCP cannot delete: the card stays in Done until you delete it in Linear. Never force-push `main`.
 
 Pass the ticket and acceptance criteria directly; no tracker, branch name, branch creation, commit, or PR is assumed. The orchestrator must stop if specialist delegation is unavailable rather than silently doing every role itself. For UI work, report any required interactive Love2D checks separately from the headless test result.
+
+**Models:** Default for `/run-ticket` is **Composer 2.5 slow** (`composer-2.5` standard, not fast). The chat model picker is authoritative; specialists in `.cursor/agents/` use `model: inherit`. The orchestrator must delegate via Task with `subagent_type` only and **must not** pass Task `model` (so specialists match the picker). See `.cursor/skills/run-ticket/SKILL.md` → Model selection.

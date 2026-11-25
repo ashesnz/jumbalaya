@@ -7,6 +7,16 @@ description: Orchestrate the gated Jumbalaya ticket lifecycle through scrum-mast
 
 You are the orchestrator. Do not implement, write tests, judge readiness, or review the diff yourself. Delegate each specialist stage to the named Cursor subagent and wait for its result before the next stage. If actual specialist delegation is unavailable, report that blocker and stop; do not silently impersonate all roles.
 
+## Model selection (required)
+
+The chat **model picker** is authoritative for this run and for every pipeline specialist.
+
+1. **Default:** Project default for `/run-ticket` is **Composer 2.5 slow** (standard variant: `composer-2.5` or `composer-2.5[]`, not `composer-2.5-fast`). Start or continue the run on whatever model the user selected in the dropdown. Do not substitute Claude Sonnet, Sonnet without thinking, or Auto-routed Sonnet when the picker shows Composer 2.5.
+2. **Task tool:** For `scrum-master`, `code-developer`, `test-writer`, and `code-reviewer`, use `subagent_type` only. **Never pass the Task `model` argument** — omitting `model` makes the subagent use the parent chat model (the picker). Never pin a different model on Task unless the user explicitly asked for that model for a specific delegation in this chat.
+3. **Specialist files:** `.cursor/agents/*.md` use `model: inherit`; do not override that by naming another model when launching Task.
+4. **No substitutes:** Do not run pipeline stages as `generalPurpose`, `explore`, `cursor-guide`, or inline impersonation when Task delegation to the named specialist is available.
+5. **Completion output:** State which model the parent chat used (from the picker) so the user can confirm it matched their selection.
+
 ## Invocation
 
 Primary form: **`/run-ticket ASH-<n>`** (for example `/run-ticket ASH-5`). The issue identifier is enough; do not require pasted ticket text when Linear returns title, description, and acceptance criteria.
@@ -48,12 +58,12 @@ Specialists must not create, rename, or switch branches; the orchestrator owns b
 
 1. **Readiness gate:** Delegate the entire ticket (from Linear or the user message) to `scrum-master`. It checks one-job scope, testable acceptance criteria, project glossary, relevant current behavior, and material ambiguity. If Not ready, return the report and stop without implementation. The branch and Linear status may already be updated; say so in the report.
 2. **Implementation:** On Ready, pass the approved brief to `code-developer`. The developer follows `docs/dry-practices.md` for hygiene on touched files. Keep changes within ticket scope and Jumbalaya's existing architecture. Preserve the baseline; no commit, push, or branch operations in specialists.
-3. **Tests:** Pass the approved brief, implementation paths, and developer findings to `test-writer`. Meaningful game tests belong under `games/jumbalaya/tests/unit/test_<feature>.lua`; the runner auto-discovers them. Do not ask for tests of constants or trivial wrappers.
+3. **Tests:** Pass the approved brief, implementation paths, and developer findings to `test-writer`. Meaningful game tests belong under `games/jumbalaya/tests/unit/test_<feature>.lua`; the runner auto-discovers them. Do not ask for tests of constants or trivial wrappers. For **deal / hand visibility** bugs, the brief must require assertions on **`dealt_letters.cards` (or pile host) after `commit_pile_hosts`**, per `docs/testing.md` → pile deal invariants — store-only checks are insufficient.
 4. **Full verification:** Run `love tests` from the repository root and include the actual output/result in later briefs. **The pipeline does not succeed unless `love tests` passes.** If it fails, do not proceed as if it passed. Treat failures as change-related unless evidence proves otherwise, and send relevant failures to the appropriate specialist for a genuine fix. Do not skip tests, reduce assertions, or hide failures. If an unrelated/pre-existing failure cannot safely be resolved within ticket scope, report it as a blocker rather than changing unrelated behavior.
 5. **Review:** Delegate read-only review to `code-reviewer` with the full ticket diff, baseline paths, all previous reports, and the full-suite result. Review only ticket changes; require actionable findings with file/line where practical.
 6. **Remediation:** Pass every recommended finding (Criticals, Warnings, and Suggestions) to `code-developer`. Send test-only findings to `test-writer`. The developer must attempt each in-scope recommended fix. After each code/test change, rerun `love tests` and read-only review. Allow at most two remediation cycles after the first review. Remediation does not succeed until `love tests` passes.
 7. **Linear leftovers:** After the last review cycle, if any recommended finding is still open, unfixed, or out of scope, post one comment on the Linear issue (`save_comment`) listing each leftover: severity, file/line when known, and why it was not done (out of scope, cycle cap, or developer deferred). Skip the comment if every finding was fixed. If Linear is unavailable, report the leftovers in the completion summary instead.
-8. **Completion:** Report changed paths, acceptance-criteria status, `love tests` result, review findings, leftovers posted to Linear (or that none remained), blockers, and manual checks still needed. Headless tests do not verify interactive rendering, motion, or input. Do not claim a visual/UI AC passed unless the relevant Love2D smoke check was actually performed.
+8. **Completion:** Report changed paths, acceptance-criteria status, `love tests` result, review findings, leftovers posted to Linear (or that none remained), blockers, and manual checks still needed. Headless tests do not verify interactive rendering, motion, or input. Do not claim a visual/UI AC passed unless the relevant Love2D smoke check was actually performed. If the ticket mixed **visual** and **deal** symptoms, completion must state which module satisfied each AC (e.g. overlay vs boss HUD ribbon) or mark visual ACs as **unverified** when only headless tests ran.
 
 If a ticket changes Lua structure or boot globals, run `emmylua_check . --severity error` (CI). New `_G` Kind aliases need `.emmyrc.json` `diagnostics.globals`. Do not replace the required `love tests` run with a static check. `/complete-ticket` repeats the error-severity check before merge.
 

@@ -9,6 +9,7 @@ local game = require("word_game.ui.util.game_runtime").game
 local Scheduler = require("jumbalaya-engine.effects.timeline_scheduler")
 
 local facade = require("word_game.ui.facade")
+local dealt_hand_layout = require("word_game.ui.table.dealt_hand")
 
 local M = {}
 
@@ -45,11 +46,27 @@ local function clear_locked_hand_layout()
 end
 
 local function clear_hand_clear_blockers()
+	local shell = facade.shell()
+	if shell and shell.set_under_overlay then
+		shell.set_under_overlay(false)
+	end
 	if WORD_GAME_UI.HandClearFocus and WORD_GAME_UI.HandClearFocus.end_focus then
 		WORD_GAME_UI.HandClearFocus.end_focus()
 	end
 	if WORD_GAME_UI.TokenReward and WORD_GAME_UI.TokenReward.reset then
 		WORD_GAME_UI.TokenReward.reset()
+	end
+end
+
+local function show_boss_hand_cards()
+	if game().dealt_letters and game().dealt_letters.states then
+		game().dealt_letters.states.visible = true
+	end
+	clear_locked_hand_layout()
+	dealt_hand_layout.apply_screen_position()
+	dealt_hand_layout.stabilize()
+	if WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
+		WORD_GAME_UI.TableInput.refresh_card_input()
 	end
 end
 
@@ -108,9 +125,11 @@ function M.present_boss_word(_wr, on_complete)
 	end
 
 	clear_hand_clear_blockers()
+	clear_locked_hand_layout()
 
-	if game().dealt_letters then
-		clear_locked_hand_layout()
+	if not jumble.prepare_boss_word() then
+		if on_complete then on_complete() end
+		return
 	end
 
 	definition.set_word_score_animating(true)
@@ -158,8 +177,13 @@ function M.present_boss_word(_wr, on_complete)
 		if fx and fx.request_layout_refresh then
 			fx.request_layout_refresh()
 		end
+		clear_hand_clear_blockers()
+		show_boss_hand_cards()
 		definition.set_word_score_animating(false)
 		definition.sync_hand_controls()
+		if WORD_GAME_UI.TableInput and WORD_GAME_UI.TableInput.refresh_card_input then
+			WORD_GAME_UI.TableInput.refresh_card_input()
+		end
 		if play_sfx then
 			play_sfx("coin2", 0.95, 0.85)
 		end
@@ -186,21 +210,19 @@ function M.present_boss_word(_wr, on_complete)
 			return
 		end
 		local puzzle = j.pending_boss
-		local letters = jumble.boss_hand_letters(puzzle.boss_word, puzzle.pattern)
+		local pattern = puzzle.pattern
+		local letters = jumble.boss_hand_letters(puzzle.boss_word, pattern)
+		if #letters == 0 and puzzle.display then
+			letters = jumble.boss_hand_letters(puzzle.boss_word, puzzle.display)
+		end
 		deck.deal_boss_hand(letters, function()
 			definition.sync_hand_after_deal()
-			word_feedback.lock_hand_layout()
+			show_boss_hand_cards()
 			deal_done = true
 			try_reveal_boss_phase()
 		end, { fast = true, instant_deal = true })
 	end
 
-	if not jumble.prepare_boss_word() then
-		definition.set_word_score_animating(false)
-		clear_boss_staging()
-		if on_complete then on_complete() end
-		return
-	end
 	if WORD_GAME_UI.Sidebar and WORD_GAME_UI.Sidebar.sync_visibility then
 		WORD_GAME_UI.Sidebar.sync_visibility()
 	end
