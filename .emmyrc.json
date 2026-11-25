@@ -28,6 +28,7 @@
       "AnimNode",
       "EaseNode",
       "SceneNode",
+      "Spatial",
       "Sprite",
       "GfxSprite",
       "SpriteAnimator",

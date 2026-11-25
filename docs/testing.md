@@ -214,7 +214,7 @@ GitHub Actions (`.github/workflows/tests.yml`) runs on every push and PR:
 | `love-tests` | LÖVE AppImage **11.5** | `LOVE_VERSION` in workflow — not distro `apt` packages |
 | `emmylua-check` | `emmylua_check` **0.25.1** | `EMMYLUA_CHECK_VERSION` in workflow |
 
-CI runs `emmylua_check . --severity error` (blocks on analyzer errors). Locally, install/run via:
+CI and `/complete-ticket` run `emmylua_check . --severity error` (blocks on analyzer errors). Boot-installed classes used as globals (`Spatial`, `Sprite`, `Node`, …) must appear in `.emmyrc.json` → `diagnostics.globals`. Locally, install/run via:
 
 ```sh
 love tests

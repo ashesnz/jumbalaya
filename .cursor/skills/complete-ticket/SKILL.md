@@ -29,7 +29,8 @@ Stop with a blocker (no merge) if any of these fail:
 2. Work branch is known: description `Branch:` line (for example `` `ash-5-main-menu-title` ``), else `ash-<n>-<slug>` from the title using the `/run-ticket` slug rules.
 3. That branch exists locally.
 4. `love tests` from the repository root **passes** (0 failed).
-5. Working tree has no unrelated secrets (`.env`, credentials). Do not commit those files.
+5. `emmylua_check . --severity error` **passes** (same as CI in `.github/workflows/tests.yml`). Use `_tools/run_emmylua_check.sh error` when `emmylua_check` is not on `PATH`. Analyzer errors such as undefined globals block merge.
+6. Working tree has no unrelated secrets (`.env`, credentials). Do not commit those files.
 
 ## Git (local, then main)
 
@@ -39,10 +40,11 @@ Do not force-push `main`. Do not skip hooks. Do not amend unless the user asked 
 2. Checkout the ticket branch.
 3. If there are uncommitted ticket changes, stage them (not secrets) and commit with a 1–2 sentence message: why the ticket landed (issue id + title). Use a HEREDOC for the message.
 4. Run `love tests`. If it fails, stop; do not merge.
-5. Checkout `main` (or the default branch from `origin/HEAD`).
-6. Merge the ticket branch (`git merge <branch>`). If conflicts, stop and report; do not invent resolutions beyond an obvious one-file fix the user would expect.
-7. Push `main` to `origin` only if `origin` exists and tracks this repo. Never `--force` on `main`.
-8. Stay on `main` after a successful merge.
+5. Run `emmylua_check . --severity error` (or `_tools/run_emmylua_check.sh error`). If it fails, stop; do not merge. Boot-installed engine globals (`Spatial`, `Sprite`, `Node`, …) must be listed in `.emmyrc.json` → `diagnostics.globals` when code uses them as globals.
+6. Checkout `main` (or the default branch from `origin/HEAD`).
+7. Merge the ticket branch (`git merge <branch>`). If conflicts, stop and report; do not invent resolutions beyond an obvious one-file fix the user would expect.
+8. Push `main` to `origin` only if `origin` exists and tracks this repo. Never `--force` on `main`.
+9. Stay on `main` after a successful merge.
 
 Do not open a PR unless the user asks. This path is a local merge to `main`.
 
@@ -59,7 +61,7 @@ If Done fails, report the merge SHA and the Linear blocker; do not retry blindly
 ## Output
 
 - Issue id, branch, merge commit SHA, whether `main` was pushed.
-- `love tests` result.
+- `love tests` result and `emmylua_check . --severity error` result.
 - Linear **Done** (or blocker).
 - Explicit: **delete the Linear issue** to free a Free-plan slot; archive is automatic-only and too slow for the 250 cap.
 - Confirmation that specialists were not re-run.

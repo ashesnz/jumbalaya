@@ -80,7 +80,7 @@ Each specialist receives a self-contained delegation brief: the approved ticket 
 
 Invoke **`/complete-ticket ASH-5`** after `/run-ticket` has finished (green `love tests`, review leftovers commented on Linear if any). This is approval to land the work. See `.cursor/skills/complete-ticket/SKILL.md` (mirrored under `.agents/skills/`).
 
-1. Checkout the issue’s work branch, commit remaining ticket changes, run `love tests` (must pass).
+1. Checkout the issue’s work branch, commit remaining ticket changes, run `love tests` (must pass) and `emmylua_check . --severity error` (must pass; same as CI).
 2. Merge that branch into **`main`**. Push `origin/main` when a remote exists. Never force-push `main`. No PR unless asked.
 3. Set the Linear issue to **Done** and comment with the merge SHA.
 4. **Delete** the Linear issue (Free plan). Linear cannot be archived by hand; auto-archive is delayed and **Done** cards still count toward **250 issues** until archived or deleted. Git on `main` is the record. Linear MCP cannot delete: after Done, delete in the Linear UI (`Cmd/Ctrl+Delete`). Optional one-time: team **Settings → Automations** → shortest auto-archive for any leftover Done issues.

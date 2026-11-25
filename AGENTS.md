@@ -182,6 +182,6 @@ The ticket lifecycle and invocation guide is in [`docs/ticket-lifecycle.md`](doc
 - `/scrum-master` checks ticket readiness against the current product and glossary; it does not implement.
 - `/code-developer`, `/test-writer`, and `/code-reviewer` can each be invoked individually.
 - `/run-ticket ASH-<n>` fetches Linear, creates branch `ash-<n>-<slug≤16>`, sets **In Progress**, runs specialists in order, requires passing `love tests`, and sends review findings to `code-developer` (at most two remediation cycles). Unfixed or out-of-scope review items are posted as a Linear comment. No commit, push, or PR unless the user asks.
-- `/complete-ticket ASH-<n>` commits the work branch, merges into `main`, sets Linear **Done**, then the issue is deleted (Linear Free 250; archive is automatic-only and still counts until then). Git on `main` is the history. Never force-push `main`.
+- `/complete-ticket ASH-<n>` commits the work branch, requires passing `love tests` and `emmylua_check . --severity error` (CI), merges into `main`, sets Linear **Done**, then the issue is deleted (Linear Free 250; archive is automatic-only and still counts until then). Git on `main` is the history. Never force-push `main`.
 
 Pass the ticket and acceptance criteria directly; no tracker, branch name, branch creation, commit, or PR is assumed. The orchestrator must stop if specialist delegation is unavailable rather than silently doing every role itself. For UI work, report any required interactive Love2D checks separately from the headless test result.
