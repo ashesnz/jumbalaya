@@ -139,9 +139,17 @@ function M.show_screen_centered(text, colour, hold, offset_y)
 	})
 end
 
-function M.show_boss_countdown(text, hold)
+--- Boss-stage center copy (countdown, "Well done!", …) — uses the board HUD overlay, not spawn_attention.
+function M.show_boss_center_text(text, hold, kind)
 	if WORD_GAME_UI and WORD_GAME_UI.BossWordAnnounce and WORD_GAME_UI.BossWordAnnounce.set_center_text then
-		WORD_GAME_UI.BossWordAnnounce.set_center_text(text, hold or 0.85, "countdown")
+		WORD_GAME_UI.BossWordAnnounce.set_center_text(text, hold or 0.85, kind or "countdown")
+		return true
+	end
+	return false
+end
+
+function M.show_boss_countdown(text, hold)
+	if M.show_boss_center_text(text, hold, "countdown") then
 		return
 	end
 	M.spawn_attention({

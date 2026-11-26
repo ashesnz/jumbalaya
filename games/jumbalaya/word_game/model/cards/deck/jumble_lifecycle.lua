@@ -10,6 +10,7 @@ local live_game = require("word_game.model.live_game")
 local core_letter_card = require("jumbalaya_core.cards.letter_card")
 local game_access = require("word_game.model.game_access")
 local piles = require("word_game.model.piles")
+local BonusStack = require("word_game.model.jumble.bonus_stack")
 
 local M = {}
 local Shared = require("word_game.model.cards.deck.shared")
@@ -144,7 +145,7 @@ end
 					live_game().pattern_row:on_remove_card(card)
 				end
 				area:remove_card(card)
-				if card.bonus_card then
+				if card.bonus_card or BonusStack.contains(card) then
 					bonus_return.return_card(card)
 				elseif card.boss_temp then
 					Deck().destroy_card(card)
@@ -156,7 +157,7 @@ end
 			for i = #live_game().dealt_letters.cards, 1, -1 do
 				local card = live_game().dealt_letters.cards[i]
 				live_game().dealt_letters:remove_card(card)
-				if card.bonus_card then
+				if card.bonus_card or BonusStack.contains(card) then
 					bonus_return.return_card(card)
 				elseif card.boss_temp then
 					Deck().destroy_card(card)

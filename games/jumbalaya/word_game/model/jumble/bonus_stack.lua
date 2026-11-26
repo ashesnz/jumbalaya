@@ -87,6 +87,10 @@ function M.on_hand_start(set, hand_index)
 	M.clear()
 end
 
+function M.gutter_cards_for_clear(j, used_cards)
+	return require("word_game.model.jumble.boss_gutter_cards").for_clear(j, used_cards)
+end
+
 function M.mark_bonus_card(card)
 	if not card or card.REMOVED then return end
 	card.bonus_card = true

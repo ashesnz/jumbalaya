@@ -10,13 +10,13 @@ local RunMode = facade.run_mode()
 local M = {}
 
 function M.present_word_play_after_cards(jumble, j, result, on_hand_cleared, on_complete)
-	local is_boss_success = j.boss_word_active
-		and result.word == (j.puzzle and j.puzzle.boss_word)
+	local live = (jumble and jumble.state and jumble.state()) or j
+	j = live or j
 	local end_hand = result.cleared and RunMode.ends_hand_on_target()
 
 	local function after_cards_cleared()
-		local live = jumble.state and jumble.state()
-		local slots = (live and live.slots) or (j and j.slots)
+		local live_j = jumble.state and jumble.state()
+		local slots = (live_j and live_j.slots) or (j and j.slots)
 		if slots then
 			jumble.clear_blank_cards(slots)
 			jumble.sync_placement_cards(slots)
@@ -53,7 +53,8 @@ function M.present_word_play_after_cards(jumble, j, result, on_hand_cleared, on_
 		return
 	end
 
-	if is_boss_success then
+	-- Boss gutter must win over the normal “fly back / deal hand” path (time_run keeps ticking).
+	if definition.should_route_boss_gutter(jumble, result) then
 		boss_success.present_boss_word_success(jumble, j, result.used_cards, on_hand_cleared, on_complete)
 		return
 	end

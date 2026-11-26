@@ -12,7 +12,8 @@ local game = shell.game
 local RetainedPanel = Spatial:derive("RetainedPanel")
 
 function RetainedPanel:construct(args)
-	Spatial.construct(self, {args.T})
+	-- Node.construct reads `args.T`; a bare `{ args.T }` nests the rect inside `T.x`.
+	Spatial.construct(self, { T = args.T })
 
 	self.states.draggable = false
 	self.draw_layers = {} -- explicit draw-order overrides (config.draw_layer)

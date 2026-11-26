@@ -174,6 +174,9 @@ function M.play()
 	placement.try_play()
 end
 
+M.maybe_auto_play_after_placement = placement.maybe_auto_play_after_placement
+M.should_auto_play_boss = placement.should_auto_play_boss
+
 --- Advance after a cleared jumble hand (Time Run proceed).
 function M.jumble_next()
 	Play.jumble_next()

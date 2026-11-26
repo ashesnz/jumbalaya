@@ -4,6 +4,8 @@ local jumble_rules = require("jumbalaya_core.rules.jumble")
 local ModifierEffects = require("jumbalaya_core.rules.letter_modifier_effects")
 local PerkEffects = require("jumbalaya_core.rules.perk_effects")
 local Validation = require("jumbalaya_core.jumble.validation")
+local puzzle_spec = require("jumbalaya_core.jumble.puzzle_spec")
+local round_config = require("jumbalaya_core.config.gameplay.round")
 
 local M = {}
 
@@ -100,6 +102,23 @@ function M.evaluate(j, wr, opts)
 	local new_rem = jumble_rules.score_remaining(new_score, target)
 	local word_pts = jumble_rules.word_points(new_pts, new_multi)
 
+	local boss_word_cleared = false
+	if wr and round_config.is_boss_word_hand(wr.set, wr.hand_index) then
+		-- Boss deal / reveal phases only play the hidden boss word (validation enforces it).
+		if j.boss_word_active or (j.boss_cards and #j.boss_cards > 0) then
+			boss_word_cleared = true
+		else
+			local boss_word = j.puzzle and j.puzzle.boss_word
+			if not boss_word then
+				local resolved = puzzle_spec.resolve_puzzle(j.puzzle)
+				boss_word = resolved and resolved.boss_word
+			end
+			if boss_word and word == boss_word then
+				boss_word_cleared = true
+			end
+		end
+	end
+
 	return {
 		kind = "word_play",
 		word = word,
@@ -115,6 +134,7 @@ function M.evaluate(j, wr, opts)
 		cleared = new_rem <= 0,
 		used_cards = used_cards,
 		post_target_doubled = post_target and new_pts > pre_pts,
+		boss_word_cleared = boss_word_cleared,
 	}
 end
 

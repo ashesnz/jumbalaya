@@ -5,16 +5,11 @@ local facade = require("word_game.ui.facade")
 local word_feedback = require("word_game.ui.feedback.word_feedback")
 local definition = require("word_game.ui.play_effects.definition")
 local context = require("word_game.ui.play_effects.animate.context")
+local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
 
 local bonus_stack_ui = facade.bonus_stack_ui()
 
 local M = {}
-
-
-local function detach_card_for_stack(card)
-local play_sfx = require("jumbalaya-engine.sound.sound").play_sfx
-	bonus_stack_ui.detach(card)
-end
 
 function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_complete)
 	local WELL_DONE_HOLD = 1.0
@@ -22,18 +17,22 @@ function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_
 	local CARD_STAGGER = 0.07
 	local STACK_HOLD = 0.3
 
+	local live = (jumble and jumble.state and jumble.state()) or j
+	j = live or j
+
 	definition.set_word_score_animating(true)
 	if WORD_GAME_UI.TimelineTimer and WORD_GAME_UI.TimelineTimer.pause then
 		WORD_GAME_UI.TimelineTimer.pause()
 	end
 
-	local cards = {}
-	for _, card in ipairs(used_cards or {}) do
-		detach_card_for_stack(card)
-		cards[#cards + 1] = card
+	local cards = bonus_stack_ui.gutter_cards_for_boss_clear(j, used_cards)
+	for _, card in ipairs(cards) do
+		bonus_stack_ui.detach(card)
 	end
-	jumble.clear_blank_cards(j.slots)
-	jumble.sync_placement_cards(j.slots)
+	if j and j.slots then
+		jumble.clear_blank_cards(j.slots)
+		jumble.sync_placement_cards(j.slots)
+	end
 	bonus_stack_ui.stage_cards(cards)
 
 	local function finish_success()
@@ -49,9 +48,15 @@ function M.present_boss_word_success(jumble, j, used_cards, on_hand_cleared, on_
 	context.effects().queue_event(Tween({
 		mode = "delayed",
 		delay = 0.05,
-		blocking = true,
+		blocking = false,
 		func = function()
-			word_feedback.show_screen_centered("Well done!", game().C.GOLD, WELL_DONE_HOLD)
+			if not word_feedback.show_boss_center_text("Well done!", WELL_DONE_HOLD, "title") then
+				word_feedback.show_screen_centered(
+					"Well done!",
+					(game().C and game().C.GOLD) or { 1, 0.8, 0, 1 },
+					WELL_DONE_HOLD
+				)
+			end
 			if play_sfx then
 				play_sfx("coin2", 1, 0.9)
 			end

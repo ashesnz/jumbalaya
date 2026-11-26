@@ -23,6 +23,7 @@ local live_game = require("word_game.model.live_game")
 local M = {}
 
 local round = require("word_game.model.round")
+local round_config = require("jumbalaya_core.config.gameplay.round")
 local bonus_stack = require("word_game.model.jumble.bonus_stack")
 local modifier_effects = require("word_game.model.jumble_play.letter_modifier_effects")
 local perk_effects = require("word_game.model.perks.effects")
@@ -43,6 +44,10 @@ local function word_round_ref(wr)
 end
 
 local function live_placed_count(slots)
+	local from_slots = core.placed_count(slots)
+	if from_slots > 0 then
+		return from_slots
+	end
 	local area = live_game() and live_game().pattern_row and live_game().pattern_row.area
 	if area then
 		local count = 0
@@ -53,11 +58,32 @@ local function live_placed_count(slots)
 		end
 		return count
 	end
-	return core.placed_count(slots)
+	return from_slots
+end
+
+local function live_collect_used_cards(slots)
+	-- Slot refs are what validation/word building use; pattern_row.area can lag a frame.
+	local from_slots = core.collect_used_cards(slots)
+	if #from_slots > 0 then
+		return from_slots
+	end
+	local area = live_game() and live_game().pattern_row and live_game().pattern_row.area
+	if area then
+		local used = {}
+		for _, card in ipairs(area.cards or {}) do
+			if card and not card.REMOVED then
+				used[#used + 1] = card
+			end
+		end
+		if #used > 0 then
+			return used
+		end
+	end
+	return from_slots
 end
 
 M.placed_count = live_placed_count
-M.collect_used_cards = core.collect_used_cards
+M.collect_used_cards = live_collect_used_cards
 M.score_remaining = core.score_remaining
 M.puzzle_total = core.puzzle_total
 M.committed_before_word = core.committed_before_word
@@ -213,6 +239,16 @@ function M.evaluate_play(jumble, j)
 		end,
 	})
 	if not result then return nil end
+	if result.kind == "word_play" then
+		local wr_live = game_access.word_round()
+		local j_live = wr_live and wr_live.jumble
+		if wr_live
+			and round_config.is_boss_word_hand(wr_live.set, wr_live.hand_index)
+			and j_live
+			and (j_live.boss_word_active or (j_live.boss_cards and #j_live.boss_cards > 0)) then
+			result.boss_word_cleared = true
+		end
+	end
 	if result.kind == "bank_puzzle" then
 		state.record_puzzle_score(result.puzzle_label, result.puzzle_total)
 	end

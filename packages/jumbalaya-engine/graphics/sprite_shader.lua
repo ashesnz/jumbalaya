@@ -7,6 +7,12 @@ local game = shell.game
 local sprite_util = require("jumbalaya-engine.graphics.sprite_util")
 local cursor_pos = { 0, 0 }
 
+--- GLSL strips uniforms a shader never reads (e.g. bonus_gold.fs), and Love's
+--- Shader:send throws on a missing name — only send what the program kept.
+local function send_uniform(sh, name, value)
+	if not sh.hasUniform or sh:hasUniform(name) then sh:send(name, value) end
+end
+
 --- Replaces the render pipeline with an ordered list of shader passes.
 --- Each step: `{shader=, shadow_height=, send={{name=, val=|func=|ref_table=+ref_value=}}, no_tilt=, other_obj=, ms, mr, mx, my}`
 function GfxSprite:define_draw_steps(draw_step_definitions)
@@ -63,27 +69,27 @@ function GfxSprite:apply_shader_effect(_shader, _shadow_height, _send, _no_tilt,
 				draw_major.tilt_var and draw_major.tilt_var.my * game().CANVAS_SCALE
 				or (game().INPUT and game().INPUT.cursor_position and game().INPUT.cursor_position.y * game().CANVAS_SCALE or 0)
 
-			sh:send('mouse_screen_pos', cursor_pos)
-			sh:send('screen_scale', game().TILESCALE * game().TILESIZE * (draw_major.mouse_damping or 1) * game().CANVAS_SCALE)
-			sh:send('hovering', ((_shadow_height and not tilt_shadow) or _no_tilt) and 0
+			send_uniform(sh, 'mouse_screen_pos', cursor_pos)
+			send_uniform(sh, 'screen_scale', game().TILESCALE * game().TILESIZE * (draw_major.mouse_damping or 1) * game().CANVAS_SCALE)
+			send_uniform(sh, 'hovering', ((_shadow_height and not tilt_shadow) or _no_tilt) and 0
 				or (draw_major.hover_tilt or 0) * (tilt_shadow or 1))
-			sh:send('dissolve', math.abs(draw_major.dissolve or 0))
+			send_uniform(sh, 'dissolve', math.abs(draw_major.dissolve or 0))
 			if _shader == 'dissolve' then
-				sh:send('dissolve_wipe', draw_major.dissolve_wipe or 0)
+				send_uniform(sh, 'dissolve_wipe', draw_major.dissolve_wipe or 0)
 			end
 			local clock = (game().TIMERS and game().TIMERS.REAL) or 0
 			if _shader == 'bonus_gold' then
-				sh:send('time', clock)
+				send_uniform(sh, 'time', clock)
 			else
-				sh:send('time', clock + (tonumber(draw_major.ID) or 0) * 0.17)
+				send_uniform(sh, 'time', clock + (tonumber(draw_major.ID) or 0) * 0.17)
 			end
-			sh:send('texture_details', self:texture_descriptor())
-			sh:send('image_details', self:image_dimensions())
-			sh:send('burn_colour_1', draw_major.dissolve_colours and draw_major.dissolve_colours[1] or game().C.CLEAR)
-			sh:send('burn_colour_2', draw_major.dissolve_colours and draw_major.dissolve_colours[2] or game().C.CLEAR)
-			sh:send('shadow', (not not _shadow_height))
+			send_uniform(sh, 'texture_details', self:texture_descriptor())
+			send_uniform(sh, 'image_details', self:image_dimensions())
+			send_uniform(sh, 'burn_colour_1', draw_major.dissolve_colours and draw_major.dissolve_colours[1] or game().C.CLEAR)
+			send_uniform(sh, 'burn_colour_2', draw_major.dissolve_colours and draw_major.dissolve_colours[2] or game().C.CLEAR)
+			send_uniform(sh, 'shadow', (not not _shadow_height))
 			if _shader ~= 'bonus_gold' and _send then
-				sh:send(_shader, _send)
+				send_uniform(sh, _shader, _send)
 			end
 		end
 	end

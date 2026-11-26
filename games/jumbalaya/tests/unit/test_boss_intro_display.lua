@@ -41,6 +41,17 @@ T.describe("boss intro display", function()
 		T.assert_equal(announce.stage_message(), "Boss Stage — Garden Theme")
 	end)
 
+	T.it("routes Well done through the center overlay", function()
+		mock_env.reset_game()
+		_G.WORD_GAME_UI = _G.WORD_GAME_UI or {}
+		_G.WORD_GAME_UI.BossWordAnnounce = require("word_game.ui.score_banner.boss_announce")
+		local announce = _G.WORD_GAME_UI.BossWordAnnounce
+		announce.clear()
+		local word_feedback = require("word_game.ui.feedback.word_feedback")
+		T.assert_true(word_feedback.show_boss_center_text("Well done!", 1.0, "title"))
+		T.assert_true(announce.has_center_overlay())
+	end)
+
 	T.it("routes boss countdown through the center overlay", function()
 		mock_env.reset_game()
 		_G.WORD_GAME_UI = _G.WORD_GAME_UI or {}

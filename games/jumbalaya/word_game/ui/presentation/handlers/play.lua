@@ -18,6 +18,12 @@ function M.register(Presentation, ctx)
 		PresentationBus.emit("score_banner_reset_jumble")
 	end)
 
+	Presentation.on("hand_shuffle_sync", function()
+		if ui.TableControls and ui.TableControls.maybe_auto_play_after_placement then
+			ui.TableControls.maybe_auto_play_after_placement()
+		end
+	end)
+
 	Presentation.on("boss_puzzle_revealed", function()
 		PresentationBus.emit("layout_refresh_placement")
 		PresentationBus.emit("sidebar_sync_visibility")

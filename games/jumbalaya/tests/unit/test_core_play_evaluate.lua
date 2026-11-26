@@ -68,6 +68,52 @@ T.describe("jumbalaya_core play evaluate", function()
 		T.assert_equal(result.err, "Word must be played!")
 	end)
 
+	T.it("sets boss_word_cleared on boss deal (boss_cards present)", function()
+		local wr = Fixtures.jumble_word_round({ target = 2, set = 1, hand_index = 3 })
+		local j = wr.jumble
+		j.boss_word_active = false
+		j.boss_cards = { { ability = { letter = "G" } }, { ability = { letter = "D" } } }
+		j.puzzle = { kind = "rigid", pattern = "_AT", boss_word = "CAT" }
+		local result = Play.evaluate(j, wr, {
+			play_blocked = function() return false end,
+			placed_count = function() return 1 end,
+			round_target = function() return 2 end,
+			run_mode = "time_run",
+			validate_current = function() return "CAT" end,
+			collect_used_cards = function() return {} end,
+			record_puzzle_word = function() return 0, 1, 1.0, 1.0 end,
+		})
+		T.assert_equal(result.kind, "word_play")
+		T.assert_true(result.boss_word_cleared)
+	end)
+
+	T.it("sets boss_word_cleared on set 1 hand 3 when the boss word is played", function()
+		local wr = Fixtures.jumble_word_round({ target = 2, set = 1, hand_index = 3 })
+		local j = wr.jumble
+		j.puzzle = {
+			kind = "rigid",
+			pattern = "_AR_E_I_G",
+			boss_word = "GARDENING",
+			display = "_AR_E_I_G",
+		}
+		j.boss_word_active = true
+		local result = Play.evaluate(j, wr, {
+			play_blocked = function() return false end,
+			placed_count = function() return 4 end,
+			round_target = function() return 2 end,
+			run_mode = "time_run",
+			validate_current = function() return "GARDENING" end,
+			collect_used_cards = function() return {} end,
+			record_puzzle_word = function(word)
+				j.puzzle_points = #word
+				return 0, #word, 1.0, 1.0
+			end,
+			on_word_recorded = function() end,
+		})
+		T.assert_equal(result.kind, "word_play")
+		T.assert_true(result.boss_word_cleared)
+	end)
+
 	T.it("banks an empty row after a word even if solved was cleared", function()
 		local wr = Fixtures.jumble_word_round({ target = 20 })
 		local j = wr.jumble

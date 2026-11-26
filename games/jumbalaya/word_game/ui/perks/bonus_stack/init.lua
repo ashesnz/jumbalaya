@@ -98,6 +98,10 @@ function M.set_cards(cards)
 	M.stage_cards(cards)
 end
 
+function M.gutter_cards_for_boss_clear(j, used_cards)
+	return bonus_stack_model().gutter_cards_for_clear(j, used_cards)
+end
+
 function M.stage_cards(cards)
 	local staged = {}
 	for _, card in ipairs(cards or {}) do

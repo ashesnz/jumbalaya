@@ -16,6 +16,7 @@ local function bonus_stack_ui()
 	return facade.bonus_stack_ui()
 end
 local round_config = require("jumbalaya_core.config.gameplay.round")
+local puzzle_spec = require("jumbalaya_core.jumble.puzzle_spec")
 
 local RunMode = facade.run_mode()
 
@@ -48,6 +49,33 @@ function M.triggers_boss_word(result)
 	local j = wr and wr.jumble
 	return wr and round_config.is_boss_word_hand(wr.set, wr.hand_index)
 		and j and not j.boss_word_active
+end
+
+--- True when a successful word play should run boss gutter choreography (1-3 showdown).
+function M.should_route_boss_gutter(jumble, result)
+	if not result or result.kind ~= "word_play" then
+		return false
+	end
+	if result.boss_word_cleared == true then
+		return true
+	end
+	local wr = game_access.word_round()
+	if not wr or not round_config.is_boss_word_hand(wr.set, wr.hand_index) then
+		return false
+	end
+	local j = (jumble and jumble.state and jumble.state()) or (wr and wr.jumble)
+	if not j then
+		return false
+	end
+	if j.boss_word_active or (j.boss_cards and #j.boss_cards > 0) then
+		return true
+	end
+	local boss_word = j.puzzle and j.puzzle.boss_word
+	if not boss_word and j.puzzle then
+		local resolved = puzzle_spec.resolve_puzzle(j.puzzle)
+		boss_word = resolved and resolved.boss_word
+	end
+	return boss_word and result.word == boss_word
 end
 
 function M.capture_token_timer_if_cleared(cleared, opts)
